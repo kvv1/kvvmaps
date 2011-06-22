@@ -1,6 +1,7 @@
 package yandex.util;
 
-
+//https://code.google.com/hosting/settings
+	
 public class YandexUtils {
 
 
