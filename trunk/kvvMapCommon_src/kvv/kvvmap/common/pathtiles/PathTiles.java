@@ -5,6 +5,7 @@ import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.Img;
+import kvv.kvvmap.common.pacemark.ISelectable;
 import kvv.kvvmap.common.pacemark.Paths;
 import kvv.kvvmap.common.pacemark.PlaceMarks;
 import kvv.kvvmap.common.tiles.Tile;
@@ -48,6 +49,7 @@ public abstract class PathTiles extends Tiles {
 	}
 	
 	protected abstract InfoLevel getInfoLevel();
+	protected abstract ISelectable getSelAsync();
 
 	private Img createPathsImg(long id) {
 		Object img1 = adapter.allocBitmap();
@@ -68,8 +70,9 @@ public abstract class PathTiles extends Tiles {
 		InfoLevel infoLevel = getInfoLevel();
 		if (infoLevel.ordinal() > 0) {
 			gc.setAntiAlias(true);
-			paths.draw(gc, id, infoLevel);
-			placemarks.draw(gc, id, infoLevel);
+			ISelectable sel = getSelAsync();
+			paths.draw(gc, id, infoLevel, sel);
+			placemarks.draw(gc, id, infoLevel, sel);
 		}
 		return new Img(img1, true);
 	}

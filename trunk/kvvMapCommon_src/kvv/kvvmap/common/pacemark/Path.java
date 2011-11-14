@@ -111,13 +111,10 @@ public class Path implements IPlaceMarks {
 		}
 	}
 
-	public void draw(GC gc, long id, InfoLevel infoLevel) {
-		if (doc == null)
-			return;
+	public void draw(GC gc, long id, InfoLevel infoLevel, ISelectable sel) {
 		if (!enabled)
 			return;
 		LocationX selPM = null;
-		ISelectable sel = doc.getSelAsync();
 		if (sel instanceof PathSelection) {
 			PathSelection pathSel = (PathSelection) sel;
 			if (pathSel.path == this)

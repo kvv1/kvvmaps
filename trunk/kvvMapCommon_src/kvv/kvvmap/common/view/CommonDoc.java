@@ -74,6 +74,11 @@ public final class CommonDoc implements IPlaceMarksListener {
 			protected InfoLevel getInfoLevel() {
 				return infoLevel;
 			}
+
+			@Override
+			protected ISelectable getSelAsync() {
+				return CommonDoc.this.getSelAsync();
+			}
 		};
 	}
 
@@ -460,7 +465,6 @@ public final class CommonDoc implements IPlaceMarksListener {
 
 	private final SelectionThread selectionThread = new SelectionThread();
 
-	@Override
 	public ISelectable getSelAsync() {
 		return selectionThread.sel;
 	}
