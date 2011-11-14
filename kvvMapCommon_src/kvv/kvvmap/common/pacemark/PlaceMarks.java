@@ -63,6 +63,10 @@ public class PlaceMarks implements IPlaceMarks {
 			int x = pm.getX(TileId.zoom(id)) - dx;
 			int y = pm.getY(TileId.zoom(id)) - dy;
 
+			if (x < -Adapter.TILE_SIZE || x > 2 * Adapter.TILE_SIZE
+					|| y < -Adapter.TILE_SIZE || y > 2 * Adapter.TILE_SIZE)
+				continue;
+
 			int diam;
 
 			IPlaceMarksListener doc = this.doc;

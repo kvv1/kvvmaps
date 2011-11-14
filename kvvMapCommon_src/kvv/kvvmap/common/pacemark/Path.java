@@ -90,27 +90,6 @@ public class Path implements IPlaceMarks {
 			Saver.getInstance().save(this);
 	}
 
-	// public void remove(PlaceMark pm) {
-	// // placemarks.remove(pm);
-	// // doc.onPlacemarkRangeChanged();
-	// }
-
-	// public float getLen() {
-	// PlaceMark pm1 = null;
-	// float len = 0;
-	// for (PlaceMark pm : placemarks) {
-	// if (pm1 != null)
-	// len += pm.loc.distanceTo(pm1.loc);
-	// pm1 = pm;
-	// }
-	// return len;
-	// }
-
-	// public PlaceMark getNearest(PointInt xy, int zoom, int maxDist) {
-	// return PathIO.getNearest(pathsInZooms[zoom].getPlaceMarks(), xy, zoom,
-	// maxDist);
-	// }
-
 	public void setFile(File newFile) {
 		file = newFile;
 	}
