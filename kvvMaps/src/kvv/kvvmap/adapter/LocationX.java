@@ -8,7 +8,6 @@ public class LocationX implements ISelectable {
 	private final Location loc;
 
 	public volatile String name;
-//	public volatile String descr;
 
 	private double x;
 	private double y;

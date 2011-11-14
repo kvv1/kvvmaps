@@ -26,13 +26,6 @@ public final class Paths {
 		private IPlaceMarksListener l;
 
 		@Override
-		public synchronized ISelectable getSelAsync() {
-			if (l != null)
-				return l.getSelAsync();
-			return null;
-		}
-
-		@Override
 		public synchronized void updateSel() {
 			if (l != null)
 				l.updateSel();
@@ -184,7 +177,7 @@ public final class Paths {
 
 	private static RectX rect = new RectX(0, 0, 0, 0);
 
-	public void draw(GC gc, long tileId, InfoLevel infoLevel) {
+	public void draw(GC gc, long tileId, InfoLevel infoLevel, ISelectable sel) {
 		int x0 = TileId.nx(tileId) * Adapter.TILE_SIZE;
 		int x1 = (TileId.nx(tileId) + 1) * Adapter.TILE_SIZE;
 		int y0 = TileId.ny(tileId) * Adapter.TILE_SIZE;
@@ -198,12 +191,12 @@ public final class Paths {
 			rect.set(lon, lat, lonw, lath);
 			for (Path path : paths) {
 				if (path.filter(rect))
-					path.draw(gc, tileId, infoLevel);
+					path.draw(gc, tileId, infoLevel, sel);
 			}
 		}
 	}
 
-	public String getNewPathName() {
+	private static String getNewPathName() {
 		String s = new Date().toLocaleString();
 		s = s.replace('.', '_');
 		s = s.replace(':', '_');

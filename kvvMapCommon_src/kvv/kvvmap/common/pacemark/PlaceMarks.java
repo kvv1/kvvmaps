@@ -56,7 +56,7 @@ public class PlaceMarks implements IPlaceMarks {
 			doc.onPathTilesChanged();
 	}
 
-	public void draw(GC gc, long id, InfoLevel infoLevel) {
+	public void draw(GC gc, long id, InfoLevel infoLevel, ISelectable sel) {
 		int dx = TileId.nx(id) * Adapter.TILE_SIZE;
 		int dy = TileId.ny(id) * Adapter.TILE_SIZE;
 		for (LocationX pm : placemarks) {
@@ -69,8 +69,7 @@ public class PlaceMarks implements IPlaceMarks {
 
 			int diam;
 
-			IPlaceMarksListener doc = this.doc;
-			if (doc != null && pm == doc.getSelAsync()) {
+			if (pm == sel) {
 				gc.setStrokeWidth(2);
 				diam = 5;
 			} else {
