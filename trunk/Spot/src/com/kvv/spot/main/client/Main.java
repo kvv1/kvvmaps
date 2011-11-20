@@ -25,7 +25,7 @@ public class Main implements EntryPoint {
 	public void onModuleLoad() {
 		rootPanel = RootPanel.get();
 
-		rootPanel.add(new HTML("<a href='spot/protected/index.jsp'>again</a>"));
+		//rootPanel.add(new HTML("<a href='spot/protected/index.jsp'>again</a>"));
 		
 		final ButtonPanel buttonPanel = new ButtonPanel();
 
