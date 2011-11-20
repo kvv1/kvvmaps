@@ -1,6 +1,6 @@
 package kvv.kvvmap.common;
 
-public class IntArray {
+public final class IntArray {
 
 	private int[] data = new int[16];
 	private int size;
@@ -32,6 +32,12 @@ public class IntArray {
 		return res;
 	}
 
+	public int get(int idx) {
+		if(idx >= size)
+			throw new ArrayIndexOutOfBoundsException(idx);
+		return data[idx];
+	}
+	
 	public int size() {
 		return size;
 	}

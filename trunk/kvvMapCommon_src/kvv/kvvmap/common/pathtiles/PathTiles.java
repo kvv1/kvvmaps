@@ -5,16 +5,17 @@ import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.Img;
+import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.pacemark.ISelectable;
+import kvv.kvvmap.common.pacemark.PathDrawer;
 import kvv.kvvmap.common.pacemark.Paths;
 import kvv.kvvmap.common.pacemark.PlaceMarks;
 import kvv.kvvmap.common.tiles.Tile;
 import kvv.kvvmap.common.tiles.TileId;
 import kvv.kvvmap.common.tiles.TileLoader;
-import kvv.kvvmap.common.tiles.Tiles;
 import kvv.kvvmap.common.tiles.TileLoader.TileLoaderCallback;
+import kvv.kvvmap.common.tiles.Tiles;
 import kvv.kvvmap.common.view.CommonDoc;
-import kvv.kvvmap.common.view.CommonView.InfoLevel;
 
 public abstract class PathTiles extends Tiles {
 
@@ -47,8 +48,9 @@ public abstract class PathTiles extends Tiles {
 			PointInt centerXY) {
 		tileLoader.load(id, callback, centerXY);
 	}
-	
+
 	protected abstract InfoLevel getInfoLevel();
+
 	protected abstract ISelectable getSelAsync();
 
 	private Img createPathsImg(long id) {
@@ -71,8 +73,8 @@ public abstract class PathTiles extends Tiles {
 		if (infoLevel.ordinal() > 0) {
 			gc.setAntiAlias(true);
 			ISelectable sel = getSelAsync();
-			paths.draw(gc, id, infoLevel, sel);
-			placemarks.draw(gc, id, infoLevel, sel);
+			PathDrawer.drawPaths(paths, gc, id, infoLevel, sel);
+			PathDrawer.drawPlacemarks(placemarks, gc, id, infoLevel, sel);
 		}
 		return new Img(img1, true);
 	}

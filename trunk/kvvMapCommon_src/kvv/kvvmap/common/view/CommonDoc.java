@@ -11,17 +11,18 @@ import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.adapter.RectX;
+import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.LongSet;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maps.MapDescr;
 import kvv.kvvmap.common.maptiles.MapTiles;
+import kvv.kvvmap.common.pacemark.IPlaceMarksListener;
 import kvv.kvvmap.common.pacemark.ISelectable;
 import kvv.kvvmap.common.pacemark.Path;
 import kvv.kvvmap.common.pacemark.PathSelection;
 import kvv.kvvmap.common.pathtiles.PathTiles;
 import kvv.kvvmap.common.tiles.Tile;
 import kvv.kvvmap.common.tiles.TileId;
-import kvv.kvvmap.common.view.CommonView.InfoLevel;
 
 public final class CommonDoc implements IPlaceMarksListener {
 

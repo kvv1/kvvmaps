@@ -1,4 +1,4 @@
-package kvv.kvvmap.common.view;
+package kvv.kvvmap.common.pacemark;
 
 
 
