@@ -10,17 +10,12 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import kvv.kvvmap.adapter.Adapter;
-import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.common.COLOR;
-import kvv.kvvmap.common.tiles.TileId;
-import kvv.kvvmap.common.view.CommonView.InfoLevel;
-import kvv.kvvmap.common.view.IPlaceMarksListener;
 
 public class PlaceMarks implements IPlaceMarks {
 
 	private final List<LocationX> placemarks = new CopyOnWriteArrayList<LocationX>();
-	private LocationX targ;
+	private volatile LocationX targ;
 	private volatile IPlaceMarksListener doc;
 
 	private static final File file = new File(Adapter.PLACEMARKS);
@@ -54,43 +49,6 @@ public class PlaceMarks implements IPlaceMarks {
 		IPlaceMarksListener doc = this.doc;
 		if (doc != null)
 			doc.onPathTilesChanged();
-	}
-
-	public void draw(GC gc, long id, InfoLevel infoLevel, ISelectable sel) {
-		int dx = TileId.nx(id) * Adapter.TILE_SIZE;
-		int dy = TileId.ny(id) * Adapter.TILE_SIZE;
-		for (LocationX pm : placemarks) {
-			int x = pm.getX(TileId.zoom(id)) - dx;
-			int y = pm.getY(TileId.zoom(id)) - dy;
-
-			if (x < -Adapter.TILE_SIZE || x > 2 * Adapter.TILE_SIZE
-					|| y < -Adapter.TILE_SIZE || y > 2 * Adapter.TILE_SIZE)
-				continue;
-
-			int diam;
-
-			if (pm == sel) {
-				gc.setStrokeWidth(2);
-				diam = 5;
-			} else {
-				gc.setStrokeWidth(1);
-				diam = 3;
-			}
-
-			if (pm == targ)
-				gc.setColor(COLOR.TARG_COLOR);
-			else
-				gc.setColor(COLOR.RED);
-
-			gc.drawLine(x, y, x + 5, y - 15);
-			gc.fillCircle(x + 5, y - 15, diam);
-
-			String name = pm.name;
-			if (infoLevel.ordinal() > InfoLevel.MEDIUM.ordinal()
-					&& name != null) {
-				PathDrawer.drawLabel(gc, name, x + 5, y + 5);
-			}
-		}
 	}
 
 	public List<LocationX> getPlaceMarks() {

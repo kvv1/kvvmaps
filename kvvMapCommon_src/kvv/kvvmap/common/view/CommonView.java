@@ -12,15 +12,13 @@ import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.adapter.RectX;
 import kvv.kvvmap.common.COLOR;
+import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maps.MapDescr;
 import kvv.kvvmap.common.pacemark.ISelectable;
 import kvv.kvvmap.common.pacemark.PathSelection;
 
 public class CommonView implements ICommonView {
-	public enum InfoLevel {
-		LOW, MEDIUM, HIGH
-	}
 
 	private final IPlatformView platformViewView;
 
@@ -364,7 +362,6 @@ public class CommonView implements ICommonView {
 		return lineHeight;
 	}
 
-	@SuppressWarnings("deprecation")
 	public void saveState() {
 		Properties props = new Properties();
 

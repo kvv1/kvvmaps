@@ -3,13 +3,8 @@ package kvv.kvvmap.common.pacemark;
 import java.util.ArrayList;
 import java.util.List;
 
-import kvv.kvvmap.adapter.Adapter;
-import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.IntArray;
-import kvv.kvvmap.common.tiles.TileId;
-import kvv.kvvmap.common.view.CommonView.InfoLevel;
 
 class PathInZoom extends PathInZoomBase {
 	private List<LocationX> notCompacted = new ArrayList<LocationX>();
@@ -75,36 +70,57 @@ class PathInZoom extends PathInZoomBase {
 		return s > sq;
 	}
 
-	public synchronized void draw(GC gc, long id, InfoLevel infoLevel,
-			LocationX selPM) {
+	// public synchronized void draw(GC gc, long id, InfoLevel infoLevel,
+	// LocationX selPM) {
+	// IntArray indices = get(id);
+	// if (indices == null)
+	// return;
+	//
+	// if (indices.size() == 0)
+	// return;
+	//
+	// gc.setColor(COLOR.RED);
+	//
+	// if (selPM != null)
+	// gc.setStrokeWidth(4);
+	// else
+	// gc.setStrokeWidth(2);
+	//
+	// int nx = TileId.nx(id);
+	// int ny = TileId.ny(id);
+	// int z = TileId.zoom(id);
+	//
+	// int dx = nx * Adapter.TILE_SIZE;
+	// int dy = ny * Adapter.TILE_SIZE;
+	//
+	// for (int i : indices.values()) {
+	// int x1 = placemarks.get(i - 1).getX(z);
+	// int y1 = placemarks.get(i - 1).getY(z);
+	// int x2 = placemarks.get(i).getX(z);
+	// int y2 = placemarks.get(i).getY(z);
+	// gc.drawLine(x1 - dx, y1 - dy, x2 - dx, y2 - dy);
+	// }
+	// }
+
+	public synchronized int[] getPoints(long id) {
 		IntArray indices = get(id);
 		if (indices == null)
-			return;
+			return new int[0];
 
 		if (indices.size() == 0)
-			return;
+			return new int[0];
 
-		gc.setColor(COLOR.RED);
+		int[] res = new int[indices.size() * 2 + 2];
 
-		if (selPM != null)
-			gc.setStrokeWidth(4);
-		else
-			gc.setStrokeWidth(2);
+		res[0] = placemarks.get(indices.get(0) - 1).getX(zoom);
+		res[1] = placemarks.get(indices.get(0) - 1).getY(zoom);
 
-		int nx = TileId.nx(id);
-		int ny = TileId.ny(id);
-		int z = TileId.zoom(id);
-
-		int dx = nx * Adapter.TILE_SIZE;
-		int dy = ny * Adapter.TILE_SIZE;
-
-		for (int i : indices.values()) {
-			int x1 = placemarks.get(i - 1).getX(z);
-			int y1 = placemarks.get(i - 1).getY(z);
-			int x2 = placemarks.get(i).getX(z);
-			int y2 = placemarks.get(i).getY(z);
-			gc.drawLine(x1 - dx, y1 - dy, x2 - dx, y2 - dy);
+		for (int i = 0; i < indices.size(); i++) {
+			res[i * 2 + 2] = placemarks.get(indices.get(i)).getX(zoom);
+			res[i * 2 + 2 + 1] = placemarks.get(indices.get(i)).getY(zoom);
 		}
+
+		return res;
 	}
 
 	public synchronized List<LocationX> getPlaceMarks() {

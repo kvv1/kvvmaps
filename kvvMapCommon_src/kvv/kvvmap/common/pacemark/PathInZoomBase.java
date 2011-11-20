@@ -8,7 +8,6 @@ import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.common.IntArray;
 import kvv.kvvmap.common.LongHashMap;
 import kvv.kvvmap.common.tiles.TileId;
-import kvv.kvvmap.common.view.IPlaceMarksListener;
 
 public class PathInZoomBase {
 
@@ -21,8 +20,7 @@ public class PathInZoomBase {
 				doc.onPathTilesChanged();
 		}
 
-		public void add(int nx, int ny, int idx) {
-			long id = TileId.get(nx, ny, zoom);
+		public void add(long id, int idx) {
 			IntArray arr = tiles.get(id);
 			if (arr == null) {
 				arr = new IntArray();
@@ -30,7 +28,7 @@ public class PathInZoomBase {
 			}
 			arr.add(idx);
 			if (doc != null)
-				doc.onPathTileChanged(TileId.get(nx, ny, zoom));
+				doc.onPathTileChanged(id);
 		}
 
 		public void removeValue(int idx) {
@@ -41,8 +39,7 @@ public class PathInZoomBase {
 			}
 		}
 
-		public IntArray get(int nx, int ny) {
-			long id = TileId.get(nx, ny, zoom);
+		public IntArray get(long id) {
 			return tiles.get(id);
 		}
 
@@ -67,7 +64,7 @@ public class PathInZoomBase {
 
 			for (int nx = nx1; nx <= nx2; nx++)
 				for (int ny = ny1; ny <= ny2; ny++) {
-					add(nx, ny, idx);
+					add(TileId.get(nx, ny, zoom), idx);
 				}
 		}
 
@@ -117,7 +114,7 @@ public class PathInZoomBase {
 	}
 
 	protected IntArray get(long id) {
-		return tiles.get(TileId.nx(id), TileId.ny(id));
+		return tiles.get(id);
 	}
 
 	protected LocationX getLast() {

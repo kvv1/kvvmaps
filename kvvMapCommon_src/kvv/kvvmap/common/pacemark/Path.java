@@ -12,12 +12,9 @@ import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.adapter.RectX;
 import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.Utils;
-import kvv.kvvmap.common.tiles.TileId;
-import kvv.kvvmap.common.view.CommonView.InfoLevel;
-import kvv.kvvmap.common.view.IPlaceMarksListener;
 
 public class Path implements IPlaceMarks {
-	private final PathInZoom[] pathsInZooms = new PathInZoom[Utils.MAX_ZOOM + 1];
+	public final PathInZoom[] pathsInZooms = new PathInZoom[Utils.MAX_ZOOM + 1];
 	private volatile File file;
 	private volatile boolean enabled = true;
 	private volatile IPlaceMarksListener doc;
@@ -111,17 +108,17 @@ public class Path implements IPlaceMarks {
 		}
 	}
 
-	public void draw(GC gc, long id, InfoLevel infoLevel, ISelectable sel) {
-		if (!enabled)
-			return;
-		LocationX selPM = null;
-		if (sel instanceof PathSelection) {
-			PathSelection pathSel = (PathSelection) sel;
-			if (pathSel.path == this)
-				selPM = pathSel.pm;
-		}
-		pathsInZooms[TileId.zoom(id)].draw(gc, id, infoLevel, selPM);
-	}
+//	public void draw(GC gc, long id, InfoLevel infoLevel, ISelectable sel) {
+//		if (!enabled)
+//			return;
+//		LocationX selPM = null;
+//		if (sel instanceof PathSelection) {
+//			PathSelection pathSel = (PathSelection) sel;
+//			if (pathSel.path == this)
+//				selPM = pathSel.pm;
+//		}
+//		pathsInZooms[TileId.zoom(id)].draw(gc, id, infoLevel, selPM);
+//	}
 
 	@Override
 	public List<LocationX> getPlaceMarks() {
