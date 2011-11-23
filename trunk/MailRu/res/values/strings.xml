@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, MailRuActivity!</string>
+    <string name="app_name">MailRu</string>
+    <string name="Start">Start</string>
+    <string name="Stop">Stop</string>
+    <string name="set">Set</string>
+
+</resources>
