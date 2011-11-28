@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.adapter.PointInt;
@@ -14,7 +15,6 @@ import kvv.kvvmap.adapter.RectX;
 import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Utils;
-import kvv.kvvmap.common.maps.MapDescr;
 import kvv.kvvmap.common.pacemark.ISelectable;
 import kvv.kvvmap.common.pacemark.PathSelection;
 
@@ -22,7 +22,7 @@ public class CommonView implements ICommonView {
 
 	private final IPlatformView platformViewView;
 
-	private final CommonDoc doc;
+	private CommonDoc doc;
 
 	private LocationX myLocation;
 	private boolean myLocationDimmed;
@@ -137,7 +137,7 @@ public class CommonView implements ICommonView {
 		return doc.isMultiple();
 	}
 
-	public List<MapDescr> getCenterMaps() {
+	public List<String> getCenterMaps() {
 		return doc.getCenterMaps();
 	}
 
@@ -416,6 +416,7 @@ public class CommonView implements ICommonView {
 
 	public void dispose() {
 		doc.dispose();
+		doc= null;
 	}
 
 	public void incInfoLevel() {
@@ -454,4 +455,9 @@ public class CommonView implements ICommonView {
 		doc.setTopMap(map);
 	}
 
+	@Override
+	protected void finalize() throws Throwable {
+		Adapter.log("~CommonView");
+		super.finalize();
+	}
 }

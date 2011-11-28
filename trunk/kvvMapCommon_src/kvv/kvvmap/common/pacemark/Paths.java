@@ -103,6 +103,7 @@ public final class Paths {
 							time = System.currentTimeMillis() - time;
 							Adapter.log("path " + path.getFile() + " added "
 									+ time);
+							//Adapter.logMem();
 						}
 						rd.close();
 					} catch (Throwable e) {
@@ -198,4 +199,13 @@ public final class Paths {
 		return s;
 	}
 
+	public void dispose() {
+		paths.clear();
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		Adapter.log("~Paths");
+		super.finalize();
+	}
 }

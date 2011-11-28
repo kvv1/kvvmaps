@@ -65,9 +65,7 @@ public class MapView extends View implements IPlatformView {
 
 		commonView = new CommonView(this, envir);
 
-		Adapter.log("mem: free=" + Runtime.getRuntime().freeMemory() / 1024
-				/ 1024 + " total=" + Runtime.getRuntime().totalMemory() / 1024
-				/ 1024);
+		Adapter.logMem();
 
 		animateTo(new LocationX(30, 60));
 
@@ -135,6 +133,8 @@ public class MapView extends View implements IPlatformView {
 
 	@Override
 	public void onDraw(Canvas canvas) {
+
+		//Adapter.log("Draw " + this);
 
 		if (activity == null) {
 			canvas.drawColor(Color.YELLOW);
@@ -389,8 +389,13 @@ public class MapView extends View implements IPlatformView {
 	public void dispose() {
 		if (commonView != null)
 			commonView.dispose();
+
 		if (envir != null)
-			envir.adapter.dispose();
+			envir.dispose();
+
+		commonView = null;
+		compass = null;
+		envir = null;
 	}
 
 	public PlaceMarks getPlacemarks() {

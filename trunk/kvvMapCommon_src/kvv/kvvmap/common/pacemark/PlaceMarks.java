@@ -106,4 +106,14 @@ public class PlaceMarks implements IPlaceMarks {
 		if (target)
 			setTarget(pm1);
 	}
+
+	public void dispose() {
+		placemarks.clear();
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		Adapter.log("~Placemarks");
+		super.finalize();
+	}
 }

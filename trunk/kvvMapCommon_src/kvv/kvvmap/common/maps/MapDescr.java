@@ -129,7 +129,7 @@ public class MapDescr {
 			if (content.zoom == -1 || content.zoom == TileId.zoom(id)) {
 				if (map.hasTile(id)) {
 					content.zoom = TileId.zoom(id);
-					content.maps.add(map);
+					content.maps.add(map.getName());
 				}
 			}
 		}

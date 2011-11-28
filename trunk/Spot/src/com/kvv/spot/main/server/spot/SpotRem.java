@@ -1,8 +1,7 @@
 package com.kvv.spot.main.server.spot;
 
-
 public class SpotRem {
-//	Rectangle spot;
+	// Rectangle spot;
 	int spotW;
 	int spotH;
 
@@ -20,8 +19,7 @@ public class SpotRem {
 
 	private boolean vert;
 
-	SpotRem(Doc document, int diam, boolean horiz,
-			boolean vert) {
+	SpotRem(Doc document, int diam, boolean horiz, boolean vert) {
 		int w = document.getWidth();
 		int h = document.getHeight();
 
@@ -50,8 +48,8 @@ public class SpotRem {
 	 * private int interpolatePixel(double x, double y, int f00, int f01, int
 	 * f10, int f11) { double r = interpolate(x, y, doc.getR(f00),
 	 * doc.getR(f01), doc .getR(f10), doc.getR(f11)); double g = interpolate(x,
-	 * y, doc.getG(f00), doc.getG(f01), doc .getG(f10), doc.getG(f11)); double b =
-	 * interpolate(x, y, doc.getB(f00), doc.getB(f01), doc .getB(f10),
+	 * y, doc.getG(f00), doc.getG(f01), doc .getG(f10), doc.getG(f11)); double b
+	 * = interpolate(x, y, doc.getB(f00), doc.getB(f01), doc .getB(f10),
 	 * doc.getB(f11)); return doc.makePixel((int) r, (int) g, (int) b); }
 	 */
 	private static double interpolate(double x0, double x1, double x,
@@ -67,8 +65,7 @@ public class SpotRem {
 	 * doc.makePixel((int) r, (int) g, (int) b); }
 	 */
 	double getGain(int x, int y) {
-		if (x < d / 2 || x >= spotW - d / 2 || y < d / 2
-				|| y >= spotH - d / 2)
+		if (x < d / 2 || x >= spotW - d / 2 || y < d / 2 || y >= spotH - d / 2)
 			return 1;
 
 		int nx = (x - d / 2) / d;
@@ -116,7 +113,7 @@ public class SpotRem {
 		int cnt = 0;
 		for (int dy = 0; dy < d; dy++)
 			for (int dx = 0; dx < d; dx++) {
-				double b = doc.getBrightness(x + dx, y + dy);
+				double b = getBrightness(x + dx, y + dy);
 				if (brExp == -1 || Math.abs(b - brExp) < brExp / 4) {
 					br += b;
 					cnt++;
@@ -126,6 +123,7 @@ public class SpotRem {
 			return brExp;
 		return br / cnt;
 	}
+
 	double getAverBr(int xx, int yy, double brExp) {
 		return getAverBrightness(xx * d, yy * d, d, brExp);
 	}
@@ -164,12 +162,11 @@ public class SpotRem {
 
 		for (int y = 0; y < spotH; y++)
 			for (int x = 0; x < spotW; x++) {
-				doc.adjustBrightness(x, y, getGain(x, y));
+				adjustBrightness(x, y, getGain(x, y));
 			}
 	}
 
-	public static void remove(Doc doc, int diam,
-			boolean horiz, boolean vert) {
+	public static void remove(Doc doc, int diam, boolean horiz, boolean vert) {
 		int w = doc.getWidth();
 		int h = doc.getHeight();
 		if (w < 10 || h < 10 || diam < 2 || diam > w / 4 || diam > h / 4)
@@ -177,6 +174,44 @@ public class SpotRem {
 
 		SpotRem r = new SpotRem(doc, diam, horiz, vert);
 		r.run();
+	}
+
+	private void adjustBrightness(int x, int y, double gain) {
+		int pixel = doc.getPixel(x, y);
+
+		int r = doc.getR(pixel);
+		int g = doc.getG(pixel);
+		int b = doc.getB(pixel);
+
+		r *= gain;
+		g *= gain;
+		b *= gain;
+
+		if (r > 255)
+			r = 255;
+		if (g > 255)
+			g = 255;
+		if (b > 255)
+			b = 255;
+
+		pixel = doc.makePixel(r, g, b);
+		doc.setPixel(x, y, pixel);
+	}
+
+	private double getBrightness(int x, int y) {
+		int pixel = 0;
+
+		try {
+			pixel = doc.getPixel(x, y);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+
+		int r = doc.getR(pixel);
+		int g = doc.getG(pixel);
+		int b = doc.getB(pixel);
+
+		return (r + g + b) / 3;
 	}
 
 }

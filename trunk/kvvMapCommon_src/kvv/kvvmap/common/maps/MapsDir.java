@@ -19,6 +19,8 @@ public class MapsDir {
 						file.getName().lastIndexOf('.'));
 				try {
 					maps.put(name, new MapDir(file));
+					Adapter.log("mapDir " + name + " loaded");
+					Adapter.logMem();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -33,4 +35,15 @@ public class MapsDir {
 	public MapDir get(String name) {
 		return maps.get(name);
 	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+		Adapter.log("~MapsDir");
+		super.finalize();
+	}
+
+	public void dispose() {
+		maps.clear();
+	}
+	
 }

@@ -63,6 +63,8 @@ public class Maps {
 			try {
 				maps.add(new MapDescr(cache, new File(Adapter.MAPS_ROOT, name
 						+ ".pac"), adapter, mapsDir.get(name)));
+				Adapter.log("map " + name + " loaded");
+				Adapter.logMem();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -78,9 +80,14 @@ public class Maps {
 		tileLoader.cancelLoading();
 	}
 
-	public void reorder(MapDescr map) {
-		maps.remove(map);
-		maps.add(0, map);
+	public void reorder(String map) {
+		for(MapDescr md : maps) {
+			if(md.getName().equals(map)) {
+				maps.remove(md);
+				maps.add(0, md);
+				return;
+			}
+		}
 	}
 
 	public String getTopMap() {
@@ -95,4 +102,16 @@ public class Maps {
 				return;
 			}
 	}
+
+	public void dispose() {
+		//maps.clear();
+		tileLoader.dispose();
+	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+		Adapter.log("~Maps");
+		super.finalize();
+	}
+
 }

@@ -7,8 +7,8 @@ import java.util.Set;
 
 public class Cache<K, V> {
 	private final int sz;
-	private final LinkedList<K> list = new LinkedList<K>();
-	private final Map<K, V> map = new HashMap<K, V>();
+	private LinkedList<K> list = new LinkedList<K>();
+	private Map<K, V> map = new HashMap<K, V>();
 
 	public Cache(int sz) {
 		this.sz = sz;
@@ -60,5 +60,7 @@ public class Cache<K, V> {
 		map.clear();
 		list.clear();
 		
+		list = new LinkedList<K>();
+		new HashMap<K, V>();
 	}
 }

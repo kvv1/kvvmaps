@@ -7,13 +7,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.common.IntToIntMap;
 
 public class MapDir {
 	private final static long MASK = 0xFFFFFFFFF0000000L;
 	private final IntToIntMap mapDir = new IntToIntMap();
 
+//	private static int cnt;
+	
 	public MapDir(File file) throws IOException {
+//		Adapter.log("MapDir " + ++cnt);
 		FileInputStream is = new FileInputStream(file);
 		DataInputStream dis = new DataInputStream(new BufferedInputStream(is));
 		try {
@@ -42,5 +46,11 @@ public class MapDir {
 		if (idx == -1)
 			return -1;
 		return (int) ((mapDir.getAt(idx) & ~MASK) << 4);
+	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+//		Adapter.log("~MapDir " + --cnt);
+		super.finalize();
 	}
 }

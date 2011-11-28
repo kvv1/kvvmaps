@@ -197,6 +197,9 @@ public class MyActivity extends Activity {
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
+			view = (MapView) findViewById(R.id.MapView);
+			Adapter.log("onServiceConnected " + view);
+
 			if (view != null) {
 				mapsService = (IKvvMapsService) service;
 				mapsService.setTrackerListener(tl);
@@ -212,7 +215,7 @@ public class MyActivity extends Activity {
 
 	private void disconnectFromService() {
 		if (mapsService != null) {
-			mapsService.setTrackerListener(null);
+			mapsService.disconnect();
 			mapsService = null;
 		}
 	}
@@ -287,8 +290,6 @@ public class MyActivity extends Activity {
 				R.drawable.sendloc);
 
 		setContentView(R.layout.screen);
-
-		view = (MapView) findViewById(R.id.MapView);
 
 		ImageButton button = (ImageButton) findViewById(R.id.edit);
 		button.setAlpha(255);
@@ -720,6 +721,7 @@ public class MyActivity extends Activity {
 			view.dispose();
 		view = null;
 		super.onDestroy();
+		System.gc();
 	}
 
 	public void updateView() {

@@ -11,13 +11,13 @@ import kvv.kvvmap.common.Pair;
 
 public abstract class TileLoader {
 	private final Adapter adapter;
-	
-	public TileLoader (Adapter adapter) {
+
+	public TileLoader(Adapter adapter) {
 		this.adapter = adapter;
 	}
-	
-	//private static void log(String s) {
-	//}
+
+	// private static void log(String s) {
+	// }
 
 	public interface TileLoaderCallback {
 		void loaded(Tile tile);
@@ -38,6 +38,8 @@ public abstract class TileLoader {
 		return ids.size() - 1;
 	}
 
+	private volatile boolean stopped;
+
 	@SuppressWarnings("unused")
 	private Thread thread = new Thread() {
 		{
@@ -50,16 +52,21 @@ public abstract class TileLoader {
 			for (;;) {
 				final Pair<Long, TileLoaderCallback> request;
 				synchronized (queue) {
-					while (queue.isEmpty())
+					while (queue.isEmpty()) {
 						try {
 							queue.wait();
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
+						if (stopped) {
+							Adapter.log("end of TileLoader thread");
+							return;
+						}
+					}
 					request = queue.removeFirst();
 					queue1.add(request);
 				}
-				//log("loading " + TileLoader.getId(request.first));
+				// log("loading " + TileLoader.getId(request.first));
 				Tile tile = loadAsync(request.first);
 				if (tile != null) {
 					final Tile tile1 = tile;
@@ -78,12 +85,12 @@ public abstract class TileLoader {
 
 								if (found) {
 									queue1.remove(request);
-									//log("notifying "
-									//		+ TileLoader.getId(request.first));
+									// log("notifying "
+									// + TileLoader.getId(request.first));
 									callback.loaded(tile1);
 								} else {
-									//log("cancelled "
-									//		+ TileLoader.getId(request.first));
+									// log("cancelled "
+									// + TileLoader.getId(request.first));
 								}
 							}
 						}
@@ -94,9 +101,10 @@ public abstract class TileLoader {
 
 	};
 
-	public void load(Long id, final TileLoaderCallback callback, PointInt centerXY) {
+	public void load(Long id, final TileLoaderCallback callback,
+			PointInt centerXY) {
 		adapter.assertUIThread();
-		//log("load " + getId(id));
+		// log("load " + getId(id));
 		synchronized (queue) {
 			for (Pair<Long, TileLoaderCallback> p : queue) {
 				if (p.first.equals(id))
@@ -112,7 +120,8 @@ public abstract class TileLoader {
 					+ Math.abs(TileId.ny(id) * Adapter.TILE_SIZE
 							+ Adapter.TILE_SIZE / 2 - centerXY.y);
 
-			ListIterator<Pair<Long, TileLoaderCallback>> it = queue.listIterator();
+			ListIterator<Pair<Long, TileLoaderCallback>> it = queue
+					.listIterator();
 			while (it.hasNext()) {
 				Pair<Long, TileLoaderCallback> p = it.next();
 				long id1 = p.first;
@@ -126,7 +135,7 @@ public abstract class TileLoader {
 				}
 			}
 
-			//log("adding " + getId(id));
+			// log("adding " + getId(id));
 			it.add(new Pair<Long, TileLoaderCallback>(id, callback));
 
 			queue.notify();
@@ -135,9 +144,15 @@ public abstract class TileLoader {
 
 	public void cancelLoading() {
 		synchronized (queue) {
-			//log("cancelling");
+			// log("cancelling");
 			queue.clear();
 			queue1.clear();
 		}
+	}
+
+	public void dispose() {
+		stopped = true;
+		thread.interrupt();
+		cancelLoading();
 	}
 }

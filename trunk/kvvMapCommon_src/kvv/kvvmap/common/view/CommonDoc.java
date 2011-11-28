@@ -14,7 +14,6 @@ import kvv.kvvmap.adapter.RectX;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.LongSet;
 import kvv.kvvmap.common.Utils;
-import kvv.kvvmap.common.maps.MapDescr;
 import kvv.kvvmap.common.maptiles.MapTiles;
 import kvv.kvvmap.common.pacemark.IPlaceMarksListener;
 import kvv.kvvmap.common.pacemark.ISelectable;
@@ -58,8 +57,7 @@ public final class CommonDoc implements IPlaceMarksListener {
 			// return compareTiles(t1, t2);
 			// }
 		};
-		this.pathTiles = new PathTiles(envir.adapter, envir.placemarks,
-				envir.paths, Adapter.PATH_TILES_CACHE_SIZE) {
+		this.pathTiles = new PathTiles(envir, Adapter.PATH_TILES_CACHE_SIZE) {
 
 			@Override
 			protected void loaded(Tile tile) {
@@ -215,7 +213,7 @@ public final class CommonDoc implements IPlaceMarksListener {
 		return tile.isMultiple();
 	}
 
-	public List<MapDescr> getCenterMaps() {
+	public List<String> getCenterMaps() {
 		Tile tile = getCenterTile();
 		if (tile == null)
 			return Collections.emptyList();
@@ -249,7 +247,7 @@ public final class CommonDoc implements IPlaceMarksListener {
 		Tile tile = getCenterTile();
 		if (tile == null)
 			return "<No map>";
-		return tile.content.maps.getFirst().getName();
+		return tile.content.maps.getFirst();
 	}
 
 	public void setTopMap(String map) {
@@ -257,6 +255,8 @@ public final class CommonDoc implements IPlaceMarksListener {
 	}
 
 	public void dispose() {
+		selectionThread.stopped = true;
+		selectionThread.interrupt();
 		pathTiles.dispose();
 		mapTiles.dispose();
 	}
@@ -332,6 +332,7 @@ public final class CommonDoc implements IPlaceMarksListener {
 		}
 
 		public volatile ISelectable sel;
+		public volatile boolean stopped;
 
 		private PointInt xy;
 		private int zoom;
@@ -348,6 +349,10 @@ public final class CommonDoc implements IPlaceMarksListener {
 							wait();
 						} catch (InterruptedException e) {
 							e.printStackTrace();
+						}
+						if(stopped) {
+							Adapter.log("end of selection thread");
+							return;
 						}
 					}
 					xy = this.xy;
@@ -512,4 +517,9 @@ public final class CommonDoc implements IPlaceMarksListener {
 		envir.adapter.exec(r);
 	}
 
+	@Override
+	protected void finalize() throws Throwable {
+		Adapter.log("~CommonDoc");
+		super.finalize();
+	}
 }
