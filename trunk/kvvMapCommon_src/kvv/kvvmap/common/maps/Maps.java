@@ -12,7 +12,7 @@ import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.tiles.Tile;
 import kvv.kvvmap.common.tiles.TileContent;
 import kvv.kvvmap.common.tiles.TileLoader;
-import kvv.kvvmap.common.tiles.TileLoader.TileLoaderCallback;
+import kvv.kvvmap.common.tiles.TileLoaderCallback;
 
 public class Maps {
 
