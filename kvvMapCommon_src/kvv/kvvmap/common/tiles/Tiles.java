@@ -6,7 +6,6 @@ import java.util.Set;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.Cache;
-import kvv.kvvmap.common.tiles.TileLoader.TileLoaderCallback;
 
 public abstract class Tiles {
 

@@ -1,8 +1,6 @@
 package kvv.kvvmap.common.tiles;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ListIterator;
 
 import kvv.kvvmap.adapter.Adapter;
@@ -19,49 +17,24 @@ public abstract class TileLoader {
 	// private static void log(String s) {
 	// }
 
-	public interface TileLoaderCallback {
-		void loaded(Tile tile);
-	}
-
 	protected abstract Tile loadAsync(long id);
 
 	private final LinkedList<Pair<Long, TileLoaderCallback>> queue = new LinkedList<Pair<Long, TileLoaderCallback>>();
 	private final LinkedList<Pair<Long, TileLoaderCallback>> queue1 = new LinkedList<Pair<Long, TileLoaderCallback>>();
 
-	static List<Long> ids = new ArrayList<Long>();
-
-	public static synchronized int getId(Long l) {
-		int idx = ids.indexOf(l);
-		if (idx >= 0)
-			return idx;
-		ids.add(l);
-		return ids.size() - 1;
-	}
-
-	private volatile boolean stopped;
-
-	@SuppressWarnings("unused")
-	private Thread thread = new Thread() {
+	class LoaderThread extends Thread {
 		{
 			setDaemon(true);
 			setPriority((MIN_PRIORITY + NORM_PRIORITY) / 2);
-			start();
 		}
 
 		public void run() {
 			for (;;) {
 				final Pair<Long, TileLoaderCallback> request;
 				synchronized (queue) {
-					while (queue.isEmpty()) {
-						try {
-							queue.wait();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						if (stopped) {
-							Adapter.log("end of TileLoader thread");
-							return;
-						}
+					if (queue.isEmpty()) {
+						thread = null;
+						return;
 					}
 					request = queue.removeFirst();
 					queue1.add(request);
@@ -75,22 +48,12 @@ public abstract class TileLoader {
 						@Override
 						public void run() {
 							synchronized (queue) {
-								boolean found = false;
 								for (Pair<Long, TileLoaderCallback> p : queue1) {
 									if (p == request) {
-										found = true;
+										queue1.remove(request);
+										callback.loaded(tile1);
 										break;
 									}
-								}
-
-								if (found) {
-									queue1.remove(request);
-									// log("notifying "
-									// + TileLoader.getId(request.first));
-									callback.loaded(tile1);
-								} else {
-									// log("cancelled "
-									// + TileLoader.getId(request.first));
 								}
 							}
 						}
@@ -98,8 +61,9 @@ public abstract class TileLoader {
 				}
 			}
 		}
+	}
 
-	};
+	private Thread thread;
 
 	public void load(Long id, final TileLoaderCallback callback,
 			PointInt centerXY) {
@@ -138,7 +102,10 @@ public abstract class TileLoader {
 			// log("adding " + getId(id));
 			it.add(new Pair<Long, TileLoaderCallback>(id, callback));
 
-			queue.notify();
+			if (thread == null) {
+				thread = new LoaderThread();
+				thread.start();
+			}
 		}
 	}
 
@@ -151,8 +118,8 @@ public abstract class TileLoader {
 	}
 
 	public void dispose() {
-		stopped = true;
-		thread.interrupt();
-		cancelLoading();
+		// stopped = true;
+		// thread.interrupt();
+		// cancelLoading();
 	}
 }

@@ -4,7 +4,7 @@ import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.maps.Maps;
 import kvv.kvvmap.common.tiles.Tile;
-import kvv.kvvmap.common.tiles.TileLoader.TileLoaderCallback;
+import kvv.kvvmap.common.tiles.TileLoaderCallback;
 import kvv.kvvmap.common.tiles.Tiles;
 
 public abstract class MapTiles extends Tiles {

@@ -1,6 +1,5 @@
 package kvv.kvvmap.common.pathtiles;
 
-import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.COLOR;
@@ -8,12 +7,10 @@ import kvv.kvvmap.common.Img;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.pacemark.ISelectable;
 import kvv.kvvmap.common.pacemark.PathDrawer;
-import kvv.kvvmap.common.pacemark.Paths;
-import kvv.kvvmap.common.pacemark.PlaceMarks;
 import kvv.kvvmap.common.tiles.Tile;
 import kvv.kvvmap.common.tiles.TileId;
 import kvv.kvvmap.common.tiles.TileLoader;
-import kvv.kvvmap.common.tiles.TileLoader.TileLoaderCallback;
+import kvv.kvvmap.common.tiles.TileLoaderCallback;
 import kvv.kvvmap.common.tiles.Tiles;
 import kvv.kvvmap.common.view.CommonDoc;
 import kvv.kvvmap.common.view.Environment;
