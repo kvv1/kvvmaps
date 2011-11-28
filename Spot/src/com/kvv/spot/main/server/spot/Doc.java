@@ -6,12 +6,15 @@ public interface Doc {
 
 	int getHeight();
 
-	double getBrightness(int x, int y);
-
 	int getPixel(int x, int y);
 
 	void setPixel(int x, int y, int pixel);
 
-	void adjustBrightness(int x, int y, double gain);
+	int getR(int pixel);
 
+	int getG(int pixel);
+
+	int getB(int pixel);
+
+	int makePixel(int r, int g, int b);
 }

@@ -176,6 +176,12 @@ public class Adapter {
 		Log.w("KVVMAPS", string);
 	}
 
+	public static void logMem() {
+		Adapter.log("mem: free=" + Runtime.getRuntime().freeMemory() / 1024.0
+				/ 1024 + " total=" + Runtime.getRuntime().totalMemory()
+				/ 1024.0 / 1024);
+	}
+
 	private static void recycle(Bitmap bm) {
 		bm.recycle();
 		cnt--;
@@ -193,4 +199,9 @@ public class Adapter {
 	// }
 	// }
 
+	@Override
+	protected void finalize() throws Throwable {
+		log("~Adapter");
+		super.finalize();
+	}
 }

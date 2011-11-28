@@ -16,21 +16,18 @@ import kvv.kvvmap.common.tiles.TileLoader;
 import kvv.kvvmap.common.tiles.TileLoader.TileLoaderCallback;
 import kvv.kvvmap.common.tiles.Tiles;
 import kvv.kvvmap.common.view.CommonDoc;
+import kvv.kvvmap.common.view.Environment;
 
 public abstract class PathTiles extends Tiles {
 
-	private final PlaceMarks placemarks;
-	private final Paths paths;
-	private final Adapter adapter;
+	private Environment envir;
 	private final TileLoader tileLoader;
 
-	public PathTiles(final Adapter adapter, PlaceMarks placemarks, Paths paths,
+	public PathTiles(final Environment envir,
 			int cacheSize) {
-		super(adapter, cacheSize);
-		this.adapter = adapter;
-		this.placemarks = placemarks;
-		this.paths = paths;
-		this.tileLoader = new TileLoader(adapter) {
+		super(envir.adapter, cacheSize);
+		this.envir = envir;
+		this.tileLoader = new TileLoader(envir.adapter) {
 			@Override
 			protected Tile loadAsync(long id) {
 				Img img = createPathsImg(id);
@@ -38,7 +35,7 @@ public abstract class PathTiles extends Tiles {
 				if (img == null)
 					return null;
 
-				return new Tile(adapter, id, img, null);
+				return new Tile(envir.adapter, id, img, null);
 			}
 		};
 	}
@@ -54,11 +51,11 @@ public abstract class PathTiles extends Tiles {
 	protected abstract ISelectable getSelAsync();
 
 	private Img createPathsImg(long id) {
-		Object img1 = adapter.allocBitmap();
+		Object img1 = envir.adapter.allocBitmap();
 		if (img1 == null)
 			return null;
 
-		GC gc = adapter.getGC(img1);
+		GC gc = envir.adapter.getGC(img1);
 
 		if (CommonDoc.debugDraw) {
 			gc.setColor(COLOR.RED);
@@ -73,8 +70,8 @@ public abstract class PathTiles extends Tiles {
 		if (infoLevel.ordinal() > 0) {
 			gc.setAntiAlias(true);
 			ISelectable sel = getSelAsync();
-			PathDrawer.drawPaths(paths, gc, id, infoLevel, sel);
-			PathDrawer.drawPlacemarks(placemarks, gc, id, infoLevel, sel);
+			PathDrawer.drawPaths(envir.paths, gc, id, infoLevel, sel);
+			PathDrawer.drawPlacemarks(envir.placemarks, gc, id, infoLevel, sel);
 		}
 		return new Img(img1, true);
 	}
@@ -83,4 +80,8 @@ public abstract class PathTiles extends Tiles {
 		tileLoader.cancelLoading();
 	}
 
+	public void dispose() {
+		tileLoader.dispose();
+		super.dispose();
+	}
 }

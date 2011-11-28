@@ -10,6 +10,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.util.Log;
 
 public class CounterService extends Service {
 
@@ -83,5 +84,11 @@ public class CounterService extends Service {
 		timerHandler.postDelayed(timerRunnable, PERIOD);
 
 		setCounter(intent.getIntExtra(SET_COUNTER_INTENT_PARAM, 0));
+	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+		Log.w("XXX", "~service");
+		super.finalize();
 	}
 }

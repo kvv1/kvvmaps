@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.kvv.spot.main.server.spot.DocImpl;
+import com.kvv.spot.main.server.spot.Doc;
 import com.kvv.spot.main.server.spot.SpotRem;
 import com.kvv.spot.main.shared.SpotRemoveMethod;
 
@@ -101,7 +101,7 @@ public class SpotServlet extends HttpServlet {
 
 	private void removeSpot(final BufferedImage img, int diam,
 			SpotRemoveMethod method) {
-		DocImpl doc = new DocImpl() {
+		Doc doc = new Doc() {
 			@Override
 			public int getPixel(int x, int y) {
 				return img.getRGB(x, y);
@@ -120,6 +120,26 @@ public class SpotServlet extends HttpServlet {
 			@Override
 			public void setPixel(int x, int y, int pixel) {
 				img.setRGB(x, y, pixel);
+			}
+
+			@Override
+			public int getR(int pixel) {
+				return pixel & 0xFF;
+			}
+
+			@Override
+			public int getG(int pixel) {
+				return (pixel >> 8) & 0xFF;
+			}
+
+			@Override
+			public int getB(int pixel) {
+				return (pixel >> 16) & 0xFF;
+			}
+
+			@Override
+			public int makePixel(int r, int g, int b) {
+				return r + (g << 8) + (b << 16);
 			}
 		};
 
