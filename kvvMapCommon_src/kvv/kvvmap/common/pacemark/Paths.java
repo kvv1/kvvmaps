@@ -162,7 +162,7 @@ public final class Paths {
 	public void split(Path path, LocationX pm) {
 		List<LocationX> pms = path.split(pm);
 		Path newPath = createPath(pms, getNewPathName());
-		Saver.getInstance().save(newPath);
+		Saver.save(newPath);
 		doc.onPathTilesChanged();
 	}
 

@@ -34,5 +34,4 @@ public abstract class MapTiles extends Tiles {
 	public void stopLoading() {
 		maps.cancelLoading();
 	}
-
 }

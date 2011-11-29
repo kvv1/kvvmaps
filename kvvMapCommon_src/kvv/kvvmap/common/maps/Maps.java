@@ -103,11 +103,6 @@ public class Maps {
 			}
 	}
 
-	public void dispose() {
-		//maps.clear();
-		tileLoader.dispose();
-	}
-	
 	@Override
 	protected void finalize() throws Throwable {
 		Adapter.log("~Maps");

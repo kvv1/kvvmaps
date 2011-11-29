@@ -6,48 +6,37 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.LocationX;
 
 public class Saver extends Thread {
 
 	private Set<IPlaceMarks> toSave = new HashSet<IPlaceMarks>();
-	public volatile boolean stopped;
 
 	{
 		setDaemon(true);
 		setPriority(Thread.MIN_PRIORITY);
-		start();
 	}
 
-	private volatile static Saver saver;
+	private static Saver saver;
 
-	public synchronized static Saver getInstance() {
-		if (saver == null)
-			saver = new Saver();
-		return saver;
-	}
-
-	public synchronized void save(IPlaceMarks path) {
-		toSave.add(path);
-		notify();
+	public static void save(IPlaceMarks path) {
+		synchronized (Saver.class) {
+			if (saver == null) {
+				saver = new Saver();
+				saver.start();
+			}
+			saver.toSave.add(path);
+		}
 	}
 
 	@Override
 	public void run() {
 		for (;;) {
 			Set<IPlaceMarks> set;
-			synchronized (this) {
-				while (toSave.isEmpty()) {
-					try {
-						wait();
-					} catch (InterruptedException e) {
-						if (stopped) {
-							Adapter.log("Saver stopped");
-							saver = null;
-							return;
-						}
-					}
+			synchronized (Saver.class) {
+				if (toSave.isEmpty()) {
+					saver = null;
+					return;
 				}
 			}
 
@@ -56,7 +45,7 @@ public class Saver extends Thread {
 			} catch (InterruptedException e1) {
 			}
 
-			synchronized (this) {
+			synchronized (Saver.class) {
 				set = toSave;
 				toSave = new HashSet<IPlaceMarks>();
 			}
@@ -82,13 +71,6 @@ public class Saver extends Thread {
 			s.println("lon=" + pm.getLongitude() + " lat=" + pm.getLatitude()
 					+ " alt=" + (int) pm.getAltitude() + " speed="
 					+ pm.getSpeed() + " time=" + pm.getTime());
-		}
-	}
-
-	public static synchronized void dispose() {
-		if (saver != null) {
-			saver.stopped = true;
-			saver.interrupt();
 		}
 	}
 

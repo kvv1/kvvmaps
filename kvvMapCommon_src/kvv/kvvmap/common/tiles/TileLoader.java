@@ -12,11 +12,14 @@ public abstract class TileLoader {
 
 	public TileLoader(Adapter adapter) {
 		this.adapter = adapter;
+		Adapter.log("TileLoader " + ++cnt);
 	}
 
 	// private static void log(String s) {
 	// }
 
+	private static int cnt; 
+	
 	protected abstract Tile loadAsync(long id);
 
 	private final LinkedList<Pair<Long, TileLoaderCallback>> queue = new LinkedList<Pair<Long, TileLoaderCallback>>();
@@ -34,6 +37,7 @@ public abstract class TileLoader {
 				synchronized (queue) {
 					if (queue.isEmpty()) {
 						thread = null;
+						System.gc();
 						return;
 					}
 					request = queue.removeFirst();
@@ -117,9 +121,9 @@ public abstract class TileLoader {
 		}
 	}
 
-	public void dispose() {
-		// stopped = true;
-		// thread.interrupt();
-		// cancelLoading();
+	@Override
+	protected void finalize() throws Throwable {
+		Adapter.log("~TileLoader " + --cnt);
+		super.finalize();
 	}
 }

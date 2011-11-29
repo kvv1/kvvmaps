@@ -11,14 +11,14 @@ public final class Tile {
 	public final TileContent content;
 	public boolean needsReloading;
 	
-//	private static int cnt;
+	private static int cnt;
 
 	public Tile(Adapter adapter, long id, Img img, TileContent context) {
 		this.adapter = adapter;
 		this.id = id;
 		this.img = img;
 		this.content = context;
-//		Adapter.log("Tile " + ++cnt);
+		Adapter.log("Tile " + ++cnt);
 	}
 
 	public synchronized void draw(GC gc, int x, int y) {
@@ -37,7 +37,7 @@ public final class Tile {
 	
 	@Override
 	protected void finalize() throws Throwable {
-//		Adapter.log("~Tile " + --cnt);
+		Adapter.log("~Tile " + --cnt);
 		super.finalize();
 	}
 }

@@ -8,11 +8,7 @@ import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Utils;
-import kvv.kvvmap.common.maps.Maps;
-import kvv.kvvmap.common.maps.MapsDir;
 import kvv.kvvmap.common.pacemark.ISelectable;
-import kvv.kvvmap.common.pacemark.Paths;
-import kvv.kvvmap.common.pacemark.PlaceMarks;
 import kvv.kvvmap.common.view.CommonDoc;
 import kvv.kvvmap.common.view.CommonView;
 import kvv.kvvmap.common.view.Environment;
@@ -37,14 +33,23 @@ public class MapView extends View implements IPlatformView {
 
 	private CommonView commonView;
 
-	private MyActivity activity;
+	private final MyActivity activity;
 
 	private Compass compass;
 
-	private Environment envir;
+	private Thread uiThread;
+
+	public void assertUIThread() {
+		if (Thread.currentThread() != uiThread) {
+			final Throwable t = new RuntimeException("illegal thread");
+			t.printStackTrace();
+		}
+	}
 
 	public MapView(Context ctxt, AttributeSet attrs) {
 		super(ctxt, attrs);
+		this.activity = (MyActivity) ctxt;
+		uiThread = Thread.currentThread();
 		setFocusable(true);
 		setFocusableInTouchMode(true);
 
@@ -55,13 +60,11 @@ public class MapView extends View implements IPlatformView {
 			setOnTouchListener(new TouchListener());
 	}
 
-	public void init(MyActivity activity) {
-		this.activity = activity;
-		Adapter adapter = new Adapter(activity);
-		MapsDir mapsDir = activity.mapsService.getMapsDir();
-		envir = new Environment(adapter, activity.mapsService.getPaths(),
-				activity.mapsService.getPlacemarks(),
-				new Maps(adapter, mapsDir), mapsDir);
+	private static int cnt;
+
+	public void init(Environment envir) {
+		assertUIThread();
+		Adapter.log("MapView.init " + ++cnt);
 
 		commonView = new CommonView(this, envir);
 
@@ -69,12 +72,12 @@ public class MapView extends View implements IPlatformView {
 
 		animateTo(new LocationX(30, 60));
 
-		// commonView.loadState();
-
 		ImageButton button = (ImageButton) activity.findViewById(R.id.here);
 		button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				if (commonView == null)
+					return;
 				LocationX myLoc = commonView.getMyLocation();
 				if (myLoc != null)
 					animateTo(myLoc);
@@ -85,6 +88,8 @@ public class MapView extends View implements IPlatformView {
 		toTarget.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				if (commonView == null)
+					return;
 				LocationX target = commonView.getTarget();
 				if (target != null)
 					animateTo(target);
@@ -108,7 +113,7 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	private void updateTitle() {
-		if (activity == null)
+		if (commonView == null)
 			return;
 
 		String lon = Utils.format(commonView.getLocation().getLongitude());
@@ -128,15 +133,17 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	public ISelectable getSel() {
+		if (commonView == null)
+			return null;
 		return commonView.getSel();
 	}
 
 	@Override
 	public void onDraw(Canvas canvas) {
 
-		//Adapter.log("Draw " + this);
+		// Adapter.log("Draw " + this);
 
-		if (activity == null) {
+		if (commonView == null) {
 			canvas.drawColor(Color.YELLOW);
 			return;
 		}
@@ -194,6 +201,10 @@ public class MapView extends View implements IPlatformView {
 
 		@Override
 		public boolean onTouch(View arg0, MotionEvent event) {
+
+			if (commonView == null)
+				return true;
+
 			int x = (int) (event.getX());
 			int y = (int) (event.getY());
 			switch (event.getAction() & MotionEvent.ACTION_MASK) {
@@ -250,6 +261,9 @@ public class MapView extends View implements IPlatformView {
 
 		@Override
 		public boolean onTouch(View arg0, MotionEvent event) {
+			if (commonView == null)
+				return true;
+
 			int x = (int) (event.getX());
 			int y = (int) (event.getY());
 			switch (event.getAction()) {
@@ -268,21 +282,23 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	public void animateTo(LocationX loc) {
-		commonView.animateTo(loc);
+		if (commonView != null)
+			commonView.animateTo(loc);
 	}
 
 	public void zoomOut() {
-		commonView.zoomOut();
+		if (commonView != null)
+			commonView.zoomOut();
 	}
 
 	public void zoomIn() {
-		commonView.zoomIn();
+		if (commonView != null)
+			commonView.zoomIn();
 	}
 
 	public void save() {
-		if (activity != null) {
+		if (commonView != null) {
 			Bundle outState = new Bundle();
-			CommonView commonView = this.commonView;
 			if (commonView != null) {
 				outState.putDouble("lon", commonView.getLocation()
 						.getLongitude());
@@ -303,15 +319,21 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	public LocationX createPlacemark() {
+		if (commonView == null)
+			return null;
+
 		LocationX pm = commonView.getLocation();
 		return pm;
 	}
 
 	public void reorderMaps() {
-		commonView.reorderMaps();
+		if (commonView != null)
+			commonView.reorderMaps();
 	}
 
 	public LocationX getCenter() {
+		if (commonView == null)
+			return null;
 		return commonView.getLocation();
 	}
 
@@ -331,16 +353,22 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	public void setMyLocation(LocationX locationX, boolean forceScroll) {
+		if (commonView == null)
+			return;
 		commonView.setMyLocation(locationX, forceScroll);
 		updateButtons();
 	}
 
 	public void dimmMyLocation() {
+		if (commonView == null)
+			return;
 		commonView.dimmMyLocation();
 		updateButtons();
 	}
 
 	public void updateButtons() {
+		if (commonView == null)
+			return;
 
 		View button = activity.findViewById(R.id.here);
 		if (commonView.getMyLocation() != null && !commonView.isOnMyLocation())
@@ -382,36 +410,30 @@ public class MapView extends View implements IPlatformView {
 		rotate.setEnabled(commonView.canReorder());
 	}
 
-	public Paths getPaths() {
-		return envir.paths;
-	}
-
 	public void dispose() {
-		if (commonView != null)
+		assertUIThread();
+		if (commonView != null) {
+			Adapter.log("MapView.dispose " + --cnt);
 			commonView.dispose();
-
-		if (envir != null)
-			envir.dispose();
+		}
 
 		commonView = null;
 		compass = null;
-		envir = null;
-	}
-
-	public PlaceMarks getPlacemarks() {
-		return envir.placemarks;
 	}
 
 	public void incInfoLevel() {
-		commonView.incInfoLevel();
+		if (commonView != null)
+			commonView.incInfoLevel();
 	}
 
 	public void decInfoLevel() {
-		commonView.decInfoLevel();
+		if (commonView != null)
+			commonView.decInfoLevel();
 	}
 
 	public void clearPathTiles() {
-		commonView.clearPathTiles();
+		if (commonView != null)
+			commonView.clearPathTiles();
 	}
 
 }

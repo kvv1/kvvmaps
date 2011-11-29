@@ -76,9 +76,4 @@ public abstract class PathTiles extends Tiles {
 	public void stopLoading() {
 		tileLoader.cancelLoading();
 	}
-
-	public void dispose() {
-		tileLoader.dispose();
-		super.dispose();
-	}
 }

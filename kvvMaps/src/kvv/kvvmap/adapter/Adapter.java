@@ -6,8 +6,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import kvv.kvvmap.common.Recycleable;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -33,7 +36,7 @@ public class Adapter {
 
 	public static int RAF_CACHE_SIZE;
 
-	private List<Bitmap> freeBitmaps;
+	private List<Bitmap> freeBitmaps = new ArrayList<Bitmap>();
 
 	private final Thread uiThread;
 
@@ -44,6 +47,14 @@ public class Adapter {
 	public Adapter(Context context) {
 		handler = new Handler();
 		uiThread = Thread.currentThread();
+		freeBitmaps = new ArrayList<Bitmap>();
+		for (int i = 0; i < MAP_TILES_CACHE_SIZE + PATH_TILES_CACHE_SIZE; i++) {
+			Bitmap bm = Bitmap.createBitmap(TILE_SIZE, TILE_SIZE,
+					Bitmap.Config.ARGB_4444);
+			cnt++;
+			// bm.setDensity(Bitmap.DENSITY_NONE);
+			freeBitmaps.add(bm);
+		}
 	}
 
 	public synchronized void disposeBitmap(Object img) {
@@ -61,17 +72,6 @@ public class Adapter {
 	}
 
 	public synchronized Object allocBitmap() {
-		if (freeBitmaps == null) {
-			freeBitmaps = new ArrayList<Bitmap>();
-			for (int i = 0; i < MAP_TILES_CACHE_SIZE + PATH_TILES_CACHE_SIZE; i++) {
-				Bitmap bm = Bitmap.createBitmap(TILE_SIZE, TILE_SIZE,
-						Bitmap.Config.ARGB_4444);
-				cnt++;
-				// bm.setDensity(Bitmap.DENSITY_NONE);
-				freeBitmaps.add(bm);
-			}
-		}
-
 		if (freeBitmaps.isEmpty()) {
 			try {
 				Bitmap bm = Bitmap.createBitmap(TILE_SIZE, TILE_SIZE,
@@ -128,13 +128,23 @@ public class Adapter {
 		return new GC(c1, paint, bm1.getWidth(), bm1.getHeight());
 	}
 
-	public synchronized void dispose() {
+	private Set<Recycleable> recycleables = new HashSet<Recycleable>();
+
+	public synchronized void addRecycleable(Recycleable recycleable) {
+		recycleables.add(recycleable);
+	}
+
+	public synchronized void recycle() {
 		// Adapter.log("--dispose free bitmaps");
 		for (Bitmap bm : freeBitmaps) {
 			recycle(bm);
 		}
 		// Adapter.log("--");
 		freeBitmaps.clear();
+		for (Recycleable r : recycleables)
+			r.recycle();
+		recycleables = new HashSet<Recycleable>();
+		log("****recycled");
 	}
 
 	public void assertUIThread() {
