@@ -45,7 +45,7 @@ public class PlaceMarks implements IPlaceMarks {
 
 	public void add(LocationX pm) {
 		placemarks.add(pm);
-		Saver.getInstance().save(this);
+		Saver.save(this);
 		IPlaceMarksListener doc = this.doc;
 		if (doc != null)
 			doc.onPathTilesChanged();
@@ -57,7 +57,7 @@ public class PlaceMarks implements IPlaceMarks {
 
 	public void remove(LocationX pm) {
 		placemarks.remove(pm);
-		Saver.getInstance().save(this);
+		Saver.save(this);
 		IPlaceMarksListener doc = this.doc;
 		if (doc != null)
 			doc.onPathTilesChanged();

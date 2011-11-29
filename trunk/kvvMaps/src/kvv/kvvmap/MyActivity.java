@@ -12,10 +12,13 @@ import java.util.Comparator;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.LocationX;
+import kvv.kvvmap.common.maps.Maps;
+import kvv.kvvmap.common.maps.MapsDir;
 import kvv.kvvmap.common.pacemark.ISelectable;
 import kvv.kvvmap.common.pacemark.Path;
 import kvv.kvvmap.common.pacemark.PathSelection;
 import kvv.kvvmap.common.view.CommonDoc;
+import kvv.kvvmap.common.view.Environment;
 import kvv.kvvmap.dlg.PathDlg;
 import kvv.kvvmap.dlg.PlaceMarkDlg;
 import kvv.kvvmap.service.KvvMapsService;
@@ -87,6 +90,11 @@ public class MyActivity extends Activity {
 	private boolean buttonsVisible;
 	public boolean enlarge;
 
+	private boolean created;
+
+	private final Adapter adapter = new Adapter(MyActivity.this);
+
+	
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		int cnt = event.getRepeatCount();
@@ -197,13 +205,20 @@ public class MyActivity extends Activity {
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			view = (MapView) findViewById(R.id.MapView);
-			Adapter.log("onServiceConnected " + view);
-
-			if (view != null) {
+			if (created) {
+				view = (MapView) findViewById(R.id.MapView);
+				Adapter.log("onServiceConnected " + view + " "
+						+ MyActivity.this);
 				mapsService = (IKvvMapsService) service;
 				mapsService.setTrackerListener(tl);
-				view.init(MyActivity.this);
+				
+				MapsDir mapsDir = mapsService.getMapsDir();
+				Environment envir = new Environment(adapter, mapsService.getPaths(),
+						mapsService.getPlacemarks(),
+						new Maps(adapter, mapsDir), mapsDir);
+
+				
+				view.init(envir);
 			}
 		}
 
@@ -350,6 +365,8 @@ public class MyActivity extends Activity {
 
 		buttonsVisible = settings.getBoolean("buttonsVisible", true);
 		updateButtons();
+
+		created = true;
 	}
 
 	private boolean checkMaps() {
@@ -550,7 +567,8 @@ public class MyActivity extends Activity {
 	}
 
 	private void paths() {
-		final Path[] paths = view.getPaths().getPaths().toArray(new Path[0]);
+		final Path[] paths = mapsService.getPaths().getPaths()
+				.toArray(new Path[0]);
 
 		Arrays.sort(paths, new Comparator<Path>() {
 			public int compare(Path path1, Path path2) {
@@ -675,7 +693,7 @@ public class MyActivity extends Activity {
 		final LocationX pm = view.createPlacemark();
 		if (pm != null) {
 			PlaceMarkDlg dlg = new PlaceMarkDlg(this, view, pm,
-					view.getPlacemarks(), PlaceMarkDlg.Type.ADD);
+					mapsService.getPlacemarks(), PlaceMarkDlg.Type.ADD);
 			dlg.show();
 		}
 	}
@@ -691,13 +709,14 @@ public class MyActivity extends Activity {
 		if (sel instanceof LocationX) {
 			LocationX pm = (LocationX) sel;
 			PlaceMarkDlg dlg = new PlaceMarkDlg(this, view, pm,
-					view.getPlacemarks(), PlaceMarkDlg.Type.EDIT);
+					mapsService.getPlacemarks(), PlaceMarkDlg.Type.EDIT);
 			dlg.show();
 		}
 
 		if (sel instanceof PathSelection) {
 			PathSelection pathSel = (PathSelection) sel;
-			new PathDlg(this, pathSel.path, pathSel.pm, view.getPaths()).show();
+			new PathDlg(this, pathSel.path, pathSel.pm, mapsService.getPaths())
+					.show();
 		}
 	}
 
@@ -720,8 +739,12 @@ public class MyActivity extends Activity {
 		if (view != null)
 			view.dispose();
 		view = null;
+		
+		adapter.recycle();
+		
 		super.onDestroy();
 		System.gc();
+		created = false;
 	}
 
 	public void updateView() {

@@ -42,7 +42,7 @@ public class Path implements IPlaceMarks {
 		List<LocationX> sublist = placemarks.subList(0, idx);
 		List<LocationX> sublist1 = placemarks.subList(idx, placemarks.size());
 		set(sublist);
-		Saver.getInstance().save(this);
+		Saver.save(this);
 		return sublist1;
 	}
 
@@ -73,7 +73,7 @@ public class Path implements IPlaceMarks {
 			rect.union(pm.getLongitude(), pm.getLatitude());
 
 		if (compacted && doc != null)
-			Saver.getInstance().save(this);
+			Saver.save(this);
 
 		return compacted;
 	}
@@ -84,7 +84,7 @@ public class Path implements IPlaceMarks {
 		}
 
 		if (doc != null)
-			Saver.getInstance().save(this);
+			Saver.save(this);
 	}
 
 	public void setFile(File newFile) {
@@ -104,7 +104,7 @@ public class Path implements IPlaceMarks {
 		if (doc != null) {
 			doc.onPathTilesChanged();
 			doc.updateSel();
-			Saver.getInstance().save(this);
+			Saver.save(this);
 		}
 	}
 

@@ -22,7 +22,7 @@ public class CommonView implements ICommonView {
 
 	private final IPlatformView platformViewView;
 
-	private CommonDoc doc;
+	private final CommonDoc doc;
 
 	private LocationX myLocation;
 	private boolean myLocationDimmed;
@@ -416,7 +416,6 @@ public class CommonView implements ICommonView {
 
 	public void dispose() {
 		doc.dispose();
-		doc= null;
 	}
 
 	public void incInfoLevel() {

@@ -257,8 +257,6 @@ public final class CommonDoc implements IPlaceMarksListener {
 	public void dispose() {
 		selectionThread.stopped = true;
 		selectionThread.interrupt();
-		pathTiles.dispose();
-		mapTiles.dispose();
 	}
 
 	@Override
@@ -345,10 +343,13 @@ public final class CommonDoc implements IPlaceMarksListener {
 				int zoom;
 				synchronized (this) {
 					while (this.xy == null) {
+						if(stopped) {
+							Adapter.log("end of selection thread");
+							return;
+						}
 						try {
 							wait();
 						} catch (InterruptedException e) {
-							e.printStackTrace();
 						}
 						if(stopped) {
 							Adapter.log("end of selection thread");
