@@ -25,7 +25,7 @@ public abstract class Tiles implements Recycleable{
 	private final TileLoaderCallback callback = new TileLoaderCallback() {
 		@Override
 		public void loaded(Tile tile) {
-//			adapter.addRecycleable(Tiles.this);
+			adapter.addRecycleable(Tiles.this);
 			//System.out.println(tile.id);
 			tileCache.remove(tile.id);
 			tileCache.put(tile.id, tile);

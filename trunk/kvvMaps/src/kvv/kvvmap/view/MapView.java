@@ -5,7 +5,6 @@ import kvv.kvvmap.R;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.pacemark.ISelectable;
@@ -27,13 +26,12 @@ import android.util.FloatMath;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 
 public class MapView extends View implements IPlatformView {
 
 	private CommonView commonView;
 
-	private final MyActivity activity;
+	private MyActivity activity;
 
 	private Compass compass;
 
@@ -48,7 +46,6 @@ public class MapView extends View implements IPlatformView {
 
 	public MapView(Context ctxt, AttributeSet attrs) {
 		super(ctxt, attrs);
-		this.activity = (MyActivity) ctxt;
 		uiThread = Thread.currentThread();
 		setFocusable(true);
 		setFocusableInTouchMode(true);
@@ -62,42 +59,16 @@ public class MapView extends View implements IPlatformView {
 
 	private static int cnt;
 
-	public void init(Environment envir) {
+	public void init( MyActivity activity, Environment envir) {
 		assertUIThread();
 		Adapter.log("MapView.init " + ++cnt);
 
+		this.activity = activity;
 		commonView = new CommonView(this, envir);
 
 		Adapter.logMem();
 
 		animateTo(new LocationX(30, 60));
-
-		ImageButton button = (ImageButton) activity.findViewById(R.id.here);
-		button.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (commonView == null)
-					return;
-				LocationX myLoc = commonView.getMyLocation();
-				if (myLoc != null)
-					animateTo(myLoc);
-			}
-		});
-
-		Button toTarget = (Button) activity.findViewById(R.id.toTarget);
-		toTarget.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (commonView == null)
-					return;
-				LocationX target = commonView.getTarget();
-				if (target != null)
-					animateTo(target);
-			}
-		});
-
-		toTarget.setBackgroundColor((COLOR.TARG_COLOR & 0x00FFFFFF) | 0x64000000);
-		toTarget.setFocusable(false);
 
 		Bundle savedInstanceState = activity.mapsService.getBundle();
 		if (savedInstanceState != null) {
@@ -113,7 +84,7 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	private void updateTitle() {
-		if (commonView == null)
+		if (activity == null || commonView == null)
 			return;
 
 		String lon = Utils.format(commonView.getLocation().getLongitude());
@@ -143,7 +114,7 @@ public class MapView extends View implements IPlatformView {
 
 		// Adapter.log("Draw " + this);
 
-		if (commonView == null) {
+		if (activity == null || commonView == null) {
 			canvas.drawColor(Color.YELLOW);
 			return;
 		}
@@ -297,7 +268,7 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	public void save() {
-		if (commonView != null) {
+		if (activity == null || commonView != null) {
 			Bundle outState = new Bundle();
 			if (commonView != null) {
 				outState.putDouble("lon", commonView.getLocation()
@@ -367,7 +338,7 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	public void updateButtons() {
-		if (commonView == null)
+		if (activity == null || commonView == null)
 			return;
 
 		View button = activity.findViewById(R.id.here);
@@ -419,6 +390,7 @@ public class MapView extends View implements IPlatformView {
 
 		commonView = null;
 		compass = null;
+		activity = null;
 	}
 
 	public void incInfoLevel() {
@@ -436,4 +408,20 @@ public class MapView extends View implements IPlatformView {
 			commonView.clearPathTiles();
 	}
 
+	@Override
+	protected void finalize() throws Throwable {
+		Adapter.log("~MapView");
+		super.finalize();
+	}
+
+	public void animateToMyLocation() {
+		if (commonView != null)
+			commonView.animateToMyLocation();
+	}
+
+	public void animateToTarget() {
+		if (commonView != null)
+			commonView.animateToTarget();
+	}
+	
 }

@@ -12,6 +12,7 @@ import java.util.Comparator;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.LocationX;
+import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.maps.Maps;
 import kvv.kvvmap.common.maps.MapsDir;
 import kvv.kvvmap.common.pacemark.ISelectable;
@@ -54,6 +55,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.ImageButton;
 
 @SuppressWarnings("deprecation")
@@ -67,7 +69,6 @@ public class MyActivity extends Activity {
 	private static final int MENU_FOLLOW_ONOFF = 101;
 	private static final int MENU_QUIT = 102;
 	private static final int MENU_CURRENT_POS = 103;
-	private static final int MENU_ADD_POINT = 104;
 	private static final int MENU_ADD_PLACEMARK = 105;
 	private static final int MENU_ENLARGE = 106;
 
@@ -78,7 +79,6 @@ public class MyActivity extends Activity {
 	private static final int MENU_TOGGLE_BUTTONS = 112;
 
 	private MapView view;
-	private LocationManager curPosLocationManager;
 
 	// public static MediaPlayer mediaPlayer;
 
@@ -92,9 +92,8 @@ public class MyActivity extends Activity {
 
 	private boolean created;
 
-	private final Adapter adapter = new Adapter(MyActivity.this);
+	private Adapter adapter;
 
-	
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		int cnt = event.getRepeatCount();
@@ -211,14 +210,13 @@ public class MyActivity extends Activity {
 						+ MyActivity.this);
 				mapsService = (IKvvMapsService) service;
 				mapsService.setTrackerListener(tl);
-				
+
 				MapsDir mapsDir = mapsService.getMapsDir();
-				Environment envir = new Environment(adapter, mapsService.getPaths(),
-						mapsService.getPlacemarks(),
+				Environment envir = new Environment(adapter,
+						mapsService.getPaths(), mapsService.getPlacemarks(),
 						new Maps(adapter, mapsDir), mapsDir);
 
-				
-				view.init(envir);
+				view.init(MyActivity.this, envir);
 			}
 		}
 
@@ -242,6 +240,8 @@ public class MyActivity extends Activity {
 
 		if (!checkMaps())
 			return;
+
+		adapter = new Adapter(this);
 
 		startService(new Intent(this, KvvMapsService.class));
 
@@ -363,6 +363,29 @@ public class MyActivity extends Activity {
 			}
 		});
 
+		ImageButton hereButton = (ImageButton) findViewById(R.id.here);
+		hereButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (view != null)
+					view.animateToMyLocation();
+			}
+		});
+
+		Button toTarget = (Button) findViewById(R.id.toTarget);
+		toTarget.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (view != null)
+					view.animateToTarget();
+			}
+		});
+
+		toTarget.setBackgroundColor((COLOR.TARG_COLOR & 0x00FFFFFF) | 0x64000000);
+		toTarget.setFocusable(false);
+
+
+		
 		buttonsVisible = settings.getBoolean("buttonsVisible", true);
 		updateButtons();
 
@@ -467,9 +490,7 @@ public class MyActivity extends Activity {
 		menu.add(0, MENU_CURRENT_POS, 0, "Здесь");
 		menu.add(0, MENU_LOGGING_ONOFF, 0, "GPS On/Off");
 		menu.add(0, MENU_FOLLOW_ONOFF, 0, "GPS On/Off");
-		// menu.add(0, MENU_ADD_POINT, 0, "Add point");
 		menu.add(0, MENU_ADD_PLACEMARK, 0, "Добавить точку");
-		// menu.add(0, MENU_NEW_PATH, 0, "New path");
 		menu.add(0, MENU_TRACKS, 0, "Пути");
 		menu.add(0, MENU_ENLARGE, 0, "Увеличенный размер");
 		menu.add(0, MENU_DEBUG_DRAW, 0, "debugDraw");
@@ -479,16 +500,11 @@ public class MyActivity extends Activity {
 		return true;
 	}
 
-	private AlertDialog curLocProgress;
-
 	/* Handles item selections */
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case MENU_CURRENT_POS:
 			gotoCurrentPos();
-			return true;
-		case MENU_ADD_POINT:
-			addPoint();
 			return true;
 		case MENU_LOGGING_ONOFF:
 			trackingOnOff();
@@ -623,14 +639,18 @@ public class MyActivity extends Activity {
 	}
 
 	private void gotoCurrentPos() {
+		final LocationManager curPosLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		final AlertDialog[] curLocProgress = new AlertDialog[1];
+
+
 		final LocationListener locListener = new LocationListener() {
 			public void onStatusChanged(String provider, int status,
 					Bundle extras) {
 				if (status == LocationProvider.OUT_OF_SERVICE) {
-					if (curPosLocationManager != null) {
-						curPosLocationManager.removeUpdates(this);
-						curPosLocationManager = null;
-					}
+					curPosLocationManager.removeUpdates(this);
+					if (curLocProgress[0] != null)
+						curLocProgress[0].dismiss();
+					curLocProgress[0] = null;
 				}
 			}
 
@@ -638,21 +658,19 @@ public class MyActivity extends Activity {
 			}
 
 			public void onProviderDisabled(String provider) {
-				if (curPosLocationManager != null) {
-					curPosLocationManager.removeUpdates(this);
-					curPosLocationManager = null;
-				}
+				curPosLocationManager.removeUpdates(this);
+				if (curLocProgress[0] != null)
+					curLocProgress[0].dismiss();
+				curLocProgress[0] = null;
 			}
 
 			public void onLocationChanged(Location location) {
 				if (location != null) {
 					if (location.getAccuracy() < 40) {
-						if (curPosLocationManager != null) {
-							curPosLocationManager.removeUpdates(this);
-						}
-						if (curLocProgress != null)
-							curLocProgress.dismiss();
-						curLocProgress = null;
+						curPosLocationManager.removeUpdates(this);
+						if (curLocProgress[0] != null)
+							curLocProgress[0].dismiss();
+						curLocProgress[0] = null;
 					}
 					LocationX loc = new LocationX(location);
 					tl.setMyLocation(loc, true);
@@ -660,33 +678,17 @@ public class MyActivity extends Activity {
 			}
 		};
 
-		curPosLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		curLocProgress[0] = ProgressDialog.show(this, "",
+				"Определение координат...", true, true, new OnCancelListener() {
+					public void onCancel(DialogInterface dialog) {
+						curPosLocationManager.removeUpdates(locListener);
+						curLocProgress[0] = null;
+					}
+				});
+		
 		curPosLocationManager.requestLocationUpdates(
 				LocationManager.GPS_PROVIDER, 1, 1, locListener);
 
-		curLocProgress = ProgressDialog.show(this, "",
-				"Определение координат...", true, true, new OnCancelListener() {
-					public void onCancel(DialogInterface dialog) {
-						if (curPosLocationManager != null) {
-							curPosLocationManager.removeUpdates(locListener);
-							curPosLocationManager = null;
-						}
-						curLocProgress = null;
-					}
-				});
-	}
-
-	private void addPoint() {
-		Location loc = curPosLocationManager
-				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		if (loc != null && view != null) {
-			// try {
-			// view.addPoint(loc);
-			// } catch (IOException e) {
-			// Toast.makeText(getApplicationContext(), "cannot add point",
-			// Toast.LENGTH_SHORT).show();
-			// }
-		}
 	}
 
 	private void addPlacemark() {
@@ -739,9 +741,20 @@ public class MyActivity extends Activity {
 		if (view != null)
 			view.dispose();
 		view = null;
-		
+
 		adapter.recycle();
-		
+		adapter = null;
+
+		bmMultimap.recycle();
+		bmFollow.recycle();
+		bmWriting.recycle();
+		bmSendLoc.recycle();
+
+		bmMultimap = null;
+		bmFollow = null;
+		bmWriting = null;
+		bmSendLoc = null;
+
 		super.onDestroy();
 		System.gc();
 		created = false;
@@ -750,11 +763,6 @@ public class MyActivity extends Activity {
 	public void updateView() {
 		if (view != null)
 			view.invalidate();
-	}
-
-	public void animateTo(LocationX location) {
-		if (view != null)
-			view.animateTo(location);
 	}
 
 }
