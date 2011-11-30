@@ -337,7 +337,7 @@ public class MapView extends View implements IPlatformView {
 		updateButtons();
 	}
 
-	public void updateButtons() {
+	private void updateButtons() {
 		if (activity == null || commonView == null)
 			return;
 

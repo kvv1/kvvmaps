@@ -170,27 +170,6 @@ public final class Paths {
 		return paths;
 	}
 
-//	private static RectX rect = new RectX(0, 0, 0, 0);
-
-//	public void draw(GC gc, long tileId, InfoLevel infoLevel, ISelectable sel) {
-//		int x0 = TileId.nx(tileId) * Adapter.TILE_SIZE;
-//		int x1 = (TileId.nx(tileId) + 1) * Adapter.TILE_SIZE;
-//		int y0 = TileId.ny(tileId) * Adapter.TILE_SIZE;
-//		int y1 = (TileId.ny(tileId) + 1) * Adapter.TILE_SIZE;
-//		int z = TileId.zoom(tileId);
-//		double lon = Utils.x2lon(x0, z);
-//		double lonw = Utils.x2lon(x1, z) - lon;
-//		double lat = Utils.y2lat(y1, z);
-//		double lath = Utils.y2lat(y0, z) - lat;
-//		synchronized (rect) {
-//			rect.set(lon, lat, lonw, lath);
-//			for (Path path : paths) {
-//				if (path.filter(rect))
-//					path.draw(gc, tileId, infoLevel, sel);
-//			}
-//		}
-//	}
-
 	private static String getNewPathName() {
 		String s = new Date().toLocaleString();
 		s = s.replace('.', '_');

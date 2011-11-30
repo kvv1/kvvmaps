@@ -108,17 +108,6 @@ public class Path implements IPlaceMarks {
 		}
 	}
 
-//	public void draw(GC gc, long id, InfoLevel infoLevel, ISelectable sel) {
-//		if (!enabled)
-//			return;
-//		LocationX selPM = null;
-//		if (sel instanceof PathSelection) {
-//			PathSelection pathSel = (PathSelection) sel;
-//			if (pathSel.path == this)
-//				selPM = pathSel.pm;
-//		}
-//		pathsInZooms[TileId.zoom(id)].draw(gc, id, infoLevel, selPM);
-//	}
 
 	@Override
 	public List<LocationX> getPlaceMarks() {
