@@ -459,4 +459,16 @@ public class CommonView implements ICommonView {
 		Adapter.log("~CommonView");
 		super.finalize();
 	}
+
+	public void animateToMyLocation() {
+		LocationX myLoc = getMyLocation();
+		if (myLoc != null)
+			animateTo(myLoc);
+	}
+
+	public void animateToTarget() {
+		LocationX target = getTarget();
+		if (target != null)
+			animateTo(target);
+	}
 }
