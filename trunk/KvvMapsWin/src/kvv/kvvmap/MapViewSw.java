@@ -14,7 +14,6 @@ import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.common.Utils;
-import kvv.kvvmap.common.maps.MapDescr;
 import kvv.kvvmap.common.maps.Maps;
 import kvv.kvvmap.common.maps.MapsDir;
 import kvv.kvvmap.common.pacemark.Paths;
@@ -44,10 +43,10 @@ public class MapViewSw extends JComponent implements IPlatformView {
 
 		g.setClip(null);
 		g.setColor(Color.BLACK);
-		List<MapDescr> maps = commonView.getCenterMaps();
+		List<String> maps = commonView.getCenterMaps();
 		int y = 40;
-		for (MapDescr map : maps) {
-			g.drawString(map.getName(), SCR_W + 20, y);
+		for (String map : maps) {
+			g.drawString(map, SCR_W + 20, y);
 			y += 40;
 		}
 

@@ -90,7 +90,7 @@ public class MyActivity extends Activity {
 	private boolean buttonsVisible;
 	public boolean enlarge;
 
-	private boolean created;
+	//private boolean created;
 
 	private Adapter adapter;
 
@@ -204,8 +204,7 @@ public class MyActivity extends Activity {
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			if (created) {
-				view = (MapView) findViewById(R.id.MapView);
+			if (view != null) {
 				Adapter.log("onServiceConnected " + view + " "
 						+ MyActivity.this);
 				mapsService = (IKvvMapsService) service;
@@ -389,7 +388,7 @@ public class MyActivity extends Activity {
 		buttonsVisible = settings.getBoolean("buttonsVisible", true);
 		updateButtons();
 
-		created = true;
+		view = (MapView) findViewById(R.id.MapView);
 	}
 
 	private boolean checkMaps() {
@@ -735,11 +734,14 @@ public class MyActivity extends Activity {
 	protected void onDestroy() {
 		if (view != null)
 			view.save();
+		
 		Adapter.log("onDestroy");
 		unbindService(conn);
 		disconnectFromService();
+		
 		if (view != null)
 			view.dispose();
+		
 		view = null;
 
 		adapter.recycle();
@@ -757,7 +759,6 @@ public class MyActivity extends Activity {
 
 		super.onDestroy();
 		System.gc();
-		created = false;
 	}
 
 	public void updateView() {

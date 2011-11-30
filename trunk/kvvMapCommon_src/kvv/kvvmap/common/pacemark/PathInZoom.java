@@ -70,37 +70,6 @@ class PathInZoom extends PathInZoomBase {
 		return s > sq;
 	}
 
-	// public synchronized void draw(GC gc, long id, InfoLevel infoLevel,
-	// LocationX selPM) {
-	// IntArray indices = get(id);
-	// if (indices == null)
-	// return;
-	//
-	// if (indices.size() == 0)
-	// return;
-	//
-	// gc.setColor(COLOR.RED);
-	//
-	// if (selPM != null)
-	// gc.setStrokeWidth(4);
-	// else
-	// gc.setStrokeWidth(2);
-	//
-	// int nx = TileId.nx(id);
-	// int ny = TileId.ny(id);
-	// int z = TileId.zoom(id);
-	//
-	// int dx = nx * Adapter.TILE_SIZE;
-	// int dy = ny * Adapter.TILE_SIZE;
-	//
-	// for (int i : indices.values()) {
-	// int x1 = placemarks.get(i - 1).getX(z);
-	// int y1 = placemarks.get(i - 1).getY(z);
-	// int x2 = placemarks.get(i).getX(z);
-	// int y2 = placemarks.get(i).getY(z);
-	// gc.drawLine(x1 - dx, y1 - dy, x2 - dx, y2 - dy);
-	// }
-	// }
 
 	public synchronized int[] getPoints(long id) {
 		IntArray indices = get(id);

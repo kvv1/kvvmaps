@@ -9,6 +9,8 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 
+import kvv.kvvmap.common.tiles.Tiles;
+
 public class Adapter {
 	public final static String ROOT = "c:/kvvMaps";
 	public final static String MAPS_ROOT = ROOT + "/maps";
@@ -81,5 +83,13 @@ public class Adapter {
 
 	public static void log(String string) {
 		System.out.println(string);
+	}
+
+	public static void logMem() {
+		// TODO Auto-generated method stub
+	}
+
+	public void addRecycleable(Tiles tiles) {
+		// TODO Auto-generated method stub
 	}
 }
