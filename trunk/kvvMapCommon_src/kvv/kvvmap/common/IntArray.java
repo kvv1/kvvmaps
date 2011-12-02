@@ -33,7 +33,7 @@ public final class IntArray {
 	}
 
 	public int get(int idx) {
-		if(idx >= size)
+		if(idx < 0 || idx >= size)
 			throw new ArrayIndexOutOfBoundsException(idx);
 		return data[idx];
 	}

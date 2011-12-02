@@ -64,6 +64,9 @@ public class PathDrawer {
 
 	public static void drawPathInZoom(PathInZoom pathInZoom, GC gc, long id,
 			InfoLevel infoLevel, LocationX selPM) {
+		
+//		pathInZoom.draw(gc, id, infoLevel, selPM);
+		
 		gc.setColor(COLOR.RED);
 
 		if (selPM != null)
@@ -79,10 +82,11 @@ public class PathDrawer {
 		int dy = ny * Adapter.TILE_SIZE;
 
 		int[] pts = pathInZoom.getPoints(id);
-		for (int i = 0; i < pts.length - 2; i += 2) {
+		for (int i = 0; i < pts.length; i += 4) {
 			gc.drawLine(pts[i] - dx, pts[i + 1] - dy, pts[i + 2] - dx,
 					pts[i + 3] - dy);
 		}
+		
 	}
 
 	public static void drawPlacemarks(PlaceMarks pms, GC gc, long id, InfoLevel infoLevel, ISelectable sel) {
