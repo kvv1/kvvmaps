@@ -90,7 +90,7 @@ public class MyActivity extends Activity {
 	private boolean buttonsVisible;
 	public boolean enlarge;
 
-	//private boolean created;
+	// private boolean created;
 
 	private Adapter adapter;
 
@@ -383,8 +383,6 @@ public class MyActivity extends Activity {
 		toTarget.setBackgroundColor((COLOR.TARG_COLOR & 0x00FFFFFF) | 0x64000000);
 		toTarget.setFocusable(false);
 
-
-		
 		buttonsVisible = settings.getBoolean("buttonsVisible", true);
 		updateButtons();
 
@@ -457,11 +455,13 @@ public class MyActivity extends Activity {
 	}
 
 	private void zoomIn() {
-		view.zoomIn();
+		if (view != null)
+			view.zoomIn();
 	}
 
 	private void zoomOut() {
-		view.zoomOut();
+		if (view != null)
+			view.zoomOut();
 	}
 
 	@Override
@@ -578,7 +578,8 @@ public class MyActivity extends Activity {
 		CommonDoc.debugDraw = !CommonDoc.debugDraw;
 		prefsPrivateEditor.putBoolean("debugDraw", CommonDoc.debugDraw);
 		prefsPrivateEditor.commit();
-		view.clearPathTiles();
+		if (view != null)
+			view.clearPathTiles();
 	}
 
 	private void paths() {
@@ -641,7 +642,6 @@ public class MyActivity extends Activity {
 		final LocationManager curPosLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		final AlertDialog[] curLocProgress = new AlertDialog[1];
 
-
 		final LocationListener locListener = new LocationListener() {
 			public void onStatusChanged(String provider, int status,
 					Bundle extras) {
@@ -684,13 +684,15 @@ public class MyActivity extends Activity {
 						curLocProgress[0] = null;
 					}
 				});
-		
+
 		curPosLocationManager.requestLocationUpdates(
 				LocationManager.GPS_PROVIDER, 1, 1, locListener);
 
 	}
 
 	private void addPlacemark() {
+		if (view == null)
+			return;
 		final LocationX pm = view.createPlacemark();
 		if (pm != null) {
 			PlaceMarkDlg dlg = new PlaceMarkDlg(this, view, pm,
@@ -734,14 +736,14 @@ public class MyActivity extends Activity {
 	protected void onDestroy() {
 		if (view != null)
 			view.save();
-		
+
 		Adapter.log("onDestroy");
 		unbindService(conn);
 		disconnectFromService();
-		
+
 		if (view != null)
 			view.dispose();
-		
+
 		view = null;
 
 		adapter.recycle();
