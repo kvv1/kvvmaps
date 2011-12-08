@@ -2,19 +2,35 @@ package kvv.kvvmap.common.view;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
+import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.common.pacemark.Path;
 import kvv.kvvmap.common.pacemark.PathDrawer;
 
 public class Diagram {
 
 	private Object bm;
+	private int h;
 	private final ICommonView view;
 	private final Adapter adapter;
 
-	private Path path;
-	private int w;
-	private int h;
 	private DiagramThread thread;
+
+	private class Params {
+		Params(Path path, LocationX pm, int w, int h) {
+			super();
+			this.path = path;
+			this.pm = pm;
+			this.w = w;
+			this.h = h;
+		}
+
+		final Path path;
+		final LocationX pm;
+		final int w;
+		final int h;
+	}
+
+	private Params params;
 
 	public Diagram(Adapter adapter, ICommonView platformViewView) {
 		this.view = platformViewView;
@@ -24,8 +40,8 @@ public class Diagram {
 	public synchronized void draw(GC gc, int y) {
 		if (thread != null)
 			return;
-
-		gc.drawImage(bm, 0, y - gc.getHeight());
+		if (bm != null)
+			gc.drawImage(bm, 0, gc.getHeight() - y - h);
 	}
 
 	class DiagramThread extends Thread {
@@ -33,31 +49,31 @@ public class Diagram {
 		public void run() {
 			Object bm = null;
 			for (;;) {
-				Path path;
-				int w;
-				int h;
+				Params params;
 				synchronized (Diagram.this) {
-					path = Diagram.this.path;
-					w = Diagram.this.w;
-					h = Diagram.this.h;
-					Diagram.this.path = null;
-					if (path == null) {
-						view.repaint();
+					params = Diagram.this.params;
+					Diagram.this.params = null;
+					if (params == null) {
 						thread = null;
 						Diagram.this.bm = bm;
+						view.repaint();
 						return;
 					}
 				}
-				
-				bm = adapter.allocBitmap(w, h);
-				GC gc = adapter.getGC(bm);
-				PathDrawer.drawDiagram1(path, gc, null);
+
+				bm = null;
+				if (params.path != null) {
+					bm = adapter.allocBitmap(params.w, params.h);
+					GC gc = adapter.getGC(bm);
+					h = params.h;
+					PathDrawer.drawDiagram1(params.path, gc, params.pm);
+				}
 			}
 		}
 	}
 
-	public synchronized void set(Path path, int w, int h) {
-		this.path = path;
+	public synchronized void set(Path path, LocationX pm, int w, int h) {
+		this.params = new Params(path, pm, w, h / 4);
 		if (thread == null) {
 			thread = new DiagramThread();
 			thread.setPriority(Thread.MIN_PRIORITY);
