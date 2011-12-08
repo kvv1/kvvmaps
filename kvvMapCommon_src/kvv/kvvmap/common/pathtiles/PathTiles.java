@@ -1,5 +1,6 @@
 package kvv.kvvmap.common.pathtiles;
 
+import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.COLOR;
@@ -12,7 +13,6 @@ import kvv.kvvmap.common.tiles.TileId;
 import kvv.kvvmap.common.tiles.TileLoader;
 import kvv.kvvmap.common.tiles.TileLoaderCallback;
 import kvv.kvvmap.common.tiles.Tiles;
-import kvv.kvvmap.common.view.CommonDoc;
 import kvv.kvvmap.common.view.Environment;
 
 public abstract class PathTiles extends Tiles {
@@ -54,7 +54,7 @@ public abstract class PathTiles extends Tiles {
 
 		GC gc = envir.adapter.getGC(img1);
 
-		if (CommonDoc.debugDraw) {
+		if (Adapter.debugDraw) {
 			gc.setColor(COLOR.RED);
 			gc.drawRect(10, 10, 235, 235);
 			gc.drawText(TileId.toString(id), 20, 20);

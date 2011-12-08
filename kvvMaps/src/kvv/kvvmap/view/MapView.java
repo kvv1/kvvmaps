@@ -5,10 +5,10 @@ import kvv.kvvmap.R;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
+import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.pacemark.ISelectable;
-import kvv.kvvmap.common.view.CommonDoc;
 import kvv.kvvmap.common.view.CommonView;
 import kvv.kvvmap.common.view.Environment;
 import kvv.kvvmap.common.view.IPlatformView;
@@ -91,7 +91,7 @@ public class MapView extends View implements IPlatformView {
 		String lat = Utils.format(commonView.getLocation().getLatitude());
 
 		String mem = "";
-		if (CommonDoc.debugDraw) {
+		if (Adapter.debugDraw) {
 			int usedMegs = (int) (Debug.getNativeHeapAllocatedSize() / 1048576L);
 			int freeMegs = (int) (Debug.getNativeHeapFreeSize() / 1048576L);
 			int allMegs = (int) (Debug.getNativeHeapSize() / 1048576L);
@@ -109,6 +109,15 @@ public class MapView extends View implements IPlatformView {
 		return commonView.getSel();
 	}
 
+	
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+		if(commonView != null)
+			commonView.onSizeChanged(w, h);
+	}
+	
+	
 	@Override
 	public void onDraw(Canvas canvas) {
 
@@ -127,7 +136,7 @@ public class MapView extends View implements IPlatformView {
 
 		paint.setAntiAlias(true);
 
-		if (commonView.canReorder()) {
+		if (commonView.isMultiple()) {
 			Bitmap bm = activity.bmMultimap;
 			canvas.drawBitmap(bm, getWidth() - bm.getWidth(), 0, null);
 		}
@@ -378,7 +387,7 @@ public class MapView extends View implements IPlatformView {
 
 		OnScreenButton rotate = (OnScreenButton) activity
 				.findViewById(R.id.rotate);
-		rotate.setEnabled(commonView.canReorder());
+		rotate.setEnabled(commonView.isMultiple());
 	}
 
 	public void dispose() {
@@ -405,7 +414,7 @@ public class MapView extends View implements IPlatformView {
 
 	public void clearPathTiles() {
 		if (commonView != null)
-			commonView.clearPathTiles();
+			commonView.invalidatePathTiles();
 	}
 
 	@Override
@@ -423,5 +432,5 @@ public class MapView extends View implements IPlatformView {
 		if (commonView != null)
 			commonView.animateToTarget();
 	}
-	
+
 }

@@ -3,8 +3,7 @@ package kvv.kvvmap.common.pacemark;
 
 
 public interface IPlaceMarksListener {
-	void onPathTileChanged(long id);
+	void onPathTileChanged(long tileid);
 	void onPathTilesChanged();
-	void updateSel();
-	void exec(Runnable r);
+	void onPathTilesChangedAsync();
 }

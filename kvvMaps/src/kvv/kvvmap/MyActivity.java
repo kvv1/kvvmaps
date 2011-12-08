@@ -18,7 +18,6 @@ import kvv.kvvmap.common.maps.MapsDir;
 import kvv.kvvmap.common.pacemark.ISelectable;
 import kvv.kvvmap.common.pacemark.Path;
 import kvv.kvvmap.common.pacemark.PathSelection;
-import kvv.kvvmap.common.view.CommonDoc;
 import kvv.kvvmap.common.view.Environment;
 import kvv.kvvmap.dlg.PathDlg;
 import kvv.kvvmap.dlg.PlaceMarkDlg;
@@ -292,7 +291,7 @@ public class MyActivity extends Activity {
 			}
 		});
 
-		CommonDoc.debugDraw = settings.getBoolean("debugDraw", false);
+		Adapter.debugDraw = settings.getBoolean("debugDraw", false);
 
 		bmMultimap = BitmapFactory.decodeResource(getResources(),
 				R.drawable.multimaps);
@@ -474,7 +473,7 @@ public class MyActivity extends Activity {
 						mapsService.getTracker().isFollowing() ? "Сдвигать по GPS выкл."
 								: "Сдвигать по GPS");
 		menu.findItem(MENU_DEBUG_DRAW).setTitle(
-				CommonDoc.debugDraw ? "Debug drawing off" : "Debug drawing on");
+				Adapter.debugDraw ? "Debug drawing off" : "Debug drawing on");
 		menu.findItem(MENU_ENLARGE).setTitle(
 				enlarge ? "Нормальный размер" : "Увеличенный размер");
 		menu.findItem(MENU_TOGGLE_BUTTONS).setTitle(
@@ -575,8 +574,8 @@ public class MyActivity extends Activity {
 	private void debugDrawOnOff() {
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 		Editor prefsPrivateEditor = settings.edit();
-		CommonDoc.debugDraw = !CommonDoc.debugDraw;
-		prefsPrivateEditor.putBoolean("debugDraw", CommonDoc.debugDraw);
+		Adapter.debugDraw = !Adapter.debugDraw;
+		prefsPrivateEditor.putBoolean("debugDraw", Adapter.debugDraw);
 		prefsPrivateEditor.commit();
 		if (view != null)
 			view.clearPathTiles();

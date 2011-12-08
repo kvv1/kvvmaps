@@ -1,8 +1,12 @@
 package kvv.kvvmap.common.pacemark;
 
+import java.io.File;
+import java.util.List;
+
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
+import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.adapter.RectX;
 import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.InfoLevel;
@@ -125,5 +129,197 @@ public class PathDrawer {
 			}
 		}
 	}
+	
+	
+	public static void drawDiagram(Path path, GC gc, int maxy, LocationX pm2) {
+		int y = maxy;
+		int w = gc.getWidth();
+
+		int lineHeight = gc.getHeight() / 24;
+
+		gc.setTextSize(lineHeight);
+
+		RectX rect = new RectX(w * 2 / 6, y - 5 * lineHeight, w * 4 / 6,
+				4 * lineHeight);
+		gc.setColor(0x80000000);
+		gc.fillRect(0, (float) (y - 5 * lineHeight), w, y);
+
+		gc.setStrokeWidth(2);
+
+		gc.setColor(COLOR.CYAN);
+		gc.drawText(
+				Utils.format(pm2.getLongitude()) + "  "
+						+ Utils.format(pm2.getLatitude()) + "  "
+						+ (int) pm2.getAltitude(), 2, y - 2);
+
+		int len = Math.max(1, (int) path.getLen());
+
+		gc.setColor(COLOR.GREEN);
+
+		List<LocationX> pms = path.getPlaceMarks();
+
+		if (pms.size() > 0) {
+			int minAlt = (int) pms.iterator().next().getAltitude();
+			int maxAlt = (int) pms.iterator().next().getAltitude();
+
+			for (LocationX pm : pms) {
+				minAlt = Math.min(minAlt, (int) pm.getAltitude());
+				maxAlt = Math.max(maxAlt, (int) pm.getAltitude());
+			}
+
+			int altDif = Math.max(1, maxAlt - minAlt);
+
+			LocationX prevPm = null;
+			PointInt prevPt = null;
+
+			float len0 = 0;
+
+			PointInt pmPt = null;
+
+			for (LocationX pm : pms) {
+				if (prevPm != null)
+					len0 += pm.distanceTo(prevPm);
+
+				int _x = (int) (rect.getX() + (len0 * rect.getWidth() / len));
+				int _y = (int) (rect.getY() + rect.getHeight() - (int) ((pm
+						.getAltitude() - minAlt) * rect.getHeight() / altDif));
+
+				PointInt pt = new PointInt(_x, _y);
+
+				if (pm == pm2)
+					pmPt = pt;
+
+				if (prevPm != null)
+					gc.drawLine(pt.x, pt.y, prevPt.x, prevPt.y);
+
+				prevPm = pm;
+				prevPt = pt;
+			}
+
+			gc.setColor(COLOR.CYAN);
+
+			if (pmPt != null) {
+				gc.fillCircle(pmPt.x, pmPt.y, 5);
+			}
+
+			gc.drawText("" + maxAlt + "m", 2,
+					(int) (rect.getY() + lineHeight - 1));
+			gc.drawText("" + minAlt + "m", 2, (int) (rect.getY() + lineHeight
+					* 4 - 2));
+
+			gc.drawText("" + len + "m", 2,
+					(int) (rect.getY() + lineHeight * 2 - 2));
+			gc.drawText("" + pms.size(), 2,
+					(int) (rect.getY() + lineHeight * 3 - 2));
+		}
+
+		y -= 5 * lineHeight;
+
+		File file = path.getFile();
+		
+		if (file != null) {
+			gc.setColor(0x80000000);
+			gc.fillRect(0, y - lineHeight, w, y);
+			gc.setColor(COLOR.CYAN);
+			gc.drawText(file.getName(), 2, y - 2);
+			y -= lineHeight;
+		}
+	}
+
+	public static void drawDiagram1(Path path, GC gc, LocationX pm2) {
+		int y = gc.getHeight();
+		int w = gc.getWidth();
+
+		int lineHeight = gc.getHeight() / 5;
+
+		gc.setTextSize(lineHeight);
+
+		RectX rect = new RectX(w * 2 / 6, y - 5 * lineHeight, w * 4 / 6,
+				4 * lineHeight);
+		gc.setColor(0x80000000);
+		gc.fillRect(0, (float) (y - 5 * lineHeight), w, y);
+
+		gc.setStrokeWidth(2);
+
+		gc.setColor(COLOR.CYAN);
+		gc.drawText(
+				Utils.format(pm2.getLongitude()) + "  "
+						+ Utils.format(pm2.getLatitude()) + "  "
+						+ (int) pm2.getAltitude(), 2, y - 2);
+
+		int len = Math.max(1, (int) path.getLen());
+
+		gc.setColor(COLOR.GREEN);
+
+		List<LocationX> pms = path.getPlaceMarks();
+
+		if (pms.size() > 0) {
+			int minAlt = (int) pms.iterator().next().getAltitude();
+			int maxAlt = (int) pms.iterator().next().getAltitude();
+
+			for (LocationX pm : pms) {
+				minAlt = Math.min(minAlt, (int) pm.getAltitude());
+				maxAlt = Math.max(maxAlt, (int) pm.getAltitude());
+			}
+
+			int altDif = Math.max(1, maxAlt - minAlt);
+
+			LocationX prevPm = null;
+			PointInt prevPt = null;
+
+			float len0 = 0;
+
+			PointInt pmPt = null;
+
+			for (LocationX pm : pms) {
+				if (prevPm != null)
+					len0 += pm.distanceTo(prevPm);
+
+				int _x = (int) (rect.getX() + (len0 * rect.getWidth() / len));
+				int _y = (int) (rect.getY() + rect.getHeight() - (int) ((pm
+						.getAltitude() - minAlt) * rect.getHeight() / altDif));
+
+				PointInt pt = new PointInt(_x, _y);
+
+				if (pm == pm2)
+					pmPt = pt;
+
+				if (prevPm != null)
+					gc.drawLine(pt.x, pt.y, prevPt.x, prevPt.y);
+
+				prevPm = pm;
+				prevPt = pt;
+			}
+
+			gc.setColor(COLOR.CYAN);
+
+			if (pmPt != null) {
+				gc.fillCircle(pmPt.x, pmPt.y, 5);
+			}
+
+			gc.drawText("" + maxAlt + "m", 2,
+					(int) (rect.getY() + lineHeight - 1));
+			gc.drawText("" + minAlt + "m", 2, (int) (rect.getY() + lineHeight
+					* 4 - 2));
+
+			gc.drawText("" + len + "m", 2,
+					(int) (rect.getY() + lineHeight * 2 - 2));
+			gc.drawText("" + pms.size(), 2,
+					(int) (rect.getY() + lineHeight * 3 - 2));
+		}
+
+		y -= 5 * lineHeight;
+
+		File file = path.getFile();
+		
+		if (file != null) {
+			gc.setColor(0x80000000);
+			gc.fillRect(0, y - lineHeight, w, y);
+			gc.setColor(COLOR.CYAN);
+			gc.drawText(file.getName(), 2, y - 2);
+			y -= lineHeight;
+		}
+	}
+
 
 }

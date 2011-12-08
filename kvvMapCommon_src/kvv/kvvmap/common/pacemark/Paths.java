@@ -19,12 +19,6 @@ public final class Paths {
 
 		private IPlaceMarksListener l;
 
-		@Override
-		public synchronized void updateSel() {
-			if (l != null)
-				l.updateSel();
-		}
-
 		public synchronized void setListener(IPlaceMarksListener l) {
 			this.l = l;
 		}
@@ -42,9 +36,9 @@ public final class Paths {
 		}
 
 		@Override
-		public synchronized void exec(Runnable r) {
+		public void onPathTilesChangedAsync() {
 			if (l != null)
-				l.exec(r);
+				l.onPathTilesChangedAsync();
 		}
 
 	}
@@ -110,12 +104,7 @@ public final class Paths {
 						e.printStackTrace();
 					}
 				}
-				doc.exec(new Runnable() {
-					@Override
-					public void run() {
-						doc.onPathTilesChanged();
-					}
-				});
+				doc.onPathTilesChangedAsync();
 			}
 
 		};
