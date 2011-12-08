@@ -21,9 +21,13 @@ class SelectionThread extends Thread {
 		start();
 	}
 
-	public static abstract class Params {
+	public interface Callback {
+		void selectionChanged(ISelectable sel);
+	}
+	
+	private static class Params {
 		public Params(int x, int y, int w, int h, int zoom,
-				Adapter adapter, PlaceMarks placemarks, Paths paths) {
+				Adapter adapter, PlaceMarks placemarks, Paths paths, Callback callback) {
 			super();
 			this.x = x;
 			this.y = y;
@@ -33,6 +37,7 @@ class SelectionThread extends Thread {
 			this.adapter = adapter;
 			this.placemarks = placemarks;
 			this.paths = paths;
+			this.callback = callback;
 		}
 
 		public final int x;
@@ -43,11 +48,10 @@ class SelectionThread extends Thread {
 		public final Adapter adapter;
 		public final PlaceMarks placemarks;
 		public final Paths paths;
-
-		public abstract void onPathTilesChanged();
+		public final Callback callback;
 	}
 
-	public volatile ISelectable sel;
+	private ISelectable sel;
 	public volatile boolean stopped;
 
 	private SelectionThread.Params params;
@@ -137,7 +141,7 @@ class SelectionThread extends Thread {
 					params.adapter.exec(new Runnable() {
 						@Override
 						public void run() {
-							params1.onPathTilesChanged();
+							params1.callback.selectionChanged(SelectionThread.this.sel);
 						}
 					});
 				}
@@ -167,8 +171,9 @@ class SelectionThread extends Thread {
 		return pmNearest;
 	}
 
-	public synchronized void set(SelectionThread.Params params) {
-		this.params = params;
+	public synchronized void set(int x, int y, int w, int h, int zoom,
+			Adapter adapter, PlaceMarks placemarks, Paths paths, Callback callback) {
+		this.params = new Params(x, y, w, h, zoom, adapter, placemarks, paths, callback);
 		cancelled = false;
 		notify();
 	}

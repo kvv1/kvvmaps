@@ -18,11 +18,14 @@ import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maptiles.MapTiles;
 import kvv.kvvmap.common.pacemark.IPlaceMarksListener;
 import kvv.kvvmap.common.pacemark.ISelectable;
+import kvv.kvvmap.common.pacemark.PathSelection;
 import kvv.kvvmap.common.pathtiles.PathTiles;
 import kvv.kvvmap.common.tiles.Tile;
 import kvv.kvvmap.common.tiles.TileId;
 
 public class CommonView implements ICommonView {
+
+	private volatile ISelectable sel;
 
 	private final IPlatformView platformViewView;
 
@@ -441,7 +444,7 @@ public class CommonView implements ICommonView {
 	}
 
 	public void setTarget() {
-		ISelectable sel = selectionThread.sel;
+		ISelectable sel = this.sel;
 		if (sel instanceof LocationX) {
 			envir.placemarks.setTarget((LocationX) sel);
 			invalidatePathTiles();
@@ -473,20 +476,28 @@ public class CommonView implements ICommonView {
 
 	public void updateSel() {
 		envir.adapter.assertUIThread();
-		SelectionThread.Params params = new SelectionThread.Params(centerXY.x,
-				centerXY.y, getWidth(), getHeight(), zoom, envir.adapter,
-				envir.placemarks, envir.paths) {
-			@Override
-			public void onPathTilesChanged() {
-				CommonView.this.invalidatePathTiles();
-			}
-		};
-
-		selectionThread.set(params);
+		selectionThread.set(centerXY.x, centerXY.y,
+				platformViewView.getWidth(), platformViewView.getHeight(),
+				zoom, envir.adapter, envir.placemarks, envir.paths,
+				new SelectionThread.Callback() {
+					@Override
+					public void selectionChanged(ISelectable sel) {
+						CommonView.this.sel = sel;
+						CommonView.this.invalidatePathTiles();
+						if (sel instanceof PathSelection) {
+							PathSelection sel1 = (PathSelection) sel;
+							diagram.set(sel1.path, sel1.pm, platformViewView.getWidth(),
+									platformViewView.getHeight());
+						} else {
+							diagram.set(null, null, platformViewView.getWidth(),
+									platformViewView.getHeight());
+						}
+					}
+				});
 	}
 
 	public ISelectable getSelAsync() {
-		return selectionThread.sel;
+		return sel;
 	}
 
 	@Override
@@ -512,19 +523,8 @@ public class CommonView implements ICommonView {
 		repaint();
 	}
 
-	@Override
-	public int getWidth() {
-		return platformViewView.getWidth();
-	}
-
-	@Override
-	public int getHeight() {
-		return platformViewView.getHeight();
-	}
-
 	public void drawDiagram(GC gc, int locationH) {
-		// TODO Auto-generated method stub
-
+		diagram.draw(gc, locationH);
 	}
 
 }
