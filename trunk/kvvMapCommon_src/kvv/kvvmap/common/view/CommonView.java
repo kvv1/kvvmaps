@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -11,28 +12,105 @@ import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.adapter.PointInt;
-import kvv.kvvmap.adapter.RectX;
-import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.InfoLevel;
+import kvv.kvvmap.common.LongSet;
 import kvv.kvvmap.common.Utils;
+import kvv.kvvmap.common.maptiles.MapTiles;
+import kvv.kvvmap.common.pacemark.IPlaceMarksListener;
 import kvv.kvvmap.common.pacemark.ISelectable;
-import kvv.kvvmap.common.pacemark.PathSelection;
+import kvv.kvvmap.common.pathtiles.PathTiles;
+import kvv.kvvmap.common.tiles.Tile;
+import kvv.kvvmap.common.tiles.TileId;
 
 public class CommonView implements ICommonView {
 
 	private final IPlatformView platformViewView;
 
-	private final CommonDoc doc;
+	private int zoom = Utils.MIN_ZOOM;
+
+	private PointInt centerXY;
+
+	private InfoLevel infoLevel = InfoLevel.HIGH;
+
+	private final MapTiles mapTiles;
+	private final PathTiles pathTiles;
+
+	private final SelectionThread selectionThread = new SelectionThread();
+	private final LongSet tilesDrawn = new LongSet();
 
 	private LocationX myLocation;
+
 	private boolean myLocationDimmed;
+
 	private final Environment envir;
 
-	public CommonView(IPlatformView platformViewView, Environment envir) {
+	private final Diagram diagram;
+
+	public CommonView(IPlatformView platformViewView, final Environment envir) {
 		this.envir = envir;
 		this.platformViewView = platformViewView;
-		this.doc = new CommonDoc(this, envir);
-		// myLocation = new LocationX(30, 60, 0, 1000, 0, 0);
+
+		IPlaceMarksListener pmListener = new IPlaceMarksListener() {
+
+			@Override
+			public void onPathTilesChanged() {
+				envir.adapter.assertUIThread();
+				CommonView.this.invalidatePathTiles();
+				updateSel();
+			}
+
+			@Override
+			public void onPathTileChanged(long id) {
+				envir.adapter.assertUIThread();
+				if (pathTiles != null) {
+					pathTiles.setInvalid(id);
+					updateSel();
+					if (tilesDrawn.contains(id)) {
+						repaint();
+					}
+				}
+			}
+
+			@Override
+			public void onPathTilesChangedAsync() {
+				envir.adapter.exec(new Runnable() {
+					@Override
+					public void run() {
+						onPathTilesChanged();
+					}
+				});
+			}
+		};
+
+		envir.placemarks.setDoc(pmListener);
+		envir.paths.setDoc(pmListener);
+
+		this.mapTiles = new MapTiles(envir.adapter, envir.maps,
+				Adapter.MAP_TILES_CACHE_SIZE) {
+			@Override
+			protected void loaded(Tile tile) {
+				repaint();
+			}
+		};
+		this.pathTiles = new PathTiles(envir, Adapter.PATH_TILES_CACHE_SIZE) {
+
+			@Override
+			protected void loaded(Tile tile) {
+				repaint();
+			}
+
+			@Override
+			protected InfoLevel getInfoLevel() {
+				return infoLevel;
+			}
+
+			@Override
+			protected ISelectable getSelAsync() {
+				return CommonView.this.getSelAsync();
+			}
+		};
+
+		diagram = new Diagram(envir.adapter, this);
 	}
 
 	public LocationX getMyLocation() {
@@ -66,7 +144,7 @@ public class CommonView implements ICommonView {
 		int x1 = loc.getX(getZoom());
 		int y1 = loc.getY(getZoom());
 
-		PointInt center = doc.getCenterXY();
+		PointInt center = getCenterXY();
 		int x2 = center.x;
 		int y2 = center.y;
 
@@ -89,15 +167,15 @@ public class CommonView implements ICommonView {
 		@Override
 		public void onMouseReleased(int x, int y) {
 			p1 = null;
-			doc.updateSel();
-			update();
+			updateSel();
+			repaint();
 		}
 
 		@Override
 		public void onMouseDragged(int x, int y) {
 			if (p1 != null) {
 				PointInt offset = new PointInt(p1.x - x, p1.y - y);
-				doc.animateBy(offset);
+				animateBy(offset);
 				p1 = new PointInt(x, y);
 			}
 		}
@@ -121,245 +199,165 @@ public class CommonView implements ICommonView {
 		ksf.mouseReleased(x, y);
 	}
 
-	public void zoomOut() {
-		doc.zoomOut();
-		doc.updateSel();
-		update();
-	}
-
-	public void zoomIn() {
-		doc.zoomIn();
-		doc.updateSel();
-		update();
-	}
-
-	public boolean canReorder() {
-		return doc.isMultiple();
+	public boolean isMultiple() {
+		Tile tile = getCenterTile();
+		if (tile == null)
+			return false;
+		return tile.isMultiple();
 	}
 
 	public List<String> getCenterMaps() {
-		return doc.getCenterMaps();
+		Tile tile = getCenterTile();
+		if (tile == null)
+			return Collections.emptyList();
+		return tile.content.maps;
+	}
+
+	private Tile getCenterTile() {
+		envir.adapter.assertUIThread();
+		int nxC = centerXY.x / Adapter.TILE_SIZE;
+		int nyC = centerXY.y / Adapter.TILE_SIZE;
+		long id = TileId.get(nxC, nyC, zoom);
+		Tile tile = mapTiles.getTile(id, centerXY);
+		return tile;
 	}
 
 	public void reorderMaps() {
-		doc.reorderMaps();
-		update();
+		Tile tile = getCenterTile();
+		if (tile != null && tile.isMultiple()) {
+			mapTiles.reorder(tile);
+			repaint();
+		}
+	}
+
+	public String getTopMap() {
+		envir.adapter.assertUIThread();
+		Tile tile = getCenterTile();
+		if (tile == null)
+			return "<No map>";
+		return tile.content.maps.getFirst();
+	}
+
+	public void setTopMap(String map) {
+		mapTiles.setTopMap(map);
+	}
+
+	public void zoomOut() {
+		if (zoom > Utils.MIN_ZOOM)
+			setZoom(zoom - 1);
+	}
+
+	public void zoomIn() {
+		if (zoom < Utils.MAX_ZOOM)
+			setZoom(zoom + 1);
 	}
 
 	public int getZoom() {
-		return doc.getZoom();
+		return zoom;
 	}
 
 	public void setZoom(int zoom) {
-		doc.setZoom(zoom);
-		doc.updateSel();
-		update();
-	}
-
-	public LocationX getLocation() {
-		return doc.getLocation();
-	}
-
-	public void animateTo(LocationX loc) {
-		doc.animateTo(loc);
-		doc.updateSel();
-		update();
+		LocationX loc = getLocation();
+		this.zoom = zoom;
+		mapTiles.stopLoading();
+		pathTiles.stopLoading();
+		animateTo(loc);
 	}
 
 	public void animateTo(LocationX loc, int dx, int dy) {
-		doc.animateTo(loc, dx, dy);
-		doc.updateSel();
-		update();
+		envir.adapter.assertUIThread();
+		if (loc.getLatitude() > 85 || loc.getLatitude() < -85)
+			return;
+		int x = (int) (Utils.lon2x(loc.getLongitude(), zoom));
+		int y = (int) (Utils.lat2y(loc.getLatitude(), zoom));
+		centerXY = new PointInt(x - dx, y - dy);
+		repaint();
+		updateSel();
+	}
+
+	public void animateTo(LocationX loc) {
+		animateTo(loc, 0, 0);
+	}
+
+	public void animateBy(PointInt offset) {
+		envir.adapter.assertUIThread();
+		int x = centerXY.x + offset.x;
+		int y = centerXY.y + offset.y;
+		double lat = Utils.y2lat(y, zoom);
+		if (lat > 85 || lat < -85)
+			return;
+		centerXY = new PointInt(x, y);
+		repaint();
+		cancelSel();
 	}
 
 	public void draw(GC gc) {
 		gc.setAntiAlias(true);
 		// long time = System.currentTimeMillis();
-		doc.draw(gc);
+		drawTiles(gc);
 		// long time1 = System.currentTimeMillis();
 		// System.out.println("t1 = " + (time1 - time));
-		int locationH = drawMyLocation(gc);
-		drawCross(gc);
-		drawScale(gc);
+		int locationH = ViewHelper.drawMyLocation(gc, this, myLocation,
+				isMyLocationDimmed());
+		ViewHelper.drawCross(gc);
+		ViewHelper.drawScale(gc, this);
 		// long time2 = System.currentTimeMillis();
 		// System.out.println("t2 = " + (time2 - time1));
+
+		drawDiagram(gc, locationH);
+
+		// diagram.draw(gc, locationH);
+
 		ISelectable sel = getSel();
 		if (p1 == null) {
-			if (doc.getInfoLevel().ordinal() != 0
-					&& (sel instanceof PathSelection)) {
-				PathSelection sel1 = (PathSelection) sel;
-				sel1.path.drawDiagram(gc, gc.getHeight() - locationH, sel1.pm);
+			// if (doc.getInfoLevel().ordinal() != 0
+			// && (sel instanceof PathSelection)) {
+			// PathSelection sel1 = (PathSelection) sel;
+			// PathDrawer.drawDiagram(sel1.path, gc, gc.getHeight() - locationH,
+			// sel1.pm);
+			// }
+			LocationX myLoc = myLocation;
+			if (!isMyLocationDimmed())
+				myLoc = null;
+			ViewHelper.drawTarget(gc, this, myLoc);
+		}
+	}
+
+	public void drawTiles(GC gc) {
+		int w = gc.getWidth();
+		int h = gc.getHeight();
+
+		tilesDrawn.clear();
+
+		int x0 = centerXY.x - w / 2;
+		int y0 = centerXY.y - h / 2;
+
+		int nx0 = x0 / Adapter.TILE_SIZE;
+		int ny0 = y0 / Adapter.TILE_SIZE;
+
+		int nx1 = (x0 + w - 1) / Adapter.TILE_SIZE;
+		int ny1 = (y0 + h - 1) / Adapter.TILE_SIZE;
+
+		for (int nx = nx0; nx <= nx1; nx++) {
+			for (int ny = ny0; ny <= ny1; ny++) {
+				long id = TileId.get(nx, ny, zoom);
+
+				int x = (nx * Adapter.TILE_SIZE) - x0;
+				int y = (ny * Adapter.TILE_SIZE) - y0;
+
+				Tile tile = mapTiles.getTile(id, centerXY);
+				if (tile != null)
+					tile.draw(gc, x, y);
+
+				if (getInfoLevel().ordinal() > 0) {
+					tile = pathTiles.getTile(id, centerXY);
+					if (tile != null)
+						tile.draw(gc, x, y);
+				}
+
+				tilesDrawn.add(id);
 			}
-			drawTarget(gc);
 		}
-	}
-
-	private void drawTarget(GC gc) {
-		LocationX targ = doc.getTarget();
-		if (targ == null)
-			return;
-
-		PointInt center = doc.getCenterXY();
-		int _dx = Math.abs(center.x - targ.getX(getZoom()));
-		int _dy = Math.abs(center.y - targ.getY(getZoom()));
-		if (_dx > gc.getWidth() / 3 || _dy > gc.getHeight() / 3) {
-			gc.setColor(COLOR.TARG_COLOR);
-			gc.setStrokeWidth(2);
-
-			int len = gc.getWidth() / 16;
-
-			double bearing = (90 - getLocation().bearingTo(targ)) * Math.PI
-					/ 180;
-
-			int dx = (int) (len * Math.cos(bearing));
-			int dy = (int) (len * Math.sin(bearing));
-
-			int x = gc.getWidth() / 2;
-			int y = gc.getHeight() / 2;
-
-			gc.drawLine(x, y, x + dx, y - dy);
-
-		}
-
-		LocationX myLoc = myLocation;
-		if (myLoc != null && !isMyLocationDimmed()) {
-			String txt = Utils.formatDistance((int) myLoc.distanceTo(targ));
-			gc.setTextSize(gc.getHeight() / 24);
-
-			RectX txtBounds = gc.getTextBounds(txt);
-
-			PointInt pt = new PointInt((int) (gc.getWidth() - gc.getWidth()
-					/ 10 - txtBounds.getWidth() / 2),
-					(int) (gc.getHeight() / 5 + txtBounds.getHeight()));
-
-			drawText(gc, txt, pt, COLOR.WHITE, COLOR.TARG_COLOR);
-		}
-	}
-
-	private void drawCross(GC gc) {
-		gc.setColor(0xFF000000);
-		gc.setStrokeWidth(2);
-		int x = gc.getWidth() / 2;
-		int y = gc.getHeight() / 2;
-		int sz = gc.getWidth() / 16;
-		gc.drawLine(x, y - sz, x, y + sz);
-		gc.drawLine(x - sz, y, x + sz, y);
-	}
-
-	private int getScale(int m) {
-		int temp = m;
-		int mul = 1;
-		while (temp >= 10) {
-			temp /= 10;
-			mul *= 10;
-		}
-
-		if (temp >= 5)
-			return 5 * mul;
-		else if (temp >= 2)
-			return 2 * mul;
-		else
-			return mul;
-	}
-
-	private void drawScale(GC gc) {
-		int lineHeight = gc.getHeight() / 24;
-		int scaleWidth = 5;
-
-		int m = (int) doc.pt2m(gc.getWidth() / 2);
-		int m1 = getScale(m);
-
-		gc.setStrokeWidth(1);
-
-		int len = gc.getWidth() / 2 * m1 / m;
-
-		int x0 = 4;
-		int x = x0;
-		int y = lineHeight + scaleWidth + scaleWidth;
-
-		gc.setColor(COLOR.BLACK);
-		gc.fillRect(x, y, x + len / 4, y + scaleWidth);
-		gc.fillRect(x + len / 2, y, x + len * 3 / 4, y + scaleWidth);
-		gc.setColor(COLOR.WHITE);
-		gc.fillRect(x + len / 4, y, x + len * 2 / 4, y + scaleWidth);
-		gc.fillRect(x + len * 3 / 4, y, x + len, y + scaleWidth);
-		gc.setColor(COLOR.BLACK);
-		gc.drawRect(x, y, x + len, y + scaleWidth);
-		gc.setColor(COLOR.WHITE);
-		gc.drawRect(x + 1, y + 1, x + len - 1, y + scaleWidth - 1);
-		gc.setColor(COLOR.BLACK);
-
-		gc.setTextSize(lineHeight);
-		String text = Float.toString((float) m1 / 1000) + "km";
-		if ((m1 >= 1000) && (m1 % 1000 == 0))
-			text = Integer.toString(m1 / 1000) + "km";
-		else
-			text = Float.toString((float) m1 / 1000) + "km";
-
-		drawText(gc, text, new PointInt(4, lineHeight), COLOR.BLACK, 0x80FFFFFF);
-
-		// RectX bounds = gc.getTextBounds(text);
-		// bounds.offset(4, lineHeight);
-		// bounds.inset(-1, -1);
-		// gc.setColor(0x80FFFFFF);
-		// gc.fillRect((float) (bounds.getX()), (float) (bounds.getY()),
-		// (float) (bounds.getX() + bounds.getWidth()),
-		// (float) (bounds.getY() + bounds.getHeight()));
-		//
-		// gc.setColor(COLOR.BLACK);
-		// gc.drawText(text, 4, lineHeight);
-	}
-
-	private void drawText(GC gc, String text, PointInt pt, int textColor,
-			int backgroundColor) {
-		RectX bounds = gc.getTextBounds(text);
-		bounds.offset(pt.x, pt.y);
-		bounds.inset(-1, -1);
-		gc.setColor(backgroundColor);
-		gc.fillRect((float) (bounds.getX()), (float) (bounds.getY()),
-				(float) (bounds.getX() + bounds.getWidth()),
-				(float) (bounds.getY() + bounds.getHeight()));
-
-		gc.setColor(textColor);
-		gc.drawText(text, pt.x, pt.y);
-	}
-
-	private int drawMyLocation(GC gc) {
-		LocationX loc = myLocation;
-		if (loc == null)
-			return 0;
-
-		PointInt center = doc.getCenterXY();
-		int ptx = loc.getX(getZoom());
-		int pty = loc.getY(getZoom());
-		int x = ptx - (center.x - gc.getWidth() / 2);
-		int y = pty - (center.y - gc.getHeight() / 2);
-
-		double accPt = doc.m2pt(loc.getAccuracy());
-
-		if (accPt > 10) {
-			gc.setColor(COLOR.MAGENTA & 0x80FFFFFF);
-			gc.fillCircle(x, y, (float) accPt);
-		}
-
-		int lineHeight = gc.getHeight() / 24;
-		gc.setTextSize(lineHeight);
-
-		gc.setColor(0xA0000000);
-		gc.fillRect(0, gc.getHeight() - lineHeight, gc.getWidth(),
-				gc.getHeight());
-
-		gc.setColor(COLOR.CYAN);
-		gc.drawText(
-				Utils.format(loc.getLongitude()) + " "
-						+ Utils.format(loc.getLatitude()) + " "
-						+ loc.getAltitude() + "m " + loc.getSpeed() * 3.6f
-						+ "km/h", 0, gc.getHeight() - 2);
-
-		// drawArrow(gc, x, y, getMyLocation().getBearing());
-		gc.drawArrow(x, y, loc, myLocationDimmed);
-
-		return lineHeight;
 	}
 
 	public void saveState() {
@@ -401,57 +399,94 @@ public class CommonView implements ICommonView {
 	}
 
 	@Override
-	public void update() {
-		platformViewView.repaint();
-	}
-
-	@Override
 	public void repaint() {
 		platformViewView.repaint();
 	}
 
 	public ISelectable getSel() {
-		return doc.getSelAsync();
+		return getSelAsync();
 	}
 
 	public void dispose() {
-		doc.dispose();
+		selectionThread.stopped = true;
+		selectionThread.interrupt();
 	}
 
 	public void incInfoLevel() {
-		doc.incInfoLevel();
+		envir.adapter.assertUIThread();
+		if (infoLevel.ordinal() < InfoLevel.values().length - 1) {
+			infoLevel = InfoLevel.values()[infoLevel.ordinal() + 1];
+			invalidatePathTiles();
+		}
 	}
 
 	public void decInfoLevel() {
-		doc.decInfoLevel();
+		envir.adapter.assertUIThread();
+		if (infoLevel.ordinal() > 0) {
+			infoLevel = InfoLevel.values()[infoLevel.ordinal() - 1];
+			invalidatePathTiles();
+		}
 	}
 
-	public void clearPathTiles() {
-		doc.clearPathTiles();
-	}
-
-	public String getTopMap() {
-		return doc.getTopMap();
-	}
-
-	public void setTarget() {
-		doc.setTarget();
-	}
-
-	public LocationX getTarget() {
-		return doc.getTarget();
+	public void invalidatePathTiles() {
+		envir.adapter.assertUIThread();
+		if (pathTiles != null) {
+			pathTiles.setInvalidAll();
+			repaint();
+		}
 	}
 
 	public InfoLevel getInfoLevel() {
-		return doc.getInfoLevel();
+		return infoLevel;
+	}
+
+	public void setTarget() {
+		ISelectable sel = selectionThread.sel;
+		if (sel instanceof LocationX) {
+			envir.placemarks.setTarget((LocationX) sel);
+			invalidatePathTiles();
+		}
+	}
+
+	public LocationX getTarget() {
+		return envir.placemarks.getTarget();
+	}
+
+	public PointInt getCenterXY() {
+		return centerXY;
+	}
+
+	public LocationX getLocation() {
+		return getLocation(0, 0);
 	}
 
 	public LocationX getLocation(int dx, int dy) {
-		return doc.getLocation(dx, dy);
+		envir.adapter.assertUIThread();
+		return new LocationX(Utils.x2lon(centerXY.x + dx, zoom), Utils.y2lat(
+				centerXY.y + dy, zoom));
 	}
 
-	public void setTopMap(String map) {
-		doc.setTopMap(map);
+	public void cancelSel() {
+		envir.adapter.assertUIThread();
+		selectionThread.cancel();
+	}
+
+	public void updateSel() {
+		envir.adapter.assertUIThread();
+		SelectionThread.Params params = new SelectionThread.Params(centerXY.x,
+				centerXY.y, getWidth(), getHeight(), zoom, envir.adapter,
+				envir.placemarks, envir.paths) {
+			@Override
+			public void onPathTilesChanged() {
+				CommonView.this.invalidatePathTiles();
+			}
+		};
+
+		selectionThread.set(params);
+	}
+
+	public ISelectable getSelAsync() {
+		return selectionThread.sel;
 	}
 
 	@Override
@@ -471,4 +506,25 @@ public class CommonView implements ICommonView {
 		if (target != null)
 			animateTo(target);
 	}
+
+	public void onSizeChanged(int w, int h) {
+		updateSel();
+		repaint();
+	}
+
+	@Override
+	public int getWidth() {
+		return platformViewView.getWidth();
+	}
+
+	@Override
+	public int getHeight() {
+		return platformViewView.getHeight();
+	}
+
+	public void drawDiagram(GC gc, int locationH) {
+		// TODO Auto-generated method stub
+
+	}
+
 }

@@ -66,7 +66,20 @@ public abstract class TileLoader {
 			}
 		}
 	}
-
+	
+	
+/*
+	ExecutorService msgQueue = Executors.newSingleThreadExecutor();
+	
+	Runnable r = new Runnable() {
+		@Override
+		public void run() {
+			Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+			
+		}
+	};
+*/	
+	
 	private Thread thread;
 
 	public void load(Long id, final TileLoaderCallback callback,

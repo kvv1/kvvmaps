@@ -71,20 +71,36 @@ public class Adapter {
 		}
 	}
 
+	public Object allocBitmap(int w, int h) {
+		try {
+			Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_4444);
+			return bm;
+		} catch (OutOfMemoryError e) {
+			int usedMegs = (int) (Debug.getNativeHeapAllocatedSize() / 1048576L);
+			Log.e("Adapter", "Native mem usage: " + usedMegs);
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	public synchronized Object allocBitmap() {
 		if (freeBitmaps.isEmpty()) {
-			try {
-				Bitmap bm = Bitmap.createBitmap(TILE_SIZE, TILE_SIZE,
-						Bitmap.Config.ARGB_4444);
+			Object bm = allocBitmap(TILE_SIZE, TILE_SIZE);
+			if(bm != null)
 				cnt++;
-				// bm.setDensity(Bitmap.DENSITY_NONE);
-				return bm;
-			} catch (OutOfMemoryError e) {
-				int usedMegs = (int) (Debug.getNativeHeapAllocatedSize() / 1048576L);
-				Log.e("Adapter", "Native mem usage: " + usedMegs);
-				e.printStackTrace();
-				return null;
-			}
+			return bm;
+//			try {
+//				Bitmap bm = Bitmap.createBitmap(TILE_SIZE, TILE_SIZE,
+//						Bitmap.Config.ARGB_4444);
+//				cnt++;
+//				// bm.setDensity(Bitmap.DENSITY_NONE);
+//				return bm;
+//			} catch (OutOfMemoryError e) {
+//				int usedMegs = (int) (Debug.getNativeHeapAllocatedSize() / 1048576L);
+//				Log.e("Adapter", "Native mem usage: " + usedMegs);
+//				e.printStackTrace();
+//				return null;
+//			}
 		}
 
 		Bitmap bm = freeBitmaps.remove(0);
@@ -129,6 +145,7 @@ public class Adapter {
 	}
 
 	private Set<Recycleable> recycleables = new HashSet<Recycleable>();
+	public static boolean debugDraw = false;
 
 	public synchronized void addRecycleable(Recycleable recycleable) {
 		recycleables.add(recycleable);
