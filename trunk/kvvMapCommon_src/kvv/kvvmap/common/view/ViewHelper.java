@@ -38,11 +38,11 @@ public class ViewHelper {
 			return mul;
 	}
 
-	public static void drawScale(GC gc, CommonView doc) {
+	public static void drawScale(GC gc, CommonView view) {
 		int lineHeight = gc.getHeight() / 24;
 		int scaleWidth = 5;
 
-		int m = (int) pt2m(gc.getWidth() / 2, doc);
+		int m = (int) pt2m(gc.getWidth() / 2, view);
 		int m1 = getScale(m);
 
 		gc.setStrokeWidth(1);
@@ -87,21 +87,21 @@ public class ViewHelper {
 		// gc.drawText(text, 4, lineHeight);
 	}
 
-	public static void drawTarget(GC gc, CommonView doc, LocationX myLoc) {
-		LocationX targ = doc.getTarget();
+	public static void drawTarget(GC gc, CommonView view, LocationX myLoc) {
+		LocationX targ = view.getTarget();
 		if (targ == null)
 			return;
 
-		PointInt center = doc.getCenterXY();
-		int _dx = Math.abs(center.x - targ.getX(doc.getZoom()));
-		int _dy = Math.abs(center.y - targ.getY(doc.getZoom()));
+		PointInt center = view.getCenterXY();
+		int _dx = Math.abs(center.x - targ.getX(view.getZoom()));
+		int _dy = Math.abs(center.y - targ.getY(view.getZoom()));
 		if (_dx > gc.getWidth() / 3 || _dy > gc.getHeight() / 3) {
 			gc.setColor(COLOR.TARG_COLOR);
 			gc.setStrokeWidth(2);
 
 			int len = gc.getWidth() / 16;
 
-			double bearing = (90 - doc.getLocation().bearingTo(targ)) * Math.PI
+			double bearing = (90 - view.getLocation().bearingTo(targ)) * Math.PI
 					/ 180;
 
 			int dx = (int) (len * Math.cos(bearing));
@@ -138,18 +138,18 @@ public class ViewHelper {
 		gc.drawLine(x - sz, y, x + sz, y);
 	}
 
-	public static int drawMyLocation(GC gc, CommonView doc, LocationX loc,
+	public static int drawMyLocation(GC gc, CommonView view, LocationX loc,
 			boolean dimmed) {
 		if (loc == null)
 			return 0;
 
-		PointInt center = doc.getCenterXY();
-		int ptx = loc.getX(doc.getZoom());
-		int pty = loc.getY(doc.getZoom());
+		PointInt center = view.getCenterXY();
+		int ptx = loc.getX(view.getZoom());
+		int pty = loc.getY(view.getZoom());
 		int x = ptx - (center.x - gc.getWidth() / 2);
 		int y = pty - (center.y - gc.getHeight() / 2);
 
-		double accPt = m2pt(loc.getAccuracy(), doc);
+		double accPt = m2pt(loc.getAccuracy(), view);
 
 		if (accPt > 10) {
 			gc.setColor(COLOR.MAGENTA & 0x80FFFFFF);
@@ -170,23 +170,22 @@ public class ViewHelper {
 						+ loc.getAltitude() + "m " + loc.getSpeed() * 3.6f
 						+ "km/h", 0, gc.getHeight() - 2);
 
-		// drawArrow(gc, x, y, getMyLocation().getBearing());
 		gc.drawArrow(x, y, loc, dimmed);
 
 		return lineHeight;
 	}
 
-	private static double pt2m(int pt, CommonView doc) {
+	private static double pt2m(int pt, CommonView view) {
 		double m1deg = 111000;
-		double lat1 = Utils.y2lat(doc.getCenterXY().y - pt / 2, doc.getZoom());
-		double lat2 = Utils.y2lat(doc.getCenterXY().y + pt / 2, doc.getZoom());
+		double lat1 = Utils.y2lat(view.getCenterXY().y - pt / 2, view.getZoom());
+		double lat2 = Utils.y2lat(view.getCenterXY().y + pt / 2, view.getZoom());
 		return (lat1 - lat2) * m1deg;
 	}
 
-	private static double m2pt(double m, CommonView doc) {
+	private static double m2pt(double m, CommonView view) {
 		double m1deg = 111000;
-		double lat1 = Utils.y2lat(doc.getCenterXY().y - 10 / 2, doc.getZoom());
-		double lat2 = Utils.y2lat(doc.getCenterXY().y + 10 / 2, doc.getZoom());
+		double lat1 = Utils.y2lat(view.getCenterXY().y - 10 / 2, view.getZoom());
+		double lat2 = Utils.y2lat(view.getCenterXY().y + 10 / 2, view.getZoom());
 		return m * 10 / ((lat1 - lat2) * m1deg);
 	}
 

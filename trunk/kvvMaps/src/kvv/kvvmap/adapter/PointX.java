@@ -9,6 +9,4 @@ public class PointX extends PointF {
 
 	public PointX() {
 	}
-
-	private static final long serialVersionUID = 1L;
 }

@@ -22,6 +22,7 @@ public class Adapter {
 
 	public static final int TILE_SIZE = 256;
 	public static final int TILE_SIZE_G = 256;
+	public static boolean debugDraw;
 
 	private final Thread uiThread;
 
@@ -62,6 +63,10 @@ public class Adapter {
 		}
 	}
 
+	public Object allocBitmap(int w, int h) {
+		return new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+	}
+
 	public GC getGC(Object bm) {
 		BufferedImage img = (BufferedImage) bm;
 		return new GC((Graphics2D) img.getGraphics(), img.getWidth(),
@@ -92,4 +97,5 @@ public class Adapter {
 	public void addRecycleable(Tiles tiles) {
 		// TODO Auto-generated method stub
 	}
+
 }

@@ -45,6 +45,9 @@ public class Diagram {
 	}
 
 	class DiagramThread extends Thread {
+		{
+			setPriority(MIN_PRIORITY);
+		}
 		@Override
 		public void run() {
 			Object bm = null;
@@ -66,7 +69,7 @@ public class Diagram {
 					bm = adapter.allocBitmap(params.w, params.h);
 					GC gc = adapter.getGC(bm);
 					h = params.h;
-					PathDrawer.drawDiagram1(params.path, gc, params.pm);
+					PathDrawer.drawDiagram(params.path, gc, params.pm);
 				}
 			}
 		}
