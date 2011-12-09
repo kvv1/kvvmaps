@@ -38,7 +38,6 @@ public class KvvMapsService extends Service {
 	private Paths paths;
 	private PlaceMarks placeMarks;
 	private MapsDir mapsDir;
-	private volatile TrackerListener trackerListener;
 	private Bundle state;
 
 	public class KvvMapsServiceBinder extends Binder implements IKvvMapsService {
@@ -53,7 +52,8 @@ public class KvvMapsService extends Service {
 
 		@Override
 		public void setTrackerListener(TrackerListener tl) {
-			KvvMapsService.this.trackerListener = tl;
+			if(tracker != null)
+				tracker.setListener(tl);
 		}
 
 		
@@ -80,7 +80,7 @@ public class KvvMapsService extends Service {
 
 		@Override
 		public void disconnect() {
-			trackerListener = null;
+			tracker.setListener(null);
 			paths.setDoc(null);
 			placeMarks.setDoc(null);
 		}
@@ -111,23 +111,7 @@ public class KvvMapsService extends Service {
 		placeMarks = new PlaceMarks();
 
 		paths = new Paths();
-		tracker = new Tracker(new TrackerListener() {
-
-			@Override
-			public void setMyLocation(LocationX locationX, boolean forceScroll) {
-				TrackerListener tl = KvvMapsService.this.trackerListener;
-				if (tl != null)
-					tl.setMyLocation(locationX, forceScroll);
-			}
-
-			@Override
-			public void dimmMyLocation() {
-				TrackerListener tl = KvvMapsService.this.trackerListener;
-				if (tl != null)
-					tl.dimmMyLocation();
-			}
-		}, paths);
-		tracker.register((LocationManager) getSystemService(Context.LOCATION_SERVICE));
+		tracker = new Tracker(paths, (LocationManager) getSystemService(Context.LOCATION_SERVICE));
 	}
 
 	@Override
@@ -140,10 +124,10 @@ public class KvvMapsService extends Service {
 			paths.setDoc(null);
 		paths = null;
 		mapsDir = null;
-		if (tracker != null)
-			tracker.unregister();
+		if (tracker != null) {
+			tracker.dispose();
+		}
 		tracker = null;
-		trackerListener = null;
 		state = null;
 		System.gc();
 		

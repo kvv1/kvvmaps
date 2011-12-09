@@ -186,17 +186,6 @@ public class MyActivity extends Activity {
 	}
 
 	private final TrackerListener tl = new TrackerListener() {
-		@Override
-		public void setMyLocation(LocationX locationX, boolean forceScroll) {
-			if (view != null)
-				view.setMyLocation(locationX, forceScroll);
-		}
-
-		@Override
-		public void dimmMyLocation() {
-			if (view != null)
-				view.dimmMyLocation();
-		}
 	};
 
 	private ServiceConnection conn = new ServiceConnection() {
@@ -214,7 +203,12 @@ public class MyActivity extends Activity {
 						mapsService.getPaths(), mapsService.getPlacemarks(),
 						new Maps(adapter, mapsDir), mapsDir);
 
-				view.init(MyActivity.this, envir);
+				Bundle b = mapsService.getBundle();
+
+				if (b != null && b.getBoolean("following"))
+					startFollow();
+
+				view.init(MyActivity.this, envir, b);
 			}
 		}
 
@@ -240,6 +234,8 @@ public class MyActivity extends Activity {
 			return;
 
 		adapter = new Adapter(this);
+
+		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 		startService(new Intent(this, KvvMapsService.class));
 
@@ -468,10 +464,9 @@ public class MyActivity extends Activity {
 		menu.findItem(MENU_LOGGING_ONOFF).setTitle(
 				mapsService.getTracker().isTracking() ? "Запись пути выкл."
 						: "Запись пути");
-		menu.findItem(MENU_FOLLOW_ONOFF)
-				.setTitle(
-						mapsService.getTracker().isFollowing() ? "Сдвигать по GPS выкл."
-								: "Сдвигать по GPS");
+		menu.findItem(MENU_FOLLOW_ONOFF).setTitle(
+				locationListener != null ? "Сдвигать по GPS выкл."
+						: "Сдвигать по GPS");
 		menu.findItem(MENU_DEBUG_DRAW).setTitle(
 				Adapter.debugDraw ? "Debug drawing off" : "Debug drawing on");
 		menu.findItem(MENU_ENLARGE).setTitle(
@@ -578,7 +573,7 @@ public class MyActivity extends Activity {
 		prefsPrivateEditor.putBoolean("debugDraw", Adapter.debugDraw);
 		prefsPrivateEditor.commit();
 		if (view != null)
-			view.clearPathTiles();
+			view.invalidatePathTiles();
 	}
 
 	private void paths() {
@@ -627,25 +622,74 @@ public class MyActivity extends Activity {
 		alert.show();
 	}
 
-	private void followOnOff() {
-		if (mapsService.getTracker().isFollowing())
-			mapsService.getTracker().stopFollow();
-		else {
-			mapsService.getTracker().startFollow();
-			gotoCurrentPos();
+	private LocationManager locationManager;
+	private LocationListener locationListener;
+
+	public boolean isFollowing() {
+		return locationListener != null;
+	}
+
+	private void startFollow() {
+		if (locationListener == null) {
+			locationListener = new LocationListener() {
+				public void onStatusChanged(String provider, int status,
+						Bundle extras) {
+					if (status == LocationProvider.OUT_OF_SERVICE) {
+						stopFollow();
+					}
+				}
+
+				public void onProviderEnabled(String provider) {
+				}
+
+				public void onProviderDisabled(String provider) {
+					stopFollow();
+				}
+
+				public void onLocationChanged(Location location) {
+					LocationX loc = new LocationX(location);
+					if (view != null)
+						view.setMyLocation(loc, false);
+				}
+			};
+
+			Adapter.log("LM " + locationManager);
+			locationManager.requestLocationUpdates(
+					LocationManager.GPS_PROVIDER, 1, 1, locationListener);
+
 		}
+	}
+
+	private void stopFollow() {
+		if (locationListener != null) {
+			locationManager.removeUpdates(locationListener);
+			locationListener = null;
+			if (view != null)
+				view.dimmMyLocation();
+		}
+	}
+
+	private void followOnOff() {
+		if (locationListener == null)
+			startFollow();
+		else
+			stopFollow();
+		/*
+		 * if (mapsService.getTracker().isFollowing())
+		 * mapsService.getTracker().stopFollow(); else {
+		 * mapsService.getTracker().startFollow(); gotoCurrentPos(); }
+		 */
 		updateView();
 	}
 
 	private void gotoCurrentPos() {
-		final LocationManager curPosLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		final AlertDialog[] curLocProgress = new AlertDialog[1];
 
 		final LocationListener locListener = new LocationListener() {
 			public void onStatusChanged(String provider, int status,
 					Bundle extras) {
 				if (status == LocationProvider.OUT_OF_SERVICE) {
-					curPosLocationManager.removeUpdates(this);
+					locationManager.removeUpdates(this);
 					if (curLocProgress[0] != null)
 						curLocProgress[0].dismiss();
 					curLocProgress[0] = null;
@@ -656,7 +700,7 @@ public class MyActivity extends Activity {
 			}
 
 			public void onProviderDisabled(String provider) {
-				curPosLocationManager.removeUpdates(this);
+				locationManager.removeUpdates(this);
 				if (curLocProgress[0] != null)
 					curLocProgress[0].dismiss();
 				curLocProgress[0] = null;
@@ -665,13 +709,14 @@ public class MyActivity extends Activity {
 			public void onLocationChanged(Location location) {
 				if (location != null) {
 					if (location.getAccuracy() < 40) {
-						curPosLocationManager.removeUpdates(this);
+						locationManager.removeUpdates(this);
 						if (curLocProgress[0] != null)
 							curLocProgress[0].dismiss();
 						curLocProgress[0] = null;
 					}
 					LocationX loc = new LocationX(location);
-					tl.setMyLocation(loc, true);
+					if (view != null)
+						view.setMyLocation(loc, true);
 				}
 			}
 		};
@@ -679,13 +724,13 @@ public class MyActivity extends Activity {
 		curLocProgress[0] = ProgressDialog.show(this, "",
 				"Определение координат...", true, true, new OnCancelListener() {
 					public void onCancel(DialogInterface dialog) {
-						curPosLocationManager.removeUpdates(locListener);
+						locationManager.removeUpdates(locListener);
 						curLocProgress[0] = null;
 					}
 				});
 
-		curPosLocationManager.requestLocationUpdates(
-				LocationManager.GPS_PROVIDER, 1, 1, locListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1,
+				1, locListener);
 
 	}
 
@@ -733,8 +778,14 @@ public class MyActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		if (view != null)
-			view.save();
+		if (view != null) {
+			Bundle b = new Bundle();
+			b.putBoolean("following", isFollowing());
+			view.save(b);
+			mapsService.setBundle(b);
+			stopFollow();
+			locationManager = null;
+		}
 
 		Adapter.log("onDestroy");
 		unbindService(conn);

@@ -109,7 +109,7 @@ public class CommonView implements ICommonView {
 
 			@Override
 			protected ISelectable getSelAsync() {
-				return CommonView.this.getSelAsync();
+				return sel;
 			}
 		};
 
@@ -282,7 +282,7 @@ public class CommonView implements ICommonView {
 		animateTo(loc, 0, 0);
 	}
 
-	public void animateBy(PointInt offset) {
+	private void animateBy(PointInt offset) {
 		envir.adapter.assertUIThread();
 		int x = centerXY.x + offset.x;
 		int y = centerXY.y + offset.y;
@@ -309,16 +309,7 @@ public class CommonView implements ICommonView {
 
 		drawDiagram(gc, locationH);
 
-		// diagram.draw(gc, locationH);
-
-		ISelectable sel = getSel();
 		if (p1 == null) {
-			// if (doc.getInfoLevel().ordinal() != 0
-			// && (sel instanceof PathSelection)) {
-			// PathSelection sel1 = (PathSelection) sel;
-			// PathDrawer.drawDiagram(sel1.path, gc, gc.getHeight() - locationH,
-			// sel1.pm);
-			// }
 			LocationX myLoc = myLocation;
 			if (!isMyLocationDimmed())
 				myLoc = null;
@@ -326,7 +317,7 @@ public class CommonView implements ICommonView {
 		}
 	}
 
-	public void drawTiles(GC gc) {
+	private void drawTiles(GC gc) {
 		int w = gc.getWidth();
 		int h = gc.getHeight();
 
@@ -407,7 +398,7 @@ public class CommonView implements ICommonView {
 	}
 
 	public ISelectable getSel() {
-		return getSelAsync();
+		return sel;
 	}
 
 	public void dispose() {
@@ -431,23 +422,15 @@ public class CommonView implements ICommonView {
 		}
 	}
 
+	public InfoLevel getInfoLevel() {
+		return infoLevel;
+	}
+
 	public void invalidatePathTiles() {
 		envir.adapter.assertUIThread();
 		if (pathTiles != null) {
 			pathTiles.setInvalidAll();
 			repaint();
-		}
-	}
-
-	public InfoLevel getInfoLevel() {
-		return infoLevel;
-	}
-
-	public void setTarget() {
-		ISelectable sel = this.sel;
-		if (sel instanceof LocationX) {
-			envir.placemarks.setTarget((LocationX) sel);
-			invalidatePathTiles();
 		}
 	}
 
@@ -469,12 +452,12 @@ public class CommonView implements ICommonView {
 				centerXY.y + dy, zoom));
 	}
 
-	public void cancelSel() {
+	private void cancelSel() {
 		envir.adapter.assertUIThread();
 		selectionThread.cancel();
 	}
 
-	public void updateSel() {
+	private void updateSel() {
 		envir.adapter.assertUIThread();
 		selectionThread.set(centerXY.x, centerXY.y,
 				platformViewView.getWidth(), platformViewView.getHeight(),
@@ -486,24 +469,16 @@ public class CommonView implements ICommonView {
 						CommonView.this.invalidatePathTiles();
 						if (sel instanceof PathSelection) {
 							PathSelection sel1 = (PathSelection) sel;
-							diagram.set(sel1.path, sel1.pm, platformViewView.getWidth(),
+							diagram.set(sel1.path, sel1.pm,
+									platformViewView.getWidth(),
 									platformViewView.getHeight());
 						} else {
-							diagram.set(null, null, platformViewView.getWidth(),
+							diagram.set(null, null,
+									platformViewView.getWidth(),
 									platformViewView.getHeight());
 						}
 					}
 				});
-	}
-
-	public ISelectable getSelAsync() {
-		return sel;
-	}
-
-	@Override
-	protected void finalize() throws Throwable {
-		Adapter.log("~CommonView");
-		super.finalize();
 	}
 
 	public void animateToMyLocation() {
@@ -523,8 +498,15 @@ public class CommonView implements ICommonView {
 		repaint();
 	}
 
-	public void drawDiagram(GC gc, int locationH) {
-		diagram.draw(gc, locationH);
+	private void drawDiagram(GC gc, int locationH) {
+		if (getInfoLevel().ordinal() != 0)
+			diagram.draw(gc, locationH);
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		Adapter.log("~CommonView");
+		super.finalize();
 	}
 
 }

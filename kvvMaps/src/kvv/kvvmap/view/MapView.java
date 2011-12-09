@@ -5,7 +5,6 @@ import kvv.kvvmap.R;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.pacemark.ISelectable;
@@ -59,7 +58,7 @@ public class MapView extends View implements IPlatformView {
 
 	private static int cnt;
 
-	public void init( MyActivity activity, Environment envir) {
+	public void init(MyActivity activity, Environment envir, Bundle savedInstanceState) {
 		assertUIThread();
 		Adapter.log("MapView.init " + ++cnt);
 
@@ -70,7 +69,6 @@ public class MapView extends View implements IPlatformView {
 
 		animateTo(new LocationX(30, 60));
 
-		Bundle savedInstanceState = activity.mapsService.getBundle();
 		if (savedInstanceState != null) {
 			double lon = savedInstanceState.getDouble("lon", 30);
 			double lat = savedInstanceState.getDouble("lat", 60);
@@ -109,15 +107,13 @@ public class MapView extends View implements IPlatformView {
 		return commonView.getSel();
 	}
 
-	
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
-		if(commonView != null)
+		if (commonView != null)
 			commonView.onSizeChanged(w, h);
 	}
-	
-	
+
 	@Override
 	public void onDraw(Canvas canvas) {
 
@@ -141,7 +137,7 @@ public class MapView extends View implements IPlatformView {
 			canvas.drawBitmap(bm, getWidth() - bm.getWidth(), 0, null);
 		}
 
-		if (activity.mapsService.getTracker().isFollowing()) {
+		if (activity.isFollowing()) {
 			Bitmap bm = activity.bmFollow;
 			canvas.drawBitmap(bm, getWidth() - 40, 0, null);
 		}
@@ -276,9 +272,8 @@ public class MapView extends View implements IPlatformView {
 			commonView.zoomIn();
 	}
 
-	public void save() {
-		if (activity == null || commonView != null) {
-			Bundle outState = new Bundle();
+	public void save(Bundle outState) {
+		if (commonView != null) {
 			if (commonView != null) {
 				outState.putDouble("lon", commonView.getLocation()
 						.getLongitude());
@@ -287,7 +282,6 @@ public class MapView extends View implements IPlatformView {
 				outState.putInt("zoom", commonView.getZoom());
 				outState.putString("map", commonView.getTopMap());
 			}
-			activity.mapsService.setBundle(outState);
 		}
 	}
 
@@ -412,7 +406,7 @@ public class MapView extends View implements IPlatformView {
 			commonView.decInfoLevel();
 	}
 
-	public void clearPathTiles() {
+	public void invalidatePathTiles() {
 		if (commonView != null)
 			commonView.invalidatePathTiles();
 	}

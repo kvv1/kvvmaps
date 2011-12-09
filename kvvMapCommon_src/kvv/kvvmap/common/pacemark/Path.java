@@ -6,11 +6,8 @@ import java.io.PrintStream;
 import java.util.List;
 
 import kvv.kvvmap.adapter.Adapter;
-import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.adapter.RectX;
-import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.Utils;
 
 public class Path implements IPlaceMarks {

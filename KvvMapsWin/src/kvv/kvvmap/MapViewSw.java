@@ -16,6 +16,7 @@ import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maps.Maps;
 import kvv.kvvmap.common.maps.MapsDir;
+import kvv.kvvmap.common.pacemark.ISelectable;
 import kvv.kvvmap.common.pacemark.Paths;
 import kvv.kvvmap.common.pacemark.PlaceMarks;
 import kvv.kvvmap.common.view.CommonView;
@@ -36,7 +37,7 @@ public class MapViewSw extends JComponent implements IPlatformView {
 		GC gc = new GC(g, SCR_W, SCR_H);
 		commonView.draw(gc);
 
-		if (commonView.canReorder()) {
+		if (commonView.isMultiple()) {
 			g.setColor(Color.CYAN);
 			g.fillOval(100, 30, 30, 30);
 		}
@@ -137,7 +138,10 @@ public class MapViewSw extends JComponent implements IPlatformView {
 	}
 
 	public void setTarget() {
-		commonView.setTarget();
+		ISelectable sel = commonView.getSel();
+		if (sel instanceof LocationX) {
+			envir.placemarks.setTarget((LocationX) sel);
+		}
 	}
 
 }
