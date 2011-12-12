@@ -5,6 +5,9 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
@@ -25,9 +28,20 @@ public class Adapter {
 	public static boolean debugDraw;
 
 	private final Thread uiThread;
+	
+	private final ExecutorService executor;
 
 	public Adapter() {
 		uiThread = Thread.currentThread();
+//		executor = Executors.newSingleThreadExecutor();
+		executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable r) {
+				Thread t = new Thread(r);
+				t.setPriority(Thread.MIN_PRIORITY);
+				return t;
+			}
+		});
 	}
 
 	public synchronized void disposeBitmap(Object img) {
@@ -82,8 +96,12 @@ public class Adapter {
 		private static final long serialVersionUID = 1L;
 	}
 
-	public void exec(Runnable runnable) {
+	public void execUI(Runnable runnable) {
 		SwingUtilities.invokeLater(runnable);
+	}
+	
+	public void execBG(Runnable runnable) {
+		executor.execute(runnable);
 	}
 
 	public static void log(String string) {

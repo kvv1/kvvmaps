@@ -14,20 +14,15 @@ import kvv.kvvmap.common.pacemark.PathSelection;
 import kvv.kvvmap.common.pacemark.Paths;
 import kvv.kvvmap.common.pacemark.PlaceMarks;
 
-class SelectionThread extends Thread {
-	{
-		setDaemon(true);
-		setPriority(MIN_PRIORITY);
-		start();
-	}
+class SelectionThread {
 
 	public interface Callback {
 		void selectionChanged(ISelectable sel);
 	}
-	
+
 	private static class Params {
-		public Params(int x, int y, int w, int h, int zoom,
-				Adapter adapter, PlaceMarks placemarks, Paths paths, Callback callback) {
+		public Params(int x, int y, int w, int h, int zoom, Adapter adapter,
+				PlaceMarks placemarks, Paths paths, Callback callback) {
 			super();
 			this.x = x;
 			this.y = y;
@@ -52,98 +47,91 @@ class SelectionThread extends Thread {
 	}
 
 	private ISelectable sel;
-	public volatile boolean stopped;
 
 	private SelectionThread.Params params;
 	private boolean cancelled;
 
+	private SelectionRunnable r;
+
 	private synchronized boolean cancelled() {
-		return stopped || cancelled || params != null;
+		return cancelled || params != null;
 	}
 
-	@Override
-	public void run() {
-		loop: for (;;) {
-			SelectionThread.Params params;
-			synchronized (this) {
-				while (this.params == null) {
-					if (stopped) {
-						Adapter.log("end of selection thread");
+	class SelectionRunnable implements Runnable {
+		@Override
+		public void run() {
+			loop: for (;;) {
+				SelectionThread.Params params;
+				synchronized (SelectionThread.this) {
+					if (SelectionThread.this.params == null) {
+						r = null;
 						return;
 					}
-					try {
-						wait();
-					} catch (InterruptedException e) {
-					}
-					if (stopped) {
-						Adapter.log("end of selection thread");
-						return;
-					}
+					params = SelectionThread.this.params;
+					SelectionThread.this.params = null;
 				}
-				params = this.params;
-				this.params = null;
-			}
 
-			ISelectable sel = null;
+				ISelectable sel = null;
 
-			RectX screenRect;
-			int x0 = params.x - params.w / 2;
-			int x1 = params.x + params.w / 2;
-			int y0 = params.y - params.h / 2;
-			int y1 = params.y + params.h / 2;
-			;
+				RectX screenRect;
+				int x0 = params.x - params.w / 2;
+				int x1 = params.x + params.w / 2;
+				int y0 = params.y - params.h / 2;
+				int y1 = params.y + params.h / 2;
 
-			double lon0 = Utils.x2lon(x0, params.zoom);
-			double lonw = Utils.x2lon(x1, params.zoom) - lon0;
-			double lat0 = Utils.y2lat(y1, params.zoom);
-			double lath = Utils.y2lat(y0, params.zoom) - lat0;
-			screenRect = new RectX(lon0, lat0, lonw, lath);
+				double lon0 = Utils.x2lon(x0, params.zoom);
+				double lonw = Utils.x2lon(x1, params.zoom) - lon0;
+				double lat0 = Utils.y2lat(y1, params.zoom);
+				double lath = Utils.y2lat(y0, params.zoom) - lat0;
+				screenRect = new RectX(lon0, lat0, lonw, lath);
 
-			Map<LocationX, Path> pms = new HashMap<LocationX, Path>();
-			for (LocationX pm : params.placemarks.getPlaceMarks()) {
-				if (cancelled())
-					continue loop;
-				pms.put(pm, null);
-			}
-			for (Path path : params.paths.getPaths()) {
-				if (!path.filter(screenRect))
-					continue;
-				if (!path.isEnabled())
-					continue;
-				for (LocationX pm : path.getPlaceMarks(params.zoom)) {
+				Map<LocationX, Path> pms = new HashMap<LocationX, Path>();
+				for (LocationX pm : params.placemarks.getPlaceMarks()) {
 					if (cancelled())
 						continue loop;
-					pms.put(pm, path);
+					pms.put(pm, null);
 				}
-			}
-			// System.out.println("sz= " + pms.size());
+				for (Path path : params.paths.getPaths()) {
+					if (!path.filter(screenRect))
+						continue;
+					if (!path.isEnabled())
+						continue;
+					for (LocationX pm : path.getPlaceMarks(params.zoom)) {
+						if (cancelled())
+							continue loop;
+						pms.put(pm, path);
+					}
+				}
+				// System.out.println("sz= " + pms.size());
 
-			LocationX pm = getNearest(pms.keySet(), params.x, params.y,
-					params.zoom, 10);
-			if (pm != null) {
-				Path path = pms.get(pm);
-				if (path == null)
-					sel = pm;
-				else
-					sel = new PathSelection(path, pm);
-			} else {
-				sel = null;
-			}
+				LocationX pm = getNearest(pms.keySet(), params.x, params.y,
+						params.zoom, 10);
+				if (pm != null) {
+					Path path = pms.get(pm);
+					if (path == null)
+						sel = pm;
+					else
+						sel = new PathSelection(path, pm);
+				} else {
+					sel = null;
+				}
 
-			synchronized (this) {
-				if (cancelled())
-					continue loop;
+				synchronized (SelectionThread.this) {
+					if (cancelled())
+						continue loop;
 
-				if (sel != null && !sel.equals(this.sel) || sel == null
-						&& this.sel != null) {
-					this.sel = sel;
-					final SelectionThread.Params params1 = params;
-					params.adapter.exec(new Runnable() {
-						@Override
-						public void run() {
-							params1.callback.selectionChanged(SelectionThread.this.sel);
-						}
-					});
+					if (sel != null && !sel.equals(SelectionThread.this.sel)
+							|| sel == null && SelectionThread.this.sel != null) {
+						SelectionThread.this.sel = sel;
+						final SelectionThread.Params params1 = params;
+						params.adapter.execUI(new Runnable() {
+							@Override
+							public void run() {
+								params1.callback
+										.selectionChanged(SelectionThread.this.sel);
+							}
+						});
+					}
 				}
 			}
 		}
@@ -172,10 +160,16 @@ class SelectionThread extends Thread {
 	}
 
 	public synchronized void set(int x, int y, int w, int h, int zoom,
-			Adapter adapter, PlaceMarks placemarks, Paths paths, Callback callback) {
-		this.params = new Params(x, y, w, h, zoom, adapter, placemarks, paths, callback);
+			Adapter adapter, PlaceMarks placemarks, Paths paths,
+			Callback callback) {
+		this.params = new Params(x, y, w, h, zoom, adapter, placemarks, paths,
+				callback);
 		cancelled = false;
-		notify();
+
+		if (r == null) {
+			r = new SelectionRunnable();
+			adapter.execBG(r);
+		}
 	}
 
 	public synchronized void cancel() {

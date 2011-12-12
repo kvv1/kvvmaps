@@ -13,7 +13,9 @@ public class Diagram {
 	private final ICommonView view;
 	private final Adapter adapter;
 
-	private DiagramThread thread;
+	//private DiagramThread thread;
+	
+	private Runnable r;
 
 	private class Params {
 		Params(Path path, LocationX pm, int w, int h) {
@@ -38,16 +40,13 @@ public class Diagram {
 	}
 
 	public synchronized void draw(GC gc, int y) {
-		if (thread != null)
+		if (r != null)
 			return;
 		if (bm != null)
 			gc.drawImage(bm, 0, gc.getHeight() - y - h);
 	}
 
-	class DiagramThread extends Thread {
-		{
-			setPriority(MIN_PRIORITY);
-		}
+	class DiagramRunnable implements Runnable {
 		@Override
 		public void run() {
 			Object bm = null;
@@ -57,7 +56,7 @@ public class Diagram {
 					params = Diagram.this.params;
 					Diagram.this.params = null;
 					if (params == null) {
-						thread = null;
+						r = null;
 						Diagram.this.bm = bm;
 						view.repaint();
 						return;
@@ -77,10 +76,9 @@ public class Diagram {
 
 	public synchronized void set(Path path, LocationX pm, int w, int h) {
 		this.params = new Params(path, pm, w, h / 4);
-		if (thread == null) {
-			thread = new DiagramThread();
-			thread.setPriority(Thread.MIN_PRIORITY);
-			thread.start();
+		if (r == null) {
+			r = new DiagramRunnable();
+			adapter.execBG(r);
 		}
 	}
 

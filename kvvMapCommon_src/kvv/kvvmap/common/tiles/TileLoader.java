@@ -25,63 +25,38 @@ public abstract class TileLoader {
 	private final LinkedList<Pair<Long, TileLoaderCallback>> queue = new LinkedList<Pair<Long, TileLoaderCallback>>();
 	private final LinkedList<Pair<Long, TileLoaderCallback>> queue1 = new LinkedList<Pair<Long, TileLoaderCallback>>();
 
-	class LoaderThread extends Thread {
-		{
-			setDaemon(true);
-			setPriority((MIN_PRIORITY + NORM_PRIORITY) / 2);
-		}
-
+	private Runnable r = new Runnable() {
+		@Override
 		public void run() {
-			for (;;) {
-				final Pair<Long, TileLoaderCallback> request;
-				synchronized (queue) {
-					if (queue.isEmpty()) {
-						thread = null;
-						System.gc();
-						return;
-					}
-					request = queue.removeFirst();
-					queue1.add(request);
-				}
-				// log("loading " + TileLoader.getId(request.first));
-				Tile tile = loadAsync(request.first);
-				if (tile != null) {
-					final Tile tile1 = tile;
-					final TileLoaderCallback callback = request.second;
-					adapter.exec(new Runnable() {
-						@Override
-						public void run() {
-							synchronized (queue) {
-								for (Pair<Long, TileLoaderCallback> p : queue1) {
-									if (p == request) {
-										queue1.remove(request);
-										callback.loaded(tile1);
-										break;
-									}
+			final Pair<Long, TileLoaderCallback> request;
+			synchronized (queue) {
+				if (queue.isEmpty())
+					return;
+				request = queue.removeFirst();
+				queue1.add(request);
+			}
+			Tile tile = loadAsync(request.first);
+			if (tile != null) {
+				final Tile tile1 = tile;
+				final TileLoaderCallback callback = request.second;
+				adapter.execUI(new Runnable() {
+					@Override
+					public void run() {
+						synchronized (queue) {
+							for (Pair<Long, TileLoaderCallback> p : queue1) {
+								if (p == request) {
+									queue1.remove(request);
+									callback.loaded(tile1);
+									break;
 								}
 							}
 						}
-					});
-				}
+					}
+				});
 			}
 		}
-	}
+	}; 
 	
-	
-/*
-	ExecutorService msgQueue = Executors.newSingleThreadExecutor();
-	
-	Runnable r = new Runnable() {
-		@Override
-		public void run() {
-			Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-			
-		}
-	};
-*/	
-	
-	private Thread thread;
-
 	public void load(Long id, final TileLoaderCallback callback,
 			PointInt centerXY) {
 		adapter.assertUIThread();
@@ -119,13 +94,12 @@ public abstract class TileLoader {
 			// log("adding " + getId(id));
 			it.add(new Pair<Long, TileLoaderCallback>(id, callback));
 
-			if (thread == null) {
-				thread = new LoaderThread();
-				thread.start();
-			}
+			adapter.execBG(r);
+			
 		}
 	}
 
+	
 	public void cancelLoading() {
 		synchronized (queue) {
 			// log("cancelling");
