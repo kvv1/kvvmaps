@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.LocationX;
 
 public class Saver extends Thread {
@@ -44,6 +45,8 @@ public class Saver extends Thread {
 				Thread.sleep(1000);
 			} catch (InterruptedException e1) {
 			}
+
+			Adapter.log("Saver");
 
 			synchronized (Saver.class) {
 				set = toSave;

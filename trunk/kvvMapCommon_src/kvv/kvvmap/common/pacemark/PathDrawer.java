@@ -30,7 +30,7 @@ public class PathDrawer {
 		gc.drawText(text, x, y);
 	}
 
-	private static RectX rect = new RectX(0, 0, 0, 0);
+	private static RectX __rect = new RectX(0, 0, 0, 0);
 
 	public static void drawPaths(Paths paths, GC gc, long tileId,
 			InfoLevel infoLevel, ISelectable sel) {
@@ -43,10 +43,10 @@ public class PathDrawer {
 		double lonw = Utils.x2lon(x1, z) - lon;
 		double lat = Utils.y2lat(y1, z);
 		double lath = Utils.y2lat(y0, z) - lat;
-		synchronized (rect) {
-			rect.set(lon, lat, lonw, lath);
+		synchronized (__rect) {
+			__rect.set(lon, lat, lonw, lath);
 			for (Path path : paths.getPaths()) {
-				if (path.filter(rect))
+				if (path.filter(__rect))
 					drawPath(path, gc, tileId, infoLevel, sel);
 			}
 		}
@@ -138,8 +138,6 @@ public class PathDrawer {
 
 		gc.setTextSize(lineHeight);
 
-		RectX rect = new RectX(w * 2 / 6, y - 5 * lineHeight, w * 4 / 6,
-				4 * lineHeight);
 		gc.setColor(0x80000000);
 		gc.fillRect(0, (float) (y - 5 * lineHeight), w, y);
 
@@ -174,6 +172,9 @@ public class PathDrawer {
 			float len0 = 0;
 
 			PointInt pmPt = null;
+
+			RectX rect = new RectX(w * 2 / 6, y - 5 * lineHeight, w * 4 / 6,
+					4 * lineHeight);
 
 			for (LocationX pm : pms) {
 				if (prevPm != null)

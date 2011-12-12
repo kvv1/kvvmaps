@@ -103,8 +103,8 @@ public final class Paths {
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
+					doc.onPathTilesChangedAsync();
 				}
-				doc.onPathTilesChangedAsync();
 			}
 
 		};

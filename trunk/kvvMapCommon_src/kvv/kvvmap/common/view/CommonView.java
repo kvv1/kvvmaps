@@ -221,7 +221,7 @@ public class CommonView implements ICommonView {
 		int nxC = centerXY.x / Adapter.TILE_SIZE;
 		int nyC = centerXY.y / Adapter.TILE_SIZE;
 		long id = TileId.get(nxC, nyC, zoom);
-		Tile tile = mapTiles.getTile(id, centerXY);
+		Tile tile = mapTiles.getTile(id, centerXY, false);
 		return tile;
 	}
 
@@ -295,6 +295,8 @@ public class CommonView implements ICommonView {
 	}
 
 	public void draw(GC gc) {
+		//Adapter.log("draw");
+		
 		gc.setAntiAlias(true);
 		// long time = System.currentTimeMillis();
 		drawTiles(gc);
@@ -339,12 +341,12 @@ public class CommonView implements ICommonView {
 				int x = (nx * Adapter.TILE_SIZE) - x0;
 				int y = (ny * Adapter.TILE_SIZE) - y0;
 
-				Tile tile = mapTiles.getTile(id, centerXY);
+				Tile tile = mapTiles.getTile(id, centerXY, p1 == null);
 				if (tile != null)
 					tile.draw(gc, x, y);
 
 				if (getInfoLevel().ordinal() > 0) {
-					tile = pathTiles.getTile(id, centerXY);
+					tile = pathTiles.getTile(id, centerXY, p1 == null);
 					if (tile != null)
 						tile.draw(gc, x, y);
 				}

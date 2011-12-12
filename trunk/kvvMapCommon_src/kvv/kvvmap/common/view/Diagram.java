@@ -63,6 +63,8 @@ public class Diagram {
 					}
 				}
 
+				Adapter.log("DiagramThread");
+
 				bm = null;
 				if (params.path != null) {
 					bm = adapter.allocBitmap(params.w, params.h);

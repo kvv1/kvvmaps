@@ -27,7 +27,6 @@ public class KvvMapsService extends Service {
 
 		PlaceMarks getPlacemarks();
 
-		void setBundle(Bundle outState);
 		Bundle getBundle();
 		
 		void disconnect();
@@ -69,12 +68,9 @@ public class KvvMapsService extends Service {
 		}
 
 		@Override
-		public void setBundle(Bundle outState) {
-			state = outState;
-		}
-
-		@Override
 		public Bundle getBundle() {
+			if(state == null)
+				state = new Bundle();
 			return state;
 		}
 

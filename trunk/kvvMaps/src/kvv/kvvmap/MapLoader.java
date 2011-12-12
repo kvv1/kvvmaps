@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 
 import kvv.kvvmap.adapter.Adapter;
@@ -109,4 +110,63 @@ public class MapLoader {
 			});
 		}
 	};
+	
+	public static boolean checkMaps(final Activity activity) {
+		if (new File(Adapter.MAPS_ROOT + "/default.dir").exists()
+				&& new File(Adapter.MAPS_ROOT + "/default.pac").exists())
+			return true;
+		if (new File(Adapter.MAPS_ROOT + "/land.dir").exists()
+				&& new File(Adapter.MAPS_ROOT + "/land.pac").exists())
+			return true;
+
+		try {
+
+			if (!new File(Adapter.MAPS_ROOT).exists()) {
+				new File(Adapter.MAPS_ROOT).mkdirs();
+			}
+
+			if (!new File(Adapter.PATH_ROOT).exists()) {
+				new File(Adapter.PATH_ROOT).mkdirs();
+			}
+
+			if (!new File(Adapter.PLACEMARKS).exists()) {
+				new File(Adapter.PLACEMARKS).createNewFile();
+			}
+		} catch (IOException e) {
+			new AlertDialog.Builder(activity)
+					.setMessage("Нет карточки памяти")
+					.setOnCancelListener(new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface dialog) {
+							activity.finish();
+						}
+					}).show();
+			return false;
+		}
+
+		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				switch (which) {
+				case DialogInterface.BUTTON_POSITIVE:
+					new MapLoader(activity).load();
+					break;
+
+				case DialogInterface.BUTTON_NEGATIVE:
+					activity.finish();
+					break;
+				}
+			}
+		};
+
+		new AlertDialog.Builder(activity)
+				.setMessage(
+						"Не найдено обзорной карты.\nЗагрузить обзорную карту (500Kb)?")
+				.setPositiveButton("Yes", dialogClickListener)
+				.setNegativeButton("No", dialogClickListener).show();
+
+		return false;
+	}
+
+
 }
