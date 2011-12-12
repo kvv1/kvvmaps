@@ -1,6 +1,5 @@
 package kvv.kvvmap;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -134,13 +133,60 @@ public class MyActivity extends Activity {
 	}
 
 	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		Adapter.log("onWindowFocusChanged " + hasFocus);
+
+		if (hasFocus) {
+			if (sensorListener == null) {
+				sensorListener = new SensorListener() {
+					public void onSensorChanged(int sensor, float[] values) {
+						if (view != null)
+							view.setCompass(values);
+					}
+
+					public void onAccuracyChanged(int sensor, int accuracy) {
+					}
+				};
+
+			}
+
+			((SensorManager) getSystemService(Context.SENSOR_SERVICE))
+					.registerListener(sensorListener,
+							SensorManager.SENSOR_ORIENTATION,
+							SensorManager.SENSOR_DELAY_NORMAL);
+
+			if (wakeLock == null)
+				wakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE))
+						.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
+								"My Tag");
+
+			wakeLock.acquire();
+
+			if (mapsService != null) {
+				Bundle b = mapsService.getBundle();
+				if (b != null && b.getBoolean("following"))
+					startFollow();
+			}
+
+		} else {
+			if (wakeLock != null)
+				wakeLock.release();
+
+			Bundle b = mapsService.getBundle();
+			b.putBoolean("following", isFollowing());
+			stopFollow();
+			
+			((SensorManager) getSystemService(Context.SENSOR_SERVICE))
+					.unregisterListener(sensorListener);
+
+		}
+
+		super.onWindowFocusChanged(hasFocus);
+	}
+
+	@Override
 	protected void onPause() {
 		Log.w("KVVMAPS", "onPause");
-		wakeLock.release();
-
-		((SensorManager) getSystemService(Context.SENSOR_SERVICE))
-				.unregisterListener(sensorListener);
-
 		super.onPause();
 		System.gc();
 	}
@@ -148,29 +194,6 @@ public class MyActivity extends Activity {
 	@Override
 	protected void onResume() {
 		Log.w("KVVMAPS", "onResume");
-		if (sensorListener == null) {
-			sensorListener = new SensorListener() {
-				public void onSensorChanged(int sensor, float[] values) {
-					if (view != null)
-						view.setCompass(values);
-				}
-
-				public void onAccuracyChanged(int sensor, int accuracy) {
-				}
-			};
-
-		}
-
-		((SensorManager) getSystemService(Context.SENSOR_SERVICE))
-				.registerListener(sensorListener,
-						SensorManager.SENSOR_ORIENTATION,
-						SensorManager.SENSOR_DELAY_NORMAL);
-
-		if (wakeLock == null)
-			wakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE))
-					.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "My Tag");
-
-		wakeLock.acquire();
 		super.onResume();
 	}
 
@@ -204,10 +227,6 @@ public class MyActivity extends Activity {
 						new Maps(adapter, mapsDir), mapsDir);
 
 				Bundle b = mapsService.getBundle();
-
-				if (b != null && b.getBoolean("following"))
-					startFollow();
-
 				view.init(MyActivity.this, envir, b);
 			}
 		}
@@ -230,7 +249,7 @@ public class MyActivity extends Activity {
 		Log.w("KVVMAPS", "onCreate");
 		super.onCreate(savedInstanceState);
 
-		if (!checkMaps())
+		if (!MapLoader.checkMaps(this))
 			return;
 
 		adapter = new Adapter(this);
@@ -382,63 +401,6 @@ public class MyActivity extends Activity {
 		updateButtons();
 
 		view = (MapView) findViewById(R.id.MapView);
-	}
-
-	private boolean checkMaps() {
-		if (new File(Adapter.MAPS_ROOT + "/default.dir").exists()
-				&& new File(Adapter.MAPS_ROOT + "/default.pac").exists())
-			return true;
-		if (new File(Adapter.MAPS_ROOT + "/land.dir").exists()
-				&& new File(Adapter.MAPS_ROOT + "/land.pac").exists())
-			return true;
-
-		try {
-
-			if (!new File(Adapter.MAPS_ROOT).exists()) {
-				new File(Adapter.MAPS_ROOT).mkdirs();
-			}
-
-			if (!new File(Adapter.PATH_ROOT).exists()) {
-				new File(Adapter.PATH_ROOT).mkdirs();
-			}
-
-			if (!new File(Adapter.PLACEMARKS).exists()) {
-				new File(Adapter.PLACEMARKS).createNewFile();
-			}
-		} catch (IOException e) {
-			new AlertDialog.Builder(MyActivity.this)
-					.setMessage("Нет карточки памяти")
-					.setOnCancelListener(new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface dialog) {
-							finish();
-						}
-					}).show();
-			return false;
-		}
-
-		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				switch (which) {
-				case DialogInterface.BUTTON_POSITIVE:
-					new MapLoader(MyActivity.this).load();
-					break;
-
-				case DialogInterface.BUTTON_NEGATIVE:
-					finish();
-					break;
-				}
-			}
-		};
-
-		new AlertDialog.Builder(this)
-				.setMessage(
-						"Не найдено обзорной карты.\nЗагрузить обзорную карту (500Kb)?")
-				.setPositiveButton("Yes", dialogClickListener)
-				.setNegativeButton("No", dialogClickListener).show();
-
-		return false;
 	}
 
 	private void updateButtons() {
@@ -778,14 +740,11 @@ public class MyActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		if (view != null) {
-			Bundle b = new Bundle();
-			b.putBoolean("following", isFollowing());
+		if (view != null && mapsService != null) {
+			Bundle b = mapsService.getBundle();
 			view.save(b);
-			mapsService.setBundle(b);
-			stopFollow();
-			locationManager = null;
 		}
+		locationManager = null;
 
 		Adapter.log("onDestroy");
 		unbindService(conn);

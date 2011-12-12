@@ -23,13 +23,14 @@ import kvv.kvvmap.common.view.CommonView;
 import kvv.kvvmap.common.view.Environment;
 import kvv.kvvmap.common.view.IPlatformView;
 
-public class MapViewSw extends JComponent implements IPlatformView {
+public class MapViewSw extends JComponent {
 	private static final long serialVersionUID = 1L;
 
 	private static final int SCR_W = 320 * 2;
 	private static final int SCR_H = 384 * 2;
-//	private static final int SCR_W = 320;
-//	private static final int SCR_H = 384;
+
+	// private static final int SCR_W = 320;
+	// private static final int SCR_H = 384;
 
 	@Override
 	protected void paintComponent(Graphics _g) {
@@ -58,7 +59,7 @@ public class MapViewSw extends JComponent implements IPlatformView {
 	private final SwingWnd swingWnd;
 
 	private final Environment envir;
-	
+
 	public MapViewSw(SwingWnd swingWnd) {
 		this.swingWnd = swingWnd;
 		setSize(SCR_W, SCR_H);
@@ -69,9 +70,26 @@ public class MapViewSw extends JComponent implements IPlatformView {
 
 		Adapter adapter = new Adapter();
 		MapsDir mapsDir = new MapsDir();
-		envir = new Environment(adapter, new Paths(), new PlaceMarks(), new Maps(adapter, mapsDir), mapsDir);
-		
-		commonView = new CommonView(this, envir);
+		envir = new Environment(adapter, new Paths(), new PlaceMarks(),
+				new Maps(adapter, mapsDir), mapsDir);
+
+		commonView = new CommonView(new IPlatformView() {
+
+			@Override
+			public void repaint() {
+				MapViewSw.this.repaint();
+			}
+
+			@Override
+			public int getWidth() {
+				return SCR_W;
+			}
+
+			@Override
+			public int getHeight() {
+				return SCR_H;
+			}
+		}, envir);
 
 		animateTo(new LocationX(30, 60));
 

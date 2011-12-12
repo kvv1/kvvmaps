@@ -10,14 +10,11 @@ public class Compass {
 
 	private Path arrowPathN = new Path();
 	private Path arrowPathS = new Path();
+	private Path arrowPathT = new Path();
 
 	private float[] compassValues;
-	
-	private final int sz;
 
 	public Compass(int sz) {
-		this.sz = sz;
-		
 		arrowPathN.moveTo(0, -sz);
 		arrowPathN.lineTo(-sz / 5, 0);
 		arrowPathN.lineTo(sz / 5, 0);
@@ -27,6 +24,11 @@ public class Compass {
 		arrowPathS.lineTo(-sz / 5, 0);
 		arrowPathS.lineTo(sz / 5, 0);
 		arrowPathS.close();
+
+		arrowPathT.moveTo(0, sz / 2);
+		arrowPathT.lineTo(-sz / 5, 0);
+		arrowPathT.lineTo(sz / 5, 0);
+		arrowPathT.close();
 	}
 
 	public void drawCompass(Canvas canvas, Paint paint, Point pt,
@@ -42,20 +44,13 @@ public class Compass {
 			paint.setColor(Color.RED);
 			canvas.drawPath(arrowPathS, paint);
 
-			int sz1 = sz * 80 / 100;
-			int sz2 = sz * 25 / 100;
-			int sz3 = sz * 15 / 100;
-			
 			if (targBearing != null) {
 				paint.setColor(Color.MAGENTA);
 				paint.setStrokeWidth(2);
-				canvas.rotate(targBearing);
-				canvas.drawLine(0, 0, 0, -sz1, paint);
-				canvas.drawLine(0, -sz1, -sz3, -sz1 + sz2, paint);
-				canvas.drawLine(0, -sz1, sz3, -sz1 + sz2, paint);
+				canvas.rotate(targBearing + 180);
+				canvas.drawPath(arrowPathT, paint);
 			}
-			
-			
+
 		}
 	}
 

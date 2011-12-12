@@ -8,7 +8,7 @@ import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.Cache;
 import kvv.kvvmap.common.Recycleable;
 
-public abstract class Tiles implements Recycleable{
+public abstract class Tiles implements Recycleable {
 
 	private final Cache<Long, Tile> tileCache;
 	private final Adapter adapter;
@@ -20,13 +20,13 @@ public abstract class Tiles implements Recycleable{
 
 	protected abstract void loaded(Tile tile);
 
-	//private static void log(String s) {}
-	
+	// private static void log(String s) {}
+
 	private final TileLoaderCallback callback = new TileLoaderCallback() {
 		@Override
 		public void loaded(Tile tile) {
 			adapter.addRecycleable(Tiles.this);
-			//System.out.println(tile.id);
+			// System.out.println(tile.id);
 			tileCache.remove(tile.id);
 			tileCache.put(tile.id, tile);
 			Tiles.this.loaded(tile);
@@ -47,7 +47,7 @@ public abstract class Tiles implements Recycleable{
 	public synchronized void recycle() {
 		tileCache.clear();
 	}
-	
+
 	public synchronized void setInvalid(long id) {
 		Tile tile = tileCache.get(id);
 		if (tile != null)
@@ -60,20 +60,22 @@ public abstract class Tiles implements Recycleable{
 		}
 	}
 
-	public synchronized Tile getTile(long id, PointInt prioLoc) {
-		//log("getTile " + TileLoader.getId(id));
+	public synchronized Tile getTile(long id, PointInt prioLoc,
+			boolean startLoadingIfNeeded) {
+		// log("getTile " + TileLoader.getId(id));
 		if (tilesToIgnore.contains(id))
 			return null;
 		Tile tile = tileCache.get(id);
 		if (tile != null) {
-			//log("found " + TileLoader.getId(id));
-			if (tile.needsReloading) {
-				//log("needsReloading " + TileLoader.getId(id));
+			// log("found " + TileLoader.getId(id));
+			if (tile.needsReloading && startLoadingIfNeeded) {
+				// log("needsReloading " + TileLoader.getId(id));
 				load(id, callback, prioLoc);
 			}
 			return tile;
 		}
-		load(id, callback, prioLoc);
+		if (startLoadingIfNeeded)
+			load(id, callback, prioLoc);
 		return null;
 	}
 
