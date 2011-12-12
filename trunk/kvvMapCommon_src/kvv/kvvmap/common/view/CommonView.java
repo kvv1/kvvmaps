@@ -76,7 +76,7 @@ public class CommonView implements ICommonView {
 
 			@Override
 			public void onPathTilesChangedAsync() {
-				envir.adapter.exec(new Runnable() {
+				envir.adapter.execUI(new Runnable() {
 					@Override
 					public void run() {
 						onPathTilesChanged();
@@ -185,7 +185,7 @@ public class CommonView implements ICommonView {
 
 		@Override
 		public void exec(Runnable r) {
-			envir.adapter.exec(r);
+			envir.adapter.execUI(r);
 		}
 
 	};
@@ -402,8 +402,6 @@ public class CommonView implements ICommonView {
 	}
 
 	public void dispose() {
-		selectionThread.stopped = true;
-		selectionThread.interrupt();
 	}
 
 	public void incInfoLevel() {

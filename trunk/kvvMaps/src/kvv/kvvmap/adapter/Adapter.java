@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import kvv.kvvmap.common.Recycleable;
 import android.content.Context;
@@ -44,6 +47,8 @@ public class Adapter {
 
 	private static volatile int cnt;
 
+	private final ExecutorService executor;
+	
 	public Adapter(Context context) {
 		handler = new Handler();
 		uiThread = Thread.currentThread();
@@ -55,6 +60,18 @@ public class Adapter {
 			// bm.setDensity(Bitmap.DENSITY_NONE);
 			freeBitmaps.add(bm);
 		}
+		
+//		executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+			executor = Executors.newFixedThreadPool(4, new ThreadFactory() {
+//		executor = Executors.newCachedThreadPool(new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable r) {
+				Thread t = new Thread(r);
+				t.setDaemon(true);
+				t.setPriority(Thread.MIN_PRIORITY);
+				return t;
+			}
+		});
 	}
 
 	public synchronized void disposeBitmap(Object img) {
@@ -162,13 +179,15 @@ public class Adapter {
 			r.recycle();
 		recycleables = new HashSet<Recycleable>();
 		log("****recycled");
+		
+		executor.shutdown();
 	}
 
 	public void assertUIThread() {
 		if (Thread.currentThread() != uiThread) {
 			final Throwable t = new IllegalThreadException();
 			t.printStackTrace();
-			exec(new Runnable() {
+			execUI(new Runnable() {
 				@Override
 				public void run() {
 					// Toast.makeText(context, "IllegalThreadException",
@@ -195,8 +214,13 @@ public class Adapter {
 		private static final long serialVersionUID = 1L;
 	}
 
-	public void exec(Runnable runnable) {
+	public void execUI(Runnable runnable) {
 		handler.post(runnable);
+	}
+
+	public void execBG(Runnable runnable) {
+		//executor.execute(runnable);
+		executor.submit(runnable);
 	}
 
 	public static void log(String string) {
