@@ -219,8 +219,8 @@ public class Adapter {
 	}
 
 	public void execBG(Runnable runnable) {
-		//executor.execute(runnable);
-		executor.submit(runnable);
+		executor.execute(runnable);
+		//executor.submit(runnable);
 	}
 
 	public static void log(String string) {
