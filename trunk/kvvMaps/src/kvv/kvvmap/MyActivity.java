@@ -59,7 +59,7 @@ import android.widget.ImageButton;
 @SuppressWarnings("deprecation")
 public class MyActivity extends Activity {
 
-	private final String VERSION = "version: 3.1.0";
+	private final String VERSION = "version: 3.2.0";
 
 	public static final String PREFS_NAME = "KvvMapPrefsFile";
 
@@ -68,7 +68,6 @@ public class MyActivity extends Activity {
 	private static final int MENU_QUIT = 102;
 	private static final int MENU_CURRENT_POS = 103;
 	private static final int MENU_ADD_PLACEMARK = 105;
-	private static final int MENU_ENLARGE = 106;
 
 	private static final int MENU_TRACKS = 108;
 
@@ -86,7 +85,6 @@ public class MyActivity extends Activity {
 	public Bitmap bmSendLoc;
 
 	private boolean buttonsVisible;
-	public boolean enlarge;
 
 	// private boolean created;
 
@@ -158,27 +156,28 @@ public class MyActivity extends Activity {
 			if (wakeLock == null)
 				wakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE))
 						.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
-								"My Tag");
+								"kvvMaps wake lock");
 
 			wakeLock.acquire();
 
-			if (mapsService != null) {
-				Bundle b = mapsService.getBundle();
-				if (b != null && b.getBoolean("following"))
-					startFollow();
-			}
+			// if (mapsService != null) {
+			// Bundle b = mapsService.getBundle();
+			// if (b != null && b.getBoolean("following"))
+			// startFollow();
+			// }
 
 		} else {
 			if (wakeLock != null)
 				wakeLock.release();
 
-			Bundle b = mapsService.getBundle();
-			b.putBoolean("following", isFollowing());
-			stopFollow();
-			
 			((SensorManager) getSystemService(Context.SENSOR_SERVICE))
 					.unregisterListener(sensorListener);
 
+			// if (mapsService != null) {
+			// Bundle b = mapsService.getBundle();
+			// b.putBoolean("following", isFollowing());
+			// stopFollow();
+			// }
 		}
 
 		super.onWindowFocusChanged(hasFocus);
@@ -187,6 +186,13 @@ public class MyActivity extends Activity {
 	@Override
 	protected void onPause() {
 		Log.w("KVVMAPS", "onPause");
+
+		if (mapsService != null) {
+			Bundle b = mapsService.getBundle();
+			b.putBoolean("following", isFollowing());
+			stopFollow();
+		}
+		
 		super.onPause();
 		System.gc();
 	}
@@ -194,6 +200,13 @@ public class MyActivity extends Activity {
 	@Override
 	protected void onResume() {
 		Log.w("KVVMAPS", "onResume");
+		
+		if (mapsService != null) {
+			Bundle b = mapsService.getBundle();
+			if (b != null && b.getBoolean("following"))
+				startFollow();
+		}
+
 		super.onResume();
 	}
 
@@ -252,6 +265,21 @@ public class MyActivity extends Activity {
 		if (!MapLoader.checkMaps(this))
 			return;
 
+		DisplayMetrics metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+		int tileSz = 256;
+		if (metrics.xdpi > 160)
+			tileSz = (int) (tileSz * metrics.xdpi / 145);
+		Adapter.TILE_SIZE = tileSz;
+
+		int cachesz = (metrics.widthPixels / Adapter.TILE_SIZE + 3)
+				* (metrics.heightPixels / Adapter.TILE_SIZE + 3);
+		Adapter.MAP_TILES_CACHE_SIZE = cachesz;
+		Adapter.PATH_TILES_CACHE_SIZE = cachesz;
+
+		Adapter.RAF_CACHE_SIZE = cachesz * 2;
+
 		adapter = new Adapter(this);
 
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -262,27 +290,6 @@ public class MyActivity extends Activity {
 				Context.BIND_AUTO_CREATE);
 
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-
-		enlarge = settings.getBoolean("enlarge", false);
-
-		DisplayMetrics metrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-		if (metrics.xdpi > 160)
-			Adapter.TILE_SIZE = (int) (Adapter.TILE_SIZE * metrics.xdpi / 145);
-
-		if (enlarge)
-			Adapter.TILE_SIZE = Adapter.TILE_SIZE * 13 / 10;
-
-		// Adapter.TILE_SIZE = (int) (Adapter.TILE_SIZE * metrics.xdpi / 100);
-
-		int cachesz = (metrics.widthPixels / Adapter.TILE_SIZE + 3)
-				* (metrics.heightPixels / Adapter.TILE_SIZE + 3);
-		Adapter.MAP_TILES_CACHE_SIZE = cachesz;
-		Adapter.PATH_TILES_CACHE_SIZE = cachesz;
-
-		Adapter.RAF_CACHE_SIZE = cachesz * 2;
-		// Adapter.RAF_CACHE_SIZE = 1;
 
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			private UncaughtExceptionHandler defaultUEH = Thread
@@ -431,8 +438,6 @@ public class MyActivity extends Activity {
 						: "Сдвигать по GPS");
 		menu.findItem(MENU_DEBUG_DRAW).setTitle(
 				Adapter.debugDraw ? "Debug drawing off" : "Debug drawing on");
-		menu.findItem(MENU_ENLARGE).setTitle(
-				enlarge ? "Нормальный размер" : "Увеличенный размер");
 		menu.findItem(MENU_TOGGLE_BUTTONS).setTitle(
 				buttonsVisible ? "Экранные кнопки выкл."
 						: "Экранные кнопки вкл.");
@@ -447,7 +452,6 @@ public class MyActivity extends Activity {
 		menu.add(0, MENU_FOLLOW_ONOFF, 0, "GPS On/Off");
 		menu.add(0, MENU_ADD_PLACEMARK, 0, "Добавить точку");
 		menu.add(0, MENU_TRACKS, 0, "Пути");
-		menu.add(0, MENU_ENLARGE, 0, "Увеличенный размер");
 		menu.add(0, MENU_DEBUG_DRAW, 0, "debugDraw");
 		menu.add(0, MENU_TOGGLE_BUTTONS, 0, "Экранные кнопки");
 		menu.add(0, MENU_ABOUT, 0, "О программе");
@@ -479,9 +483,6 @@ public class MyActivity extends Activity {
 		case MENU_TOGGLE_BUTTONS:
 			buttonsOnOff();
 			return true;
-		case MENU_ENLARGE:
-			enlargeOnOff();
-			return true;
 		case MENU_ABOUT:
 			about();
 			return true;
@@ -501,18 +502,6 @@ public class MyActivity extends Activity {
 		prefsPrivateEditor.putBoolean("buttonsVisible", buttonsVisible);
 		prefsPrivateEditor.commit();
 		updateButtons();
-	}
-
-	private void enlargeOnOff() {
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-		Editor prefsPrivateEditor = settings.edit();
-		enlarge = !enlarge;
-		prefsPrivateEditor.putBoolean("enlarge", enlarge);
-		prefsPrivateEditor.commit();
-		new AlertDialog.Builder(this)
-				.setMessage(
-						"Для вступления изменений в силу необходимо перезапустить программу.")
-				.show();
 	}
 
 	private void about() {
@@ -597,7 +586,7 @@ public class MyActivity extends Activity {
 				public void onStatusChanged(String provider, int status,
 						Bundle extras) {
 					if (status == LocationProvider.OUT_OF_SERVICE) {
-						stopFollow();
+						// stopFollow();
 					}
 				}
 
@@ -605,13 +594,16 @@ public class MyActivity extends Activity {
 				}
 
 				public void onProviderDisabled(String provider) {
-					stopFollow();
+					// stopFollow();
 				}
+
+				private boolean scroll = true;
 
 				public void onLocationChanged(Location location) {
 					LocationX loc = new LocationX(location);
 					if (view != null)
-						view.setMyLocation(loc, false);
+						view.setMyLocation(loc, scroll);
+					scroll = false;
 				}
 			};
 
