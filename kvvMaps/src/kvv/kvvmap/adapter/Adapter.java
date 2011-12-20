@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import kvv.kvvmap.common.Recycleable;
-import android.content.Context;
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -32,7 +32,7 @@ public class Adapter {
 	public static final String PATH_ROOT = ROOT + "/paths";
 	public static final String PLACEMARKS = ROOT + "/placemarks.pms";
 
-	public static int TILE_SIZE = 256;
+	public static int TILE_SIZE;
 
 	public static int MAP_TILES_CACHE_SIZE;
 	public static int PATH_TILES_CACHE_SIZE;
@@ -49,7 +49,8 @@ public class Adapter {
 
 	private final ExecutorService executor;
 	
-	public Adapter(Context context) {
+	public Adapter(Activity context) {
+		
 		handler = new Handler();
 		uiThread = Thread.currentThread();
 		freeBitmaps = new ArrayList<Bitmap>();

@@ -28,7 +28,11 @@ public class GC {
 		this.paint = paint;
 		this.width = w;
 		this.height = h;
-		arrow = new Arrow(width / 16);
+		
+		int sz = width / 16;
+		if(sz > 32)
+			sz = 32;
+		arrow = new Arrow(sz);
 	}
 
 	private DashPathEffect pathEffect = new DashPathEffect(new float[] { 15, 5,

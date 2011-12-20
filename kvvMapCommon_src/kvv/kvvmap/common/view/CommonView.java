@@ -125,37 +125,40 @@ public class CommonView implements ICommonView {
 	}
 
 	public void setMyLocation(LocationX locationX, boolean forceScroll) {
-		forceScroll |= (isOnMyLocation() && !isHere(locationX));
+
+		LocationX oldLocation = myLocation;
+		boolean wasDimmed = myLocationDimmed;
 
 		myLocation = locationX;
 		myLocationDimmed = false;
 
-		if (forceScroll && locationX != null)
-			animateTo(locationX);
-		else
-			repaint();
+		forceScroll |= wasDimmed;
+
+		forceScroll |= oldLocation != null
+				&& (Math.abs(oldLocation.getX(zoom) - centerXY.x) < platformViewView
+						.getWidth() / 2 && Math.abs(oldLocation.getY(zoom)
+						- centerXY.y) < platformViewView.getHeight() / 2);
+
+		if (forceScroll) {
+			if (oldLocation != null && !wasDimmed) {
+				int dx = myLocation.getX(zoom) - oldLocation.getX(zoom);
+				int dy = myLocation.getY(zoom) - oldLocation.getY(zoom);
+				animateBy(new PointInt(dx, dy));
+			} else {
+				animateTo(myLocation);
+			}
+		}
+
+		repaint();
 	}
 
 	public void dimmMyLocation() {
 		myLocationDimmed = true;
 	}
 
-	private boolean isHere(LocationX loc) {
-		if (loc == null)
-			return false;
-
-		int x1 = loc.getX(getZoom());
-		int y1 = loc.getY(getZoom());
-
-		PointInt center = getCenterXY();
-		int x2 = center.x;
-		int y2 = center.y;
-
-		return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)) < 20;
-	}
-
 	public boolean isOnMyLocation() {
-		return isHere(myLocation);
+		return myLocation != null && myLocation.getX(zoom) == centerXY.x
+				&& myLocation.getY(zoom) == centerXY.y;
 	}
 
 	private PointInt p1;
@@ -295,8 +298,8 @@ public class CommonView implements ICommonView {
 	}
 
 	public void draw(GC gc) {
-		//Adapter.log("draw");
-		
+		// Adapter.log("draw");
+
 		gc.setAntiAlias(true);
 		// long time = System.currentTimeMillis();
 		drawTiles(gc);
