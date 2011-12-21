@@ -12,6 +12,7 @@ import java.util.Arrays;
 import kvv.convert.Utils.PoligonBorder;
 import kvv.kvvmap.conversion.Conversion2x;
 import kvv.kvvmap.conversion.MatrixException;
+import kvv.utils.Spline;
 
 public class OziMapDescr implements MapDescr1 {
 
@@ -288,9 +289,8 @@ public class OziMapDescr implements MapDescr1 {
 					int yc = y1 + k * (y2 - y1) / n;
 
 					int dy = getDY(x2 - x1, latc, lon1, lon2, lonc);
-					yc += dy;
 
-					_mmpxy.add(new Point(xc, yc));
+					_mmpxy.add(new Point(xc, yc + dy));
 					_mmpll.add(new Point2D.Double(lonc, latc));
 				}
 			}
@@ -300,25 +300,30 @@ public class OziMapDescr implements MapDescr1 {
 		}
 	}
 
+	private final static Spline spline = new Spline(new double[] {0, 34, 62, 74, 84}, new double[] {0, 11, 20, 20, 22.5});
+	
 	private static int getDY(int dx, double lat, double lon1, double lon2,
 			double lon) {
+		
+		double dlon = lon2 - lon1;
 		double lonc = (lon1 + lon2) / 2;
-		double coeff = 1;
-		coeff = Math.pow(lat / 60, 12);
-//		double coeff = lat * lat * lat * lat * lat * lat * lat / 60 / 60 / 60
-//				/ 60 / 60 / 60 / 60;
-		return (int) (Math.abs(dx)
-				* ((lon2 - lon1) * (lon2 - lon1) / 4 - (lon - lonc)
-						* (lon - lonc)) / 370 * coeff);
+		double dl = lon - lonc;
+		
+		double k = spline.splineValue(Math.abs(lat));
+		
+		double dy = k * dx * (dlon * dlon / 4 - dl * dl) / Math.abs(dlon); 
+		
+		return (int) dy  / 2511;
 	}
 
-	 public static void main(String[] args) {
-		 double lambda = 1 * Math.PI / 180;
-		 double phi = 50 * Math.PI / 180;
-		 double dy = Math.atan(Math.tan(phi) / Math.cos(lambda)) * 180 / Math.PI;
-		System.out.println(dy);
-	}
-
+//	public static void main(String[] args) {
+//		System.out.println(getDY(3325, 34, 0, 3, 1.5));
+//		System.out.println(getDY(3160, 38, 0, 3, 1.5));
+//		System.out.println(getDY(6386, 66, 0, 6, 3));
+//		System.out.println(getDY(4876, 72, 0, 12, 6));
+//		
+//	}
+	
 	private double minNewX;
 	private double maxNewX;
 	private double minNewY;

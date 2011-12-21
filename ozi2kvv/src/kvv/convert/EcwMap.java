@@ -8,7 +8,7 @@ import kvv.ecw.EcwFile;
 public class EcwMap implements MapDescr {
 
 	private EcwFile ecw;
-	
+
 	public EcwMap(File file) throws IOException {
 		ecw = new EcwFile(file.getAbsolutePath(), 0);
 	}
