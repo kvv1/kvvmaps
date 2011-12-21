@@ -20,6 +20,8 @@ public class Maps {
 	private final TileLoader tileLoader;
 	private final CopyOnWriteArrayList<MapDescr> maps = new CopyOnWriteArrayList<MapDescr>();
 
+	private MapDescr fixedMap;
+	
 	static class CacheKey {
 		public CacheKey(MapDescr mapDescr, int idx) {
 			this.mapDescr = mapDescr;

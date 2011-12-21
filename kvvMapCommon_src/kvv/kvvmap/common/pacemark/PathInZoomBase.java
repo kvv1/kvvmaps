@@ -64,7 +64,7 @@ public class PathInZoomBase {
 
 			for (int nx = nx1; nx <= nx2; nx++)
 				for (int ny = ny1; ny <= ny2; ny++) {
-					add(TileId.get(nx, ny, zoom), idx);
+					add(TileId.make(nx, ny, zoom), idx);
 				}
 		}
 

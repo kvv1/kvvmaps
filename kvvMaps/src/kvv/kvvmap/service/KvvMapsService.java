@@ -1,7 +1,6 @@
 package kvv.kvvmap.service;
 
 import kvv.kvvmap.adapter.Adapter;
-import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.common.maps.MapsDir;
 import kvv.kvvmap.common.pacemark.Paths;
 import kvv.kvvmap.common.pacemark.PlaceMarks;
@@ -88,22 +87,12 @@ public class KvvMapsService extends Service {
 		return myServiceBinder;
 	}
 
-	static class TTT {
-		@Override
-		protected void finalize() throws Throwable {
-			Adapter.log("~TTT");
-			super.finalize();
-		}
-	}
-	
 	@Override
 	public void onCreate() {
 		Adapter.log("service onCreate");
 		super.onCreate();
 		mapsDir = new MapsDir();
 
-		new TTT();
-		
 		placeMarks = new PlaceMarks();
 
 		paths = new Paths();
