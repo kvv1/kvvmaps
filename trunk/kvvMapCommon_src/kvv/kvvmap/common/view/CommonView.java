@@ -223,7 +223,7 @@ public class CommonView implements ICommonView {
 		envir.adapter.assertUIThread();
 		int nxC = centerXY.x / Adapter.TILE_SIZE;
 		int nyC = centerXY.y / Adapter.TILE_SIZE;
-		long id = TileId.get(nxC, nyC, zoom);
+		long id = TileId.make(nxC, nyC, zoom);
 		Tile tile = mapTiles.getTile(id, centerXY, false);
 		return tile;
 	}
@@ -339,7 +339,7 @@ public class CommonView implements ICommonView {
 
 		for (int nx = nx0; nx <= nx1; nx++) {
 			for (int ny = ny0; ny <= ny1; ny++) {
-				long id = TileId.get(nx, ny, zoom);
+				long id = TileId.make(nx, ny, zoom);
 
 				int x = (nx * Adapter.TILE_SIZE) - x0;
 				int y = (ny * Adapter.TILE_SIZE) - y0;

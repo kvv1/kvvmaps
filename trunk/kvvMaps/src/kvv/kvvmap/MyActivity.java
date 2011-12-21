@@ -59,7 +59,10 @@ import android.widget.ImageButton;
 @SuppressWarnings("deprecation")
 public class MyActivity extends Activity {
 
-	private final String VERSION = "version: 3.2.0";
+	private final static String VERSION = "version: 3.2.1";
+
+	private static final String BUTTONS_VISIBLE_SETTING = "buttonsVisible";
+	private static final String FOLLOW_GPS_SETTING = "followGPS";
 
 	public static final String PREFS_NAME = "KvvMapPrefsFile";
 
@@ -67,6 +70,7 @@ public class MyActivity extends Activity {
 	private static final int MENU_FOLLOW_ONOFF = 101;
 	private static final int MENU_QUIT = 102;
 	private static final int MENU_CURRENT_POS = 103;
+	private static final int MENU_FIX_MAP = 103;
 	private static final int MENU_ADD_PLACEMARK = 105;
 
 	private static final int MENU_TRACKS = 108;
@@ -84,11 +88,12 @@ public class MyActivity extends Activity {
 	public Bitmap bmWriting;
 	public Bitmap bmSendLoc;
 
-	private boolean buttonsVisible;
-
-	// private boolean created;
-
 	private Adapter adapter;
+	private PowerManager.WakeLock wakeLock;
+	private SensorListener sensorListener;
+	private SharedPreferences settings;
+	public IKvvMapsService mapsService;
+
 
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
@@ -160,24 +165,12 @@ public class MyActivity extends Activity {
 
 			wakeLock.acquire();
 
-			// if (mapsService != null) {
-			// Bundle b = mapsService.getBundle();
-			// if (b != null && b.getBoolean("following"))
-			// startFollow();
-			// }
-
 		} else {
 			if (wakeLock != null)
 				wakeLock.release();
 
 			((SensorManager) getSystemService(Context.SENSOR_SERVICE))
 					.unregisterListener(sensorListener);
-
-			// if (mapsService != null) {
-			// Bundle b = mapsService.getBundle();
-			// b.putBoolean("following", isFollowing());
-			// stopFollow();
-			// }
 		}
 
 		super.onWindowFocusChanged(hasFocus);
@@ -187,12 +180,7 @@ public class MyActivity extends Activity {
 	protected void onPause() {
 		Log.w("KVVMAPS", "onPause");
 
-		if (mapsService != null) {
-			Bundle b = mapsService.getBundle();
-			b.putBoolean("following", isFollowing());
-			stopFollow();
-		}
-		
+		stopFollow();
 		super.onPause();
 		System.gc();
 	}
@@ -200,20 +188,12 @@ public class MyActivity extends Activity {
 	@Override
 	protected void onResume() {
 		Log.w("KVVMAPS", "onResume");
+		Adapter.log("onResume");
 		
-		if (mapsService != null) {
-			Bundle b = mapsService.getBundle();
-			if (b != null && b.getBoolean("following"))
-				startFollow();
-		}
-
+		if(following())
+			startFollow();
 		super.onResume();
 	}
-
-	private PowerManager.WakeLock wakeLock;
-	private SensorListener sensorListener;
-
-	public IKvvMapsService mapsService;
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
@@ -261,6 +241,8 @@ public class MyActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		Log.w("KVVMAPS", "onCreate");
 		super.onCreate(savedInstanceState);
+		
+		settings = getSharedPreferences(PREFS_NAME, 0);
 
 		if (!MapLoader.checkMaps(this))
 			return;
@@ -288,8 +270,6 @@ public class MyActivity extends Activity {
 
 		bindService(new Intent(this, KvvMapsService.class), conn,
 				Context.BIND_AUTO_CREATE);
-
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			private UncaughtExceptionHandler defaultUEH = Thread
@@ -404,15 +384,22 @@ public class MyActivity extends Activity {
 		toTarget.setBackgroundColor((COLOR.TARG_COLOR & 0x00FFFFFF) | 0x64000000);
 		toTarget.setFocusable(false);
 
-		buttonsVisible = settings.getBoolean("buttonsVisible", true);
 		updateButtons();
 
 		view = (MapView) findViewById(R.id.MapView);
 	}
 
+	private boolean buttonsVisible() {
+		return settings.getBoolean(BUTTONS_VISIBLE_SETTING, true);
+	}
+
+	private boolean following() {
+		return settings.getBoolean(FOLLOW_GPS_SETTING, true);
+	}
+
 	private void updateButtons() {
 		View buttons = findViewById(R.id.linearLayout1);
-		if (buttonsVisible)
+		if (buttonsVisible())
 			buttons.setVisibility(View.VISIBLE);
 		else
 			buttons.setVisibility(View.GONE);
@@ -439,8 +426,11 @@ public class MyActivity extends Activity {
 		menu.findItem(MENU_DEBUG_DRAW).setTitle(
 				Adapter.debugDraw ? "Debug drawing off" : "Debug drawing on");
 		menu.findItem(MENU_TOGGLE_BUTTONS).setTitle(
-				buttonsVisible ? "Ёкранные кнопки выкл."
+				buttonsVisible() ? "Ёкранные кнопки выкл."
 						: "Ёкранные кнопки вкл.");
+		menu.findItem(MENU_FIX_MAP).setTitle(
+				getFixedMap() != null ? "‘икс. карта выкл."
+						: "‘икс. карта");
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -452,6 +442,7 @@ public class MyActivity extends Activity {
 		menu.add(0, MENU_FOLLOW_ONOFF, 0, "GPS On/Off");
 		menu.add(0, MENU_ADD_PLACEMARK, 0, "ƒобавить точку");
 		menu.add(0, MENU_TRACKS, 0, "ѕути");
+		menu.add(0, MENU_FIX_MAP, 0, "Fix map");
 		menu.add(0, MENU_DEBUG_DRAW, 0, "debugDraw");
 		menu.add(0, MENU_TOGGLE_BUTTONS, 0, "Ёкранные кнопки");
 		menu.add(0, MENU_ABOUT, 0, "ќ программе");
@@ -495,11 +486,15 @@ public class MyActivity extends Activity {
 		return false;
 	}
 
+	private String getFixedMap() {
+		if(mapsService == null)
+			return null;
+		return mapsService.getBundle().getString("fixedMap");
+	}
+
 	private void buttonsOnOff() {
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 		Editor prefsPrivateEditor = settings.edit();
-		buttonsVisible = !buttonsVisible;
-		prefsPrivateEditor.putBoolean("buttonsVisible", buttonsVisible);
+		prefsPrivateEditor.putBoolean(BUTTONS_VISIBLE_SETTING, !buttonsVisible());
 		prefsPrivateEditor.commit();
 		updateButtons();
 	}
@@ -518,7 +513,6 @@ public class MyActivity extends Activity {
 	}
 
 	private void debugDrawOnOff() {
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 		Editor prefsPrivateEditor = settings.edit();
 		Adapter.debugDraw = !Adapter.debugDraw;
 		prefsPrivateEditor.putBoolean("debugDraw", Adapter.debugDraw);
@@ -624,15 +618,17 @@ public class MyActivity extends Activity {
 	}
 
 	private void followOnOff() {
-		if (locationListener == null)
+		if (!following()) {
 			startFollow();
-		else
+			Editor prefsPrivateEditor = settings.edit();
+			prefsPrivateEditor.putBoolean(FOLLOW_GPS_SETTING, true);
+			prefsPrivateEditor.commit();
+		} else {
 			stopFollow();
-		/*
-		 * if (mapsService.getTracker().isFollowing())
-		 * mapsService.getTracker().stopFollow(); else {
-		 * mapsService.getTracker().startFollow(); gotoCurrentPos(); }
-		 */
+			Editor prefsPrivateEditor = settings.edit();
+			prefsPrivateEditor.putBoolean(FOLLOW_GPS_SETTING, false);
+			prefsPrivateEditor.commit();
+		}
 		updateView();
 	}
 

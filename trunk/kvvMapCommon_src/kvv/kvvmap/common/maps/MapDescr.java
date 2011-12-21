@@ -38,7 +38,35 @@ public class MapDescr {
 		return name;
 	}
 
-	public boolean hasTile(long id) {
+	public static Img load(Collection<MapDescr> maps, long id, int x, int y,
+			int sz, Img img, TileContent content) {
+		img = loadInZoom(maps, id, x, y, sz, img, content);
+		int nx = TileId.nx(id);
+		int ny = TileId.ny(id);
+		int zoom = TileId.zoom(id);
+		if (zoom > Utils.MIN_ZOOM && (img == null || img.transparent)) {
+			img = load(maps, TileId.make(nx >>> 1, ny >>> 1, zoom - 1), x / 2
+					+ ((nx & 1) << 7), y / 2 + ((ny & 1) << 7), sz / 2, img,
+					content);
+		}
+		return img;
+	}
+
+	private static Img loadInZoom(Collection<MapDescr> maps, long id, int x,
+			int y, int sz, Img img, TileContent content) {
+		for (MapDescr map : maps) {
+			img = map.load(id, x, y, sz, img);
+			if (content.zoom == -1 || content.zoom == TileId.zoom(id)) {
+				if (map.hasTile(id)) {
+					content.zoom = TileId.zoom(id);
+					content.maps.add(map.getName());
+				}
+			}
+		}
+		return img;
+	}
+
+	private boolean hasTile(long id) {
 		int idx = mapDir.getOffset(TileId.nx(id), TileId.ny(id),
 				TileId.zoom(id));
 		return idx != -1;
@@ -106,34 +134,6 @@ public class MapDescr {
 			}
 		}
 		return new ByteArrayInputStream(buf);
-	}
-
-	public static Img load(Collection<MapDescr> maps, long id, int x, int y,
-			int sz, Img img, TileContent content) {
-		img = loadInZoom(maps, id, x, y, sz, img, content);
-		int nx = TileId.nx(id);
-		int ny = TileId.ny(id);
-		int zoom = TileId.zoom(id);
-		if (zoom > Utils.MIN_ZOOM && (img == null || img.transparent)) {
-			img = load(maps, TileId.get(nx >>> 1, ny >>> 1, zoom - 1), x / 2
-					+ ((nx & 1) << 7), y / 2 + ((ny & 1) << 7), sz / 2, img,
-					content);
-		}
-		return img;
-	}
-
-	private static Img loadInZoom(Collection<MapDescr> maps, long id, int x,
-			int y, int sz, Img img, TileContent content) {
-		for (MapDescr map : maps) {
-			img = map.load(id, x, y, sz, img);
-			if (content.zoom == -1 || content.zoom == TileId.zoom(id)) {
-				if (map.hasTile(id)) {
-					content.zoom = TileId.zoom(id);
-					content.maps.add(map.getName());
-				}
-			}
-		}
-		return img;
 	}
 
 }

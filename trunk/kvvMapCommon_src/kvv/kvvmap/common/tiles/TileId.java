@@ -4,7 +4,7 @@ package kvv.kvvmap.common.tiles;
 
 
 public class TileId {
-	public static long get(int nx, int ny, int zoom) {
+	public static long make(int nx, int ny, int zoom) {
 		long l = ((long) zoom << 32) + ((long) (nx & 0xFFFF) << 16) + (ny & 0xFFFF);
 		return l;
 	}
