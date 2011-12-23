@@ -311,7 +311,10 @@ public class OziMapDescr implements MapDescr1 {
 		
 		double k = spline.splineValue(Math.abs(lat));
 		
-		double dy = k * dx * (dlon * dlon / 4 - dl * dl) / Math.abs(dlon); 
+		double dy = k * Math.abs(dx) * (dlon * dlon / 4 - dl * dl) / Math.abs(dlon); 
+		
+		if(lat < 0)
+			dy = -dy;
 		
 		return (int) dy  / 2511;
 	}

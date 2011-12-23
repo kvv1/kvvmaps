@@ -11,6 +11,7 @@ import kvv.kvvmap.common.Img;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.tiles.Tile;
 import kvv.kvvmap.common.tiles.TileContent;
+import kvv.kvvmap.common.tiles.TileId;
 import kvv.kvvmap.common.tiles.TileLoader;
 import kvv.kvvmap.common.tiles.TileLoaderCallback;
 
@@ -21,7 +22,7 @@ public class Maps {
 	private final CopyOnWriteArrayList<MapDescr> maps = new CopyOnWriteArrayList<MapDescr>();
 
 	private MapDescr fixedMap;
-	
+
 	static class CacheKey {
 		public CacheKey(MapDescr mapDescr, int idx) {
 			this.mapDescr = mapDescr;
@@ -50,8 +51,8 @@ public class Maps {
 			@Override
 			protected Tile loadAsync(long id) {
 				TileContent content = new TileContent();
-				Img img = MapDescr.load(maps, id, 0, 0, Utils.TILE_SIZE_G, null,
-						content);
+				Img img = MapDescr.load(maps, fixedMap, TileId.nx(id), TileId.ny(id),
+						TileId.zoom(id), content);
 				if (img == null)
 					return null;
 				return new Tile(adapter, id, img, content);
@@ -73,7 +74,8 @@ public class Maps {
 		}
 	}
 
-	public void load(Long id, final TileLoaderCallback callback, PointInt centerXY) {
+	public void load(Long id, final TileLoaderCallback callback,
+			PointInt centerXY) {
 		adapter.assertUIThread();
 		tileLoader.load(id, callback, centerXY);
 	}
@@ -83,8 +85,8 @@ public class Maps {
 	}
 
 	public void reorder(String map) {
-		for(MapDescr md : maps) {
-			if(md.getName().equals(map)) {
+		for (MapDescr md : maps) {
+			if (md.getName().equals(map)) {
 				maps.remove(md);
 				maps.add(0, md);
 				return;

@@ -14,6 +14,7 @@ import kvv.kvvmap.common.Img;
 import kvv.kvvmap.common.PackedDataFile;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maps.Maps.CacheKey;
+import kvv.kvvmap.common.tiles.Tile;
 import kvv.kvvmap.common.tiles.TileContent;
 import kvv.kvvmap.common.tiles.TileId;
 
@@ -38,45 +39,66 @@ public class MapDescr {
 		return name;
 	}
 
-	public static Img load(Collection<MapDescr> maps, long id, int x, int y,
-			int sz, Img img, TileContent content) {
-		img = loadInZoom(maps, id, x, y, sz, img, content);
-		int nx = TileId.nx(id);
-		int ny = TileId.ny(id);
-		int zoom = TileId.zoom(id);
-		if (zoom > Utils.MIN_ZOOM && (img == null || img.transparent)) {
-			img = load(maps, TileId.make(nx >>> 1, ny >>> 1, zoom - 1), x / 2
-					+ ((nx & 1) << 7), y / 2 + ((ny & 1) << 7), sz / 2, img,
-					content);
+	public static Img load(Collection<MapDescr> maps, MapDescr fixedMap,
+			int nx, int ny, int zoom, TileContent content) {
+
+		if (fixedMap != null) {
+			int x = 0;
+			int y = 0;
+			int sz = Utils.TILE_SIZE_G;
+			Img img = null;
+			
+			
+			img = loadInZoom(fixedMap, nx, ny, zoom, 0, 0, Utils.TILE_SIZE_G, null, content);
+			
+
 		}
+
+		int x = 0;
+		int y = 0;
+		int sz = Utils.TILE_SIZE_G;
+		Img img = null;
+		
+		while (true) {
+			for (MapDescr map : maps)
+				img = loadInZoom(map, nx, ny, zoom, x, y, sz, img, content);
+
+			if (zoom <= Utils.MIN_ZOOM || (img != null && !img.transparent))
+				break;
+
+			x = x / 2 + ((nx & 1) << 7);
+			y = y / 2 + ((ny & 1) << 7);
+			nx = nx >>> 1;
+			ny = ny >>> 1;
+			zoom = zoom - 1;
+			sz = sz / 2;
+		}
+		
 		return img;
 	}
 
-	private static Img loadInZoom(Collection<MapDescr> maps, long id, int x,
-			int y, int sz, Img img, TileContent content) {
-		for (MapDescr map : maps) {
-			img = map.load(id, x, y, sz, img);
-			if (content.zoom == -1 || content.zoom == TileId.zoom(id)) {
-				if (map.hasTile(id)) {
-					content.zoom = TileId.zoom(id);
-					content.maps.add(map.getName());
-				}
+
+	private static Img loadInZoom(MapDescr map, int nx, int ny, int zoom,
+			int x, int y, int sz, Img img, TileContent content) {
+		if (map.hasTile(nx, ny, zoom)) {
+			img = map.load(nx, ny, zoom, x, y, sz, img);
+			if (content.zoom == -1 || content.zoom == zoom) {
+				content.zoom = zoom;
+				content.maps.add(map.getName());
 			}
 		}
 		return img;
 	}
 
-	private boolean hasTile(long id) {
-		int idx = mapDir.getOffset(TileId.nx(id), TileId.ny(id),
-				TileId.zoom(id));
+	private boolean hasTile(int nx, int ny, int zoom) {
+		int idx = mapDir.getOffset(nx, ny, zoom);
 		return idx != -1;
 	}
 
-	private Img load(long id, int x, int y, int sz, Img imgBase) {
+	private Img load(int nx, int ny, int zoom, int x, int y, int sz, Img imgBase) {
 		if (imgBase != null && !imgBase.transparent)
 			return imgBase;
-		return loadTile(TileId.nx(id), TileId.ny(id), TileId.zoom(id), x, y,
-				sz, imgBase);
+		return loadTile(nx, ny, zoom, x, y, sz, imgBase);
 	}
 
 	private Img loadTile(int nx, int ny, int zoom, int x, int y, int sz,
@@ -117,7 +139,6 @@ public class MapDescr {
 	}
 
 	private synchronized InputStream getInputStream(int nx, int ny, int z) {
-
 		int off = mapDir.getOffset(nx, ny, z);
 		if (off == -1)
 			return null;
