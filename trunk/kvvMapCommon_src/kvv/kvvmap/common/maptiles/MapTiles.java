@@ -34,4 +34,10 @@ public abstract class MapTiles extends Tiles {
 	public void stopLoading() {
 		maps.cancelLoading();
 	}
+
+	public void fixMap(String map) {
+		maps.fixMap(map);
+		setInvalidAll();
+	}
+
 }

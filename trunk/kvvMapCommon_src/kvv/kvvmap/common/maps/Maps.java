@@ -8,7 +8,6 @@ import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.Cache;
 import kvv.kvvmap.common.Img;
-import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.tiles.Tile;
 import kvv.kvvmap.common.tiles.TileContent;
 import kvv.kvvmap.common.tiles.TileId;
@@ -19,9 +18,9 @@ public class Maps {
 
 	private final Adapter adapter;
 	private final TileLoader tileLoader;
-	private final CopyOnWriteArrayList<MapDescr> maps = new CopyOnWriteArrayList<MapDescr>();
+	private final CopyOnWriteArrayList<MapDescrBase> maps = new CopyOnWriteArrayList<MapDescrBase>();
 
-	private MapDescr fixedMap;
+	private volatile MapDescrBase fixedMap;
 
 	static class CacheKey {
 		public CacheKey(MapDescr mapDescr, int idx) {
@@ -51,8 +50,8 @@ public class Maps {
 			@Override
 			protected Tile loadAsync(long id) {
 				TileContent content = new TileContent();
-				Img img = MapDescr.load(maps, fixedMap, TileId.nx(id), TileId.ny(id),
-						TileId.zoom(id), content);
+				Img img = MapDescr.load(maps, fixedMap, TileId.nx(id),
+						TileId.ny(id), TileId.zoom(id), content);
 				if (img == null)
 					return null;
 				return new Tile(adapter, id, img, content);
@@ -85,7 +84,7 @@ public class Maps {
 	}
 
 	public void reorder(String map) {
-		for (MapDescr md : maps) {
+		for (MapDescrBase md : maps) {
 			if (md.getName().equals(map)) {
 				maps.remove(md);
 				maps.add(0, md);
@@ -94,12 +93,8 @@ public class Maps {
 		}
 	}
 
-	public String getTopMap() {
-		return maps.get(0).getName();
-	}
-
 	public void setTopMap(String map) {
-		for (MapDescr md : maps)
+		for (MapDescrBase md : maps)
 			if (md.getName().equals(map)) {
 				maps.remove(md);
 				maps.add(0, md);
@@ -113,4 +108,17 @@ public class Maps {
 		super.finalize();
 	}
 
+	public void fixMap(String map) {
+		if(map == null) {
+			fixedMap = null;
+		} else {
+			for (MapDescrBase md : maps)
+				if (md.getName().equals(map)) {
+					fixedMap = md;
+					return;
+				}
+		}
+		Adapter.log("fixed map = "
+				+ (fixedMap != null ? fixedMap.getName() : null));
+	}
 }

@@ -239,8 +239,8 @@ public class CommonView implements ICommonView {
 	public String getTopMap() {
 		envir.adapter.assertUIThread();
 		Tile tile = getCenterTile();
-		if (tile == null)
-			return "<No map>";
+		if (tile == null || tile.content.maps.size() == 0)
+			return null;
 		return tile.content.maps.getFirst();
 	}
 
@@ -512,4 +512,21 @@ public class CommonView implements ICommonView {
 		super.finalize();
 	}
 
+	public void fixMap(String map) {
+		mapTiles.fixMap(map);
+		repaint();
+	}
+	
+	public String fixMap(boolean fix) {
+		if(!fix) {
+			mapTiles.fixMap(null);
+			repaint();
+			return null;
+		} else {
+			String topMap = getTopMap();
+			mapTiles.fixMap(topMap);
+			repaint();
+			return topMap;
+		}
+	}
 }

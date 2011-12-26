@@ -20,8 +20,11 @@ public class Convert {
 		int scale = 0;
 		boolean debug = false;
 		boolean yandex = false;
-		Integer min = null; 
+		Integer min = null;
 		Integer max = null;
+		boolean noAddPoints = false;
+		int bpp = 6;
+		String outDir = ".";
 
 		for (int i = 1; i < args.length; i++) {
 			if (args[i].equals("-zoom")) {
@@ -36,12 +39,20 @@ public class Convert {
 			} else if (args[i].equals("-max")) {
 				max = Integer.parseInt(args[i + 1]);
 				i++;
+			} else if (args[i].equals("-bpp")) {
+				bpp = Integer.parseInt(args[i + 1]);
+				i++;
+			} else if (args[i].equals("-out")) {
+				outDir = args[i + 1];
+				i++;
 			} else if (args[i].equals("-resize")) {
 				resize = true;
 			} else if (args[i].equals("-debug")) {
 				debug = true;
 			} else if (args[i].equals("-yandex")) {
 				yandex = true;
+			} else if (args[i].equals("-noaddpoints")) {
+				noAddPoints = true;
 			} else {
 				System.err.println("illegal parameter " + args[i]);
 				System.exit(1);
@@ -65,7 +76,7 @@ public class Convert {
 									xs.lastIndexOf('.')));
 							MapDescr1 mapDescr = new YandexTile(yandexDir, tx,
 									ty, z);
-							createTiles(mapDescr, z, false, 0);
+							createTiles(mapDescr, z, false, 0, outDir);
 						} catch (Exception e) {
 						}
 					}
@@ -74,12 +85,18 @@ public class Convert {
 		} else if (zoom != 0) {
 			System.out.println(args[0]);
 			long t = System.currentTimeMillis();
-			
-			MapDescr1 mapDescr = new OziMapDescr(new File(args[0]), zoom,
-					scale, debug, min, max);
-			createTiles(mapDescr, zoom, resize, 5);
-			if(debug)
-				System.out.println("time = " + (System.currentTimeMillis() - t) / 1000 + " s");
+
+			File file = new File(args[0]);
+			if (file.exists()) {
+				MapDescr1 mapDescr = new OziMapDescr(new File(args[0]), zoom,
+						scale, debug, min, max, noAddPoints);
+				createTiles(mapDescr, zoom, resize, bpp, outDir);
+				if (debug)
+					System.out.println("time = "
+							+ (System.currentTimeMillis() - t) / 1000 + " s");
+			} else {
+				System.out.println("file not found " + file);
+			}
 		} else {
 			System.err.println("args: <mapFile> -zoom <zoom>");
 			System.err.println("      or");
@@ -89,9 +106,10 @@ public class Convert {
 	}
 
 	private static void createTiles(final MapDescr1 mapDescr, int zoom,
-			final boolean resize, int bpp) throws IOException {
-		File zoomDir = new File("z" + zoom);
-		zoomDir.mkdir();
+			final boolean resize, int bpp, String outDir) throws IOException {
+
+		File zoomDir = new File(outDir, "z" + zoom);
+		zoomDir.mkdirs();
 
 		Img.SrcImg src = new SrcImg() {
 			@Override

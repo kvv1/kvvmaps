@@ -57,7 +57,7 @@ public abstract class NormalizedMap implements MapDescr {
 			long sum = 0;
 			for (int i = 0; i < histo.length; i++) {
 				sum += histo[i];
-				if (sum * 100 / cnt > 2) {
+				if (sum * 1000 / cnt > 10) {
 					this.min = i;
 					break;
 				}

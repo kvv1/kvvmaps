@@ -70,7 +70,7 @@ public class MyActivity extends Activity {
 	private static final int MENU_FOLLOW_ONOFF = 101;
 	private static final int MENU_QUIT = 102;
 	private static final int MENU_CURRENT_POS = 103;
-	private static final int MENU_FIX_MAP = 103;
+	private static final int MENU_FIX_MAP = 104;
 	private static final int MENU_ADD_PLACEMARK = 105;
 
 	private static final int MENU_TRACKS = 108;
@@ -87,13 +87,13 @@ public class MyActivity extends Activity {
 	public Bitmap bmFollow;
 	public Bitmap bmWriting;
 	public Bitmap bmSendLoc;
+	public Bitmap bmFixedMap;
 
 	private Adapter adapter;
 	private PowerManager.WakeLock wakeLock;
 	private SensorListener sensorListener;
 	private SharedPreferences settings;
 	public IKvvMapsService mapsService;
-
 
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
@@ -189,8 +189,8 @@ public class MyActivity extends Activity {
 	protected void onResume() {
 		Log.w("KVVMAPS", "onResume");
 		Adapter.log("onResume");
-		
-		if(following())
+
+		if (following())
 			startFollow();
 		super.onResume();
 	}
@@ -241,7 +241,7 @@ public class MyActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		Log.w("KVVMAPS", "onCreate");
 		super.onCreate(savedInstanceState);
-		
+
 		settings = getSharedPreferences(PREFS_NAME, 0);
 
 		if (!MapLoader.checkMaps(this))
@@ -301,6 +301,8 @@ public class MyActivity extends Activity {
 				R.drawable.follow);
 		bmWriting = BitmapFactory.decodeResource(getResources(),
 				R.drawable.writing);
+		bmFixedMap = BitmapFactory.decodeResource(getResources(),
+				R.drawable.fixedmap);
 		bmSendLoc = BitmapFactory.decodeResource(getResources(),
 				R.drawable.sendloc);
 
@@ -429,8 +431,7 @@ public class MyActivity extends Activity {
 				buttonsVisible() ? "Ёкранные кнопки выкл."
 						: "Ёкранные кнопки вкл.");
 		menu.findItem(MENU_FIX_MAP).setTitle(
-				getFixedMap() != null ? "‘икс. карта выкл."
-						: "‘икс. карта");
+				getFixedMap() != null ? "‘икс. карта выкл." : "‘икс. карта");
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -477,6 +478,9 @@ public class MyActivity extends Activity {
 		case MENU_ABOUT:
 			about();
 			return true;
+		case MENU_FIX_MAP:
+			fixUnfixMap();
+			return true;
 		case MENU_QUIT:
 			stopService(new Intent(this, KvvMapsService.class));
 			finish();
@@ -486,15 +490,24 @@ public class MyActivity extends Activity {
 		return false;
 	}
 
-	private String getFixedMap() {
-		if(mapsService == null)
+	private void fixUnfixMap() {
+		if (mapsService == null || view == null)
+			return;
+		String fixedMap = mapsService.getBundle().getString("fixedMap");
+		fixedMap = view.fixMap(fixedMap == null);
+		mapsService.getBundle().putString("fixedMap", fixedMap);
+	}
+
+	public String getFixedMap() {
+		if (mapsService == null)
 			return null;
 		return mapsService.getBundle().getString("fixedMap");
 	}
 
 	private void buttonsOnOff() {
 		Editor prefsPrivateEditor = settings.edit();
-		prefsPrivateEditor.putBoolean(BUTTONS_VISIBLE_SETTING, !buttonsVisible());
+		prefsPrivateEditor.putBoolean(BUTTONS_VISIBLE_SETTING,
+				!buttonsVisible());
 		prefsPrivateEditor.commit();
 		updateButtons();
 	}
@@ -749,11 +762,13 @@ public class MyActivity extends Activity {
 		bmMultimap.recycle();
 		bmFollow.recycle();
 		bmWriting.recycle();
+		bmFixedMap.recycle();
 		bmSendLoc.recycle();
 
 		bmMultimap = null;
 		bmFollow = null;
 		bmWriting = null;
+		bmFixedMap = null;
 		bmSendLoc = null;
 
 		super.onDestroy();
