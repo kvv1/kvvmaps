@@ -63,8 +63,12 @@ public class Maps {
 
 		for (String name : mapsDir.names()) {
 			try {
-				maps.add(new MapDescr(cache, new File(Adapter.MAPS_ROOT, name
-						+ ".pac"), adapter, mapsDir.get(name)));
+				MapDir mapDir = mapsDir.get(name);
+				String mapPath = mapDir.filePath.substring(0,
+						mapDir.filePath.lastIndexOf(".dir"))
+						+ ".pac";
+				maps.add(new MapDescr(name, cache, new File(mapPath), adapter,
+						mapDir));
 				Adapter.log("map " + name + " loaded");
 				Adapter.logMem();
 			} catch (FileNotFoundException e) {
@@ -109,7 +113,7 @@ public class Maps {
 	}
 
 	public void fixMap(String map) {
-		if(map == null) {
+		if (map == null) {
 			fixedMap = null;
 		} else {
 			for (MapDescrBase md : maps)
