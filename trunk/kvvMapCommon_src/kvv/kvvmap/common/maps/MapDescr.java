@@ -6,15 +6,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.common.Cache;
 import kvv.kvvmap.common.Img;
 import kvv.kvvmap.common.PackedDataFile;
-import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maps.Maps.CacheKey;
-import kvv.kvvmap.common.tiles.TileContent;
 
 public class MapDescr extends MapDescrBase {
 	private final Cache<CacheKey, byte[]> cache;
@@ -22,10 +19,9 @@ public class MapDescr extends MapDescrBase {
 	private final Adapter adapter;
 	private final PackedDataFile pdf;
 
-	public MapDescr(Cache<CacheKey, byte[]> cache, File file, Adapter adapter,
+	public MapDescr(String name, Cache<CacheKey, byte[]> cache, File file, Adapter adapter,
 			MapDir mapDir) throws FileNotFoundException {
-		super(file.getName()
-				.substring(0, file.getName().lastIndexOf('.')));
+		super(name);
 		this.pdf = new PackedDataFile(file);
 		this.cache = cache;
 		this.adapter = adapter;

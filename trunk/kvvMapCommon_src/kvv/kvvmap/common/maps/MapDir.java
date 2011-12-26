@@ -13,9 +13,12 @@ public class MapDir {
 	private final static long MASK = 0xFFFFFFFFF0000000L;
 	private final IntToIntMap mapDir = new IntToIntMap();
 
+	public final String filePath;
+	
 //	private static int cnt;
 	
 	public MapDir(File file) throws IOException {
+		this.filePath = file.getAbsolutePath();
 //		Adapter.log("MapDir " + ++cnt);
 		FileInputStream is = new FileInputStream(file);
 		DataInputStream dis = new DataInputStream(new BufferedInputStream(is));
