@@ -31,10 +31,11 @@ public class OziMapDescr implements MapDescr1 {
 	private final int zoom;
 
 	private MapDescr map;
-	private boolean latCorrection;
+	private boolean transverse;
 
 	public OziMapDescr(File inFile, int zoom, int scale, boolean debug,
-			Integer min, Integer max) throws IOException, MatrixException {
+			Integer min, Integer max, boolean noAddPoints)
+			throws IOException, MatrixException {
 		this.zoom = zoom;
 		BufferedReader in = new BufferedReader(new FileReader(inFile));
 		File parent = inFile.getParentFile();
@@ -55,7 +56,7 @@ public class OziMapDescr implements MapDescr1 {
 						datum = "Pulkovo 1942";
 				}
 				if (n == 8)
-					latCorrection = line.contains("Transverse");
+					transverse = line.contains("Transverse");
 
 				String[] strings = line.split(",", -1);
 				if (strings.length == 17 && strings[0].startsWith("Point")
@@ -95,6 +96,7 @@ public class OziMapDescr implements MapDescr1 {
 
 		in.close();
 
+		if(!noAddPoints)
 		addBorderPoints();
 
 		prepare();
@@ -231,7 +233,7 @@ public class OziMapDescr implements MapDescr1 {
 				double lonc = (lon1 + lon2) / 2;
 				double latc = (lat1 + lat2) / 2;
 
-				if (latCorrection) {
+				if (transverse) {
 					int dy = getDY(x2 - x1, latc, lon1, lon2, lonc);
 					yc = (y1 + y2) / 2 + dy;
 				} else {
@@ -256,12 +258,12 @@ public class OziMapDescr implements MapDescr1 {
 			mmpll = _mmpll;
 
 		}
-		if (latCorrection) {
+		if (transverse) {
 			ArrayList<Point> _mmpxy = new ArrayList<Point>();
 			ArrayList<Point2D> _mmpll = new ArrayList<Point2D>();
 
 			sz = mmpxy.size();
-			
+
 			for (int i = 0; i < sz; i++) {
 				int j = (i + 1) % sz;
 
@@ -300,15 +302,16 @@ public class OziMapDescr implements MapDescr1 {
 		}
 	}
 
-	private final static Spline spline = new Spline(new double[] {0, 34, 62, 74, 84}, new double[] {0, 11, 20, 20, 22.5});
-	
+	private final static Spline spline = new Spline(new double[] { 0, 34, 62,
+			74, 84 }, new double[] { 0, 11, 20, 20, 22.5 });
+
 	private static int getDY(int dx, double lat, double lon1, double lon2,
 			double lon) {
-		
+
 		double dlon = lon2 - lon1;
 		double lonc = (lon1 + lon2) / 2;
 		double dl = lon - lonc;
-		
+
 		double k = spline.splineValue(Math.abs(lat));
 		
 		double dy = k * Math.abs(dx) * (dlon * dlon / 4 - dl * dl) / Math.abs(dlon); 
@@ -319,14 +322,14 @@ public class OziMapDescr implements MapDescr1 {
 		return (int) dy  / 2511;
 	}
 
-//	public static void main(String[] args) {
-//		System.out.println(getDY(3325, 34, 0, 3, 1.5));
-//		System.out.println(getDY(3160, 38, 0, 3, 1.5));
-//		System.out.println(getDY(6386, 66, 0, 6, 3));
-//		System.out.println(getDY(4876, 72, 0, 12, 6));
-//		
-//	}
-	
+	// public static void main(String[] args) {
+	// System.out.println(getDY(3325, 34, 0, 3, 1.5));
+	// System.out.println(getDY(3160, 38, 0, 3, 1.5));
+	// System.out.println(getDY(6386, 66, 0, 6, 3));
+	// System.out.println(getDY(4876, 72, 0, 12, 6));
+	//
+	// }
+
 	private double minNewX;
 	private double maxNewX;
 	private double minNewY;

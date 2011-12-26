@@ -77,6 +77,7 @@ public class MapView extends View implements IPlatformView {
 			commonView.setZoom(zoom);
 			animateTo(new LocationX(lon, lat));
 			commonView.setTopMap(topMap);
+			commonView.fixMap(activity.getFixedMap());
 		}
 
 	}
@@ -145,6 +146,11 @@ public class MapView extends View implements IPlatformView {
 		if (activity.mapsService.getTracker().isTracking()) {
 			Bitmap bm = activity.bmWriting;
 			canvas.drawBitmap(bm, getWidth() - 60, 0, null);
+		}
+
+		if (activity.getFixedMap() != null) {
+			Bitmap bm = activity.bmFixedMap;
+			canvas.drawBitmap(bm, getWidth() - 80, 0, null);
 		}
 
 		if (compass == null)
@@ -425,6 +431,12 @@ public class MapView extends View implements IPlatformView {
 	public void animateToTarget() {
 		if (commonView != null)
 			commonView.animateToTarget();
+	}
+
+	public String fixMap(boolean fix) {
+		if (commonView != null)
+			return commonView.fixMap(fix);
+		return null;
 	}
 
 }

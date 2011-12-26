@@ -14,88 +14,32 @@ import kvv.kvvmap.common.Img;
 import kvv.kvvmap.common.PackedDataFile;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maps.Maps.CacheKey;
-import kvv.kvvmap.common.tiles.Tile;
 import kvv.kvvmap.common.tiles.TileContent;
-import kvv.kvvmap.common.tiles.TileId;
 
-public class MapDescr {
+public class MapDescr extends MapDescrBase {
 	private final Cache<CacheKey, byte[]> cache;
 	private final MapDir mapDir;
 	private final Adapter adapter;
 	private final PackedDataFile pdf;
-	private final String name;
 
 	public MapDescr(Cache<CacheKey, byte[]> cache, File file, Adapter adapter,
 			MapDir mapDir) throws FileNotFoundException {
-		this.name = file.getName()
-				.substring(0, file.getName().lastIndexOf('.'));
+		super(file.getName()
+				.substring(0, file.getName().lastIndexOf('.')));
 		this.pdf = new PackedDataFile(file);
 		this.cache = cache;
 		this.adapter = adapter;
 		this.mapDir = mapDir;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public static Img load(Collection<MapDescr> maps, MapDescr fixedMap,
-			int nx, int ny, int zoom, TileContent content) {
-
-		if (fixedMap != null) {
-			int x = 0;
-			int y = 0;
-			int sz = Utils.TILE_SIZE_G;
-			Img img = null;
-			
-			
-			img = loadInZoom(fixedMap, nx, ny, zoom, 0, 0, Utils.TILE_SIZE_G, null, content);
-			
-
-		}
-
-		int x = 0;
-		int y = 0;
-		int sz = Utils.TILE_SIZE_G;
-		Img img = null;
-		
-		while (true) {
-			for (MapDescr map : maps)
-				img = loadInZoom(map, nx, ny, zoom, x, y, sz, img, content);
-
-			if (zoom <= Utils.MIN_ZOOM || (img != null && !img.transparent))
-				break;
-
-			x = x / 2 + ((nx & 1) << 7);
-			y = y / 2 + ((ny & 1) << 7);
-			nx = nx >>> 1;
-			ny = ny >>> 1;
-			zoom = zoom - 1;
-			sz = sz / 2;
-		}
-		
-		return img;
-	}
-
-
-	private static Img loadInZoom(MapDescr map, int nx, int ny, int zoom,
-			int x, int y, int sz, Img img, TileContent content) {
-		if (map.hasTile(nx, ny, zoom)) {
-			img = map.load(nx, ny, zoom, x, y, sz, img);
-			if (content.zoom == -1 || content.zoom == zoom) {
-				content.zoom = zoom;
-				content.maps.add(map.getName());
-			}
-		}
-		return img;
-	}
-
-	private boolean hasTile(int nx, int ny, int zoom) {
+	@Override
+	protected boolean hasTile(int nx, int ny, int zoom) {
 		int idx = mapDir.getOffset(nx, ny, zoom);
 		return idx != -1;
 	}
 
-	private Img load(int nx, int ny, int zoom, int x, int y, int sz, Img imgBase) {
+	@Override
+	protected Img load(int nx, int ny, int zoom, int x, int y, int sz, Img imgBase) {
 		if (imgBase != null && !imgBase.transparent)
 			return imgBase;
 		return loadTile(nx, ny, zoom, x, y, sz, imgBase);
