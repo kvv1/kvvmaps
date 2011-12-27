@@ -1,5 +1,7 @@
 package kvv.kvvmap.service;
 
+import java.io.IOException;
+
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.common.maps.MapsDir;
 import kvv.kvvmap.common.pacemark.Paths;
@@ -91,7 +93,11 @@ public class KvvMapsService extends Service {
 	public void onCreate() {
 		Adapter.log("service onCreate");
 		super.onCreate();
-		mapsDir = new MapsDir();
+		try {
+			mapsDir = new MapsDir();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		placeMarks = new PlaceMarks();
 
