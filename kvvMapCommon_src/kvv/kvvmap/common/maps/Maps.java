@@ -63,11 +63,8 @@ public class Maps {
 
 		for (String name : mapsDir.names()) {
 			try {
-				MapDir mapDir = mapsDir.get(name);
-				String mapPath = mapDir.filePath.substring(0,
-						mapDir.filePath.lastIndexOf(".dir"))
-						+ ".pac";
-				maps.add(new MapDescr(name, cache, new File(mapPath), adapter,
+				MapDir[] mapDir = mapsDir.get(name);
+				maps.add(new MapDescr(name, cache, adapter,
 						mapDir));
 				Adapter.log("map " + name + " loaded");
 				Adapter.logMem();
