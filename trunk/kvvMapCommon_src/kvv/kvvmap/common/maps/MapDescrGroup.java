@@ -15,19 +15,18 @@ public class MapDescrGroup extends MapDescrBase {
 
 	@Override
 	protected boolean hasTile(int nx, int ny, int zoom) {
-		for(MapDescr map : maps)
-			if(map.hasTile(nx, ny, zoom))
+		for (MapDescr map : maps)
+			if (map.hasTile(nx, ny, zoom))
 				return true;
 		return false;
 	}
 
 	@Override
-	protected Img load(int nx, int ny, int zoom, int x, int y, int sz,
-			Img imgBase) {
-		for(MapDescr map : maps)
-			if(map.hasTile(nx, ny, zoom))
-				return map.load(nx, ny, zoom, x, y, sz, imgBase);
-		return imgBase;
+	protected Img load(int nx, int ny, int zoom, int x, int y, int sz, Img img) {
+		for (MapDescr map : maps)
+			if (map.hasTile(nx, ny, zoom))
+				img = map.load(nx, ny, zoom, x, y, sz, img);
+		return img;
 	}
 
 }

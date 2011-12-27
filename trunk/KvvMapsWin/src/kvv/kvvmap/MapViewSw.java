@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JComponent;
@@ -60,7 +61,7 @@ public class MapViewSw extends JComponent {
 
 	private final Environment envir;
 
-	public MapViewSw(SwingWnd swingWnd) {
+	public MapViewSw(SwingWnd swingWnd) throws IOException {
 		this.swingWnd = swingWnd;
 		setSize(SCR_W, SCR_H);
 		setPreferredSize(new Dimension(SCR_W, SCR_H));

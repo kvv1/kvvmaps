@@ -59,7 +59,7 @@ import android.widget.ImageButton;
 @SuppressWarnings("deprecation")
 public class MyActivity extends Activity {
 
-	private final static String VERSION = "version: 3.2.1";
+	private final static String VERSION = "version: 3.3.0";
 
 	private static final String BUTTONS_VISIBLE_SETTING = "buttonsVisible";
 	private static final String FOLLOW_GPS_SETTING = "followGPS";
