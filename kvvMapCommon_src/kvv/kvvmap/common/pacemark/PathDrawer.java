@@ -16,14 +16,16 @@ import kvv.kvvmap.common.tiles.TileId;
 public class PathDrawer {
 
 	public static void drawLabel(GC gc, String text, int x, int y) {
+		gc.setTextSize(16);
+		
 		RectX rect = gc.getTextBounds(text);
 		rect.offset(x, y);
 		rect.inset(-2, -2);
+
 		gc.setColor(0x80000000);
 		gc.fillRect((int) rect.getX(), (int) rect.getY(),
 				(int) (rect.getX() + rect.getWidth()),
 				(int) (rect.getY() + rect.getHeight()));
-		gc.setTextSize(16);
 		gc.setColor(COLOR.CYAN);
 		// gc.drawText(text, x+1, y+1);
 		// gc.setColor(COLOR.BLUE);
@@ -68,19 +70,19 @@ public class PathDrawer {
 
 	public static void drawPathInZoom(PathInZoom pathInZoom, GC gc, long id,
 			InfoLevel infoLevel, LocationX selPM) {
-		
-//		pathInZoom.draw(gc, id, infoLevel, selPM);
-		
+
+		// pathInZoom.draw(gc, id, infoLevel, selPM);
+
 		gc.setColor(COLOR.RED);
 
 		if (selPM != null)
-			gc.setStrokeWidth(4);
+			gc.setStrokeWidth(6);
 		else
-			gc.setStrokeWidth(2);
+			gc.setStrokeWidth(4);
 
 		int nx = TileId.nx(id);
 		int ny = TileId.ny(id);
-//		int z = TileId.zoom(id);
+		// int z = TileId.zoom(id);
 
 		int dx = nx * Adapter.TILE_SIZE;
 		int dy = ny * Adapter.TILE_SIZE;
@@ -90,10 +92,11 @@ public class PathDrawer {
 			gc.drawLine(pts[i] - dx, pts[i + 1] - dy, pts[i + 2] - dx,
 					pts[i + 3] - dy);
 		}
-		
+
 	}
 
-	public static void drawPlacemarks(PlaceMarks pms, GC gc, long id, InfoLevel infoLevel, ISelectable sel) {
+	public static void drawPlacemarks(PlaceMarks pms, GC gc, long id,
+			InfoLevel infoLevel, ISelectable sel) {
 		int dx = TileId.nx(id) * Adapter.TILE_SIZE;
 		int dy = TileId.ny(id) * Adapter.TILE_SIZE;
 		for (LocationX pm : pms.getPlaceMarks()) {
@@ -129,7 +132,7 @@ public class PathDrawer {
 			}
 		}
 	}
-	
+
 	public static void drawDiagram(Path path, GC gc, LocationX pm2) {
 		int y = gc.getHeight();
 		int w = gc.getWidth();
@@ -216,7 +219,7 @@ public class PathDrawer {
 		y -= 5 * lineHeight;
 
 		File file = path.getFile();
-		
+
 		if (file != null) {
 			gc.setColor(0x80000000);
 			gc.fillRect(0, y - lineHeight, w, y);
@@ -225,6 +228,5 @@ public class PathDrawer {
 			y -= lineHeight;
 		}
 	}
-
 
 }

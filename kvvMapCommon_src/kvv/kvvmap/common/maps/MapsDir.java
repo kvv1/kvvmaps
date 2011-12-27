@@ -18,8 +18,11 @@ public class MapsDir {
 		File[] files = new File(Adapter.MAPS_ROOT).listFiles();
 		for (File file : files) {
 			List<MapDir> res = new ArrayList<MapDir>();
-			String name = file.getName().substring(0,
-					file.getName().lastIndexOf('.'));
+			int ptidx = file.getName().lastIndexOf('.');
+			if (ptidx < 0)
+				ptidx = file.getName().length();
+
+			String name = file.getName().substring(0, ptidx);
 			if (file.getName().endsWith(".dir")) {
 				res.add(new MapDir(file));
 			} else if (file.isDirectory()) {

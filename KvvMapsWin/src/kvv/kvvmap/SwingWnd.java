@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -22,7 +23,7 @@ public class SwingWnd extends JFrame {
 
 	private MapViewSw view;
 
-	private SwingWnd() {
+	private SwingWnd() throws IOException {
 		setSize(1000, 880);
 		setLayout(new BorderLayout());
 
@@ -107,7 +108,12 @@ public class SwingWnd extends JFrame {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				new SwingWnd();
+				try {
+					new SwingWnd();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		});
 	}
