@@ -124,32 +124,32 @@ public class CommonView implements ICommonView {
 		return myLocationDimmed;
 	}
 
-	public void setMyLocation(LocationX locationX, boolean forceScroll) {
+	public void setMyLocation(LocationX locationX, boolean scroll) {
 
 		LocationX oldLocation = myLocation;
-		boolean wasDimmed = myLocationDimmed;
 
 		myLocation = locationX;
 		myLocationDimmed = false;
 
-		forceScroll |= wasDimmed;
-
-		forceScroll |= oldLocation != null
-				&& (Math.abs(oldLocation.getX(zoom) - centerXY.x) < platformViewView
-						.getWidth() / 2 && Math.abs(oldLocation.getY(zoom)
-						- centerXY.y) < platformViewView.getHeight() / 2);
-
-		if (forceScroll) {
-			if (oldLocation != null && !wasDimmed) {
-				int dx = myLocation.getX(zoom) - oldLocation.getX(zoom);
-				int dy = myLocation.getY(zoom) - oldLocation.getY(zoom);
-				animateBy(new PointInt(dx, dy));
-			} else {
-				animateTo(myLocation);
-			}
+		if (onScreen(oldLocation)) {
+			int dx = myLocation.getX(zoom) - oldLocation.getX(zoom);
+			int dy = myLocation.getY(zoom) - oldLocation.getY(zoom);
+			animateBy(new PointInt(dx, dy));
+			repaint();
+		} else if (scroll) {
+			animateTo(myLocation);
+			repaint();
 		}
 
-		repaint();
+	}
+
+	private boolean onScreen(LocationX loc) {
+		return loc != null
+				&& (Math.abs(loc.getX(zoom) - centerXY.x) < platformViewView
+						.getWidth() / 2 && Math
+						.abs(loc.getY(zoom) - centerXY.y) < platformViewView
+						.getHeight() / 2);
+
 	}
 
 	public void dimmMyLocation() {
@@ -516,9 +516,9 @@ public class CommonView implements ICommonView {
 		mapTiles.fixMap(map);
 		repaint();
 	}
-	
+
 	public String fixMap(boolean fix) {
-		if(!fix) {
+		if (!fix) {
 			mapTiles.fixMap(null);
 			repaint();
 			return null;

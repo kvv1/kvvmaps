@@ -1,6 +1,5 @@
 package kvv.kvvmap.common.maps;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.concurrent.CopyOnWriteArrayList;
 

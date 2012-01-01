@@ -58,7 +58,8 @@ public class MapView extends View implements IPlatformView {
 
 	private static int cnt;
 
-	public void init(MyActivity activity, Environment envir, Bundle savedInstanceState) {
+	public void init(MyActivity activity, Environment envir,
+			Bundle savedInstanceState) {
 		assertUIThread();
 		Adapter.log("MapView.init " + ++cnt);
 
@@ -140,17 +141,17 @@ public class MapView extends View implements IPlatformView {
 
 		if (activity.isFollowing()) {
 			Bitmap bm = activity.bmFollow;
-			canvas.drawBitmap(bm, getWidth() - 40, 0, null);
+			canvas.drawBitmap(bm, getWidth() - bm.getWidth() * 2, 0, null);
 		}
 
 		if (activity.mapsService.getTracker().isTracking()) {
 			Bitmap bm = activity.bmWriting;
-			canvas.drawBitmap(bm, getWidth() - 60, 0, null);
+			canvas.drawBitmap(bm, getWidth() - bm.getWidth() * 3, 0, null);
 		}
 
 		if (activity.getFixedMap() != null) {
 			Bitmap bm = activity.bmFixedMap;
-			canvas.drawBitmap(bm, getWidth() - 80, 0, null);
+			canvas.drawBitmap(bm, getWidth() - bm.getWidth() * 4, 0, null);
 		}
 
 		if (compass == null)

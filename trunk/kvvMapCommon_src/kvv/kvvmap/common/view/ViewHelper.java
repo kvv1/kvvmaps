@@ -167,7 +167,7 @@ public class ViewHelper {
 		gc.drawText(
 				Utils.format(loc.getLongitude()) + " "
 						+ Utils.format(loc.getLatitude()) + " "
-						+ loc.getAltitude() + "m " + loc.getSpeed() * 3.6f
+						+ (int)loc.getAltitude() + "m " + (int)(loc.getSpeed() * 3.6f)
 						+ "km/h", 0, gc.getHeight() - 2);
 
 		gc.drawArrow(x, y, loc, dimmed);

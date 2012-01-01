@@ -91,6 +91,8 @@ public class KvvMapsService extends Service {
 
 	@Override
 	public void onCreate() {
+		
+		setForeground(true);
 		Adapter.log("service onCreate");
 		super.onCreate();
 		try {

@@ -17,7 +17,7 @@ public class PathDrawer {
 
 	public static void drawLabel(GC gc, String text, int x, int y) {
 		gc.setTextSize(16);
-		
+
 		RectX rect = gc.getTextBounds(text);
 		rect.offset(x, y);
 		rect.inset(-2, -2);
@@ -142,7 +142,7 @@ public class PathDrawer {
 		gc.setTextSize(lineHeight);
 
 		gc.setColor(0x80000000);
-		gc.fillRect(0, (float) (y - 5 * lineHeight), w, y);
+		gc.fillRect(0, 0, w, y);
 
 		gc.setStrokeWidth(2);
 
@@ -150,7 +150,8 @@ public class PathDrawer {
 		gc.drawText(
 				Utils.format(pm2.getLongitude()) + "  "
 						+ Utils.format(pm2.getLatitude()) + "  "
-						+ (int) pm2.getAltitude(), 2, y - 2);
+						+ (int) pm2.getAltitude() + "m "
+						+ (int) (pm2.getSpeed() * 3.6) + "km/h", 2, y - 2);
 
 		int len = Math.max(1, (int) path.getLen());
 
@@ -162,15 +163,24 @@ public class PathDrawer {
 			int minAlt = (int) pms.iterator().next().getAltitude();
 			int maxAlt = (int) pms.iterator().next().getAltitude();
 
+			int minSpeed = (int) pms.iterator().next().getSpeed();
+			int maxSpeed = (int) pms.iterator().next().getSpeed();
+
 			for (LocationX pm : pms) {
 				minAlt = Math.min(minAlt, (int) pm.getAltitude());
 				maxAlt = Math.max(maxAlt, (int) pm.getAltitude());
+				if (pm.getSpeed() < 127) {
+					minSpeed = Math.min(minSpeed, (int) pm.getSpeed());
+					maxSpeed = Math.max(maxSpeed, (int) pm.getSpeed());
+				}
 			}
 
 			int altDif = Math.max(1, maxAlt - minAlt);
+			int speedDif = Math.max(1, maxSpeed - minSpeed);
 
 			LocationX prevPm = null;
 			PointInt prevPt = null;
+			PointInt prevPt1 = null;
 
 			float len0 = 0;
 
@@ -186,17 +196,31 @@ public class PathDrawer {
 				int _x = (int) (rect.getX() + (len0 * rect.getWidth() / len));
 				int _y = (int) (rect.getY() + rect.getHeight() - (int) ((pm
 						.getAltitude() - minAlt) * rect.getHeight() / altDif));
+				int _y1 = (int) (rect.getY() + rect.getHeight() - (int) ((pm
+						.getSpeed() - minSpeed) * rect.getHeight() / speedDif));
 
 				PointInt pt = new PointInt(_x, _y);
+				PointInt pt1 = new PointInt(_x, _y1);
 
 				if (pm == pm2)
 					pmPt = pt;
 
-				if (prevPm != null)
+				if (prevPm != null) {
+					gc.setColor(COLOR.GREEN);
 					gc.drawLine(pt.x, pt.y, prevPt.x, prevPt.y);
+
+					if (pm.getSpeed() < 127) {
+						if (prevPt1 != null) {
+							gc.setColor(COLOR.YELLOW);
+							gc.drawLine(pt1.x, pt1.y, prevPt1.x, prevPt1.y);
+						}
+						prevPt1 = pt1;
+					}
+				}
 
 				prevPm = pm;
 				prevPt = pt;
+
 			}
 
 			gc.setColor(COLOR.CYAN);
@@ -222,7 +246,6 @@ public class PathDrawer {
 
 		if (file != null) {
 			gc.setColor(0x80000000);
-			gc.fillRect(0, y - lineHeight, w, y);
 			gc.setColor(COLOR.CYAN);
 			gc.drawText(file.getName(), 2, y - 2);
 			y -= lineHeight;
