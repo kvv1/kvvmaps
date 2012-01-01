@@ -13,6 +13,7 @@ public class LocationX implements ISelectable {
 	private double y;
 	private int z = -1;
 	private int bmsize;
+	
 
 	public LocationX(double lon, double lat) {
 		this(lon, lat, 0, 0, 0, 0);
@@ -31,6 +32,8 @@ public class LocationX implements ISelectable {
 
 	public LocationX(Location loc) {
 		this.loc = loc;
+		if(loc.getSpeed() > 120)
+			loc.setSpeed(-1);
 	}
 
 	public synchronized int getX(int zoom) {

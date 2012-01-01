@@ -12,6 +12,7 @@ import java.util.Comparator;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.common.COLOR;
+import kvv.kvvmap.common.Pair;
 import kvv.kvvmap.common.maps.Maps;
 import kvv.kvvmap.common.maps.MapsDir;
 import kvv.kvvmap.common.pacemark.ISelectable;
@@ -44,6 +45,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
@@ -59,7 +61,7 @@ import android.widget.ImageButton;
 @SuppressWarnings("deprecation")
 public class MyActivity extends Activity {
 
-	private final static String VERSION = "version: 3.3.0";
+	private final static String VERSION = "version: 3.3.1";
 
 	private static final String BUTTONS_VISIBLE_SETTING = "buttonsVisible";
 	private static final String FOLLOW_GPS_SETTING = "followGPS";
@@ -94,6 +96,8 @@ public class MyActivity extends Activity {
 	private SensorListener sensorListener;
 	private SharedPreferences settings;
 	public IKvvMapsService mapsService;
+
+	private final Handler handler = new Handler();
 
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
@@ -135,6 +139,13 @@ public class MyActivity extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
+	private Runnable gpsOff = new Runnable() {
+		@Override
+		public void run() {
+			stopFollow();
+		}
+	};
+
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		Adapter.log("onWindowFocusChanged " + hasFocus);
@@ -165,12 +176,18 @@ public class MyActivity extends Activity {
 
 			wakeLock.acquire();
 
+			handler.removeCallbacks(gpsOff);
+			if (following())
+				startFollow();
+
 		} else {
 			if (wakeLock != null)
 				wakeLock.release();
 
 			((SensorManager) getSystemService(Context.SENSOR_SERVICE))
 					.unregisterListener(sensorListener);
+
+			handler.postDelayed(gpsOff, 120000);
 		}
 
 		super.onWindowFocusChanged(hasFocus);
@@ -180,7 +197,6 @@ public class MyActivity extends Activity {
 	protected void onPause() {
 		Log.w("KVVMAPS", "onPause");
 
-		stopFollow();
 		super.onPause();
 		System.gc();
 	}
@@ -190,8 +206,6 @@ public class MyActivity extends Activity {
 		Log.w("KVVMAPS", "onResume");
 		Adapter.log("onResume");
 
-		if (following())
-			startFollow();
 		super.onResume();
 	}
 
@@ -389,6 +403,7 @@ public class MyActivity extends Activity {
 		updateButtons();
 
 		view = (MapView) findViewById(R.id.MapView);
+
 	}
 
 	private boolean buttonsVisible() {
@@ -419,9 +434,11 @@ public class MyActivity extends Activity {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		menu.findItem(MENU_LOGGING_ONOFF).setTitle(
-				mapsService.getTracker().isTracking() ? "Запись пути выкл."
-						: "Запись пути");
+		menu.findItem(MENU_LOGGING_ONOFF)
+				.setTitle(
+						mapsService != null
+								&& mapsService.getTracker().isTracking() ? "Запись пути выкл."
+								: "Запись пути");
 		menu.findItem(MENU_FOLLOW_ONOFF).setTitle(
 				locationListener != null ? "Сдвигать по GPS выкл."
 						: "Сдвигать по GPS");
@@ -534,14 +551,26 @@ public class MyActivity extends Activity {
 			view.invalidatePathTiles();
 	}
 
+	static class PathLocPair extends Pair<Path, LocationX> {
+		public PathLocPair(Path first, LocationX second) {
+			super(first, second);
+		}
+	}
+
 	private void paths() {
 		final Path[] paths = mapsService.getPaths().getPaths()
 				.toArray(new Path[0]);
 
-		Arrays.sort(paths, new Comparator<Path>() {
-			public int compare(Path path1, Path path2) {
-				LocationX pm1 = path1.getNearest(view.getCenter());
-				LocationX pm2 = path2.getNearest(view.getCenter());
+		final PathLocPair[] paths1 = new PathLocPair[paths.length];
+
+		for (int i = 0; i < paths.length; i++)
+			paths1[i] = new PathLocPair(paths[i], paths[i].getNearest(view
+					.getCenter()));
+
+		Arrays.sort(paths1, new Comparator<PathLocPair>() {
+			public int compare(PathLocPair path1, PathLocPair path2) {
+				LocationX pm1 = path1.second;
+				LocationX pm2 = path2.second;
 				if (pm1 == null)
 					return 1;
 				if (pm2 == null)
@@ -557,13 +586,13 @@ public class MyActivity extends Activity {
 			}
 		});
 
-		final String[] names = new String[paths.length];
-		for (int i = 0; i < paths.length; i++)
-			names[i] = paths[i].getName();
+		final String[] names = new String[paths1.length];
+		for (int i = 0; i < paths1.length; i++)
+			names[i] = paths1[i].first.getName();
 
-		final boolean[] checks = new boolean[paths.length];
-		for (int i = 0; i < paths.length; i++)
-			checks[i] = paths[i].isEnabled();
+		final boolean[] checks = new boolean[paths1.length];
+		for (int i = 0; i < paths1.length; i++)
+			checks[i] = paths1[i].first.isEnabled();
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Paths");
@@ -572,7 +601,7 @@ public class MyActivity extends Activity {
 					public void onClick(DialogInterface dialog, int which,
 							boolean isChecked) {
 						checks[which] = isChecked;
-						paths[which].setEnabled(isChecked);
+						paths1[which].first.setEnabled(isChecked);
 					}
 				});
 
@@ -745,7 +774,7 @@ public class MyActivity extends Activity {
 			Bundle b = mapsService.getBundle();
 			view.save(b);
 		}
-		locationManager = null;
+		//locationManager = null;
 
 		Adapter.log("onDestroy");
 		unbindService(conn);

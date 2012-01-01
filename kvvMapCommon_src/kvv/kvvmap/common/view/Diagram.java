@@ -40,8 +40,8 @@ public class Diagram {
 	}
 
 	public synchronized void draw(GC gc, int y) {
-		if (r != null)
-			return;
+		//if (r != null)
+		//	return;
 		if (bm != null)
 			gc.drawImage(bm, 0, gc.getHeight() - y - h);
 	}

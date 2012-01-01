@@ -92,6 +92,8 @@ public class Adapter {
 	public Object allocBitmap(int w, int h) {
 		try {
 			Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_4444);
+			//new Canvas(bm).drawColor(0);
+			
 			return bm;
 		} catch (OutOfMemoryError e) {
 			int usedMegs = (int) (Debug.getNativeHeapAllocatedSize() / 1048576L);
