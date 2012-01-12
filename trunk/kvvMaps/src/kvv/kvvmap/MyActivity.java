@@ -1,11 +1,15 @@
 package kvv.kvvmap;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -44,6 +48,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -81,6 +86,8 @@ public class MyActivity extends Activity {
 	private static final int MENU_ABOUT = 111;
 	private static final int MENU_TOGGLE_BUTTONS = 112;
 
+	private static final int MENU_UPDATE = 113;
+	
 	private MapView view;
 
 	// public static MediaPlayer mediaPlayer;
@@ -464,6 +471,7 @@ public class MyActivity extends Activity {
 		menu.add(0, MENU_DEBUG_DRAW, 0, "debugDraw");
 		menu.add(0, MENU_TOGGLE_BUTTONS, 0, "Экранные кнопки");
 		menu.add(0, MENU_ABOUT, 0, "О программе");
+		menu.add(0, MENU_UPDATE, 0, "Update");
 		menu.add(0, MENU_QUIT, 0, "Выход");
 		return true;
 	}
@@ -498,6 +506,13 @@ public class MyActivity extends Activity {
 		case MENU_FIX_MAP:
 			fixUnfixMap();
 			return true;
+		case MENU_UPDATE:
+			try {
+				updateSoftware();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return true;
 		case MENU_QUIT:
 			stopService(new Intent(this, KvvMapsService.class));
 			finish();
@@ -505,6 +520,28 @@ public class MyActivity extends Activity {
 		default:
 		}
 		return false;
+	}
+
+	private void updateSoftware() throws MalformedURLException, IOException {
+		
+		InputStream is = new URL("http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk").openStream();
+		
+		OutputStream os = new FileOutputStream(Adapter.ROOT + "/file.apk");
+		
+		int c;
+		while((c = is.read()) != -1)
+			os.write(c);
+		
+		os.close();
+		is.close();
+		
+		
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setDataAndType(Uri.fromFile(new File(Adapter.ROOT + "/file.apk")), "application/vnd.android.package-archive");
+		
+		startActivity(intent);  		
+		
+//		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk")));
 	}
 
 	private void fixUnfixMap() {
