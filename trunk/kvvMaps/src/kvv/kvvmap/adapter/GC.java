@@ -28,9 +28,9 @@ public class GC {
 		this.paint = paint;
 		this.width = w;
 		this.height = h;
-		
+
 		int sz = width / 16;
-		if(sz > 32)
+		if (sz > 32)
 			sz = 32;
 		arrow = new Arrow(sz);
 	}
@@ -78,6 +78,19 @@ public class GC {
 
 	public void drawImage(Object img, int x, int y) {
 		canvas.drawBitmap((Bitmap) img, x, y, paint);
+	}
+
+	private final Rect src = new Rect();
+	private final Rect dst = new Rect();
+
+	public void drawImage(Object img, int x, int y, int factor) {
+		synchronized (src) {
+			Bitmap bm = (Bitmap) img;
+			src.set(0, 0, bm.getWidth(), bm.getHeight());
+			dst.set(x, y, x + bm.getWidth() * factor, y + bm.getHeight()
+					* factor);
+			canvas.drawBitmap(bm, src, dst, paint);
+		}
 	}
 
 	// public void drawImage(Object img, int dstx, int dsty, int srcx, int srcy,

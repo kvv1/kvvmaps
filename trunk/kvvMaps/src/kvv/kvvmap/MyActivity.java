@@ -40,6 +40,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.SensorListener;
@@ -66,7 +67,7 @@ import android.widget.ImageButton;
 @SuppressWarnings("deprecation")
 public class MyActivity extends Activity {
 
-	private final static String VERSION = "version: 3.3.1";
+	private final static String VERSION = "version: 3.3.2";
 
 	private static final String BUTTONS_VISIBLE_SETTING = "buttonsVisible";
 	private static final String FOLLOW_GPS_SETTING = "followGPS";
@@ -87,7 +88,7 @@ public class MyActivity extends Activity {
 	private static final int MENU_TOGGLE_BUTTONS = 112;
 
 	private static final int MENU_UPDATE = 113;
-	
+
 	private MapView view;
 
 	// public static MediaPlayer mediaPlayer;
@@ -185,7 +186,7 @@ public class MyActivity extends Activity {
 
 			handler.removeCallbacks(gpsOff);
 			if (following())
-				startFollow();
+				startFollow(false);
 
 		} else {
 			if (wakeLock != null)
@@ -523,25 +524,29 @@ public class MyActivity extends Activity {
 	}
 
 	private void updateSoftware() throws MalformedURLException, IOException {
-		
-		InputStream is = new URL("http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk").openStream();
-		
-		OutputStream os = new FileOutputStream(Adapter.ROOT + "/file.apk");
-		
-		int c;
-		while((c = is.read()) != -1)
-			os.write(c);
-		
-		os.close();
-		is.close();
-		
-		
-		Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setDataAndType(Uri.fromFile(new File(Adapter.ROOT + "/file.apk")), "application/vnd.android.package-archive");
-		
-		startActivity(intent);  		
-		
-//		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk")));
+
+//		InputStream is = new URL(
+//				"http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk").openStream();
+//
+//		OutputStream os = new FileOutputStream(Adapter.ROOT + "/file.apk");
+//
+//		byte[] buffer = new byte[4096];
+//		int n;
+//		while ((n = is.read(buffer)) != -1)
+//			os.write(buffer, 0, n);
+//
+//		os.close();
+//		is.close();
+//
+//		Intent intent = new Intent(Intent.ACTION_VIEW);
+//		intent.setDataAndType(
+//				Uri.fromFile(new File(Adapter.ROOT + "/file.apk")),
+//				"application/vnd.android.package-archive");
+//
+//		startActivity(intent);
+
+		 startActivity(new Intent(Intent.ACTION_VIEW,
+		 Uri.parse("http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk")));
 	}
 
 	private void fixUnfixMap() {
@@ -567,16 +572,22 @@ public class MyActivity extends Activity {
 	}
 
 	private void about() {
-		AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-		alertDialog.setTitle("About");
-		alertDialog.setMessage("KvvMaps\n" + VERSION
-				+ "\nVladimir Krupsky\nv_krupsky@mail.ru");
-		alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				return;
-			}
-		});
-		alertDialog.show();
+
+		try {
+			String app_ver = this.getPackageManager().getPackageInfo(
+					this.getPackageName(), 0).versionName;
+			AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+			alertDialog.setTitle("About");
+			alertDialog.setMessage("KvvMaps\nversion: " + app_ver
+					+ "\nVladimir Krupsky\nv_krupsky@mail.ru");
+			alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					return;
+				}
+			});
+			alertDialog.show();
+		} catch (NameNotFoundException e) {
+		}
 	}
 
 	private void debugDrawOnOff() {
@@ -653,7 +664,7 @@ public class MyActivity extends Activity {
 		return locationListener != null;
 	}
 
-	private void startFollow() {
+	private void startFollow(final boolean fromMenu) {
 		if (locationListener == null) {
 			locationListener = new LocationListener() {
 				public void onStatusChanged(String provider, int status,
@@ -670,7 +681,7 @@ public class MyActivity extends Activity {
 					// stopFollow();
 				}
 
-				private boolean scroll = true;
+				private boolean scroll = fromMenu;
 
 				public void onLocationChanged(Location location) {
 					LocationX loc = new LocationX(location);
@@ -698,7 +709,7 @@ public class MyActivity extends Activity {
 
 	private void followOnOff() {
 		if (!following()) {
-			startFollow();
+			startFollow(true);
 			Editor prefsPrivateEditor = settings.edit();
 			prefsPrivateEditor.putBoolean(FOLLOW_GPS_SETTING, true);
 			prefsPrivateEditor.commit();
@@ -811,7 +822,7 @@ public class MyActivity extends Activity {
 			Bundle b = mapsService.getBundle();
 			view.save(b);
 		}
-		//locationManager = null;
+		// locationManager = null;
 
 		Adapter.log("onDestroy");
 		unbindService(conn);

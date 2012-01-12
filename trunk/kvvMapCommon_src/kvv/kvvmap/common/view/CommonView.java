@@ -49,6 +49,8 @@ public class CommonView implements ICommonView {
 
 	private final Diagram diagram;
 
+	int factor = 1;
+
 	public CommonView(IPlatformView platformViewView, final Environment envir) {
 		this.envir = envir;
 		this.platformViewView = platformViewView;
@@ -322,36 +324,78 @@ public class CommonView implements ICommonView {
 		}
 	}
 
+	public int x_scr2tiles(int x) {
+		x -= platformViewView.getWidth() / 2;
+		x /= factor;
+		return x + centerXY.x;
+	}
+
+	public int y_scr2tiles(int y) {
+		y -= platformViewView.getHeight() / 2;
+		y /= factor;
+		return y + centerXY.y;
+	}
+
+	public int x_tiles2scr(int x) {
+		x -= centerXY.x;
+		x *= factor;
+		return x + platformViewView.getWidth() / 2;
+	}
+
+	public int y_tiles2scr(int y) {
+		y -= centerXY.y;
+		y *= factor;
+		return y + platformViewView.getHeight() / 2;
+	}
+
 	private void drawTiles(GC gc) {
+		tilesDrawn.clear();
 		int w = gc.getWidth();
 		int h = gc.getHeight();
-
-		tilesDrawn.clear();
-
-		int x0 = centerXY.x - w / 2;
-		int y0 = centerXY.y - h / 2;
-
-		int nx0 = x0 / Adapter.TILE_SIZE;
-		int ny0 = y0 / Adapter.TILE_SIZE;
-
-		int nx1 = (x0 + w - 1) / Adapter.TILE_SIZE;
-		int ny1 = (y0 + h - 1) / Adapter.TILE_SIZE;
-
-		for (int nx = nx0; nx <= nx1; nx++) {
-			for (int ny = ny0; ny <= ny1; ny++) {
+		
+		int nx0 = x_scr2tiles(0) / Adapter.TILE_SIZE;
+		int x0 = x_tiles2scr(nx0 * Adapter.TILE_SIZE);
+		int ny0 = y_scr2tiles(0) / Adapter.TILE_SIZE;
+		int y0 = y_tiles2scr(ny0 * Adapter.TILE_SIZE);
+		
+//
+//
+//		int nx0 = (centerXY.x * factor - w / 2) / Adapter.TILE_SIZE;
+//		int ny0 = (centerXY.y * factor - h / 2) / Adapter.TILE_SIZE;
+//
+//		int x0 = (centerXY.x * factor - w / 2) % Adapter.TILE_SIZE;
+//
+//		int x0 = (centerXY.x * factor - w / 2) / factor;
+//		int y0 = (centerXY.y * factor - h / 2) / factor;
+//
+//		int x0scr = centerXY.x - w / 2;
+//		int y0scr = centerXY.y - h / 2;
+//
+//		int nx0 = x0 / Adapter.TILE_SIZE;
+//		int ny0 = y0 / Adapter.TILE_SIZE;
+//
+//		// int nx1 = (x0 + w - 1) / Adapter.TILE_SIZE;
+//		// int ny1 = (y0 + h - 1) / Adapter.TILE_SIZE;
+//
+//		int x = centerXY.x - w / 2
+		
+		int x = x0;
+		for (int nx = nx0; x < w; nx++, x += Adapter.TILE_SIZE * factor) {
+			int y = y0;
+			for (int ny = ny0; y < h; ny++, y += Adapter.TILE_SIZE * factor) {
 				long id = TileId.make(nx, ny, zoom);
 
-				int x = (nx * Adapter.TILE_SIZE) - x0;
-				int y = (ny * Adapter.TILE_SIZE) - y0;
+				// int x = (nx * Adapter.TILE_SIZE) - x0;
+				// int y = (ny * Adapter.TILE_SIZE) - y0;
 
 				Tile tile = mapTiles.getTile(id, centerXY, p1 == null);
 				if (tile != null)
-					tile.draw(gc, x, y);
+					tile.draw(gc, x, y, factor);
 
 				if (getInfoLevel().ordinal() > 0) {
 					tile = pathTiles.getTile(id, centerXY, p1 == null);
 					if (tile != null)
-						tile.draw(gc, x, y);
+						tile.draw(gc, x, y, factor);
 				}
 
 				tilesDrawn.add(id);

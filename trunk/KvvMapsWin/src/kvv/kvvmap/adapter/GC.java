@@ -18,7 +18,7 @@ public class GC {
 		this.width = width;
 		this.height = height;
 		font = g.getFont();
-//		g.fillRect(0, 0, width, height);
+		// g.fillRect(0, 0, width, height);
 		g.clipRect(0, 0, width, height);
 	}
 
@@ -89,11 +89,17 @@ public class GC {
 		g.drawImage((BufferedImage) img, x, y, null);
 	}
 
-//	public void drawImage(Object img, int dstx, int dsty, int srcx, int srcy,
-//			int w, int h) {
-//		g.drawImage((BufferedImage) img, dstx, dsty, dstx + w, dsty + h, srcx,
-//				srcy, srcx + w, srcy + h, null);
-//	}
+	public void drawImage(Object img, int x, int y, int factor) {
+		BufferedImage bm = (BufferedImage) img;
+		g.drawImage(bm, x, y, bm.getWidth() * factor, bm.getHeight() * factor,
+				null);
+	}
+
+	// public void drawImage(Object img, int dstx, int dsty, int srcx, int srcy,
+	// int w, int h) {
+	// g.drawImage((BufferedImage) img, dstx, dsty, dstx + w, dsty + h, srcx,
+	// srcy, srcx + w, srcy + h, null);
+	// }
 
 	public void clipRect(int x, int y, int w, int h) {
 		g.clipRect(x, y, w, h);
