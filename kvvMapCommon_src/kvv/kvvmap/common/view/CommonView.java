@@ -27,11 +27,12 @@ public class CommonView implements ICommonView {
 
 	private volatile ISelectable sel;
 
-	private final IPlatformView platformViewView;
+	private final IPlatformView platformView;
 
-	private int zoom = Utils.MIN_ZOOM;
+	private MapViewParams mapPos = new MapViewParams();
 
-	private PointInt centerXY;
+	// private int zoom = Utils.MIN_ZOOM;
+	// private PointInt centerXY;
 
 	private InfoLevel infoLevel = InfoLevel.HIGH;
 
@@ -49,11 +50,9 @@ public class CommonView implements ICommonView {
 
 	private final Diagram diagram;
 
-	int factor = 1;
-
-	public CommonView(IPlatformView platformViewView, final Environment envir) {
+	public CommonView(IPlatformView platformView, final Environment envir) {
 		this.envir = envir;
-		this.platformViewView = platformViewView;
+		this.platformView = platformView;
 
 		IPlaceMarksListener pmListener = new IPlaceMarksListener() {
 
@@ -134,8 +133,8 @@ public class CommonView implements ICommonView {
 		myLocationDimmed = false;
 
 		if (onScreen(oldLocation)) {
-			int dx = myLocation.getX(zoom) - oldLocation.getX(zoom);
-			int dy = myLocation.getY(zoom) - oldLocation.getY(zoom);
+			int dx = myLocation.getX(getZoom()) - oldLocation.getX(getZoom());
+			int dy = myLocation.getY(getZoom()) - oldLocation.getY(getZoom());
 			animateBy(new PointInt(dx, dy));
 			repaint();
 		} else if (scroll) {
@@ -147,10 +146,9 @@ public class CommonView implements ICommonView {
 
 	private boolean onScreen(LocationX loc) {
 		return loc != null
-				&& (Math.abs(loc.getX(zoom) - centerXY.x) < platformViewView
-						.getWidth() / 2 && Math
-						.abs(loc.getY(zoom) - centerXY.y) < platformViewView
-						.getHeight() / 2);
+				&& (Math.abs(mapPos.geo2scrX(loc.getX(getZoom()))) < platformView
+						.getWidth() / 2 && Math.abs(mapPos.geo2scrX(loc
+						.getY(getZoom()))) < platformView.getHeight() / 2);
 
 	}
 
@@ -159,8 +157,8 @@ public class CommonView implements ICommonView {
 	}
 
 	public boolean isOnMyLocation() {
-		return myLocation != null && myLocation.getX(zoom) == centerXY.x
-				&& myLocation.getY(zoom) == centerXY.y;
+		return myLocation != null && Math.abs(myLocation.getX(getZoom())) < 2
+				&& Math.abs(myLocation.getY(getZoom())) < 2;
 	}
 
 	private PointInt p1;
@@ -223,9 +221,13 @@ public class CommonView implements ICommonView {
 
 	private Tile getCenterTile() {
 		envir.adapter.assertUIThread();
+
+		PointInt centerXY = new PointInt((int) mapPos.centerX(),
+				(int) mapPos.centerY());
+
 		int nxC = centerXY.x / Adapter.TILE_SIZE;
 		int nyC = centerXY.y / Adapter.TILE_SIZE;
-		long id = TileId.make(nxC, nyC, zoom);
+		long id = TileId.make(nxC, nyC, getZoom());
 		Tile tile = mapTiles.getTile(id, centerXY, false);
 		return tile;
 	}
@@ -251,34 +253,31 @@ public class CommonView implements ICommonView {
 	}
 
 	public void zoomOut() {
-		if (zoom > Utils.MIN_ZOOM)
-			setZoom(zoom - 1);
+		if (getZoom() > Utils.MIN_ZOOM)
+			setZoom(getZoom() - 1);
 	}
 
 	public void zoomIn() {
-		if (zoom < Utils.MAX_ZOOM)
-			setZoom(zoom + 1);
+		if (getZoom() < Utils.MAX_ZOOM)
+			setZoom(getZoom() + 1);
 	}
 
 	public int getZoom() {
-		return zoom;
+		return mapPos.getZoom();
 	}
 
 	public void setZoom(int zoom) {
-		LocationX loc = getLocation();
-		this.zoom = zoom;
+		envir.adapter.assertUIThread();
 		mapTiles.stopLoading();
 		pathTiles.stopLoading();
-		animateTo(loc);
+		mapPos.setZoom(zoom);
+		repaint();
+		updateSel();
 	}
 
 	public void animateTo(LocationX loc, int dx, int dy) {
 		envir.adapter.assertUIThread();
-		if (loc.getLatitude() > 85 || loc.getLatitude() < -85)
-			return;
-		int x = (int) (Utils.lon2x(loc.getLongitude(), zoom));
-		int y = (int) (Utils.lat2y(loc.getLatitude(), zoom));
-		centerXY = new PointInt(x - dx, y - dy);
+		mapPos.animateTo(loc.getLongitude(), loc.getLatitude(), dx, dy);
 		repaint();
 		updateSel();
 	}
@@ -289,12 +288,7 @@ public class CommonView implements ICommonView {
 
 	private void animateBy(PointInt offset) {
 		envir.adapter.assertUIThread();
-		int x = centerXY.x + offset.x;
-		int y = centerXY.y + offset.y;
-		double lat = Utils.y2lat(y, zoom);
-		if (lat > 85 || lat < -85)
-			return;
-		centerXY = new PointInt(x, y);
+		mapPos.animateBy(offset);
 		repaint();
 		cancelSel();
 	}
@@ -307,10 +301,10 @@ public class CommonView implements ICommonView {
 		drawTiles(gc);
 		// long time1 = System.currentTimeMillis();
 		// System.out.println("t1 = " + (time1 - time));
-		int locationH = ViewHelper.drawMyLocation(gc, this, myLocation,
+		int locationH = ViewHelper.drawMyLocation(gc, mapPos, myLocation,
 				isMyLocationDimmed());
 		ViewHelper.drawCross(gc);
-		ViewHelper.drawScale(gc, this);
+		ViewHelper.drawScale(gc, mapPos);
 		// long time2 = System.currentTimeMillis();
 		// System.out.println("t2 = " + (time2 - time1));
 
@@ -320,82 +314,61 @@ public class CommonView implements ICommonView {
 			LocationX myLoc = myLocation;
 			if (!isMyLocationDimmed())
 				myLoc = null;
-			ViewHelper.drawTarget(gc, this, myLoc);
+			ViewHelper
+					.drawTarget(gc, mapPos, getLocation(), myLoc, getTarget());
 		}
 	}
 
-	public int x_scr2tiles(int x) {
-		x -= platformViewView.getWidth() / 2;
-		x /= factor;
-		return x + centerXY.x;
-	}
-
-	public int y_scr2tiles(int y) {
-		y -= platformViewView.getHeight() / 2;
-		y /= factor;
-		return y + centerXY.y;
-	}
-
-	public int x_tiles2scr(int x) {
-		x -= centerXY.x;
-		x *= factor;
-		return x + platformViewView.getWidth() / 2;
-	}
-
-	public int y_tiles2scr(int y) {
-		y -= centerXY.y;
-		y *= factor;
-		return y + platformViewView.getHeight() / 2;
-	}
+	// public int x_scr2tiles(int x, int w) {
+	// x -= w / 2;
+	// return x + centerXY.x;
+	// }
+	//
+	// public int y_scr2tiles(int y, int h) {
+	// y -= h / 2;
+	// return y + centerXY.y;
+	// }
+	//
+	// public int x_tiles2scr(int x, int w) {
+	// x -= centerXY.x;
+	// return x + w / 2;
+	// }
+	//
+	// public int y_tiles2scr(int y, int h) {
+	// y -= centerXY.y;
+	// return y + h / 2;
+	// }
 
 	private void drawTiles(GC gc) {
 		tilesDrawn.clear();
+
+		PointInt centerXY = new PointInt((int) mapPos.centerX(),
+				(int) mapPos.centerX());
+
 		int w = gc.getWidth();
 		int h = gc.getHeight();
-		
-		int nx0 = x_scr2tiles(0) / Adapter.TILE_SIZE;
-		int x0 = x_tiles2scr(nx0 * Adapter.TILE_SIZE);
-		int ny0 = y_scr2tiles(0) / Adapter.TILE_SIZE;
-		int y0 = y_tiles2scr(ny0 * Adapter.TILE_SIZE);
-		
-//
-//
-//		int nx0 = (centerXY.x * factor - w / 2) / Adapter.TILE_SIZE;
-//		int ny0 = (centerXY.y * factor - h / 2) / Adapter.TILE_SIZE;
-//
-//		int x0 = (centerXY.x * factor - w / 2) % Adapter.TILE_SIZE;
-//
-//		int x0 = (centerXY.x * factor - w / 2) / factor;
-//		int y0 = (centerXY.y * factor - h / 2) / factor;
-//
-//		int x0scr = centerXY.x - w / 2;
-//		int y0scr = centerXY.y - h / 2;
-//
-//		int nx0 = x0 / Adapter.TILE_SIZE;
-//		int ny0 = y0 / Adapter.TILE_SIZE;
-//
-//		// int nx1 = (x0 + w - 1) / Adapter.TILE_SIZE;
-//		// int ny1 = (y0 + h - 1) / Adapter.TILE_SIZE;
-//
-//		int x = centerXY.x - w / 2
-		
-		int x = x0;
-		for (int nx = nx0; x < w; nx++, x += Adapter.TILE_SIZE * factor) {
-			int y = y0;
-			for (int ny = ny0; y < h; ny++, y += Adapter.TILE_SIZE * factor) {
-				long id = TileId.make(nx, ny, zoom);
 
-				// int x = (nx * Adapter.TILE_SIZE) - x0;
-				// int y = (ny * Adapter.TILE_SIZE) - y0;
+		int nx0 = (int) mapPos.scr2geoX(-w / 2) / Adapter.TILE_SIZE;
+		int x0 = (int) mapPos.geo2scrX(nx0 * Adapter.TILE_SIZE) + w / 2;
+		// int x0 = x_tiles2scr(nx0 * Adapter.TILE_SIZE, w);
+		int ny0 = (int) mapPos.scr2geoY(-h / 2) / Adapter.TILE_SIZE;
+		int y0 = (int) mapPos.geo2scrY(ny0 * Adapter.TILE_SIZE) + h / 2;
+		// int y0 = y_tiles2scr(ny0 * Adapter.TILE_SIZE, h);
+
+		int x = x0;
+		for (int nx = nx0; x < w; nx++, x += Adapter.TILE_SIZE) {
+			int y = y0;
+			for (int ny = ny0; y < h; ny++, y += Adapter.TILE_SIZE) {
+				long id = TileId.make(nx, ny, getZoom());
 
 				Tile tile = mapTiles.getTile(id, centerXY, p1 == null);
 				if (tile != null)
-					tile.draw(gc, x, y, factor);
+					tile.draw(gc, x, y);
 
 				if (getInfoLevel().ordinal() > 0) {
 					tile = pathTiles.getTile(id, centerXY, p1 == null);
 					if (tile != null)
-						tile.draw(gc, x, y, factor);
+						tile.draw(gc, x, y);
 				}
 
 				tilesDrawn.add(id);
@@ -443,7 +416,7 @@ public class CommonView implements ICommonView {
 
 	@Override
 	public void repaint() {
-		platformViewView.repaint();
+		platformView.repaint();
 	}
 
 	public ISelectable getSel() {
@@ -485,9 +458,9 @@ public class CommonView implements ICommonView {
 		return envir.placemarks.getTarget();
 	}
 
-	public PointInt getCenterXY() {
-		return centerXY;
-	}
+	// public PointInt getCenterXY() {
+	// return centerXY;
+	// }
 
 	public LocationX getLocation() {
 		return getLocation(0, 0);
@@ -495,8 +468,8 @@ public class CommonView implements ICommonView {
 
 	public LocationX getLocation(int dx, int dy) {
 		envir.adapter.assertUIThread();
-		return new LocationX(Utils.x2lon(centerXY.x + dx, zoom), Utils.y2lat(
-				centerXY.y + dy, zoom));
+		return new LocationX(Utils.x2lon(mapPos.scr2geoX(dx), getZoom()),
+				Utils.y2lat(mapPos.scr2geoY(dy), getZoom()));
 	}
 
 	private void cancelSel() {
@@ -506,9 +479,9 @@ public class CommonView implements ICommonView {
 
 	private void updateSel() {
 		envir.adapter.assertUIThread();
-		selectionThread.set(centerXY.x, centerXY.y,
-				platformViewView.getWidth(), platformViewView.getHeight(),
-				zoom, envir.adapter, envir.placemarks, envir.paths,
+		selectionThread.set((int) mapPos.centerX(), (int) mapPos.centerY(),
+				platformView.getWidth(), platformView.getHeight(), getZoom(),
+				envir.adapter, envir.placemarks, envir.paths,
 				new SelectionThread.Callback() {
 					@Override
 					public void selectionChanged(ISelectable sel) {
@@ -517,12 +490,11 @@ public class CommonView implements ICommonView {
 						if (sel instanceof PathSelection) {
 							PathSelection sel1 = (PathSelection) sel;
 							diagram.set(sel1.path, sel1.pm,
-									platformViewView.getWidth(),
-									platformViewView.getHeight());
+									platformView.getWidth(),
+									platformView.getHeight());
 						} else {
-							diagram.set(null, null,
-									platformViewView.getWidth(),
-									platformViewView.getHeight());
+							diagram.set(null, null, platformView.getWidth(),
+									platformView.getHeight());
 						}
 					}
 				});

@@ -21,9 +21,9 @@ public final class Tile {
 		Adapter.log("Tile " + ++cnt);
 	}
 
-	public synchronized void draw(GC gc, int x, int y, int factor) {
+	public synchronized void draw(GC gc, int x, int y) {
 		if (img != null)
-			gc.drawImage(img.img, x, y, factor);
+			gc.drawImage(img.img, x, y);
 	}
 
 	public boolean isMultiple() {

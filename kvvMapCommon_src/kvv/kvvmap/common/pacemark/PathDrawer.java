@@ -71,14 +71,21 @@ public class PathDrawer {
 	public static void drawPathInZoom(PathInZoom pathInZoom, GC gc, long id,
 			InfoLevel infoLevel, LocationX selPM) {
 
-		// pathInZoom.draw(gc, id, infoLevel, selPM);
+		if (selPM != null) {
+			drawPathInZoom(pathInZoom, gc, id, infoLevel, 0x7fFFFFFF, 8);
+			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.ALYI, 6);
+			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.YELLOW, 2);
+		} else {
+			drawPathInZoom(pathInZoom, gc, id, infoLevel, 0x7fFFFFFF, 8);
+			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.ALYI, 4);
+			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.YELLOW, 1);
+		}
+	}
 
-		gc.setColor(COLOR.RED);
-
-		if (selPM != null)
-			gc.setStrokeWidth(6);
-		else
-			gc.setStrokeWidth(4);
+	public static void drawPathInZoom(PathInZoom pathInZoom, GC gc, long id,
+			InfoLevel infoLevel, int color, int width) {
+		gc.setColor(color);
+		gc.setStrokeWidth(width);
 
 		int nx = TileId.nx(id);
 		int ny = TileId.ny(id);
@@ -92,7 +99,6 @@ public class PathDrawer {
 			gc.drawLine(pts[i] - dx, pts[i + 1] - dy, pts[i + 2] - dx,
 					pts[i + 3] - dy);
 		}
-
 	}
 
 	public static void drawPlacemarks(PlaceMarks pms, GC gc, long id,
