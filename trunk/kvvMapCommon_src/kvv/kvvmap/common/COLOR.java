@@ -9,6 +9,8 @@ public class COLOR {
 	public static final int CYAN = 0xFF00FFFF;
 	public static final int GREEN = 0xFF00FF00;
 	public static final int YELLOW = 0xFFFFFF00;
+	public static final int CHARTREUSE = 0xFF7FFF00;
+	public static final int ALYI = 0xFFFF2400;
 	
 //	public static final int TARG_COLOR = 0xFFFF8000;
 	public static final int TARG_COLOR = MAGENTA;

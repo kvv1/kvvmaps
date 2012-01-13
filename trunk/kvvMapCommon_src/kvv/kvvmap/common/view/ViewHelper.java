@@ -38,11 +38,11 @@ public class ViewHelper {
 			return mul;
 	}
 
-	public static void drawScale(GC gc, CommonView view) {
+	public static void drawScale(GC gc, MapViewParams mapPos) {
 		int lineHeight = gc.getHeight() / 24;
 		int scaleWidth = 5;
 
-		int m = (int) pt2m(gc.getWidth() / 2, view);
+		int m = (int) pt2m(gc.getWidth() / 2, mapPos);
 		int m1 = getScale(m);
 
 		gc.setStrokeWidth(1);
@@ -87,22 +87,20 @@ public class ViewHelper {
 		// gc.drawText(text, 4, lineHeight);
 	}
 
-	public static void drawTarget(GC gc, CommonView view, LocationX myLoc) {
-		LocationX targ = view.getTarget();
+	public static void drawTarget(GC gc, MapViewParams mapPos, LocationX center,
+			LocationX myLoc, LocationX targ) {
 		if (targ == null)
 			return;
 
-		PointInt center = view.getCenterXY();
-		int _dx = Math.abs(center.x - targ.getX(view.getZoom()));
-		int _dy = Math.abs(center.y - targ.getY(view.getZoom()));
+		int _dx = (int) Math.abs(mapPos.lon2scrX(targ.getLongitude()));
+		int _dy = (int) Math.abs(mapPos.lat2scrY(targ.getLatitude()));
 		if (_dx > gc.getWidth() / 3 || _dy > gc.getHeight() / 3) {
 			gc.setColor(COLOR.TARG_COLOR);
 			gc.setStrokeWidth(2);
 
 			int len = gc.getWidth() / 16;
 
-			double bearing = (90 - view.getLocation().bearingTo(targ)) * Math.PI
-					/ 180;
+			double bearing = (90 - center.bearingTo(targ)) * Math.PI / 180;
 
 			int dx = (int) (len * Math.cos(bearing));
 			int dy = (int) (len * Math.sin(bearing));
@@ -138,28 +136,33 @@ public class ViewHelper {
 		gc.drawLine(x - sz, y, x + sz, y);
 	}
 
-	public static int drawMyLocation(GC gc, CommonView view, LocationX loc,
+	public static int drawMyLocation(GC gc, MapViewParams mapPos, LocationX loc,
 			boolean dimmed) {
 		if (loc == null)
 			return 0;
 
-		PointInt center = view.getCenterXY();
-		int ptx = loc.getX(view.getZoom());
-		int pty = loc.getY(view.getZoom());
-		int x = ptx - (center.x - gc.getWidth() / 2);
-		int y = pty - (center.y - gc.getHeight() / 2);
+		// PointInt center = view.getCenterXY();
+		// int ptx = loc.getX(view.getZoom());
+		// int pty = loc.getY(view.getZoom());
+		// int x = ptx - (center.x - gc.getWidth() / 2);
+		// int y = pty - (center.y - gc.getHeight() / 2);
 
-		double accPt = m2pt(loc.getAccuracy(), view);
+		int x = (int) mapPos.lon2scrX(loc.getLongitude());
+		int y = (int) mapPos.lat2scrY(loc.getLatitude());
+
+		double accPt = m2pt(loc.getAccuracy(), mapPos);
 
 		if (accPt > 10) {
 			gc.setColor(COLOR.MAGENTA & 0x80FFFFFF);
 			gc.fillCircle(x, y, (float) accPt);
 		}
 
+		gc.drawArrow(x, y, loc, dimmed);
+
 		int lineHeight = gc.getHeight() / 24;
 		gc.setTextSize(lineHeight);
 
-		gc.setColor(0xA0000000);
+		gc.setColor(0x80000000);
 		gc.fillRect(0, gc.getHeight() - lineHeight, gc.getWidth(),
 				gc.getHeight());
 
@@ -167,25 +170,26 @@ public class ViewHelper {
 		gc.drawText(
 				Utils.format(loc.getLongitude()) + " "
 						+ Utils.format(loc.getLatitude()) + " "
-						+ (int)loc.getAltitude() + "m " + (int)(loc.getSpeed() * 3.6f)
-						+ "km/h", 0, gc.getHeight() - 2);
-
-		gc.drawArrow(x, y, loc, dimmed);
+						+ (int) loc.getAltitude() + "m "
+						+ (int) (loc.getSpeed() * 3.6f) + "km/h", 0,
+				gc.getHeight() - 2);
 
 		return lineHeight;
 	}
 
-	private static double pt2m(int pt, CommonView view) {
+	private static double pt2m(int pt, MapViewParams mapPos) {
 		double m1deg = 111000;
-		double lat1 = Utils.y2lat(view.getCenterXY().y - pt / 2, view.getZoom());
-		double lat2 = Utils.y2lat(view.getCenterXY().y + pt / 2, view.getZoom());
+		double lat1 = Utils.y2lat(mapPos.centerY() - pt / 2, mapPos.getZoom());
+		double lat2 = Utils.y2lat(mapPos.centerY() + pt / 2, mapPos.getZoom());
 		return (lat1 - lat2) * m1deg;
 	}
 
-	private static double m2pt(double m, CommonView view) {
+	private static double m2pt(double m, MapViewParams mapPos) {
 		double m1deg = 111000;
-		double lat1 = Utils.y2lat(view.getCenterXY().y - 10 / 2, view.getZoom());
-		double lat2 = Utils.y2lat(view.getCenterXY().y + 10 / 2, view.getZoom());
+		double lat1 = Utils
+				.y2lat(mapPos.centerY() - 10 / 2, mapPos.getZoom());
+		double lat2 = Utils
+				.y2lat(mapPos.centerY() + 10 / 2, mapPos.getZoom());
 		return m * 10 / ((lat1 - lat2) * m1deg);
 	}
 
