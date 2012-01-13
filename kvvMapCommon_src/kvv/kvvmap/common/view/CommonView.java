@@ -29,10 +29,7 @@ public class CommonView implements ICommonView {
 
 	private final IPlatformView platformView;
 
-	private MapViewParams mapPos = new MapViewParams();
-
-	// private int zoom = Utils.MIN_ZOOM;
-	// private PointInt centerXY;
+	private final MapViewParams mapPos = new MapViewParams();
 
 	private InfoLevel infoLevel = InfoLevel.HIGH;
 
@@ -133,8 +130,10 @@ public class CommonView implements ICommonView {
 		myLocationDimmed = false;
 
 		if (onScreen(oldLocation)) {
-			int dx = myLocation.getX(getZoom()) - oldLocation.getX(getZoom());
-			int dy = myLocation.getY(getZoom()) - oldLocation.getY(getZoom());
+			int dx = (int) (mapPos.lon2scrX(myLocation.getLongitude()) - mapPos
+					.lon2scrX(oldLocation.getLongitude()));
+			int dy = (int) (mapPos.lat2scrY(myLocation.getLatitude()) - mapPos
+					.lat2scrY(oldLocation.getLatitude()));
 			animateBy(new PointInt(dx, dy));
 			repaint();
 		} else if (scroll) {
@@ -146,9 +145,9 @@ public class CommonView implements ICommonView {
 
 	private boolean onScreen(LocationX loc) {
 		return loc != null
-				&& (Math.abs(mapPos.geo2scrX(loc.getX(getZoom()))) < platformView
-						.getWidth() / 2 && Math.abs(mapPos.geo2scrX(loc
-						.getY(getZoom()))) < platformView.getHeight() / 2);
+				&& (Math.abs(mapPos.lon2scrX(loc.getLongitude())) < platformView
+						.getWidth() / 2 && Math.abs(mapPos.lat2scrY(loc
+						.getLatitude())) < platformView.getHeight() / 2);
 
 	}
 
@@ -157,8 +156,9 @@ public class CommonView implements ICommonView {
 	}
 
 	public boolean isOnMyLocation() {
-		return myLocation != null && Math.abs(myLocation.getX(getZoom())) < 2
-				&& Math.abs(myLocation.getY(getZoom())) < 2;
+		return myLocation != null
+				&& Math.abs(mapPos.lon2scrX(myLocation.getLongitude())) < 2
+				&& Math.abs(mapPos.lat2scrY(myLocation.getLatitude())) < 2;
 	}
 
 	private PointInt p1;
@@ -288,7 +288,7 @@ public class CommonView implements ICommonView {
 
 	private void animateBy(PointInt offset) {
 		envir.adapter.assertUIThread();
-		mapPos.animateBy(offset);
+		mapPos.animateBy(offset.x, offset.y);
 		repaint();
 		cancelSel();
 	}
@@ -343,7 +343,7 @@ public class CommonView implements ICommonView {
 		tilesDrawn.clear();
 
 		PointInt centerXY = new PointInt((int) mapPos.centerX(),
-				(int) mapPos.centerX());
+				(int) mapPos.centerY());
 
 		int w = gc.getWidth();
 		int h = gc.getHeight();
@@ -458,18 +458,13 @@ public class CommonView implements ICommonView {
 		return envir.placemarks.getTarget();
 	}
 
-	// public PointInt getCenterXY() {
-	// return centerXY;
-	// }
-
 	public LocationX getLocation() {
 		return getLocation(0, 0);
 	}
 
 	public LocationX getLocation(int dx, int dy) {
 		envir.adapter.assertUIThread();
-		return new LocationX(Utils.x2lon(mapPos.scr2geoX(dx), getZoom()),
-				Utils.y2lat(mapPos.scr2geoY(dy), getZoom()));
+		return new LocationX(mapPos.scrX2lon(dx), mapPos.scrY2lat(dy));
 	}
 
 	private void cancelSel() {

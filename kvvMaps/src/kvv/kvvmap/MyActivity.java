@@ -1,15 +1,12 @@
 package kvv.kvvmap;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -66,8 +63,6 @@ import android.widget.ImageButton;
 
 @SuppressWarnings("deprecation")
 public class MyActivity extends Activity {
-
-	private final static String VERSION = "version: 3.3.2";
 
 	private static final String BUTTONS_VISIBLE_SETTING = "buttonsVisible";
 	private static final String FOLLOW_GPS_SETTING = "followGPS";
