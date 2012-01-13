@@ -1,12 +1,11 @@
 package kvv.kvvmap.common.view;
 
-import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.Utils;
 
-public class MapViewParams {
+public final class MapViewParams {
 	private double centerX;
 	private double centerY;
-	private int zoom;
+	private int zoom = Utils.MIN_ZOOM;
 	private float angle;
 
 	public int getZoom() {
@@ -37,6 +36,14 @@ public class MapViewParams {
 		return geo2scrY(Utils.lat2y(lat, zoom));
 	}
 
+	public double scrX2lon(double x) {
+		return Utils.x2lon(scr2geoX(x), zoom);
+	}
+
+	public double scrY2lat(double y) {
+		return Utils.y2lat(scr2geoY(y), zoom);
+	}
+
 	public void setZoom(int zoom) {
 		double lon = Utils.x2lon(centerX, this.zoom);
 		double lat = Utils.y2lat(centerY, this.zoom);
@@ -53,9 +60,9 @@ public class MapViewParams {
 		centerY = y - dy;
 	}
 
-	public void animateBy(PointInt offset) {
-		double x = centerX + offset.x;
-		double y = centerY + offset.y;
+	public void animateBy(int dx, int dy) {
+		double x = centerX + dx;
+		double y = centerY + dy;
 		double lat = Utils.y2lat(y, zoom);
 		if (lat > 85 || lat < -85)
 			return;

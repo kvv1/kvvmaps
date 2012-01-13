@@ -74,21 +74,10 @@ public class ViewHelper {
 
 		ViewHelper.drawText(gc, text, new PointInt(4, lineHeight), COLOR.BLACK,
 				0x80FFFFFF);
-
-		// RectX bounds = gc.getTextBounds(text);
-		// bounds.offset(4, lineHeight);
-		// bounds.inset(-1, -1);
-		// gc.setColor(0x80FFFFFF);
-		// gc.fillRect((float) (bounds.getX()), (float) (bounds.getY()),
-		// (float) (bounds.getX() + bounds.getWidth()),
-		// (float) (bounds.getY() + bounds.getHeight()));
-		//
-		// gc.setColor(COLOR.BLACK);
-		// gc.drawText(text, 4, lineHeight);
 	}
 
-	public static void drawTarget(GC gc, MapViewParams mapPos, LocationX center,
-			LocationX myLoc, LocationX targ) {
+	public static void drawTarget(GC gc, MapViewParams mapPos,
+			LocationX center, LocationX myLoc, LocationX targ) {
 		if (targ == null)
 			return;
 
@@ -136,19 +125,13 @@ public class ViewHelper {
 		gc.drawLine(x - sz, y, x + sz, y);
 	}
 
-	public static int drawMyLocation(GC gc, MapViewParams mapPos, LocationX loc,
-			boolean dimmed) {
+	public static int drawMyLocation(GC gc, MapViewParams mapPos,
+			LocationX loc, boolean dimmed) {
 		if (loc == null)
 			return 0;
 
-		// PointInt center = view.getCenterXY();
-		// int ptx = loc.getX(view.getZoom());
-		// int pty = loc.getY(view.getZoom());
-		// int x = ptx - (center.x - gc.getWidth() / 2);
-		// int y = pty - (center.y - gc.getHeight() / 2);
-
-		int x = (int) mapPos.lon2scrX(loc.getLongitude());
-		int y = (int) mapPos.lat2scrY(loc.getLatitude());
+		int x = (int) mapPos.lon2scrX(loc.getLongitude()) + gc.getWidth() / 2;
+		int y = (int) mapPos.lat2scrY(loc.getLatitude()) + gc.getHeight() / 2;
 
 		double accPt = m2pt(loc.getAccuracy(), mapPos);
 
@@ -186,10 +169,8 @@ public class ViewHelper {
 
 	private static double m2pt(double m, MapViewParams mapPos) {
 		double m1deg = 111000;
-		double lat1 = Utils
-				.y2lat(mapPos.centerY() - 10 / 2, mapPos.getZoom());
-		double lat2 = Utils
-				.y2lat(mapPos.centerY() + 10 / 2, mapPos.getZoom());
+		double lat1 = Utils.y2lat(mapPos.centerY() - 10 / 2, mapPos.getZoom());
+		double lat2 = Utils.y2lat(mapPos.centerY() + 10 / 2, mapPos.getZoom());
 		return m * 10 / ((lat1 - lat2) * m1deg);
 	}
 
