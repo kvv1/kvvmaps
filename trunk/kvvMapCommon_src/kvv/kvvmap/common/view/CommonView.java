@@ -130,11 +130,11 @@ public class CommonView implements ICommonView {
 		myLocationDimmed = false;
 
 		if (onScreen(oldLocation)) {
-			int dx = (int) (mapPos.lon2scrX(myLocation.getLongitude()) - mapPos
-					.lon2scrX(oldLocation.getLongitude()));
-			int dy = (int) (mapPos.lat2scrY(myLocation.getLatitude()) - mapPos
-					.lat2scrY(oldLocation.getLatitude()));
-			animateBy(new PointInt(dx, dy));
+			double dx = mapPos.lon2scrX(myLocation.getLongitude())
+					- mapPos.lon2scrX(oldLocation.getLongitude());
+			double dy = mapPos.lat2scrY(myLocation.getLatitude())
+					- mapPos.lat2scrY(oldLocation.getLatitude());
+			animateBy(dx, dy);
 			repaint();
 		} else if (scroll) {
 			animateTo(myLocation);
@@ -180,8 +180,7 @@ public class CommonView implements ICommonView {
 		@Override
 		public void onMouseDragged(int x, int y) {
 			if (p1 != null) {
-				PointInt offset = new PointInt(p1.x - x, p1.y - y);
-				animateBy(offset);
+				animateBy(p1.x - x, p1.y - y);
 				p1 = new PointInt(x, y);
 			}
 		}
@@ -286,9 +285,9 @@ public class CommonView implements ICommonView {
 		animateTo(loc, 0, 0);
 	}
 
-	private void animateBy(PointInt offset) {
+	private void animateBy(double dx, double dy) {
 		envir.adapter.assertUIThread();
-		mapPos.animateBy(offset.x, offset.y);
+		mapPos.animateBy(dx, dy);
 		repaint();
 		cancelSel();
 	}

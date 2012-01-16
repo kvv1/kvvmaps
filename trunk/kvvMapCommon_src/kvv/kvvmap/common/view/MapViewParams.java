@@ -60,7 +60,7 @@ public final class MapViewParams {
 		centerY = y - dy;
 	}
 
-	public void animateBy(int dx, int dy) {
+	public void animateBy(double dx, double dy) {
 		double x = centerX + dx;
 		double y = centerY + dy;
 		double lat = Utils.y2lat(y, zoom);
