@@ -45,11 +45,21 @@ public class PathDrawer {
 		double lonw = Utils.x2lon(x1, z) - lon;
 		double lat = Utils.y2lat(y1, z);
 		double lath = Utils.y2lat(y0, z) - lat;
+
+		Path selectedPath = null;
+		if (sel instanceof PathSelection)
+			selectedPath = ((PathSelection) sel).path;
+
 		synchronized (__rect) {
 			__rect.set(lon, lat, lonw, lath);
 			for (Path path : paths.getPaths()) {
-				if (path.filter(__rect))
-					drawPath(path, gc, tileId, infoLevel, sel);
+				if (path != selectedPath)
+					if (path.filter(__rect))
+						drawPath(path, gc, tileId, infoLevel, sel);
+			}
+			if (selectedPath != null) {
+				if (selectedPath.filter(__rect))
+					drawPath(selectedPath, gc, tileId, infoLevel, sel);
 			}
 		}
 	}
@@ -73,12 +83,12 @@ public class PathDrawer {
 
 		if (selPM != null) {
 			drawPathInZoom(pathInZoom, gc, id, infoLevel, 0x7fFFFFFF, 8);
-			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.ALYI, 6);
-			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.YELLOW, 2);
-		} else {
-			drawPathInZoom(pathInZoom, gc, id, infoLevel, 0x7fFFFFFF, 8);
 			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.ALYI, 4);
 			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.YELLOW, 1);
+		} else {
+			drawPathInZoom(pathInZoom, gc, id, infoLevel, 0x7fFFFFFF, 8);
+			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.ALYI, 2);
+			//drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.YELLOW, 1);
 		}
 	}
 
