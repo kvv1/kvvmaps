@@ -13,20 +13,12 @@ public class Tracker implements LocationListener {
 	private Path curPath;
 
 	private LocationManager lm;
-	private TrackerListener listener;
-
-	public interface TrackerListener {
-	}
 
 	public Tracker(Paths paths, LocationManager locationManager) {
 		this.lm = locationManager;
 		this.paths = paths;
 	}
 
-	public void setListener(TrackerListener tl) {
-		listener = tl;
-	}
-	
 	public void startPath() {
 		if (curPath == null) {
 			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000L, 20.0f,
@@ -69,7 +61,6 @@ public class Tracker implements LocationListener {
 	}
 
 	public void dispose() {
-		setListener(null);
 		endPath();
 		this.lm = null;
 	}

@@ -6,42 +6,60 @@ public final class MapViewParams {
 	private double centerX;
 	private double centerY;
 	private int zoom = Utils.MIN_ZOOM;
-	private float angle;
-
+	private double angle;
+	private double cos;
+	private double sin;
+	
 	public int getZoom() {
 		return zoom;
 	}
 
-	public double geo2scrX(double x) {
-		return x - centerX;
+	// public PointD geo2scr(PointD geo) {
+	// double x = geo.x - centerX;
+	// double y = geo.y - centerY;
+	// return new PointD(x, y);
+	// }
+
+	public double geo2scrX(double x, double y) {
+		x -= centerX;
+		y -= centerY;
+		return x * cos - y * sin;
 	}
 
-	public double geo2scrY(double y) {
-		return y - centerY;
+	public double geo2scrY(double x, double y) {
+		x -= centerX;
+		y -= centerY;
+		return x * sin + y * cos;
 	}
 
-	public double scr2geoX(double x) {
-		return x + centerX;
+	public double scr2geoX(double x, double y) {
+		double x1 = x * cos + y * sin;
+		return x1 + centerX;
 	}
 
-	public double scr2geoY(double y) {
-		return y + centerY;
+	public double scr2geoY(double x, double y) {
+		double y1 = -x * sin + y * cos;
+		return y1 + centerY;
 	}
 
-	public double lon2scrX(double lon) {
-		return geo2scrX(Utils.lon2x(lon, zoom));
+	public double scrX2lon(double x, double y) {
+		return Utils.x2lon(scr2geoX(x, y), zoom);
 	}
 
-	public double lat2scrY(double lat) {
-		return geo2scrY(Utils.lat2y(lat, zoom));
+	public double scrY2lat(double x, double y) {
+		return Utils.y2lat(scr2geoY(x, y), zoom);
 	}
 
-	public double scrX2lon(double x) {
-		return Utils.x2lon(scr2geoX(x), zoom);
+	public void setAngle(double angle) {
+		this.angle = angle;
+		this.cos = Math.cos(angle);
+		this.sin = Math.sin(angle);
 	}
 
-	public double scrY2lat(double y) {
-		return Utils.y2lat(scr2geoY(y), zoom);
+	{
+		setAngle(Math.PI / 8);
+		setAngle(Math.PI / 16);
+		setAngle(0);
 	}
 
 	public void setZoom(int zoom) {
@@ -77,4 +95,26 @@ public final class MapViewParams {
 	public double centerY() {
 		return centerY;
 	}
+
+	public double lon() {
+		return Utils.x2lon(centerX, this.zoom);
+	}
+
+	public double lat() {
+		return Utils.y2lat(centerY, this.zoom);
+	}
+	
+	public double sin() {
+		return sin;
+	}
+
+	public double cos() {
+		return cos;
+	}
+
+	public double angle() {
+		return angle;
+	}
+	
+	
 }

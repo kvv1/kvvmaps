@@ -3,6 +3,7 @@ package kvv.kvvmap.adapter;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.PorterDuff;
@@ -77,6 +78,7 @@ public class GC {
 	}
 
 	public void drawImage(Object img, int x, int y) {
+		paint.setFilterBitmap(true);
 		canvas.drawBitmap((Bitmap) img, x, y, paint);
 	}
 
@@ -84,6 +86,7 @@ public class GC {
 	private final Rect dst = new Rect();
 
 	public void drawImage(Object img, int x, int y, int factor) {
+		paint.setFilterBitmap(true);
 		synchronized (src) {
 			Bitmap bm = (Bitmap) img;
 			src.set(0, 0, bm.getWidth(), bm.getHeight());
@@ -171,6 +174,26 @@ public class GC {
 
 	public void drawArrow(int x, int y, LocationX myLocation, boolean dimmed) {
 		arrow.draw(canvas, x, y, myLocation.getBearing(), dimmed);
+	}
+
+	Matrix m;
+	
+	public void setTransform(float[] trans) {
+		m = canvas.getMatrix();
+		Matrix m = new Matrix();
+		m.setPolyToPoly(trans, 0, trans, trans.length / 2, trans.length / 4);
+		canvas.setMatrix(m);
+	}
+
+	public void setTransform(float deg, float px, float py) {
+		m = canvas.getMatrix();
+		Matrix m1 = new Matrix(m);
+		m1.postRotate(deg, px, py);
+		canvas.setMatrix(m1);
+	}
+	
+	public void clearTransform() {
+		canvas.setMatrix(m);
 	}
 
 }

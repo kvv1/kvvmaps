@@ -24,7 +24,7 @@ import kvv.kvvmap.dlg.PathDlg;
 import kvv.kvvmap.dlg.PlaceMarkDlg;
 import kvv.kvvmap.service.KvvMapsService;
 import kvv.kvvmap.service.KvvMapsService.IKvvMapsService;
-import kvv.kvvmap.service.Tracker.TrackerListener;
+import kvv.kvvmap.service.KvvMapsService.KvvMapsServiceListener;
 import kvv.kvvmap.view.MapView;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -218,9 +218,6 @@ public class MyActivity extends Activity {
 		super.onSaveInstanceState(outState);
 	}
 
-	private final TrackerListener tl = new TrackerListener() {
-	};
-
 	private ServiceConnection conn = new ServiceConnection() {
 
 		@Override
@@ -229,7 +226,6 @@ public class MyActivity extends Activity {
 				Adapter.log("onServiceConnected " + view + " "
 						+ MyActivity.this);
 				mapsService = (IKvvMapsService) service;
-				mapsService.setTrackerListener(tl);
 
 				MapsDir mapsDir = mapsService.getMapsDir();
 				Environment envir = new Environment(adapter,
@@ -238,6 +234,14 @@ public class MyActivity extends Activity {
 
 				Bundle b = mapsService.getBundle();
 				view.init(MyActivity.this, envir, b);
+				
+				mapsService.setListener(new KvvMapsServiceListener() {
+					@Override
+					public void mapsLoaded() {
+						if(view != null)
+							view.repaint();
+					}
+				});
 			}
 		}
 
@@ -510,6 +514,7 @@ public class MyActivity extends Activity {
 			}
 			return true;
 		case MENU_QUIT:
+			stopFollow();
 			stopService(new Intent(this, KvvMapsService.class));
 			finish();
 			return true;
@@ -520,28 +525,28 @@ public class MyActivity extends Activity {
 
 	private void updateSoftware() throws MalformedURLException, IOException {
 
-//		InputStream is = new URL(
-//				"http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk").openStream();
-//
-//		OutputStream os = new FileOutputStream(Adapter.ROOT + "/file.apk");
-//
-//		byte[] buffer = new byte[4096];
-//		int n;
-//		while ((n = is.read(buffer)) != -1)
-//			os.write(buffer, 0, n);
-//
-//		os.close();
-//		is.close();
-//
-//		Intent intent = new Intent(Intent.ACTION_VIEW);
-//		intent.setDataAndType(
-//				Uri.fromFile(new File(Adapter.ROOT + "/file.apk")),
-//				"application/vnd.android.package-archive");
-//
-//		startActivity(intent);
+		// InputStream is = new URL(
+		// "http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk").openStream();
+		//
+		// OutputStream os = new FileOutputStream(Adapter.ROOT + "/file.apk");
+		//
+		// byte[] buffer = new byte[4096];
+		// int n;
+		// while ((n = is.read(buffer)) != -1)
+		// os.write(buffer, 0, n);
+		//
+		// os.close();
+		// is.close();
+		//
+		// Intent intent = new Intent(Intent.ACTION_VIEW);
+		// intent.setDataAndType(
+		// Uri.fromFile(new File(Adapter.ROOT + "/file.apk")),
+		// "application/vnd.android.package-archive");
+		//
+		// startActivity(intent);
 
-		 startActivity(new Intent(Intent.ACTION_VIEW,
-		 Uri.parse("http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk")));
+		startActivity(new Intent(Intent.ACTION_VIEW,
+				Uri.parse("http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk")));
 	}
 
 	private void fixUnfixMap() {
@@ -820,8 +825,11 @@ public class MyActivity extends Activity {
 		// locationManager = null;
 
 		Adapter.log("onDestroy");
-		unbindService(conn);
-		disconnectFromService();
+
+		if (mapsService != null) {
+			unbindService(conn);
+			disconnectFromService();
+		}
 
 		if (view != null)
 			view.dispose();

@@ -146,8 +146,8 @@ class SelectionThread {
 		for (LocationX pm : placemarks) {
 			if (cancelled())
 				return null;
-			long dx = pm.getX(zoom) - x;
-			long dy = pm.getY(zoom) - y;
+			long dx = pm.getXint(zoom) - x;
+			long dy = pm.getYint(zoom) - y;
 			long d = dx * dx + dy * dy;
 			if ((maxDist == 0 || d < maxDist)
 					&& (pmNearest == null || d < dist)) {

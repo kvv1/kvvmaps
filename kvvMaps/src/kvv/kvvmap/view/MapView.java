@@ -119,12 +119,15 @@ public class MapView extends View implements IPlatformView {
 	@Override
 	public void onDraw(Canvas canvas) {
 
-		// Adapter.log("Draw " + this);
+		Adapter.log("Draw");
 
 		if (activity == null || commonView == null) {
 			canvas.drawColor(Color.YELLOW);
 			return;
 		}
+
+		Adapter.log("Draw1");
+
 
 		Paint paint = new Paint();
 
@@ -165,6 +168,12 @@ public class MapView extends View implements IPlatformView {
 
 		compass.drawCompass(canvas, paint, new Point(getWidth() - getWidth()
 				/ 10, getHeight() / 10), targBearing);
+		
+		if(activity.mapsService.isLoadingMaps()) {
+			paint.setColor(Color.CYAN);
+			paint.setTextSize(24);
+			canvas.drawText("Загрузка карт...", 10, 100, paint);
+		}
 
 	}
 

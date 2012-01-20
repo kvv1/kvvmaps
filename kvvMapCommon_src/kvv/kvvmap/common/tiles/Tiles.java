@@ -1,8 +1,5 @@
 package kvv.kvvmap.common.tiles;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.Cache;
@@ -13,7 +10,7 @@ public abstract class Tiles implements Recycleable {
 	private final Cache<Long, Tile> tileCache;
 	private final Adapter adapter;
 
-	private final Set<Long> tilesToIgnore = new HashSet<Long>();
+//	private final Set<Long> tilesToIgnore = new HashSet<Long>();
 
 	protected abstract void load(Long id, final TileLoaderCallback callback,
 			PointInt prioLoc);
@@ -62,14 +59,9 @@ public abstract class Tiles implements Recycleable {
 
 	public synchronized Tile getTile(long id, PointInt prioLoc,
 			boolean startLoadingIfNeeded) {
-		// log("getTile " + TileLoader.getId(id));
-		if (tilesToIgnore.contains(id))
-			return null;
 		Tile tile = tileCache.get(id);
 		if (tile != null) {
-			// log("found " + TileLoader.getId(id));
 			if (tile.needsReloading && startLoadingIfNeeded) {
-				// log("needsReloading " + TileLoader.getId(id));
 				load(id, callback, prioLoc);
 			}
 			return tile;

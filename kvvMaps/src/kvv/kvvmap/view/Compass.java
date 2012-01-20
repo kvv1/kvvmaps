@@ -2,6 +2,7 @@ package kvv.kvvmap.view;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
@@ -50,7 +51,9 @@ public class Compass {
 				canvas.rotate(targBearing + 180);
 				canvas.drawPath(arrowPathT, paint);
 			}
-
+			
+			canvas.rotate(compassValues[0]);
+			canvas.translate(-pt.x, -pt.y);
 		}
 	}
 

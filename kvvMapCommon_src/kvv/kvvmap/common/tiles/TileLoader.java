@@ -1,11 +1,12 @@
 package kvv.kvvmap.common.tiles;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.Set;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.PointInt;
-import kvv.kvvmap.common.Pair;
 
 public abstract class TileLoader {
 	private final Adapter adapter;
@@ -18,69 +19,80 @@ public abstract class TileLoader {
 	// private static void log(String s) {
 	// }
 
-	private static int cnt; 
-	
+	private static int cnt;
+
 	protected abstract Tile loadAsync(long id);
 
-	private final LinkedList<Pair<Long, TileLoaderCallback>> queue = new LinkedList<Pair<Long, TileLoaderCallback>>();
-	private final LinkedList<Pair<Long, TileLoaderCallback>> queue1 = new LinkedList<Pair<Long, TileLoaderCallback>>();
+	static class Request {
+		public Request(long id, TileLoaderCallback callback,
+				int requestId) {
+			this.id = id;
+			this.callback = callback;
+			this.requestId = requestId;
+		}
+
+		long id;
+		TileLoaderCallback callback;
+		int requestId;
+	}
+
+	private final LinkedList<Request> queue = new LinkedList<Request>();
+	private final Set<Request> processingRequests = new HashSet<Request>();
 
 	private Runnable r = new Runnable() {
 		@Override
 		public void run() {
-			final Pair<Long, TileLoaderCallback> request;
+			final Request request;
 			synchronized (queue) {
 				if (queue.isEmpty())
 					return;
 				request = queue.removeFirst();
-				queue1.add(request);
+				processingRequests.add(request);
 			}
-			Tile tile = loadAsync(request.first);
+			Tile tile = loadAsync(request.id);
 			if (tile != null) {
 				final Tile tile1 = tile;
-				final TileLoaderCallback callback = request.second;
+				final TileLoaderCallback callback = request.callback;
 				adapter.execUI(new Runnable() {
 					@Override
 					public void run() {
 						synchronized (queue) {
-							for (Pair<Long, TileLoaderCallback> p : queue1) {
-								if (p == request) {
-									queue1.remove(request);
-									callback.loaded(tile1);
-									break;
-								}
-							}
+							if (processingRequests.remove(request))
+								callback.loaded(tile1);
 						}
 					}
 				});
+			} else {
+				synchronized (queue) {
+					processingRequests.remove(request);
+				}
 			}
 		}
-	}; 
-	
+	};
+
 	public void load(Long id, final TileLoaderCallback callback,
 			PointInt centerXY) {
 		adapter.assertUIThread();
 		// log("load " + getId(id));
 		synchronized (queue) {
-			for (Pair<Long, TileLoaderCallback> p : queue) {
-				if (p.first.equals(id))
+			for (Request p : queue)
+				if (p.id ==id)
 					return;
-			}
-			for (Pair<Long, TileLoaderCallback> p : queue1) {
-				if (p.first.equals(id))
+
+			for (Request p : processingRequests)
+				if (p.id ==id)
 					return;
-			}
 
 			int d1 = Math.abs(TileId.nx(id) * Adapter.TILE_SIZE
 					+ Adapter.TILE_SIZE / 2 - centerXY.x)
 					+ Math.abs(TileId.ny(id) * Adapter.TILE_SIZE
 							+ Adapter.TILE_SIZE / 2 - centerXY.y);
 
-			ListIterator<Pair<Long, TileLoaderCallback>> it = queue
+			ListIterator<Request> it = queue
 					.listIterator();
 			while (it.hasNext()) {
-				Pair<Long, TileLoaderCallback> p = it.next();
-				long id1 = p.first;
+				Request p = it.next();
+				long id1 = p.id;
 				int d2 = Math.abs(TileId.nx(id1) * Adapter.TILE_SIZE
 						+ Adapter.TILE_SIZE / 2 - centerXY.x)
 						+ Math.abs(TileId.ny(id1) * Adapter.TILE_SIZE
@@ -92,19 +104,18 @@ public abstract class TileLoader {
 			}
 
 			// log("adding " + getId(id));
-			it.add(new Pair<Long, TileLoaderCallback>(id, callback));
+			it.add(new Request(id, callback, 0));
 
 			adapter.execBG(r);
-			
+
 		}
 	}
 
-	
 	public void cancelLoading() {
 		synchronized (queue) {
 			// log("cancelling");
 			queue.clear();
-			queue1.clear();
+			processingRequests.clear();
 		}
 	}
 

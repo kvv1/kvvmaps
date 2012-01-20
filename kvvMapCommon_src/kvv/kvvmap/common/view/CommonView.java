@@ -1,12 +1,7 @@
 package kvv.kvvmap.common.view;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
@@ -15,6 +10,7 @@ import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.LongSet;
 import kvv.kvvmap.common.Utils;
+import kvv.kvvmap.common.maps.Maps.MapsListener;
 import kvv.kvvmap.common.maptiles.MapTiles;
 import kvv.kvvmap.common.pacemark.IPlaceMarksListener;
 import kvv.kvvmap.common.pacemark.ISelectable;
@@ -85,6 +81,17 @@ public class CommonView implements ICommonView {
 
 		envir.placemarks.setDoc(pmListener);
 		envir.paths.setDoc(pmListener);
+		envir.maps.setListener(new MapsListener() {
+			@Override
+			public void mapAdded(String name) {
+				if (mapTiles != null) {
+					mapTiles.stopLoading();
+					mapTiles.setInvalidAll();
+					Adapter.log("mapAdded notified");
+					repaint();
+				}
+			}
+		});
 
 		this.mapTiles = new MapTiles(envir.adapter, envir.maps,
 				Adapter.MAP_TILES_CACHE_SIZE) {
@@ -130,10 +137,14 @@ public class CommonView implements ICommonView {
 		myLocationDimmed = false;
 
 		if (onScreen(oldLocation)) {
-			double dx = mapPos.lon2scrX(myLocation.getLongitude())
-					- mapPos.lon2scrX(oldLocation.getLongitude());
-			double dy = mapPos.lat2scrY(myLocation.getLatitude())
-					- mapPos.lat2scrY(oldLocation.getLatitude());
+			double dx = mapPos.geo2scrX(myLocation.getX(mapPos.getZoom()),
+					myLocation.getY(mapPos.getZoom()))
+					- mapPos.geo2scrX(oldLocation.getX(mapPos.getZoom()),
+							oldLocation.getY(mapPos.getZoom()));
+			double dy = mapPos.geo2scrY(myLocation.getX(mapPos.getZoom()),
+					myLocation.getY(mapPos.getZoom()))
+					- mapPos.geo2scrY(oldLocation.getX(mapPos.getZoom()),
+							oldLocation.getY(mapPos.getZoom()));
 			animateBy(dx, dy);
 			repaint();
 		} else if (scroll) {
@@ -145,10 +156,11 @@ public class CommonView implements ICommonView {
 
 	private boolean onScreen(LocationX loc) {
 		return loc != null
-				&& (Math.abs(mapPos.lon2scrX(loc.getLongitude())) < platformView
-						.getWidth() / 2 && Math.abs(mapPos.lat2scrY(loc
-						.getLatitude())) < platformView.getHeight() / 2);
-
+				&& (Math.abs(mapPos.geo2scrX(loc.getX(mapPos.getZoom()),
+						loc.getY(mapPos.getZoom()))) < platformView.getWidth() / 2 && Math
+						.abs(mapPos.geo2scrY(loc.getX(mapPos.getZoom()),
+								loc.getY(mapPos.getZoom()))) < platformView
+						.getHeight() / 2);
 	}
 
 	public void dimmMyLocation() {
@@ -157,8 +169,10 @@ public class CommonView implements ICommonView {
 
 	public boolean isOnMyLocation() {
 		return myLocation != null
-				&& Math.abs(mapPos.lon2scrX(myLocation.getLongitude())) < 2
-				&& Math.abs(mapPos.lat2scrY(myLocation.getLatitude())) < 2;
+				&& Math.abs(mapPos.geo2scrX(myLocation.getX(mapPos.getZoom()),
+						myLocation.getY(mapPos.getZoom()))) < 2
+				&& Math.abs(mapPos.geo2scrY(myLocation.getX(mapPos.getZoom()),
+						myLocation.getY(mapPos.getZoom()))) < 2;
 	}
 
 	private PointInt p1;
@@ -318,25 +332,25 @@ public class CommonView implements ICommonView {
 		}
 	}
 
-	// public int x_scr2tiles(int x, int w) {
+	// private static int x_scr2tiles(int x, int w, int centerx) {
 	// x -= w / 2;
-	// return x + centerXY.x;
+	// return x + centerx;
 	// }
 	//
-	// public int y_scr2tiles(int y, int h) {
+	// private static int y_scr2tiles(int y, int h, int centery) {
 	// y -= h / 2;
-	// return y + centerXY.y;
+	// return y + centery;
 	// }
 	//
-	// public int x_tiles2scr(int x, int w) {
-	// x -= centerXY.x;
-	// return x + w / 2;
-	// }
-	//
-	// public int y_tiles2scr(int y, int h) {
-	// y -= centerXY.y;
-	// return y + h / 2;
-	// }
+	private static double x_tiles2scr(double x, int w, double centerx) {
+		x -= centerx;
+		return x + w / 2;
+	}
+
+	private static double y_tiles2scr(double y, int h, double centery) {
+		y -= centery;
+		return y + h / 2;
+	}
 
 	private void drawTiles(GC gc) {
 		tilesDrawn.clear();
@@ -347,12 +361,18 @@ public class CommonView implements ICommonView {
 		int w = gc.getWidth();
 		int h = gc.getHeight();
 
-		int nx0 = (int) mapPos.scr2geoX(-w / 2) / Adapter.TILE_SIZE;
-		int x0 = (int) mapPos.geo2scrX(nx0 * Adapter.TILE_SIZE) + w / 2;
-		// int x0 = x_tiles2scr(nx0 * Adapter.TILE_SIZE, w);
-		int ny0 = (int) mapPos.scr2geoY(-h / 2) / Adapter.TILE_SIZE;
-		int y0 = (int) mapPos.geo2scrY(ny0 * Adapter.TILE_SIZE) + h / 2;
-		// int y0 = y_tiles2scr(ny0 * Adapter.TILE_SIZE, h);
+		int nx0 = (int) (mapPos.centerX() - w / 2) / Adapter.TILE_SIZE;
+		int ny0 = (int) (mapPos.centerY() - h / 2) / Adapter.TILE_SIZE;
+		int x0 = (int) x_tiles2scr(nx0 * Adapter.TILE_SIZE, w, mapPos.centerX());
+		int y0 = (int) y_tiles2scr(ny0 * Adapter.TILE_SIZE, h, mapPos.centerY());
+
+		int[] scrLoc = new int[2];
+		platformView.getLocationOnScreen(scrLoc);
+
+		gc.setTransform((float) (mapPos.angle() * 180 / Math.PI), w / 2
+				+ scrLoc[0], h / 2 + scrLoc[1]);
+
+		gc.setAntiAlias(true);
 
 		int x = x0;
 		for (int nx = nx0; x < w; nx++, x += Adapter.TILE_SIZE) {
@@ -373,44 +393,8 @@ public class CommonView implements ICommonView {
 				tilesDrawn.add(id);
 			}
 		}
-	}
 
-	public void saveState() {
-		Properties props = new Properties();
-
-		String sLon = Double.toString(getLocation().getLongitude());
-		String sLat = Double.toString(getLocation().getLatitude());
-		String sZoom = Integer.toString(getZoom());
-
-		props.put("lon", sLon);
-		props.put("lat", sLat);
-		props.put("zoom", sZoom);
-		try {
-			props.save(new FileOutputStream("a.properties"), "");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void loadState() {
-		Properties props = new Properties();
-		try {
-			props.load(new FileInputStream("a.properties"));
-		} catch (IOException e1) {
-		}
-
-		String sLon = props.getProperty("lon");
-		String sLat = props.getProperty("lat");
-		String sZoom = props.getProperty("zoom");
-
-		if (sLon != null && sLat != null && sZoom != null) {
-			double lon = Double.parseDouble(sLon);
-			double lat = Double.parseDouble(sLat);
-			int zoom = Integer.parseInt(sZoom);
-			setZoom(zoom);
-			animateTo(new LocationX(lon, lat));
-		}
-
+		gc.clearTransform();
 	}
 
 	@Override
@@ -458,12 +442,13 @@ public class CommonView implements ICommonView {
 	}
 
 	public LocationX getLocation() {
-		return getLocation(0, 0);
+		envir.adapter.assertUIThread();
+		return new LocationX(mapPos.lon(), mapPos.lat());
 	}
 
 	public LocationX getLocation(int dx, int dy) {
 		envir.adapter.assertUIThread();
-		return new LocationX(mapPos.scrX2lon(dx), mapPos.scrY2lat(dy));
+		return new LocationX(mapPos.scrX2lon(dx, dy), mapPos.scrY2lat(dx, dy));
 	}
 
 	private void cancelSel() {

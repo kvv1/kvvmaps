@@ -81,8 +81,8 @@ public class ViewHelper {
 		if (targ == null)
 			return;
 
-		int _dx = (int) Math.abs(mapPos.lon2scrX(targ.getLongitude()));
-		int _dy = (int) Math.abs(mapPos.lat2scrY(targ.getLatitude()));
+		int _dx = (int) Math.abs(mapPos.geo2scrX(targ.getX(mapPos.getZoom()), targ.getY(mapPos.getZoom())));
+		int _dy = (int) Math.abs(mapPos.geo2scrY(targ.getX(mapPos.getZoom()), targ.getY(mapPos.getZoom())));
 		if (_dx > gc.getWidth() / 3 || _dy > gc.getHeight() / 3) {
 			gc.setColor(COLOR.TARG_COLOR);
 			gc.setStrokeWidth(2);
@@ -130,8 +130,8 @@ public class ViewHelper {
 		if (loc == null)
 			return 0;
 
-		int x = (int) mapPos.lon2scrX(loc.getLongitude()) + gc.getWidth() / 2;
-		int y = (int) mapPos.lat2scrY(loc.getLatitude()) + gc.getHeight() / 2;
+		int x = (int) mapPos.geo2scrX(loc.getX(mapPos.getZoom()), loc.getY(mapPos.getZoom())) + gc.getWidth() / 2;
+		int y = (int) mapPos.geo2scrY(loc.getX(mapPos.getZoom()), loc.getY(mapPos.getZoom())) + gc.getHeight() / 2;
 
 		double accPt = m2pt(loc.getAccuracy(), mapPos);
 

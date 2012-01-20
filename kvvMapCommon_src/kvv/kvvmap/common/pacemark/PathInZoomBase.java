@@ -44,11 +44,11 @@ public class PathInZoomBase {
 		}
 
 		public synchronized void add(LocationX lastPm, LocationX pm, int idx) {
-			int nx1 = pm.getX(zoom) / Adapter.TILE_SIZE;
-			int ny1 = pm.getY(zoom) / Adapter.TILE_SIZE;
+			int nx1 = pm.getXint(zoom) / Adapter.TILE_SIZE;
+			int ny1 = pm.getYint(zoom) / Adapter.TILE_SIZE;
 
-			int nx2 = lastPm.getX(zoom) / Adapter.TILE_SIZE;
-			int ny2 = lastPm.getY(zoom) / Adapter.TILE_SIZE;
+			int nx2 = lastPm.getXint(zoom) / Adapter.TILE_SIZE;
+			int ny2 = lastPm.getYint(zoom) / Adapter.TILE_SIZE;
 
 			if (nx1 > nx2) {
 				int t = nx1;

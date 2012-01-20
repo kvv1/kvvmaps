@@ -19,7 +19,7 @@ public class MapDescr extends MapDescrBase {
 	private final Adapter adapter;
 	private final PackedDataFile[] pdf;
 
-	public MapDescr(String name, Cache<CacheKey, byte[]> cache, 
+	public MapDescr(String name, Cache<CacheKey, byte[]> cache,
 			Adapter adapter, MapDir[] mapDir) throws FileNotFoundException {
 		super(name);
 		this.pdf = new PackedDataFile[mapDir.length];
@@ -53,11 +53,11 @@ public class MapDescr extends MapDescrBase {
 		return img;
 	}
 
-	private Img loadTile(int idx, int nx, int ny, int zoom, int x, int y,
+	private Img loadTile(int mapIdx, int nx, int ny, int zoom, int x, int y,
 			int sz, Img imgBase) {
 		// System.out.println("loading tile " + nx + " " + ny + " " + zoom);
 
-		InputStream is = getInputStream(idx, nx, ny, zoom);
+		InputStream is = getInputStream(mapIdx, nx, ny, zoom);
 		if (is == null)
 			return imgBase;
 
@@ -90,24 +90,26 @@ public class MapDescr extends MapDescrBase {
 		return new Img(img1, transparent);
 	}
 
-	private synchronized InputStream getInputStream(int idx, int nx, int ny,
+	private synchronized InputStream getInputStream(int mapIdx, int nx, int ny,
 			int z) {
-		int off = mapDir[idx].getOffset(nx, ny, z);
+		int off = mapDir[mapIdx].getOffset(nx, ny, z);
 		if (off == -1)
 			return null;
 
 		Maps.CacheKey key = new Maps.CacheKey(this, off);
 
-		byte[] buf = cache.get(key);
-		if (buf == null) {
-			try {
-				buf = pdf[idx].getBytes(off);
-				cache.put(key, buf);
-			} catch (IOException e) {
-				return null;
+		synchronized (cache) {
+			byte[] buf = cache.get(key);
+			if (buf == null) {
+				try {
+					buf = pdf[mapIdx].getBytes(off);
+					cache.put(key, buf);
+				} catch (IOException e) {
+					return null;
+				}
 			}
+			return new ByteArrayInputStream(buf);
 		}
-		return new ByteArrayInputStream(buf);
 	}
 
 }

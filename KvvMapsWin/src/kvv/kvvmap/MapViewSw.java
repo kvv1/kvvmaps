@@ -6,8 +6,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.JComponent;
 
@@ -94,7 +98,7 @@ public class MapViewSw extends JComponent {
 
 		animateTo(new LocationX(30, 60));
 
-		commonView.loadState();
+		loadState();
 	}
 
 	private MouseAdapter mouseAdapter = new MouseAdapter() {
@@ -144,8 +148,43 @@ public class MapViewSw extends JComponent {
 		commonView.animateTo(loc);
 	}
 
+	@SuppressWarnings("deprecation")
 	public void saveState() {
-		commonView.saveState();
+		Properties props = new Properties();
+
+		String sLon = Double.toString(commonView.getLocation().getLongitude());
+		String sLat = Double.toString(commonView.getLocation().getLatitude());
+		String sZoom = Integer.toString(commonView.getZoom());
+
+		props.put("lon", sLon);
+		props.put("lat", sLat);
+		props.put("zoom", sZoom);
+		try {
+			props.save(new FileOutputStream("a.properties"), "");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void loadState() {
+		Properties props = new Properties();
+		try {
+			props.load(new FileInputStream("a.properties"));
+		} catch (IOException e1) {
+		}
+
+		String sLon = props.getProperty("lon");
+		String sLat = props.getProperty("lat");
+		String sZoom = props.getProperty("zoom");
+
+		if (sLon != null && sLat != null && sZoom != null) {
+			double lon = Double.parseDouble(sLon);
+			double lat = Double.parseDouble(sLat);
+			int zoom = Integer.parseInt(sZoom);
+			commonView.setZoom(zoom);
+			commonView.animateTo(new LocationX(lon, lat));
+		}
+
 	}
 
 	public void incInfoLevel() {
