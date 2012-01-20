@@ -27,4 +27,5 @@ public class Environment {
 		Adapter.log("~Environment");
 		super.finalize();
 	}
+
 }

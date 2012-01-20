@@ -58,10 +58,10 @@ class PathInZoom extends PathInZoomBase {
 	private boolean needToCompact(LocationX pm, LocationX pm1, LocationX pm2,
 			int sq) {
 
-		double x1 = pm1.getXd(zoom) - pm.getXd(zoom);
-		double y1 = pm1.getYd(zoom) - pm.getYd(zoom);
-		double x2 = pm2.getXd(zoom) - pm.getXd(zoom);
-		double y2 = pm2.getYd(zoom) - pm.getYd(zoom);
+		double x1 = pm1.getX(zoom) - pm.getX(zoom);
+		double y1 = pm1.getY(zoom) - pm.getY(zoom);
+		double x2 = pm2.getX(zoom) - pm.getX(zoom);
+		double y2 = pm2.getY(zoom) - pm.getY(zoom);
 
 		if (x1 * x2 + y1 * y2 > 0)
 			return true;
@@ -115,10 +115,10 @@ class PathInZoom extends PathInZoomBase {
 		for (int i = 0; i < indices.size(); i++) {
 			int ii = indices.get(i);
 			
-			res[i * 4] = placemarks.get(ii - 1).getX(zoom);
-			res[i * 4 + 1] = placemarks.get(ii - 1).getY(zoom);
-			res[i * 4 + 2] = placemarks.get(ii).getX(zoom);
-			res[i * 4 + 3] = placemarks.get(ii).getY(zoom);
+			res[i * 4] = placemarks.get(ii - 1).getXint(zoom);
+			res[i * 4 + 1] = placemarks.get(ii - 1).getYint(zoom);
+			res[i * 4 + 2] = placemarks.get(ii).getXint(zoom);
+			res[i * 4 + 3] = placemarks.get(ii).getYint(zoom);
 		}
 
 		return res;

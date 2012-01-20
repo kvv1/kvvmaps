@@ -13,7 +13,6 @@ public class LocationX implements ISelectable {
 	private double y;
 	private int z = -1;
 	private int bmsize;
-	
 
 	public LocationX(double lon, double lat) {
 		this(lon, lat, 0, 0, 0, 0);
@@ -32,28 +31,28 @@ public class LocationX implements ISelectable {
 
 	public LocationX(Location loc) {
 		this.loc = loc;
-		if(loc.getSpeed() > 120)
+		if (!loc.hasSpeed() || loc.getSpeed() > 120)
 			loc.setSpeed(-1);
 	}
 
-	public synchronized int getX(int zoom) {
-		calcXY(zoom);
-		return (int) x;
-	}
-
-	public synchronized int getY(int zoom) {
-		calcXY(zoom);
-		return (int) y;
-	}
-
-	public synchronized double getXd(int zoom) {
+	public synchronized double getX(int zoom) {
 		calcXY(zoom);
 		return x;
 	}
 
-	public synchronized double getYd(int zoom) {
+	public synchronized double getY(int zoom) {
 		calcXY(zoom);
 		return y;
+	}
+
+	public synchronized int getXint(int zoom) {
+		calcXY(zoom);
+		return (int) x;
+	}
+
+	public synchronized int getYint(int zoom) {
+		calcXY(zoom);
+		return (int) y;
 	}
 
 	private void calcXY(int zoom) {
@@ -96,7 +95,7 @@ public class LocationX implements ISelectable {
 	public float distanceTo(LocationX dest) {
 		return loc.distanceTo(dest.loc);
 	}
-	
+
 	public float bearingTo(LocationX dest) {
 		return loc.bearingTo(dest.loc);
 	}

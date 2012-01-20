@@ -83,12 +83,12 @@ public class PathDrawer {
 
 		if (selPM != null) {
 			drawPathInZoom(pathInZoom, gc, id, infoLevel, 0x7fFFFFFF, 8);
-			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.ALYI, 4);
-			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.YELLOW, 1);
+			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.ALYI, 6);
+			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.YELLOW, 2);
 		} else {
 			drawPathInZoom(pathInZoom, gc, id, infoLevel, 0x7fFFFFFF, 8);
-			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.ALYI, 2);
-			//drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.YELLOW, 1);
+			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.ALYI, 4);
+			drawPathInZoom(pathInZoom, gc, id, infoLevel, COLOR.YELLOW, 1);
 		}
 	}
 
@@ -116,8 +116,8 @@ public class PathDrawer {
 		int dx = TileId.nx(id) * Adapter.TILE_SIZE;
 		int dy = TileId.ny(id) * Adapter.TILE_SIZE;
 		for (LocationX pm : pms.getPlaceMarks()) {
-			int x = pm.getX(TileId.zoom(id)) - dx;
-			int y = pm.getY(TileId.zoom(id)) - dy;
+			int x = pm.getXint(TileId.zoom(id)) - dx;
+			int y = pm.getYint(TileId.zoom(id)) - dy;
 
 			if (x < -Adapter.TILE_SIZE || x > 2 * Adapter.TILE_SIZE
 					|| y < -Adapter.TILE_SIZE || y > 2 * Adapter.TILE_SIZE)
@@ -179,15 +179,20 @@ public class PathDrawer {
 			int minAlt = (int) pms.iterator().next().getAltitude();
 			int maxAlt = (int) pms.iterator().next().getAltitude();
 
-			int minSpeed = (int) pms.iterator().next().getSpeed();
-			int maxSpeed = (int) pms.iterator().next().getSpeed();
+			int minSpeed = -1;
+			int maxSpeed = -1;
 
 			for (LocationX pm : pms) {
+				float speed = pm.getSpeed();
 				minAlt = Math.min(minAlt, (int) pm.getAltitude());
 				maxAlt = Math.max(maxAlt, (int) pm.getAltitude());
-				if (pm.getSpeed() < 127) {
-					minSpeed = Math.min(minSpeed, (int) pm.getSpeed());
-					maxSpeed = Math.max(maxSpeed, (int) pm.getSpeed());
+				if (speed > 0) {
+					if(minSpeed >= 0) {
+						minSpeed = Math.min(minSpeed, (int) speed);
+						maxSpeed = Math.max(maxSpeed, (int) speed);
+					} else {
+						minSpeed = maxSpeed = (int) speed;
+					}
 				}
 			}
 

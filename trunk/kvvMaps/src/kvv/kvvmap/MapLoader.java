@@ -15,8 +15,10 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 
 public class MapLoader {
-	protected static final String DEFAULT_MAP_URL_PAC = "http://www.palermo.ru/vladimir/kvvMaps/default.pac";
-	protected static final String DEFAULT_MAP_URL_DIR = "http://www.palermo.ru/vladimir/kvvMaps/default.dir";
+	public static final String DEFAULT_MAP_DIR_NAME = "default.dir";
+	public static final String DEFAULT_MAP_PAC_NAME = "default.pac";
+	protected static final String DEFAULT_MAP_URL_PAC = "http://palermo.ru/vladimir/kvvMaps/" + DEFAULT_MAP_PAC_NAME;
+	protected static final String DEFAULT_MAP_URL_DIR = "http://palermo.ru/vladimir/kvvMaps/" + DEFAULT_MAP_DIR_NAME;
 
 	private final Activity activity;
 

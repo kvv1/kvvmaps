@@ -54,8 +54,11 @@ public abstract class MapDescrBase {
 		int sz = Utils.TILE_SIZE_G;
 
 		while (true) {
-			for (MapDescrBase map : maps)
+			
+			for (MapDescrBase map : maps) {
+//				Adapter.log("loading tile from map " + map.name);
 				img = loadInZoom(map, nx, ny, zoom, x, y, sz, img, content);
+			}
 
 			if (zoom <= Utils.MIN_ZOOM || (img != null && !img.transparent))
 				break;
