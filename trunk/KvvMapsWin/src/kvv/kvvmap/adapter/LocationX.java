@@ -27,19 +27,19 @@ public class LocationX implements ISelectable {
 		this(lon, lat, 0, 0, 0, 0);
 	}
 
-	public int getX(int zoom) {
+	public int getXint(int zoom) {
 		return (int) Utils.lon2x(lon, zoom);
 	}
 
-	public int getY(int zoom) {
+	public int getYint(int zoom) {
 		return (int) Utils.lat2y(lat, zoom);
 	}
 
-	public double getXd(int zoom) {
+	public double getX(int zoom) {
 		return Utils.lon2x(lon, zoom);
 	}
 
-	public double getYd(int zoom) {
+	public double getY(int zoom) {
 		return Utils.lat2y(lat, zoom);
 	}
 
