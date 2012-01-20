@@ -35,7 +35,7 @@ public abstract class MapDescrBase {
 			int z = zoom;
 
 			while (true) {
-				img = loadInZoom(fixedMap, nx1, ny1, z, x, y, sz, img, null);
+				img = fixedMap.loadInZoom(nx1, ny1, z, x, y, sz, img, null);
 
 				if (z <= Utils.MIN_ZOOM || (img != null && !img.transparent))
 					break;
@@ -57,7 +57,7 @@ public abstract class MapDescrBase {
 			
 			for (MapDescrBase map : maps) {
 //				Adapter.log("loading tile from map " + map.name);
-				img = loadInZoom(map, nx, ny, zoom, x, y, sz, img, content);
+				img = map.loadInZoom(nx, ny, zoom, x, y, sz, img, content);
 			}
 
 			if (zoom <= Utils.MIN_ZOOM || (img != null && !img.transparent))
@@ -74,14 +74,25 @@ public abstract class MapDescrBase {
 		return img;
 	}
 
-	private static Img loadInZoom(MapDescrBase map, int nx, int ny, int zoom,
+	private Img loadInZoom(int nx, int ny, int zoom,
 			int x, int y, int sz, Img img, TileContent content) {
-		if (map.hasTile(nx, ny, zoom)) {
-			img = map.load(nx, ny, zoom, x, y, sz, img);
+		if (hasTile(nx, ny, zoom)) {
+			img = load(nx, ny, zoom, x, y, sz, img);
 			if (content != null && (content.zoom == -1 || content.zoom == zoom)) {
 				content.zoom = zoom;
-				content.maps.add(map.getName());
+				content.maps.add(name);
 			}
+		}
+		return img;
+	}
+
+	private Img loadInZoom1(int nx, int ny, int zoom, int x, int y, int sz,
+			Img imgBase, TileContent content) {
+		Img img = load(nx, ny, zoom, x, y, sz, imgBase);
+		if (img != imgBase && content != null
+				&& (content.zoom == -1 || content.zoom == zoom)) {
+			content.zoom = zoom;
+			content.maps.add(name);
 		}
 		return img;
 	}

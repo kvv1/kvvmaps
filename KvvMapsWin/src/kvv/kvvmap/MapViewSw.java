@@ -94,6 +94,10 @@ public class MapViewSw extends JComponent {
 			public int getHeight() {
 				return SCR_H;
 			}
+
+			@Override
+			public void getLocationOnScreen(int[] res) {
+			}
 		}, envir);
 
 		animateTo(new LocationX(30, 60));
