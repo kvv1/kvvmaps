@@ -19,6 +19,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Environment;
@@ -48,9 +50,9 @@ public class Adapter {
 	private static volatile int cnt;
 
 	private final ExecutorService executor;
-	
+
 	public Adapter(Activity context) {
-		
+
 		handler = new Handler();
 		uiThread = Thread.currentThread();
 		freeBitmaps = new ArrayList<Bitmap>();
@@ -61,10 +63,10 @@ public class Adapter {
 			// bm.setDensity(Bitmap.DENSITY_NONE);
 			freeBitmaps.add(bm);
 		}
-		
-//		executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
-			executor = Executors.newFixedThreadPool(4, new ThreadFactory() {
-//		executor = Executors.newCachedThreadPool(new ThreadFactory() {
+
+		// executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+		executor = Executors.newFixedThreadPool(4, new ThreadFactory() {
+			// executor = Executors.newCachedThreadPool(new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
 				Thread t = new Thread(r);
@@ -92,8 +94,8 @@ public class Adapter {
 	public Object allocBitmap(int w, int h) {
 		try {
 			Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_4444);
-			//new Canvas(bm).drawColor(0);
-			
+			// new Canvas(bm).drawColor(0);
+
 			return bm;
 		} catch (OutOfMemoryError e) {
 			int usedMegs = (int) (Debug.getNativeHeapAllocatedSize() / 1048576L);
@@ -106,34 +108,15 @@ public class Adapter {
 	public synchronized Object allocBitmap() {
 		if (freeBitmaps.isEmpty()) {
 			Object bm = allocBitmap(TILE_SIZE, TILE_SIZE);
-			if(bm != null)
+			if (bm != null)
 				cnt++;
 			return bm;
-//			try {
-//				Bitmap bm = Bitmap.createBitmap(TILE_SIZE, TILE_SIZE,
-//						Bitmap.Config.ARGB_4444);
-//				cnt++;
-//				// bm.setDensity(Bitmap.DENSITY_NONE);
-//				return bm;
-//			} catch (OutOfMemoryError e) {
-//				int usedMegs = (int) (Debug.getNativeHeapAllocatedSize() / 1048576L);
-//				Log.e("Adapter", "Native mem usage: " + usedMegs);
-//				e.printStackTrace();
-//				return null;
-//			}
 		}
 
 		Bitmap bm = freeBitmaps.remove(0);
 		bm.eraseColor(0);
 		return bm;
 	}
-
-	public void drawOver(Object imgDst, Object imgSrc) {
-		Canvas c = new Canvas((Bitmap) imgDst);
-		c.drawBitmap((Bitmap) imgSrc, 0, 0, null);
-	}
-
-	// private static volatile Bitmap bm1;
 
 	public Object decodeBitmap(InputStream is) {
 		try {
@@ -147,14 +130,6 @@ public class Adapter {
 			e.printStackTrace();
 			return null;
 		}
-	}
-
-	public void drawOver(Object imgDst, Object imgSrc, int x, int y, int sz) {
-		Canvas c = new Canvas((Bitmap) imgDst);
-		Paint paint = new Paint();
-		paint.setFilterBitmap(true);
-		c.drawBitmap((Bitmap) imgSrc, new Rect(x, y, x + sz, y + sz), new Rect(
-				0, 0, TILE_SIZE, TILE_SIZE), paint);
 	}
 
 	public GC getGC(Object bm) {
@@ -182,7 +157,7 @@ public class Adapter {
 			r.recycle();
 		recycleables = new HashSet<Recycleable>();
 		log("****recycled");
-		
+
 		executor.shutdown();
 	}
 
@@ -223,7 +198,7 @@ public class Adapter {
 
 	public void execBG(Runnable runnable) {
 		executor.execute(runnable);
-		//executor.submit(runnable);
+		// executor.submit(runnable);
 	}
 
 	public static void log(String string) {
@@ -257,5 +232,32 @@ public class Adapter {
 	protected void finalize() throws Throwable {
 		log("~Adapter");
 		super.finalize();
+	}
+
+//	public boolean isTransparent(Object img) {
+//		Bitmap bm = (Bitmap) img;
+//
+//		int[] pixels = new int[bm.getWidth() * bm.getHeight()];
+//		bm.getPixels(pixels, 0, bm.getWidth(), 0, 0, bm.getWidth(),
+//				bm.getHeight());
+//
+//		int transPixels = 0;
+//
+//		for (int p : pixels)
+//			if ((p & 0xFF000000) == 0)
+//				transPixels++;
+//
+//		return transPixels > bm.getWidth() * bm.getHeight() / 100;
+//	}
+
+	public void drawUnder(Object imgDst, Object imgSrc, int x, int y, int sz) {
+		Bitmap dst = (Bitmap) imgDst;
+		Bitmap src = (Bitmap) imgSrc;
+		Canvas c = new Canvas(dst);
+		Paint paint = new Paint();
+		paint.setFilterBitmap(true);
+		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OVER));
+		c.drawBitmap(src, new Rect(x, y, x + sz, y + sz), new Rect(0, 0,
+				TILE_SIZE, TILE_SIZE), paint);
 	}
 }

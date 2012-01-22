@@ -1,5 +1,6 @@
 package kvv.kvvmap.adapter;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -114,6 +115,15 @@ public class Adapter {
 
 	public void addRecycleable(Tiles tiles) {
 		// TODO Auto-generated method stub
+	}
+
+	public void drawUnder(Object imgDst, Object imgSrc, int x, int y, int sz) {
+		BufferedImage dst = (BufferedImage) imgDst;
+		BufferedImage src = (BufferedImage) imgSrc;
+		Graphics2D g = (Graphics2D) dst.getGraphics();
+		g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER));
+		g.drawImage(src, 0, 0, TILE_SIZE, TILE_SIZE, x, y, x + sz, y + sz, null);
+		g.dispose();
 	}
 
 }

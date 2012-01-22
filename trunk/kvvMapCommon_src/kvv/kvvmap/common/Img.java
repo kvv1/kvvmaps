@@ -2,8 +2,8 @@ package kvv.kvvmap.common;
 
 
 public class Img {
-	public final Object img;
-	public final boolean transparent;
+	public Object img;
+	public boolean transparent;
 
 	public Img(Object img, boolean transparent) {
 		this.img = img;
