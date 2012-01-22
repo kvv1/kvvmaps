@@ -42,24 +42,18 @@ public class MapDescr extends MapDescrBase {
 	}
 
 	@Override
-	protected Img load(int nx, int ny, int zoom, int x, int y, int sz, Img img) {
-		for (int i = 0; i < mapDir.length; i++) {
-			if (img != null && !img.transparent)
-				return img;
-
-			img = loadTile(i, nx, ny, zoom, x, y, sz, img);
-		}
-
-		return img;
+	protected void load(int nx, int ny, int zoom, int x, int y, int sz, Img img) {
+		for (int i = 0; i < mapDir.length && img.transparent; i++)
+			loadTile(i, nx, ny, zoom, x, y, sz, img);
 	}
 
-	private Img loadTile(int mapIdx, int nx, int ny, int zoom, int x, int y,
-			int sz, Img imgBase) {
+	private void loadTile(int mapIdx, int nx, int ny, int zoom, int x, int y,
+			int sz, Img img) {
 		// System.out.println("loading tile " + nx + " " + ny + " " + zoom);
 
 		InputStream is = getInputStream(mapIdx, nx, ny, zoom);
 		if (is == null)
-			return imgBase;
+			return;
 
 		DataInputStream dis = new DataInputStream(is);
 
@@ -67,27 +61,20 @@ public class MapDescr extends MapDescrBase {
 		try {
 			flags = dis.readInt();
 		} catch (IOException e) {
-			return imgBase;
+			return;
 		}
 
 		boolean transparent = (flags & 1) != 0;
 
 		Object bm = adapter.decodeBitmap(dis);
 		if (bm == null)
-			return imgBase;
+			return;
 
-		Object img1 = adapter.allocBitmap();
-		if (img1 == null)
-			return imgBase;
-		adapter.drawOver(img1, bm, x, y, sz);
+		adapter.drawUnder(img.img, bm, x, y, sz);
 		adapter.disposeBitmap(bm);
-
-		if (imgBase != null) {
-			adapter.drawOver(img1, imgBase.img);
-			adapter.disposeBitmap(imgBase.img);
-		}
-
-		return new Img(img1, transparent);
+		
+//		img.transparent = adapter.isTransparent(img.img);
+		img.transparent &= transparent;
 	}
 
 	private synchronized InputStream getInputStream(int mapIdx, int nx, int ny,

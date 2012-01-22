@@ -1,10 +1,6 @@
 package kvv.kvvmap.common.maps;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -12,7 +8,6 @@ import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.Cache;
 import kvv.kvvmap.common.Img;
-import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maps.MapsDir.MapsDirListener;
 import kvv.kvvmap.common.tiles.Tile;
 import kvv.kvvmap.common.tiles.TileContent;
@@ -66,7 +61,7 @@ public class Maps {
 			protected Tile loadAsync(long id) {
 				TileContent content = new TileContent();
 				Img img = MapDescr.load(maps, fixedMap, TileId.nx(id),
-						TileId.ny(id), TileId.zoom(id), content);
+						TileId.ny(id), TileId.zoom(id), content, adapter);
 				if (img == null)
 					return null;
 				return new Tile(adapter, id, img, content);
@@ -85,7 +80,7 @@ public class Maps {
 			addMap(name, mapsDir);
 		}
 
-		maps.add(new GoogleMapDescr("GOOGLE"));
+		//maps.add(new GoogleMapDescr("GOOGLE"));
 
 	}
 
@@ -158,7 +153,7 @@ public class Maps {
 		Adapter.log("fixed map = "
 				+ (fixedMap != null ? fixedMap.getName() : null));
 	}
-
+/*
 	class GoogleMapDescr extends MapDescrBase {
 
 		public GoogleMapDescr(String name) {
@@ -214,4 +209,5 @@ public class Maps {
 		}
 
 	}
+	*/
 }

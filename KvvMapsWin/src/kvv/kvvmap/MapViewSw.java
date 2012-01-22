@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -73,8 +74,10 @@ public class MapViewSw extends JComponent {
 		addMouseListener(mouseAdapter);
 		addMouseMotionListener(mouseAdapter);
 
+		File[] files = new File(Adapter.MAPS_ROOT).listFiles();
+		
 		Adapter adapter = new Adapter();
-		MapsDir mapsDir = new MapsDir();
+		MapsDir mapsDir = new MapsDir(files);
 		envir = new Environment(adapter, new Paths(), new PlaceMarks(),
 				new Maps(adapter, mapsDir), mapsDir);
 
