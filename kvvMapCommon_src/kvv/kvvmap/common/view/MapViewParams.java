@@ -1,19 +1,27 @@
 package kvv.kvvmap.common.view;
 
+import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.common.Utils;
 
 public final class MapViewParams {
 	private double centerX;
 	private double centerY;
 	private int zoom = Utils.MIN_ZOOM;
+	private int prevzoom = Utils.MIN_ZOOM;
 	private double angle;
 	private double cos;
 	private double sin;
-	
+
+	private LocationX loc = new LocationX(0, 0);
+
 	public int getZoom() {
 		return zoom;
 	}
 
+	public int getPrevZoom() {
+		return prevzoom;
+	}
+	
 	// public PointD geo2scr(PointD geo) {
 	// double x = geo.x - centerX;
 	// double y = geo.y - centerY;
@@ -63,8 +71,9 @@ public final class MapViewParams {
 	}
 
 	public void setZoom(int zoom) {
-		double lon = Utils.x2lon(centerX, this.zoom);
-		double lat = Utils.y2lat(centerY, this.zoom);
+		prevzoom = this.zoom;
+		double lon = loc.getLongitude();
+		double lat = loc.getLatitude();
 		this.zoom = zoom;
 		animateTo(lon, lat, 0, 0);
 	}
@@ -76,16 +85,19 @@ public final class MapViewParams {
 		double y = Utils.lat2y(lat, zoom);
 		centerX = x - dx;
 		centerY = y - dy;
+		loc = new LocationX(lon, lat);
 	}
 
 	public void animateBy(double dx, double dy) {
 		double x = centerX + dx;
 		double y = centerY + dy;
+		double lon = Utils.x2lon(x, zoom);
 		double lat = Utils.y2lat(y, zoom);
 		if (lat > 85 || lat < -85)
 			return;
 		centerX = x;
 		centerY = y;
+		loc = new LocationX(lon, lat);
 	}
 
 	public double centerX() {
@@ -96,14 +108,6 @@ public final class MapViewParams {
 		return centerY;
 	}
 
-	public double lon() {
-		return Utils.x2lon(centerX, this.zoom);
-	}
-
-	public double lat() {
-		return Utils.y2lat(centerY, this.zoom);
-	}
-	
 	public double sin() {
 		return sin;
 	}
@@ -115,6 +119,9 @@ public final class MapViewParams {
 	public double angle() {
 		return angle;
 	}
-	
-	
+
+	public LocationX getLocation() {
+		return loc;
+	}
+
 }

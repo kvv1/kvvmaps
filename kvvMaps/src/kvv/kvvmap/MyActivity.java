@@ -28,6 +28,7 @@ import kvv.kvvmap.service.KvvMapsService.KvvMapsServiceListener;
 import kvv.kvvmap.view.MapView;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent.OnFinished;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -75,6 +76,7 @@ public class MyActivity extends Activity {
 	private static final int MENU_CURRENT_POS = 103;
 	private static final int MENU_FIX_MAP = 104;
 	private static final int MENU_ADD_PLACEMARK = 105;
+	private static final int MENU_KINETIC_SCROLLING = 106;
 
 	private static final int MENU_TRACKS = 108;
 
@@ -83,6 +85,7 @@ public class MyActivity extends Activity {
 	private static final int MENU_TOGGLE_BUTTONS = 112;
 
 	private static final int MENU_UPDATE = 113;
+	private static final int MENU_UPDATE1 = 114;
 
 	private MapView view;
 
@@ -234,11 +237,11 @@ public class MyActivity extends Activity {
 
 				Bundle b = mapsService.getBundle();
 				view.init(MyActivity.this, envir, b);
-				
+
 				mapsService.setListener(new KvvMapsServiceListener() {
 					@Override
 					public void mapsLoaded() {
-						if(view != null)
+						if (view != null)
 							view.repaint();
 					}
 				});
@@ -441,37 +444,41 @@ public class MyActivity extends Activity {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		menu.findItem(MENU_LOGGING_ONOFF)
-				.setTitle(
-						mapsService != null
-								&& mapsService.getTracker().isTracking() ? "Запись пути выкл."
-								: "Запись пути");
-		menu.findItem(MENU_FOLLOW_ONOFF).setTitle(
-				locationListener != null ? "Сдвигать по GPS выкл."
-						: "Сдвигать по GPS");
-		menu.findItem(MENU_DEBUG_DRAW).setTitle(
-				Adapter.debugDraw ? "Debug drawing off" : "Debug drawing on");
-		menu.findItem(MENU_TOGGLE_BUTTONS).setTitle(
-				buttonsVisible() ? "Экранные кнопки выкл."
-						: "Экранные кнопки вкл.");
-		menu.findItem(MENU_FIX_MAP).setTitle(
-				getFixedMap() != null ? "Фикс. карта выкл." : "Фикс. карта");
+		menu.findItem(MENU_FOLLOW_ONOFF).setChecked(locationListener != null);
+		if (locationListener != null)
+			menu.findItem(MENU_FOLLOW_ONOFF).setTitle("Сдвигать по GPS выкл");
+		else
+			menu.findItem(MENU_FOLLOW_ONOFF).setTitle("Сдвигать по GPS");
+
+		menu.findItem(MENU_LOGGING_ONOFF).setChecked(
+				mapsService != null && mapsService.getTracker().isTracking());
+		if (mapsService != null && mapsService.getTracker().isTracking())
+			menu.findItem(MENU_LOGGING_ONOFF).setTitle("Запись пути выкл");
+		else
+			menu.findItem(MENU_LOGGING_ONOFF).setTitle("Запись пути");
+
+		menu.findItem(MENU_DEBUG_DRAW).setChecked(Adapter.debugDraw);
+		menu.findItem(MENU_TOGGLE_BUTTONS).setChecked(buttonsVisible());
+		menu.findItem(MENU_FIX_MAP).setChecked(getFixedMap() != null);
 		return super.onPrepareOptionsMenu(menu);
 	}
 
 	/* Creates the menu items */
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// menu.addSubMenu(0, MENU_PATHS, order, title)
+
 		menu.add(0, MENU_CURRENT_POS, 0, "Здесь");
-		menu.add(0, MENU_LOGGING_ONOFF, 0, "GPS On/Off");
-		menu.add(0, MENU_FOLLOW_ONOFF, 0, "GPS On/Off");
+		menu.add(0, MENU_FOLLOW_ONOFF, 0, "Сдвигать по GPS").setCheckable(true);
+		menu.add(0, MENU_LOGGING_ONOFF, 0, "Запись пути").setCheckable(true);
 		menu.add(0, MENU_ADD_PLACEMARK, 0, "Добавить точку");
 		menu.add(0, MENU_TRACKS, 0, "Пути");
-		menu.add(0, MENU_FIX_MAP, 0, "Fix map");
-		menu.add(0, MENU_DEBUG_DRAW, 0, "debugDraw");
-		menu.add(0, MENU_TOGGLE_BUTTONS, 0, "Экранные кнопки");
+		menu.add(0, MENU_FIX_MAP, 0, "Фикс. карта").setCheckable(true);
+		menu.add(0, MENU_DEBUG_DRAW, 0, "debugDraw").setCheckable(true);
+		menu.add(0, MENU_TOGGLE_BUTTONS, 0, "Экранные кнопки").setCheckable(
+				true);
 		menu.add(0, MENU_ABOUT, 0, "О программе");
 		menu.add(0, MENU_UPDATE, 0, "Update");
+		menu.add(0, MENU_UPDATE1, 0, "Update test");
 		menu.add(0, MENU_QUIT, 0, "Выход");
 		return true;
 	}
@@ -513,9 +520,22 @@ public class MyActivity extends Activity {
 				e.printStackTrace();
 			}
 			return true;
+		case MENU_UPDATE1:
+			try {
+				updateSoftware1();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return true;
 		case MENU_QUIT:
 			stopFollow();
 			stopService(new Intent(this, KvvMapsService.class));
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					System.exit(0);
+				}
+			}, 1000);
 			finish();
 			return true;
 		default:
@@ -523,30 +543,15 @@ public class MyActivity extends Activity {
 		return false;
 	}
 
+	
 	private void updateSoftware() throws MalformedURLException, IOException {
-
-		// InputStream is = new URL(
-		// "http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk").openStream();
-		//
-		// OutputStream os = new FileOutputStream(Adapter.ROOT + "/file.apk");
-		//
-		// byte[] buffer = new byte[4096];
-		// int n;
-		// while ((n = is.read(buffer)) != -1)
-		// os.write(buffer, 0, n);
-		//
-		// os.close();
-		// is.close();
-		//
-		// Intent intent = new Intent(Intent.ACTION_VIEW);
-		// intent.setDataAndType(
-		// Uri.fromFile(new File(Adapter.ROOT + "/file.apk")),
-		// "application/vnd.android.package-archive");
-		//
-		// startActivity(intent);
-
 		startActivity(new Intent(Intent.ACTION_VIEW,
 				Uri.parse("http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk")));
+	}
+
+	private void updateSoftware1() throws MalformedURLException, IOException {
+		startActivity(new Intent(Intent.ACTION_VIEW,
+				Uri.parse("http://palermo.ru/vladimir/kvvMaps.apk")));
 	}
 
 	private void fixUnfixMap() {
@@ -852,7 +857,11 @@ public class MyActivity extends Activity {
 		bmSendLoc = null;
 
 		super.onDestroy();
+		System.runFinalizersOnExit(true);
 		System.gc();
+		
+		
+		
 	}
 
 	public void updateView() {

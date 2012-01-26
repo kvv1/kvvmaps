@@ -128,6 +128,10 @@ public class KvvMapsService extends Service {
 			final File file = files[idx++];
 
 			new Thread() {
+				{
+					setPriority((MIN_PRIORITY + MAX_PRIORITY) / 2);
+				}
+
 				public void run() {
 					try {
 						final MapDir[] dirs = MapsDir.read(file);
@@ -203,11 +207,6 @@ public class KvvMapsService extends Service {
 		listener = null;
 
 		System.gc();
-
-		System.runFinalizersOnExit(true);
-		System.gc();
-		// System.exit(0);
-
 	}
 
 	@Override

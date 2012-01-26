@@ -57,14 +57,13 @@ public class MapDescr extends MapDescrBase {
 
 		DataInputStream dis = new DataInputStream(is);
 
-		int flags;
 		try {
-			flags = dis.readInt();
+			dis.readInt(); // flags
 		} catch (IOException e) {
 			return;
 		}
 
-		boolean transparent = (flags & 1) != 0;
+		//boolean transparent = (flags & 1) != 0;
 
 		Object bm = adapter.decodeBitmap(dis);
 		if (bm == null)
@@ -73,8 +72,8 @@ public class MapDescr extends MapDescrBase {
 		adapter.drawUnder(img.img, bm, x, y, sz);
 		adapter.disposeBitmap(bm);
 		
-//		img.transparent = adapter.isTransparent(img.img);
-		img.transparent &= transparent;
+		img.transparent = adapter.isTransparent(img.img);
+//		img.transparent &= transparent;
 	}
 
 	private synchronized InputStream getInputStream(int mapIdx, int nx, int ny,

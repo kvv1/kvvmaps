@@ -82,6 +82,12 @@ public class GC {
 		canvas.drawBitmap((Bitmap) img, x, y, paint);
 	}
 
+	public void drawImage(Object img, RectInt src, RectInt dst) {
+		paint.setFilterBitmap(true);
+		Bitmap bm = (Bitmap) img;
+		canvas.drawBitmap(bm, src.rect, dst.rect, paint);
+	}
+
 	private final Rect src = new Rect();
 	private final Rect dst = new Rect();
 
@@ -177,7 +183,7 @@ public class GC {
 	}
 
 	Matrix m;
-	
+
 	public void setTransform(float[] trans) {
 		m = canvas.getMatrix();
 		Matrix m = new Matrix();
@@ -191,7 +197,7 @@ public class GC {
 		m1.postRotate(deg, px, py);
 		canvas.setMatrix(m1);
 	}
-	
+
 	public void clearTransform() {
 		canvas.setMatrix(m);
 	}
