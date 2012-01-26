@@ -7,6 +7,8 @@ import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.adapter.PointInt;
+import kvv.kvvmap.adapter.RectInt;
+import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.LongSet;
 import kvv.kvvmap.common.Utils;
@@ -18,6 +20,7 @@ import kvv.kvvmap.common.pacemark.PathSelection;
 import kvv.kvvmap.common.pathtiles.PathTiles;
 import kvv.kvvmap.common.tiles.Tile;
 import kvv.kvvmap.common.tiles.TileId;
+import kvv.kvvmap.common.tiles.Tiles;
 
 public class CommonView implements ICommonView {
 
@@ -42,6 +45,8 @@ public class CommonView implements ICommonView {
 	private final Environment envir;
 
 	private final Diagram diagram;
+
+	private boolean scrolling;
 
 	public CommonView(IPlatformView platformView, final Environment envir) {
 		this.envir = envir;
@@ -175,47 +180,15 @@ public class CommonView implements ICommonView {
 						myLocation.getY(mapPos.getZoom()))) < 2;
 	}
 
-	private PointInt p1;
-
-	private KineticScrollingFilter ksf = new KineticScrollingFilterImpl1() {
-
-		@Override
-		public void onMousePressed(int x, int y) {
-			p1 = new PointInt(x, y);
-		}
-
-		@Override
-		public void onMouseReleased(int x, int y) {
-			p1 = null;
-			updateSel();
-			repaint();
-		}
-
-		@Override
-		public void onMouseDragged(int x, int y) {
-			if (p1 != null) {
-				animateBy(p1.x - x, p1.y - y);
-				p1 = new PointInt(x, y);
-			}
-		}
-
-		@Override
-		public void exec(Runnable r) {
-			envir.adapter.execUI(r);
-		}
-
-	};
-
-	public void onMove(int x, int y) {
-		ksf.mouseDragged(x, y);
+	public void startScrolling() {
+		scrolling = true;
+		cancelSel();
 	}
 
-	public void onDown(int x, int y) {
-		ksf.mousePressed(x, y);
-	}
-
-	public void onUp(int x, int y) {
-		ksf.mouseReleased(x, y);
+	public void endScrolling() {
+		scrolling = false;
+		updateSel();
+		repaint();
 	}
 
 	public boolean isMultiple() {
@@ -299,7 +272,7 @@ public class CommonView implements ICommonView {
 		animateTo(loc, 0, 0);
 	}
 
-	private void animateBy(double dx, double dy) {
+	public void animateBy(double dx, double dy) {
 		envir.adapter.assertUIThread();
 		mapPos.animateBy(dx, dy);
 		repaint();
@@ -323,25 +296,24 @@ public class CommonView implements ICommonView {
 
 		drawDiagram(gc, locationH);
 
-		if (p1 == null) {
+		if (!scrolling) {
 			LocationX myLoc = myLocation;
 			if (!isMyLocationDimmed())
 				myLoc = null;
 			ViewHelper
 					.drawTarget(gc, mapPos, getLocation(), myLoc, getTarget());
 		}
+
+		LocationX targ = getTarget();
+		if (targ != null) {
+			ViewHelper.drawLine(gc, mapPos, getLocation(), targ,
+					COLOR.dimm(COLOR.TARG_COLOR));
+			if (myLocation != null)
+				ViewHelper.drawLine(gc, mapPos, myLocation, targ,
+						COLOR.dimm(COLOR.ARROW_COLOR));
+		}
 	}
 
-	// private static int x_scr2tiles(int x, int w, int centerx) {
-	// x -= w / 2;
-	// return x + centerx;
-	// }
-	//
-	// private static int y_scr2tiles(int y, int h, int centery) {
-	// y -= h / 2;
-	// return y + centery;
-	// }
-	//
 	private static double x_tiles2scr(double x, int w, double centerx) {
 		x -= centerx;
 		return x + w / 2;
@@ -380,15 +352,10 @@ public class CommonView implements ICommonView {
 			for (int ny = ny0; y < h; ny++, y += Adapter.TILE_SIZE) {
 				long id = TileId.make(nx, ny, getZoom());
 
-				Tile tile = mapTiles.getTile(id, centerXY, p1 == null);
-				if (tile != null)
-					tile.draw(gc, x, y);
+				drawTile(gc, mapTiles, centerXY, id, x, y);
 
-				if (getInfoLevel().ordinal() > 0) {
-					tile = pathTiles.getTile(id, centerXY, p1 == null);
-					if (tile != null)
-						tile.draw(gc, x, y);
-				}
+				if (getInfoLevel().ordinal() > 0)
+					drawTile(gc, pathTiles, centerXY, id, x, y);
 
 				tilesDrawn.add(id);
 			}
@@ -396,6 +363,96 @@ public class CommonView implements ICommonView {
 
 		gc.clearTransform();
 	}
+
+	private final RectInt src = new RectInt();
+	private final RectInt dst = new RectInt();
+
+	private void drawTile(GC gc, Tiles tiles, PointInt centerXY, long id,
+			int x, int y) {
+
+		int _sz = Adapter.TILE_SIZE;
+		int _x = 0;
+		int _y = 0;
+		int _nx = TileId.nx(id);
+		int _ny = TileId.ny(id);
+		int _z = TileId.zoom(id);
+
+		Tile tile = tiles.getTile(id, centerXY, !scrolling);
+		if (tile != null) {
+			src.set(_x, _y, _sz, _sz);
+			dst.set(x, y, Adapter.TILE_SIZE, Adapter.TILE_SIZE);
+			tile.draw(gc, src, dst);
+			return;
+		}
+
+		if (mapPos.getZoom() > mapPos.getPrevZoom()) {
+			while (_z > Utils.MIN_ZOOM) {
+
+				_sz /= 2;
+
+				if ((_nx & 1) != 0)
+					_x += _sz;
+				if ((_ny & 1) != 0)
+					_y += _sz;
+
+				_nx /= 2;
+				_ny /= 2;
+				_z--;
+
+				tile = tiles
+						.getTile(TileId.make(_nx, _ny, _z), centerXY, false);
+				if (tile != null) {
+					src.set(_x, _y, _sz, _sz);
+					dst.set(x, y, Adapter.TILE_SIZE, Adapter.TILE_SIZE);
+					tile.draw(gc, src, dst);
+					return;
+				}
+			}
+		}
+		if (mapPos.getZoom() < mapPos.getPrevZoom() && _z < Utils.MAX_ZOOM) {
+			tile = tiles.getTile(TileId.make(_nx * 2, _ny * 2, _z + 1),
+					centerXY, false);
+			if (tile != null) {
+				src.set(_x, _y, _sz, _sz);
+				dst.set(x, y, Adapter.TILE_SIZE / 2, Adapter.TILE_SIZE / 2);
+				tile.draw(gc, src, dst);
+			}
+			tile = tiles.getTile(TileId.make(_nx * 2 + 1, _ny * 2, _z + 1),
+					centerXY, false);
+			if (tile != null) {
+				src.set(_x, _y, _sz, _sz);
+				dst.set(x + Adapter.TILE_SIZE / 2, y, Adapter.TILE_SIZE / 2,
+						Adapter.TILE_SIZE / 2);
+				tile.draw(gc, src, dst);
+			}
+			tile = tiles.getTile(TileId.make(_nx * 2, _ny * 2 + 1, _z + 1),
+					centerXY, false);
+			if (tile != null) {
+				src.set(_x, _y, _sz, _sz);
+				dst.set(x, y + Adapter.TILE_SIZE / 2, Adapter.TILE_SIZE / 2,
+						Adapter.TILE_SIZE / 2);
+				tile.draw(gc, src, dst);
+			}
+			tile = tiles.getTile(TileId.make(_nx * 2 + 1, _ny * 2 + 1, _z + 1),
+					centerXY, false);
+			if (tile != null) {
+				src.set(_x, _y, _sz, _sz);
+				dst.set(x + Adapter.TILE_SIZE / 2, y + Adapter.TILE_SIZE / 2,
+						Adapter.TILE_SIZE / 2, Adapter.TILE_SIZE / 2);
+				tile.draw(gc, src, dst);
+			}
+		}
+	}
+
+	// void drawTile(GC gc, Tiles tiles, PointInt centerXY, int id, RectInt src,
+	// RectInt dst) {
+	// Tile tile = tiles
+	// .getTile(id, centerXY, false);
+	// if (tile != null) {
+	// tile.draw(gc, src, dst);
+	// return;
+	// }
+	// }
 
 	@Override
 	public void repaint() {
@@ -432,6 +489,7 @@ public class CommonView implements ICommonView {
 	public void invalidatePathTiles() {
 		envir.adapter.assertUIThread();
 		if (pathTiles != null) {
+			pathTiles.stopLoading();
 			pathTiles.setInvalidAll();
 			repaint();
 		}
@@ -443,7 +501,7 @@ public class CommonView implements ICommonView {
 
 	public LocationX getLocation() {
 		envir.adapter.assertUIThread();
-		return new LocationX(mapPos.lon(), mapPos.lat());
+		return mapPos.getLocation();
 	}
 
 	public LocationX getLocation(int dx, int dy) {

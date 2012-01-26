@@ -5,6 +5,7 @@ import kvv.kvvmap.R;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
+import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.pacemark.ISelectable;
@@ -22,9 +23,13 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.util.AttributeSet;
 import android.util.FloatMath;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Scroller;
 
 public class MapView extends View implements IPlatformView {
 
@@ -35,6 +40,8 @@ public class MapView extends View implements IPlatformView {
 	private Compass compass;
 
 	private Thread uiThread;
+
+	private OnTouchListener touchListener;
 
 	public void assertUIThread() {
 		if (Thread.currentThread() != uiThread) {
@@ -51,9 +58,9 @@ public class MapView extends View implements IPlatformView {
 
 		boolean hasMultiTouch = Integer.parseInt(Build.VERSION.SDK) >= 5;
 		if (hasMultiTouch)
-			setOnTouchListener(new MultiTouchListener());
+			touchListener = new MultiTouchListener();
 		else
-			setOnTouchListener(new TouchListener());
+			touchListener = new TouchListener();
 	}
 
 	private static int cnt;
@@ -119,15 +126,12 @@ public class MapView extends View implements IPlatformView {
 	@Override
 	public void onDraw(Canvas canvas) {
 
-		Adapter.log("Draw");
+		// Adapter.log("Draw");
 
 		if (activity == null || commonView == null) {
 			canvas.drawColor(Color.YELLOW);
 			return;
 		}
-
-		Adapter.log("Draw1");
-
 
 		Paint paint = new Paint();
 
@@ -168,8 +172,8 @@ public class MapView extends View implements IPlatformView {
 
 		compass.drawCompass(canvas, paint, new Point(getWidth() - getWidth()
 				/ 10, getHeight() / 10), targBearing);
-		
-		if(activity.mapsService.isLoadingMaps()) {
+
+		if (activity.mapsService.isLoadingMaps()) {
 			paint.setColor(Color.CYAN);
 			paint.setTextSize(24);
 			canvas.drawText("Загрузка карт...", 10, 100, paint);
@@ -183,6 +187,8 @@ public class MapView extends View implements IPlatformView {
 			float y = event.getY(0) - event.getY(1);
 			return FloatMath.sqrt(x * x + y * y);
 		}
+
+		private PointInt p1;
 
 		float oldDist;
 
@@ -201,12 +207,14 @@ public class MapView extends View implements IPlatformView {
 			int y = (int) (event.getY());
 			switch (event.getAction() & MotionEvent.ACTION_MASK) {
 			case MotionEvent.ACTION_DOWN:
-				commonView.onDown(x, y);
+				p1 = new PointInt(x, y);
+				commonView.startScrolling();
 				mode = DRAG;
 				break;
 			case MotionEvent.ACTION_UP:
 			case MotionEvent.ACTION_POINTER_UP:
-				commonView.onUp(x, y);
+				p1 = null;
+				commonView.endScrolling();
 				mode = NONE;
 				break;
 
@@ -220,7 +228,10 @@ public class MapView extends View implements IPlatformView {
 
 			case MotionEvent.ACTION_MOVE:
 				if (mode == DRAG) {
-					commonView.onMove(x, y);
+					if (p1 != null) {
+						commonView.animateBy(p1.x - x, p1.y - y);
+						p1 = new PointInt(x, y);
+					}
 				} else if (mode == ZOOM) {
 					float newDist = spacing(event);
 					if (newDist > 10f) {
@@ -251,6 +262,8 @@ public class MapView extends View implements IPlatformView {
 
 	class TouchListener implements OnTouchListener {
 
+		private PointInt p1;
+
 		@Override
 		public boolean onTouch(View arg0, MotionEvent event) {
 			if (commonView == null)
@@ -260,16 +273,155 @@ public class MapView extends View implements IPlatformView {
 			int y = (int) (event.getY());
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
-				commonView.onDown(x, y);
+				p1 = new PointInt(x, y);
+				commonView.startScrolling();
 				break;
 			case MotionEvent.ACTION_UP:
-				commonView.onUp(x, y);
+				p1 = null;
+				commonView.endScrolling();
 				break;
 			case MotionEvent.ACTION_MOVE:
-				commonView.onMove(x, y);
+				if (p1 != null) {
+					commonView.animateBy(p1.x - x, p1.y - y);
+					p1 = new PointInt(x, y);
+				}
 			}
 			return true;
 		}
+
+	}
+
+	Runnable downUpDetector = new Runnable() {
+		@Override
+		public void run() {
+			commonView.endScrolling();
+		}
+	};
+
+	private void move() {
+		commonView.startScrolling();
+		removeCallbacks(downUpDetector);
+		postDelayed(downUpDetector, 200);
+	}
+
+	private final Scroller mScroller = new Scroller(getContext());
+	private int oldx;
+	private int oldy;
+
+	private Runnable r = new Runnable() {
+		@Override
+		public void run() {
+
+			if (!mScroller.computeScrollOffset())
+				return;
+			int x = mScroller.getCurrX();
+			int y = mScroller.getCurrY();
+
+			move();
+			commonView.animateBy(x - oldx, y - oldy);
+			oldx = x;
+			oldy = y;
+
+			// System.out.println("scroll " + x + " " + y);
+
+			if (!mScroller.isFinished())
+				post(this);
+
+		}
+	};
+
+	private GestureDetector mGestureDetector = new GestureDetector(
+			new SimpleOnGestureListener() {
+
+				@Override
+				public boolean onScroll(MotionEvent e1, MotionEvent e2,
+						float distanceX, float distanceY) {
+					move();
+					commonView.animateBy((int) distanceX, (int) distanceY);
+					return true;
+				}
+
+				@Override
+				public boolean onFling(MotionEvent e1, MotionEvent e2,
+						float vX, float vY) {
+
+					int max = 400;
+
+					int v = (int) Math.sqrt(vX * vX + vY * vY);
+
+					if (v > max) {
+						vX = vX * max / v;
+						vY = vY * max / v;
+					}
+
+					// System.out.println("onFling " + vX + " " + vY);
+					mScroller.fling(oldx, oldy, -(int) vX, -(int) vY,
+							Integer.MIN_VALUE, Integer.MAX_VALUE,
+							Integer.MIN_VALUE, Integer.MAX_VALUE);
+					post(r);
+					return true;
+				}
+
+				@Override
+				public boolean onDown(MotionEvent e) {
+					if (!mScroller.isFinished()) { // is flinging
+						mScroller.forceFinished(true); // to stop flinging on
+														// touch
+					}
+					return true; // else won't work
+				}
+			}) {
+		{
+			setIsLongpressEnabled(false);
+		}
+	};
+
+	private class ScaleListener extends
+			ScaleGestureDetector.SimpleOnScaleGestureListener {
+		@Override
+		public boolean onScale(ScaleGestureDetector detector) {
+			Adapter.log("onScale " + detector.getScaleFactor());
+			return true;
+		}
+	}
+
+	private class MyScaleGestureDetector {
+		private final ScaleGestureDetector mScaleDetector;
+
+		MyScaleGestureDetector(Context context) {
+			mScaleDetector = new ScaleGestureDetector(context,
+					new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+						@Override
+						public boolean onScale(ScaleGestureDetector detector) {
+							Adapter.log("onScale " + detector.getScaleFactor());
+							return true;
+						}
+					});
+		}
+
+		public void onTouchEvent(MotionEvent event) {
+			mScaleDetector.onTouchEvent(event);
+		}
+
+		public boolean isInProgress() {
+			return mScaleDetector.isInProgress();
+		}
+	}
+
+	private MyScaleGestureDetector mScaleDetector;
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		if (Integer.parseInt(Build.VERSION.SDK) >= 8) {
+			if (mScaleDetector == null)
+				mScaleDetector = new MyScaleGestureDetector(getContext());
+			mScaleDetector.onTouchEvent(event);
+			if (mScaleDetector.isInProgress())
+				return true;
+		}
+		return mGestureDetector.onTouchEvent(event);
+
+		// return touchListener.onTouch(this, event);
 
 	}
 

@@ -71,7 +71,7 @@ public class Adapter {
 			public Thread newThread(Runnable r) {
 				Thread t = new Thread(r);
 				t.setDaemon(true);
-				t.setPriority(Thread.MIN_PRIORITY);
+				t.setPriority((Thread.MIN_PRIORITY + Thread.MAX_PRIORITY) / 2);
 				return t;
 			}
 		});
@@ -234,21 +234,28 @@ public class Adapter {
 		super.finalize();
 	}
 
-//	public boolean isTransparent(Object img) {
-//		Bitmap bm = (Bitmap) img;
-//
-//		int[] pixels = new int[bm.getWidth() * bm.getHeight()];
-//		bm.getPixels(pixels, 0, bm.getWidth(), 0, 0, bm.getWidth(),
-//				bm.getHeight());
-//
-//		int transPixels = 0;
-//
-//		for (int p : pixels)
-//			if ((p & 0xFF000000) == 0)
-//				transPixels++;
-//
-//		return transPixels > bm.getWidth() * bm.getHeight() / 100;
-//	}
+	public boolean isTransparent(Object img) {
+		Bitmap bm = (Bitmap) img;
+
+		final int n = 8;
+
+		int w = bm.getWidth();
+		int h = bm.getHeight();
+
+		int dw = w / n / 2;
+		int dh = h / n / 2;
+
+		for (int i = 0; i < n; i++) {
+			int y = h * i / n + dh;
+			for (int j = 0; j < n; j++) {
+				int x = w * j / n + dw;
+				if ((bm.getPixel(x, y) & 0xFF000000) == 0)
+					return true;
+			}
+		}
+
+		return false;
+	}
 
 	public void drawUnder(Object imgDst, Object imgSrc, int x, int y, int sz) {
 		Bitmap dst = (Bitmap) imgDst;

@@ -2,6 +2,7 @@ package kvv.kvvmap.common.tiles;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
+import kvv.kvvmap.adapter.RectInt;
 import kvv.kvvmap.common.Img;
 
 public final class Tile {
@@ -26,6 +27,11 @@ public final class Tile {
 			gc.drawImage(img.img, x, y);
 	}
 
+	public void draw(GC gc, RectInt src, RectInt dst) {
+		if (img != null)
+			gc.drawImage(img.img, src, dst);
+	}
+	
 	public boolean isMultiple() {
 		return content != null && content.maps.size() > 1;
 	}
@@ -40,4 +46,5 @@ public final class Tile {
 		Adapter.log("~Tile " + --cnt);
 		super.finalize();
 	}
+
 }

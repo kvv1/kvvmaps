@@ -14,6 +14,7 @@ public class COLOR {
 	
 //	public static final int TARG_COLOR = 0xFFFF8000;
 	public static final int TARG_COLOR = MAGENTA;
+	public static final int ARROW_COLOR = RED;
 	
 	public static int dimm (int color) {
 		return color & 0x7FFFFFFF;

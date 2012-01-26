@@ -76,30 +76,66 @@ public class ViewHelper {
 				0x80FFFFFF);
 	}
 
+	
+	public static void drawLineToTarget(GC gc, MapViewParams mapPos,
+			LocationX targ) {
+		if (targ == null)
+			return;
+
+		int w = gc.getWidth();
+		int h = gc.getHeight();
+		
+		int targx = (int) mapPos.geo2scrX(targ.getX(mapPos.getZoom()), targ.getY(mapPos.getZoom())) + w/2;
+		int targy = (int) mapPos.geo2scrY(targ.getX(mapPos.getZoom()), targ.getY(mapPos.getZoom())) + h/2;
+		
+		gc.setColor(COLOR.dimm(COLOR.TARG_COLOR));
+		gc.setStrokeWidth(2);
+		gc.drawLine(w/2, h/2, targx, targy);
+	}
+
+	public static void drawLine(GC gc, MapViewParams mapPos,
+			LocationX loc1, LocationX loc2, int color) {
+		
+		int w = gc.getWidth();
+		int h = gc.getHeight();
+		
+		int x1 = (int) mapPos.geo2scrX(loc1.getX(mapPos.getZoom()), loc1.getY(mapPos.getZoom())) + w/2;
+		int y1 = (int) mapPos.geo2scrY(loc1.getX(mapPos.getZoom()), loc1.getY(mapPos.getZoom())) + h/2;
+		
+		int x2 = (int) mapPos.geo2scrX(loc2.getX(mapPos.getZoom()), loc2.getY(mapPos.getZoom())) + w/2;
+		int y2 = (int) mapPos.geo2scrY(loc2.getX(mapPos.getZoom()), loc2.getY(mapPos.getZoom())) + h/2;
+		
+//		gc.setColor(COLOR.dimm(COLOR.TARG_COLOR));
+		gc.setColor(color);
+		gc.setStrokeWidth(2);
+		gc.drawLine(x1, y1, x2, y2);
+	}
+	
 	public static void drawTarget(GC gc, MapViewParams mapPos,
 			LocationX center, LocationX myLoc, LocationX targ) {
 		if (targ == null)
 			return;
 
-		int _dx = (int) Math.abs(mapPos.geo2scrX(targ.getX(mapPos.getZoom()), targ.getY(mapPos.getZoom())));
-		int _dy = (int) Math.abs(mapPos.geo2scrY(targ.getX(mapPos.getZoom()), targ.getY(mapPos.getZoom())));
-		if (_dx > gc.getWidth() / 3 || _dy > gc.getHeight() / 3) {
-			gc.setColor(COLOR.TARG_COLOR);
-			gc.setStrokeWidth(2);
-
-			int len = gc.getWidth() / 16;
-
-			double bearing = (90 - center.bearingTo(targ)) * Math.PI / 180;
-
-			int dx = (int) (len * Math.cos(bearing));
-			int dy = (int) (len * Math.sin(bearing));
-
-			int x = gc.getWidth() / 2;
-			int y = gc.getHeight() / 2;
-
-			gc.drawLine(x, y, x + dx, y - dy);
-
-		}
+//		
+//		int _dx = (int) Math.abs(mapPos.geo2scrX(targ.getX(mapPos.getZoom()), targ.getY(mapPos.getZoom())));
+//		int _dy = (int) Math.abs(mapPos.geo2scrY(targ.getX(mapPos.getZoom()), targ.getY(mapPos.getZoom())));
+//		if (_dx > gc.getWidth() / 3 || _dy > gc.getHeight() / 3) {
+//			gc.setColor(COLOR.dimm(COLOR.TARG_COLOR));
+//			gc.setStrokeWidth(2);
+//
+//			int len = gc.getWidth() / 16;
+//
+//			double bearing = (90 - center.bearingTo(targ)) * Math.PI / 180;
+//
+//			int dx = (int) (len * Math.cos(bearing));
+//			int dy = (int) (len * Math.sin(bearing));
+//
+//			int x = gc.getWidth() / 2;
+//			int y = gc.getHeight() / 2;
+//
+//			gc.drawLine(x, y, x + dx, y - dy);
+//
+//		}
 
 		if (myLoc != null) {
 			String txt = Utils.formatDistance((int) myLoc.distanceTo(targ));
