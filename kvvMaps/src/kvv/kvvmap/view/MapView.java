@@ -21,6 +21,7 @@ import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.FloatMath;
 import android.view.GestureDetector;
@@ -330,58 +331,64 @@ public class MapView extends View implements IPlatformView {
 		}
 	};
 
-	private GestureDetector mGestureDetector = new GestureDetector(
-			new SimpleOnGestureListener() {
+	private class MyOnGestureListener extends SimpleOnGestureListener {
 
-				@Override
-				public boolean onScroll(MotionEvent e1, MotionEvent e2,
-						float distanceX, float distanceY) {
-					move();
-					commonView.animateBy((int) distanceX, (int) distanceY);
-					return true;
-				}
+		@Override
+		public boolean onScroll(MotionEvent e1, MotionEvent e2,
+				float distanceX, float distanceY) {
+			move();
+			commonView.animateBy((int) distanceX, (int) distanceY);
+			return true;
+		}
 
-				@Override
-				public boolean onFling(MotionEvent e1, MotionEvent e2,
-						float vX, float vY) {
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float vX,
+				float vY) {
 
-					int max = 400;
+			int max = 400;
 
-					int v = (int) Math.sqrt(vX * vX + vY * vY);
+			int v = (int) Math.sqrt(vX * vX + vY * vY);
 
-					if (v > max) {
-						vX = vX * max / v;
-						vY = vY * max / v;
-					}
+			if (v > max) {
+				vX = vX * max / v;
+				vY = vY * max / v;
+			}
 
-					// System.out.println("onFling " + vX + " " + vY);
-					mScroller.fling(oldx, oldy, -(int) vX, -(int) vY,
-							Integer.MIN_VALUE, Integer.MAX_VALUE,
-							Integer.MIN_VALUE, Integer.MAX_VALUE);
-					post(r);
-					return true;
-				}
+			// System.out.println("onFling " + vX + " " + vY);
+			mScroller.fling(oldx, oldy, -(int) vX, -(int) vY,
+					Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE,
+					Integer.MAX_VALUE);
+			post(r);
+			return true;
+		}
 
-				@Override
-				public boolean onDown(MotionEvent e) {
-					if (!mScroller.isFinished()) { // is flinging
-						mScroller.forceFinished(true); // to stop flinging on
-														// touch
-					}
-					return true; // else won't work
-				}
-			}) {
+		@Override
+		public boolean onDown(MotionEvent e) {
+			if (!mScroller.isFinished()) { // is flinging
+				mScroller.forceFinished(true); // to stop flinging on
+												// touch
+			}
+			return true; // else won't work
+		}
+	}
+
+	private class MyGestureDetector extends GestureDetector {
+		public MyGestureDetector() {
+			super(new MyOnGestureListener());
+		}
+
 		{
 			setIsLongpressEnabled(false);
 		}
-	};
+	}
 
-	private class ScaleListener extends
-			ScaleGestureDetector.SimpleOnScaleGestureListener {
-		@Override
-		public boolean onScale(ScaleGestureDetector detector) {
-			Adapter.log("onScale " + detector.getScaleFactor());
-			return true;
+	private class MyGestureDetector22 extends GestureDetector {
+		public MyGestureDetector22() {
+			super(getContext(), new MyOnGestureListener(), new Handler(), true);
+		}
+
+		{
+			setIsLongpressEnabled(false);
 		}
 	}
 
@@ -391,9 +398,28 @@ public class MapView extends View implements IPlatformView {
 		MyScaleGestureDetector(Context context) {
 			mScaleDetector = new ScaleGestureDetector(context,
 					new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+						int initZoom;
+
+						@Override
+						public boolean onScaleBegin(
+								ScaleGestureDetector detector) {
+							initZoom = commonView.getZoom();
+							return super.onScaleBegin(detector);
+						}
+
 						@Override
 						public boolean onScale(ScaleGestureDetector detector) {
 							Adapter.log("onScale " + detector.getScaleFactor());
+
+							int newZoom = (int) (initZoom * detector
+									.getScaleFactor());
+
+							newZoom = Math.max(Utils.MIN_ZOOM,
+									Math.min(Utils.MAX_ZOOM, newZoom));
+
+							if (newZoom != commonView.getZoom())
+								commonView.setZoom(newZoom);
+
 							return true;
 						}
 					});
@@ -403,25 +429,28 @@ public class MapView extends View implements IPlatformView {
 			mScaleDetector.onTouchEvent(event);
 		}
 
-		public boolean isInProgress() {
-			return mScaleDetector.isInProgress();
-		}
 	}
 
 	private MyScaleGestureDetector mScaleDetector;
+	private GestureDetector mGestureDetector;
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+		if(mGestureDetector == null) {
+			if (Integer.parseInt(Build.VERSION.SDK) >= 8)
+				mGestureDetector = new MyGestureDetector22();
+			else
+				mGestureDetector = new MyGestureDetector();
+		}
+		
 		if (Integer.parseInt(Build.VERSION.SDK) >= 8) {
 			if (mScaleDetector == null)
 				mScaleDetector = new MyScaleGestureDetector(getContext());
 			mScaleDetector.onTouchEvent(event);
-			if (mScaleDetector.isInProgress())
-				return true;
 		}
-		return mGestureDetector.onTouchEvent(event);
 
-		// return touchListener.onTouch(this, event);
+		mGestureDetector.onTouchEvent(event);
+		return true;
 
 	}
 

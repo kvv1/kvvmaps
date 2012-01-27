@@ -42,12 +42,12 @@ public abstract class MapDescrBase {
 
 			while (zoom1 >= Utils.MIN_ZOOM && img.transparent) {
 				fixedMap.loadInZoom(nx1, ny1, zoom1, x, y, sz, img, null);
-				x = x / 2 + ((nx1 & 1) << 7);
+				x = x /  2 + ((nx1 & 1) << 7);
 				y = y / 2 + ((ny1 & 1) << 7);
-				nx1 = nx1 >>> 1;
-				ny1 = ny1 >>> 1;
-				zoom1 = zoom1 - 1;
-				sz = sz / 2;
+				nx1 >>>= 1;
+				ny1 >>>= 1;
+				zoom1--;
+				sz >>>= 1;
 			}
 		}
 
@@ -60,10 +60,10 @@ public abstract class MapDescrBase {
 				map.loadInZoom(nx, ny, zoom, x, y, sz, img, content);
 			x = x / 2 + ((nx & 1) << 7);
 			y = y / 2 + ((ny & 1) << 7);
-			nx = nx >>> 1;
-			ny = ny >>> 1;
+			nx >>>= 1;
+			ny >>>= 1;
 			zoom = zoom - 1;
-			sz = sz / 2;
+			sz >>>= 1;
 		}
 
 
