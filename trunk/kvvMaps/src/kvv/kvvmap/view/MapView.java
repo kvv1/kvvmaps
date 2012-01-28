@@ -345,6 +345,9 @@ public class MapView extends View implements IPlatformView {
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float vX,
 				float vY) {
 
+			if (!activity.isKineticScrolling())
+				return true;
+
 			int max = 400;
 
 			int v = (int) Math.sqrt(vX * vX + vY * vY);
@@ -358,6 +361,8 @@ public class MapView extends View implements IPlatformView {
 			mScroller.fling(oldx, oldy, -(int) vX, -(int) vY,
 					Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE,
 					Integer.MAX_VALUE);
+
+			removeCallbacks(r);
 			post(r);
 			return true;
 		}
@@ -436,13 +441,13 @@ public class MapView extends View implements IPlatformView {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		if(mGestureDetector == null) {
+		if (mGestureDetector == null) {
 			if (Integer.parseInt(Build.VERSION.SDK) >= 8)
 				mGestureDetector = new MyGestureDetector22();
 			else
 				mGestureDetector = new MyGestureDetector();
 		}
-		
+
 		if (Integer.parseInt(Build.VERSION.SDK) >= 8) {
 			if (mScaleDetector == null)
 				mScaleDetector = new MyScaleGestureDetector(getContext());
@@ -628,6 +633,11 @@ public class MapView extends View implements IPlatformView {
 		if (commonView != null)
 			return commonView.fixMap(fix);
 		return null;
+	}
+
+	@Override
+	public boolean loadDuringScrolling() {
+		return activity == null || activity.loadDuringScrolling();
 	}
 
 }

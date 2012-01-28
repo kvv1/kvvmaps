@@ -14,11 +14,11 @@ import kvv.quantizer.ImageQuantizer;
 
 public class Convert {
 
+	static boolean debug = false;
+
 	public static void main(String[] args) throws IOException, MatrixException {
 		int zoom = 0;
-		boolean resize = false;
 		int scale = 0;
-		boolean debug = false;
 		boolean yandex = false;
 		Integer min = null;
 		Integer max = null;
@@ -45,8 +45,6 @@ public class Convert {
 			} else if (args[i].equals("-out")) {
 				outDir = args[i + 1];
 				i++;
-			} else if (args[i].equals("-resize")) {
-				resize = true;
 			} else if (args[i].equals("-debug")) {
 				debug = true;
 			} else if (args[i].equals("-yandex")) {
@@ -76,7 +74,7 @@ public class Convert {
 									xs.lastIndexOf('.')));
 							MapDescr1 mapDescr = new YandexTile(yandexDir, tx,
 									ty, z);
-							createTiles(mapDescr, z, false, 0, outDir);
+							createTiles(mapDescr, z, 0, outDir);
 						} catch (Exception e) {
 						}
 					}
@@ -90,7 +88,7 @@ public class Convert {
 			if (file.exists()) {
 				MapDescr1 mapDescr = new OziMapDescr(new File(args[0]), zoom,
 						scale, debug, min, max, noAddPoints);
-				createTiles(mapDescr, zoom, resize, bpp, outDir);
+				createTiles(mapDescr, zoom, bpp, outDir);
 				if (debug)
 					System.out.println("time = "
 							+ (System.currentTimeMillis() - t) / 1000 + " s");
@@ -106,10 +104,29 @@ public class Convert {
 	}
 
 	private static void createTiles(final MapDescr1 mapDescr, int zoom,
-			final boolean resize, int bpp, String outDir) throws IOException {
+			int bpp, String outDir) throws IOException {
 
 		File zoomDir = new File(outDir, "z" + zoom);
 		zoomDir.mkdirs();
+
+		double minDestX = mapDescr.getMinDestX();
+		double maxDestX = mapDescr.getMaxDestX();
+		double minDestY = mapDescr.getMinDestY();
+		double maxDestY = mapDescr.getMaxDestY();
+		double minSrcX = mapDescr.getSrcX((int) minDestX, (int) minDestY);
+		double minSrcY = mapDescr.getSrcY((int) minDestX, (int) minDestY);
+		double maxSrcX = mapDescr.getSrcX((int) maxDestX, (int) maxDestY);
+		double maxSrcY = mapDescr.getSrcY((int) maxDestX, (int) maxDestY);
+
+		double distDest = Math.sqrt((minDestX - maxDestX)
+				* (minDestX - maxDestX) + (minDestY - maxDestY)
+				* (minDestY - maxDestY));
+		double distSrc = Math.sqrt((minSrcX - maxSrcX) * (minSrcX - maxSrcX)
+				+ (minSrcY - maxSrcY) * (minSrcY - maxSrcY));
+
+		final int factor = Math.max(1, (int) (distSrc / distDest));
+		if (debug)
+			System.out.println("factor = " + factor);
 
 		Img.SrcImg src = new SrcImg() {
 			@Override
@@ -118,17 +135,48 @@ public class Convert {
 						|| y >= mapDescr.getHeight())
 					return 0;
 
-				int rgb = mapDescr.getRGB(x, y);
-				if (resize && y + 1 < mapDescr.getHeight()
-						&& x + 1 < mapDescr.getWidth()) {
-					int pix00 = rgb;
-					int pix01 = mapDescr.getRGB(x, y + 1);
-					int pix10 = mapDescr.getRGB(x + 1, y);
-					int pix11 = mapDescr.getRGB(x + 1, y + 1);
-					rgb = Img.merge(pix00, pix01, pix10, pix11, 128, 128);
-				}
+				int width = mapDescr.getWidth();
+				int height = mapDescr.getHeight();
 
-				return rgb;
+				int w = factor;
+
+				int a = 0;
+				int r = 0;
+				int g = 0;
+				int b = 0;
+
+				int n = 0;
+
+				for (int dx = 0; dx < w; dx++)
+					for (int dy = 0; dy < w; dy++) {
+						if (x + dx >= width || y + dy >= height)
+							continue;
+						int rgb = mapDescr.getRGB(x + dx, y + dy);
+						a += rgb >>> 24;
+						r += (rgb >>> 16) & 0xFF;
+						g += (rgb >>> 8) & 0xFF;
+						b += rgb & 0xFF;
+						n++;
+					}
+
+				a /= n;
+				r /= n;
+				g /= n;
+				b /= n;
+
+				return (a << 24) + (r << 16) + (g << 8) + b;
+
+				// int rgb = mapDescr.getRGB(x, y);
+				// if (resize && y + 1 < mapDescr.getHeight()
+				// && x + 1 < mapDescr.getWidth()) {
+				// int pix00 = rgb;
+				// int pix01 = mapDescr.getRGB(x, y + 1);
+				// int pix10 = mapDescr.getRGB(x + 1, y);
+				// int pix11 = mapDescr.getRGB(x + 1, y + 1);
+				// rgb = Img.merge(pix00, pix01, pix10, pix11, 128, 128);
+				// }
+				//
+				// return rgb;
 			}
 		};
 
@@ -205,4 +253,5 @@ public class Convert {
 		}
 		System.out.println("               ");
 	}
+
 }

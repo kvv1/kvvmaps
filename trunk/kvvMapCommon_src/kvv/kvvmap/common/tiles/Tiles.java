@@ -25,6 +25,7 @@ public abstract class Tiles implements Recycleable {
 	private final TileLoaderCallback callback = new TileLoaderCallback() {
 		@Override
 		public void loaded(Tile tile) {
+			adapter.assertUIThread();
 			adapter.addRecycleable(Tiles.this);
 			// System.out.println(tile.id);
 			tileCache.remove(tile.id);
@@ -44,24 +45,27 @@ public abstract class Tiles implements Recycleable {
 	}
 
 	@Override
-	public synchronized void recycle() {
+	public void recycle() {
+		adapter.assertUIThread();
 		tileCache.clear();
 	}
 
-	public synchronized void setInvalid(long id) {
+	public void setInvalid(long id) {
+		adapter.assertUIThread();
 		Tile tile = tileCache.get(id);
 		if (tile != null)
 			tile.needsReloading = true;
 	}
 
-	public synchronized void setInvalidAll() {
+	public void setInvalidAll() {
+		adapter.assertUIThread();
 		for (long id : tileCache.keySet()) {
 			tileCache.get(id).needsReloading = true;
 		}
 	}
 
-	public synchronized Tile getTile(long id, PointInt prioLoc,
-			boolean startLoadingIfNeeded) {
+	public Tile getTile(long id, PointInt prioLoc, boolean startLoadingIfNeeded) {
+		adapter.assertUIThread();
 		Tile tile = tileCache.get(id);
 		if (tile != null) {
 			if (tile.needsReloading && startLoadingIfNeeded) {
@@ -78,7 +82,7 @@ public abstract class Tiles implements Recycleable {
 	private final RectInt dst = new RectInt();
 
 	public void drawTile(GC gc, PointInt centerXY, long id, int x, int y,
-			boolean scrolling, int zoom, int prevZoom) {
+			boolean loadIfNeeded, int zoom, int prevZoom) {
 		adapter.assertUIThread();
 
 		int _sz = Adapter.TILE_SIZE;
@@ -88,7 +92,7 @@ public abstract class Tiles implements Recycleable {
 		int _ny = TileId.ny(id);
 		int _z = TileId.zoom(id);
 
-		Tile tile = getTile(id, centerXY, !scrolling);
+		Tile tile = getTile(id, centerXY, loadIfNeeded);
 		if (tile != null) {
 			src.set(_x, _y, _sz, _sz);
 			dst.set(x, y, Adapter.TILE_SIZE, Adapter.TILE_SIZE);
@@ -100,12 +104,9 @@ public abstract class Tiles implements Recycleable {
 			while (_z > Utils.MIN_ZOOM) {
 
 				if (_sz >= 2) {
+					_x = _x / 2 + ((_nx & 1) * Adapter.TILE_SIZE / 2);
+					_y = _y / 2 + ((_ny & 1) * Adapter.TILE_SIZE / 2);
 					_sz /= 2;
-
-					if ((_nx & 1) != 0)
-						_x += _sz;
-					if ((_ny & 1) != 0)
-						_y += _sz;
 				}
 
 				_nx /= 2;
