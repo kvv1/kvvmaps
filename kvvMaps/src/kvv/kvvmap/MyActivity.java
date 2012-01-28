@@ -28,7 +28,6 @@ import kvv.kvvmap.service.KvvMapsService.KvvMapsServiceListener;
 import kvv.kvvmap.view.MapView;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.PendingIntent.OnFinished;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -67,6 +66,8 @@ public class MyActivity extends Activity {
 
 	private static final String BUTTONS_VISIBLE_SETTING = "buttonsVisible";
 	private static final String FOLLOW_GPS_SETTING = "followGPS";
+	private static final String KINETIC_SCROLLING_SETTING = "kineticScrolling";
+	private static final String LOAD_DURING_SCROLLING_SETTING = "loadDuringScrolling";
 
 	public static final String PREFS_NAME = "KvvMapPrefsFile";
 
@@ -77,6 +78,7 @@ public class MyActivity extends Activity {
 	private static final int MENU_FIX_MAP = 104;
 	private static final int MENU_ADD_PLACEMARK = 105;
 	private static final int MENU_KINETIC_SCROLLING = 106;
+	private static final int MENU_LOAD_DURING_SCROLLING = 107;
 
 	private static final int MENU_TRACKS = 108;
 
@@ -85,7 +87,7 @@ public class MyActivity extends Activity {
 	private static final int MENU_TOGGLE_BUTTONS = 112;
 
 	private static final int MENU_UPDATE = 113;
-	private static final int MENU_UPDATE1 = 114;
+	// private static final int MENU_UPDATE1 = 114;
 
 	private MapView view;
 
@@ -460,6 +462,10 @@ public class MyActivity extends Activity {
 		menu.findItem(MENU_DEBUG_DRAW).setChecked(Adapter.debugDraw);
 		menu.findItem(MENU_TOGGLE_BUTTONS).setChecked(buttonsVisible());
 		menu.findItem(MENU_FIX_MAP).setChecked(getFixedMap() != null);
+		menu.findItem(MENU_KINETIC_SCROLLING).setChecked(
+				settings.getBoolean(KINETIC_SCROLLING_SETTING, true));
+		menu.findItem(MENU_LOAD_DURING_SCROLLING).setChecked(
+				settings.getBoolean(LOAD_DURING_SCROLLING_SETTING, true));
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -476,9 +482,13 @@ public class MyActivity extends Activity {
 		menu.add(0, MENU_DEBUG_DRAW, 0, "debugDraw").setCheckable(true);
 		menu.add(0, MENU_TOGGLE_BUTTONS, 0, "Экранные кнопки").setCheckable(
 				true);
+		menu.add(0, MENU_KINETIC_SCROLLING, 0, "Плавная прокрутка")
+				.setCheckable(true);
+		menu.add(0, MENU_LOAD_DURING_SCROLLING, 0, "Подгружать при прокрутке")
+				.setCheckable(true);
 		menu.add(0, MENU_ABOUT, 0, "О программе");
 		menu.add(0, MENU_UPDATE, 0, "Update");
-		menu.add(0, MENU_UPDATE1, 0, "Update test");
+		// menu.add(0, MENU_UPDATE1, 0, "Update test");
 		menu.add(0, MENU_QUIT, 0, "Выход");
 		return true;
 	}
@@ -513,6 +523,20 @@ public class MyActivity extends Activity {
 		case MENU_FIX_MAP:
 			fixUnfixMap();
 			return true;
+		case MENU_KINETIC_SCROLLING: {
+			Editor ed = settings.edit();
+			ed.putBoolean(KINETIC_SCROLLING_SETTING,
+					!settings.getBoolean(KINETIC_SCROLLING_SETTING, true));
+			ed.commit();
+			return true;
+		}
+		case MENU_LOAD_DURING_SCROLLING: {
+			Editor ed = settings.edit();
+			ed.putBoolean(LOAD_DURING_SCROLLING_SETTING,
+					!settings.getBoolean(LOAD_DURING_SCROLLING_SETTING, true));
+			ed.commit();
+			return true;
+		}
 		case MENU_UPDATE:
 			try {
 				updateSoftware();
@@ -520,13 +544,13 @@ public class MyActivity extends Activity {
 				e.printStackTrace();
 			}
 			return true;
-		case MENU_UPDATE1:
-			try {
-				updateSoftware1();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return true;
+			// case MENU_UPDATE1:
+			// try {
+			// updateSoftware1();
+			// } catch (Exception e) {
+			// e.printStackTrace();
+			// }
+			// return true;
 		case MENU_QUIT:
 			stopFollow();
 			stopService(new Intent(this, KvvMapsService.class));
@@ -543,7 +567,6 @@ public class MyActivity extends Activity {
 		return false;
 	}
 
-	
 	private void updateSoftware() throws MalformedURLException, IOException {
 		startActivity(new Intent(Intent.ACTION_VIEW,
 				Uri.parse("http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk")));
@@ -821,6 +844,16 @@ public class MyActivity extends Activity {
 		updateView();
 	}
 
+	public boolean isKineticScrolling() {
+		return settings == null
+				|| settings.getBoolean(KINETIC_SCROLLING_SETTING, true);
+	}
+
+	public boolean loadDuringScrolling() {
+		return settings == null
+				|| settings.getBoolean(LOAD_DURING_SCROLLING_SETTING, true);
+	}
+
 	@Override
 	protected void onDestroy() {
 		if (view != null && mapsService != null) {
@@ -859,9 +892,7 @@ public class MyActivity extends Activity {
 		super.onDestroy();
 		System.runFinalizersOnExit(true);
 		System.gc();
-		
-		
-		
+
 	}
 
 	public void updateView() {

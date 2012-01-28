@@ -187,6 +187,7 @@ public class CommonView implements ICommonView {
 		scrolling = false;
 		updateSel();
 		repaint();
+		System.gc();
 	}
 
 	public boolean isMultiple() {
@@ -350,11 +351,13 @@ public class CommonView implements ICommonView {
 			for (int ny = ny0; y < h; ny++, y += Adapter.TILE_SIZE) {
 				long id = TileId.make(nx, ny, getZoom());
 
-				mapTiles.drawTile(gc, centerXY, id, x, y, scrolling,
+				mapTiles.drawTile(gc, centerXY, id, x, y,
+						platformView.loadDuringScrolling() || !scrolling,
 						mapPos.getZoom(), mapPos.getPrevZoom());
 
 				if (getInfoLevel().ordinal() > 0)
-					pathTiles.drawTile(gc, centerXY, id, x, y, scrolling,
+					pathTiles.drawTile(gc, centerXY, id, x, y,
+							platformView.loadDuringScrolling() || !scrolling,
 							mapPos.getZoom(), mapPos.getPrevZoom());
 
 				tilesDrawn.add(id);

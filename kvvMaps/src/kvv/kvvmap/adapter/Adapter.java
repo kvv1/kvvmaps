@@ -94,6 +94,7 @@ public class Adapter {
 	public Object allocBitmap(int w, int h) {
 		try {
 			Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_4444);
+			//Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ALPHA_8);
 			// new Canvas(bm).drawColor(0);
 
 			return bm;
