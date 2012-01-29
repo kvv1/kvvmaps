@@ -117,6 +117,30 @@ public class Adapter {
 		// TODO Auto-generated method stub
 	}
 
+	public boolean isTransparent(Object img) {
+		BufferedImage bm = (BufferedImage) img;
+
+		final int n = 8;
+
+		int w = bm.getWidth();
+		int h = bm.getHeight();
+
+		int dw = w / n / 2;
+		int dh = h / n / 2;
+
+		for (int i = 0; i < n; i++) {
+			int y = h * i / n + dh;
+			for (int j = 0; j < n; j++) {
+				int x = w * j / n + dw;
+				if ((bm.getRGB(x, y) & 0xFF000000) == 0)
+					return true;
+			}
+		}
+
+		return false;
+	}
+
+	
 	public void drawUnder(Object imgDst, Object imgSrc, int x, int y, int sz) {
 		BufferedImage dst = (BufferedImage) imgDst;
 		BufferedImage src = (BufferedImage) imgSrc;

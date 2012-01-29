@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -75,7 +76,7 @@ public class MapViewSw extends JComponent {
 		addMouseMotionListener(mouseAdapter);
 
 		File[] files = new File(Adapter.MAPS_ROOT).listFiles();
-		
+
 		Adapter adapter = new Adapter();
 		MapsDir mapsDir = new MapsDir(files);
 		envir = new Environment(adapter, new Paths(), new PlaceMarks(),
@@ -101,6 +102,11 @@ public class MapViewSw extends JComponent {
 			@Override
 			public void getLocationOnScreen(int[] res) {
 			}
+
+			@Override
+			public boolean loadDuringScrolling() {
+				return true;
+			}
 		}, envir);
 
 		animateTo(new LocationX(30, 60));
@@ -110,19 +116,26 @@ public class MapViewSw extends JComponent {
 
 	private MouseAdapter mouseAdapter = new MouseAdapter() {
 
+		private Point p;
+
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			commonView.onMove(e.getX(), e.getY());
+			if (p != null) {
+				commonView.animateBy(p.x - e.getX(), p.y - e.getY());
+				p = new Point(e.getX(), e.getY());
+			}
 		}
 
 		@Override
 		public void mousePressed(MouseEvent e) {
-			commonView.onDown(e.getX(), e.getY());
+			p = new Point(e.getX(), e.getY());
+			commonView.startScrolling();
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e) {
-			commonView.onUp(e.getX(), e.getY());
+			p = null;
+			commonView.endScrolling();
 		}
 
 	};

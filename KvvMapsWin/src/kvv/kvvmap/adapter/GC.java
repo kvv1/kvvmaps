@@ -95,6 +95,13 @@ public class GC {
 				null);
 	}
 
+	public void drawImage(Object img, RectInt src, RectInt dst) {
+		BufferedImage bm = (BufferedImage) img;
+		g.drawImage(bm, dst.rect.x, dst.rect.y, dst.rect.x + dst.rect.width,
+				dst.rect.y + dst.rect.height, src.rect.x, src.rect.y,
+				src.rect.x + src.rect.width, src.rect.y + src.rect.height, null);
+	}
+
 	// public void drawImage(Object img, int dstx, int dsty, int srcx, int srcy,
 	// int w, int h) {
 	// g.drawImage((BufferedImage) img, dstx, dsty, dstx + w, dsty + h, srcx,

@@ -33,7 +33,7 @@ public class OziMapDescr implements MapDescr1 {
 	private MapDescr map;
 	private boolean transverse;
 
-	public OziMapDescr(File inFile, int zoom, int scale, boolean debug,
+	public OziMapDescr(File inFile, int zoom, boolean debug,
 			Integer min, Integer max, boolean noAddPoints)
 			throws IOException, MatrixException {
 		this.zoom = zoom;
@@ -62,8 +62,8 @@ public class OziMapDescr implements MapDescr1 {
 				if (strings.length == 17 && strings[0].startsWith("Point")
 						&& strings[1].trim().equals("xy")
 						&& strings[2].trim().length() > 0) {
-					int x = Integer.parseInt(strings[2].trim()) << scale;
-					int y = Integer.parseInt(strings[3].trim()) << scale;
+					int x = Integer.parseInt(strings[2].trim());
+					int y = Integer.parseInt(strings[3].trim());
 					double lat = Double.parseDouble(strings[6].trim());
 					lat += Double.parseDouble(strings[7].trim()) / 60;
 					double lon = Double.parseDouble(strings[9].trim());
@@ -82,8 +82,8 @@ public class OziMapDescr implements MapDescr1 {
 						mmpll.add(null);
 					mmpll.set(mmpn - 1, new Point2D.Double(lon, lat));
 				} else if (strings[0].trim().equals("MMPXY")) {
-					int x = Integer.parseInt(strings[2].trim()) << scale;
-					int y = Integer.parseInt(strings[3].trim()) << scale;
+					int x = Integer.parseInt(strings[2].trim());
+					int y = Integer.parseInt(strings[3].trim());
 					int mmpn = Integer.parseInt(strings[1].trim());
 					while (mmpxy.size() < mmpn)
 						mmpxy.add(null);
