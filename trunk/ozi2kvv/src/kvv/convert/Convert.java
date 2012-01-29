@@ -18,7 +18,6 @@ public class Convert {
 
 	public static void main(String[] args) throws IOException, MatrixException {
 		int zoom = 0;
-		int scale = 0;
 		boolean yandex = false;
 		Integer min = null;
 		Integer max = null;
@@ -29,9 +28,6 @@ public class Convert {
 		for (int i = 1; i < args.length; i++) {
 			if (args[i].equals("-zoom")) {
 				zoom = Integer.parseInt(args[i + 1]);
-				i++;
-			} else if (args[i].equals("-scale")) {
-				scale = Integer.parseInt(args[i + 1]);
 				i++;
 			} else if (args[i].equals("-min")) {
 				min = Integer.parseInt(args[i + 1]);
@@ -87,7 +83,7 @@ public class Convert {
 			File file = new File(args[0]);
 			if (file.exists()) {
 				MapDescr1 mapDescr = new OziMapDescr(new File(args[0]), zoom,
-						scale, debug, min, max, noAddPoints);
+						debug, min, max, noAddPoints);
 				createTiles(mapDescr, zoom, bpp, outDir);
 				if (debug)
 					System.out.println("time = "
@@ -165,18 +161,6 @@ public class Convert {
 				b /= n;
 
 				return (a << 24) + (r << 16) + (g << 8) + b;
-
-				// int rgb = mapDescr.getRGB(x, y);
-				// if (resize && y + 1 < mapDescr.getHeight()
-				// && x + 1 < mapDescr.getWidth()) {
-				// int pix00 = rgb;
-				// int pix01 = mapDescr.getRGB(x, y + 1);
-				// int pix10 = mapDescr.getRGB(x + 1, y);
-				// int pix11 = mapDescr.getRGB(x + 1, y + 1);
-				// rgb = Img.merge(pix00, pix01, pix10, pix11, 128, 128);
-				// }
-				//
-				// return rgb;
 			}
 		};
 
