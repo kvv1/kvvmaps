@@ -292,7 +292,7 @@ public class MapView extends View implements IPlatformView {
 
 	}
 
-	Runnable downUpDetector = new Runnable() {
+	private Runnable endScrollNotifier = new Runnable() {
 		@Override
 		public void run() {
 			commonView.endScrolling();
@@ -301,15 +301,15 @@ public class MapView extends View implements IPlatformView {
 
 	private void move() {
 		commonView.startScrolling();
-		removeCallbacks(downUpDetector);
-		postDelayed(downUpDetector, 200);
+		removeCallbacks(endScrollNotifier);
+		postDelayed(endScrollNotifier, 200);
 	}
 
 	private final Scroller mScroller = new Scroller(getContext());
 	private int oldx;
 	private int oldy;
 
-	private Runnable r = new Runnable() {
+	private Runnable scrollerRunnable = new Runnable() {
 		@Override
 		public void run() {
 
@@ -337,7 +337,7 @@ public class MapView extends View implements IPlatformView {
 		public boolean onScroll(MotionEvent e1, MotionEvent e2,
 				float distanceX, float distanceY) {
 			move();
-			commonView.animateBy((int) distanceX, (int) distanceY);
+			commonView.animateBy(distanceX, distanceY);
 			return true;
 		}
 
@@ -362,8 +362,8 @@ public class MapView extends View implements IPlatformView {
 					Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE,
 					Integer.MAX_VALUE);
 
-			removeCallbacks(r);
-			post(r);
+			removeCallbacks(scrollerRunnable);
+			post(scrollerRunnable);
 			return true;
 		}
 
@@ -385,6 +385,7 @@ public class MapView extends View implements IPlatformView {
 		{
 			setIsLongpressEnabled(false);
 		}
+
 	}
 
 	private class MyGestureDetector22 extends GestureDetector {
