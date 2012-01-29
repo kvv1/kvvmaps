@@ -37,7 +37,7 @@ public class Adapter {
 	public static int TILE_SIZE;
 
 	public static int MAP_TILES_CACHE_SIZE;
-	public static int PATH_TILES_CACHE_SIZE;
+	// public static int PATH_TILES_CACHE_SIZE;
 
 	public static int RAF_CACHE_SIZE;
 
@@ -56,7 +56,7 @@ public class Adapter {
 		handler = new Handler();
 		uiThread = Thread.currentThread();
 		freeBitmaps = new ArrayList<Bitmap>();
-		for (int i = 0; i < MAP_TILES_CACHE_SIZE + PATH_TILES_CACHE_SIZE; i++) {
+		for (int i = 0; i < MAP_TILES_CACHE_SIZE; i++) {
 			Bitmap bm = Bitmap.createBitmap(TILE_SIZE, TILE_SIZE,
 					Bitmap.Config.ARGB_4444);
 			cnt++;
@@ -77,24 +77,24 @@ public class Adapter {
 		});
 	}
 
+	public synchronized void recycleBitmap(Object img) {
+		if (img == null)
+			return;
+		Bitmap bm = (Bitmap) img;
+		freeBitmaps.add(bm);
+	}
+	
 	public synchronized void disposeBitmap(Object img) {
 		if (img == null)
 			return;
 		Bitmap bm = (Bitmap) img;
-		if (bm.isMutable()) {
-			// Adapter.log("add to free bitmaps");
-			freeBitmaps.add(bm);
-			// Log.i("Adapter", "freeBitmaps " + freeBitmaps.size());
-		} else {
-			// Adapter.log("recycle");
-			recycle(bm);
-		}
+		recycle(bm);
 	}
 
 	public Object allocBitmap(int w, int h) {
 		try {
 			Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_4444);
-			//Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ALPHA_8);
+			// Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ALPHA_8);
 			// new Canvas(bm).drawColor(0);
 
 			return bm;

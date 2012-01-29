@@ -8,17 +8,20 @@ import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.COLOR;
+import kvv.kvvmap.common.Img;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.LongSet;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maps.Maps.MapsListener;
-import kvv.kvvmap.common.maptiles.MapTiles;
 import kvv.kvvmap.common.pacemark.IPlaceMarksListener;
 import kvv.kvvmap.common.pacemark.ISelectable;
+import kvv.kvvmap.common.pacemark.PathDrawer;
 import kvv.kvvmap.common.pacemark.PathSelection;
-import kvv.kvvmap.common.pathtiles.PathTiles;
 import kvv.kvvmap.common.tiles.Tile;
+import kvv.kvvmap.common.tiles.TileContent;
 import kvv.kvvmap.common.tiles.TileId;
+import kvv.kvvmap.common.tiles.TileLoader.TileSource;
+import kvv.kvvmap.common.tiles.Tiles;
 
 public class CommonView implements ICommonView {
 
@@ -30,8 +33,7 @@ public class CommonView implements ICommonView {
 
 	private InfoLevel infoLevel = InfoLevel.HIGH;
 
-	private final MapTiles mapTiles;
-	private final PathTiles pathTiles;
+	private final Tiles tiles;
 
 	private final SelectionThread selectionThread = new SelectionThread();
 	private final LongSet tilesDrawn = new LongSet();
@@ -62,8 +64,8 @@ public class CommonView implements ICommonView {
 			@Override
 			public void onPathTileChanged(long id) {
 				envir.adapter.assertUIThread();
-				if (pathTiles != null) {
-					pathTiles.setInvalid(id);
+				if (tiles != null) {
+					tiles.setInvalid(id);
 					updateSel();
 					if (tilesDrawn.contains(id)) {
 						repaint();
@@ -87,41 +89,70 @@ public class CommonView implements ICommonView {
 		envir.maps.setListener(new MapsListener() {
 			@Override
 			public void mapAdded(String name) {
-				if (mapTiles != null) {
-					mapTiles.stopLoading();
-					mapTiles.setInvalidAll();
+				if (tiles != null) {
+					tiles.cancelLoading();
+					tiles.setInvalidAll();
 					Adapter.log("mapAdded notified");
 					repaint();
 				}
 			}
 		});
 
-		this.mapTiles = new MapTiles(envir.adapter, envir.maps,
-				Adapter.MAP_TILES_CACHE_SIZE) {
+		this.tiles = new Tiles(envir.adapter, new TileSource() {
+			@Override
+			public Tile loadAsync(long id) {
+				TileContent content = new TileContent();
+				
+				long t = System.currentTimeMillis();
+				
+				Img img = envir.maps.load(TileId.nx(id), TileId.ny(id),
+						TileId.zoom(id), content);
+				if(img == null)
+					return null;
+
+				long t1 = System.currentTimeMillis();
+				t = t1 - t;
+				
+				createPathsImg(id, img.img);
+				
+				 t1 = System.currentTimeMillis() - t1;
+				Adapter.log("load tile " + t + " " + t1);
+
+				return new Tile(envir.adapter, id, img, content);
+			}
+		}, Adapter.MAP_TILES_CACHE_SIZE) {
 			@Override
 			protected void loaded(Tile tile) {
 				repaint();
-			}
-		};
-		this.pathTiles = new PathTiles(envir, Adapter.PATH_TILES_CACHE_SIZE) {
-
-			@Override
-			protected void loaded(Tile tile) {
-				repaint();
-			}
-
-			@Override
-			protected InfoLevel getInfoLevel() {
-				return infoLevel;
-			}
-
-			@Override
-			protected ISelectable getSelAsync() {
-				return sel;
 			}
 		};
 
 		diagram = new Diagram(envir.adapter, this);
+	}
+
+	private Img createPathsImg(long id, Object img1) {
+		if (img1 == null)
+			return null;
+
+		GC gc = envir.adapter.getGC(img1);
+
+		if (Adapter.debugDraw) {
+			gc.setColor(COLOR.RED);
+			gc.drawRect(10, 10, 235, 235);
+			gc.drawText(TileId.toString(id), 20, 20);
+			gc.drawText("mem " + Runtime.getRuntime().freeMemory() / 1024
+					/ 1024 + " " + Runtime.getRuntime().totalMemory() / 1024
+					/ 1024, 20, 40);
+		}
+
+		InfoLevel infoLevel = getInfoLevel();
+		if (infoLevel.ordinal() > 0) {
+			gc.setAntiAlias(true);
+			ISelectable sel = CommonView.this.sel;
+			PathDrawer.drawPaths(envir.paths, gc, id, infoLevel, sel);
+			PathDrawer.drawPlacemarks(envir.placemarks, gc, id, infoLevel, sel);
+		}
+		return new Img(img1, true);
 	}
 
 	public LocationX getMyLocation() {
@@ -213,14 +244,15 @@ public class CommonView implements ICommonView {
 		int nxC = centerXY.x / Adapter.TILE_SIZE;
 		int nyC = centerXY.y / Adapter.TILE_SIZE;
 		long id = TileId.make(nxC, nyC, getZoom());
-		Tile tile = mapTiles.getTile(id, centerXY, false);
+		Tile tile = tiles.getTile(id, centerXY, false);
 		return tile;
 	}
 
 	public void reorderMaps() {
 		Tile tile = getCenterTile();
 		if (tile != null && tile.isMultiple()) {
-			mapTiles.reorder(tile);
+			envir.maps.reorder(tile.content.maps.getLast());
+			tiles.setInvalidAll();
 			repaint();
 		}
 	}
@@ -234,7 +266,8 @@ public class CommonView implements ICommonView {
 	}
 
 	public void setTopMap(String map) {
-		mapTiles.setTopMap(map);
+		envir.maps.setTopMap(map);
+		tiles.setInvalidAll();
 	}
 
 	public void zoomOut() {
@@ -253,8 +286,7 @@ public class CommonView implements ICommonView {
 
 	public void setZoom(int zoom) {
 		envir.adapter.assertUIThread();
-		mapTiles.stopLoading();
-		pathTiles.stopLoading();
+		tiles.cancelLoading();
 		mapPos.setZoom(zoom);
 		repaint();
 		updateSel();
@@ -351,14 +383,14 @@ public class CommonView implements ICommonView {
 			for (int ny = ny0; y < h; ny++, y += Adapter.TILE_SIZE) {
 				long id = TileId.make(nx, ny, getZoom());
 
-				mapTiles.drawTile(gc, centerXY, id, x, y,
+				tiles.drawTile(gc, centerXY, id, x, y,
 						platformView.loadDuringScrolling() || !scrolling,
 						mapPos.getZoom(), mapPos.getPrevZoom());
 
-				if (getInfoLevel().ordinal() > 0)
-					pathTiles.drawTile(gc, centerXY, id, x, y,
-							platformView.loadDuringScrolling() || !scrolling,
-							mapPos.getZoom(), mapPos.getPrevZoom());
+//				if (getInfoLevel().ordinal() > 0)
+//					pathTiles.drawTile(gc, centerXY, id, x, y,
+//							platformView.loadDuringScrolling() || !scrolling,
+//							mapPos.getZoom(), mapPos.getPrevZoom());
 
 				tilesDrawn.add(id);
 			}
@@ -401,9 +433,9 @@ public class CommonView implements ICommonView {
 
 	public void invalidatePathTiles() {
 		envir.adapter.assertUIThread();
-		if (pathTiles != null) {
-			pathTiles.stopLoading();
-			pathTiles.setInvalidAll();
+		if (tiles != null) {
+			tiles.cancelLoading();
+			tiles.setInvalidAll();
 			repaint();
 		}
 	}
@@ -479,18 +511,21 @@ public class CommonView implements ICommonView {
 	}
 
 	public void fixMap(String map) {
-		mapTiles.fixMap(map);
+		envir.maps.fixMap(map);
+		tiles.setInvalidAll();
 		repaint();
 	}
 
 	public String fixMap(boolean fix) {
 		if (!fix) {
-			mapTiles.fixMap(null);
+			envir.maps.fixMap(null);
+			tiles.setInvalidAll();
 			repaint();
 			return null;
 		} else {
 			String topMap = getTopMap();
-			mapTiles.fixMap(topMap);
+			envir.maps.fixMap(topMap);
+			tiles.setInvalidAll();
 			repaint();
 			return topMap;
 		}

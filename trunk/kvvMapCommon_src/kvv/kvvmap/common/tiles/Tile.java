@@ -37,7 +37,7 @@ public final class Tile {
 	}
 	
 	public synchronized void dispose() {
-		adapter.disposeBitmap(img.img);
+		adapter.recycleBitmap(img.img);
 		img = null;
 	}
 	

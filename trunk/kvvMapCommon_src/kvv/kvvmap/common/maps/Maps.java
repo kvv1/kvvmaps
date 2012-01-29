@@ -24,10 +24,10 @@ public class Maps {
 	private MapsListener listener;
 
 	private final Adapter adapter;
-	private final TileLoader tileLoader;
-	private final CopyOnWriteArrayList<MapDescrBase> maps = new CopyOnWriteArrayList<MapDescrBase>();
+	//private final TileLoader tileLoader;
+	public final CopyOnWriteArrayList<MapDescrBase> maps = new CopyOnWriteArrayList<MapDescrBase>();
 
-	private volatile MapDescrBase fixedMap;
+	public volatile MapDescrBase fixedMap;
 
 	static class CacheKey {
 		public CacheKey(MapDescr mapDescr, int idx) {
@@ -55,19 +55,6 @@ public class Maps {
 
 	public Maps(final Adapter adapter, final MapsDir mapsDir) {
 		this.adapter = adapter;
-
-		tileLoader = new TileLoader(adapter) {
-			@Override
-			protected Tile loadAsync(long id) {
-				TileContent content = new TileContent();
-				Img img = MapDescr.load(maps, fixedMap, TileId.nx(id),
-						TileId.ny(id), TileId.zoom(id), content, adapter);
-				if (img == null)
-					return null;
-				return new Tile(adapter, id, img, content);
-			}
-		};
-
 		mapsDir.setListener(new MapsDirListener() {
 			@Override
 			public void mapAdded(String name) {
@@ -103,16 +90,6 @@ public class Maps {
 
 	public void setListener(MapsListener l) {
 		listener = l;
-	}
-
-	public void load(Long id, final TileLoaderCallback callback,
-			PointInt centerXY) {
-		adapter.assertUIThread();
-		tileLoader.load(id, callback, centerXY);
-	}
-
-	public void cancelLoading() {
-		tileLoader.cancelLoading();
 	}
 
 	public void reorder(String map) {
@@ -210,4 +187,8 @@ public class Maps {
 
 	}
 	*/
+
+	public Img load(int nx, int ny, int zoom, TileContent content) {
+		return MapDescr.load(maps, fixedMap, nx, ny, zoom, content, adapter);
+	}
 }
