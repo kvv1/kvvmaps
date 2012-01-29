@@ -57,6 +57,8 @@ public class Diagram {
 					Diagram.this.params = null;
 					if (params == null) {
 						r = null;
+						if(Diagram.this.bm != null)
+							adapter.disposeBitmap(Diagram.this.bm);
 						Diagram.this.bm = bm;
 						view.repaint();
 						return;

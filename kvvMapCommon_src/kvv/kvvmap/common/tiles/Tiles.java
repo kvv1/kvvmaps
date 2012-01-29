@@ -7,16 +7,13 @@ import kvv.kvvmap.adapter.RectInt;
 import kvv.kvvmap.common.Cache;
 import kvv.kvvmap.common.Recycleable;
 import kvv.kvvmap.common.Utils;
+import kvv.kvvmap.common.tiles.TileLoader.TileSource;
 
 public abstract class Tiles implements Recycleable {
 
 	private final Cache<Long, Tile> tileCache;
 	private final Adapter adapter;
-
-	// private final Set<Long> tilesToIgnore = new HashSet<Long>();
-
-	protected abstract void load(Long id, final TileLoaderCallback callback,
-			PointInt prioLoc);
+	private final TileLoader loader;
 
 	protected abstract void loaded(Tile tile);
 
@@ -34,8 +31,9 @@ public abstract class Tiles implements Recycleable {
 		}
 	};
 
-	public Tiles(Adapter adapter, int cacheSize) {
+	public Tiles(Adapter adapter, TileSource tileSource, int cacheSize) {
 		this.adapter = adapter;
+		this.loader = new TileLoader(adapter, tileSource);
 		tileCache = new Cache<Long, Tile>(cacheSize) {
 			@Override
 			protected void dispose(Tile tile) {
@@ -69,12 +67,12 @@ public abstract class Tiles implements Recycleable {
 		Tile tile = tileCache.get(id);
 		if (tile != null) {
 			if (tile.needsReloading && startLoadingIfNeeded) {
-				load(id, callback, prioLoc);
+				loader.load(id, callback, prioLoc);
 			}
 			return tile;
 		}
 		if (startLoadingIfNeeded)
-			load(id, callback, prioLoc);
+			loader.load(id, callback, prioLoc);
 		return null;
 	}
 
@@ -153,6 +151,10 @@ public abstract class Tiles implements Recycleable {
 				tile.draw(gc, src, dst);
 			}
 		}
+	}
+
+	public void cancelLoading() {
+		loader.cancelLoading();
 	}
 
 }

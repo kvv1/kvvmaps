@@ -283,9 +283,7 @@ public class MyActivity extends Activity {
 
 		int cachesz = (metrics.widthPixels / Adapter.TILE_SIZE + 3)
 				* (metrics.heightPixels / Adapter.TILE_SIZE + 3);
-		Adapter.MAP_TILES_CACHE_SIZE = cachesz;
-		Adapter.PATH_TILES_CACHE_SIZE = cachesz;
-
+		Adapter.MAP_TILES_CACHE_SIZE = cachesz * 2;
 		Adapter.RAF_CACHE_SIZE = cachesz * 2;
 
 		adapter = new Adapter(this);

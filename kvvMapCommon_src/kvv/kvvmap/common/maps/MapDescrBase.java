@@ -29,6 +29,8 @@ public abstract class MapDescrBase {
 			TileContent content, Adapter adapter) {
 
 		Img img = new Img(adapter.allocBitmap(), true);
+		if(img.img == null)
+			return null;
 
 		//Object bm = adapter.allocBitmap(Utils.TILE_SIZE_G, Utils.TILE_SIZE_G);
 		

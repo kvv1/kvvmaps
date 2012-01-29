@@ -8,11 +8,13 @@ import java.util.Set;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.PointInt;
 
-public abstract class TileLoader {
+public class TileLoader {
 	private final Adapter adapter;
+	private final TileSource tileSource;
 
-	public TileLoader(Adapter adapter) {
+	public TileLoader(Adapter adapter, TileSource tileSource) {
 		this.adapter = adapter;
+		this.tileSource = tileSource;
 		Adapter.log("TileLoader " + ++cnt);
 	}
 
@@ -21,11 +23,12 @@ public abstract class TileLoader {
 
 	private static int cnt;
 
-	protected abstract Tile loadAsync(long id);
+	public interface TileSource {
+		Tile loadAsync(long id);
+	}
 
 	static class Request {
-		public Request(long id, TileLoaderCallback callback,
-				int requestId) {
+		public Request(long id, TileLoaderCallback callback, int requestId) {
 			this.id = id;
 			this.callback = callback;
 			this.requestId = requestId;
@@ -49,7 +52,7 @@ public abstract class TileLoader {
 				request = queue.removeFirst();
 				processingRequests.add(request);
 			}
-			Tile tile = loadAsync(request.id);
+			Tile tile = tileSource.loadAsync(request.id);
 			if (tile != null) {
 				final Tile tile1 = tile;
 				final TileLoaderCallback callback = request.callback;
@@ -76,11 +79,11 @@ public abstract class TileLoader {
 		// log("load " + getId(id));
 		synchronized (queue) {
 			for (Request p : queue)
-				if (p.id ==id)
+				if (p.id == id)
 					return;
 
 			for (Request p : processingRequests)
-				if (p.id ==id)
+				if (p.id == id)
 					return;
 
 			int d1 = Math.abs(TileId.nx(id) * Adapter.TILE_SIZE
@@ -88,8 +91,7 @@ public abstract class TileLoader {
 					+ Math.abs(TileId.ny(id) * Adapter.TILE_SIZE
 							+ Adapter.TILE_SIZE / 2 - centerXY.y);
 
-			ListIterator<Request> it = queue
-					.listIterator();
+			ListIterator<Request> it = queue.listIterator();
 			while (it.hasNext()) {
 				Request p = it.next();
 				long id1 = p.id;

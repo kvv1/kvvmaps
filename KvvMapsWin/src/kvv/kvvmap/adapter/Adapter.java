@@ -21,7 +21,7 @@ public class Adapter {
 	public final static String PATH_ROOT = ROOT + "/paths";
 	public static final String PLACEMARKS = ROOT + "/placemarks.pms";
 	public static final int MAP_TILES_CACHE_SIZE = 20;
-	public static final int PATH_TILES_CACHE_SIZE = 20;
+	//public static final int PATH_TILES_CACHE_SIZE = 20;
 	public static final int RAF_CACHE_SIZE = 50;
 
 	public static final int TILE_SIZE = 256;
@@ -47,6 +47,10 @@ public class Adapter {
 
 	public synchronized void disposeBitmap(Object img) {
 	}
+	
+	public void recycleBitmap(Object img) {
+	}
+
 
 	public synchronized Object allocBitmap() {
 		return new BufferedImage(TILE_SIZE, TILE_SIZE,
