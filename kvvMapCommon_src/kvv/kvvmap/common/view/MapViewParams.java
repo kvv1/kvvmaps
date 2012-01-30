@@ -12,6 +12,13 @@ public final class MapViewParams {
 	private double cos;
 	private double sin;
 
+	{
+		setAngle(Math.PI / 8);
+		setAngle(Math.PI / 16);
+		setAngle(0);
+	}
+
+
 	private LocationX loc = new LocationX(0, 0);
 
 	public int getZoom() {
@@ -64,12 +71,6 @@ public final class MapViewParams {
 		this.sin = Math.sin(angle);
 	}
 
-	{
-		setAngle(Math.PI / 8);
-		setAngle(Math.PI / 16);
-		setAngle(0);
-	}
-
 	public void setZoom(int zoom) {
 		prevzoom = this.zoom;
 		double lon = loc.getLongitude();
@@ -89,8 +90,8 @@ public final class MapViewParams {
 	}
 
 	public void animateBy(double dx, double dy) {
-		double x = centerX + dx;
-		double y = centerY + dy;
+		double x = scr2geoX(dx, dy);
+		double y = scr2geoY(dx, dy);
 		double lon = Utils.x2lon(x, zoom);
 		double lat = Utils.y2lat(y, zoom);
 		if (lat > 85 || lat < -85)

@@ -230,7 +230,7 @@ public class MapView extends View implements IPlatformView {
 			case MotionEvent.ACTION_MOVE:
 				if (mode == DRAG) {
 					if (p1 != null) {
-						commonView.animateBy(p1.x - x, p1.y - y);
+						commonView.scrollBy(p1.x - x, p1.y - y);
 						p1 = new PointInt(x, y);
 					}
 				} else if (mode == ZOOM) {
@@ -283,7 +283,7 @@ public class MapView extends View implements IPlatformView {
 				break;
 			case MotionEvent.ACTION_MOVE:
 				if (p1 != null) {
-					commonView.animateBy(p1.x - x, p1.y - y);
+					commonView.scrollBy(p1.x - x, p1.y - y);
 					p1 = new PointInt(x, y);
 				}
 			}
@@ -319,7 +319,7 @@ public class MapView extends View implements IPlatformView {
 			int y = mScroller.getCurrY();
 
 			move();
-			commonView.animateBy(x - oldx, y - oldy);
+			commonView.scrollBy(x - oldx, y - oldy);
 			oldx = x;
 			oldy = y;
 
@@ -337,7 +337,7 @@ public class MapView extends View implements IPlatformView {
 		public boolean onScroll(MotionEvent e1, MotionEvent e2,
 				float distanceX, float distanceY) {
 			move();
-			commonView.animateBy(distanceX, distanceY);
+			commonView.scrollBy(distanceX, distanceY);
 			return true;
 		}
 
@@ -377,7 +377,7 @@ public class MapView extends View implements IPlatformView {
 		}
 	}
 
-	private class MyGestureDetector extends GestureDetector {
+	private class MyGestureDetector extends GestureDetector1 {
 		public MyGestureDetector() {
 			super(new MyOnGestureListener());
 		}
@@ -388,7 +388,7 @@ public class MapView extends View implements IPlatformView {
 
 	}
 
-	private class MyGestureDetector22 extends GestureDetector {
+	private class MyGestureDetector22 extends GestureDetector1 {
 		public MyGestureDetector22() {
 			super(getContext(), new MyOnGestureListener(), new Handler(), true);
 		}
@@ -405,21 +405,23 @@ public class MapView extends View implements IPlatformView {
 			mScaleDetector = new ScaleGestureDetector(context,
 					new ScaleGestureDetector.SimpleOnScaleGestureListener() {
 						int initZoom;
+						float mScaleFactor; 
 
 						@Override
 						public boolean onScaleBegin(
 								ScaleGestureDetector detector) {
 							initZoom = commonView.getZoom();
+							mScaleFactor = 1f;
 							return super.onScaleBegin(detector);
 						}
 
 						@Override
 						public boolean onScale(ScaleGestureDetector detector) {
 							Adapter.log("onScale " + detector.getScaleFactor());
+							
+							mScaleFactor *= detector.getScaleFactor();
 
-							int newZoom = (int) (initZoom * detector
-									.getScaleFactor());
-
+							int newZoom = (int) (initZoom + Math.log(mScaleFactor) + 0.5);
 							newZoom = Math.max(Utils.MIN_ZOOM,
 									Math.min(Utils.MAX_ZOOM, newZoom));
 
@@ -438,7 +440,7 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	private MyScaleGestureDetector mScaleDetector;
-	private GestureDetector mGestureDetector;
+	private GestureDetector1 mGestureDetector;
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
@@ -493,6 +495,11 @@ public class MapView extends View implements IPlatformView {
 			compass.setValues(values);
 			invalidate();
 		}
+		
+		if(commonView != null && values != null && values.length >= 1) {
+			//commonView.setAngle(-values[0] * Math.PI / 180);
+		}
+		
 	}
 
 	public LocationX createPlacemark() {

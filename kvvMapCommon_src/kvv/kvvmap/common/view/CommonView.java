@@ -31,7 +31,7 @@ public class CommonView implements ICommonView {
 
 	private final MapViewParams mapPos = new MapViewParams();
 
-	private InfoLevel infoLevel = InfoLevel.HIGH;
+	private volatile InfoLevel infoLevel = InfoLevel.HIGH;
 
 	private final Tiles tiles;
 
@@ -102,21 +102,40 @@ public class CommonView implements ICommonView {
 			@Override
 			public Tile loadAsync(long id) {
 				TileContent content = new TileContent();
-				
-				long t = System.currentTimeMillis();
-				
+
+//				long t = System.currentTimeMillis();
+
 				Img img = envir.maps.load(TileId.nx(id), TileId.ny(id),
 						TileId.zoom(id), content);
-				if(img == null)
+				if (img == null)
 					return null;
 
-				long t1 = System.currentTimeMillis();
-				t = t1 - t;
-				
-				createPathsImg(id, img.img);
-				
-				 t1 = System.currentTimeMillis() - t1;
-				Adapter.log("load tile " + t + " " + t1);
+//				long t1 = System.currentTimeMillis();
+//				t = t1 - t;
+
+				GC gc = envir.adapter.getGC(img.img);
+
+				if (Adapter.debugDraw) {
+					gc.setColor(COLOR.RED);
+					gc.drawRect(10, 10, 235, 235);
+					
+					ViewHelper.drawText(gc, TileId.toString(id), new PointInt(20, 20), COLOR.RED, 0x80FFFFFF);
+					ViewHelper.drawText(gc, "mem " + Runtime.getRuntime().freeMemory()
+							/ 1024 / 1024 + " "
+							+ Runtime.getRuntime().totalMemory() / 1024 / 1024, new PointInt(20, 40), COLOR.RED, 0x80FFFFFF);
+				}
+
+				InfoLevel infoLevel = CommonView.this.infoLevel;
+				if (infoLevel.ordinal() > 0) {
+					gc.setAntiAlias(true);
+					ISelectable sel1 = sel;
+					PathDrawer.drawPaths(envir.paths, gc, id, infoLevel, sel1);
+					PathDrawer.drawPlacemarks(envir.placemarks, gc, id,
+							infoLevel, sel1);
+				}
+
+//				t1 = System.currentTimeMillis() - t1;
+//				Adapter.log("load tile " + t + " " + t1);
 
 				return new Tile(envir.adapter, id, img, content);
 			}
@@ -128,31 +147,6 @@ public class CommonView implements ICommonView {
 		};
 
 		diagram = new Diagram(envir.adapter, this);
-	}
-
-	private Img createPathsImg(long id, Object img1) {
-		if (img1 == null)
-			return null;
-
-		GC gc = envir.adapter.getGC(img1);
-
-		if (Adapter.debugDraw) {
-			gc.setColor(COLOR.RED);
-			gc.drawRect(10, 10, 235, 235);
-			gc.drawText(TileId.toString(id), 20, 20);
-			gc.drawText("mem " + Runtime.getRuntime().freeMemory() / 1024
-					/ 1024 + " " + Runtime.getRuntime().totalMemory() / 1024
-					/ 1024, 20, 40);
-		}
-
-		InfoLevel infoLevel = getInfoLevel();
-		if (infoLevel.ordinal() > 0) {
-			gc.setAntiAlias(true);
-			ISelectable sel = CommonView.this.sel;
-			PathDrawer.drawPaths(envir.paths, gc, id, infoLevel, sel);
-			PathDrawer.drawPlacemarks(envir.placemarks, gc, id, infoLevel, sel);
-		}
-		return new Img(img1, true);
 	}
 
 	public LocationX getMyLocation() {
@@ -179,7 +173,7 @@ public class CommonView implements ICommonView {
 					myLocation.getY(mapPos.getZoom()))
 					- mapPos.geo2scrY(oldLocation.getX(mapPos.getZoom()),
 							oldLocation.getY(mapPos.getZoom()));
-			animateBy(dx, dy);
+			scrollBy(dx, dy);
 			repaint();
 		} else if (scroll) {
 			animateTo(myLocation);
@@ -284,6 +278,12 @@ public class CommonView implements ICommonView {
 		return mapPos.getZoom();
 	}
 
+	public void setAngle(double angle) {
+		envir.adapter.assertUIThread();
+		mapPos.setAngle(angle);
+		repaint();
+	}
+	
 	public void setZoom(int zoom) {
 		envir.adapter.assertUIThread();
 		tiles.cancelLoading();
@@ -303,7 +303,7 @@ public class CommonView implements ICommonView {
 		animateTo(loc, 0, 0);
 	}
 
-	public void animateBy(double dx, double dy) {
+	public void scrollBy(double dx, double dy) {
 		envir.adapter.assertUIThread();
 		mapPos.animateBy(dx, dy);
 		repaint();
@@ -387,10 +387,10 @@ public class CommonView implements ICommonView {
 						platformView.loadDuringScrolling() || !scrolling,
 						mapPos.getZoom(), mapPos.getPrevZoom());
 
-//				if (getInfoLevel().ordinal() > 0)
-//					pathTiles.drawTile(gc, centerXY, id, x, y,
-//							platformView.loadDuringScrolling() || !scrolling,
-//							mapPos.getZoom(), mapPos.getPrevZoom());
+				// if (getInfoLevel().ordinal() > 0)
+				// pathTiles.drawTile(gc, centerXY, id, x, y,
+				// platformView.loadDuringScrolling() || !scrolling,
+				// mapPos.getZoom(), mapPos.getPrevZoom());
 
 				tilesDrawn.add(id);
 			}
