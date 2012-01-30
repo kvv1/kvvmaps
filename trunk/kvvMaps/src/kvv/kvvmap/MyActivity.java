@@ -68,6 +68,10 @@ public class MyActivity extends Activity {
 	private static final String FOLLOW_GPS_SETTING = "followGPS";
 	private static final String KINETIC_SCROLLING_SETTING = "kineticScrolling";
 	private static final String LOAD_DURING_SCROLLING_SETTING = "loadDuringScrolling";
+	
+	private static final int ORIENTATION_NONE = 0;
+	private static final int ORIENTATION_COMPASS = 1;
+	private static final int ORIENTATION_GPS = 2;
 
 	public static final String PREFS_NAME = "KvvMapPrefsFile";
 
