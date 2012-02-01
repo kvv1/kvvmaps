@@ -73,9 +73,22 @@ public class GestureDetector1 {
 	class NewDetector extends OldDetector {
 		@Override
 		public void onTouchEvent(MotionEvent event) {
-			switch (event.getAction()) {
+			System.out.println("ACTION " + (event.getAction() & MotionEvent.ACTION_MASK));
+			switch (event.getAction() & MotionEvent.ACTION_MASK) {
+//			case MotionEvent.ACTION_DOWN:
+//				System.out.println("ACTION_DOWN");
+//				return;
 			case MotionEvent.ACTION_POINTER_DOWN:
-				if (event.getPointerCount() > 1) {
+				System.out.println("ACTION_POINTER_DOWN");
+				if (event.getPointerCount() == 1) {
+//					int x = (int) (event.getX(0));
+//					int y = (int) (event.getY(0));
+//					System.out.println("xy = " + x + " " + y);
+//					p1 = new PointF(x, y);
+//					vx = vy = 0;
+//					time = event.getEventTime();
+//					listener.onDown(event);
+				} else {
 					p1 = null;
 					vx = vy = 0;
 				}
