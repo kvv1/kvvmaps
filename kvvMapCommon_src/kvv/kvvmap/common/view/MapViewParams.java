@@ -8,16 +8,15 @@ public final class MapViewParams {
 	private double centerY;
 	private int zoom = Utils.MIN_ZOOM;
 	private int prevzoom = Utils.MIN_ZOOM;
-	private double angle;
+	private float angle;
 	private double cos;
 	private double sin;
 
 	{
-		setAngle(Math.PI / 8);
-		setAngle(Math.PI / 16);
 		setAngle(0);
+		// setAngle(45);
+		// setAngle(90);
 	}
-
 
 	private LocationX loc = new LocationX(0, 0);
 
@@ -28,12 +27,6 @@ public final class MapViewParams {
 	public int getPrevZoom() {
 		return prevzoom;
 	}
-	
-	// public PointD geo2scr(PointD geo) {
-	// double x = geo.x - centerX;
-	// double y = geo.y - centerY;
-	// return new PointD(x, y);
-	// }
 
 	public double geo2scrX(double x, double y) {
 		x -= centerX;
@@ -57,18 +50,18 @@ public final class MapViewParams {
 		return y1 + centerY;
 	}
 
-	public double scrX2lon(double x, double y) {
+	public double scr2lon(double x, double y) {
 		return Utils.x2lon(scr2geoX(x, y), zoom);
 	}
 
-	public double scrY2lat(double x, double y) {
+	public double scr2lat(double x, double y) {
 		return Utils.y2lat(scr2geoY(x, y), zoom);
 	}
 
-	public void setAngle(double angle) {
-		this.angle = angle;
-		this.cos = Math.cos(angle);
-		this.sin = Math.sin(angle);
+	public void setAngle(float deg) {
+		this.angle = deg;
+		this.cos = Math.cos(deg * Math.PI / 180);
+		this.sin = Math.sin(deg * Math.PI / 180);
 	}
 
 	public void setZoom(int zoom) {
@@ -76,20 +69,18 @@ public final class MapViewParams {
 		double lon = loc.getLongitude();
 		double lat = loc.getLatitude();
 		this.zoom = zoom;
-		animateTo(lon, lat, 0, 0);
+		animateTo(lon, lat);
 	}
 
-	public void animateTo(double lon, double lat, int dx, int dy) {
+	public void animateTo(double lon, double lat) {
 		if (lat > 85 || lat < -85)
 			return;
-		double x = Utils.lon2x(lon, zoom);
-		double y = Utils.lat2y(lat, zoom);
-		centerX = x - dx;
-		centerY = y - dy;
+		centerX = Utils.lon2x(lon, zoom);
+		centerY = Utils.lat2y(lat, zoom);
 		loc = new LocationX(lon, lat);
 	}
 
-	public void animateBy(double dx, double dy) {
+	public void scrollBy(double dx, double dy) {
 		double x = scr2geoX(dx, dy);
 		double y = scr2geoY(dx, dy);
 		double lon = Utils.x2lon(x, zoom);
@@ -117,7 +108,7 @@ public final class MapViewParams {
 		return cos;
 	}
 
-	public double angle() {
+	public float angle() {
 		return angle;
 	}
 

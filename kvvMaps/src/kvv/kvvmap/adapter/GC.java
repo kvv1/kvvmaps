@@ -178,8 +178,8 @@ public class GC {
 			paint.setXfermode(null);
 	}
 
-	public void drawArrow(int x, int y, LocationX myLocation, boolean dimmed) {
-		arrow.draw(canvas, x, y, myLocation.getBearing(), dimmed);
+	public void drawArrow(int x, int y, float rot, boolean dimmed) {
+		arrow.draw(canvas, x, y, rot, dimmed);
 	}
 
 	Matrix m;

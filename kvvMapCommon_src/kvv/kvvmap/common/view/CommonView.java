@@ -7,6 +7,7 @@ import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.adapter.PointInt;
+import kvv.kvvmap.adapter.RectX;
 import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.Img;
 import kvv.kvvmap.common.InfoLevel;
@@ -48,6 +49,15 @@ public class CommonView implements ICommonView {
 
 	private boolean scrolling;
 
+	// private PointInt sreenCenter = new PointInt(0, 0);
+	private RotationMode rotationMode = RotationMode.ROTATION_NONE;
+
+	public enum RotationMode {
+		ROTATION_NONE,
+		ROTATION_COMPASS,
+		ROTATION_GPS
+	}
+	
 	public CommonView(IPlatformView platformView, final Environment envir) {
 		this.envir = envir;
 		this.platformView = platformView;
@@ -103,26 +113,31 @@ public class CommonView implements ICommonView {
 			public Tile loadAsync(long id) {
 				TileContent content = new TileContent();
 
-//				long t = System.currentTimeMillis();
+				// long t = System.currentTimeMillis();
 
 				Img img = envir.maps.load(TileId.nx(id), TileId.ny(id),
 						TileId.zoom(id), content);
 				if (img == null)
 					return null;
 
-//				long t1 = System.currentTimeMillis();
-//				t = t1 - t;
+				// long t1 = System.currentTimeMillis();
+				// t = t1 - t;
 
 				GC gc = envir.adapter.getGC(img.img);
 
 				if (Adapter.debugDraw) {
 					gc.setColor(COLOR.RED);
 					gc.drawRect(10, 10, 235, 235);
-					
-					ViewHelper.drawText(gc, TileId.toString(id), new PointInt(20, 20), COLOR.RED, 0x80FFFFFF);
-					ViewHelper.drawText(gc, "mem " + Runtime.getRuntime().freeMemory()
-							/ 1024 / 1024 + " "
-							+ Runtime.getRuntime().totalMemory() / 1024 / 1024, new PointInt(20, 40), COLOR.RED, 0x80FFFFFF);
+
+					ViewHelper.drawText(gc, TileId.toString(id), new PointInt(
+							20, 20), COLOR.RED, 0x80FFFFFF);
+					ViewHelper
+							.drawText(gc, "mem "
+									+ Runtime.getRuntime().freeMemory() / 1024
+									/ 1024 + " "
+									+ Runtime.getRuntime().totalMemory() / 1024
+									/ 1024, new PointInt(20, 40), COLOR.RED,
+									0x80FFFFFF);
 				}
 
 				InfoLevel infoLevel = CommonView.this.infoLevel;
@@ -134,8 +149,8 @@ public class CommonView implements ICommonView {
 							infoLevel, sel1);
 				}
 
-//				t1 = System.currentTimeMillis() - t1;
-//				Adapter.log("load tile " + t + " " + t1);
+				// t1 = System.currentTimeMillis() - t1;
+				// Adapter.log("load tile " + t + " " + t1);
 
 				return new Tile(envir.adapter, id, img, content);
 			}
@@ -147,6 +162,11 @@ public class CommonView implements ICommonView {
 		};
 
 		diagram = new Diagram(envir.adapter, this);
+	}
+
+	public void setRotationMode(RotationMode rotationMode) {
+		this.rotationMode = rotationMode;
+		setAngle(0);
 	}
 
 	public LocationX getMyLocation() {
@@ -164,20 +184,23 @@ public class CommonView implements ICommonView {
 		myLocation = locationX;
 		myLocationDimmed = false;
 
-		if (onScreen(oldLocation)) {
-			double dx = mapPos.geo2scrX(myLocation.getX(mapPos.getZoom()),
-					myLocation.getY(mapPos.getZoom()))
-					- mapPos.geo2scrX(oldLocation.getX(mapPos.getZoom()),
-							oldLocation.getY(mapPos.getZoom()));
-			double dy = mapPos.geo2scrY(myLocation.getX(mapPos.getZoom()),
-					myLocation.getY(mapPos.getZoom()))
-					- mapPos.geo2scrY(oldLocation.getX(mapPos.getZoom()),
-							oldLocation.getY(mapPos.getZoom()));
-			scrollBy(dx, dy);
-			repaint();
-		} else if (scroll) {
+		if (rotationMode == RotationMode.ROTATION_GPS) {
 			animateTo(myLocation);
-			repaint();
+			setAngle(myLocation.getBearing());
+		} else {
+			if (onScreen(oldLocation)) {
+				double dx = mapPos.geo2scrX(myLocation.getX(mapPos.getZoom()),
+						myLocation.getY(mapPos.getZoom()))
+						- mapPos.geo2scrX(oldLocation.getX(mapPos.getZoom()),
+								oldLocation.getY(mapPos.getZoom()));
+				double dy = mapPos.geo2scrY(myLocation.getX(mapPos.getZoom()),
+						myLocation.getY(mapPos.getZoom()))
+						- mapPos.geo2scrY(oldLocation.getX(mapPos.getZoom()),
+								oldLocation.getY(mapPos.getZoom()));
+				scrollBy(dx, dy);
+			} else if (scroll) {
+				animateTo(myLocation);
+			}
 		}
 
 	}
@@ -278,12 +301,12 @@ public class CommonView implements ICommonView {
 		return mapPos.getZoom();
 	}
 
-	public void setAngle(double angle) {
+	public void setAngle(float deg) {
 		envir.adapter.assertUIThread();
-		mapPos.setAngle(angle);
+		mapPos.setAngle(deg);
 		repaint();
 	}
-	
+
 	public void setZoom(int zoom) {
 		envir.adapter.assertUIThread();
 		tiles.cancelLoading();
@@ -292,20 +315,16 @@ public class CommonView implements ICommonView {
 		updateSel();
 	}
 
-	public void animateTo(LocationX loc, int dx, int dy) {
+	public void animateTo(LocationX loc) {
 		envir.adapter.assertUIThread();
-		mapPos.animateTo(loc.getLongitude(), loc.getLatitude(), dx, dy);
+		mapPos.animateTo(loc.getLongitude(), loc.getLatitude());
 		repaint();
 		updateSel();
 	}
 
-	public void animateTo(LocationX loc) {
-		animateTo(loc, 0, 0);
-	}
-
 	public void scrollBy(double dx, double dy) {
 		envir.adapter.assertUIThread();
-		mapPos.animateBy(dx, dy);
+		mapPos.scrollBy(dx, dy);
 		repaint();
 		cancelSel();
 	}
@@ -318,8 +337,7 @@ public class CommonView implements ICommonView {
 		drawTiles(gc);
 		// long time1 = System.currentTimeMillis();
 		// System.out.println("t1 = " + (time1 - time));
-		int locationH = ViewHelper.drawMyLocation(gc, mapPos, myLocation,
-				isMyLocationDimmed());
+		int locationH = ViewHelper.drawMyLocationStatus(gc, myLocation);
 		ViewHelper.drawCross(gc);
 		ViewHelper.drawScale(gc, mapPos);
 		// long time2 = System.currentTimeMillis();
@@ -372,8 +390,8 @@ public class CommonView implements ICommonView {
 		int[] scrLoc = new int[2];
 		platformView.getLocationOnScreen(scrLoc);
 
-		gc.setTransform((float) (mapPos.angle() * 180 / Math.PI), w / 2
-				+ scrLoc[0], h / 2 + scrLoc[1]);
+		gc.setTransform((float) (mapPos.angle()), w / 2 + scrLoc[0], h / 2
+				+ scrLoc[1]);
 
 		gc.setAntiAlias(true);
 
@@ -382,19 +400,15 @@ public class CommonView implements ICommonView {
 			int y = y0;
 			for (int ny = ny0; y < h; ny++, y += Adapter.TILE_SIZE) {
 				long id = TileId.make(nx, ny, getZoom());
-
 				tiles.drawTile(gc, centerXY, id, x, y,
 						platformView.loadDuringScrolling() || !scrolling,
 						mapPos.getZoom(), mapPos.getPrevZoom());
-
-				// if (getInfoLevel().ordinal() > 0)
-				// pathTiles.drawTile(gc, centerXY, id, x, y,
-				// platformView.loadDuringScrolling() || !scrolling,
-				// mapPos.getZoom(), mapPos.getPrevZoom());
-
 				tilesDrawn.add(id);
 			}
 		}
+
+		ViewHelper.drawMyLocationArrow(gc, mapPos, myLocation,
+				isMyLocationDimmed());
 
 		gc.clearTransform();
 	}
@@ -451,7 +465,7 @@ public class CommonView implements ICommonView {
 
 	public LocationX getLocation(int dx, int dy) {
 		envir.adapter.assertUIThread();
-		return new LocationX(mapPos.scrX2lon(dx, dy), mapPos.scrY2lat(dx, dy));
+		return new LocationX(mapPos.scr2lon(dx, dy), mapPos.scr2lat(dx, dy));
 	}
 
 	private void cancelSel() {
@@ -462,9 +476,8 @@ public class CommonView implements ICommonView {
 	private void updateSel() {
 		envir.adapter.assertUIThread();
 		selectionThread.set((int) mapPos.centerX(), (int) mapPos.centerY(),
-				platformView.getWidth(), platformView.getHeight(), getZoom(),
-				envir.adapter, envir.placemarks, envir.paths,
-				new SelectionThread.Callback() {
+				getScreenRect(), getZoom(), envir.adapter, envir.placemarks,
+				envir.paths, new SelectionThread.Callback() {
 					@Override
 					public void selectionChanged(ISelectable sel) {
 						CommonView.this.sel = sel;
@@ -480,6 +493,24 @@ public class CommonView implements ICommonView {
 						}
 					}
 				});
+	}
+
+	private RectX getScreenRect() {
+		double lon1 = mapPos.scr2lon(-platformView.getWidth() / 2,
+				-platformView.getHeight() / 2);
+		double lon2 = mapPos.scr2lon(platformView.getWidth() / 2,
+				platformView.getHeight() / 2);
+		double lat1 = mapPos.scr2lat(-platformView.getWidth() / 2,
+				-platformView.getHeight() / 2);
+		double lat2 = mapPos.scr2lat(platformView.getWidth() / 2,
+				platformView.getHeight() / 2);
+
+		double minLon = Math.min(lon1, lon2);
+		double maxLon = Math.max(lon1, lon2);
+		double minLat = Math.min(lat1, lat2);
+		double maxLat = Math.max(lat1, lat2);
+
+		return new RectX(minLon, minLat, maxLon - minLon, maxLat - minLat);
 	}
 
 	public void animateToMyLocation() {
