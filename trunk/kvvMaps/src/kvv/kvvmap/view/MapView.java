@@ -5,11 +5,11 @@ import kvv.kvvmap.R;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.pacemark.ISelectable;
 import kvv.kvvmap.common.view.CommonView;
+import kvv.kvvmap.common.view.CommonView.RotationMode;
 import kvv.kvvmap.common.view.Environment;
 import kvv.kvvmap.common.view.IPlatformView;
 import android.content.Context;
@@ -23,8 +23,6 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.FloatMath;
-import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -42,8 +40,6 @@ public class MapView extends View implements IPlatformView {
 
 	private Thread uiThread;
 
-	private OnTouchListener touchListener;
-
 	public void assertUIThread() {
 		if (Thread.currentThread() != uiThread) {
 			final Throwable t = new RuntimeException("illegal thread");
@@ -56,12 +52,6 @@ public class MapView extends View implements IPlatformView {
 		uiThread = Thread.currentThread();
 		setFocusable(true);
 		setFocusableInTouchMode(true);
-
-		boolean hasMultiTouch = Integer.parseInt(Build.VERSION.SDK) >= 5;
-		if (hasMultiTouch)
-			touchListener = new MultiTouchListener();
-		else
-			touchListener = new TouchListener();
 	}
 
 	private static int cnt;
@@ -182,116 +172,6 @@ public class MapView extends View implements IPlatformView {
 
 	}
 
-	class MultiTouchListener implements OnTouchListener {
-		private float spacing(MotionEvent event) {
-			float x = event.getX(0) - event.getX(1);
-			float y = event.getY(0) - event.getY(1);
-			return FloatMath.sqrt(x * x + y * y);
-		}
-
-		private PointInt p1;
-
-		float oldDist;
-
-		int DRAG = 2;
-		int ZOOM = 1;
-		int NONE = 0;
-		int mode;
-
-		@Override
-		public boolean onTouch(View arg0, MotionEvent event) {
-
-			if (commonView == null)
-				return true;
-
-			int x = (int) (event.getX());
-			int y = (int) (event.getY());
-			switch (event.getAction() & MotionEvent.ACTION_MASK) {
-			case MotionEvent.ACTION_DOWN:
-				p1 = new PointInt(x, y);
-				commonView.startScrolling();
-				mode = DRAG;
-				break;
-			case MotionEvent.ACTION_UP:
-			case MotionEvent.ACTION_POINTER_UP:
-				p1 = null;
-				commonView.endScrolling();
-				mode = NONE;
-				break;
-
-			case MotionEvent.ACTION_POINTER_DOWN:
-				if (event.getPointerCount() == 2) {
-					oldDist = spacing(event);
-					if (oldDist > 10f)
-						mode = ZOOM;
-				}
-				break;
-
-			case MotionEvent.ACTION_MOVE:
-				if (mode == DRAG) {
-					if (p1 != null) {
-						commonView.scrollBy(p1.x - x, p1.y - y);
-						p1 = new PointInt(x, y);
-					}
-				} else if (mode == ZOOM) {
-					float newDist = spacing(event);
-					if (newDist > 10f) {
-						float scale = newDist / oldDist;
-						int dx = (int) ((event.getX(0) + event.getX(1)) / 2)
-								- getWidth() / 2;
-						int dy = (int) ((event.getY(0) + event.getY(1)) / 2)
-								- getHeight() / 2;
-
-						LocationX loc = commonView.getLocation(dx, dy);
-
-						if (scale > 1.5) {
-							zoomIn();
-							commonView.animateTo(loc, dx, dy);
-							mode = NONE;
-						} else if (scale < 0.75) {
-							zoomOut();
-							commonView.animateTo(loc, dx, dy);
-							mode = NONE;
-						}
-					}
-				}
-				break;
-			}
-			return true;
-		}
-	}
-
-	class TouchListener implements OnTouchListener {
-
-		private PointInt p1;
-
-		@Override
-		public boolean onTouch(View arg0, MotionEvent event) {
-			if (commonView == null)
-				return true;
-
-			int x = (int) (event.getX());
-			int y = (int) (event.getY());
-			switch (event.getAction()) {
-			case MotionEvent.ACTION_DOWN:
-				p1 = new PointInt(x, y);
-				commonView.startScrolling();
-				break;
-			case MotionEvent.ACTION_UP:
-				p1 = null;
-				commonView.endScrolling();
-				break;
-			case MotionEvent.ACTION_MOVE:
-				if (p1 != null) {
-					commonView.scrollBy(p1.x - x, p1.y - y);
-					p1 = new PointInt(x, y);
-				}
-			}
-			return true;
-		}
-
-	}
-
 	private Runnable endScrollNotifier = new Runnable() {
 		@Override
 		public void run() {
@@ -405,7 +285,7 @@ public class MapView extends View implements IPlatformView {
 			mScaleDetector = new ScaleGestureDetector(context,
 					new ScaleGestureDetector.SimpleOnScaleGestureListener() {
 						int initZoom;
-						float mScaleFactor; 
+						float mScaleFactor;
 
 						@Override
 						public boolean onScaleBegin(
@@ -418,10 +298,11 @@ public class MapView extends View implements IPlatformView {
 						@Override
 						public boolean onScale(ScaleGestureDetector detector) {
 							Adapter.log("onScale " + detector.getScaleFactor());
-							
+
 							mScaleFactor *= detector.getScaleFactor();
 
-							int newZoom = (int) (initZoom + Math.log(mScaleFactor) + 0.5);
+							int newZoom = (int) (initZoom
+									+ Math.log(mScaleFactor) + 0.5);
 							newZoom = Math.max(Utils.MIN_ZOOM,
 									Math.min(Utils.MAX_ZOOM, newZoom));
 
@@ -495,11 +376,12 @@ public class MapView extends View implements IPlatformView {
 			compass.setValues(values);
 			invalidate();
 		}
-		
-		if(commonView != null && values != null && values.length >= 1) {
-			//commonView.setAngle(-values[0] * Math.PI / 180);
+
+		if (commonView != null
+				&& activity.getRotation() == RotationMode.ROTATION_COMPASS
+				&& values != null && values.length >= 1) {
+			commonView.setAngle(-values[0]);
 		}
-		
 	}
 
 	public LocationX createPlacemark() {
@@ -646,6 +528,11 @@ public class MapView extends View implements IPlatformView {
 	@Override
 	public boolean loadDuringScrolling() {
 		return activity == null || activity.loadDuringScrolling();
+	}
+
+	public void setRotationMode(RotationMode rotationMode) {
+		if(commonView != null)
+			commonView.setRotationMode(rotationMode);
 	}
 
 }

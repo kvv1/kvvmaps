@@ -7,7 +7,6 @@ import java.util.Map;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.adapter.RectX;
-import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.pacemark.ISelectable;
 import kvv.kvvmap.common.pacemark.Path;
 import kvv.kvvmap.common.pacemark.PathSelection;
@@ -21,13 +20,13 @@ class SelectionThread {
 	}
 
 	private static class Params {
-		public Params(int x, int y, int w, int h, int zoom, Adapter adapter,
-				PlaceMarks placemarks, Paths paths, Callback callback) {
+		public Params(int x, int y, RectX screenRect, int zoom,
+				Adapter adapter, PlaceMarks placemarks, Paths paths,
+				Callback callback) {
 			super();
 			this.x = x;
 			this.y = y;
-			this.w = w;
-			this.h = h;
+			this.screenRect = screenRect;
 			this.zoom = zoom;
 			this.adapter = adapter;
 			this.placemarks = placemarks;
@@ -37,8 +36,7 @@ class SelectionThread {
 
 		public final int x;
 		public final int y;
-		public final int w;
-		public final int h;
+		public final RectX screenRect;
 		public final int zoom;
 		public final Adapter adapter;
 		public final PlaceMarks placemarks;
@@ -73,18 +71,6 @@ class SelectionThread {
 
 				ISelectable sel = null;
 
-				RectX screenRect;
-				int x0 = params.x - params.w / 2;
-				int x1 = params.x + params.w / 2;
-				int y0 = params.y - params.h / 2;
-				int y1 = params.y + params.h / 2;
-
-				double lon0 = Utils.x2lon(x0, params.zoom);
-				double lonw = Utils.x2lon(x1, params.zoom) - lon0;
-				double lat0 = Utils.y2lat(y1, params.zoom);
-				double lath = Utils.y2lat(y0, params.zoom) - lat0;
-				screenRect = new RectX(lon0, lat0, lonw, lath);
-
 				Map<LocationX, Path> pms = new HashMap<LocationX, Path>();
 				for (LocationX pm : params.placemarks.getPlaceMarks()) {
 					if (cancelled())
@@ -92,7 +78,7 @@ class SelectionThread {
 					pms.put(pm, null);
 				}
 				for (Path path : params.paths.getPaths()) {
-					if (!path.filter(screenRect))
+					if (!path.filter(params.screenRect))
 						continue;
 					if (!path.isEnabled())
 						continue;
@@ -159,11 +145,11 @@ class SelectionThread {
 		return pmNearest;
 	}
 
-	public synchronized void set(int x, int y, int w, int h, int zoom,
+	public synchronized void set(int x, int y, RectX screenRect, int zoom,
 			Adapter adapter, PlaceMarks placemarks, Paths paths,
 			Callback callback) {
-		this.params = new Params(x, y, w, h, zoom, adapter, placemarks, paths,
-				callback);
+		this.params = new Params(x, y, screenRect, zoom, adapter, placemarks,
+				paths, callback);
 		cancelled = false;
 
 		if (r == null) {

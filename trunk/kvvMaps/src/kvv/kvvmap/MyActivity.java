@@ -19,6 +19,7 @@ import kvv.kvvmap.common.maps.MapsDir;
 import kvv.kvvmap.common.pacemark.ISelectable;
 import kvv.kvvmap.common.pacemark.Path;
 import kvv.kvvmap.common.pacemark.PathSelection;
+import kvv.kvvmap.common.view.CommonView.RotationMode;
 import kvv.kvvmap.common.view.Environment;
 import kvv.kvvmap.dlg.PathDlg;
 import kvv.kvvmap.dlg.PlaceMarkDlg;
@@ -56,6 +57,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -68,10 +70,6 @@ public class MyActivity extends Activity {
 	private static final String FOLLOW_GPS_SETTING = "followGPS";
 	private static final String KINETIC_SCROLLING_SETTING = "kineticScrolling";
 	private static final String LOAD_DURING_SCROLLING_SETTING = "loadDuringScrolling";
-	
-	private static final int ORIENTATION_NONE = 0;
-	private static final int ORIENTATION_COMPASS = 1;
-	private static final int ORIENTATION_GPS = 2;
 
 	public static final String PREFS_NAME = "KvvMapPrefsFile";
 
@@ -85,6 +83,11 @@ public class MyActivity extends Activity {
 	private static final int MENU_LOAD_DURING_SCROLLING = 107;
 
 	private static final int MENU_TRACKS = 108;
+
+	private static final int MENU_ROTATION_GROUP = 109;
+	private static final int MENU_ROTATION_NONE = MENU_ROTATION_GROUP * 10 + 1;
+	private static final int MENU_ROTATION_COMPASS = MENU_ROTATION_GROUP * 10 + 2;
+	private static final int MENU_ROTATION_GPS = MENU_ROTATION_GROUP * 10 + 3;
 
 	private static final int MENU_DEBUG_DRAW = 110;
 	private static final int MENU_ABOUT = 111;
@@ -446,6 +449,11 @@ public class MyActivity extends Activity {
 			view.zoomOut();
 	}
 
+	public RotationMode getRotation() {
+		return mapsService == null ? RotationMode.ROTATION_NONE : RotationMode
+				.values()[mapsService.getBundle().getInt("rotation", 0)];
+	}
+
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		menu.findItem(MENU_FOLLOW_ONOFF).setChecked(locationListener != null);
@@ -468,6 +476,16 @@ public class MyActivity extends Activity {
 				settings.getBoolean(KINETIC_SCROLLING_SETTING, true));
 		menu.findItem(MENU_LOAD_DURING_SCROLLING).setChecked(
 				settings.getBoolean(LOAD_DURING_SCROLLING_SETTING, true));
+
+		RotationMode rot = getRotation();
+
+		if (rot == RotationMode.ROTATION_NONE)
+			menu.findItem(MENU_ROTATION_NONE).setChecked(true);
+		if (rot == RotationMode.ROTATION_COMPASS)
+			menu.findItem(MENU_ROTATION_COMPASS).setChecked(true);
+		if (rot == RotationMode.ROTATION_GPS)
+			menu.findItem(MENU_ROTATION_GPS).setChecked(true);
+
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -475,23 +493,34 @@ public class MyActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// menu.addSubMenu(0, MENU_PATHS, order, title)
 
-		menu.add(0, MENU_CURRENT_POS, 0, "Здесь");
-		menu.add(0, MENU_FOLLOW_ONOFF, 0, "Сдвигать по GPS").setCheckable(true);
-		menu.add(0, MENU_LOGGING_ONOFF, 0, "Запись пути").setCheckable(true);
-		menu.add(0, MENU_ADD_PLACEMARK, 0, "Добавить точку");
-		menu.add(0, MENU_TRACKS, 0, "Пути");
-		menu.add(0, MENU_FIX_MAP, 0, "Фикс. карта").setCheckable(true);
-		menu.add(0, MENU_DEBUG_DRAW, 0, "debugDraw").setCheckable(true);
-		menu.add(0, MENU_TOGGLE_BUTTONS, 0, "Экранные кнопки").setCheckable(
+		menu.add(Menu.NONE, MENU_CURRENT_POS, 0, "Здесь");
+		menu.add(Menu.NONE, MENU_FOLLOW_ONOFF, 0, "Сдвигать по GPS")
+				.setCheckable(true);
+		menu.add(Menu.NONE, MENU_LOGGING_ONOFF, 0, "Запись пути").setCheckable(
 				true);
-		menu.add(0, MENU_KINETIC_SCROLLING, 0, "Плавная прокрутка")
+		menu.add(Menu.NONE, MENU_ADD_PLACEMARK, 0, "Добавить точку");
+		SubMenu rotationSubMenu = menu.addSubMenu("Вращение карты");
+		menu.add(Menu.NONE, MENU_TRACKS, 0, "Пути");
+		menu.add(Menu.NONE, MENU_FIX_MAP, 0, "Фикс. карта").setCheckable(true);
+		menu.add(Menu.NONE, MENU_DEBUG_DRAW, 0, "debugDraw").setCheckable(true);
+		menu.add(Menu.NONE, MENU_TOGGLE_BUTTONS, 0, "Экранные кнопки")
 				.setCheckable(true);
-		menu.add(0, MENU_LOAD_DURING_SCROLLING, 0, "Подгружать при прокрутке")
+		menu.add(Menu.NONE, MENU_KINETIC_SCROLLING, 0, "Плавная прокрутка")
 				.setCheckable(true);
-		menu.add(0, MENU_ABOUT, 0, "О программе");
-		menu.add(0, MENU_UPDATE, 0, "Update");
+		menu.add(Menu.NONE, MENU_LOAD_DURING_SCROLLING, 0,
+				"Подгружать при прокрутке").setCheckable(true);
+		menu.add(Menu.NONE, MENU_ABOUT, 0, "О программе");
+		menu.add(Menu.NONE, MENU_UPDATE, 0, "Update");
 		// menu.add(0, MENU_UPDATE1, 0, "Update test");
-		menu.add(0, MENU_QUIT, 0, "Выход");
+		menu.add(Menu.NONE, MENU_QUIT, 0, "Выход");
+
+		rotationSubMenu.add(MENU_ROTATION_GROUP, MENU_ROTATION_NONE, 0,
+				"Без вращения");
+		rotationSubMenu.add(MENU_ROTATION_GROUP, MENU_ROTATION_COMPASS, 0,
+				"Компас");
+		rotationSubMenu.add(MENU_ROTATION_GROUP, MENU_ROTATION_GPS, 0, "GPS");
+		rotationSubMenu.setGroupCheckable(MENU_ROTATION_GROUP, true, true);
+
 		return true;
 	}
 
@@ -524,6 +553,30 @@ public class MyActivity extends Activity {
 			return true;
 		case MENU_FIX_MAP:
 			fixUnfixMap();
+			return true;
+		case MENU_ROTATION_NONE:
+			if (mapsService == null)
+				return true;
+			mapsService.getBundle().putInt("rotation",
+					RotationMode.ROTATION_NONE.ordinal());
+			if (view != null)
+				view.setRotationMode(getRotation());
+			return true;
+		case MENU_ROTATION_COMPASS:
+			if (mapsService == null)
+				return true;
+			mapsService.getBundle().putInt("rotation",
+					RotationMode.ROTATION_COMPASS.ordinal());
+			if (view != null)
+				view.setRotationMode(getRotation());
+			return true;
+		case MENU_ROTATION_GPS:
+			if (mapsService == null)
+				return true;
+			mapsService.getBundle().putInt("rotation",
+					RotationMode.ROTATION_GPS.ordinal());
+			if (view != null)
+				view.setRotationMode(getRotation());
 			return true;
 		case MENU_KINETIC_SCROLLING: {
 			Editor ed = settings.edit();

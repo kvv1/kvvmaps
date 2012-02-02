@@ -161,10 +161,10 @@ public class ViewHelper {
 		gc.drawLine(x - sz, y, x + sz, y);
 	}
 
-	public static int drawMyLocation(GC gc, MapViewParams mapPos,
+	public static void drawMyLocationArrow(GC gc, MapViewParams mapPos,
 			LocationX loc, boolean dimmed) {
 		if (loc == null)
-			return 0;
+			return;
 
 		int x = (int) mapPos.geo2scrX(loc.getX(mapPos.getZoom()), loc.getY(mapPos.getZoom())) + gc.getWidth() / 2;
 		int y = (int) mapPos.geo2scrY(loc.getX(mapPos.getZoom()), loc.getY(mapPos.getZoom())) + gc.getHeight() / 2;
@@ -176,7 +176,12 @@ public class ViewHelper {
 			gc.fillCircle(x, y, (float) accPt);
 		}
 
-		gc.drawArrow(x, y, loc, dimmed);
+		gc.drawArrow(x, y, loc.getBearing() + mapPos.angle(), dimmed);
+	}
+	
+	public static int drawMyLocationStatus(GC gc, LocationX loc) {
+		if (loc == null)
+			return 0;
 
 		int lineHeight = gc.getHeight() / 24;
 		gc.setTextSize(lineHeight);
