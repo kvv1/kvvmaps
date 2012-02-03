@@ -20,6 +20,8 @@ public class Arrow {
 		Paint paint = new Paint();
 		paint.setAntiAlias(true);
 
+		System.out.println("" + rot);
+		
 		paint.setStyle(Paint.Style.FILL);
 
 		canvas.translate(x, y);

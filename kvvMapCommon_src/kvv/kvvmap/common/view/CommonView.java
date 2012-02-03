@@ -53,11 +53,9 @@ public class CommonView implements ICommonView {
 	private RotationMode rotationMode = RotationMode.ROTATION_NONE;
 
 	public enum RotationMode {
-		ROTATION_NONE,
-		ROTATION_COMPASS,
-		ROTATION_GPS
+		ROTATION_NONE, ROTATION_COMPASS, ROTATION_GPS
 	}
-	
+
 	public CommonView(IPlatformView platformView, final Environment envir) {
 		this.envir = envir;
 		this.platformView = platformView;
@@ -167,6 +165,8 @@ public class CommonView implements ICommonView {
 	public void setRotationMode(RotationMode rotationMode) {
 		this.rotationMode = rotationMode;
 		setAngle(0);
+		if (rotationMode == RotationMode.ROTATION_GPS)
+			scrollToRotationGPS();
 	}
 
 	public LocationX getMyLocation() {
@@ -177,26 +177,38 @@ public class CommonView implements ICommonView {
 		return myLocationDimmed;
 	}
 
-	public void setMyLocation(LocationX locationX, boolean scroll) {
+	private void scrollToRotationGPS() {
+		if (myLocation == null)
+			return;
+
+		setAngle(-myLocation.getBearing());
+
+		double x = mapPos.loc2scrX(myLocation);
+		double y = mapPos.loc2scrY(myLocation);
+
+		y -= platformView.getHeight() / 4;
+
+		double lon = mapPos.scr2lon(x, y);
+		double lat = mapPos.scr2lat(x, y);
+
+		animateTo(new LocationX(lon, lat));
+	}
+
+	public void setMyLocation(LocationX loc, boolean scroll) {
 
 		LocationX oldLocation = myLocation;
 
-		myLocation = locationX;
+		myLocation = loc;
 		myLocationDimmed = false;
 
 		if (rotationMode == RotationMode.ROTATION_GPS) {
-			animateTo(myLocation);
-			setAngle(myLocation.getBearing());
+			scrollToRotationGPS();
 		} else {
 			if (onScreen(oldLocation)) {
-				double dx = mapPos.geo2scrX(myLocation.getX(mapPos.getZoom()),
-						myLocation.getY(mapPos.getZoom()))
-						- mapPos.geo2scrX(oldLocation.getX(mapPos.getZoom()),
-								oldLocation.getY(mapPos.getZoom()));
-				double dy = mapPos.geo2scrY(myLocation.getX(mapPos.getZoom()),
-						myLocation.getY(mapPos.getZoom()))
-						- mapPos.geo2scrY(oldLocation.getX(mapPos.getZoom()),
-								oldLocation.getY(mapPos.getZoom()));
+				double dx = mapPos.loc2scrX(myLocation)
+						- mapPos.loc2scrX(oldLocation);
+				double dy = mapPos.loc2scrY(myLocation)
+						- mapPos.loc2scrY(oldLocation);
 				scrollBy(dx, dy);
 			} else if (scroll) {
 				animateTo(myLocation);
@@ -207,11 +219,8 @@ public class CommonView implements ICommonView {
 
 	private boolean onScreen(LocationX loc) {
 		return loc != null
-				&& (Math.abs(mapPos.geo2scrX(loc.getX(mapPos.getZoom()),
-						loc.getY(mapPos.getZoom()))) < platformView.getWidth() / 2 && Math
-						.abs(mapPos.geo2scrY(loc.getX(mapPos.getZoom()),
-								loc.getY(mapPos.getZoom()))) < platformView
-						.getHeight() / 2);
+				&& (Math.abs(mapPos.loc2scrX(loc)) < platformView.getWidth() / 2 && Math
+						.abs(mapPos.loc2scrY(loc)) < platformView.getHeight() / 2);
 	}
 
 	public void dimmMyLocation() {
@@ -219,11 +228,8 @@ public class CommonView implements ICommonView {
 	}
 
 	public boolean isOnMyLocation() {
-		return myLocation != null
-				&& Math.abs(mapPos.geo2scrX(myLocation.getX(mapPos.getZoom()),
-						myLocation.getY(mapPos.getZoom()))) < 2
-				&& Math.abs(mapPos.geo2scrY(myLocation.getX(mapPos.getZoom()),
-						myLocation.getY(mapPos.getZoom()))) < 2;
+		return myLocation != null && Math.abs(mapPos.loc2scrX(myLocation)) < 2
+				&& Math.abs(mapPos.loc2scrY(myLocation)) < 2;
 	}
 
 	public void startScrolling() {
@@ -301,8 +307,27 @@ public class CommonView implements ICommonView {
 		return mapPos.getZoom();
 	}
 
+	private static float normalize(float deg) {
+		while (deg < -180)
+			deg += 360;
+		while (deg > 180)
+			deg -= 360;
+		return deg;
+	}
+
 	public void setAngle(float deg) {
 		envir.adapter.assertUIThread();
+
+		// deg = normalize(deg);
+		//
+		// float oldDeg = normalize(mapPos.angle());
+		//
+		// if (deg - oldDeg < 180) {
+		//
+		// }
+		//
+		// envir.adapter.execUI(runnable, 100);
+
 		mapPos.setAngle(deg);
 		repaint();
 	}
@@ -311,6 +336,8 @@ public class CommonView implements ICommonView {
 		envir.adapter.assertUIThread();
 		tiles.cancelLoading();
 		mapPos.setZoom(zoom);
+		if (rotationMode == RotationMode.ROTATION_GPS)
+			scrollToRotationGPS();
 		repaint();
 		updateSel();
 	}
@@ -337,6 +364,9 @@ public class CommonView implements ICommonView {
 		drawTiles(gc);
 		// long time1 = System.currentTimeMillis();
 		// System.out.println("t1 = " + (time1 - time));
+		ViewHelper.drawMyLocationArrow(gc, mapPos, myLocation,
+				isMyLocationDimmed());
+
 		int locationH = ViewHelper.drawMyLocationStatus(gc, myLocation);
 		ViewHelper.drawCross(gc);
 		ViewHelper.drawScale(gc, mapPos);
@@ -407,9 +437,6 @@ public class CommonView implements ICommonView {
 			}
 		}
 
-		ViewHelper.drawMyLocationArrow(gc, mapPos, myLocation,
-				isMyLocationDimmed());
-
 		gc.clearTransform();
 	}
 
@@ -473,24 +500,31 @@ public class CommonView implements ICommonView {
 		selectionThread.cancel();
 	}
 
+	private void select(ISelectable sel) {
+		CommonView.this.sel = sel;
+		CommonView.this.invalidatePathTiles();
+		if (sel instanceof PathSelection) {
+			PathSelection sel1 = (PathSelection) sel;
+			diagram.set(sel1.path, sel1.pm, platformView.getWidth(),
+					platformView.getHeight());
+		} else {
+			diagram.set(null, null, platformView.getWidth(),
+					platformView.getHeight());
+		}
+	}
+
 	private void updateSel() {
 		envir.adapter.assertUIThread();
+		if (rotationMode == RotationMode.ROTATION_GPS) {
+			select(null);
+			return;
+		}
 		selectionThread.set((int) mapPos.centerX(), (int) mapPos.centerY(),
 				getScreenRect(), getZoom(), envir.adapter, envir.placemarks,
 				envir.paths, new SelectionThread.Callback() {
 					@Override
 					public void selectionChanged(ISelectable sel) {
-						CommonView.this.sel = sel;
-						CommonView.this.invalidatePathTiles();
-						if (sel instanceof PathSelection) {
-							PathSelection sel1 = (PathSelection) sel;
-							diagram.set(sel1.path, sel1.pm,
-									platformView.getWidth(),
-									platformView.getHeight());
-						} else {
-							diagram.set(null, null, platformView.getWidth(),
-									platformView.getHeight());
-						}
+						select(sel);
 					}
 				});
 	}

@@ -28,6 +28,16 @@ public final class MapViewParams {
 		return prevzoom;
 	}
 
+	public double loc2scrX(LocationX loc) {
+		return geo2scrX(loc.getX(zoom),
+				loc.getY(zoom));
+	}
+	
+	public double loc2scrY(LocationX loc) {
+		return geo2scrY(loc.getX(zoom),
+				loc.getY(zoom));
+	}
+	
 	public double geo2scrX(double x, double y) {
 		x -= centerX;
 		y -= centerY;
