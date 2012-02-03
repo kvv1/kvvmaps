@@ -531,8 +531,16 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	public void setRotationMode(RotationMode rotationMode) {
-		if(commonView != null)
+		if(commonView != null) {
 			commonView.setRotationMode(rotationMode);
+//			if(rotationMode == RotationMode.ROTATION_GPS)
+//				commonView.setMyLocation(new LocationX(30, 60) {
+//					@Override
+//					public float getBearing() {
+//						return 10;
+//					}
+//				}, true);
+		}
 	}
 
 }
