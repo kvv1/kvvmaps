@@ -10,7 +10,7 @@ public final class Tile {
 	public final long id;
 	public Img img;
 	public final TileContent content;
-	public boolean needsReloading;
+	public boolean expired;
 	
 	private static int cnt;
 

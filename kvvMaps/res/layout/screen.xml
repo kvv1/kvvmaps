@@ -1,20 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	android:orientation="vertical" android:background="@color/gray">
-    <FrameLayout android:layout_width="wrap_content" android:id="@+id/FrameLayout01" android:layout_height="wrap_content" android:layout_weight="10">
-        <kvv.kvvmap.view.MapView android:layout_height="fill_parent" android:layout_width="fill_parent" android:id="@+id/MapView"></kvv.kvvmap.view.MapView>
-        <LinearLayout android:id="@+id/LinearLayout01" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="left|center_vertical" android:orientation="vertical">
-            <Button android:text="Button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/toTarget"></Button>
-            <kvv.kvvmap.view.OnScreenButton android:focusable="false" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/here" android:id="@+id/here"></kvv.kvvmap.view.OnScreenButton>
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/gray"
+    android:orientation="vertical" >
+
+    <FrameLayout
+        android:id="@+id/FrameLayout01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="10" >
+
+        <kvv.kvvmap.view.MapView
+            android:id="@+id/MapView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" >
+        </kvv.kvvmap.view.MapView>
+
+        <LinearLayout
+            android:id="@+id/LinearLayout01"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/toTarget"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Button" >
+            </Button>
+
+            <kvv.kvvmap.view.OnScreenButton
+                android:id="@+id/here"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:src="@drawable/here" >
+            </kvv.kvvmap.view.OnScreenButton>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|right"
+            android:orientation="horizontal" >
+
+            <kvv.kvvmap.view.OnScreenButton
+                android:id="@+id/writing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:focusable="false"
+                android:src="@drawable/writing" />
+
+            <kvv.kvvmap.view.OnScreenButton
+                android:id="@+id/gps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:focusable="false"
+                android:src="@drawable/gps" />
+
+            <kvv.kvvmap.view.OnScreenButton
+                android:id="@+id/fixedmap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:focusable="false"
+                android:src="@drawable/fixedmap" />
+
+            <kvv.kvvmap.view.OnScreenButton
+                android:id="@+id/rotate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:focusable="false"
+                android:src="@drawable/rotate" />
         </LinearLayout>
     </FrameLayout>
-    <LinearLayout android:id="@+id/linearLayout1" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_weight="0" android:layout_gravity="bottom|center_horizontal" android:layout_width="fill_parent" android:background="@color/gray">
-        <kvv.kvvmap.view.OnScreenButton android:focusable="false" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/edit" android:id="@+id/edit" android:layout_weight="1"></kvv.kvvmap.view.OnScreenButton>
-        <kvv.kvvmap.view.OnScreenButton android:focusable="false" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/zoomout" android:id="@+id/zoomout" android:layout_weight="1"></kvv.kvvmap.view.OnScreenButton>
-        <kvv.kvvmap.view.OnScreenButton android:src="@drawable/zoomin" android:focusable="false" android:layout_width="wrap_content" android:id="@+id/zoomin" android:layout_height="wrap_content" android:layout_weight="1"></kvv.kvvmap.view.OnScreenButton>
-        <kvv.kvvmap.view.OnScreenButton android:focusable="false" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/infominus" android:id="@+id/infominus" android:layout_weight="1"></kvv.kvvmap.view.OnScreenButton>
-        <kvv.kvvmap.view.OnScreenButton android:src="@drawable/infoplus" android:focusable="false" android:layout_width="wrap_content" android:id="@+id/infoplus" android:layout_height="wrap_content" android:layout_weight="1"></kvv.kvvmap.view.OnScreenButton>
-        <kvv.kvvmap.view.OnScreenButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:focusable="false" android:src="@drawable/rotate" android:id="@+id/rotate"></kvv.kvvmap.view.OnScreenButton>
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_weight="0"
+        android:orientation="horizontal" >
+
+        <kvv.kvvmap.view.OnScreenButton
+            android:id="@+id/edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:focusable="false"
+            android:src="@drawable/edit" />
+
+        <kvv.kvvmap.view.OnScreenButton
+            android:id="@+id/zoomout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:focusable="false"
+            android:src="@drawable/zoomout" />
+
+        <kvv.kvvmap.view.OnScreenButton
+            android:id="@+id/zoomin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:focusable="false"
+            android:src="@drawable/zoomin" />
+
+        <kvv.kvvmap.view.OnScreenButton
+            android:id="@+id/infominus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:focusable="false"
+            android:src="@drawable/infominus" />
+
+        <kvv.kvvmap.view.OnScreenButton
+            android:id="@+id/infoplus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:focusable="false"
+            android:src="@drawable/infoplus" />
     </LinearLayout>
+
 </LinearLayout>

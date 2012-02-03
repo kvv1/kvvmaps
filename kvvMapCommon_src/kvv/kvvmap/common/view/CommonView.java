@@ -7,6 +7,7 @@ import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.adapter.PointInt;
+import kvv.kvvmap.adapter.RectInt;
 import kvv.kvvmap.adapter.RectX;
 import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.Img;
@@ -162,6 +163,10 @@ public class CommonView implements ICommonView {
 		diagram = new Diagram(envir.adapter, this);
 	}
 
+	public RotationMode getRotationMode() {
+		return rotationMode;
+	}
+
 	public void setRotationMode(RotationMode rotationMode) {
 		this.rotationMode = rotationMode;
 		setAngle(0);
@@ -307,13 +312,13 @@ public class CommonView implements ICommonView {
 		return mapPos.getZoom();
 	}
 
-	private static float normalize(float deg) {
-		while (deg < -180)
-			deg += 360;
-		while (deg > 180)
-			deg -= 360;
-		return deg;
-	}
+	// private static float normalize(float deg) {
+	// while (deg < -180)
+	// deg += 360;
+	// while (deg > 180)
+	// deg -= 360;
+	// return deg;
+	// }
 
 	public void setAngle(float deg) {
 		envir.adapter.assertUIThread();
@@ -406,16 +411,20 @@ public class CommonView implements ICommonView {
 	private void drawTiles(GC gc) {
 		tilesDrawn.clear();
 
-		PointInt centerXY = new PointInt((int) mapPos.centerX(),
-				(int) mapPos.centerY());
-
 		int w = gc.getWidth();
 		int h = gc.getHeight();
 
-		int nx0 = (int) (mapPos.centerX() - w / 2) / Adapter.TILE_SIZE;
-		int ny0 = (int) (mapPos.centerY() - h / 2) / Adapter.TILE_SIZE;
-		int x0 = (int) x_tiles2scr(nx0 * Adapter.TILE_SIZE, w, mapPos.centerX());
-		int y0 = (int) y_tiles2scr(ny0 * Adapter.TILE_SIZE, h, mapPos.centerY());
+		RectInt screenRect = getScreenRectInt();
+		int nx0 = screenRect.getX() / Adapter.TILE_SIZE;
+		int ny0 = screenRect.getY() / Adapter.TILE_SIZE;
+		int nx1 = (screenRect.getX() + screenRect.getW()) / Adapter.TILE_SIZE;
+		int ny1 = (screenRect.getY() + screenRect.getH()) / Adapter.TILE_SIZE;
+
+		int x0 = (int) (nx0 * Adapter.TILE_SIZE - mapPos.centerX() + w / 2);
+		int y0 = (int) (ny0 * Adapter.TILE_SIZE - mapPos.centerY() + h / 2);
+
+		PointInt centerXY = new PointInt((int) mapPos.centerX(),
+				(int) mapPos.centerY());
 
 		int[] scrLoc = new int[2];
 		platformView.getLocationOnScreen(scrLoc);
@@ -426,9 +435,9 @@ public class CommonView implements ICommonView {
 		gc.setAntiAlias(true);
 
 		int x = x0;
-		for (int nx = nx0; x < w; nx++, x += Adapter.TILE_SIZE) {
+		for (int nx = nx0; nx <= nx1; nx++, x += Adapter.TILE_SIZE) {
 			int y = y0;
-			for (int ny = ny0; y < h; ny++, y += Adapter.TILE_SIZE) {
+			for (int ny = ny0; ny <= ny1; ny++, y += Adapter.TILE_SIZE) {
 				long id = TileId.make(nx, ny, getZoom());
 				tiles.drawTile(gc, centerXY, id, x, y,
 						platformView.loadDuringScrolling() || !scrolling,
@@ -529,20 +538,46 @@ public class CommonView implements ICommonView {
 				});
 	}
 
-	private RectX getScreenRect() {
-		double lon1 = mapPos.scr2lon(-platformView.getWidth() / 2,
-				-platformView.getHeight() / 2);
-		double lon2 = mapPos.scr2lon(platformView.getWidth() / 2,
-				platformView.getHeight() / 2);
-		double lat1 = mapPos.scr2lat(-platformView.getWidth() / 2,
-				-platformView.getHeight() / 2);
-		double lat2 = mapPos.scr2lat(platformView.getWidth() / 2,
-				platformView.getHeight() / 2);
+	private RectInt getScreenRectInt() {
+		int w = platformView.getWidth();
+		int h = platformView.getHeight();
 
-		double minLon = Math.min(lon1, lon2);
-		double maxLon = Math.max(lon1, lon2);
-		double minLat = Math.min(lat1, lat2);
-		double maxLat = Math.max(lat1, lat2);
+		int x1 = (int) mapPos.scr2geoX(-w / 2, -h / 2);
+		int x2 = (int) mapPos.scr2geoX(w / 2, h / 2);
+		int x3 = (int) mapPos.scr2geoX(w / 2, -h / 2);
+		int x4 = (int) mapPos.scr2geoX(-w / 2, h / 2);
+		int y1 = (int) mapPos.scr2geoY(-w / 2, -h / 2);
+		int y2 = (int) mapPos.scr2geoY(w / 2, h / 2);
+		int y3 = (int) mapPos.scr2geoY(-w / 2, h / 2);
+		int y4 = (int) mapPos.scr2geoY(w / 2, -h / 2);
+
+		int minX = Math.min(Math.min(x1, x2), Math.min(x3, x4));
+		int maxX = Math.max(Math.max(x1, x2), Math.max(x3, x4));
+		int minY = Math.min(Math.min(y1, y2), Math.min(y3, y4));
+		int maxY = Math.max(Math.max(y1, y2), Math.max(y3, y4));
+
+		RectInt rect = new RectInt();
+		rect.set(minX, minY, maxX - minX, maxY - minY);
+		return rect;
+	}
+
+	private RectX getScreenRect() {
+		int w = platformView.getWidth();
+		int h = platformView.getHeight();
+
+		double lon1 = mapPos.scr2lon(-w / 2, -h / 2);
+		double lon2 = mapPos.scr2lon(w / 2, h / 2);
+		double lon3 = mapPos.scr2lon(-w / 2, h / 2);
+		double lon4 = mapPos.scr2lon(w / 2, -h / 2);
+		double lat1 = mapPos.scr2lat(-w / 2, -h / 2);
+		double lat2 = mapPos.scr2lat(w / 2, h / 2);
+		double lat3 = mapPos.scr2lat(-w / 2, h / 2);
+		double lat4 = mapPos.scr2lat(w / 2, -h / 2);
+
+		double minLon = Math.min(Math.min(lon1, lon2), Math.min(lon3, lon4));
+		double maxLon = Math.max(Math.max(lon1, lon2), Math.max(lon3, lon4));
+		double minLat = Math.min(Math.min(lat1, lat2), Math.min(lat3, lat4));
+		double maxLat = Math.max(Math.max(lat1, lat2), Math.max(lat3, lat4));
 
 		return new RectX(minLon, minLat, maxLon - minLon, maxLat - minLat);
 	}
@@ -595,4 +630,5 @@ public class CommonView implements ICommonView {
 			return topMap;
 		}
 	}
+
 }

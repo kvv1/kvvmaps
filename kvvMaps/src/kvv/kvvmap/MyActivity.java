@@ -29,11 +29,9 @@ import kvv.kvvmap.service.KvvMapsService.KvvMapsServiceListener;
 import kvv.kvvmap.view.MapView;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -74,10 +72,7 @@ public class MyActivity extends Activity {
 	public static final String PREFS_NAME = "KvvMapPrefsFile";
 
 	private static final int MENU_LOGGING_ONOFF = 100;
-	private static final int MENU_FOLLOW_ONOFF = 101;
 	private static final int MENU_QUIT = 102;
-	private static final int MENU_CURRENT_POS = 103;
-	private static final int MENU_FIX_MAP = 104;
 	private static final int MENU_ADD_PLACEMARK = 105;
 	private static final int MENU_KINETIC_SCROLLING = 106;
 	private static final int MENU_LOAD_DURING_SCROLLING = 107;
@@ -99,12 +94,6 @@ public class MyActivity extends Activity {
 	private MapView view;
 
 	// public static MediaPlayer mediaPlayer;
-
-	public Bitmap bmMultimap;
-	public Bitmap bmFollow;
-	public Bitmap bmWriting;
-	public Bitmap bmSendLoc;
-	public Bitmap bmFixedMap;
 
 	private Adapter adapter;
 	private PowerManager.WakeLock wakeLock;
@@ -157,7 +146,7 @@ public class MyActivity extends Activity {
 	private Runnable gpsOff = new Runnable() {
 		@Override
 		public void run() {
-			stopFollow();
+			stopGPS();
 		}
 	};
 
@@ -193,7 +182,9 @@ public class MyActivity extends Activity {
 
 			handler.removeCallbacks(gpsOff);
 			if (following())
-				startFollow(false);
+				startGPS(false);
+			updateGpsButton();
+			updateWritingButton();
 
 		} else {
 			if (wakeLock != null)
@@ -245,7 +236,7 @@ public class MyActivity extends Activity {
 						new Maps(adapter, mapsDir), mapsDir);
 
 				Bundle b = mapsService.getBundle();
-				view.init(MyActivity.this, envir, b);
+				view.init(MyActivity.this, envir, b, getRotationMode());
 
 				mapsService.setListener(new KvvMapsServiceListener() {
 					@Override
@@ -254,6 +245,8 @@ public class MyActivity extends Activity {
 							view.repaint();
 					}
 				});
+
+				updateWritingButton();
 			}
 		}
 
@@ -326,17 +319,6 @@ public class MyActivity extends Activity {
 
 		Adapter.debugDraw = settings.getBoolean("debugDraw", false);
 
-		bmMultimap = BitmapFactory.decodeResource(getResources(),
-				R.drawable.multimaps);
-		bmFollow = BitmapFactory.decodeResource(getResources(),
-				R.drawable.follow);
-		bmWriting = BitmapFactory.decodeResource(getResources(),
-				R.drawable.writing);
-		bmFixedMap = BitmapFactory.decodeResource(getResources(),
-				R.drawable.fixedmap);
-		bmSendLoc = BitmapFactory.decodeResource(getResources(),
-				R.drawable.sendloc);
-
 		setContentView(R.layout.screen);
 
 		ImageButton button = (ImageButton) findViewById(R.id.edit);
@@ -349,7 +331,6 @@ public class MyActivity extends Activity {
 		});
 
 		button = (ImageButton) findViewById(R.id.infoplus);
-		button.setAlpha(255);
 		button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -359,7 +340,6 @@ public class MyActivity extends Activity {
 		});
 
 		button = (ImageButton) findViewById(R.id.infominus);
-		button.setAlpha(255);
 		button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -369,7 +349,6 @@ public class MyActivity extends Activity {
 		});
 
 		button = (ImageButton) findViewById(R.id.zoomin);
-		button.setAlpha(255);
 		button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -378,7 +357,6 @@ public class MyActivity extends Activity {
 		});
 
 		button = (ImageButton) findViewById(R.id.zoomout);
-		button.setAlpha(255);
 		button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -387,12 +365,27 @@ public class MyActivity extends Activity {
 		});
 
 		button = (ImageButton) findViewById(R.id.rotate);
-		button.setAlpha(255);
 		button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (view != null)
 					view.reorderMaps();
+			}
+		});
+
+		button = (ImageButton) findViewById(R.id.gps);
+		button.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				gpsOnOff();
+			}
+		});
+
+		button = (ImageButton) findViewById(R.id.fixedmap);
+		button.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				fixUnfixMap();
 			}
 		});
 
@@ -449,18 +442,13 @@ public class MyActivity extends Activity {
 			view.zoomOut();
 	}
 
-	public RotationMode getRotation() {
+	private RotationMode getRotationMode() {
 		return mapsService == null ? RotationMode.ROTATION_NONE : RotationMode
 				.values()[mapsService.getBundle().getInt("rotation", 0)];
 	}
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		menu.findItem(MENU_FOLLOW_ONOFF).setChecked(locationListener != null);
-		if (locationListener != null)
-			menu.findItem(MENU_FOLLOW_ONOFF).setTitle("Сдвигать по GPS выкл");
-		else
-			menu.findItem(MENU_FOLLOW_ONOFF).setTitle("Сдвигать по GPS");
 
 		menu.findItem(MENU_LOGGING_ONOFF).setChecked(
 				mapsService != null && mapsService.getTracker().isTracking());
@@ -471,13 +459,12 @@ public class MyActivity extends Activity {
 
 		menu.findItem(MENU_DEBUG_DRAW).setChecked(Adapter.debugDraw);
 		menu.findItem(MENU_TOGGLE_BUTTONS).setChecked(buttonsVisible());
-		menu.findItem(MENU_FIX_MAP).setChecked(getFixedMap() != null);
 		menu.findItem(MENU_KINETIC_SCROLLING).setChecked(
 				settings.getBoolean(KINETIC_SCROLLING_SETTING, true));
 		menu.findItem(MENU_LOAD_DURING_SCROLLING).setChecked(
 				settings.getBoolean(LOAD_DURING_SCROLLING_SETTING, true));
 
-		RotationMode rot = getRotation();
+		RotationMode rot = getRotationMode();
 
 		if (rot == RotationMode.ROTATION_NONE)
 			menu.findItem(MENU_ROTATION_NONE).setChecked(true);
@@ -493,21 +480,21 @@ public class MyActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// menu.addSubMenu(0, MENU_PATHS, order, title)
 
-		menu.add(Menu.NONE, MENU_CURRENT_POS, 0, "Здесь");
-		menu.add(Menu.NONE, MENU_FOLLOW_ONOFF, 0, "Сдвигать по GPS")
-				.setCheckable(true);
 		menu.add(Menu.NONE, MENU_LOGGING_ONOFF, 0, "Запись пути").setCheckable(
 				true);
 		menu.add(Menu.NONE, MENU_ADD_PLACEMARK, 0, "Добавить точку");
 		SubMenu rotationSubMenu = menu.addSubMenu("Вращение карты");
 		menu.add(Menu.NONE, MENU_TRACKS, 0, "Пути");
-		menu.add(Menu.NONE, MENU_FIX_MAP, 0, "Фикс. карта").setCheckable(true);
-		menu.add(Menu.NONE, MENU_DEBUG_DRAW, 0, "debugDraw").setCheckable(true);
-		menu.add(Menu.NONE, MENU_TOGGLE_BUTTONS, 0, "Экранные кнопки")
+
+		SubMenu settingsSubMenu = menu.addSubMenu("Настройки");
+
+		settingsSubMenu.add(Menu.NONE, MENU_DEBUG_DRAW, 0, "debugDraw")
 				.setCheckable(true);
-		menu.add(Menu.NONE, MENU_KINETIC_SCROLLING, 0, "Плавная прокрутка")
-				.setCheckable(true);
-		menu.add(Menu.NONE, MENU_LOAD_DURING_SCROLLING, 0,
+		settingsSubMenu.add(Menu.NONE, MENU_TOGGLE_BUTTONS, 0,
+				"Экранные кнопки").setCheckable(true);
+		settingsSubMenu.add(Menu.NONE, MENU_KINETIC_SCROLLING, 0,
+				"Плавная прокрутка").setCheckable(true);
+		settingsSubMenu.add(Menu.NONE, MENU_LOAD_DURING_SCROLLING, 0,
 				"Подгружать при прокрутке").setCheckable(true);
 		menu.add(Menu.NONE, MENU_ABOUT, 0, "О программе");
 		menu.add(Menu.NONE, MENU_UPDATE, 0, "Update");
@@ -527,14 +514,8 @@ public class MyActivity extends Activity {
 	/* Handles item selections */
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case MENU_CURRENT_POS:
-			gotoCurrentPos();
-			return true;
 		case MENU_LOGGING_ONOFF:
 			trackingOnOff();
-			return true;
-		case MENU_FOLLOW_ONOFF:
-			followOnOff();
 			return true;
 		case MENU_ADD_PLACEMARK:
 			addPlacemark();
@@ -551,16 +532,13 @@ public class MyActivity extends Activity {
 		case MENU_ABOUT:
 			about();
 			return true;
-		case MENU_FIX_MAP:
-			fixUnfixMap();
-			return true;
 		case MENU_ROTATION_NONE:
 			if (mapsService == null)
 				return true;
 			mapsService.getBundle().putInt("rotation",
 					RotationMode.ROTATION_NONE.ordinal());
 			if (view != null)
-				view.setRotationMode(getRotation());
+				view.setRotationMode(getRotationMode());
 			return true;
 		case MENU_ROTATION_COMPASS:
 			if (mapsService == null)
@@ -568,7 +546,7 @@ public class MyActivity extends Activity {
 			mapsService.getBundle().putInt("rotation",
 					RotationMode.ROTATION_COMPASS.ordinal());
 			if (view != null)
-				view.setRotationMode(getRotation());
+				view.setRotationMode(getRotationMode());
 			return true;
 		case MENU_ROTATION_GPS:
 			if (mapsService == null)
@@ -576,7 +554,7 @@ public class MyActivity extends Activity {
 			mapsService.getBundle().putInt("rotation",
 					RotationMode.ROTATION_GPS.ordinal());
 			if (view != null)
-				view.setRotationMode(getRotation());
+				view.setRotationMode(getRotationMode());
 			return true;
 		case MENU_KINETIC_SCROLLING: {
 			Editor ed = settings.edit();
@@ -607,7 +585,7 @@ public class MyActivity extends Activity {
 			// }
 			// return true;
 		case MENU_QUIT:
-			stopFollow();
+			stopGPS();
 			stopService(new Intent(this, KvvMapsService.class));
 			handler.postDelayed(new Runnable() {
 				@Override
@@ -627,10 +605,11 @@ public class MyActivity extends Activity {
 				Uri.parse("http://palermo.ru/vladimir/kvvMaps/kvvMaps.apk")));
 	}
 
-	private void updateSoftware1() throws MalformedURLException, IOException {
-		startActivity(new Intent(Intent.ACTION_VIEW,
-				Uri.parse("http://palermo.ru/vladimir/kvvMaps.apk")));
-	}
+	// private void updateSoftware1() throws MalformedURLException, IOException
+	// {
+	// startActivity(new Intent(Intent.ACTION_VIEW,
+	// Uri.parse("http://palermo.ru/vladimir/kvvMaps.apk")));
+	// }
 
 	private void fixUnfixMap() {
 		if (mapsService == null || view == null)
@@ -638,6 +617,11 @@ public class MyActivity extends Activity {
 		String fixedMap = mapsService.getBundle().getString("fixedMap");
 		fixedMap = view.fixMap(fixedMap == null);
 		mapsService.getBundle().putString("fixedMap", fixedMap);
+
+		ImageButton button = (ImageButton) findViewById(R.id.fixedmap);
+		button.setImageBitmap(BitmapFactory.decodeResource(getResources(),
+				fixedMap == null ? R.drawable.fixedmap : R.drawable.fixedmapon));
+
 	}
 
 	public String getFixedMap() {
@@ -743,11 +727,11 @@ public class MyActivity extends Activity {
 	private LocationManager locationManager;
 	private LocationListener locationListener;
 
-	public boolean isFollowing() {
+	public boolean isGPS() {
 		return locationListener != null;
 	}
 
-	private void startFollow(final boolean fromMenu) {
+	private void startGPS(final boolean fromMenu) {
 		if (locationListener == null) {
 			locationListener = new LocationListener() {
 				public void onStatusChanged(String provider, int status,
@@ -774,14 +758,12 @@ public class MyActivity extends Activity {
 				}
 			};
 
-			Adapter.log("LM " + locationManager);
 			locationManager.requestLocationUpdates(
 					LocationManager.GPS_PROVIDER, 1, 1, locationListener);
-
 		}
 	}
 
-	private void stopFollow() {
+	private void stopGPS() {
 		if (locationListener != null) {
 			locationManager.removeUpdates(locationListener);
 			locationListener = null;
@@ -790,72 +772,79 @@ public class MyActivity extends Activity {
 		}
 	}
 
-	private void followOnOff() {
+	private void gpsOnOff() {
 		if (!following()) {
-			startFollow(true);
+			startGPS(true);
 			Editor prefsPrivateEditor = settings.edit();
 			prefsPrivateEditor.putBoolean(FOLLOW_GPS_SETTING, true);
 			prefsPrivateEditor.commit();
 		} else {
-			stopFollow();
+			stopGPS();
 			Editor prefsPrivateEditor = settings.edit();
 			prefsPrivateEditor.putBoolean(FOLLOW_GPS_SETTING, false);
 			prefsPrivateEditor.commit();
 		}
+		updateGpsButton();
 		updateView();
 	}
-
-	private void gotoCurrentPos() {
-		final AlertDialog[] curLocProgress = new AlertDialog[1];
-
-		final LocationListener locListener = new LocationListener() {
-			public void onStatusChanged(String provider, int status,
-					Bundle extras) {
-				if (status == LocationProvider.OUT_OF_SERVICE) {
-					locationManager.removeUpdates(this);
-					if (curLocProgress[0] != null)
-						curLocProgress[0].dismiss();
-					curLocProgress[0] = null;
-				}
-			}
-
-			public void onProviderEnabled(String provider) {
-			}
-
-			public void onProviderDisabled(String provider) {
-				locationManager.removeUpdates(this);
-				if (curLocProgress[0] != null)
-					curLocProgress[0].dismiss();
-				curLocProgress[0] = null;
-			}
-
-			public void onLocationChanged(Location location) {
-				if (location != null) {
-					if (location.getAccuracy() < 40) {
-						locationManager.removeUpdates(this);
-						if (curLocProgress[0] != null)
-							curLocProgress[0].dismiss();
-						curLocProgress[0] = null;
-					}
-					LocationX loc = new LocationX(location);
-					if (view != null)
-						view.setMyLocation(loc, true);
-				}
-			}
-		};
-
-		curLocProgress[0] = ProgressDialog.show(this, "",
-				"Определение координат...", true, true, new OnCancelListener() {
-					public void onCancel(DialogInterface dialog) {
-						locationManager.removeUpdates(locListener);
-						curLocProgress[0] = null;
-					}
-				});
-
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1,
-				1, locListener);
-
+	
+	private void updateGpsButton() {
+		ImageButton button = (ImageButton) findViewById(R.id.gps);
+		button.setImageBitmap(BitmapFactory.decodeResource(getResources(),
+				following() ? R.drawable.gpson : R.drawable.gps));
 	}
+
+	// private void gotoCurrentPos() {
+	// final AlertDialog[] curLocProgress = new AlertDialog[1];
+	//
+	// final LocationListener locListener = new LocationListener() {
+	// public void onStatusChanged(String provider, int status,
+	// Bundle extras) {
+	// if (status == LocationProvider.OUT_OF_SERVICE) {
+	// locationManager.removeUpdates(this);
+	// if (curLocProgress[0] != null)
+	// curLocProgress[0].dismiss();
+	// curLocProgress[0] = null;
+	// }
+	// }
+	//
+	// public void onProviderEnabled(String provider) {
+	// }
+	//
+	// public void onProviderDisabled(String provider) {
+	// locationManager.removeUpdates(this);
+	// if (curLocProgress[0] != null)
+	// curLocProgress[0].dismiss();
+	// curLocProgress[0] = null;
+	// }
+	//
+	// public void onLocationChanged(Location location) {
+	// if (location != null) {
+	// if (location.getAccuracy() < 40) {
+	// locationManager.removeUpdates(this);
+	// if (curLocProgress[0] != null)
+	// curLocProgress[0].dismiss();
+	// curLocProgress[0] = null;
+	// }
+	// LocationX loc = new LocationX(location);
+	// if (view != null)
+	// view.setMyLocation(loc, true);
+	// }
+	// }
+	// };
+	//
+	// curLocProgress[0] = ProgressDialog.show(this, "",
+	// "Определение координат...", true, true, new OnCancelListener() {
+	// public void onCancel(DialogInterface dialog) {
+	// locationManager.removeUpdates(locListener);
+	// curLocProgress[0] = null;
+	// }
+	// });
+	//
+	// locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1,
+	// 1, locListener);
+	//
+	// }
 
 	private void addPlacemark() {
 		if (view == null)
@@ -891,12 +880,22 @@ public class MyActivity extends Activity {
 	}
 
 	private void trackingOnOff() {
+		if (mapsService == null)
+			return;
 		if (mapsService.getTracker().isTracking()) {
 			mapsService.getTracker().endPath();
 		} else {
 			mapsService.getTracker().startPath();
 		}
+		updateWritingButton();
 		updateView();
+	}
+
+	private void updateWritingButton() {
+		if (mapsService != null)
+			findViewById(R.id.writing).setVisibility(
+					mapsService.getTracker().isTracking() ? View.VISIBLE
+							: View.GONE);
 	}
 
 	public boolean isKineticScrolling() {
@@ -931,18 +930,6 @@ public class MyActivity extends Activity {
 
 		adapter.recycle();
 		adapter = null;
-
-		bmMultimap.recycle();
-		bmFollow.recycle();
-		bmWriting.recycle();
-		bmFixedMap.recycle();
-		bmSendLoc.recycle();
-
-		bmMultimap = null;
-		bmFollow = null;
-		bmWriting = null;
-		bmFixedMap = null;
-		bmSendLoc = null;
 
 		super.onDestroy();
 		System.runFinalizersOnExit(true);

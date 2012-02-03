@@ -12,4 +12,11 @@ public class RectInt {
 		rect.height = h;
 	}
 
+	public int getX() {
+		return rect.x;
+	}
+
+	public int getY() {
+		return rect.y;
+	}
 }
