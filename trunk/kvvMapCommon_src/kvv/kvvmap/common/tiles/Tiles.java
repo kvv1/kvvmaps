@@ -52,27 +52,27 @@ public abstract class Tiles implements Recycleable {
 		adapter.assertUIThread();
 		Tile tile = tileCache.get(id);
 		if (tile != null)
-			tile.needsReloading = true;
+			tile.expired = true;
 	}
 
 	public void setInvalidAll() {
 		adapter.assertUIThread();
 		for (long id : tileCache.keySet()) {
-			tileCache.get(id).needsReloading = true;
+			tileCache.get(id).expired = true;
 		}
 	}
 
-	public Tile getTile(long id, PointInt prioLoc, boolean startLoadingIfNeeded) {
+	public Tile getTile(long id, PointInt centerXY, boolean startLoadingIfNeeded) {
 		adapter.assertUIThread();
 		Tile tile = tileCache.get(id);
 		if (tile != null) {
-			if (tile.needsReloading && startLoadingIfNeeded) {
-				loader.load(id, callback, prioLoc);
+			if (tile.expired && startLoadingIfNeeded) {
+				loader.load(id, callback, centerXY);
 			}
 			return tile;
 		}
 		if (startLoadingIfNeeded)
-			loader.load(id, callback, prioLoc);
+			loader.load(id, callback, centerXY);
 		return null;
 	}
 

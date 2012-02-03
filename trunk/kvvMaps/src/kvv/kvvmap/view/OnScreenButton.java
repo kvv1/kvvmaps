@@ -17,8 +17,8 @@ public class OnScreenButton extends ImageButton{
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 		if(enabled)
-			setAlpha(255);
+			setAlpha(128);
 		else
-			setAlpha(100);
+			setAlpha(32);
 	}
 }

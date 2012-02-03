@@ -57,7 +57,7 @@ public class MapView extends View implements IPlatformView {
 	private static int cnt;
 
 	public void init(MyActivity activity, Environment envir,
-			Bundle savedInstanceState) {
+			Bundle savedInstanceState, RotationMode rotationMode) {
 		assertUIThread();
 		Adapter.log("MapView.init " + ++cnt);
 
@@ -78,6 +78,8 @@ public class MapView extends View implements IPlatformView {
 			commonView.setTopMap(topMap);
 			commonView.fixMap(activity.getFixedMap());
 		}
+		
+		setRotationMode(rotationMode);
 
 	}
 
@@ -132,26 +134,6 @@ public class MapView extends View implements IPlatformView {
 
 		paint.setAntiAlias(true);
 
-		if (commonView.isMultiple()) {
-			Bitmap bm = activity.bmMultimap;
-			canvas.drawBitmap(bm, getWidth() - bm.getWidth(), 0, null);
-		}
-
-		if (activity.isFollowing()) {
-			Bitmap bm = activity.bmFollow;
-			canvas.drawBitmap(bm, getWidth() - bm.getWidth() * 2, 0, null);
-		}
-
-		if (activity.mapsService.getTracker().isTracking()) {
-			Bitmap bm = activity.bmWriting;
-			canvas.drawBitmap(bm, getWidth() - bm.getWidth() * 3, 0, null);
-		}
-
-		if (activity.getFixedMap() != null) {
-			Bitmap bm = activity.bmFixedMap;
-			canvas.drawBitmap(bm, getWidth() - bm.getWidth() * 4, 0, null);
-		}
-
 		if (compass == null)
 			compass = new Compass(getWidth() / 10);
 
@@ -162,7 +144,7 @@ public class MapView extends View implements IPlatformView {
 			targBearing = myLoc.bearingTo(targ);
 
 		compass.drawCompass(canvas, paint, new Point(getWidth() - getWidth()
-				/ 10, getHeight() / 10), targBearing);
+				/ 10, getHeight() / 8), targBearing);
 
 		if (activity.mapsService.isLoadingMaps()) {
 			paint.setColor(Color.CYAN);
@@ -378,7 +360,7 @@ public class MapView extends View implements IPlatformView {
 		}
 
 		if (commonView != null
-				&& activity.getRotation() == RotationMode.ROTATION_COMPASS
+				&& commonView.getRotationMode() == RotationMode.ROTATION_COMPASS
 				&& values != null && values.length >= 1) {
 			commonView.setAngle(-values[0]);
 		}

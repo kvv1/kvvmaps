@@ -121,7 +121,7 @@ public class MapViewSw extends JComponent {
 		@Override
 		public void mouseDragged(MouseEvent e) {
 			if (p != null) {
-				commonView.animateBy(p.x - e.getX(), p.y - e.getY());
+				commonView.scrollBy(p.x - e.getX(), p.y - e.getY());
 				p = new Point(e.getX(), e.getY());
 			}
 		}

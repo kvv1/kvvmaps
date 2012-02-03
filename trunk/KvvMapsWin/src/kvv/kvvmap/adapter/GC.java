@@ -136,7 +136,7 @@ public class GC {
 
 	}
 
-	public void drawArrow(int x, int y, LocationX myLocation, boolean dimmed) {
+	public void drawArrow(int x, int y, float geg, boolean dimmed) {
 	}
 
 	public void setTransform(float f, int i, int j) {
