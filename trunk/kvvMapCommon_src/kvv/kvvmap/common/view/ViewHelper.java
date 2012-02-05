@@ -2,16 +2,15 @@ package kvv.kvvmap.common.view;
 
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.adapter.RectX;
 import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.Utils;
 
 public class ViewHelper {
-	public static void drawText(GC gc, String text, PointInt pt, int textColor,
-			int backgroundColor) {
+	public static void drawText(GC gc, String text, int x, int y,
+			int textColor, int backgroundColor) {
 		RectX bounds = gc.getTextBounds(text);
-		bounds.offset(pt.x, pt.y);
+		bounds.offset(x, y);
 		bounds.inset(-1, -1);
 		gc.setColor(backgroundColor);
 		gc.fillRect((float) (bounds.getX()), (float) (bounds.getY()),
@@ -19,7 +18,7 @@ public class ViewHelper {
 				(float) (bounds.getY() + bounds.getHeight()));
 
 		gc.setColor(textColor);
-		gc.drawText(text, pt.x, pt.y);
+		gc.drawText(text, x, y);
 	}
 
 	private static int getScale(int m) {
@@ -49,9 +48,8 @@ public class ViewHelper {
 
 		int len = gc.getWidth() / 2 * m1 / m;
 
-		int x0 = 4;
-		int x = x0;
-		int y = lineHeight + scaleWidth + scaleWidth;
+		int x = 4;
+		int y = gc.getHeight() - scaleWidth * 2;
 
 		gc.setColor(COLOR.BLACK);
 		gc.fillRect(x, y, x + len / 4, y + scaleWidth);
@@ -72,11 +70,10 @@ public class ViewHelper {
 		else
 			text = Float.toString((float) m1 / 1000) + "km";
 
-		ViewHelper.drawText(gc, text, new PointInt(4, lineHeight), COLOR.BLACK,
+		ViewHelper.drawText(gc, text, x, y - scaleWidth, COLOR.BLACK,
 				0x80FFFFFF);
 	}
 
-	
 	public static void drawLineToTarget(GC gc, MapViewParams mapPos,
 			LocationX targ) {
 		if (targ == null)
@@ -84,71 +81,43 @@ public class ViewHelper {
 
 		int w = gc.getWidth();
 		int h = gc.getHeight();
-		
-		int targx = (int) mapPos.geo2scrX(targ.getX(mapPos.getZoom()), targ.getY(mapPos.getZoom())) + w/2;
-		int targy = (int) mapPos.geo2scrY(targ.getX(mapPos.getZoom()), targ.getY(mapPos.getZoom())) + h/2;
-		
+
+		int targx = (int) mapPos.geo2scrX(targ.getX(mapPos.getZoom()),
+				targ.getY(mapPos.getZoom()))
+				+ w / 2;
+		int targy = (int) mapPos.geo2scrY(targ.getX(mapPos.getZoom()),
+				targ.getY(mapPos.getZoom()))
+				+ h / 2;
+
 		gc.setColor(COLOR.dimm(COLOR.TARG_COLOR));
 		gc.setStrokeWidth(2);
-		gc.drawLine(w/2, h/2, targx, targy);
+		gc.drawLine(w / 2, h / 2, targx, targy);
 	}
 
-	public static void drawLine(GC gc, MapViewParams mapPos,
-			LocationX loc1, LocationX loc2, int color) {
-		
+	public static void drawLine(GC gc, MapViewParams mapPos, LocationX loc1,
+			LocationX loc2, int color) {
+
 		int w = gc.getWidth();
 		int h = gc.getHeight();
-		
-		int x1 = (int) mapPos.geo2scrX(loc1.getX(mapPos.getZoom()), loc1.getY(mapPos.getZoom())) + w/2;
-		int y1 = (int) mapPos.geo2scrY(loc1.getX(mapPos.getZoom()), loc1.getY(mapPos.getZoom())) + h/2;
-		
-		int x2 = (int) mapPos.geo2scrX(loc2.getX(mapPos.getZoom()), loc2.getY(mapPos.getZoom())) + w/2;
-		int y2 = (int) mapPos.geo2scrY(loc2.getX(mapPos.getZoom()), loc2.getY(mapPos.getZoom())) + h/2;
-		
-//		gc.setColor(COLOR.dimm(COLOR.TARG_COLOR));
+
+		int x1 = (int) mapPos.geo2scrX(loc1.getX(mapPos.getZoom()),
+				loc1.getY(mapPos.getZoom()))
+				+ w / 2;
+		int y1 = (int) mapPos.geo2scrY(loc1.getX(mapPos.getZoom()),
+				loc1.getY(mapPos.getZoom()))
+				+ h / 2;
+
+		int x2 = (int) mapPos.geo2scrX(loc2.getX(mapPos.getZoom()),
+				loc2.getY(mapPos.getZoom()))
+				+ w / 2;
+		int y2 = (int) mapPos.geo2scrY(loc2.getX(mapPos.getZoom()),
+				loc2.getY(mapPos.getZoom()))
+				+ h / 2;
+
+		// gc.setColor(COLOR.dimm(COLOR.TARG_COLOR));
 		gc.setColor(color);
 		gc.setStrokeWidth(2);
 		gc.drawLine(x1, y1, x2, y2);
-	}
-	
-	public static void drawTarget(GC gc, MapViewParams mapPos,
-			LocationX center, LocationX myLoc, LocationX targ) {
-		if (targ == null)
-			return;
-
-//		
-//		int _dx = (int) Math.abs(mapPos.geo2scrX(targ.getX(mapPos.getZoom()), targ.getY(mapPos.getZoom())));
-//		int _dy = (int) Math.abs(mapPos.geo2scrY(targ.getX(mapPos.getZoom()), targ.getY(mapPos.getZoom())));
-//		if (_dx > gc.getWidth() / 3 || _dy > gc.getHeight() / 3) {
-//			gc.setColor(COLOR.dimm(COLOR.TARG_COLOR));
-//			gc.setStrokeWidth(2);
-//
-//			int len = gc.getWidth() / 16;
-//
-//			double bearing = (90 - center.bearingTo(targ)) * Math.PI / 180;
-//
-//			int dx = (int) (len * Math.cos(bearing));
-//			int dy = (int) (len * Math.sin(bearing));
-//
-//			int x = gc.getWidth() / 2;
-//			int y = gc.getHeight() / 2;
-//
-//			gc.drawLine(x, y, x + dx, y - dy);
-//
-//		}
-
-		if (myLoc != null) {
-			String txt = Utils.formatDistance((int) myLoc.distanceTo(targ));
-			gc.setTextSize(gc.getHeight() / 24);
-
-			RectX txtBounds = gc.getTextBounds(txt);
-
-			PointInt pt = new PointInt((int) (gc.getWidth() - gc.getWidth()
-					/ 10 - txtBounds.getWidth() / 2),
-					(int) (gc.getHeight() / 5 + txtBounds.getHeight()));
-
-			ViewHelper.drawText(gc, txt, pt, COLOR.WHITE, COLOR.TARG_COLOR);
-		}
 	}
 
 	public static void drawCross(GC gc) {
@@ -166,8 +135,12 @@ public class ViewHelper {
 		if (loc == null)
 			return;
 
-		int x = (int) mapPos.geo2scrX(loc.getX(mapPos.getZoom()), loc.getY(mapPos.getZoom())) + gc.getWidth() / 2;
-		int y = (int) mapPos.geo2scrY(loc.getX(mapPos.getZoom()), loc.getY(mapPos.getZoom())) + gc.getHeight() / 2;
+		int x = (int) mapPos.geo2scrX(loc.getX(mapPos.getZoom()),
+				loc.getY(mapPos.getZoom()))
+				+ gc.getWidth() / 2;
+		int y = (int) mapPos.geo2scrY(loc.getX(mapPos.getZoom()),
+				loc.getY(mapPos.getZoom()))
+				+ gc.getHeight() / 2;
 
 		double accPt = m2pt(loc.getAccuracy(), mapPos);
 
@@ -177,28 +150,6 @@ public class ViewHelper {
 		}
 
 		gc.drawArrow(x, y, loc.getBearing() + mapPos.angle(), dimmed);
-	}
-	
-	public static int drawMyLocationStatus(GC gc, LocationX loc) {
-		if (loc == null)
-			return 0;
-
-		int lineHeight = gc.getHeight() / 24;
-		gc.setTextSize(lineHeight);
-
-		gc.setColor(0x80000000);
-		gc.fillRect(0, gc.getHeight() - lineHeight, gc.getWidth(),
-				gc.getHeight());
-
-		gc.setColor(COLOR.CYAN);
-		gc.drawText(
-				Utils.format(loc.getLongitude()) + " "
-						+ Utils.format(loc.getLatitude()) + " "
-						+ (int) loc.getAltitude() + "m "
-						+ (int) (loc.getSpeed() * 3.6f) + "km/h", 0,
-				gc.getHeight() - 2);
-
-		return lineHeight;
 	}
 
 	private static double pt2m(int pt, MapViewParams mapPos) {

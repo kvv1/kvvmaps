@@ -5,22 +5,20 @@ import kvv.kvvmap.R;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.pacemark.ISelectable;
+import kvv.kvvmap.common.pacemark.PathSelection;
 import kvv.kvvmap.common.view.CommonView;
 import kvv.kvvmap.common.view.CommonView.RotationMode;
 import kvv.kvvmap.common.view.Environment;
 import kvv.kvvmap.common.view.IPlatformView;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -52,6 +50,7 @@ public class MapView extends View implements IPlatformView {
 		uiThread = Thread.currentThread();
 		setFocusable(true);
 		setFocusableInTouchMode(true);
+		
 	}
 
 	private static int cnt;
@@ -78,7 +77,7 @@ public class MapView extends View implements IPlatformView {
 			commonView.setTopMap(topMap);
 			commonView.fixMap(activity.getFixedMap());
 		}
-		
+
 		setRotationMode(rotationMode);
 
 	}
@@ -90,16 +89,16 @@ public class MapView extends View implements IPlatformView {
 		String lon = Utils.format(commonView.getLocation().getLongitude());
 		String lat = Utils.format(commonView.getLocation().getLatitude());
 
-		String mem = "";
-		if (Adapter.debugDraw) {
-			int usedMegs = (int) (Debug.getNativeHeapAllocatedSize() / 1048576L);
-			int freeMegs = (int) (Debug.getNativeHeapFreeSize() / 1048576L);
-			int allMegs = (int) (Debug.getNativeHeapSize() / 1048576L);
-			mem = usedMegs + " " + freeMegs + " " + allMegs + " ";
-		}
+		// String mem = "";
+		// if (Adapter.debugDraw) {
+		// int usedMegs = (int) (Debug.getNativeHeapAllocatedSize() / 1048576L);
+		// int freeMegs = (int) (Debug.getNativeHeapFreeSize() / 1048576L);
+		// int allMegs = (int) (Debug.getNativeHeapSize() / 1048576L);
+		// mem = usedMegs + " " + freeMegs + " " + allMegs + " ";
+		// }
 
 		String title = lon + " " + lat + " z" + commonView.getZoom() + " "
-				+ mem + commonView.getTopMap();
+				+ commonView.getTopMap();
 		activity.setTitle(title);
 	}
 
@@ -134,8 +133,8 @@ public class MapView extends View implements IPlatformView {
 
 		paint.setAntiAlias(true);
 
-		if (compass == null)
-			compass = new Compass(getWidth() / 10);
+		// if (compass == null)
+		// compass = new Compass(getWidth() / 10);
 
 		Float targBearing = null;
 		LocationX myLoc = commonView.getMyLocation();
@@ -143,8 +142,9 @@ public class MapView extends View implements IPlatformView {
 		if (myLoc != null && targ != null && !commonView.isMyLocationDimmed())
 			targBearing = myLoc.bearingTo(targ);
 
-		compass.drawCompass(canvas, paint, new Point(getWidth() - getWidth()
-				/ 10, getHeight() / 8), targBearing);
+		if (compass != null)
+			compass.drawCompass(canvas, paint, new Point(getWidth()
+					- getWidth() / 10, getHeight() / 8), targBearing);
 
 		if (activity.mapsService.isLoadingMaps()) {
 			paint.setColor(Color.CYAN);
@@ -445,14 +445,6 @@ public class MapView extends View implements IPlatformView {
 		OnScreenButton edit = (OnScreenButton) activity.findViewById(R.id.edit);
 		edit.setEnabled(commonView.getSel() != null);
 
-		OnScreenButton iplus = (OnScreenButton) activity
-				.findViewById(R.id.infoplus);
-		iplus.setEnabled(commonView.getInfoLevel() != InfoLevel.HIGH);
-
-		OnScreenButton iminus = (OnScreenButton) activity
-				.findViewById(R.id.infominus);
-		iminus.setEnabled(commonView.getInfoLevel() != InfoLevel.LOW);
-
 		OnScreenButton rotate = (OnScreenButton) activity
 				.findViewById(R.id.rotate);
 		rotate.setEnabled(commonView.isMultiple());
@@ -513,16 +505,21 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	public void setRotationMode(RotationMode rotationMode) {
-		if(commonView != null) {
+		if (commonView != null) {
 			commonView.setRotationMode(rotationMode);
-//			if(rotationMode == RotationMode.ROTATION_GPS)
-//				commonView.setMyLocation(new LocationX(30, 60) {
-//					@Override
-//					public float getBearing() {
-//						return 10;
-//					}
-//				}, true);
+			// if(rotationMode == RotationMode.ROTATION_GPS)
+			// commonView.setMyLocation(new LocationX(30, 60) {
+			// @Override
+			// public float getBearing() {
+			// return 10;
+			// }
+			// }, true);
 		}
+	}
+
+	@Override
+	public void pathSelected(PathSelection sel) {
+		activity.pathSelected(sel);
 	}
 
 }

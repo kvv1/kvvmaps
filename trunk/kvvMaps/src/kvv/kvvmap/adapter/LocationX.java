@@ -5,14 +5,22 @@ import kvv.kvvmap.common.pacemark.ISelectable;
 import android.location.Location;
 
 public class LocationX implements ISelectable {
-	private final Location loc;
+
+	private static final float[] distResults = new float[2];
 
 	public volatile String name;
 
+	private double lon;
+	private double lat;
+	private double alt;
+	private long time;
+	private float bearing;
+	private float acc;
+	private float speed;
+
+	private int z = -1;
 	private double x;
 	private double y;
-	private int z = -1;
-	private int bmsize;
 
 	public LocationX(double lon, double lat) {
 		this(lon, lat, 0, 0, 0, 0);
@@ -20,19 +28,20 @@ public class LocationX implements ISelectable {
 
 	public LocationX(double lon, double lat, double alt, float acc,
 			float speed, long time) {
-		loc = new Location("");
-		loc.setLongitude(lon);
-		loc.setLatitude(lat);
-		loc.setAltitude(alt);
-		loc.setAccuracy(acc);
-		loc.setSpeed(speed);
-		loc.setTime(time);
+		this.lon = lon;
+		this.lat = lat;
+		this.alt = alt;
+		this.acc = acc;
+		this.speed = speed;
+		this.time = time;
 	}
 
 	public LocationX(Location loc) {
-		this.loc = loc;
+		this(loc.getLongitude(), loc.getLatitude(), loc.getAltitude(), loc
+				.getAccuracy(), loc.getSpeed(), loc.getTime());
+		bearing = loc.getBearing();
 		if (!loc.hasSpeed() || loc.getSpeed() > 120)
-			loc.setSpeed(-1);
+			speed = -1;
 	}
 
 	public synchronized double getX(int zoom) {
@@ -56,47 +65,52 @@ public class LocationX implements ISelectable {
 	}
 
 	private void calcXY(int zoom) {
-		if (z != zoom || bmsize != Adapter.TILE_SIZE) {
-			y = Utils.lat2y(loc.getLatitude(), zoom);
-			x = Utils.lon2x(loc.getLongitude(), zoom);
+		if (z != zoom) {
+			y = Utils.lat2y(lat, zoom);
+			x = Utils.lon2x(lon, zoom);
 			z = zoom;
-			bmsize = Adapter.TILE_SIZE;
 		}
 	}
 
 	public double getLongitude() {
-		return loc.getLongitude();
+		return lon;
 	}
 
 	public double getLatitude() {
-		return loc.getLatitude();
+		return lat;
 	}
 
 	public double getAltitude() {
-		return loc.getAltitude();
+		return alt;
 	}
 
 	public float getAccuracy() {
-		return loc.getAccuracy();
+		return acc;
 	}
 
 	public float getSpeed() {
-		return loc.getSpeed();
+		return speed;
 	}
 
 	public long getTime() {
-		return loc.getTime();
+		return time;
 	}
 
 	public float getBearing() {
-		return loc.getBearing();
+		return bearing;
 	}
 
 	public float distanceTo(LocationX dest) {
-		return loc.distanceTo(dest.loc);
+		synchronized (distResults) {
+			Location.distanceBetween(lat, lon, dest.lat, dest.lon, distResults);
+			return distResults[0];
+		}
 	}
 
 	public float bearingTo(LocationX dest) {
-		return loc.bearingTo(dest.loc);
+		synchronized (distResults) {
+			Location.distanceBetween(lat, lon, dest.lat, dest.lon, distResults);
+			return distResults[1];
+		}
 	}
 }

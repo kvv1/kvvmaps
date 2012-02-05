@@ -24,6 +24,7 @@ import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maps.Maps;
 import kvv.kvvmap.common.maps.MapsDir;
 import kvv.kvvmap.common.pacemark.ISelectable;
+import kvv.kvvmap.common.pacemark.PathSelection;
 import kvv.kvvmap.common.pacemark.Paths;
 import kvv.kvvmap.common.pacemark.PlaceMarks;
 import kvv.kvvmap.common.view.CommonView;
@@ -41,6 +42,11 @@ public class MapViewSw extends JComponent {
 
 	@Override
 	protected void paintComponent(Graphics _g) {
+		
+		Runtime.getRuntime().freeMemory();
+		Runtime.getRuntime().maxMemory();
+		Runtime.getRuntime().totalMemory();
+		
 		Graphics2D g = (Graphics2D) _g;
 		GC gc = new GC(g, SCR_W, SCR_H);
 		commonView.draw(gc);
@@ -106,6 +112,12 @@ public class MapViewSw extends JComponent {
 			@Override
 			public boolean loadDuringScrolling() {
 				return true;
+			}
+
+			@Override
+			public void pathSelected(PathSelection sel) {
+				// TODO Auto-generated method stub
+				
 			}
 		}, envir);
 

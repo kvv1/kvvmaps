@@ -2,15 +2,14 @@ package kvv.kvvmap.common.view;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
-import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.common.pacemark.Path;
 import kvv.kvvmap.common.pacemark.PathDrawer;
+import kvv.kvvmap.common.pacemark.PathSelection;
 
 public class Diagram {
 
 	private Object bm;
 	private int h;
-	private final ICommonView view;
+	private final IPlatformView view;
 	private final Adapter adapter;
 
 	//private DiagramThread thread;
@@ -18,23 +17,21 @@ public class Diagram {
 	private Runnable r;
 
 	private class Params {
-		Params(Path path, LocationX pm, int w, int h) {
+		Params(PathSelection sel, int w, int h) {
 			super();
-			this.path = path;
-			this.pm = pm;
+			this.sel = sel;
 			this.w = w;
 			this.h = h;
 		}
 
-		final Path path;
-		final LocationX pm;
+		final PathSelection sel;
 		final int w;
 		final int h;
 	}
 
 	private Params params;
 
-	public Diagram(Adapter adapter, ICommonView platformViewView) {
+	public Diagram(Adapter adapter, IPlatformView platformViewView) {
 		this.view = platformViewView;
 		this.adapter = adapter;
 	}
@@ -68,18 +65,18 @@ public class Diagram {
 				Adapter.log("DiagramThread");
 
 				bm = null;
-				if (params.path != null) {
+				if (params.sel != null) {
 					bm = adapter.allocBitmap(params.w, params.h);
 					GC gc = adapter.getGC(bm);
 					h = params.h;
-					PathDrawer.drawDiagram(params.path, gc, params.pm);
+					PathDrawer.drawDiagram(gc, params.sel);
 				}
 			}
 		}
 	}
 
-	public synchronized void set(Path path, LocationX pm, int w, int h) {
-		this.params = new Params(path, pm, w, h / 4);
+	public synchronized void set(PathSelection sel, int w, int h) {
+		this.params = new Params(sel, w, h);
 		if (r == null) {
 			r = new DiagramRunnable();
 			adapter.execBG(r);

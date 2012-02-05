@@ -3,7 +3,6 @@ package kvv.kvvmap.adapter;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.PorterDuff;
@@ -30,9 +29,7 @@ public class GC {
 		this.width = w;
 		this.height = h;
 
-		int sz = width / 16;
-		if (sz > 32)
-			sz = 32;
+		int sz = width / 20;
 		arrow = new Arrow(sz);
 	}
 
@@ -182,24 +179,20 @@ public class GC {
 		arrow.draw(canvas, x, y, rot, dimmed);
 	}
 
-	Matrix m;
-
-	public void setTransform(float[] trans) {
-		m = canvas.getMatrix();
-		Matrix m = new Matrix();
-		m.setPolyToPoly(trans, 0, trans, trans.length / 2, trans.length / 4);
-		canvas.setMatrix(m);
-	}
+//	Matrix m;
 
 	public void setTransform(float deg, float px, float py) {
-		m = canvas.getMatrix();
-		Matrix m1 = new Matrix(m);
-		m1.postRotate(deg, px, py);
-		canvas.setMatrix(m1);
+//		m = canvas.getMatrix();
+//		Matrix m1 = new Matrix(m);
+//		m1.postRotate(deg, px, py);
+//		canvas.setMatrix(m1);
+		canvas.save();
+		canvas.rotate(deg, px, py);
 	}
 
 	public void clearTransform() {
-		canvas.setMatrix(m);
+		canvas.restore();
+//		canvas.setMatrix(m);
 	}
 
 }

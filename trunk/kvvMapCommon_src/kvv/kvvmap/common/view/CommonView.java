@@ -3,6 +3,8 @@ package kvv.kvvmap.common.view;
 import java.util.Collections;
 import java.util.List;
 
+import android.os.Debug;
+
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
@@ -45,8 +47,6 @@ public class CommonView implements ICommonView {
 	private boolean myLocationDimmed;
 
 	private final Environment envir;
-
-	private final Diagram diagram;
 
 	private boolean scrolling;
 
@@ -124,20 +124,13 @@ public class CommonView implements ICommonView {
 
 				GC gc = envir.adapter.getGC(img.img);
 
-				if (Adapter.debugDraw) {
-					gc.setColor(COLOR.RED);
-					gc.drawRect(10, 10, 235, 235);
-
-					ViewHelper.drawText(gc, TileId.toString(id), new PointInt(
-							20, 20), COLOR.RED, 0x80FFFFFF);
-					ViewHelper
-							.drawText(gc, "mem "
-									+ Runtime.getRuntime().freeMemory() / 1024
-									/ 1024 + " "
-									+ Runtime.getRuntime().totalMemory() / 1024
-									/ 1024, new PointInt(20, 40), COLOR.RED,
-									0x80FFFFFF);
-				}
+				// if (Adapter.debugDraw) {
+				// gc.setColor(COLOR.RED);
+				// gc.drawRect(10, 10, 235, 235);
+				//
+				// ViewHelper.drawText(gc, TileId.toString(id), new PointInt(
+				// 20, 20), COLOR.RED, 0x80FFFFFF);
+				// }
 
 				InfoLevel infoLevel = CommonView.this.infoLevel;
 				if (infoLevel.ordinal() > 0) {
@@ -159,8 +152,6 @@ public class CommonView implements ICommonView {
 				repaint();
 			}
 		};
-
-		diagram = new Diagram(envir.adapter, this);
 	}
 
 	public RotationMode getRotationMode() {
@@ -366,29 +357,29 @@ public class CommonView implements ICommonView {
 
 		gc.setAntiAlias(true);
 		// long time = System.currentTimeMillis();
-		drawTiles(gc);
+		int[] scrLoc = new int[2];
+		platformView.getLocationOnScreen(scrLoc);
+		int w = gc.getWidth();
+		int h = gc.getHeight();
+		gc.setTransform((float) (mapPos.angle()), w / 2 + scrLoc[0], h / 2
+				+ scrLoc[1]);
+		try {
+			drawTiles(gc);
+		} catch (Exception e) {
+		}
+		gc.clearTransform();
 		// long time1 = System.currentTimeMillis();
 		// System.out.println("t1 = " + (time1 - time));
-		ViewHelper.drawMyLocationArrow(gc, mapPos, myLocation,
-				isMyLocationDimmed());
+		ViewHelper
+				.drawMyLocationArrow(gc, mapPos, myLocation, myLocationDimmed);
 
-		int locationH = ViewHelper.drawMyLocationStatus(gc, myLocation);
 		ViewHelper.drawCross(gc);
 		ViewHelper.drawScale(gc, mapPos);
 		// long time2 = System.currentTimeMillis();
 		// System.out.println("t2 = " + (time2 - time1));
 
-		drawDiagram(gc, locationH);
-
-		if (!scrolling) {
-			LocationX myLoc = myLocation;
-			if (!isMyLocationDimmed())
-				myLoc = null;
-			ViewHelper
-					.drawTarget(gc, mapPos, getLocation(), myLoc, getTarget());
-		}
-
 		LocationX targ = getTarget();
+
 		if (targ != null) {
 			ViewHelper.drawLine(gc, mapPos, getLocation(), targ,
 					COLOR.dimm(COLOR.TARG_COLOR));
@@ -396,16 +387,24 @@ public class CommonView implements ICommonView {
 				ViewHelper.drawLine(gc, mapPos, myLocation, targ,
 						COLOR.dimm(COLOR.ARROW_COLOR));
 		}
-	}
 
-	private static double x_tiles2scr(double x, int w, double centerx) {
-		x -= centerx;
-		return x + w / 2;
-	}
+		if (Adapter.debugDraw) {
+			int usedMegs = (int) (Debug.getNativeHeapAllocatedSize() / 1048576L);
+			int freeMegs = (int) (Debug.getNativeHeapFreeSize() / 1048576L);
+			int allMegs = (int) (Debug.getNativeHeapSize() / 1048576L);
+			String mem = "J " + Runtime.getRuntime().totalMemory() / 1024
+					/ 1024 + " " + Runtime.getRuntime().freeMemory() / 1024
+					/ 1024 + " " + Runtime.getRuntime().maxMemory() / 1024
+					/ 1024 + " " + " N " + usedMegs + " " + freeMegs + " "
+					+ allMegs + " ";
+			gc.setTextSize(20);
 
-	private static double y_tiles2scr(double y, int h, double centery) {
-		y -= centery;
-		return y + h / 2;
+			ViewHelper.drawText(gc, mem, 10, 50, COLOR.RED, COLOR.WHITE);
+			//
+			// gc.setColor(COLOR.RED);
+			// gc.drawText(mem, 10, 50);
+		}
+
 	}
 
 	private void drawTiles(GC gc) {
@@ -426,12 +425,6 @@ public class CommonView implements ICommonView {
 		PointInt centerXY = new PointInt((int) mapPos.centerX(),
 				(int) mapPos.centerY());
 
-		int[] scrLoc = new int[2];
-		platformView.getLocationOnScreen(scrLoc);
-
-		gc.setTransform((float) (mapPos.angle()), w / 2 + scrLoc[0], h / 2
-				+ scrLoc[1]);
-
 		gc.setAntiAlias(true);
 
 		int x = x0;
@@ -445,8 +438,6 @@ public class CommonView implements ICommonView {
 				tilesDrawn.add(id);
 			}
 		}
-
-		gc.clearTransform();
 	}
 
 	@Override
@@ -465,8 +456,10 @@ public class CommonView implements ICommonView {
 		envir.adapter.assertUIThread();
 		if (infoLevel.ordinal() < InfoLevel.values().length - 1) {
 			infoLevel = InfoLevel.values()[infoLevel.ordinal() + 1];
-			invalidatePathTiles();
+		} else {
+			infoLevel = InfoLevel.values()[0];
 		}
+		invalidatePathTiles();
 	}
 
 	public void decInfoLevel() {
@@ -513,12 +506,9 @@ public class CommonView implements ICommonView {
 		CommonView.this.sel = sel;
 		CommonView.this.invalidatePathTiles();
 		if (sel instanceof PathSelection) {
-			PathSelection sel1 = (PathSelection) sel;
-			diagram.set(sel1.path, sel1.pm, platformView.getWidth(),
-					platformView.getHeight());
+			platformView.pathSelected((PathSelection) sel);
 		} else {
-			diagram.set(null, null, platformView.getWidth(),
-					platformView.getHeight());
+			platformView.pathSelected(null);
 		}
 	}
 
@@ -597,11 +587,6 @@ public class CommonView implements ICommonView {
 	public void onSizeChanged(int w, int h) {
 		updateSel();
 		repaint();
-	}
-
-	private void drawDiagram(GC gc, int locationH) {
-		if (getInfoLevel().ordinal() != 0)
-			diagram.draw(gc, locationH);
 	}
 
 	@Override

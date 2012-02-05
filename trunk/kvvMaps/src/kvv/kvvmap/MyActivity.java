@@ -26,6 +26,7 @@ import kvv.kvvmap.dlg.PlaceMarkDlg;
 import kvv.kvvmap.service.KvvMapsService;
 import kvv.kvvmap.service.KvvMapsService.IKvvMapsService;
 import kvv.kvvmap.service.KvvMapsService.KvvMapsServiceListener;
+import kvv.kvvmap.view.DiagramView;
 import kvv.kvvmap.view.MapView;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -37,7 +38,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
@@ -60,6 +60,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 @SuppressWarnings("deprecation")
 public class MyActivity extends Activity {
@@ -92,6 +93,8 @@ public class MyActivity extends Activity {
 	// private static final int MENU_UPDATE1 = 114;
 
 	private MapView view;
+	private DiagramView diagramView;
+	private TextView altSpeed;
 
 	// public static MediaPlayer mediaPlayer;
 
@@ -237,6 +240,7 @@ public class MyActivity extends Activity {
 
 				Bundle b = mapsService.getBundle();
 				view.init(MyActivity.this, envir, b, getRotationMode());
+				diagramView.init(envir.adapter);
 
 				mapsService.setListener(new KvvMapsServiceListener() {
 					@Override
@@ -267,7 +271,7 @@ public class MyActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		Log.w("KVVMAPS", "onCreate");
 		super.onCreate(savedInstanceState);
-
+		
 		settings = getSharedPreferences(PREFS_NAME, 0);
 
 		if (!MapLoader.checkMaps(this))
@@ -320,6 +324,10 @@ public class MyActivity extends Activity {
 		Adapter.debugDraw = settings.getBoolean("debugDraw", false);
 
 		setContentView(R.layout.screen);
+		altSpeed = (TextView) findViewById(R.id.altSpeed);
+		altSpeed.setBackgroundColor(0x80000000);
+		altSpeed.setTextColor(COLOR.CYAN);
+		altSpeed.setText("");
 
 		ImageButton button = (ImageButton) findViewById(R.id.edit);
 		button.setAlpha(255);
@@ -330,21 +338,12 @@ public class MyActivity extends Activity {
 			}
 		});
 
-		button = (ImageButton) findViewById(R.id.infoplus);
+		button = (ImageButton) findViewById(R.id.info);
 		button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (view != null)
 					view.incInfoLevel();
-			}
-		});
-
-		button = (ImageButton) findViewById(R.id.infominus);
-		button.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (view != null)
-					view.decInfoLevel();
 			}
 		});
 
@@ -413,6 +412,7 @@ public class MyActivity extends Activity {
 		updateButtons();
 
 		view = (MapView) findViewById(R.id.MapView);
+		diagramView = (DiagramView) findViewById(R.id.diagramView);
 
 	}
 
@@ -425,7 +425,7 @@ public class MyActivity extends Activity {
 	}
 
 	private void updateButtons() {
-		View buttons = findViewById(R.id.linearLayout1);
+		View buttons = findViewById(R.id.screenButtons);
 		if (buttonsVisible())
 			buttons.setVisibility(View.VISIBLE);
 		else
@@ -488,7 +488,7 @@ public class MyActivity extends Activity {
 
 		SubMenu settingsSubMenu = menu.addSubMenu("Настройки");
 
-		settingsSubMenu.add(Menu.NONE, MENU_DEBUG_DRAW, 0, "debugDraw")
+		settingsSubMenu.add(Menu.NONE, MENU_DEBUG_DRAW, 0, "debug info")
 				.setCheckable(true);
 		settingsSubMenu.add(Menu.NONE, MENU_TOGGLE_BUTTONS, 0,
 				"Экранные кнопки").setCheckable(true);
@@ -755,6 +755,9 @@ public class MyActivity extends Activity {
 					if (view != null)
 						view.setMyLocation(loc, scroll);
 					scroll = false;
+
+					altSpeed.setText("" + (int) loc.getAltitude() + "m "
+							+ (int) (loc.getSpeed() * 3.6f) + "km/h");
 				}
 			};
 
@@ -765,6 +768,7 @@ public class MyActivity extends Activity {
 
 	private void stopGPS() {
 		if (locationListener != null) {
+			altSpeed.setText("");
 			locationManager.removeUpdates(locationListener);
 			locationListener = null;
 			if (view != null)
@@ -787,7 +791,7 @@ public class MyActivity extends Activity {
 		updateGpsButton();
 		updateView();
 	}
-	
+
 	private void updateGpsButton() {
 		ImageButton button = (ImageButton) findViewById(R.id.gps);
 		button.setImageBitmap(BitmapFactory.decodeResource(getResources(),
@@ -927,6 +931,7 @@ public class MyActivity extends Activity {
 			view.dispose();
 
 		view = null;
+		diagramView = null;
 
 		adapter.recycle();
 		adapter = null;
@@ -940,6 +945,11 @@ public class MyActivity extends Activity {
 	public void updateView() {
 		if (view != null)
 			view.invalidate();
+	}
+
+	public void pathSelected(PathSelection sel) {
+		if (diagramView != null)
+			diagramView.pathSelected(sel);
 	}
 
 }
