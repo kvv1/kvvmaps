@@ -149,7 +149,7 @@ public class PathDrawer {
 		}
 	}
 
-	public static void drawDiagram(Path path, GC gc, LocationX pm2) {
+	public static void drawDiagram(GC gc, PathSelection sel) {
 		int y = gc.getHeight();
 		int w = gc.getWidth();
 
@@ -164,16 +164,16 @@ public class PathDrawer {
 
 		gc.setColor(COLOR.CYAN);
 		gc.drawText(
-				Utils.format(pm2.getLongitude()) + "  "
-						+ Utils.format(pm2.getLatitude()) + "  "
-						+ (int) pm2.getAltitude() + "m "
-						+ (int) (pm2.getSpeed() * 3.6) + "km/h", 2, y - 2);
+				Utils.format(sel.pm.getLongitude()) + "  "
+						+ Utils.format(sel.pm.getLatitude()) + "  "
+						+ (int) sel.pm.getAltitude() + "m "
+						+ (int) (sel.pm.getSpeed() * 3.6) + "km/h", 2, y - 2);
 
-		int len = Math.max(1, (int) path.getLen());
+		int len = Math.max(1, (int) sel.path.getLen());
 
 		gc.setColor(COLOR.GREEN);
 
-		List<LocationX> pms = path.getPlaceMarks();
+		List<LocationX> pms = sel.path.getPlaceMarks();
 
 		if (pms.size() > 0) {
 			int minAlt = (int) pms.iterator().next().getAltitude();
@@ -223,7 +223,7 @@ public class PathDrawer {
 				PointInt pt = new PointInt(_x, _y);
 				PointInt pt1 = new PointInt(_x, _y1);
 
-				if (pm == pm2)
+				if (pm == sel.pm)
 					pmPt = pt;
 
 				if (prevPm != null) {
@@ -263,7 +263,7 @@ public class PathDrawer {
 
 		y -= 5 * lineHeight;
 
-		File file = path.getFile();
+		File file = sel.path.getFile();
 
 		if (file != null) {
 			gc.setColor(0x80000000);
