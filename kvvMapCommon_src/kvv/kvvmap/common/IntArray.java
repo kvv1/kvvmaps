@@ -2,12 +2,12 @@ package kvv.kvvmap.common;
 
 public final class IntArray {
 
-	private int[] data = new int[16];
+	private int[] data = new int[0];
 	private int size;
 
 	public void add(int n) {
 		if (size == data.length) {
-			int[] newdata = new int[data.length + 16];
+			int[] newdata = new int[data.length + 1];
 			System.arraycopy(data, 0, newdata, 0, data.length);
 			data = newdata;
 		}
