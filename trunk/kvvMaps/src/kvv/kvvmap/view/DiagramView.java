@@ -42,9 +42,9 @@ public class DiagramView extends View implements IPlatformView {
 		if (diagram != null)
 			diagram.draw(new GC(canvas, new Paint(), w, h), 0);
 
-//		Paint paint = new Paint();
-//		canvas.drawLine(0, 0, w, h, paint);
-//		canvas.drawLine(0, h, w, 0, paint);
+		// Paint paint = new Paint();
+		// canvas.drawLine(0, 0, w, h, paint);
+		// canvas.drawLine(0, h, w, 0, paint);
 	}
 
 	@Override
@@ -55,5 +55,17 @@ public class DiagramView extends View implements IPlatformView {
 	@Override
 	public boolean loadDuringScrolling() {
 		return false;
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		Adapter.log("~DiagramView");
+		super.finalize();
+	}
+
+	public void dispose() {
+		if (diagram != null)
+			diagram.dispose();
+		diagram = null;
 	}
 }

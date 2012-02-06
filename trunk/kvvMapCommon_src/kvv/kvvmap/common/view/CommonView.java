@@ -82,14 +82,16 @@ public class CommonView implements ICommonView {
 				}
 			}
 
+			private Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					onPathTilesChanged();
+				}
+			};
+
 			@Override
 			public void onPathTilesChangedAsync() {
-				envir.adapter.execUI(new Runnable() {
-					@Override
-					public void run() {
-						onPathTilesChanged();
-					}
-				});
+				envir.adapter.execUI(r);
 			}
 		};
 
@@ -123,14 +125,6 @@ public class CommonView implements ICommonView {
 				// t = t1 - t;
 
 				GC gc = envir.adapter.getGC(img.img);
-
-				// if (Adapter.debugDraw) {
-				// gc.setColor(COLOR.RED);
-				// gc.drawRect(10, 10, 235, 235);
-				//
-				// ViewHelper.drawText(gc, TileId.toString(id), new PointInt(
-				// 20, 20), COLOR.RED, 0x80FFFFFF);
-				// }
 
 				InfoLevel infoLevel = CommonView.this.infoLevel;
 				if (infoLevel.ordinal() > 0) {
@@ -187,7 +181,7 @@ public class CommonView implements ICommonView {
 		double lon = mapPos.scr2lon(x, y);
 		double lat = mapPos.scr2lat(x, y);
 
-		animateTo(new LocationX(lon, lat));
+		animateTo(lon, lat);
 	}
 
 	public void setMyLocation(LocationX loc, boolean scroll) {
@@ -338,6 +332,13 @@ public class CommonView implements ICommonView {
 		updateSel();
 	}
 
+	public void animateTo(double lon, double lat) {
+		envir.adapter.assertUIThread();
+		mapPos.animateTo(lon, lat);
+		repaint();
+		updateSel();
+	}
+
 	public void animateTo(LocationX loc) {
 		envir.adapter.assertUIThread();
 		mapPos.animateTo(loc.getLongitude(), loc.getLatitude());
@@ -357,12 +358,9 @@ public class CommonView implements ICommonView {
 
 		gc.setAntiAlias(true);
 		// long time = System.currentTimeMillis();
-		int[] scrLoc = new int[2];
-		platformView.getLocationOnScreen(scrLoc);
 		int w = gc.getWidth();
 		int h = gc.getHeight();
-		gc.setTransform((float) (mapPos.angle()), w / 2 + scrLoc[0], h / 2
-				+ scrLoc[1]);
+		gc.setTransform((float) (mapPos.angle()), w / 2, h / 2);
 		try {
 			drawTiles(gc);
 		} catch (Exception e) {
@@ -512,6 +510,13 @@ public class CommonView implements ICommonView {
 		}
 	}
 
+	private SelectionThread.Callback selCallback = new SelectionThread.Callback() {
+		@Override
+		public void selectionChanged(ISelectable sel) {
+			select(sel);
+		}
+	};
+
 	private void updateSel() {
 		envir.adapter.assertUIThread();
 		if (rotationMode == RotationMode.ROTATION_GPS) {
@@ -520,12 +525,7 @@ public class CommonView implements ICommonView {
 		}
 		selectionThread.set((int) mapPos.centerX(), (int) mapPos.centerY(),
 				getScreenRect(), getZoom(), envir.adapter, envir.placemarks,
-				envir.paths, new SelectionThread.Callback() {
-					@Override
-					public void selectionChanged(ISelectable sel) {
-						select(sel);
-					}
-				});
+				envir.paths, selCallback);
 	}
 
 	private RectInt getScreenRectInt() {

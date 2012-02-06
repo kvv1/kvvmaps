@@ -12,8 +12,8 @@ public class Diagram {
 	private final IPlatformView view;
 	private final Adapter adapter;
 
-	//private DiagramThread thread;
-	
+	// private DiagramThread thread;
+
 	private Runnable r;
 
 	private class Params {
@@ -37,8 +37,8 @@ public class Diagram {
 	}
 
 	public synchronized void draw(GC gc, int y) {
-		//if (r != null)
-		//	return;
+		// if (r != null)
+		// return;
 		if (bm != null)
 			gc.drawImage(bm, 0, gc.getHeight() - y - h);
 	}
@@ -54,7 +54,7 @@ public class Diagram {
 					Diagram.this.params = null;
 					if (params == null) {
 						r = null;
-						if(Diagram.this.bm != null)
+						if (Diagram.this.bm != null)
 							adapter.disposeBitmap(Diagram.this.bm);
 						Diagram.this.bm = bm;
 						view.repaint();
@@ -83,4 +83,15 @@ public class Diagram {
 		}
 	}
 
+	public void dispose() {
+		if (bm != null)
+			adapter.disposeBitmap(bm);
+		bm = null;
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		Adapter.log("~Diagram");
+		super.finalize();
+	}
 }

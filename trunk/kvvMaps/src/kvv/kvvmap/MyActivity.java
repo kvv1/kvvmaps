@@ -58,6 +58,7 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -929,6 +930,8 @@ public class MyActivity extends Activity {
 
 		if (view != null)
 			view.dispose();
+		if (diagramView != null)
+			diagramView.dispose();
 
 		view = null;
 		diagramView = null;
@@ -938,10 +941,29 @@ public class MyActivity extends Activity {
 
 		super.onDestroy();
 		System.runFinalizersOnExit(true);
+		
+		unbindDrawables(findViewById(R.id.RootView));
+		
 		System.gc();
 
 	}
 
+	private void unbindDrawables(View view) {
+	    if (view.getBackground() != null) {
+	        view.getBackground().setCallback(null);
+	    }
+	    if (view instanceof ViewGroup) {
+	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+	            unbindDrawables(((ViewGroup) view).getChildAt(i));
+	        }
+	        try {	        
+	        	((ViewGroup) view).removeAllViews();
+	        } catch (UnsupportedOperationException mayHappen) {
+	        	// AdapterViews, ListViews and potentially other ViewGroups don’t support the removeAllViews operation
+	        }
+	    }
+	}
+	
 	public void updateView() {
 		if (view != null)
 			view.invalidate();
