@@ -47,6 +47,8 @@ public class MapView extends View implements IPlatformView {
 
 	public MapView(Context ctxt, AttributeSet attrs) {
 		super(ctxt, attrs);
+		Adapter.log("MapView");
+		
 		uiThread = Thread.currentThread();
 		setFocusable(true);
 		setFocusableInTouchMode(true);
@@ -507,13 +509,13 @@ public class MapView extends View implements IPlatformView {
 	public void setRotationMode(RotationMode rotationMode) {
 		if (commonView != null) {
 			commonView.setRotationMode(rotationMode);
-			// if(rotationMode == RotationMode.ROTATION_GPS)
-			// commonView.setMyLocation(new LocationX(30, 60) {
-			// @Override
-			// public float getBearing() {
-			// return 10;
-			// }
-			// }, true);
+//			 if(rotationMode == RotationMode.ROTATION_GPS)
+//			 commonView.setMyLocation(new LocationX(30, 60) {
+//			 @Override
+//			 public float getBearing() {
+//			 return 10;
+//			 }
+//			 }, true);
 		}
 	}
 
