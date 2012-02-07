@@ -74,45 +74,40 @@ public class ViewHelper {
 				0x80FFFFFF);
 	}
 
-	public static void drawLineToTarget(GC gc, MapViewParams mapPos,
-			LocationX targ) {
-		if (targ == null)
-			return;
+	// public static void drawLineToTarget(GC gc, int x0, int y0, MapViewParams
+	// mapPos,
+	// LocationX targ) {
+	// if (targ == null)
+	// return;
+	//
+	// int targx = (int) mapPos.geo2scrX(targ.getX(mapPos.getZoom()),
+	// targ.getY(mapPos.getZoom()))
+	// + x0;
+	// int targy = (int) mapPos.geo2scrY(targ.getX(mapPos.getZoom()),
+	// targ.getY(mapPos.getZoom()))
+	// + y0;
+	//
+	// gc.setColor(COLOR.dimm(COLOR.TARG_COLOR));
+	// gc.setStrokeWidth(2);
+	// gc.drawLine(x0, y0, targx, targy);
+	// }
 
-		int w = gc.getWidth();
-		int h = gc.getHeight();
-
-		int targx = (int) mapPos.geo2scrX(targ.getX(mapPos.getZoom()),
-				targ.getY(mapPos.getZoom()))
-				+ w / 2;
-		int targy = (int) mapPos.geo2scrY(targ.getX(mapPos.getZoom()),
-				targ.getY(mapPos.getZoom()))
-				+ h / 2;
-
-		gc.setColor(COLOR.dimm(COLOR.TARG_COLOR));
-		gc.setStrokeWidth(2);
-		gc.drawLine(w / 2, h / 2, targx, targy);
-	}
-
-	public static void drawLine(GC gc, MapViewParams mapPos, LocationX loc1,
-			LocationX loc2, int color) {
-
-		int w = gc.getWidth();
-		int h = gc.getHeight();
+	public static void drawLine(GC gc, int x0, int y0, MapViewParams mapPos,
+			LocationX loc1, LocationX loc2, int color) {
 
 		int x1 = (int) mapPos.geo2scrX(loc1.getX(mapPos.getZoom()),
 				loc1.getY(mapPos.getZoom()))
-				+ w / 2;
+				+ x0;
 		int y1 = (int) mapPos.geo2scrY(loc1.getX(mapPos.getZoom()),
 				loc1.getY(mapPos.getZoom()))
-				+ h / 2;
+				+ y0;
 
 		int x2 = (int) mapPos.geo2scrX(loc2.getX(mapPos.getZoom()),
 				loc2.getY(mapPos.getZoom()))
-				+ w / 2;
+				+ x0;
 		int y2 = (int) mapPos.geo2scrY(loc2.getX(mapPos.getZoom()),
 				loc2.getY(mapPos.getZoom()))
-				+ h / 2;
+				+ y0;
 
 		// gc.setColor(COLOR.dimm(COLOR.TARG_COLOR));
 		gc.setColor(color);
@@ -120,27 +115,25 @@ public class ViewHelper {
 		gc.drawLine(x1, y1, x2, y2);
 	}
 
-	public static void drawCross(GC gc) {
+	public static void drawCross(GC gc, int x, int y) {
 		gc.setColor(0xFF000000);
 		gc.setStrokeWidth(2);
-		int x = gc.getWidth() / 2;
-		int y = gc.getHeight() / 2;
 		int sz = gc.getWidth() / 16;
 		gc.drawLine(x, y - sz, x, y + sz);
 		gc.drawLine(x - sz, y, x + sz, y);
 	}
 
-	public static void drawMyLocationArrow(GC gc, MapViewParams mapPos,
-			LocationX loc, boolean dimmed) {
+	public static void drawMyLocationArrow(GC gc, int x0, int y0,
+			MapViewParams mapPos, LocationX loc, boolean dimmed) {
 		if (loc == null)
 			return;
 
 		int x = (int) mapPos.geo2scrX(loc.getX(mapPos.getZoom()),
 				loc.getY(mapPos.getZoom()))
-				+ gc.getWidth() / 2;
+				+ x0;
 		int y = (int) mapPos.geo2scrY(loc.getX(mapPos.getZoom()),
 				loc.getY(mapPos.getZoom()))
-				+ gc.getHeight() / 2;
+				+ y0;
 
 		double accPt = m2pt(loc.getAccuracy(), mapPos);
 

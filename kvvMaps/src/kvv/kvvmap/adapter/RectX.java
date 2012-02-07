@@ -3,114 +3,75 @@ package kvv.kvvmap.adapter;
 import android.graphics.Rect;
 import android.graphics.RectF;
 
-public final class RectX extends RectF {
+public final class RectX {
 
-	public RectX(float x, float y, float w, float h) {
-		super(x, y, x + w, y + h);
-	}
+	private double x;
+	private double y;
+	private double w;
+	private double h;
 
 	public RectX(double x, double y, double w, double h) {
-		this((float) x, (float) y, (float) w, (float) h);
-	}
-
-	public RectX(Rect r) {
-		super(r.left, r.top, r.right, r.bottom);
-	}
-
-	public RectX(RectF r) {
-		super(r.left, r.top, r.right, r.bottom);
-	}
-
-	private static final int OUT_LEFT = 1;
-	private static final int OUT_TOP = 2;
-	private static final int OUT_RIGHT = 4;
-	private static final int OUT_BOTTOM = 8;
-
-	private int outcode(double x, double y) {
-		int out = 0;
-		if (this.right - this.left <= 0) {
-			out |= OUT_LEFT | OUT_RIGHT;
-		} else if (x < this.left) {
-			out |= OUT_LEFT;
-		} else if (x > this.right) {
-			out |= OUT_RIGHT;
-		}
-		if (this.bottom - this.top <= 0) {
-			out |= OUT_TOP | OUT_BOTTOM;
-		} else if (y < this.top) {
-			out |= OUT_TOP;
-		} else if (y > this.bottom) {
-			out |= OUT_BOTTOM;
-		}
-		return out;
-	}
-
-	public final boolean intersectsLine(double x1, double y1, double x2,
-			double y2) {
-		int out1, out2;
-		if ((out2 = outcode(x2, y2)) == 0) {
-			return true;
-		}
-		while ((out1 = outcode(x1, y1)) != 0) {
-			if ((out1 & out2) != 0) {
-				return false;
-			}
-			if ((out1 & (OUT_LEFT | OUT_RIGHT)) != 0) {
-				double x = super.left;
-				if ((out1 & OUT_RIGHT) != 0) {
-					x += super.right - super.left;
-				}
-				y1 = y1 + (x - x1) * (y2 - y1) / (x2 - x1);
-				x1 = x;
-			} else {
-				double y = super.top;
-				if ((out1 & OUT_BOTTOM) != 0) {
-					y += super.bottom - super.top;
-				}
-				x1 = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
-				y1 = y;
-			}
-		}
-		return true;
-	}
-
-	public final boolean contains(PointX pt) {
-		return super.contains(pt.x, pt.y);
-	}
-
-	public final void union(double x, double y) {
-		super.union((float) x, (float) y);
-	}
-
-	public final void union(float x, float y) {
-		super.union(x, y);
-	}
-
-	public final boolean intersects(RectX rect) {
-		return intersects(this, rect);
-	}
-
-	public final boolean contains(double x, double y) {
-		return super.contains((float) x, (float) y);
-	}
-
-	public final double getX() {
-		return super.left;
-	}
-
-	public final double getY() {
-		return super.top;
-	}
-
-	public final double getWidth() {
-		return super.right - super.left;
-	}
-
-	public final double getHeight() {
-		return super.bottom - super.top;
+		set(x, y, w, h);
 	}
 
 	public void set(double x, double y, double w, double h) {
-		super.set((float) x, (float) y, (float) (x + w), (float) (y + h));
+		this.x = x;
+		this.y = y;
+		this.w = w;
+		this.h = h;
+	}
+
+	public double getX() {
+		return x;
+	}
+
+	public double getY() {
+		return y;
+	}
+
+	public double getWidth() {
+		return w;
+	}
+
+	public double getHeight() {
+		return h;
+	}
+
+	public boolean intersects(double x, double y, double w, double h) {
+		if (this.w <= 0 || this.h <= 0 || w <= 0 || h <= 0) {
+			return false;
+		}
+		double x0 = getX();
+		double y0 = getY();
+		return (x + w > x0 && y + h > y0 && x < x0 + this.w && y < y0 + this.h);
+	}
+
+	public final boolean intersects(RectX r) {
+		return intersects(r.getX(), r.getY(), r.getWidth(), r.getHeight());
+	}
+
+	public void union(double newx, double newy) {
+		double x1 = Math.min(x, newx);
+		double x2 = Math.max(x + w, newx);
+		double y1 = Math.min(y, newy);
+		double y2 = Math.max(y + h, newy);
+		set(x1, y1, x2 - x1, y2 - y1);
+	}
+
+	public void offset(double x, double y) {
+		this.x += x;
+		this.y += y;
+	}
+
+	public void inset(double x, double y) {
+		this.x += x;
+		this.y += y;
+		this.w -= 2 * x;
+		this.h -= 2 * y;
+	}
+
+	public boolean contains(double x, double y) {
+		return x >= this.x && x < this.x + this.w && y >= this.y
+				&& y < this.y + this.h;
 	}
 }

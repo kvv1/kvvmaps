@@ -123,7 +123,8 @@ public class GC {
 	public RectX getTextBounds(String text) {
 		Rect bounds = new Rect();
 		paint.getTextBounds(text, 0, text.length(), bounds);
-		return new RectX(bounds);
+		return new RectX(bounds.left, bounds.top, bounds.width(),
+				bounds.height());
 	}
 
 	public void drawText(String text, int x, int y) {
@@ -179,20 +180,20 @@ public class GC {
 		arrow.draw(canvas, x, y, rot, dimmed);
 	}
 
-//	Matrix m;
+	// Matrix m;
 
 	public void setTransform(float deg, float px, float py) {
-//		m = canvas.getMatrix();
-//		Matrix m1 = new Matrix(m);
-//		m1.postRotate(deg, px, py);
-//		canvas.setMatrix(m1);
+		// m = canvas.getMatrix();
+		// Matrix m1 = new Matrix(m);
+		// m1.postRotate(deg, px, py);
+		// canvas.setMatrix(m1);
 		canvas.save();
 		canvas.rotate(deg, px, py);
 	}
 
 	public void clearTransform() {
 		canvas.restore();
-//		canvas.setMatrix(m);
+		// canvas.setMatrix(m);
 	}
 
 }

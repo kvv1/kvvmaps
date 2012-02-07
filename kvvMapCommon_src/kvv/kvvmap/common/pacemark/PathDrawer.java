@@ -207,18 +207,20 @@ public class PathDrawer {
 
 			PointInt pmPt = null;
 
-			RectX rect = new RectX(w * 2 / 6, y - 5 * lineHeight, w * 4 / 6,
-					4 * lineHeight);
-
+			int rectX = w * 2 / 6;
+			int rectY = y - 5 * lineHeight;
+			int rectW = w * 4 / 6;
+			int rectH = 4 * lineHeight;
+			
 			for (LocationX pm : pms) {
 				if (prevPm != null)
 					len0 += pm.distanceTo(prevPm);
 
-				int _x = (int) (rect.getX() + (len0 * rect.getWidth() / len));
-				int _y = (int) (rect.getY() + rect.getHeight() - (int) ((pm
-						.getAltitude() - minAlt) * rect.getHeight() / altDif));
-				int _y1 = (int) (rect.getY() + rect.getHeight() - (int) ((pm
-						.getSpeed() - minSpeed) * rect.getHeight() / speedDif));
+				int _x = (int) (rectX + (len0 * rectW / len));
+				int _y = (int) (rectY + rectH - (int) ((pm
+						.getAltitude() - minAlt) * rectH / altDif));
+				int _y1 = (int) (rectY + rectH - (int) ((pm
+						.getSpeed() - minSpeed) * rectH / speedDif));
 
 				PointInt pt = new PointInt(_x, _y);
 				PointInt pt1 = new PointInt(_x, _y1);
@@ -251,14 +253,14 @@ public class PathDrawer {
 			}
 
 			gc.drawText("" + maxAlt + "m", 2,
-					(int) (rect.getY() + lineHeight - 1));
-			gc.drawText("" + minAlt + "m", 2, (int) (rect.getY() + lineHeight
-					* 4 - 2));
+					rectY + lineHeight - 1);
+			gc.drawText("" + minAlt + "m", 2, rectY + lineHeight
+					* 4 - 2);
 
 			gc.drawText("" + len + "m", 2,
-					(int) (rect.getY() + lineHeight * 2 - 2));
+					rectY + lineHeight * 2 - 2);
 			gc.drawText("" + pms.size(), 2,
-					(int) (rect.getY() + lineHeight * 3 - 2));
+					rectY + lineHeight * 3 - 2);
 		}
 
 		y -= 5 * lineHeight;
