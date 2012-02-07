@@ -50,11 +50,21 @@ public class CommonView implements ICommonView {
 
 	private boolean scrolling;
 
-	// private PointInt sreenCenter = new PointInt(0, 0);
 	private RotationMode rotationMode = RotationMode.ROTATION_NONE;
 
 	public enum RotationMode {
 		ROTATION_NONE, ROTATION_COMPASS, ROTATION_GPS
+	}
+
+	private int getScreenCenterX() {
+		return platformView.getWidth() / 2;
+	}
+
+	private int getScreenCenterY() {
+		if (rotationMode == RotationMode.ROTATION_GPS)
+			return platformView.getHeight() * 3 / 4;
+		else
+			return platformView.getHeight() / 2;
 	}
 
 	public CommonView(IPlatformView platformView, final Environment envir) {
@@ -172,16 +182,7 @@ public class CommonView implements ICommonView {
 			return;
 
 		setAngle(-myLocation.getBearing());
-
-		double x = mapPos.loc2scrX(myLocation);
-		double y = mapPos.loc2scrY(myLocation);
-
-		y -= platformView.getHeight() / 4;
-
-		double lon = mapPos.scr2lon(x, y);
-		double lat = mapPos.scr2lat(x, y);
-
-		animateTo(lon, lat);
+		animateTo(myLocation);
 	}
 
 	public void setMyLocation(LocationX loc, boolean scroll) {
@@ -194,7 +195,9 @@ public class CommonView implements ICommonView {
 		if (rotationMode == RotationMode.ROTATION_GPS) {
 			scrollToRotationGPS();
 		} else {
-			if (onScreen(oldLocation)) {
+			if (oldLocation != null
+					&& getScreenRect().contains(oldLocation.getLongitude(),
+							oldLocation.getLatitude())) {
 				double dx = mapPos.loc2scrX(myLocation)
 						- mapPos.loc2scrX(oldLocation);
 				double dy = mapPos.loc2scrY(myLocation)
@@ -205,12 +208,6 @@ public class CommonView implements ICommonView {
 			}
 		}
 
-	}
-
-	private boolean onScreen(LocationX loc) {
-		return loc != null
-				&& (Math.abs(mapPos.loc2scrX(loc)) < platformView.getWidth() / 2 && Math
-						.abs(mapPos.loc2scrY(loc)) < platformView.getHeight() / 2);
 	}
 
 	public void dimmMyLocation() {
@@ -356,22 +353,26 @@ public class CommonView implements ICommonView {
 	public void draw(GC gc) {
 		// Adapter.log("draw");
 
+		int x0 = getScreenCenterX();
+		int y0 = getScreenCenterY();
+
 		gc.setAntiAlias(true);
 		// long time = System.currentTimeMillis();
-		int w = gc.getWidth();
-		int h = gc.getHeight();
-		gc.setTransform((float) (mapPos.angle()), w / 2, h / 2);
+		// int w = gc.getWidth();
+		// int h = gc.getHeight();
+		gc.setTransform((float) (mapPos.angle()), getScreenCenterX(),
+				getScreenCenterY());
 		try {
-			drawTiles(gc);
+			drawTiles(gc, x0, y0);
 		} catch (Exception e) {
 		}
 		gc.clearTransform();
 		// long time1 = System.currentTimeMillis();
 		// System.out.println("t1 = " + (time1 - time));
-		ViewHelper
-				.drawMyLocationArrow(gc, mapPos, myLocation, myLocationDimmed);
+		ViewHelper.drawMyLocationArrow(gc, x0, y0, mapPos, myLocation,
+				myLocationDimmed);
 
-		ViewHelper.drawCross(gc);
+		ViewHelper.drawCross(gc, x0, y0);
 		ViewHelper.drawScale(gc, mapPos);
 		// long time2 = System.currentTimeMillis();
 		// System.out.println("t2 = " + (time2 - time1));
@@ -379,10 +380,10 @@ public class CommonView implements ICommonView {
 		LocationX targ = getTarget();
 
 		if (targ != null) {
-			ViewHelper.drawLine(gc, mapPos, getLocation(), targ,
+			ViewHelper.drawLine(gc, x0, y0, mapPos, getLocation(), targ,
 					COLOR.dimm(COLOR.TARG_COLOR));
 			if (myLocation != null)
-				ViewHelper.drawLine(gc, mapPos, myLocation, targ,
+				ViewHelper.drawLine(gc, x0, y0, mapPos, myLocation, targ,
 						COLOR.dimm(COLOR.ARROW_COLOR));
 		}
 
@@ -405,11 +406,8 @@ public class CommonView implements ICommonView {
 
 	}
 
-	private void drawTiles(GC gc) {
+	private void drawTiles(GC gc, int x0, int y0) {
 		tilesDrawn.clear();
-
-		int w = gc.getWidth();
-		int h = gc.getHeight();
 
 		RectInt screenRect = getScreenRectInt();
 		int nx0 = screenRect.getX() / Adapter.TILE_SIZE;
@@ -417,8 +415,8 @@ public class CommonView implements ICommonView {
 		int nx1 = (screenRect.getX() + screenRect.getW()) / Adapter.TILE_SIZE;
 		int ny1 = (screenRect.getY() + screenRect.getH()) / Adapter.TILE_SIZE;
 
-		int x0 = (int) (nx0 * Adapter.TILE_SIZE - mapPos.centerX() + w / 2);
-		int y0 = (int) (ny0 * Adapter.TILE_SIZE - mapPos.centerY() + h / 2);
+		x0 = (int) (nx0 * Adapter.TILE_SIZE - mapPos.centerX() + x0);
+		y0 = (int) (ny0 * Adapter.TILE_SIZE - mapPos.centerY() + y0);
 
 		PointInt centerXY = new PointInt((int) mapPos.centerX(),
 				(int) mapPos.centerY());
@@ -529,17 +527,19 @@ public class CommonView implements ICommonView {
 	}
 
 	private RectInt getScreenRectInt() {
-		int w = platformView.getWidth();
-		int h = platformView.getHeight();
+		int left = -getScreenCenterX();
+		int right = platformView.getWidth() - getScreenCenterX();
+		int top = -getScreenCenterY();
+		int bottom = platformView.getHeight() - getScreenCenterY();
 
-		int x1 = (int) mapPos.scr2geoX(-w / 2, -h / 2);
-		int x2 = (int) mapPos.scr2geoX(w / 2, h / 2);
-		int x3 = (int) mapPos.scr2geoX(w / 2, -h / 2);
-		int x4 = (int) mapPos.scr2geoX(-w / 2, h / 2);
-		int y1 = (int) mapPos.scr2geoY(-w / 2, -h / 2);
-		int y2 = (int) mapPos.scr2geoY(w / 2, h / 2);
-		int y3 = (int) mapPos.scr2geoY(-w / 2, h / 2);
-		int y4 = (int) mapPos.scr2geoY(w / 2, -h / 2);
+		int x1 = (int) mapPos.scr2geoX(left, top);
+		int x2 = (int) mapPos.scr2geoX(right, bottom);
+		int x3 = (int) mapPos.scr2geoX(right, top);
+		int x4 = (int) mapPos.scr2geoX(left, bottom);
+		int y1 = (int) mapPos.scr2geoY(left, top);
+		int y2 = (int) mapPos.scr2geoY(right, bottom);
+		int y3 = (int) mapPos.scr2geoY(right, top);
+		int y4 = (int) mapPos.scr2geoY(left, bottom);
 
 		int minX = Math.min(Math.min(x1, x2), Math.min(x3, x4));
 		int maxX = Math.max(Math.max(x1, x2), Math.max(x3, x4));
@@ -552,17 +552,19 @@ public class CommonView implements ICommonView {
 	}
 
 	private RectX getScreenRect() {
-		int w = platformView.getWidth();
-		int h = platformView.getHeight();
+		int left = -getScreenCenterX();
+		int right = platformView.getWidth() - getScreenCenterX();
+		int top = -getScreenCenterY();
+		int bottom = platformView.getHeight() - getScreenCenterY();
 
-		double lon1 = mapPos.scr2lon(-w / 2, -h / 2);
-		double lon2 = mapPos.scr2lon(w / 2, h / 2);
-		double lon3 = mapPos.scr2lon(-w / 2, h / 2);
-		double lon4 = mapPos.scr2lon(w / 2, -h / 2);
-		double lat1 = mapPos.scr2lat(-w / 2, -h / 2);
-		double lat2 = mapPos.scr2lat(w / 2, h / 2);
-		double lat3 = mapPos.scr2lat(-w / 2, h / 2);
-		double lat4 = mapPos.scr2lat(w / 2, -h / 2);
+		double lon1 = mapPos.scr2lon(left, top);
+		double lon2 = mapPos.scr2lon(right, bottom);
+		double lon3 = mapPos.scr2lon(right, top);
+		double lon4 = mapPos.scr2lon(left, bottom);
+		double lat1 = mapPos.scr2lat(left, top);
+		double lat2 = mapPos.scr2lat(right, bottom);
+		double lat3 = mapPos.scr2lat(right, top);
+		double lat4 = mapPos.scr2lat(left, bottom);
 
 		double minLon = Math.min(Math.min(lon1, lon2), Math.min(lon3, lon4));
 		double maxLon = Math.max(Math.max(lon1, lon2), Math.max(lon3, lon4));
