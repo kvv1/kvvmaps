@@ -1,7 +1,5 @@
 package kvv.kvvmap.adapter;
 
-import android.graphics.Rect;
-import android.graphics.RectF;
 
 public final class RectX {
 
