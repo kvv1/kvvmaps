@@ -39,9 +39,18 @@ public class LocationX implements ISelectable {
 	public LocationX(Location loc) {
 		this(loc.getLongitude(), loc.getLatitude(), loc.getAltitude(), loc
 				.getAccuracy(), loc.getSpeed(), loc.getTime());
-		bearing = loc.getBearing();
+
+		if (loc.hasBearing())
+			bearing = loc.getBearing();
+		else
+			bearing = 360f;
+
 		if (!loc.hasSpeed() || loc.getSpeed() > 120)
 			speed = -1;
+	}
+
+	public boolean hasBearing() {
+		return bearing != 360f;
 	}
 
 	public synchronized double getX(int zoom) {
