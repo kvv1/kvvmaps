@@ -181,7 +181,9 @@ public class CommonView implements ICommonView {
 		if (myLocation == null)
 			return;
 
-		setAngle(-myLocation.getBearing());
+		if(myLocation.hasBearing())
+			setAngle(-myLocation.getBearing());
+		
 		animateTo(myLocation);
 	}
 
@@ -294,27 +296,8 @@ public class CommonView implements ICommonView {
 		return mapPos.getZoom();
 	}
 
-	// private static float normalize(float deg) {
-	// while (deg < -180)
-	// deg += 360;
-	// while (deg > 180)
-	// deg -= 360;
-	// return deg;
-	// }
-
 	public void setAngle(float deg) {
 		envir.adapter.assertUIThread();
-
-		// deg = normalize(deg);
-		//
-		// float oldDeg = normalize(mapPos.angle());
-		//
-		// if (deg - oldDeg < 180) {
-		//
-		// }
-		//
-		// envir.adapter.execUI(runnable, 100);
-
 		mapPos.setAngle(deg);
 		repaint();
 	}
