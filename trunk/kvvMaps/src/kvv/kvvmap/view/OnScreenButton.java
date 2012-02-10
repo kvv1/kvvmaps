@@ -9,7 +9,7 @@ public class OnScreenButton extends ImageButton{
 
 	public OnScreenButton(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		setBackgroundColor(0);
+		//setBackgroundColor(0);
 		setFocusable(false);
 		setEnabled(true);
 	}

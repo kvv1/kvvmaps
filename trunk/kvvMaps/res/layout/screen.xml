@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RootView"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@color/gray"
-    android:orientation="vertical" 
-    android:id="@+id/RootView">
+    android:orientation="vertical" >
 
     <FrameLayout
         android:id="@+id/FrameLayout01"
@@ -18,10 +18,30 @@
             android:layout_height="fill_parent" />
 
         <LinearLayout
+            android:id="@+id/linearLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <View
+                android:id="@+id/view1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <kvv.kvvmap.view.DiagramView
+                android:id="@+id/diagramView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="3" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/linearLayout3"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" android:layout_gravity="top|right">
+            android:layout_gravity="top|right"
+            android:orientation="vertical" >
 
             <FrameLayout
                 android:id="@+id/frameLayout1"
@@ -33,20 +53,48 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
 
-                    <kvv.kvvmap.view.OnScreenButton
+                    <ToggleButton
                         android:id="@+id/gps"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="2dp"
+                        android:layout_marginRight="2dp"
                         android:layout_weight="1"
-                        android:focusable="false"
-                        android:src="@drawable/gps" />
+                        android:background="@drawable/gps"
+                        android:text="ToggleButton"
+                        android:textOff=" "
+                        android:textOn=" " />
 
+                    <ToggleButton
+                        android:id="@+id/orient_gps"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="2dp"
+                        android:layout_marginRight="2dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/orient_gps_on"
+                        android:text="ToggleButton"
+                        android:textOff=" "
+                        android:textOn=" " />
+
+                    <ToggleButton
+                        android:id="@+id/orient_compass"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="2dp"
+                        android:layout_marginRight="2dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/orient_compass_on"
+                        android:text="ToggleButton"
+                        android:textOff=" "
+                        android:textOn=" " />
                 </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/linearLayout2"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:layout_gravity="right">
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right" >
 
                     <kvv.kvvmap.view.OnScreenButton
                         android:id="@+id/writing"
@@ -54,7 +102,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:focusable="false"
-                        android:src="@drawable/writing" />
+                        android:src="@drawable/writing" android:scaleType="fitCenter"/>
 
                     <kvv.kvvmap.view.OnScreenButton
                         android:id="@+id/fixedmap"
@@ -64,7 +112,6 @@
                         android:focusable="false"
                         android:src="@drawable/fixedmap" />
                 </LinearLayout>
-
             </FrameLayout>
 
             <FrameLayout
@@ -84,7 +131,8 @@
                     android:id="@+id/linearLayout4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical" android:layout_gravity="right">
+                    android:layout_gravity="right"
+                    android:orientation="vertical" >
 
                     <kvv.kvvmap.view.OnScreenButton
                         android:id="@+id/rotate"
@@ -93,6 +141,14 @@
                         android:layout_weight="1"
                         android:focusable="false"
                         android:src="@drawable/rotate" />
+
+                    <kvv.kvvmap.view.KvvMapsButton
+                        android:id="@+id/OnScreenButton01"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:focusable="false"
+                        android:background="@drawable/orient_compass_on" android:layout_gravity="right"/>
 
                     <LinearLayout
                         android:id="@+id/screenButtons"
@@ -134,7 +190,6 @@
                             android:src="@drawable/zoomout" />
                     </LinearLayout>
                 </LinearLayout>
-
             </FrameLayout>
         </LinearLayout>
 
@@ -160,25 +215,6 @@
                 android:src="@drawable/here" >
             </kvv.kvvmap.view.OnScreenButton>
         </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/linearLayout1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
-
-            <View
-                android:id="@+id/view1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:layout_weight="1"/>
-
-            <kvv.kvvmap.view.DiagramView
-                android:id="@+id/diagramView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:layout_weight="3"/>
-
-        </LinearLayout>
-
     </FrameLayout>
 
 </LinearLayout>
