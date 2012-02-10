@@ -5,6 +5,7 @@ import kvv.kvvmap.R;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
+import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.pacemark.ISelectable;
 import kvv.kvvmap.common.pacemark.PathSelection;
@@ -26,6 +27,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Scroller;
 
 public class MapView extends View implements IPlatformView {
@@ -48,11 +50,11 @@ public class MapView extends View implements IPlatformView {
 	public MapView(Context ctxt, AttributeSet attrs) {
 		super(ctxt, attrs);
 		Adapter.log("MapView");
-		
+
 		uiThread = Thread.currentThread();
 		setFocusable(true);
 		setFocusableInTouchMode(true);
-		
+
 	}
 
 	private static int cnt;
@@ -436,20 +438,8 @@ public class MapView extends View implements IPlatformView {
 			toTarget.setVisibility(View.GONE);
 		}
 
-		OnScreenButton zoomIn = (OnScreenButton) activity
-				.findViewById(R.id.zoomin);
-		zoomIn.setEnabled(commonView.getZoom() < Utils.MAX_ZOOM);
-
-		OnScreenButton zoomOut = (OnScreenButton) activity
-				.findViewById(R.id.zoomout);
-		zoomOut.setEnabled(commonView.getZoom() > Utils.MIN_ZOOM);
-
-		OnScreenButton edit = (OnScreenButton) activity.findViewById(R.id.edit);
-		edit.setEnabled(commonView.getSel() != null);
-
-		OnScreenButton rotate = (OnScreenButton) activity
-				.findViewById(R.id.rotate);
-		rotate.setEnabled(commonView.isMultiple());
+		((KvvMapsButton) findViewById(R.id.rotate)).setEnabled(commonView.isMultiple());
+		((KvvMapsButton) findViewById(R.id.edit)).setEnabled(getSel() != null);
 	}
 
 	public void dispose() {
@@ -509,19 +499,43 @@ public class MapView extends View implements IPlatformView {
 	public void setRotationMode(RotationMode rotationMode) {
 		if (commonView != null) {
 			commonView.setRotationMode(rotationMode);
-//			 if(rotationMode == RotationMode.ROTATION_GPS)
-//			 commonView.setMyLocation(new LocationX(30, 60) {
-//			 @Override
-//			 public float getBearing() {
-//			 return 10;
-//			 }
-//			 }, true);
+			// if(rotationMode == RotationMode.ROTATION_GPS)
+			// commonView.setMyLocation(new LocationX(30, 60) {
+			// @Override
+			// public float getBearing() {
+			// return 10;
+			// }
+			// }, true);
 		}
 	}
 
 	@Override
 	public void pathSelected(PathSelection sel) {
 		activity.pathSelected(sel);
+	}
+
+	public boolean toggleInfoLevel() {
+		if (commonView == null)
+			return false;
+		if (commonView.getInfoLevel() == InfoLevel.HIGH) {
+			commonView.setInfoLevel(InfoLevel.LOW);
+			return false;
+		} else {
+			commonView.setInfoLevel(InfoLevel.HIGH);
+			return true;
+		}
+	}
+
+	public InfoLevel getInfoLevel() {
+		if (commonView == null)
+			return InfoLevel.LOW;
+		return commonView.getInfoLevel();
+	}
+
+	public int getZoom() {
+		if (commonView == null)
+			return Utils.MIN_ZOOM;
+		return commonView.getZoom();
 	}
 
 }

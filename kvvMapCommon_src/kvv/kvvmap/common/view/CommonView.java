@@ -448,6 +448,13 @@ public class CommonView implements ICommonView {
 			invalidatePathTiles();
 		}
 	}
+	
+	public void setInfoLevel(InfoLevel level) {
+		infoLevel = level;
+		invalidatePathTiles();
+	}
+
+
 
 	public InfoLevel getInfoLevel() {
 		return infoLevel;

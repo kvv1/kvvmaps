@@ -53,41 +53,32 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
 
-                    <ToggleButton
+                    <kvv.kvvmap.view.KvvMapsButton
                         android:id="@+id/gps"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:layout_marginRight="2dp"
+                        android:layout_margin="1dp"
                         android:layout_weight="1"
-                        android:background="@drawable/gps"
-                        android:text="ToggleButton"
-                        android:textOff=" "
-                        android:textOn=" " />
+                        android:background="@drawable/gps_on"
+                        android:focusable="false" />
 
-                    <ToggleButton
+                    <kvv.kvvmap.view.KvvMapsButton
                         android:id="@+id/orient_gps"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:layout_marginRight="2dp"
+                        android:layout_margin="1dp"
                         android:layout_weight="1"
                         android:background="@drawable/orient_gps_on"
-                        android:text="ToggleButton"
-                        android:textOff=" "
-                        android:textOn=" " />
+                        />
 
-                    <ToggleButton
+                    <kvv.kvvmap.view.KvvMapsButton
                         android:id="@+id/orient_compass"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:layout_marginRight="2dp"
+                        android:layout_margin="1dp"
                         android:layout_weight="1"
                         android:background="@drawable/orient_compass_on"
-                        android:text="ToggleButton"
-                        android:textOff=" "
-                        android:textOn=" " />
+                        />
                 </LinearLayout>
 
                 <LinearLayout
@@ -96,21 +87,42 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="right" >
 
-                    <kvv.kvvmap.view.OnScreenButton
+                    <kvv.kvvmap.view.KvvMapsButton
                         android:id="@+id/writing"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_margin="1dp"
                         android:layout_weight="1"
-                        android:focusable="false"
-                        android:src="@drawable/writing" android:scaleType="fitCenter"/>
+                        android:background="@drawable/writing"
+                        android:focusable="false" />
 
-                    <kvv.kvvmap.view.OnScreenButton
+                    <kvv.kvvmap.view.KvvMapsButton
+                        android:id="@+id/info"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="1dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/info"
+                        android:focusable="false" />
+
+                    <kvv.kvvmap.view.KvvMapsButton
                         android:id="@+id/fixedmap"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_margin="1dp"
                         android:layout_weight="1"
-                        android:focusable="false"
-                        android:src="@drawable/fixedmap" />
+                        android:background="@drawable/fixedmapon"
+                        android:focusable="false" />
+
+                    <kvv.kvvmap.view.KvvMapsButton
+                        android:id="@+id/rotate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="1dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/rotate"
+                        android:focusable="false" />
+
                 </LinearLayout>
             </FrameLayout>
 
@@ -133,62 +145,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
                     android:orientation="vertical" >
-
-                    <kvv.kvvmap.view.OnScreenButton
-                        android:id="@+id/rotate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:focusable="false"
-                        android:src="@drawable/rotate" />
-
-                    <kvv.kvvmap.view.KvvMapsButton
-                        android:id="@+id/OnScreenButton01"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:focusable="false"
-                        android:background="@drawable/orient_compass_on" android:layout_gravity="right"/>
-
-                    <LinearLayout
-                        android:id="@+id/screenButtons"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical" >
-
-                        <kvv.kvvmap.view.OnScreenButton
-                            android:id="@+id/info"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:focusable="false"
-                            android:src="@drawable/info" />
-
-                        <kvv.kvvmap.view.OnScreenButton
-                            android:id="@+id/edit"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:focusable="false"
-                            android:src="@drawable/edit" />
-
-                        <kvv.kvvmap.view.OnScreenButton
-                            android:id="@+id/zoomin"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:focusable="false"
-                            android:src="@drawable/zoomin" />
-
-                        <kvv.kvvmap.view.OnScreenButton
-                            android:id="@+id/zoomout"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:focusable="false"
-                            android:src="@drawable/zoomout" />
-                    </LinearLayout>
                 </LinearLayout>
             </FrameLayout>
         </LinearLayout>
@@ -215,6 +171,42 @@
                 android:src="@drawable/here" >
             </kvv.kvvmap.view.OnScreenButton>
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/screenButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical" android:layout_gravity="right|center_vertical">
+
+            <kvv.kvvmap.view.KvvMapsButton
+                android:id="@+id/edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@drawable/edit"
+                android:focusable="false" />
+
+            <kvv.kvvmap.view.KvvMapsButton
+                android:id="@+id/zoomin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@drawable/zoomin"
+                android:focusable="false" />
+
+            <kvv.kvvmap.view.KvvMapsButton
+                android:id="@+id/zoomout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@drawable/zoomout"
+                android:focusable="false" />
+        </LinearLayout>
+
     </FrameLayout>
 
 </LinearLayout>
