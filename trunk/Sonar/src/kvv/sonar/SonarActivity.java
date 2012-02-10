@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.ToggleButton;
 
 public class SonarActivity extends Activity {
 
@@ -19,7 +20,7 @@ public class SonarActivity extends Activity {
 		Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("http://palermo.ru/vladimir/kvvMap/Locus.apk"));
 		startActivity(i);
 		
-		
+		new ToggleButton(context);
 	}
 
 //	@Override

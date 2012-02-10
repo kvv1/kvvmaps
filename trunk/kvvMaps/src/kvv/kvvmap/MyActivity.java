@@ -13,7 +13,9 @@ import java.util.Comparator;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.common.COLOR;
+import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Pair;
+import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maps.Maps;
 import kvv.kvvmap.common.maps.MapsDir;
 import kvv.kvvmap.common.pacemark.ISelectable;
@@ -27,7 +29,9 @@ import kvv.kvvmap.service.KvvMapsService;
 import kvv.kvvmap.service.KvvMapsService.IKvvMapsService;
 import kvv.kvvmap.service.KvvMapsService.KvvMapsServiceListener;
 import kvv.kvvmap.view.DiagramView;
+import kvv.kvvmap.view.KvvMapsButton;
 import kvv.kvvmap.view.MapView;
+import kvv.kvvmap.view.OnScreenButton;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -38,7 +42,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.BitmapFactory;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.location.Location;
@@ -60,11 +63,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 @SuppressWarnings("deprecation")
 public class MyActivity extends Activity {
@@ -190,8 +190,7 @@ public class MyActivity extends Activity {
 			handler.removeCallbacks(gpsOff);
 			if (following())
 				startGPS(false);
-			updateGpsButton();
-			updateWritingButton();
+			updateButtons();
 
 		} else {
 			if (wakeLock != null)
@@ -254,7 +253,7 @@ public class MyActivity extends Activity {
 					}
 				});
 
-				updateWritingButton();
+				updateButtons();
 			}
 		}
 
@@ -333,64 +332,61 @@ public class MyActivity extends Activity {
 		altSpeed.setTextColor(COLOR.CYAN);
 		altSpeed.setText("");
 
-		ImageButton button = (ImageButton) findViewById(R.id.edit);
-		button.setAlpha(255);
-		button.setOnClickListener(new OnClickListener() {
+		((KvvMapsButton)findViewById(R.id.edit)).setup(R.drawable.edit, R.drawable.edit, R.drawable.edit_dis).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				editSel();
+				updateButtons();
 			}
-		});
-
-		button = (ImageButton) findViewById(R.id.info);
-		button.setOnClickListener(new OnClickListener() {
+		});;
+		
+		((KvvMapsButton)findViewById(R.id.info)).setup(R.drawable.info_off, R.drawable.info, R.drawable.info).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (view != null)
-					view.incInfoLevel();
+					view.toggleInfoLevel();
+				updateButtons();
 			}
-		});
-
-		button = (ImageButton) findViewById(R.id.zoomin);
-		button.setOnClickListener(new OnClickListener() {
+		});;
+		
+		((KvvMapsButton)findViewById(R.id.zoomin)).setup(R.drawable.zoomin, R.drawable.zoomin, R.drawable.zoomin_dis).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				zoomIn();
+				updateButtons();
 			}
-		});
-
-		button = (ImageButton) findViewById(R.id.zoomout);
-		button.setOnClickListener(new OnClickListener() {
+		});;
+		
+		((KvvMapsButton)findViewById(R.id.zoomout)).setup(R.drawable.zoomout, R.drawable.zoomout, R.drawable.zoomout_dis).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				zoomOut();
+				updateButtons();
 			}
-		});
-
-		button = (ImageButton) findViewById(R.id.rotate);
-		button.setOnClickListener(new OnClickListener() {
+		});;
+		
+		((KvvMapsButton)findViewById(R.id.rotate)).setup(R.drawable.rotate, R.drawable.rotate, R.drawable.rotate_dis).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (view != null)
 					view.reorderMaps();
+				updateButtons();
 			}
-		});
-
-//		button = (ImageButton) findViewById(R.id.gps);
-//		button.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				gpsOnOff();
-//			}
-//		});
-
-		button = (ImageButton) findViewById(R.id.fixedmap);
-		button.setOnClickListener(new OnClickListener() {
+		});;
+		
+		((KvvMapsButton)findViewById(R.id.gps)).setup(R.drawable.gps_off, R.drawable.gps_on, R.drawable.gps_off).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				gpsOnOff();
+			}
+		});;
+		
+		((KvvMapsButton)findViewById(R.id.fixedmap)).setup(R.drawable.fixedmapoff, R.drawable.fixedmapon, R.drawable.fixedmapoff).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				fixUnfixMap();
 			}
-		});
+		});;
 
 		ImageButton hereButton = (ImageButton) findViewById(R.id.here);
 		hereButton.setOnClickListener(new OnClickListener() {
@@ -413,27 +409,6 @@ public class MyActivity extends Activity {
 		toTarget.setBackgroundColor((COLOR.TARG_COLOR & 0x00FFFFFF) | 0x64000000);
 		toTarget.setFocusable(false);
 
-		
-		
-		final ToggleButton gps = (ToggleButton) findViewById(R.id.gps);
-		gps.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-				if(gps.isChecked())
-					gps.setBackgroundDrawable(getResources().getDrawable(R.drawable.gps_on));
-				else
-					gps.setBackgroundDrawable(getResources().getDrawable(R.drawable.gps_off));
-			}
-		});
-		gps.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				System.out.println("XXX " + gps.isChecked());
-			}
-		});
-		
-		
-		
 		
 		updateButtons();
 
@@ -462,6 +437,21 @@ public class MyActivity extends Activity {
 			buttons.setVisibility(View.VISIBLE);
 		else
 			buttons.setVisibility(View.GONE);
+		
+		
+		((KvvMapsButton) findViewById(R.id.gps)).setCheched(following());
+		((KvvMapsButton) findViewById(R.id.info)).setCheched(view != null && view.getInfoLevel() != InfoLevel.LOW);
+		
+
+		if (mapsService != null)
+			findViewById(R.id.writing).setVisibility(
+					mapsService.getTracker().isTracking() ? View.VISIBLE
+							: View.GONE);
+
+		((KvvMapsButton) findViewById(R.id.fixedmap)).setCheched(mapsService != null && mapsService.getBundle().getString("fixedMap") != null);
+
+		((KvvMapsButton) findViewById(R.id.zoomin)).setCheched(view != null && view.getZoom() < Utils.MAX_ZOOM);
+		((KvvMapsButton) findViewById(R.id.zoomout)).setCheched(view != null && view.getZoom() > Utils.MIN_ZOOM);
 	}
 
 	private void zoomIn() {
@@ -649,11 +639,7 @@ public class MyActivity extends Activity {
 		String fixedMap = mapsService.getBundle().getString("fixedMap");
 		fixedMap = view.fixMap(fixedMap == null);
 		mapsService.getBundle().putString("fixedMap", fixedMap);
-
-		ImageButton button = (ImageButton) findViewById(R.id.fixedmap);
-		button.setImageBitmap(BitmapFactory.decodeResource(getResources(),
-				fixedMap == null ? R.drawable.fixedmap : R.drawable.fixedmapon));
-
+		updateButtons();
 	}
 
 	public String getFixedMap() {
@@ -820,14 +806,8 @@ public class MyActivity extends Activity {
 			prefsPrivateEditor.putBoolean(FOLLOW_GPS_SETTING, false);
 			prefsPrivateEditor.commit();
 		}
-		updateGpsButton();
+		updateButtons();
 		updateView();
-	}
-
-	private void updateGpsButton() {
-//		ImageButton button = (ImageButton) findViewById(R.id.gps);
-//		button.setImageBitmap(BitmapFactory.decodeResource(getResources(),
-//				following() ? R.drawable.gpson : R.drawable.gps));
 	}
 
 	// private void gotoCurrentPos() {
@@ -923,15 +903,8 @@ public class MyActivity extends Activity {
 		} else {
 			mapsService.getTracker().startPath();
 		}
-		updateWritingButton();
+		updateButtons();
 		updateView();
-	}
-
-	private void updateWritingButton() {
-		if (mapsService != null)
-			findViewById(R.id.writing).setVisibility(
-					mapsService.getTracker().isTracking() ? View.VISIBLE
-							: View.GONE);
 	}
 
 	public boolean isKineticScrolling() {
