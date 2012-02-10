@@ -60,8 +60,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 @SuppressWarnings("deprecation")
 public class MyActivity extends Activity {
@@ -373,13 +376,13 @@ public class MyActivity extends Activity {
 			}
 		});
 
-		button = (ImageButton) findViewById(R.id.gps);
-		button.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				gpsOnOff();
-			}
-		});
+//		button = (ImageButton) findViewById(R.id.gps);
+//		button.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//				gpsOnOff();
+//			}
+//		});
 
 		button = (ImageButton) findViewById(R.id.fixedmap);
 		button.setOnClickListener(new OnClickListener() {
@@ -410,6 +413,28 @@ public class MyActivity extends Activity {
 		toTarget.setBackgroundColor((COLOR.TARG_COLOR & 0x00FFFFFF) | 0x64000000);
 		toTarget.setFocusable(false);
 
+		
+		
+		final ToggleButton gps = (ToggleButton) findViewById(R.id.gps);
+		gps.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+				if(gps.isChecked())
+					gps.setBackgroundDrawable(getResources().getDrawable(R.drawable.gps_on));
+				else
+					gps.setBackgroundDrawable(getResources().getDrawable(R.drawable.gps_off));
+			}
+		});
+		gps.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				System.out.println("XXX " + gps.isChecked());
+			}
+		});
+		
+		
+		
+		
 		updateButtons();
 
 		view = (MapView) findViewById(R.id.MapView);
@@ -417,6 +442,12 @@ public class MyActivity extends Activity {
 
 	}
 
+	void setupImageButton(int buttonId, int img, int imgDisabled) {
+		ImageButton button = (ImageButton) findViewById(buttonId);
+		button.setBackgroundResource(img);
+		button.setImageResource(img);
+	}
+	
 	private boolean buttonsVisible() {
 		return settings.getBoolean(BUTTONS_VISIBLE_SETTING, true);
 	}
@@ -794,9 +825,9 @@ public class MyActivity extends Activity {
 	}
 
 	private void updateGpsButton() {
-		ImageButton button = (ImageButton) findViewById(R.id.gps);
-		button.setImageBitmap(BitmapFactory.decodeResource(getResources(),
-				following() ? R.drawable.gpson : R.drawable.gps));
+//		ImageButton button = (ImageButton) findViewById(R.id.gps);
+//		button.setImageBitmap(BitmapFactory.decodeResource(getResources(),
+//				following() ? R.drawable.gpson : R.drawable.gps));
 	}
 
 	// private void gotoCurrentPos() {
