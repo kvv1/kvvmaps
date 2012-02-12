@@ -435,10 +435,9 @@ public class CommonView implements ICommonView {
 		envir.adapter.assertUIThread();
 		if (infoLevel.ordinal() < InfoLevel.values().length - 1) {
 			infoLevel = InfoLevel.values()[infoLevel.ordinal() + 1];
-		} else {
-			infoLevel = InfoLevel.values()[0];
+			invalidatePathTiles();
+			updateSel();
 		}
-		invalidatePathTiles();
 	}
 
 	public void decInfoLevel() {
@@ -446,12 +445,14 @@ public class CommonView implements ICommonView {
 		if (infoLevel.ordinal() > 0) {
 			infoLevel = InfoLevel.values()[infoLevel.ordinal() - 1];
 			invalidatePathTiles();
+			updateSel();
 		}
 	}
 	
 	public void setInfoLevel(InfoLevel level) {
 		infoLevel = level;
 		invalidatePathTiles();
+		updateSel();
 	}
 
 
