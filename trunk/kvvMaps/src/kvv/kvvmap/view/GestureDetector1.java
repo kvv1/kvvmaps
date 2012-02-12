@@ -66,6 +66,7 @@ public class GestureDetector1 {
 					p1.set(x, y);
 					time = event.getEventTime();
 				}
+				break;
 			}
 		}
 	}

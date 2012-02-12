@@ -31,7 +31,6 @@ import kvv.kvvmap.service.KvvMapsService.KvvMapsServiceListener;
 import kvv.kvvmap.view.DiagramView;
 import kvv.kvvmap.view.KvvMapsButton;
 import kvv.kvvmap.view.MapView;
-import kvv.kvvmap.view.OnScreenButton;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -84,10 +83,13 @@ public class MyActivity extends Activity {
 
 	private static final int MENU_TRACKS = 108;
 
-	private static final int MENU_ROTATION_GROUP = 109;
-	private static final int MENU_ROTATION_NONE = MENU_ROTATION_GROUP * 10 + 1;
-	private static final int MENU_ROTATION_COMPASS = MENU_ROTATION_GROUP * 10 + 2;
-	private static final int MENU_ROTATION_GPS = MENU_ROTATION_GROUP * 10 + 3;
+	// private static final int MENU_ROTATION_GROUP = 109;
+	// private static final int MENU_ROTATION_NONE = MENU_ROTATION_GROUP * 10 +
+	// 1;
+	// private static final int MENU_ROTATION_COMPASS = MENU_ROTATION_GROUP * 10
+	// + 2;
+	// private static final int MENU_ROTATION_GPS = MENU_ROTATION_GROUP * 10 +
+	// 3;
 
 	private static final int MENU_DEBUG_DRAW = 110;
 	private static final int MENU_ABOUT = 111;
@@ -142,8 +144,7 @@ public class MyActivity extends Activity {
 		} else if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
 			if (event.getRepeatCount() == 0) {
 			} else {
-				if (view != null && view.getSel() != null)
-					editSel();
+				editSel();
 			}
 			return true;
 		}
@@ -274,7 +275,7 @@ public class MyActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		Log.w("KVVMAPS", "onCreate");
 		super.onCreate(savedInstanceState);
-		
+
 		settings = getSharedPreferences(PREFS_NAME, 0);
 
 		if (!MapLoader.checkMaps(this))
@@ -332,61 +333,114 @@ public class MyActivity extends Activity {
 		altSpeed.setTextColor(COLOR.CYAN);
 		altSpeed.setText("");
 
-		((KvvMapsButton)findViewById(R.id.edit)).setup(R.drawable.edit, R.drawable.edit, R.drawable.edit_dis).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				editSel();
-				updateButtons();
-			}
-		});;
-		
-		((KvvMapsButton)findViewById(R.id.info)).setup(R.drawable.info_off, R.drawable.info, R.drawable.info).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (view != null)
-					view.toggleInfoLevel();
-				updateButtons();
-			}
-		});;
-		
-		((KvvMapsButton)findViewById(R.id.zoomin)).setup(R.drawable.zoomin, R.drawable.zoomin, R.drawable.zoomin_dis).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				zoomIn();
-				updateButtons();
-			}
-		});;
-		
-		((KvvMapsButton)findViewById(R.id.zoomout)).setup(R.drawable.zoomout, R.drawable.zoomout, R.drawable.zoomout_dis).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				zoomOut();
-				updateButtons();
-			}
-		});;
-		
-		((KvvMapsButton)findViewById(R.id.rotate)).setup(R.drawable.rotate, R.drawable.rotate, R.drawable.rotate_dis).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (view != null)
-					view.reorderMaps();
-				updateButtons();
-			}
-		});;
-		
-		((KvvMapsButton)findViewById(R.id.gps)).setup(R.drawable.gps_off, R.drawable.gps_on, R.drawable.gps_off).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				gpsOnOff();
-			}
-		});;
-		
-		((KvvMapsButton)findViewById(R.id.fixedmap)).setup(R.drawable.fixedmapoff, R.drawable.fixedmapon, R.drawable.fixedmapoff).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				fixUnfixMap();
-			}
-		});;
+		((KvvMapsButton) findViewById(R.id.edit)).setup(R.drawable.edit,
+				R.drawable.edit, R.drawable.edit_dis).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						editSel();
+						updateButtons();
+					}
+				});
+		;
+
+		((KvvMapsButton) findViewById(R.id.info)).setup(R.drawable.info_off,
+				R.drawable.info, R.drawable.info).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if (view != null)
+							view.toggleInfoLevel();
+						updateButtons();
+					}
+				});
+		;
+
+		((KvvMapsButton) findViewById(R.id.zoomin)).setup(R.drawable.zoomin,
+				R.drawable.zoomin, R.drawable.zoomin_dis).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						zoomIn();
+						updateButtons();
+					}
+				});
+		;
+
+		((KvvMapsButton) findViewById(R.id.zoomout)).setup(R.drawable.zoomout,
+				R.drawable.zoomout, R.drawable.zoomout_dis).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						zoomOut();
+						updateButtons();
+					}
+				});
+		;
+
+		((KvvMapsButton) findViewById(R.id.rotate)).setup(R.drawable.rotate,
+				R.drawable.rotate, R.drawable.rotate_dis).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if (view != null)
+							view.reorderMaps();
+						updateButtons();
+					}
+				});
+		;
+
+		((KvvMapsButton) findViewById(R.id.gps)).setup(R.drawable.gps_off,
+				R.drawable.gps_on, R.drawable.gps_off).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						gpsOnOff();
+						setRotationMode(RotationMode.ROTATION_NONE);
+					}
+				});
+		;
+
+		((KvvMapsButton) findViewById(R.id.orient_gps)).setup(
+				R.drawable.orient_gps_off, R.drawable.orient_gps_on,
+				R.drawable.orient_gps_off).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if (getRotationMode() == RotationMode.ROTATION_GPS)
+							setRotationMode(RotationMode.ROTATION_NONE);
+						else {
+							gpsOn();
+							setRotationMode(RotationMode.ROTATION_GPS);
+						}
+					}
+				});
+		;
+
+		((KvvMapsButton) findViewById(R.id.orient_compass)).setup(
+				R.drawable.orient_compass_off, R.drawable.orient_compass_on,
+				R.drawable.orient_compass_off).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if (getRotationMode() == RotationMode.ROTATION_COMPASS)
+							setRotationMode(RotationMode.ROTATION_NONE);
+						else
+							setRotationMode(RotationMode.ROTATION_COMPASS);
+					}
+				});
+		;
+
+		((KvvMapsButton) findViewById(R.id.fixedmap)).setup(
+				R.drawable.fixedmapoff, R.drawable.fixedmapon,
+				R.drawable.fixedmapoff).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						fixUnfixMap();
+					}
+				});
+		;
 
 		ImageButton hereButton = (ImageButton) findViewById(R.id.here);
 		hereButton.setOnClickListener(new OnClickListener() {
@@ -409,7 +463,6 @@ public class MyActivity extends Activity {
 		toTarget.setBackgroundColor((COLOR.TARG_COLOR & 0x00FFFFFF) | 0x64000000);
 		toTarget.setFocusable(false);
 
-		
 		updateButtons();
 
 		view = (MapView) findViewById(R.id.MapView);
@@ -422,7 +475,7 @@ public class MyActivity extends Activity {
 		button.setBackgroundResource(img);
 		button.setImageResource(img);
 	}
-	
+
 	private boolean buttonsVisible() {
 		return settings.getBoolean(BUTTONS_VISIBLE_SETTING, true);
 	}
@@ -437,21 +490,32 @@ public class MyActivity extends Activity {
 			buttons.setVisibility(View.VISIBLE);
 		else
 			buttons.setVisibility(View.GONE);
-		
-		
+
 		((KvvMapsButton) findViewById(R.id.gps)).setCheched(following());
-		((KvvMapsButton) findViewById(R.id.info)).setCheched(view != null && view.getInfoLevel() != InfoLevel.LOW);
-		
+
+		RotationMode rot = getRotationMode();
+
+		((KvvMapsButton) findViewById(R.id.orient_compass))
+				.setCheched(rot == RotationMode.ROTATION_COMPASS);
+		((KvvMapsButton) findViewById(R.id.orient_gps))
+				.setCheched(rot == RotationMode.ROTATION_GPS);
+
+		((KvvMapsButton) findViewById(R.id.info)).setCheched(view != null
+				&& view.getInfoLevel() != InfoLevel.LOW);
 
 		if (mapsService != null)
 			findViewById(R.id.writing).setVisibility(
 					mapsService.getTracker().isTracking() ? View.VISIBLE
 							: View.GONE);
 
-		((KvvMapsButton) findViewById(R.id.fixedmap)).setCheched(mapsService != null && mapsService.getBundle().getString("fixedMap") != null);
+		((KvvMapsButton) findViewById(R.id.fixedmap))
+				.setCheched(mapsService != null
+						&& mapsService.getBundle().getString("fixedMap") != null);
 
-		((KvvMapsButton) findViewById(R.id.zoomin)).setCheched(view != null && view.getZoom() < Utils.MAX_ZOOM);
-		((KvvMapsButton) findViewById(R.id.zoomout)).setCheched(view != null && view.getZoom() > Utils.MIN_ZOOM);
+		((KvvMapsButton) findViewById(R.id.zoomin)).setEnabled(view != null
+				&& view.getZoom() < Utils.MAX_ZOOM);
+		((KvvMapsButton) findViewById(R.id.zoomout)).setEnabled(view != null
+				&& view.getZoom() > Utils.MIN_ZOOM);
 	}
 
 	private void zoomIn() {
@@ -486,14 +550,13 @@ public class MyActivity extends Activity {
 		menu.findItem(MENU_LOAD_DURING_SCROLLING).setChecked(
 				settings.getBoolean(LOAD_DURING_SCROLLING_SETTING, true));
 
-		RotationMode rot = getRotationMode();
-
-		if (rot == RotationMode.ROTATION_NONE)
-			menu.findItem(MENU_ROTATION_NONE).setChecked(true);
-		if (rot == RotationMode.ROTATION_COMPASS)
-			menu.findItem(MENU_ROTATION_COMPASS).setChecked(true);
-		if (rot == RotationMode.ROTATION_GPS)
-			menu.findItem(MENU_ROTATION_GPS).setChecked(true);
+		// RotationMode rot = getRotationMode();
+		// if (rot == RotationMode.ROTATION_NONE)
+		// menu.findItem(MENU_ROTATION_NONE).setChecked(true);
+		// if (rot == RotationMode.ROTATION_COMPASS)
+		// menu.findItem(MENU_ROTATION_COMPASS).setChecked(true);
+		// if (rot == RotationMode.ROTATION_GPS)
+		// menu.findItem(MENU_ROTATION_GPS).setChecked(true);
 
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -505,7 +568,7 @@ public class MyActivity extends Activity {
 		menu.add(Menu.NONE, MENU_LOGGING_ONOFF, 0, "Запись пути").setCheckable(
 				true);
 		menu.add(Menu.NONE, MENU_ADD_PLACEMARK, 0, "Добавить точку");
-		SubMenu rotationSubMenu = menu.addSubMenu("Вращение карты");
+		//SubMenu rotationSubMenu = menu.addSubMenu("Вращение карты");
 		menu.add(Menu.NONE, MENU_TRACKS, 0, "Пути");
 
 		SubMenu settingsSubMenu = menu.addSubMenu("Настройки");
@@ -523,12 +586,13 @@ public class MyActivity extends Activity {
 		// menu.add(0, MENU_UPDATE1, 0, "Update test");
 		menu.add(Menu.NONE, MENU_QUIT, 0, "Выход");
 
-		rotationSubMenu.add(MENU_ROTATION_GROUP, MENU_ROTATION_NONE, 0,
-				"Без вращения");
-		rotationSubMenu.add(MENU_ROTATION_GROUP, MENU_ROTATION_COMPASS, 0,
-				"Компас");
-		rotationSubMenu.add(MENU_ROTATION_GROUP, MENU_ROTATION_GPS, 0, "GPS");
-		rotationSubMenu.setGroupCheckable(MENU_ROTATION_GROUP, true, true);
+		// rotationSubMenu.add(MENU_ROTATION_GROUP, MENU_ROTATION_NONE, 0,
+		// "Без вращения");
+		// rotationSubMenu.add(MENU_ROTATION_GROUP, MENU_ROTATION_COMPASS, 0,
+		// "Компас");
+		// rotationSubMenu.add(MENU_ROTATION_GROUP, MENU_ROTATION_GPS, 0,
+		// "GPS");
+		// rotationSubMenu.setGroupCheckable(MENU_ROTATION_GROUP, true, true);
 
 		return true;
 	}
@@ -554,30 +618,15 @@ public class MyActivity extends Activity {
 		case MENU_ABOUT:
 			about();
 			return true;
-		case MENU_ROTATION_NONE:
-			if (mapsService == null)
-				return true;
-			mapsService.getBundle().putInt("rotation",
-					RotationMode.ROTATION_NONE.ordinal());
-			if (view != null)
-				view.setRotationMode(getRotationMode());
-			return true;
-		case MENU_ROTATION_COMPASS:
-			if (mapsService == null)
-				return true;
-			mapsService.getBundle().putInt("rotation",
-					RotationMode.ROTATION_COMPASS.ordinal());
-			if (view != null)
-				view.setRotationMode(getRotationMode());
-			return true;
-		case MENU_ROTATION_GPS:
-			if (mapsService == null)
-				return true;
-			mapsService.getBundle().putInt("rotation",
-					RotationMode.ROTATION_GPS.ordinal());
-			if (view != null)
-				view.setRotationMode(getRotationMode());
-			return true;
+			// case MENU_ROTATION_NONE:
+			// setRotationMode(RotationMode.ROTATION_NONE);
+			// return true;
+			// case MENU_ROTATION_COMPASS:
+			// setRotationMode(RotationMode.ROTATION_COMPASS);
+			// return true;
+			// case MENU_ROTATION_GPS:
+			// setRotationMode(RotationMode.ROTATION_GPS);
+			// return true;
 		case MENU_KINETIC_SCROLLING: {
 			Editor ed = settings.edit();
 			ed.putBoolean(KINETIC_SCROLLING_SETTING,
@@ -620,6 +669,15 @@ public class MyActivity extends Activity {
 		default:
 		}
 		return false;
+	}
+
+	private void setRotationMode(RotationMode rotationMode) {
+		if (mapsService == null)
+			return;
+		mapsService.getBundle().putInt("rotation", rotationMode.ordinal());
+		if (view != null)
+			view.setRotationMode(rotationMode);
+		updateButtons();
 	}
 
 	private void updateSoftware() throws MalformedURLException, IOException {
@@ -794,73 +852,30 @@ public class MyActivity extends Activity {
 		}
 	}
 
-	private void gpsOnOff() {
-		if (!following()) {
-			startGPS(true);
-			Editor prefsPrivateEditor = settings.edit();
-			prefsPrivateEditor.putBoolean(FOLLOW_GPS_SETTING, true);
-			prefsPrivateEditor.commit();
-		} else {
-			stopGPS();
-			Editor prefsPrivateEditor = settings.edit();
-			prefsPrivateEditor.putBoolean(FOLLOW_GPS_SETTING, false);
-			prefsPrivateEditor.commit();
-		}
+	private void gpsOn() {
+		startGPS(true);
+		Editor prefsPrivateEditor = settings.edit();
+		prefsPrivateEditor.putBoolean(FOLLOW_GPS_SETTING, true);
+		prefsPrivateEditor.commit();
 		updateButtons();
 		updateView();
 	}
 
-	// private void gotoCurrentPos() {
-	// final AlertDialog[] curLocProgress = new AlertDialog[1];
-	//
-	// final LocationListener locListener = new LocationListener() {
-	// public void onStatusChanged(String provider, int status,
-	// Bundle extras) {
-	// if (status == LocationProvider.OUT_OF_SERVICE) {
-	// locationManager.removeUpdates(this);
-	// if (curLocProgress[0] != null)
-	// curLocProgress[0].dismiss();
-	// curLocProgress[0] = null;
-	// }
-	// }
-	//
-	// public void onProviderEnabled(String provider) {
-	// }
-	//
-	// public void onProviderDisabled(String provider) {
-	// locationManager.removeUpdates(this);
-	// if (curLocProgress[0] != null)
-	// curLocProgress[0].dismiss();
-	// curLocProgress[0] = null;
-	// }
-	//
-	// public void onLocationChanged(Location location) {
-	// if (location != null) {
-	// if (location.getAccuracy() < 40) {
-	// locationManager.removeUpdates(this);
-	// if (curLocProgress[0] != null)
-	// curLocProgress[0].dismiss();
-	// curLocProgress[0] = null;
-	// }
-	// LocationX loc = new LocationX(location);
-	// if (view != null)
-	// view.setMyLocation(loc, true);
-	// }
-	// }
-	// };
-	//
-	// curLocProgress[0] = ProgressDialog.show(this, "",
-	// "Определение координат...", true, true, new OnCancelListener() {
-	// public void onCancel(DialogInterface dialog) {
-	// locationManager.removeUpdates(locListener);
-	// curLocProgress[0] = null;
-	// }
-	// });
-	//
-	// locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1,
-	// 1, locListener);
-	//
-	// }
+	private void gpsOff() {
+		stopGPS();
+		Editor prefsPrivateEditor = settings.edit();
+		prefsPrivateEditor.putBoolean(FOLLOW_GPS_SETTING, false);
+		prefsPrivateEditor.commit();
+		updateButtons();
+		updateView();
+	}
+
+	private void gpsOnOff() {
+		if (!following())
+			gpsOn();
+		else
+			gpsOff();
+	}
 
 	private void addPlacemark() {
 		if (view == null)
@@ -873,7 +888,7 @@ public class MyActivity extends Activity {
 		}
 	}
 
-	private void editSel() {
+	public void editSel() {
 		if (view == null)
 			return;
 
@@ -945,29 +960,30 @@ public class MyActivity extends Activity {
 
 		super.onDestroy();
 		System.runFinalizersOnExit(true);
-		
+
 		unbindDrawables(findViewById(R.id.RootView));
-		
+
 		System.gc();
 
 	}
 
 	private void unbindDrawables(View view) {
-	    if (view.getBackground() != null) {
-	        view.getBackground().setCallback(null);
-	    }
-	    if (view instanceof ViewGroup) {
-	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-	            unbindDrawables(((ViewGroup) view).getChildAt(i));
-	        }
-	        try {	        
-	        	((ViewGroup) view).removeAllViews();
-	        } catch (UnsupportedOperationException mayHappen) {
-	        	// AdapterViews, ListViews and potentially other ViewGroups don’t support the removeAllViews operation
-	        }
-	    }
+		if (view.getBackground() != null) {
+			view.getBackground().setCallback(null);
+		}
+		if (view instanceof ViewGroup) {
+			for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+				unbindDrawables(((ViewGroup) view).getChildAt(i));
+			}
+			try {
+				((ViewGroup) view).removeAllViews();
+			} catch (UnsupportedOperationException mayHappen) {
+				// AdapterViews, ListViews and potentially other ViewGroups
+				// don’t support the removeAllViews operation
+			}
+		}
 	}
-	
+
 	public void updateView() {
 		if (view != null)
 			view.invalidate();
@@ -975,7 +991,8 @@ public class MyActivity extends Activity {
 
 	public void pathSelected(PathSelection sel) {
 		if (diagramView != null)
-			diagramView.pathSelected(sel);
+			diagramView.pathSelected(view != null
+					&& view.getInfoLevel() == InfoLevel.HIGH ? sel : null);
 	}
 
 }

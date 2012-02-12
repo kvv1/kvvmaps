@@ -57,10 +57,16 @@ public class Utils {
 	}
 
 	public static String format(double latLon) {
+		String sign = "";
+		if(latLon < 0) {
+			sign = "-";
+			latLon = -latLon;
+		}
+		
 		int degrees = (int) latLon;
 		int minutes = ((int) (latLon * 60)) % 60;
 		int seconds = ((int) (latLon * 3600)) % 60;
-		return "" + degrees + "-" + minutes + "-" + seconds;
+		return sign + degrees + "\u00B0" + minutes + "'" + seconds + "\"";
 	}
 
 	public static  String formatDistance(int dist) {

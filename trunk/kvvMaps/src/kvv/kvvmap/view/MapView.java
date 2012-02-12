@@ -22,13 +22,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.Scroller;
+import android.widget.TextView;
 
 public class MapView extends View implements IPlatformView {
 
@@ -55,6 +56,15 @@ public class MapView extends View implements IPlatformView {
 		setFocusable(true);
 		setFocusableInTouchMode(true);
 
+//		setLongClickable(true);
+//		setOnLongClickListener(new OnLongClickListener() {
+//			@Override
+//			public boolean onLongClick(View v) {
+//				if(activity!= null)
+//					activity.editSel();
+//				return true;
+//			}
+//		});
 	}
 
 	private static int cnt;
@@ -93,16 +103,12 @@ public class MapView extends View implements IPlatformView {
 		String lon = Utils.format(commonView.getLocation().getLongitude());
 		String lat = Utils.format(commonView.getLocation().getLatitude());
 
-		// String mem = "";
-		// if (Adapter.debugDraw) {
-		// int usedMegs = (int) (Debug.getNativeHeapAllocatedSize() / 1048576L);
-		// int freeMegs = (int) (Debug.getNativeHeapFreeSize() / 1048576L);
-		// int allMegs = (int) (Debug.getNativeHeapSize() / 1048576L);
-		// mem = usedMegs + " " + freeMegs + " " + allMegs + " ";
-		// }
-
 		String title = lon + " " + lat + " z" + commonView.getZoom() + " "
 				+ commonView.getTopMap();
+
+		TextView text = (TextView) activity.findViewById(R.id.mapInfo);
+		text.setText(title);
+
 		activity.setTitle(title);
 	}
 
@@ -241,6 +247,13 @@ public class MapView extends View implements IPlatformView {
 			}
 			return true; // else won't work
 		}
+		
+		@Override
+		public void onLongPress(MotionEvent e) {
+			if(activity != null)
+				activity.editSel();
+			super.onLongPress(e);
+		}
 	}
 
 	private class MyGestureDetector extends GestureDetector1 {
@@ -249,7 +262,7 @@ public class MapView extends View implements IPlatformView {
 		}
 
 		{
-			setIsLongpressEnabled(false);
+//			setIsLongpressEnabled(false);
 		}
 
 	}
@@ -260,7 +273,7 @@ public class MapView extends View implements IPlatformView {
 		}
 
 		{
-			setIsLongpressEnabled(false);
+//			setIsLongpressEnabled(false);
 		}
 	}
 
@@ -317,7 +330,7 @@ public class MapView extends View implements IPlatformView {
 			else
 				mGestureDetector = new MyGestureDetector();
 		}
-
+		
 		if (Integer.parseInt(Build.VERSION.SDK) >= 8) {
 			if (mScaleDetector == null)
 				mScaleDetector = new MyScaleGestureDetector(getContext());
@@ -438,8 +451,10 @@ public class MapView extends View implements IPlatformView {
 			toTarget.setVisibility(View.GONE);
 		}
 
-		((KvvMapsButton) findViewById(R.id.rotate)).setEnabled(commonView.isMultiple());
-		((KvvMapsButton) findViewById(R.id.edit)).setEnabled(getSel() != null);
+		((KvvMapsButton) activity.findViewById(R.id.rotate))
+				.setEnabled(commonView != null && commonView.isMultiple());
+		((KvvMapsButton) activity.findViewById(R.id.edit))
+				.setEnabled(getInfoLevel() != InfoLevel.LOW && getSel() != null);
 	}
 
 	public void dispose() {
@@ -457,11 +472,13 @@ public class MapView extends View implements IPlatformView {
 	public void incInfoLevel() {
 		if (commonView != null)
 			commonView.incInfoLevel();
+		updateButtons();
 	}
 
 	public void decInfoLevel() {
 		if (commonView != null)
 			commonView.decInfoLevel();
+		updateButtons();
 	}
 
 	public void invalidatePathTiles() {
@@ -519,9 +536,11 @@ public class MapView extends View implements IPlatformView {
 			return false;
 		if (commonView.getInfoLevel() == InfoLevel.HIGH) {
 			commonView.setInfoLevel(InfoLevel.LOW);
+			updateButtons();
 			return false;
 		} else {
 			commonView.setInfoLevel(InfoLevel.HIGH);
+			updateButtons();
 			return true;
 		}
 	}

@@ -1,5 +1,7 @@
 package kvv.kvvmap.view;
 
+import kvv.kvvmap.R;
+import kvv.kvvmap.adapter.Adapter;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageButton;
@@ -9,10 +11,23 @@ public class KvvMapsButton extends ImageButton {
 	public KvvMapsButton(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		setFocusable(false);
-		//setBackgroundResource(attrs.getAttributeResourceValue(null, "Src", 0));
-		//setBackgroundResource(R.drawable.gps);
 
-		
+//		if (attrs.getAttributeValue(
+//				"http://schemas.android.com/apk/res/android", "minWidth") == null)
+//			setMinimumWidth(40);
+//		if (attrs.getAttributeValue(
+//				"http://schemas.android.com/apk/res/android", "minHeight") == null)
+//			setMinimumHeight(40);
+
+		// setAlpha(128);
+
+		// setBackgroundColor(0x80000000);
+
+		// setBackgroundResource(attrs.getAttributeResourceValue(null, "Src",
+		// 0));
+		// setBackgroundResource(R.drawable.bg);
+		// setImageResource(R.drawable.gps_on);
+
 		// setMinHeight(60);
 		// setMinWidth(60);
 	}
@@ -32,7 +47,10 @@ public class KvvMapsButton extends ImageButton {
 
 	private void setImage() {
 		int id = isEnabled() ? (checked ? bgChecked : bg) : bgDisabled;
-		setBackgroundResource(id);
+		if (checked)
+			setBackgroundResource(R.drawable.bg_on);
+		else
+			setBackgroundResource(R.drawable.bg);
 		setImageResource(id);
 	}
 
