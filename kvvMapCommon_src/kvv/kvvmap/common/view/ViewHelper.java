@@ -49,7 +49,7 @@ public class ViewHelper {
 		int len = gc.getWidth() / 2 * m1 / m;
 
 		int x = 4;
-		int y = gc.getHeight() - scaleWidth * 2;
+		int y = gc.getHeight() - scaleWidth * 2 - 40;
 
 		gc.setColor(COLOR.BLACK);
 		gc.fillRect(x, y, x + len / 4, y + scaleWidth);
