@@ -1,7 +1,6 @@
 package kvv.kvvmap.view;
 
 import kvv.kvvmap.R;
-import kvv.kvvmap.adapter.Adapter;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageButton;

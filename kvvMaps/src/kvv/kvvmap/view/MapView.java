@@ -22,7 +22,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -56,15 +55,15 @@ public class MapView extends View implements IPlatformView {
 		setFocusable(true);
 		setFocusableInTouchMode(true);
 
-//		setLongClickable(true);
-//		setOnLongClickListener(new OnLongClickListener() {
-//			@Override
-//			public boolean onLongClick(View v) {
-//				if(activity!= null)
-//					activity.editSel();
-//				return true;
-//			}
-//		});
+		// setLongClickable(true);
+		// setOnLongClickListener(new OnLongClickListener() {
+		// @Override
+		// public boolean onLongClick(View v) {
+		// if(activity!= null)
+		// activity.editSel();
+		// return true;
+		// }
+		// });
 	}
 
 	private static int cnt;
@@ -100,7 +99,8 @@ public class MapView extends View implements IPlatformView {
 		if (activity == null || commonView == null)
 			return;
 
-		String lon = Utils.formatLatLon(commonView.getLocation().getLongitude());
+		String lon = Utils
+				.formatLatLon(commonView.getLocation().getLongitude());
 		String lat = Utils.formatLatLon(commonView.getLocation().getLatitude());
 
 		String title = lon + " " + lat + " z" + commonView.getZoom() + " "
@@ -247,10 +247,10 @@ public class MapView extends View implements IPlatformView {
 			}
 			return true; // else won't work
 		}
-		
+
 		@Override
 		public void onLongPress(MotionEvent e) {
-			if(activity != null)
+			if (activity != null)
 				activity.editSel();
 			super.onLongPress(e);
 		}
@@ -262,7 +262,7 @@ public class MapView extends View implements IPlatformView {
 		}
 
 		{
-//			setIsLongpressEnabled(false);
+			// setIsLongpressEnabled(false);
 		}
 
 	}
@@ -273,7 +273,7 @@ public class MapView extends View implements IPlatformView {
 		}
 
 		{
-//			setIsLongpressEnabled(false);
+			// setIsLongpressEnabled(false);
 		}
 	}
 
@@ -330,7 +330,7 @@ public class MapView extends View implements IPlatformView {
 			else
 				mGestureDetector = new MyGestureDetector();
 		}
-		
+
 		if (Integer.parseInt(Build.VERSION.SDK) >= 8) {
 			if (mScaleDetector == null)
 				mScaleDetector = new MyScaleGestureDetector(getContext());
@@ -446,7 +446,7 @@ public class MapView extends View implements IPlatformView {
 		if (target != null) {
 			toTarget.setVisibility(View.VISIBLE);
 			int dist = (int) commonView.getLocation().distanceTo(target);
-			toTarget.setText(Utils.formatDistance(dist));
+			toTarget.setText(Utils.formatDistance(dist) + " " + dist);
 		} else {
 			toTarget.setVisibility(View.GONE);
 		}
@@ -454,7 +454,8 @@ public class MapView extends View implements IPlatformView {
 		((KvvMapsButton) activity.findViewById(R.id.rotate))
 				.setEnabled(commonView != null && commonView.isMultiple());
 		((KvvMapsButton) activity.findViewById(R.id.edit))
-				.setEnabled(getInfoLevel() != InfoLevel.LOW && getSel() != null);
+				.setVisibility(getInfoLevel() != InfoLevel.LOW
+						&& getSel() != null ? VISIBLE : INVISIBLE);
 	}
 
 	public void dispose() {

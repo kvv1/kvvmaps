@@ -67,14 +67,13 @@ public class Utils {
 		int minutes = ((int) (latLon * 60)) % 60;
 		int seconds = ((int) (latLon * 3600)) % 60;
 		return String.format("%s%02d\u00B0%02d'%02d\"", sign, degrees, minutes, seconds);
-		//return sign + degrees + "\u00B0" + minutes + "'" + seconds + "\"";
 	}
 
 	public static  String formatDistance(int dist) {
 		if (dist < 1000)
 			return dist + "m";
 		else if (dist < 10000)
-			return dist / 1000 + "." + (dist % 1000) / 10 + "km";
+			return String.format("%d.%02dkm", dist / 1000, (dist % 1000) / 10);
 		else
 			return dist / 1000 + "km";
 	}
