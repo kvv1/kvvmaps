@@ -56,7 +56,7 @@ public class Utils {
 				* (2 * Math.atan(Math.exp((center - y) * 2 * Math.PI / size)) - Math.PI / 2); // широта.
 	}
 
-	public static String format(double latLon) {
+	public static String formatLatLon(double latLon) {
 		String sign = "";
 		if(latLon < 0) {
 			sign = "-";
@@ -66,7 +66,8 @@ public class Utils {
 		int degrees = (int) latLon;
 		int minutes = ((int) (latLon * 60)) % 60;
 		int seconds = ((int) (latLon * 3600)) % 60;
-		return sign + degrees + "\u00B0" + minutes + "'" + seconds + "\"";
+		return String.format("%s%02d\u00B0%02d'%02d\"", sign, degrees, minutes, seconds);
+		//return sign + degrees + "\u00B0" + minutes + "'" + seconds + "\"";
 	}
 
 	public static  String formatDistance(int dist) {

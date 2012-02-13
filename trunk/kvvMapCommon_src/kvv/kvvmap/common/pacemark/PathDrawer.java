@@ -164,8 +164,8 @@ public class PathDrawer {
 
 		gc.setColor(COLOR.CYAN);
 		gc.drawText(
-				Utils.format(sel.pm.getLongitude()) + "  "
-						+ Utils.format(sel.pm.getLatitude()) + "  "
+				Utils.formatLatLon(sel.pm.getLongitude()) + "  "
+						+ Utils.formatLatLon(sel.pm.getLatitude()) + "  "
 						+ (int) sel.pm.getAltitude() + "m "
 						+ (int) (sel.pm.getSpeed() * 3.6) + "km/h", 2, y - 2);
 
