@@ -5,15 +5,10 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import kvv.kvvmap.adapter.Adapter;
-import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.common.Cache;
 import kvv.kvvmap.common.Img;
 import kvv.kvvmap.common.maps.MapsDir.MapsDirListener;
-import kvv.kvvmap.common.tiles.Tile;
 import kvv.kvvmap.common.tiles.TileContent;
-import kvv.kvvmap.common.tiles.TileId;
-import kvv.kvvmap.common.tiles.TileLoader;
-import kvv.kvvmap.common.tiles.TileLoaderCallback;
 
 public class Maps {
 

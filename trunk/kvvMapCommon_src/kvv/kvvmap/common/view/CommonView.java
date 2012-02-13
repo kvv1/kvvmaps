@@ -181,9 +181,9 @@ public class CommonView implements ICommonView {
 		if (myLocation == null)
 			return;
 
-		if(myLocation.hasBearing())
+		if (myLocation.hasBearing())
 			setAngle(-myLocation.getBearing());
-		
+
 		animateTo(myLocation);
 	}
 
@@ -198,7 +198,7 @@ public class CommonView implements ICommonView {
 			scrollToRotationGPS();
 		} else {
 			if (oldLocation != null
-					&& getScreenRect().contains(oldLocation.getLongitude(),
+					&& getScreenRect(null).contains(oldLocation.getLongitude(),
 							oldLocation.getLatitude())) {
 				double dx = mapPos.loc2scrX(myLocation)
 						- mapPos.loc2scrX(oldLocation);
@@ -389,10 +389,14 @@ public class CommonView implements ICommonView {
 
 	}
 
+	private final RectInt screenRect = new RectInt();
+	private final PointInt centerXY = new PointInt(0, 0);
+	
 	private void drawTiles(GC gc, int x0, int y0) {
 		tilesDrawn.clear();
 
-		RectInt screenRect = getScreenRectInt();
+		getScreenRectInt(screenRect);
+		
 		int nx0 = screenRect.getX() / Adapter.TILE_SIZE;
 		int ny0 = screenRect.getY() / Adapter.TILE_SIZE;
 		int nx1 = (screenRect.getX() + screenRect.getW()) / Adapter.TILE_SIZE;
@@ -401,7 +405,7 @@ public class CommonView implements ICommonView {
 		x0 = (int) (nx0 * Adapter.TILE_SIZE - mapPos.centerX() + x0);
 		y0 = (int) (ny0 * Adapter.TILE_SIZE - mapPos.centerY() + y0);
 
-		PointInt centerXY = new PointInt((int) mapPos.centerX(),
+		centerXY.set((int) mapPos.centerX(),
 				(int) mapPos.centerY());
 
 		gc.setAntiAlias(true);
@@ -448,14 +452,12 @@ public class CommonView implements ICommonView {
 			updateSel();
 		}
 	}
-	
+
 	public void setInfoLevel(InfoLevel level) {
 		infoLevel = level;
 		invalidatePathTiles();
 		updateSel();
 	}
-
-
 
 	public InfoLevel getInfoLevel() {
 		return infoLevel;
@@ -508,16 +510,21 @@ public class CommonView implements ICommonView {
 
 	private void updateSel() {
 		envir.adapter.assertUIThread();
-		if (rotationMode == RotationMode.ROTATION_GPS) {
+		if (getInfoLevel() != InfoLevel.HIGH
+				|| rotationMode == RotationMode.ROTATION_GPS) {
+			cancelSel();
 			select(null);
 			return;
 		}
 		selectionThread.set((int) mapPos.centerX(), (int) mapPos.centerY(),
-				getScreenRect(), getZoom(), envir.adapter, envir.placemarks,
+				getScreenRect(null), getZoom(), envir.adapter, envir.placemarks,
 				envir.paths, selCallback);
 	}
 
-	private RectInt getScreenRectInt() {
+	private RectInt getScreenRectInt(RectInt rect) {
+		if (rect == null)
+			rect = new RectInt();
+
 		int left = -getScreenCenterX();
 		int right = platformView.getWidth() - getScreenCenterX();
 		int top = -getScreenCenterY();
@@ -537,12 +544,14 @@ public class CommonView implements ICommonView {
 		int minY = Math.min(Math.min(y1, y2), Math.min(y3, y4));
 		int maxY = Math.max(Math.max(y1, y2), Math.max(y3, y4));
 
-		RectInt rect = new RectInt();
 		rect.set(minX, minY, maxX - minX, maxY - minY);
 		return rect;
 	}
 
-	private RectX getScreenRect() {
+	private RectX getScreenRect(RectX rect) {
+		if(rect == null)
+			rect = new RectX(0, 0, 0, 0);
+		
 		int left = -getScreenCenterX();
 		int right = platformView.getWidth() - getScreenCenterX();
 		int top = -getScreenCenterY();
@@ -562,7 +571,9 @@ public class CommonView implements ICommonView {
 		double minLat = Math.min(Math.min(lat1, lat2), Math.min(lat3, lat4));
 		double maxLat = Math.max(Math.max(lat1, lat2), Math.max(lat3, lat4));
 
-		return new RectX(minLon, minLat, maxLon - minLon, maxLat - minLat);
+		rect.set(minLon, minLat, maxLon - minLon, maxLat - minLat);
+		
+		return rect;
 	}
 
 	public void animateToMyLocation() {
