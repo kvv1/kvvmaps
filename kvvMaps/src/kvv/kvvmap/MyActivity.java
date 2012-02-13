@@ -395,8 +395,13 @@ public class MyActivity extends Activity {
 				new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						gpsOnOff();
-						setRotationMode(RotationMode.ROTATION_NONE);
+						if (!following()) {
+							gpsOn();
+						} else {
+							gpsOff();
+							if(getRotationMode() == RotationMode.ROTATION_COMPASS)
+								setRotationMode(RotationMode.ROTATION_NONE);
+						}
 					}
 				});
 		;
@@ -868,13 +873,6 @@ public class MyActivity extends Activity {
 		prefsPrivateEditor.commit();
 		updateButtons();
 		updateView();
-	}
-
-	private void gpsOnOff() {
-		if (!following())
-			gpsOn();
-		else
-			gpsOff();
 	}
 
 	private void addPlacemark() {
