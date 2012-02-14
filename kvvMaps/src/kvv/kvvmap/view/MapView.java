@@ -1,7 +1,6 @@
 package kvv.kvvmap.view;
 
 import kvv.kvvmap.MyActivity;
-import kvv.kvvmap.R;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
@@ -26,9 +25,7 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Scroller;
-import android.widget.TextView;
 
 public class MapView extends View implements IPlatformView {
 
@@ -54,16 +51,6 @@ public class MapView extends View implements IPlatformView {
 		uiThread = Thread.currentThread();
 		setFocusable(true);
 		setFocusableInTouchMode(true);
-
-		// setLongClickable(true);
-		// setOnLongClickListener(new OnLongClickListener() {
-		// @Override
-		// public boolean onLongClick(View v) {
-		// if(activity!= null)
-		// activity.editSel();
-		// return true;
-		// }
-		// });
 	}
 
 	private static int cnt;
@@ -93,23 +80,6 @@ public class MapView extends View implements IPlatformView {
 
 		setRotationMode(rotationMode);
 
-	}
-
-	private void updateTitle() {
-		if (activity == null || commonView == null)
-			return;
-
-		String lon = Utils
-				.formatLatLon(commonView.getLocation().getLongitude());
-		String lat = Utils.formatLatLon(commonView.getLocation().getLatitude());
-
-		String title = lon + " " + lat + " z" + commonView.getZoom() + " "
-				+ commonView.getTopMap();
-
-		TextView text = (TextView) activity.findViewById(R.id.mapInfo);
-		text.setText(title);
-
-		activity.setTitle(title);
 	}
 
 	public ISelectable getSel() {
@@ -305,8 +275,10 @@ public class MapView extends View implements IPlatformView {
 							newZoom = Math.max(Utils.MIN_ZOOM,
 									Math.min(Utils.MAX_ZOOM, newZoom));
 
-							if (newZoom != commonView.getZoom())
+							if (newZoom != commonView.getZoom()) {
 								commonView.setZoom(newZoom);
+								activity.updateButtons();
+							}
 
 							return true;
 						}
@@ -402,61 +374,51 @@ public class MapView extends View implements IPlatformView {
 		return commonView.getLocation();
 	}
 
-	private final Runnable titleUpdater = new Runnable() {
-		@Override
-		public void run() {
-			updateTitle();
-			updateButtons();
-		}
-	};
-
 	@Override
 	public void repaint() {
 		postInvalidate();
-		removeCallbacks(titleUpdater);
-		postDelayed(titleUpdater, 200);
+		if(activity != null)
+			activity.updateButtons();
 	}
 
 	public void setMyLocation(LocationX locationX, boolean forceScroll) {
 		if (commonView == null)
 			return;
 		commonView.setMyLocation(locationX, forceScroll);
-		updateButtons();
 	}
 
 	public void dimmMyLocation() {
 		if (commonView == null)
 			return;
 		commonView.dimmMyLocation();
-		updateButtons();
 	}
 
-	private void updateButtons() {
-		if (activity == null || commonView == null)
-			return;
-
-		View button = activity.findViewById(R.id.here);
-		if (commonView.getMyLocation() != null && !commonView.isOnMyLocation())
-			button.setVisibility(View.VISIBLE);
-		else
-			button.setVisibility(View.GONE);
-
-		Button toTarget = (Button) activity.findViewById(R.id.toTarget);
-		LocationX target = commonView.getTarget();
-		if (target != null) {
-			toTarget.setVisibility(View.VISIBLE);
-			int dist = (int) commonView.getLocation().distanceTo(target);
-			toTarget.setText(Utils.formatDistance(dist) + " " + dist);
-		} else {
-			toTarget.setVisibility(View.GONE);
-		}
-
-		((KvvMapsButton) activity.findViewById(R.id.rotate))
-				.setEnabled(commonView != null && commonView.isMultiple());
-		((KvvMapsButton) activity.findViewById(R.id.edit))
-				.setVisibility(getInfoLevel() != InfoLevel.LOW
-						&& getSel() != null ? VISIBLE : INVISIBLE);
-	}
+//	private void updateButtons() {
+//		if (activity == null || commonView == null)
+//			return;
+//
+//		View button = activity.findViewById(R.id.here);
+//		if (commonView.getMyLocation() != null && !commonView.isOnMyLocation())
+//			button.setVisibility(View.VISIBLE);
+//		else
+//			button.setVisibility(View.GONE);
+//
+//		Button toTarget = (Button) activity.findViewById(R.id.toTarget);
+//		LocationX target = commonView.getTarget();
+//		if (target != null) {
+//			toTarget.setVisibility(View.VISIBLE);
+//			int dist = (int) commonView.getLocation().distanceTo(target);
+//			toTarget.setText(Utils.formatDistance(dist));
+//		} else {
+//			toTarget.setVisibility(View.GONE);
+//		}
+//
+//		((KvvMapsButton) activity.findViewById(R.id.rotate))
+//				.setEnabled(commonView != null && commonView.isMultiple());
+//		((KvvMapsButton) activity.findViewById(R.id.edit))
+//				.setVisibility(getInfoLevel() != InfoLevel.LOW
+//						&& getSel() != null ? VISIBLE : INVISIBLE);
+//	}
 
 	public void dispose() {
 		assertUIThread();
@@ -473,13 +435,11 @@ public class MapView extends View implements IPlatformView {
 	public void incInfoLevel() {
 		if (commonView != null)
 			commonView.incInfoLevel();
-		updateButtons();
 	}
 
 	public void decInfoLevel() {
 		if (commonView != null)
 			commonView.decInfoLevel();
-		updateButtons();
 	}
 
 	public void invalidatePathTiles() {
@@ -537,11 +497,9 @@ public class MapView extends View implements IPlatformView {
 			return false;
 		if (commonView.getInfoLevel() == InfoLevel.HIGH) {
 			commonView.setInfoLevel(InfoLevel.LOW);
-			updateButtons();
 			return false;
 		} else {
 			commonView.setInfoLevel(InfoLevel.HIGH);
-			updateButtons();
 			return true;
 		}
 	}
@@ -556,6 +514,42 @@ public class MapView extends View implements IPlatformView {
 		if (commonView == null)
 			return Utils.MIN_ZOOM;
 		return commonView.getZoom();
+	}
+
+	public LocationX getMyLocation() {
+		if (commonView == null)
+			return null;
+		return commonView.getMyLocation();
+	}
+
+	public LocationX getLocation() {
+		if (commonView == null)
+			return null;
+		return commonView.getLocation();
+	}
+
+	public boolean isOnMyLocation() {
+		if (commonView == null)
+			return false;
+		return commonView.isOnMyLocation();
+	}
+
+	public LocationX getTarget() {
+		if (commonView == null)
+			return null;
+		return commonView.getTarget();
+	}
+
+	public boolean isMultiple() {
+		if (commonView == null)
+			return false;
+		return commonView.isMultiple();
+	}
+
+	public String getTopMap() {
+		if (commonView == null)
+			return null;
+		return commonView.getTopMap();
 	}
 
 }
