@@ -130,10 +130,12 @@ public class MyActivity extends Activity {
 		 */if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
 			if (view != null)
 				view.decInfoLevel();
+			updateButtons();
 			return true;
 		} else if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
 			if (view != null)
 				view.incInfoLevel();
+			updateButtons();
 			return true;
 		} else if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
 			zoomIn();
@@ -339,7 +341,6 @@ public class MyActivity extends Activity {
 					@Override
 					public void onClick(View v) {
 						editSel();
-						updateButtons();
 					}
 				});
 		;
@@ -362,7 +363,6 @@ public class MyActivity extends Activity {
 					@Override
 					public void onClick(View v) {
 						zoomIn();
-						updateButtons();
 					}
 				});
 		;
@@ -373,7 +373,6 @@ public class MyActivity extends Activity {
 					@Override
 					public void onClick(View v) {
 						zoomOut();
-						updateButtons();
 					}
 				});
 		;
@@ -489,48 +488,97 @@ public class MyActivity extends Activity {
 		return settings.getBoolean(FOLLOW_GPS_SETTING, true);
 	}
 
-	private void updateButtons() {
-		View buttons = findViewById(R.id.screenButtons);
-		if (buttonsVisible())
-			buttons.setVisibility(View.VISIBLE);
-		else
-			buttons.setVisibility(View.GONE);
+	private final Runnable buttonsUpdater = new Runnable() {
+		@Override
+		public void run() {
+			View buttons = findViewById(R.id.screenButtons);
+			if (buttonsVisible())
+				buttons.setVisibility(View.VISIBLE);
+			else
+				buttons.setVisibility(View.GONE);
 
-		((KvvMapsButton) findViewById(R.id.gps)).setCheched(following());
+			((KvvMapsButton) findViewById(R.id.gps)).setCheched(following());
 
-		RotationMode rot = getRotationMode();
+			RotationMode rot = getRotationMode();
 
-		((KvvMapsButton) findViewById(R.id.orient_compass))
-				.setCheched(rot == RotationMode.ROTATION_COMPASS);
-		((KvvMapsButton) findViewById(R.id.orient_gps))
-				.setCheched(rot == RotationMode.ROTATION_GPS);
+			((KvvMapsButton) findViewById(R.id.orient_compass))
+					.setCheched(rot == RotationMode.ROTATION_COMPASS);
+			((KvvMapsButton) findViewById(R.id.orient_gps))
+					.setCheched(rot == RotationMode.ROTATION_GPS);
 
-		((KvvMapsButton) findViewById(R.id.info)).setCheched(view != null
-				&& view.getInfoLevel() != InfoLevel.LOW);
+			((KvvMapsButton) findViewById(R.id.info)).setCheched(view != null
+					&& view.getInfoLevel() != InfoLevel.LOW);
 
-		if (mapsService != null)
-			findViewById(R.id.writing).setVisibility(
-					mapsService.getTracker().isTracking() ? View.VISIBLE
-							: View.GONE);
+			if (mapsService != null)
+				findViewById(R.id.writing).setVisibility(
+						mapsService.getTracker().isTracking() ? View.VISIBLE
+								: View.GONE);
 
-		((KvvMapsButton) findViewById(R.id.fixedmap))
-				.setCheched(mapsService != null
-						&& mapsService.getBundle().getString("fixedMap") != null);
+			((KvvMapsButton) findViewById(R.id.fixedmap))
+					.setCheched(mapsService != null
+							&& mapsService.getBundle().getString("fixedMap") != null);
 
-		((KvvMapsButton) findViewById(R.id.zoomin)).setEnabled(view != null
-				&& view.getZoom() < Utils.MAX_ZOOM);
-		((KvvMapsButton) findViewById(R.id.zoomout)).setEnabled(view != null
-				&& view.getZoom() > Utils.MIN_ZOOM);
+			((KvvMapsButton) findViewById(R.id.zoomin)).setEnabled(view != null
+					&& view.getZoom() < Utils.MAX_ZOOM);
+			((KvvMapsButton) findViewById(R.id.zoomout)).setEnabled(view != null
+					&& view.getZoom() > Utils.MIN_ZOOM);
+			
+			
+			View button = findViewById(R.id.here);
+			if (view != null && view.getMyLocation() != null && !view.isOnMyLocation())
+				button.setVisibility(View.VISIBLE);
+			else
+				button.setVisibility(View.GONE);
+
+			Button toTarget = (Button) findViewById(R.id.toTarget);
+			LocationX target = view == null ? null : view.getTarget();
+			if (target != null) {
+				toTarget.setVisibility(View.VISIBLE);
+				int dist = (int) view.getLocation().distanceTo(target);
+				toTarget.setText(Utils.formatDistance(dist));
+			} else {
+				toTarget.setVisibility(View.GONE);
+			}
+
+			((KvvMapsButton) findViewById(R.id.rotate))
+					.setEnabled(view != null && view.isMultiple());
+			
+			((KvvMapsButton) findViewById(R.id.edit))
+					.setVisibility(view != null && view.getInfoLevel() != InfoLevel.LOW
+							&& view.getSel() != null ? View.VISIBLE : View.INVISIBLE);
+			
+			
+			if(view != null && view.getLocation() != null) {
+				String lon = Utils
+						.formatLatLon(view.getLocation().getLongitude());
+				String lat = Utils.formatLatLon(view.getLocation().getLatitude());
+	
+				String title = lon + " " + lat + " z" + view.getZoom() + " "
+						+ view.getTopMap();
+	
+				TextView text = (TextView) findViewById(R.id.mapInfo);
+				text.setText(title);
+			}
+		}
+	};
+
+
+	
+	public void updateButtons() {
+		handler.removeCallbacks(buttonsUpdater);
+		handler.postDelayed(buttonsUpdater, 100);
 	}
 
 	private void zoomIn() {
 		if (view != null)
 			view.zoomIn();
+		updateButtons();
 	}
 
 	private void zoomOut() {
 		if (view != null)
 			view.zoomOut();
+		updateButtons();
 	}
 
 	private RotationMode getRotationMode() {
@@ -555,14 +603,6 @@ public class MyActivity extends Activity {
 		menu.findItem(MENU_LOAD_DURING_SCROLLING).setChecked(
 				settings.getBoolean(LOAD_DURING_SCROLLING_SETTING, true));
 
-		// RotationMode rot = getRotationMode();
-		// if (rot == RotationMode.ROTATION_NONE)
-		// menu.findItem(MENU_ROTATION_NONE).setChecked(true);
-		// if (rot == RotationMode.ROTATION_COMPASS)
-		// menu.findItem(MENU_ROTATION_COMPASS).setChecked(true);
-		// if (rot == RotationMode.ROTATION_GPS)
-		// menu.findItem(MENU_ROTATION_GPS).setChecked(true);
-
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -573,7 +613,6 @@ public class MyActivity extends Activity {
 		menu.add(Menu.NONE, MENU_LOGGING_ONOFF, 0, "Запись пути").setCheckable(
 				true);
 		menu.add(Menu.NONE, MENU_ADD_PLACEMARK, 0, "Добавить точку");
-		//SubMenu rotationSubMenu = menu.addSubMenu("Вращение карты");
 		menu.add(Menu.NONE, MENU_TRACKS, 0, "Пути");
 
 		SubMenu settingsSubMenu = menu.addSubMenu("Настройки");
@@ -588,16 +627,7 @@ public class MyActivity extends Activity {
 				"Подгружать при прокрутке").setCheckable(true);
 		menu.add(Menu.NONE, MENU_ABOUT, 0, "О программе");
 		menu.add(Menu.NONE, MENU_UPDATE, 0, "Update");
-		// menu.add(0, MENU_UPDATE1, 0, "Update test");
 		menu.add(Menu.NONE, MENU_QUIT, 0, "Выход");
-
-		// rotationSubMenu.add(MENU_ROTATION_GROUP, MENU_ROTATION_NONE, 0,
-		// "Без вращения");
-		// rotationSubMenu.add(MENU_ROTATION_GROUP, MENU_ROTATION_COMPASS, 0,
-		// "Компас");
-		// rotationSubMenu.add(MENU_ROTATION_GROUP, MENU_ROTATION_GPS, 0,
-		// "GPS");
-		// rotationSubMenu.setGroupCheckable(MENU_ROTATION_GROUP, true, true);
 
 		return true;
 	}
@@ -623,15 +653,6 @@ public class MyActivity extends Activity {
 		case MENU_ABOUT:
 			about();
 			return true;
-			// case MENU_ROTATION_NONE:
-			// setRotationMode(RotationMode.ROTATION_NONE);
-			// return true;
-			// case MENU_ROTATION_COMPASS:
-			// setRotationMode(RotationMode.ROTATION_COMPASS);
-			// return true;
-			// case MENU_ROTATION_GPS:
-			// setRotationMode(RotationMode.ROTATION_GPS);
-			// return true;
 		case MENU_KINETIC_SCROLLING: {
 			Editor ed = settings.edit();
 			ed.putBoolean(KINETIC_SCROLLING_SETTING,
@@ -653,13 +674,6 @@ public class MyActivity extends Activity {
 				e.printStackTrace();
 			}
 			return true;
-			// case MENU_UPDATE1:
-			// try {
-			// updateSoftware1();
-			// } catch (Exception e) {
-			// e.printStackTrace();
-			// }
-			// return true;
 		case MENU_QUIT:
 			stopGPS();
 			stopService(new Intent(this, KvvMapsService.class));
@@ -835,6 +849,7 @@ public class MyActivity extends Activity {
 					LocationX loc = new LocationX(location);
 					if (view != null)
 						view.setMyLocation(loc, scroll);
+					updateButtons();
 					scroll = false;
 
 					altSpeed.setText("" + (int) loc.getAltitude() + "m "
@@ -854,6 +869,7 @@ public class MyActivity extends Activity {
 			locationListener = null;
 			if (view != null)
 				view.dimmMyLocation();
+			updateButtons();
 		}
 	}
 
@@ -906,6 +922,7 @@ public class MyActivity extends Activity {
 			new PathDlg(this, pathSel.path, pathSel.pm, mapsService.getPaths())
 					.show();
 		}
+		updateButtons();
 	}
 
 	private void trackingOnOff() {

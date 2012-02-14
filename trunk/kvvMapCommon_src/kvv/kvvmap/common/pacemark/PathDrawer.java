@@ -186,7 +186,7 @@ public class PathDrawer {
 				float speed = pm.getSpeed();
 				minAlt = Math.min(minAlt, (int) pm.getAltitude());
 				maxAlt = Math.max(maxAlt, (int) pm.getAltitude());
-				if (speed > 0) {
+				if (speed >= 0 && speed < 127) {
 					if(minSpeed >= 0) {
 						minSpeed = Math.min(minSpeed, (int) speed);
 						maxSpeed = Math.max(maxSpeed, (int) speed);
@@ -215,12 +215,13 @@ public class PathDrawer {
 			for (LocationX pm : pms) {
 				if (prevPm != null)
 					len0 += pm.distanceTo(prevPm);
+				
+				float speed = pm.getSpeed();
 
 				int _x = (int) (rectX + (len0 * rectW / len));
 				int _y = (int) (rectY + rectH - (int) ((pm
 						.getAltitude() - minAlt) * rectH / altDif));
-				int _y1 = (int) (rectY + rectH - (int) ((pm
-						.getSpeed() - minSpeed) * rectH / speedDif));
+				int _y1 = (int) (rectY + rectH - (int) ((speed - minSpeed) * rectH / speedDif));
 
 				PointInt pt = new PointInt(_x, _y);
 				PointInt pt1 = new PointInt(_x, _y1);
@@ -232,7 +233,7 @@ public class PathDrawer {
 					gc.setColor(COLOR.GREEN);
 					gc.drawLine(pt.x, pt.y, prevPt.x, prevPt.y);
 
-					if (pm.getSpeed() < 127) {
+					if (speed >= 0 && speed < 127) {
 						if (prevPt1 != null) {
 							gc.setColor(COLOR.YELLOW);
 							gc.drawLine(pt1.x, pt1.y, prevPt1.x, prevPt1.y);
