@@ -491,6 +491,9 @@ public class MyActivity extends Activity {
 	private final Runnable buttonsUpdater = new Runnable() {
 		@Override
 		public void run() {
+			if(view == null)
+				return;
+			
 			View buttons = findViewById(R.id.screenButtons);
 			if (buttonsVisible())
 				buttons.setVisibility(View.VISIBLE);
