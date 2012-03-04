@@ -13,6 +13,7 @@ import java.util.concurrent.ThreadFactory;
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 
+import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.tiles.Tiles;
 
 public class Adapter {
@@ -21,7 +22,7 @@ public class Adapter {
 	public final static String PATH_ROOT = ROOT + "/paths";
 	public static final String PLACEMARKS = ROOT + "/placemarks.pms";
 	public static final int MAP_TILES_CACHE_SIZE = 20;
-	//public static final int PATH_TILES_CACHE_SIZE = 20;
+	// public static final int PATH_TILES_CACHE_SIZE = 20;
 	public static final int RAF_CACHE_SIZE = 50;
 
 	public static final int TILE_SIZE = 256;
@@ -29,12 +30,12 @@ public class Adapter {
 	public static boolean debugDraw;
 
 	private final Thread uiThread;
-	
+
 	private final ExecutorService executor;
 
 	public Adapter() {
 		uiThread = Thread.currentThread();
-//		executor = Executors.newSingleThreadExecutor();
+		// executor = Executors.newSingleThreadExecutor();
 		executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
@@ -47,10 +48,9 @@ public class Adapter {
 
 	public synchronized void disposeBitmap(Object img) {
 	}
-	
+
 	public void recycleBitmap(Object img) {
 	}
-
 
 	public synchronized Object allocBitmap() {
 		return new BufferedImage(TILE_SIZE, TILE_SIZE,
@@ -104,7 +104,7 @@ public class Adapter {
 	public void execUI(Runnable runnable) {
 		SwingUtilities.invokeLater(runnable);
 	}
-	
+
 	public void execBG(Runnable runnable) {
 		executor.execute(runnable);
 	}
@@ -144,14 +144,32 @@ public class Adapter {
 		return false;
 	}
 
-	
 	public void drawUnder(Object imgDst, Object imgSrc, int x, int y, int sz) {
 		BufferedImage dst = (BufferedImage) imgDst;
 		BufferedImage src = (BufferedImage) imgSrc;
+
+		int srcW = src.getWidth();
+		int srcH = src.getHeight();
+
 		Graphics2D g = (Graphics2D) dst.getGraphics();
 		g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER));
-		g.drawImage(src, 0, 0, TILE_SIZE, TILE_SIZE, x, y, x + sz, y + sz, null);
+		g.drawImage(src, 0, 0, TILE_SIZE, TILE_SIZE, x * srcW
+				/ Utils.TILE_SIZE_G, y * srcH / Utils.TILE_SIZE_G, (x + sz)
+				* srcW / Utils.TILE_SIZE_G,
+				(y + sz) * srcH / Utils.TILE_SIZE_G, null);
 		g.dispose();
+	}
+
+	public static long getNativeHeapAllocatedSize() {
+		return 0;
+	}
+
+	public static long getNativeHeapFreeSize() {
+		return 0;
+	}
+
+	public static long getNativeHeapSize() {
+		return 0;
 	}
 
 }

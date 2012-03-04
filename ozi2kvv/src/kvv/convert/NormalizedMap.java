@@ -84,7 +84,7 @@ public abstract class NormalizedMap implements MapDescr {
 		// n = 127 * (n - min) / (mean - min);
 		// else
 		// n = 128 + 127 * (n - mean) / (max - mean);
-		n = 255 * (n - min) / (max - min);
+		n = 255 * (n - min) / Math.max(10, max - min);
 
 		if (n < 0)
 			n = 0;

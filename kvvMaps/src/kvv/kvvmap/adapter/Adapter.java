@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import kvv.kvvmap.common.Recycleable;
+import kvv.kvvmap.common.Utils;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -83,7 +84,7 @@ public class Adapter {
 		Bitmap bm = (Bitmap) img;
 		freeBitmaps.add(bm);
 	}
-	
+
 	public synchronized void disposeBitmap(Object img) {
 		if (img == null)
 			return;
@@ -261,11 +262,29 @@ public class Adapter {
 	public void drawUnder(Object imgDst, Object imgSrc, int x, int y, int sz) {
 		Bitmap dst = (Bitmap) imgDst;
 		Bitmap src = (Bitmap) imgSrc;
+
+		int srcW = src.getWidth();
+		int srcH = src.getHeight();
+
 		Canvas c = new Canvas(dst);
 		Paint paint = new Paint();
 		paint.setFilterBitmap(true);
 		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OVER));
-		c.drawBitmap(src, new Rect(x, y, x + sz, y + sz), new Rect(0, 0,
-				TILE_SIZE, TILE_SIZE), paint);
+		c.drawBitmap(src, new Rect(x * srcW / Utils.TILE_SIZE_G, y * srcH
+				/ Utils.TILE_SIZE_G, (x + sz) * srcW / Utils.TILE_SIZE_G,
+				(y + sz) * srcH / Utils.TILE_SIZE_G), new Rect(0, 0, TILE_SIZE,
+				TILE_SIZE), paint);
+	}
+
+	public static long getNativeHeapAllocatedSize() {
+		return Debug.getNativeHeapAllocatedSize();
+	}
+
+	public static long getNativeHeapFreeSize() {
+		return Debug.getNativeHeapFreeSize();
+	}
+
+	public static long getNativeHeapSize() {
+		return Debug.getNativeHeapSize();
 	}
 }

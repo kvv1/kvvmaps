@@ -3,8 +3,6 @@ package kvv.kvvmap.common.view;
 import java.util.Collections;
 import java.util.List;
 
-import android.os.Debug;
-
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
@@ -371,9 +369,9 @@ public class CommonView implements ICommonView {
 		}
 
 		if (Adapter.debugDraw) {
-			int usedMegs = (int) (Debug.getNativeHeapAllocatedSize() / 1048576L);
-			int freeMegs = (int) (Debug.getNativeHeapFreeSize() / 1048576L);
-			int allMegs = (int) (Debug.getNativeHeapSize() / 1048576L);
+			int usedMegs = (int) (Adapter.getNativeHeapAllocatedSize() / 1048576L);
+			int freeMegs = (int) (Adapter.getNativeHeapFreeSize() / 1048576L);
+			int allMegs = (int) (Adapter.getNativeHeapSize() / 1048576L);
 			String mem = "J " + Runtime.getRuntime().totalMemory() / 1024
 					/ 1024 + " " + Runtime.getRuntime().freeMemory() / 1024
 					/ 1024 + " " + Runtime.getRuntime().maxMemory() / 1024

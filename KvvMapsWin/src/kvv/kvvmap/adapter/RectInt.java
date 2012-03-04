@@ -19,4 +19,12 @@ public class RectInt {
 	public int getY() {
 		return rect.y;
 	}
+
+	public int getW() {
+		return rect.width;
+	}
+
+	public int getH() {
+		return rect.height;
+	}
 }
