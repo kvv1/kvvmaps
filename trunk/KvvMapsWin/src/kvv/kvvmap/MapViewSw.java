@@ -165,8 +165,8 @@ public class MapViewSw extends JComponent {
 	}
 
 	private void updateTitle() {
-		String lon = Utils.format(commonView.getLocation().getLongitude());
-		String lat = Utils.format(commonView.getLocation().getLatitude());
+		String lon = Utils.formatLatLon(commonView.getLocation().getLongitude());
+		String lat = Utils.formatLatLon(commonView.getLocation().getLatitude());
 		String title = lon + " " + lat + " z" + commonView.getZoom() + " "
 				+ getTopMap();
 		swingWnd.setTitle(title);

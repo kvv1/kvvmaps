@@ -65,8 +65,9 @@ public class OzfFile {
 		int[] pixels = getTile(x >> 6, y >> 6);
 		int pixel = pixels[(y & 63) * 64 + (x & 63)];
 		int r = pixel & 0xFF;
+		int g = (pixel >> 8) & 0xFF;
 		int b = (pixel >> 16) & 0xFF;
-		return (pixel & 0xFF00FF00) | b | (r << 16);
+		return  0xFF000000 | (r << 16) | (g << 8) | b;
 	}
 
 	private int[] getTile(int tx, int ty) {

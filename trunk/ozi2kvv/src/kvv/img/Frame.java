@@ -47,7 +47,7 @@ public class Frame extends JFrame {
 			
 			Img.transform(src, dst, new Transformation() {
 				@Override
-				public long getX(int x, int y) {
+				public long getSrcX(int x, int y) {
 					long _x = (long) x << 32;
 					long _y = (long) y << 32;
 					return (long) (_x * 0.3 + _y * 0.1);
@@ -56,7 +56,7 @@ public class Frame extends JFrame {
 				}
 
 				@Override
-				public long getY(int x, int y) {
+				public long getSrcY(int x, int y) {
 					long _x = (long) x << 32;
 					long _y = (long) y << 32;
 					return (long) (_y * 0.3 - _x * 0.1);

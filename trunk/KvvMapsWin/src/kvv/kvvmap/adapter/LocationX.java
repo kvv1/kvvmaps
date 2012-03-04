@@ -84,4 +84,8 @@ public class LocationX implements ISelectable {
 				* Math.cos(loc.getLatitude() * Math.PI / 180);
 		return (float) (90 - (Math.atan2(dy, dx) * 180 / Math.PI));
 	}
+
+	public boolean hasBearing() {
+		return false;
+	}
 }

@@ -49,9 +49,9 @@ public class Img {
 	}
 
 	public interface Transformation {
-		long getX(int dstX, int dstY);
+		long getSrcX(int dstX, int dstY);
 
-		long getY(int dstX, int dstY);
+		long getSrcY(int dstX, int dstY);
 	}
 
 	public static void transform(SrcImg src, DstImg dst, Transformation trans) {
@@ -60,8 +60,8 @@ public class Img {
 
 		for (int y = 0; y < h; y++)
 			for (int x = 0; x < w; x++) {
-				long srcX = trans.getX(x, y);
-				long srcY = trans.getY(x, y);
+				long srcX = trans.getSrcX(x, y);
+				long srcY = trans.getSrcY(x, y);
 
 				int pixel00 = src.getRGB((int) (srcX >>> 32),
 						(int) (srcY >>> 32));
