@@ -6,7 +6,6 @@ import java.util.List;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.adapter.RectInt;
 import kvv.kvvmap.adapter.RectX;
 import kvv.kvvmap.common.COLOR;
@@ -73,8 +72,7 @@ public class CommonView implements ICommonView {
 
 			@Override
 			public void onPathTilesChanged() {
-				envir.adapter.assertUIThread();
-				CommonView.this.invalidatePathTiles();
+				invalidatePathTiles();
 				updateSel();
 			}
 
@@ -103,21 +101,16 @@ public class CommonView implements ICommonView {
 			}
 		};
 
-		envir.placemarks.setDoc(pmListener);
-		envir.paths.setDoc(pmListener);
+		envir.placemarks.setListener(pmListener);
+		envir.paths.setListener(pmListener);
 		envir.maps.setListener(new MapsListener() {
 			@Override
 			public void mapAdded(String name) {
-				if (tiles != null) {
-					tiles.cancelLoading();
-					tiles.setInvalidAll();
-					Adapter.log("mapAdded notified");
-					repaint();
-				}
+				invalidatePathTiles();
 			}
 		});
 
-		this.tiles = new Tiles(envir.adapter, new TileSource() {
+		TileSource tileSource = new TileSource() {
 			@Override
 			public Tile loadAsync(long id) {
 				TileContent content = new TileContent();
@@ -148,7 +141,10 @@ public class CommonView implements ICommonView {
 
 				return new Tile(envir.adapter, id, img, content);
 			}
-		}, Adapter.MAP_TILES_CACHE_SIZE) {
+		};
+
+		this.tiles = new Tiles(envir.adapter, tileSource,
+				Adapter.MAP_TILES_CACHE_SIZE) {
 			@Override
 			protected void loaded(Tile tile) {
 				repaint();
@@ -248,13 +244,13 @@ public class CommonView implements ICommonView {
 	private Tile getCenterTile() {
 		envir.adapter.assertUIThread();
 
-		PointInt centerXY = new PointInt((int) mapPos.centerX(),
-				(int) mapPos.centerY());
+		int centerX = (int) mapPos.centerX();
+		int centerY = (int) mapPos.centerY();
 
-		int nxC = centerXY.x / Adapter.TILE_SIZE;
-		int nyC = centerXY.y / Adapter.TILE_SIZE;
+		int nxC = centerX / Adapter.TILE_SIZE;
+		int nyC = centerY / Adapter.TILE_SIZE;
 		long id = TileId.make(nxC, nyC, getZoom());
-		Tile tile = tiles.getTile(id, centerXY, false);
+		Tile tile = tiles.getTile(id, centerX, centerY, false);
 		return tile;
 	}
 
@@ -262,8 +258,7 @@ public class CommonView implements ICommonView {
 		Tile tile = getCenterTile();
 		if (tile != null && tile.isMultiple()) {
 			envir.maps.reorder(tile.content.maps.getLast());
-			tiles.setInvalidAll();
-			repaint();
+			invalidatePathTiles();
 		}
 	}
 
@@ -277,7 +272,7 @@ public class CommonView implements ICommonView {
 
 	public void setTopMap(String map) {
 		envir.maps.setTopMap(map);
-		tiles.setInvalidAll();
+		invalidatePathTiles();
 	}
 
 	public void zoomOut() {
@@ -388,13 +383,12 @@ public class CommonView implements ICommonView {
 	}
 
 	private final RectInt screenRect = new RectInt();
-	private final PointInt centerXY = new PointInt(0, 0);
-	
+
 	private void drawTiles(GC gc, int x0, int y0) {
 		tilesDrawn.clear();
 
 		getScreenRectInt(screenRect);
-		
+
 		int nx0 = screenRect.getX() / Adapter.TILE_SIZE;
 		int ny0 = screenRect.getY() / Adapter.TILE_SIZE;
 		int nx1 = (screenRect.getX() + screenRect.getW()) / Adapter.TILE_SIZE;
@@ -403,8 +397,8 @@ public class CommonView implements ICommonView {
 		x0 = (int) (nx0 * Adapter.TILE_SIZE - mapPos.centerX() + x0);
 		y0 = (int) (ny0 * Adapter.TILE_SIZE - mapPos.centerY() + y0);
 
-		centerXY.set((int) mapPos.centerX(),
-				(int) mapPos.centerY());
+		int centerX = (int) mapPos.centerX();
+		int centerY = (int) mapPos.centerY();
 
 		gc.setAntiAlias(true);
 
@@ -413,7 +407,7 @@ public class CommonView implements ICommonView {
 			int y = y0;
 			for (int ny = ny0; ny <= ny1; ny++, y += Adapter.TILE_SIZE) {
 				long id = TileId.make(nx, ny, getZoom());
-				tiles.drawTile(gc, centerXY, id, x, y,
+				tiles.drawTile(gc, centerX, centerY, id, x, y,
 						platformView.loadDuringScrolling() || !scrolling,
 						mapPos.getZoom(), mapPos.getPrevZoom());
 				tilesDrawn.add(id);
@@ -508,15 +502,15 @@ public class CommonView implements ICommonView {
 
 	private void updateSel() {
 		envir.adapter.assertUIThread();
-		if (getInfoLevel() != InfoLevel.HIGH
+		if (infoLevel != InfoLevel.HIGH
 				|| rotationMode == RotationMode.ROTATION_GPS) {
 			cancelSel();
 			select(null);
 			return;
 		}
 		selectionThread.set((int) mapPos.centerX(), (int) mapPos.centerY(),
-				getScreenRect(null), getZoom(), envir.adapter, envir.placemarks,
-				envir.paths, selCallback);
+				getScreenRect(null), getZoom(), envir.adapter,
+				envir.placemarks, envir.paths, selCallback);
 	}
 
 	private RectInt getScreenRectInt(RectInt rect) {
@@ -547,9 +541,9 @@ public class CommonView implements ICommonView {
 	}
 
 	private RectX getScreenRect(RectX rect) {
-		if(rect == null)
+		if (rect == null)
 			rect = new RectX(0, 0, 0, 0);
-		
+
 		int left = -getScreenCenterX();
 		int right = platformView.getWidth() - getScreenCenterX();
 		int top = -getScreenCenterY();
@@ -570,7 +564,7 @@ public class CommonView implements ICommonView {
 		double maxLat = Math.max(Math.max(lat1, lat2), Math.max(lat3, lat4));
 
 		rect.set(minLon, minLat, maxLon - minLon, maxLat - minLat);
-		
+
 		return rect;
 	}
 
@@ -599,21 +593,18 @@ public class CommonView implements ICommonView {
 
 	public void fixMap(String map) {
 		envir.maps.fixMap(map);
-		tiles.setInvalidAll();
-		repaint();
+		invalidatePathTiles();
 	}
 
 	public String fixMap(boolean fix) {
 		if (!fix) {
 			envir.maps.fixMap(null);
-			tiles.setInvalidAll();
-			repaint();
+			invalidatePathTiles();
 			return null;
 		} else {
 			String topMap = getTopMap();
 			envir.maps.fixMap(topMap);
-			tiles.setInvalidAll();
-			repaint();
+			invalidatePathTiles();
 			return topMap;
 		}
 	}
