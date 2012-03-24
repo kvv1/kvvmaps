@@ -16,7 +16,7 @@ public class PlaceMarks implements IPlaceMarks {
 
 	private final List<LocationX> placemarks = new CopyOnWriteArrayList<LocationX>();
 	private volatile LocationX targ;
-	private volatile IPlaceMarksListener doc;
+	private volatile IPlaceMarksListener listener;
 
 	private static final File file = new File(Adapter.PLACEMARKS);
 
@@ -39,14 +39,14 @@ public class PlaceMarks implements IPlaceMarks {
 		}
 	}
 
-	public void setDoc(IPlaceMarksListener l) {
-		doc = l;
+	public void setListener(IPlaceMarksListener l) {
+		listener = l;
 	}
 
 	public void add(LocationX pm) {
 		placemarks.add(pm);
 		Saver.save(this);
-		IPlaceMarksListener doc = this.doc;
+		IPlaceMarksListener doc = this.listener;
 		if (doc != null)
 			doc.onPathTilesChanged();
 	}
@@ -58,7 +58,7 @@ public class PlaceMarks implements IPlaceMarks {
 	public void remove(LocationX pm) {
 		placemarks.remove(pm);
 		Saver.save(this);
-		IPlaceMarksListener doc = this.doc;
+		IPlaceMarksListener doc = this.listener;
 		if (doc != null)
 			doc.onPathTilesChanged();
 	}
@@ -66,14 +66,14 @@ public class PlaceMarks implements IPlaceMarks {
 	public void set(List<LocationX> pms) {
 		placemarks.clear();
 		placemarks.addAll(pms);
-		IPlaceMarksListener doc = this.doc;
+		IPlaceMarksListener doc = this.listener;
 		if (doc != null)
 			doc.onPathTilesChanged();
 	}
 
 	public void setTarget(LocationX targ) {
 		this.targ = targ;
-		IPlaceMarksListener doc = this.doc;
+		IPlaceMarksListener doc = this.listener;
 		if (doc != null)
 			doc.onPathTilesChanged();
 	}

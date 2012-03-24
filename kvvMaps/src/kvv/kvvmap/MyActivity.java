@@ -398,7 +398,7 @@ public class MyActivity extends Activity {
 							gpsOn();
 						} else {
 							gpsOff();
-							if(getRotationMode() == RotationMode.ROTATION_COMPASS)
+							if(getRotationMode() == RotationMode.ROTATION_GPS)
 								setRotationMode(RotationMode.ROTATION_NONE);
 						}
 					}

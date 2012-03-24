@@ -80,8 +80,8 @@ public class KvvMapsService extends Service {
 		@Override
 		public void disconnect() {
 			mapsDir.setListener(null);
-			paths.setDoc(null);
-			placeMarks.setDoc(null);
+			paths.setListener(null);
+			placeMarks.setListener(null);
 			KvvMapsService.this.listener = null;
 		}
 
@@ -191,10 +191,10 @@ public class KvvMapsService extends Service {
 		h.removeCallbacksAndMessages(null);
 
 		if (placeMarks != null)
-			placeMarks.setDoc(null);
+			placeMarks.setListener(null);
 		placeMarks = null;
 		if (paths != null)
-			paths.setDoc(null);
+			paths.setListener(null);
 		paths = null;
 		if (mapsDir != null)
 			mapsDir.setListener(null);

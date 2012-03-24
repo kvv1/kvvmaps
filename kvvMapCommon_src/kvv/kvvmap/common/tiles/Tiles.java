@@ -2,7 +2,6 @@ package kvv.kvvmap.common.tiles;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
-import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.adapter.RectInt;
 import kvv.kvvmap.common.Cache;
 import kvv.kvvmap.common.Recycleable;
@@ -62,25 +61,26 @@ public abstract class Tiles implements Recycleable {
 		}
 	}
 
-	public Tile getTile(long id, PointInt centerXY, boolean startLoadingIfNeeded) {
+	public Tile getTile(long id, int centerX, int centerY,
+			boolean startLoadingIfNeeded) {
 		adapter.assertUIThread();
 		Tile tile = tileCache.get(id);
 		if (tile != null) {
 			if (tile.expired && startLoadingIfNeeded) {
-				loader.load(id, callback, centerXY);
+				loader.load(id, callback, centerX, centerY);
 			}
 			return tile;
 		}
 		if (startLoadingIfNeeded)
-			loader.load(id, callback, centerXY);
+			loader.load(id, callback, centerX, centerY);
 		return null;
 	}
 
 	private final RectInt src = new RectInt();
 	private final RectInt dst = new RectInt();
 
-	public void drawTile(GC gc, PointInt centerXY, long id, int x, int y,
-			boolean loadIfNeeded, int zoom, int prevZoom) {
+	public void drawTile(GC gc, int centerX, int centerY, long id, int x,
+			int y, boolean loadIfNeeded, int zoom, int prevZoom) {
 		adapter.assertUIThread();
 
 		int _sz = Adapter.TILE_SIZE;
@@ -90,7 +90,7 @@ public abstract class Tiles implements Recycleable {
 		int _ny = TileId.ny(id);
 		int _z = TileId.zoom(id);
 
-		Tile tile = getTile(id, centerXY, loadIfNeeded);
+		Tile tile = getTile(id, centerX, centerY, loadIfNeeded);
 		if (tile != null) {
 			src.set(_x, _y, _sz, _sz);
 			dst.set(x, y, Adapter.TILE_SIZE, Adapter.TILE_SIZE);
@@ -111,7 +111,8 @@ public abstract class Tiles implements Recycleable {
 				_ny /= 2;
 				_z--;
 
-				tile = getTile(TileId.make(_nx, _ny, _z), centerXY, false);
+				tile = getTile(TileId.make(_nx, _ny, _z), centerX, centerY,
+						false);
 				if (tile != null) {
 					src.set(_x, _y, _sz, _sz);
 					dst.set(x, y, Adapter.TILE_SIZE, Adapter.TILE_SIZE);
@@ -123,28 +124,28 @@ public abstract class Tiles implements Recycleable {
 		if (zoom < prevZoom && _z < Utils.MAX_ZOOM) {
 			src.set(0, 0, Adapter.TILE_SIZE, Adapter.TILE_SIZE);
 
-			tile = getTile(TileId.make(_nx * 2, _ny * 2, _z + 1), centerXY,
-					false);
+			tile = getTile(TileId.make(_nx * 2, _ny * 2, _z + 1), centerX,
+					centerY, false);
 			if (tile != null) {
 				dst.set(x, y, Adapter.TILE_SIZE / 2, Adapter.TILE_SIZE / 2);
 				tile.draw(gc, src, dst);
 			}
-			tile = getTile(TileId.make(_nx * 2 + 1, _ny * 2, _z + 1), centerXY,
-					false);
+			tile = getTile(TileId.make(_nx * 2 + 1, _ny * 2, _z + 1), centerX,
+					centerY, false);
 			if (tile != null) {
 				dst.set(x + Adapter.TILE_SIZE / 2, y, Adapter.TILE_SIZE / 2,
 						Adapter.TILE_SIZE / 2);
 				tile.draw(gc, src, dst);
 			}
-			tile = getTile(TileId.make(_nx * 2, _ny * 2 + 1, _z + 1), centerXY,
-					false);
+			tile = getTile(TileId.make(_nx * 2, _ny * 2 + 1, _z + 1), centerX,
+					centerY, false);
 			if (tile != null) {
 				dst.set(x, y + Adapter.TILE_SIZE / 2, Adapter.TILE_SIZE / 2,
 						Adapter.TILE_SIZE / 2);
 				tile.draw(gc, src, dst);
 			}
 			tile = getTile(TileId.make(_nx * 2 + 1, _ny * 2 + 1, _z + 1),
-					centerXY, false);
+					centerX, centerY, false);
 			if (tile != null) {
 				dst.set(x + Adapter.TILE_SIZE / 2, y + Adapter.TILE_SIZE / 2,
 						Adapter.TILE_SIZE / 2, Adapter.TILE_SIZE / 2);

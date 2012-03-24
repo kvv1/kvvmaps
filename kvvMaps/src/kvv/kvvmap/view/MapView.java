@@ -377,7 +377,7 @@ public class MapView extends View implements IPlatformView {
 	@Override
 	public void repaint() {
 		postInvalidate();
-		if(activity != null)
+		if (activity != null)
 			activity.updateButtons();
 	}
 
@@ -393,32 +393,32 @@ public class MapView extends View implements IPlatformView {
 		commonView.dimmMyLocation();
 	}
 
-//	private void updateButtons() {
-//		if (activity == null || commonView == null)
-//			return;
-//
-//		View button = activity.findViewById(R.id.here);
-//		if (commonView.getMyLocation() != null && !commonView.isOnMyLocation())
-//			button.setVisibility(View.VISIBLE);
-//		else
-//			button.setVisibility(View.GONE);
-//
-//		Button toTarget = (Button) activity.findViewById(R.id.toTarget);
-//		LocationX target = commonView.getTarget();
-//		if (target != null) {
-//			toTarget.setVisibility(View.VISIBLE);
-//			int dist = (int) commonView.getLocation().distanceTo(target);
-//			toTarget.setText(Utils.formatDistance(dist));
-//		} else {
-//			toTarget.setVisibility(View.GONE);
-//		}
-//
-//		((KvvMapsButton) activity.findViewById(R.id.rotate))
-//				.setEnabled(commonView != null && commonView.isMultiple());
-//		((KvvMapsButton) activity.findViewById(R.id.edit))
-//				.setVisibility(getInfoLevel() != InfoLevel.LOW
-//						&& getSel() != null ? VISIBLE : INVISIBLE);
-//	}
+	// private void updateButtons() {
+	// if (activity == null || commonView == null)
+	// return;
+	//
+	// View button = activity.findViewById(R.id.here);
+	// if (commonView.getMyLocation() != null && !commonView.isOnMyLocation())
+	// button.setVisibility(View.VISIBLE);
+	// else
+	// button.setVisibility(View.GONE);
+	//
+	// Button toTarget = (Button) activity.findViewById(R.id.toTarget);
+	// LocationX target = commonView.getTarget();
+	// if (target != null) {
+	// toTarget.setVisibility(View.VISIBLE);
+	// int dist = (int) commonView.getLocation().distanceTo(target);
+	// toTarget.setText(Utils.formatDistance(dist));
+	// } else {
+	// toTarget.setVisibility(View.GONE);
+	// }
+	//
+	// ((KvvMapsButton) activity.findViewById(R.id.rotate))
+	// .setEnabled(commonView != null && commonView.isMultiple());
+	// ((KvvMapsButton) activity.findViewById(R.id.edit))
+	// .setVisibility(getInfoLevel() != InfoLevel.LOW
+	// && getSel() != null ? VISIBLE : INVISIBLE);
+	// }
 
 	public void dispose() {
 		assertUIThread();
@@ -477,13 +477,6 @@ public class MapView extends View implements IPlatformView {
 	public void setRotationMode(RotationMode rotationMode) {
 		if (commonView != null) {
 			commonView.setRotationMode(rotationMode);
-			// if(rotationMode == RotationMode.ROTATION_GPS)
-			// commonView.setMyLocation(new LocationX(30, 60) {
-			// @Override
-			// public float getBearing() {
-			// return 10;
-			// }
-			// }, true);
 		}
 	}
 

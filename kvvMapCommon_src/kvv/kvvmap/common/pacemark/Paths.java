@@ -43,14 +43,14 @@ public final class Paths {
 
 	}
 
-	private final PlaceMarksListener doc = new PlaceMarksListener();
+	private final PlaceMarksListener listener = new PlaceMarksListener();
 
 	public Paths() {
 		load();
 	}
 
-	public void setDoc(IPlaceMarksListener l) {
-		doc.setListener(l);
+	public void setListener(IPlaceMarksListener l) {
+		listener.setListener(l);
 	}
 
 	public void clear() {
@@ -92,7 +92,7 @@ public final class Paths {
 
 							List<LocationX> pms = PathIO.readPlaceMarks(rd,
 									line);
-							final Path path = new Path(file, pms, en, doc);
+							final Path path = new Path(file, pms, en, listener);
 							paths.add(path);
 							time = System.currentTimeMillis() - time;
 							Adapter.log("path " + path.getFile() + " added "
@@ -103,7 +103,7 @@ public final class Paths {
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
-					doc.onPathTilesChangedAsync();
+					listener.onPathTilesChangedAsync();
 				}
 			}
 
@@ -121,9 +121,9 @@ public final class Paths {
 	private Path createPath(List<LocationX> pms, String name) {
 		String pathName = name;
 		File file = new File(Adapter.PATH_ROOT + "/" + pathName);
-		Path path = new Path(file, pms, true, doc);
+		Path path = new Path(file, pms, true, listener);
 		paths.add(path);
-		doc.onPathTilesChanged();
+		listener.onPathTilesChanged();
 		return path;
 	}
 
@@ -137,7 +137,7 @@ public final class Paths {
 		File oldFile = path.getFile();
 		path.setFile(newFile);
 		oldFile.renameTo(newFile);
-		doc.onPathTilesChanged();
+		listener.onPathTilesChanged();
 
 		return true;
 	}
@@ -145,14 +145,14 @@ public final class Paths {
 	public void remove(Path path) {
 		paths.remove(path);
 		path.getFile().delete();
-		doc.onPathTilesChanged();
+		listener.onPathTilesChanged();
 	}
 
 	public void split(Path path, LocationX pm) {
 		List<LocationX> pms = path.split(pm);
 		Path newPath = createPath(pms, getNewPathName());
 		Saver.save(newPath);
-		doc.onPathTilesChanged();
+		listener.onPathTilesChanged();
 	}
 
 	public Collection<Path> getPaths() {

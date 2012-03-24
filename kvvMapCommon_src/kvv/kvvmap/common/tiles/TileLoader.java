@@ -6,7 +6,6 @@ import java.util.ListIterator;
 import java.util.Set;
 
 import kvv.kvvmap.adapter.Adapter;
-import kvv.kvvmap.adapter.PointInt;
 
 public class TileLoader {
 	private final Adapter adapter;
@@ -73,8 +72,8 @@ public class TileLoader {
 		}
 	};
 
-	public void load(Long id, final TileLoaderCallback callback,
-			PointInt centerXY) {
+	public void load(Long id, final TileLoaderCallback callback, int centerX,
+			int centerY) {
 		adapter.assertUIThread();
 		// log("load " + getId(id));
 		synchronized (queue) {
@@ -87,18 +86,18 @@ public class TileLoader {
 					return;
 
 			int d1 = Math.abs(TileId.nx(id) * Adapter.TILE_SIZE
-					+ Adapter.TILE_SIZE / 2 - centerXY.x)
+					+ Adapter.TILE_SIZE / 2 - centerX)
 					+ Math.abs(TileId.ny(id) * Adapter.TILE_SIZE
-							+ Adapter.TILE_SIZE / 2 - centerXY.y);
+							+ Adapter.TILE_SIZE / 2 - centerY);
 
 			ListIterator<Request> it = queue.listIterator();
 			while (it.hasNext()) {
 				Request p = it.next();
 				long id1 = p.id;
 				int d2 = Math.abs(TileId.nx(id1) * Adapter.TILE_SIZE
-						+ Adapter.TILE_SIZE / 2 - centerXY.x)
+						+ Adapter.TILE_SIZE / 2 - centerX)
 						+ Math.abs(TileId.ny(id1) * Adapter.TILE_SIZE
-								+ Adapter.TILE_SIZE / 2 - centerXY.y);
+								+ Adapter.TILE_SIZE / 2 - centerY);
 				if (d2 > d1) {
 					it.previous();
 					break;

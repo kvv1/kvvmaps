@@ -10,8 +10,8 @@ import kvv.utils.IntHashMap;
 
 public class YandexMap implements MapDescr {
 
-	private int minY;
-	private int minX;
+//	private int minY;
+//	private int minX;
 	private int h;
 	private int w;
 
@@ -37,8 +37,8 @@ public class YandexMap implements MapDescr {
 			}
 		}
 
-		this.minY = minY;
-		this.minX = minX;
+//		this.minY = minY;
+//		this.minX = minX;
 		this.h = (maxY - minY + 1) * 256;
 		this.w = (maxX - minX + 1) * 256;
 	}
