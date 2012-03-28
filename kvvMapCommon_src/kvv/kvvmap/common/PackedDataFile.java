@@ -9,9 +9,11 @@ import java.io.RandomAccessFile;
 
 public class PackedDataFile {
 	private final RandomAccessFile raf;
+	private final int off;
 
-	public PackedDataFile(File file) throws FileNotFoundException {
+	public PackedDataFile(File file, int dataOff) throws FileNotFoundException {
 		raf = new RandomAccessFile(file, "r");
+		off = dataOff;
 	}
 
 	public synchronized InputStream getInputStream(int off) throws IOException {
@@ -19,7 +21,7 @@ public class PackedDataFile {
 	}
 
 	public byte[] getBytes(int off) throws IOException {
-		raf.seek(off);
+		raf.seek(off + this.off);
 		int len = raf.readInt();
 		byte[] buf = new byte[len];
 		raf.readFully(buf);

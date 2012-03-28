@@ -24,6 +24,7 @@ public class Convert {
 
 	static boolean debug = false;
 	static int qual = -1;
+	static boolean noborder = false;
 
 	public static void main(String[] args) throws IOException, MatrixException {
 		int zoom = 0;
@@ -57,6 +58,8 @@ public class Convert {
 				debug = true;
 			} else if (args[i].equals("-yandex")) {
 				yandex = true;
+			} else if (args[i].equals("-noborder")) {
+				noborder = true;
 			} else if (args[i].equals("-noaddpoints")) {
 				noAddPoints = true;
 			} else {
@@ -97,7 +100,7 @@ public class Convert {
 				MapDescr1 mapDescr = null;
 				if (args[0].endsWith(".map"))
 					mapDescr = new OziMapDescr(new File(args[0]), zoom, debug,
-							min, max, noAddPoints);
+							min, max, noAddPoints, noborder);
 				else if (args[0].endsWith(".cal"))
 					mapDescr = new KvvMapDescr(new File(args[0]), zoom, debug,
 							min, max, noAddPoints);

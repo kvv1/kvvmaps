@@ -47,7 +47,7 @@ public class MapsDir {
 		Adapter.log("mapDir " + name + " loading...");
 		if (dirs != null) {
 			maps.put(name, dirs);
-			Adapter.log("mapDir " + name + " loaded l = " + l);
+			Adapter.log("mapDir " + name + " loaded");
 			if (l != null)
 				l.mapAdded(name);
 			Adapter.logMem();
@@ -58,11 +58,15 @@ public class MapsDir {
 		List<MapDir> res = new ArrayList<MapDir>();
 
 		if (file.getName().endsWith(".dir")) {
-			res.add(new MapDir(file));
+			res.add(new MapDir(file, false));
+		} else if (file.getName().endsWith(".kvvmap")) {
+			res.add(new MapDir(file, true));
 		} else if (file.isDirectory()) {
 			for (File f : file.listFiles()) {
 				if (f.getName().endsWith(".dir"))
-					res.add(new MapDir(f));
+					res.add(new MapDir(f, false));
+				else if(f.getName().endsWith(".kvvmap"))
+					res.add(new MapDir(f, true));
 			}
 		}
 		if (res.isEmpty())
