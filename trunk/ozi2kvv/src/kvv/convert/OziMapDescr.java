@@ -13,8 +13,8 @@ import kvv.kvvmap.conversion.MatrixException;
 public class OziMapDescr extends MapDescrBase {
 
 	public OziMapDescr(File inFile, int zoom, boolean debug, Integer min,
-			Integer max, boolean noAddPoints) throws IOException,
-			MatrixException {
+			Integer max, boolean noAddPoints, boolean noborder)
+			throws IOException, MatrixException {
 
 		boolean transverse = false;
 		boolean pulkovo = false;
@@ -61,7 +61,6 @@ public class OziMapDescr extends MapDescrBase {
 					yarr.add((double) y);
 					lonarr.add(lon);
 					latarr.add(lat);
-
 				} else if (strings[0].trim().equals("MMPLL")) {
 					double lon = Double.parseDouble(strings[2].trim());
 					double lat = Double.parseDouble(strings[3].trim());
@@ -87,8 +86,66 @@ public class OziMapDescr extends MapDescrBase {
 		if (fname == null)
 			throw new IOException("cannot parse .map file : no map name");
 
+		if (noborder) {
+			Point xyTL = new Point();
+			Point xyTR = new Point();
+			Point xyBR = new Point();
+			Point xyBL = new Point();
+
+			Point2D.Double llTL = new Point2D.Double(1000,
+					-1000);
+			Point2D.Double llTR = new Point2D.Double(-1000,
+					-1000);
+			Point2D.Double llBR = new Point2D.Double(-1000,
+					1000);
+			Point2D.Double llBL = new Point2D.Double(1000,
+					1000);
+
+			for (int i = 0; i < xarr.size(); i++) {
+				double lon = lonarr.get(i);
+				double lat = latarr.get(i);
+				double x = xarr.get(i);
+				double y = yarr.get(i);
+				
+				if(lon + lat > llTR.x + llTR.y){
+					llTR.setLocation(lon, lat);
+					xyTR.setLocation(x, y);
+				}
+				
+				if(lon + lat < llBL.x + llBL.y){
+					llBL.setLocation(lon, lat);
+					xyBL.setLocation(x, y);
+				}
+
+				if(lon - lat > llBR.x - llBR.y){
+					llBR.setLocation(lon, lat);
+					xyBR.setLocation(x, y);
+				}
+				
+				if(lon - lat < llTL.x - llTL.y){
+					llTL.setLocation(lon, lat);
+					xyTL.setLocation(x, y);
+				}
+			}
+			
+			mmpxy = new ArrayList<Point>();
+			mmpll = new ArrayList<Point2D>();
+
+			mmpxy.add(xyTL);
+			mmpxy.add(xyTR);
+			mmpxy.add(xyBR);
+			mmpxy.add(xyBL);
+			
+			mmpll.add(llTL);
+			mmpll.add(llTR);
+			mmpll.add(llBR);
+			mmpll.add(llBL);
+			
+//			System.out.println(xyTL + " " + llTL);
+//			System.exit(0);
+		}
+
 		init(parent, fname, debug, min, max, noAddPoints, zoom, transverse,
 				pulkovo, xarr, yarr, lonarr, latarr, mmpxy, mmpll);
 	}
-
 }

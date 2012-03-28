@@ -12,8 +12,12 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Properties;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -49,7 +53,8 @@ public class CalibrMap extends JFrame {
 	private double lat0;
 	private double lat1;
 
-	private File dir;
+	private Properties props = new Properties();
+	private final static String PROP_FILE = "calibrmap.properties";
 
 	private final JPanel panel = new JPanel() {
 		private static final long serialVersionUID = 1L;
@@ -83,6 +88,11 @@ public class CalibrMap extends JFrame {
 
 	private CalibrMap() throws IOException {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		try {
+			props.load(new FileInputStream(PROP_FILE));
+		} catch (IOException e) {
+		}
 
 		panel.addMouseListener(new MouseAdapter() {
 			@Override
@@ -175,11 +185,20 @@ public class CalibrMap extends JFrame {
 	}
 
 	private void open() {
+		File dir = new File(props.getProperty("dir", "."));
 		JFileChooser fileopen = new JFileChooser(dir);
 		int ret = fileopen.showDialog(null, "ŒÚÍ˚Ú¸ Ù‡ÈÎ");
 		if (ret == JFileChooser.APPROVE_OPTION) {
 			File file = fileopen.getSelectedFile();
 			dir = file.getParentFile();
+			props.put("dir", dir.getAbsolutePath());
+			try {
+				props.store(new FileOutputStream(PROP_FILE), null);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			try {
 				img = ImageIO.read(file);
 			} catch (IOException e1) {
@@ -219,12 +238,12 @@ public class CalibrMap extends JFrame {
 				int part2 = Integer.parseInt(parts[3]);
 				if (part2 == part + 1)
 					setBounds(lon0, lat0, (part - 1) / 2, 6, 12);
-			} else if (name.matches("[a-zA-Z]-\\d\\d-[ABVGabvg]")) {
+			} else if (name.matches("[a-zA-Z]-\\d\\d-[ABVGabvg¿¡¬√‡·‚„]")) {
 				String[] parts = name.split("-");
 				double lat0 = toLat(parts[0].charAt(0));
 				double lon0 = toLon(Integer.parseInt(parts[1]));
 				int part = abvg2idx(parts[2].charAt(0));
-				setBounds(lon0, lat0, part - 1, 2, 2);
+				setBounds(lon0, lat0, part, 2, 2);
 			} else if (name.matches("[a-zA-Z]\\d\\d-\\d\\d")) {
 				String[] parts = name.split("-");
 				double lat0 = toLat(parts[0].charAt(0));
@@ -268,6 +287,14 @@ public class CalibrMap extends JFrame {
 		if (c == 'v')
 			return 2;
 		if (c == 'g')
+			return 3;
+		if (c == '‡')
+			return 0;
+		if (c == '·')
+			return 1;
+		if (c == '‚')
+			return 2;
+		if (c == '„')
 			return 3;
 		throw new IllegalArgumentException("letter = " + c);
 	}

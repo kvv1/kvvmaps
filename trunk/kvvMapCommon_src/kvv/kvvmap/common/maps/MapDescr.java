@@ -28,8 +28,7 @@ public class MapDescr extends MapDescrBase {
 		this.mapDir = mapDir;
 
 		for (int i = 0; i < mapDir.length; i++) {
-			pdf[i] = new PackedDataFile(new File(mapDir[i].filePath.substring(
-					0, mapDir[i].filePath.lastIndexOf(".dir")) + ".pac"));
+			pdf[i] = new PackedDataFile(new File(mapDir[i].dataPath), mapDir[i].dataOff);
 		}
 	}
 
