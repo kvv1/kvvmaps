@@ -17,7 +17,6 @@ import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Pair;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maps.Maps;
-import kvv.kvvmap.common.maps.MapsDir;
 import kvv.kvvmap.common.pacemark.ISelectable;
 import kvv.kvvmap.common.pacemark.Path;
 import kvv.kvvmap.common.pacemark.PathSelection;
@@ -72,6 +71,7 @@ public class MyActivity extends Activity {
 	private static final String FOLLOW_GPS_SETTING = "followGPS";
 	private static final String KINETIC_SCROLLING_SETTING = "kineticScrolling";
 	private static final String LOAD_DURING_SCROLLING_SETTING = "loadDuringScrolling";
+	private static final String LARGE_SETTING = "largeZoom";
 
 	public static final String PREFS_NAME = "KvvMapPrefsFile";
 
@@ -80,29 +80,18 @@ public class MyActivity extends Activity {
 	private static final int MENU_ADD_PLACEMARK = 105;
 	private static final int MENU_KINETIC_SCROLLING = 106;
 	private static final int MENU_LOAD_DURING_SCROLLING = 107;
-
 	private static final int MENU_TRACKS = 108;
-
-	// private static final int MENU_ROTATION_GROUP = 109;
-	// private static final int MENU_ROTATION_NONE = MENU_ROTATION_GROUP * 10 +
-	// 1;
-	// private static final int MENU_ROTATION_COMPASS = MENU_ROTATION_GROUP * 10
-	// + 2;
-	// private static final int MENU_ROTATION_GPS = MENU_ROTATION_GROUP * 10 +
-	// 3;
+	private static final int MENU_LARGE = 109;
 
 	private static final int MENU_DEBUG_DRAW = 110;
 	private static final int MENU_ABOUT = 111;
 	private static final int MENU_TOGGLE_BUTTONS = 112;
 
 	private static final int MENU_UPDATE = 113;
-	// private static final int MENU_UPDATE1 = 114;
 
 	private MapView view;
 	private DiagramView diagramView;
 	private TextView altSpeed;
-
-	// public static MediaPlayer mediaPlayer;
 
 	private Adapter adapter;
 	private PowerManager.WakeLock wakeLock;
@@ -239,10 +228,9 @@ public class MyActivity extends Activity {
 						+ MyActivity.this);
 				mapsService = (IKvvMapsService) service;
 
-				MapsDir mapsDir = mapsService.getMapsDir();
 				Environment envir = new Environment(adapter,
 						mapsService.getPaths(), mapsService.getPlacemarks(),
-						new Maps(adapter, mapsDir), mapsDir);
+						new Maps(adapter, mapsService.getMapsDir()));
 
 				Bundle b = mapsService.getBundle();
 				view.init(MyActivity.this, envir, b, getRotationMode());
@@ -273,6 +261,16 @@ public class MyActivity extends Activity {
 		}
 	}
 
+	private void setLarge(boolean large) {
+		DisplayMetrics metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		adapter.setTileSize(large ? Adapter.TILE_SIZE_0 * 2
+				: Adapter.TILE_SIZE_0, metrics.widthPixels,
+				metrics.heightPixels);
+		if (view != null)
+			view.invalidateTiles();
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.w("KVVMAPS", "onCreate");
@@ -289,14 +287,16 @@ public class MyActivity extends Activity {
 		int tileSz = 256;
 		if (metrics.xdpi > 160)
 			tileSz = (int) (tileSz * metrics.xdpi / 145);
-		Adapter.TILE_SIZE = tileSz;
+		Adapter.TILE_SIZE_0 = tileSz;
 
-		int cachesz = (metrics.widthPixels / Adapter.TILE_SIZE + 3)
-				* (metrics.heightPixels / Adapter.TILE_SIZE + 3);
-		Adapter.MAP_TILES_CACHE_SIZE = cachesz * 2;
-		Adapter.RAF_CACHE_SIZE = cachesz * 2;
+		// int cachesz = (metrics.widthPixels / Adapter.TILE_SIZE + 3)
+		// * (metrics.heightPixels / Adapter.TILE_SIZE + 3);
+		// Adapter.MAP_TILES_CACHE_SIZE = cachesz * 2;
+		// Adapter.RAF_CACHE_SIZE = cachesz * 2;
 
 		adapter = new Adapter(this);
+
+		setLarge(settings.getBoolean(LARGE_SETTING, false));
 
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -398,7 +398,7 @@ public class MyActivity extends Activity {
 							gpsOn();
 						} else {
 							gpsOff();
-							if(getRotationMode() == RotationMode.ROTATION_GPS)
+							if (getRotationMode() == RotationMode.ROTATION_GPS)
 								setRotationMode(RotationMode.ROTATION_NONE);
 						}
 					}
@@ -491,9 +491,9 @@ public class MyActivity extends Activity {
 	private final Runnable buttonsUpdater = new Runnable() {
 		@Override
 		public void run() {
-			if(view == null)
+			if (view == null)
 				return;
-			
+
 			View buttons = findViewById(R.id.screenButtons);
 			if (buttonsVisible())
 				buttons.setVisibility(View.VISIBLE);
@@ -523,12 +523,12 @@ public class MyActivity extends Activity {
 
 			((KvvMapsButton) findViewById(R.id.zoomin)).setEnabled(view != null
 					&& view.getZoom() < Utils.MAX_ZOOM);
-			((KvvMapsButton) findViewById(R.id.zoomout)).setEnabled(view != null
-					&& view.getZoom() > Utils.MIN_ZOOM);
-			
-			
+			((KvvMapsButton) findViewById(R.id.zoomout))
+					.setEnabled(view != null && view.getZoom() > Utils.MIN_ZOOM);
+
 			View button = findViewById(R.id.here);
-			if (view != null && view.getMyLocation() != null && !view.isOnMyLocation())
+			if (view != null && view.getMyLocation() != null
+					&& !view.isOnMyLocation())
 				button.setVisibility(View.VISIBLE);
 			else
 				button.setVisibility(View.GONE);
@@ -543,30 +543,30 @@ public class MyActivity extends Activity {
 				toTarget.setVisibility(View.GONE);
 			}
 
-			((KvvMapsButton) findViewById(R.id.rotate))
-					.setEnabled(view != null && view.isMultiple());
-			
+			((KvvMapsButton) findViewById(R.id.rotate)).setEnabled(view != null
+					&& view.isMultiple());
+
 			((KvvMapsButton) findViewById(R.id.edit))
-					.setVisibility(view != null && view.getInfoLevel() != InfoLevel.LOW
-							&& view.getSel() != null ? View.VISIBLE : View.INVISIBLE);
-			
-			
-			if(view != null && view.getLocation() != null) {
-				String lon = Utils
-						.formatLatLon(view.getLocation().getLongitude());
-				String lat = Utils.formatLatLon(view.getLocation().getLatitude());
-	
+					.setVisibility(view != null
+							&& view.getInfoLevel() != InfoLevel.LOW
+							&& view.getSel() != null ? View.VISIBLE
+							: View.INVISIBLE);
+
+			if (view != null && view.getLocation() != null) {
+				String lon = Utils.formatLatLon(view.getLocation()
+						.getLongitude());
+				String lat = Utils.formatLatLon(view.getLocation()
+						.getLatitude());
+
 				String title = lon + " " + lat + " z" + view.getZoom() + " "
 						+ view.getTopMap();
-	
+
 				TextView text = (TextView) findViewById(R.id.mapInfo);
 				text.setText(title);
 			}
 		}
 	};
 
-
-	
 	public void updateButtons() {
 		handler.removeCallbacks(buttonsUpdater);
 		handler.postDelayed(buttonsUpdater, 100);
@@ -605,6 +605,8 @@ public class MyActivity extends Activity {
 				settings.getBoolean(KINETIC_SCROLLING_SETTING, true));
 		menu.findItem(MENU_LOAD_DURING_SCROLLING).setChecked(
 				settings.getBoolean(LOAD_DURING_SCROLLING_SETTING, true));
+		menu.findItem(MENU_LARGE).setChecked(
+				settings.getBoolean(LARGE_SETTING, false));
 
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -628,6 +630,8 @@ public class MyActivity extends Activity {
 				"Плавная прокрутка").setCheckable(true);
 		settingsSubMenu.add(Menu.NONE, MENU_LOAD_DURING_SCROLLING, 0,
 				"Подгружать при прокрутке").setCheckable(true);
+		settingsSubMenu.add(Menu.NONE, MENU_LARGE, 0, "Крупный размер")
+				.setCheckable(true);
 		menu.add(Menu.NONE, MENU_ABOUT, 0, "О программе");
 		menu.add(Menu.NONE, MENU_UPDATE, 0, "Update");
 		menu.add(Menu.NONE, MENU_QUIT, 0, "Выход");
@@ -670,6 +674,16 @@ public class MyActivity extends Activity {
 			ed.commit();
 			return true;
 		}
+
+		case MENU_LARGE: {
+			Editor ed = settings.edit();
+			ed.putBoolean(LARGE_SETTING,
+					!settings.getBoolean(LARGE_SETTING, false));
+			ed.commit();
+			setLarge(settings.getBoolean(LARGE_SETTING, false));
+			return true;
+		}
+
 		case MENU_UPDATE:
 			try {
 				updateSoftware();
@@ -761,7 +775,7 @@ public class MyActivity extends Activity {
 		prefsPrivateEditor.putBoolean("debugDraw", Adapter.debugDraw);
 		prefsPrivateEditor.commit();
 		if (view != null)
-			view.invalidatePathTiles();
+			view.invalidateTiles();
 	}
 
 	static class PathLocPair extends Pair<Path, LocationX> {
@@ -973,8 +987,10 @@ public class MyActivity extends Activity {
 		view = null;
 		diagramView = null;
 
-		adapter.recycle();
-		adapter = null;
+		if (adapter != null) {
+			adapter.recycle();
+			adapter = null;
+		}
 
 		super.onDestroy();
 		System.runFinalizersOnExit(true);

@@ -30,7 +30,7 @@ public class CommonView implements ICommonView {
 
 	private final IPlatformView platformView;
 
-	private final MapViewParams mapPos = new MapViewParams();
+	private final MapViewParams viewParams = new MapViewParams();
 
 	private volatile InfoLevel infoLevel = InfoLevel.HIGH;
 
@@ -72,7 +72,7 @@ public class CommonView implements ICommonView {
 
 			@Override
 			public void onPathTilesChanged() {
-				invalidatePathTiles();
+				invalidateTiles();
 				updateSel();
 			}
 
@@ -106,7 +106,7 @@ public class CommonView implements ICommonView {
 		envir.maps.setListener(new MapsListener() {
 			@Override
 			public void mapAdded(String name) {
-				invalidatePathTiles();
+				invalidateTiles();
 			}
 		});
 
@@ -143,8 +143,7 @@ public class CommonView implements ICommonView {
 			}
 		};
 
-		this.tiles = new Tiles(envir.adapter, tileSource,
-				Adapter.MAP_TILES_CACHE_SIZE) {
+		this.tiles = new Tiles(envir.adapter, tileSource) {
 			@Override
 			protected void loaded(Tile tile) {
 				repaint();
@@ -194,10 +193,10 @@ public class CommonView implements ICommonView {
 			if (oldLocation != null
 					&& getScreenRect(null).contains(oldLocation.getLongitude(),
 							oldLocation.getLatitude())) {
-				double dx = mapPos.loc2scrX(myLocation)
-						- mapPos.loc2scrX(oldLocation);
-				double dy = mapPos.loc2scrY(myLocation)
-						- mapPos.loc2scrY(oldLocation);
+				double dx = viewParams.loc2scrX(myLocation)
+						- viewParams.loc2scrX(oldLocation);
+				double dy = viewParams.loc2scrY(myLocation)
+						- viewParams.loc2scrY(oldLocation);
 				scrollBy(dx, dy);
 			} else if (scroll) {
 				animateTo(myLocation);
@@ -211,8 +210,9 @@ public class CommonView implements ICommonView {
 	}
 
 	public boolean isOnMyLocation() {
-		return myLocation != null && Math.abs(mapPos.loc2scrX(myLocation)) < 2
-				&& Math.abs(mapPos.loc2scrY(myLocation)) < 2;
+		return myLocation != null
+				&& Math.abs(viewParams.loc2scrX(myLocation)) < 2
+				&& Math.abs(viewParams.loc2scrY(myLocation)) < 2;
 	}
 
 	public void startScrolling() {
@@ -244,8 +244,8 @@ public class CommonView implements ICommonView {
 	private Tile getCenterTile() {
 		envir.adapter.assertUIThread();
 
-		int centerX = (int) mapPos.centerX();
-		int centerY = (int) mapPos.centerY();
+		int centerX = (int) viewParams.centerX();
+		int centerY = (int) viewParams.centerY();
 
 		int nxC = centerX / Adapter.TILE_SIZE;
 		int nyC = centerY / Adapter.TILE_SIZE;
@@ -258,7 +258,7 @@ public class CommonView implements ICommonView {
 		Tile tile = getCenterTile();
 		if (tile != null && tile.isMultiple()) {
 			envir.maps.reorder(tile.content.maps.getLast());
-			invalidatePathTiles();
+			invalidateTiles();
 		}
 	}
 
@@ -272,7 +272,7 @@ public class CommonView implements ICommonView {
 
 	public void setTopMap(String map) {
 		envir.maps.setTopMap(map);
-		invalidatePathTiles();
+		invalidateTiles();
 	}
 
 	public void zoomOut() {
@@ -286,19 +286,19 @@ public class CommonView implements ICommonView {
 	}
 
 	public int getZoom() {
-		return mapPos.getZoom();
+		return viewParams.getZoom();
 	}
 
 	public void setAngle(float deg) {
 		envir.adapter.assertUIThread();
-		mapPos.setAngle(deg);
+		viewParams.setAngle(deg);
 		repaint();
 	}
 
 	public void setZoom(int zoom) {
 		envir.adapter.assertUIThread();
 		tiles.cancelLoading();
-		mapPos.setZoom(zoom);
+		viewParams.setZoom(zoom);
 		if (rotationMode == RotationMode.ROTATION_GPS)
 			scrollToRotationGPS();
 		repaint();
@@ -307,21 +307,21 @@ public class CommonView implements ICommonView {
 
 	public void animateTo(double lon, double lat) {
 		envir.adapter.assertUIThread();
-		mapPos.animateTo(lon, lat);
+		viewParams.animateTo(lon, lat);
 		repaint();
 		updateSel();
 	}
 
 	public void animateTo(LocationX loc) {
 		envir.adapter.assertUIThread();
-		mapPos.animateTo(loc.getLongitude(), loc.getLatitude());
+		viewParams.animateTo(loc.getLongitude(), loc.getLatitude());
 		repaint();
 		updateSel();
 	}
 
 	public void scrollBy(double dx, double dy) {
 		envir.adapter.assertUIThread();
-		mapPos.scrollBy(dx, dy);
+		viewParams.scrollBy(dx, dy);
 		repaint();
 		cancelSel();
 	}
@@ -336,7 +336,7 @@ public class CommonView implements ICommonView {
 		// long time = System.currentTimeMillis();
 		// int w = gc.getWidth();
 		// int h = gc.getHeight();
-		gc.setTransform((float) (mapPos.angle()), getScreenCenterX(),
+		gc.setTransform((float) (viewParams.angle()), getScreenCenterX(),
 				getScreenCenterY());
 		try {
 			drawTiles(gc, x0, y0);
@@ -345,21 +345,21 @@ public class CommonView implements ICommonView {
 		gc.clearTransform();
 		// long time1 = System.currentTimeMillis();
 		// System.out.println("t1 = " + (time1 - time));
-		ViewHelper.drawMyLocationArrow(gc, x0, y0, mapPos, myLocation,
+		ViewHelper.drawMyLocationArrow(gc, x0, y0, viewParams, myLocation,
 				myLocationDimmed);
 
 		ViewHelper.drawCross(gc, x0, y0);
-		ViewHelper.drawScale(gc, mapPos);
+		ViewHelper.drawScale(gc, viewParams);
 		// long time2 = System.currentTimeMillis();
 		// System.out.println("t2 = " + (time2 - time1));
 
 		LocationX targ = getTarget();
 
 		if (targ != null) {
-			ViewHelper.drawLine(gc, x0, y0, mapPos, getLocation(), targ,
+			ViewHelper.drawLine(gc, x0, y0, viewParams, getLocation(), targ,
 					COLOR.dimm(COLOR.TARG_COLOR));
 			if (myLocation != null)
-				ViewHelper.drawLine(gc, x0, y0, mapPos, myLocation, targ,
+				ViewHelper.drawLine(gc, x0, y0, viewParams, myLocation, targ,
 						COLOR.dimm(COLOR.ARROW_COLOR));
 		}
 
@@ -394,11 +394,11 @@ public class CommonView implements ICommonView {
 		int nx1 = (screenRect.getX() + screenRect.getW()) / Adapter.TILE_SIZE;
 		int ny1 = (screenRect.getY() + screenRect.getH()) / Adapter.TILE_SIZE;
 
-		x0 = (int) (nx0 * Adapter.TILE_SIZE - mapPos.centerX() + x0);
-		y0 = (int) (ny0 * Adapter.TILE_SIZE - mapPos.centerY() + y0);
+		x0 = (int) (nx0 * Adapter.TILE_SIZE - viewParams.centerX() + x0);
+		y0 = (int) (ny0 * Adapter.TILE_SIZE - viewParams.centerY() + y0);
 
-		int centerX = (int) mapPos.centerX();
-		int centerY = (int) mapPos.centerY();
+		int centerX = (int) viewParams.centerX();
+		int centerY = (int) viewParams.centerY();
 
 		gc.setAntiAlias(true);
 
@@ -409,7 +409,7 @@ public class CommonView implements ICommonView {
 				long id = TileId.make(nx, ny, getZoom());
 				tiles.drawTile(gc, centerX, centerY, id, x, y,
 						platformView.loadDuringScrolling() || !scrolling,
-						mapPos.getZoom(), mapPos.getPrevZoom());
+						viewParams.getZoom(), viewParams.getPrevZoom());
 				tilesDrawn.add(id);
 			}
 		}
@@ -431,7 +431,7 @@ public class CommonView implements ICommonView {
 		envir.adapter.assertUIThread();
 		if (infoLevel.ordinal() < InfoLevel.values().length - 1) {
 			infoLevel = InfoLevel.values()[infoLevel.ordinal() + 1];
-			invalidatePathTiles();
+			invalidateTiles();
 			updateSel();
 		}
 	}
@@ -440,14 +440,14 @@ public class CommonView implements ICommonView {
 		envir.adapter.assertUIThread();
 		if (infoLevel.ordinal() > 0) {
 			infoLevel = InfoLevel.values()[infoLevel.ordinal() - 1];
-			invalidatePathTiles();
+			invalidateTiles();
 			updateSel();
 		}
 	}
 
 	public void setInfoLevel(InfoLevel level) {
 		infoLevel = level;
-		invalidatePathTiles();
+		invalidateTiles();
 		updateSel();
 	}
 
@@ -455,8 +455,9 @@ public class CommonView implements ICommonView {
 		return infoLevel;
 	}
 
-	public void invalidatePathTiles() {
+	public void invalidateTiles() {
 		envir.adapter.assertUIThread();
+		// viewParams.reset();
 		if (tiles != null) {
 			tiles.cancelLoading();
 			tiles.setInvalidAll();
@@ -470,12 +471,13 @@ public class CommonView implements ICommonView {
 
 	public LocationX getLocation() {
 		envir.adapter.assertUIThread();
-		return mapPos.getLocation();
+		return viewParams.getLocation();
 	}
 
 	public LocationX getLocation(int dx, int dy) {
 		envir.adapter.assertUIThread();
-		return new LocationX(mapPos.scr2lon(dx, dy), mapPos.scr2lat(dx, dy));
+		return new LocationX(viewParams.scr2lon(dx, dy), viewParams.scr2lat(dx,
+				dy));
 	}
 
 	private void cancelSel() {
@@ -485,7 +487,7 @@ public class CommonView implements ICommonView {
 
 	private void select(ISelectable sel) {
 		CommonView.this.sel = sel;
-		CommonView.this.invalidatePathTiles();
+		CommonView.this.invalidateTiles();
 		if (sel instanceof PathSelection) {
 			platformView.pathSelected((PathSelection) sel);
 		} else {
@@ -508,9 +510,9 @@ public class CommonView implements ICommonView {
 			select(null);
 			return;
 		}
-		selectionThread.set((int) mapPos.centerX(), (int) mapPos.centerY(),
-				getScreenRect(null), getZoom(), envir.adapter,
-				envir.placemarks, envir.paths, selCallback);
+		selectionThread.set((int) viewParams.centerX(),
+				(int) viewParams.centerY(), getScreenRect(null), getZoom(),
+				envir.adapter, envir.placemarks, envir.paths, selCallback);
 	}
 
 	private RectInt getScreenRectInt(RectInt rect) {
@@ -522,14 +524,14 @@ public class CommonView implements ICommonView {
 		int top = -getScreenCenterY();
 		int bottom = platformView.getHeight() - getScreenCenterY();
 
-		int x1 = (int) mapPos.scr2geoX(left, top);
-		int x2 = (int) mapPos.scr2geoX(right, bottom);
-		int x3 = (int) mapPos.scr2geoX(right, top);
-		int x4 = (int) mapPos.scr2geoX(left, bottom);
-		int y1 = (int) mapPos.scr2geoY(left, top);
-		int y2 = (int) mapPos.scr2geoY(right, bottom);
-		int y3 = (int) mapPos.scr2geoY(right, top);
-		int y4 = (int) mapPos.scr2geoY(left, bottom);
+		int x1 = (int) viewParams.scr2geoX(left, top);
+		int x2 = (int) viewParams.scr2geoX(right, bottom);
+		int x3 = (int) viewParams.scr2geoX(right, top);
+		int x4 = (int) viewParams.scr2geoX(left, bottom);
+		int y1 = (int) viewParams.scr2geoY(left, top);
+		int y2 = (int) viewParams.scr2geoY(right, bottom);
+		int y3 = (int) viewParams.scr2geoY(right, top);
+		int y4 = (int) viewParams.scr2geoY(left, bottom);
 
 		int minX = Math.min(Math.min(x1, x2), Math.min(x3, x4));
 		int maxX = Math.max(Math.max(x1, x2), Math.max(x3, x4));
@@ -549,14 +551,14 @@ public class CommonView implements ICommonView {
 		int top = -getScreenCenterY();
 		int bottom = platformView.getHeight() - getScreenCenterY();
 
-		double lon1 = mapPos.scr2lon(left, top);
-		double lon2 = mapPos.scr2lon(right, bottom);
-		double lon3 = mapPos.scr2lon(right, top);
-		double lon4 = mapPos.scr2lon(left, bottom);
-		double lat1 = mapPos.scr2lat(left, top);
-		double lat2 = mapPos.scr2lat(right, bottom);
-		double lat3 = mapPos.scr2lat(right, top);
-		double lat4 = mapPos.scr2lat(left, bottom);
+		double lon1 = viewParams.scr2lon(left, top);
+		double lon2 = viewParams.scr2lon(right, bottom);
+		double lon3 = viewParams.scr2lon(right, top);
+		double lon4 = viewParams.scr2lon(left, bottom);
+		double lat1 = viewParams.scr2lat(left, top);
+		double lat2 = viewParams.scr2lat(right, bottom);
+		double lat3 = viewParams.scr2lat(right, top);
+		double lat4 = viewParams.scr2lat(left, bottom);
 
 		double minLon = Math.min(Math.min(lon1, lon2), Math.min(lon3, lon4));
 		double maxLon = Math.max(Math.max(lon1, lon2), Math.max(lon3, lon4));
@@ -593,18 +595,18 @@ public class CommonView implements ICommonView {
 
 	public void fixMap(String map) {
 		envir.maps.fixMap(map);
-		invalidatePathTiles();
+		invalidateTiles();
 	}
 
 	public String fixMap(boolean fix) {
 		if (!fix) {
 			envir.maps.fixMap(null);
-			invalidatePathTiles();
+			invalidateTiles();
 			return null;
 		} else {
 			String topMap = getTopMap();
 			envir.maps.fixMap(topMap);
-			invalidatePathTiles();
+			invalidateTiles();
 			return topMap;
 		}
 	}

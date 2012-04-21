@@ -234,4 +234,9 @@ public class MapViewSw extends JComponent {
 		}
 	}
 
+	public void setLarge(boolean selected) {
+		Adapter.TILE_SIZE = selected ? 512 : 256;
+		commonView.invalidateTiles();
+	}
+
 }

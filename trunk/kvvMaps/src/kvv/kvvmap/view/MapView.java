@@ -442,9 +442,9 @@ public class MapView extends View implements IPlatformView {
 			commonView.decInfoLevel();
 	}
 
-	public void invalidatePathTiles() {
+	public void invalidateTiles() {
 		if (commonView != null)
-			commonView.invalidatePathTiles();
+			commonView.invalidateTiles();
 	}
 
 	@Override

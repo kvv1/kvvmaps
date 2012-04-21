@@ -12,6 +12,7 @@ import java.io.IOException;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 
 public class SwingWnd extends JFrame {
@@ -86,6 +87,16 @@ public class SwingWnd extends JFrame {
 			}
 		});
 		toolbar.add(targ);
+
+		final JToggleButton large = new JToggleButton("Large");
+		
+		large.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				view.setLarge(large.isSelected());
+			}
+		});
+		toolbar.add(large);
 
 		panel.add(toolbar, BorderLayout.NORTH);
 		panel.add(view);

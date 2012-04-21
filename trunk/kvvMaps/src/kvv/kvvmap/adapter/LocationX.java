@@ -22,6 +22,8 @@ public class LocationX implements ISelectable {
 	private double x;
 	private double y;
 
+	private int tilesize;
+
 	public LocationX(double lon, double lat) {
 		this(lon, lat, 0, 0, 0, 0);
 	}
@@ -74,10 +76,11 @@ public class LocationX implements ISelectable {
 	}
 
 	private void calcXY(int zoom) {
-		if (z != zoom) {
+		if (z != zoom || tilesize != Adapter.TILE_SIZE) {
 			y = Utils.lat2y(lat, zoom);
 			x = Utils.lon2x(lon, zoom);
 			z = zoom;
+			tilesize = Adapter.TILE_SIZE;
 		}
 	}
 
