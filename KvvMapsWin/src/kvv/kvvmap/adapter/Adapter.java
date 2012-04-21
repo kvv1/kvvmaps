@@ -25,7 +25,7 @@ public class Adapter {
 	// public static final int PATH_TILES_CACHE_SIZE = 20;
 	public static final int RAF_CACHE_SIZE = 50;
 
-	public static final int TILE_SIZE = 256;
+	public static  int TILE_SIZE = 256;
 	public static final int TILE_SIZE_G = 256;
 	public static boolean debugDraw;
 

@@ -10,7 +10,7 @@ import kvv.kvvmap.common.tiles.TileLoader.TileSource;
 
 public abstract class Tiles implements Recycleable {
 
-	private final Cache<Long, Tile> tileCache;
+	private Cache<Long, Tile> tileCache;
 	private final Adapter adapter;
 	private final TileLoader loader;
 
@@ -18,37 +18,50 @@ public abstract class Tiles implements Recycleable {
 
 	// private static void log(String s) {}
 
+	private int cacheSize;
+
+	private void checkCacheSize() {
+		if (tileCache == null || cacheSize != Adapter.MAP_TILES_CACHE_SIZE) {
+			if (tileCache != null)
+				tileCache.clear();
+			cacheSize = Adapter.MAP_TILES_CACHE_SIZE;
+			tileCache = new Cache<Long, Tile>(Adapter.MAP_TILES_CACHE_SIZE) {
+				@Override
+				protected void dispose(Tile tile) {
+					tile.dispose();
+				};
+			};
+		}
+	}
+
 	private final TileLoaderCallback callback = new TileLoaderCallback() {
 		@Override
 		public void loaded(Tile tile) {
 			adapter.assertUIThread();
 			adapter.addRecycleable(Tiles.this);
 			// System.out.println(tile.id);
+			checkCacheSize();
 			tileCache.remove(tile.id);
 			tileCache.put(tile.id, tile);
 			Tiles.this.loaded(tile);
 		}
 	};
 
-	public Tiles(Adapter adapter, TileSource tileSource, int cacheSize) {
+	public Tiles(Adapter adapter, TileSource tileSource) {
 		this.adapter = adapter;
 		this.loader = new TileLoader(adapter, tileSource);
-		tileCache = new Cache<Long, Tile>(cacheSize) {
-			@Override
-			protected void dispose(Tile tile) {
-				tile.dispose();
-			};
-		};
 	}
 
 	@Override
 	public void recycle() {
 		adapter.assertUIThread();
+		checkCacheSize();
 		tileCache.clear();
 	}
 
 	public void setInvalid(long id) {
 		adapter.assertUIThread();
+		checkCacheSize();
 		Tile tile = tileCache.get(id);
 		if (tile != null)
 			tile.expired = true;
@@ -56,6 +69,7 @@ public abstract class Tiles implements Recycleable {
 
 	public void setInvalidAll() {
 		adapter.assertUIThread();
+		checkCacheSize();
 		for (long id : tileCache.keySet()) {
 			tileCache.get(id).expired = true;
 		}
@@ -64,6 +78,7 @@ public abstract class Tiles implements Recycleable {
 	public Tile getTile(long id, int centerX, int centerY,
 			boolean startLoadingIfNeeded) {
 		adapter.assertUIThread();
+		checkCacheSize();
 		Tile tile = tileCache.get(id);
 		if (tile != null) {
 			if (tile.expired && startLoadingIfNeeded) {

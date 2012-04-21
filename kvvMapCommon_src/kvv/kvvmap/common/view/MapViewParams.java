@@ -4,21 +4,21 @@ import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.common.Utils;
 
 public final class MapViewParams {
-	private double centerX;
-	private double centerY;
+//	private double centerX;
+//	private double centerY;
 	private int zoom = Utils.MIN_ZOOM;
 	private int prevzoom = Utils.MIN_ZOOM;
 	private float angle;
 	private double cos;
 	private double sin;
+	private LocationX loc = new LocationX(0, 0);
+
 
 	{
 		setAngle(0);
 		// setAngle(45);
 		// setAngle(90);
 	}
-
-	private LocationX loc = new LocationX(0, 0);
 
 	public int getZoom() {
 		return zoom;
@@ -39,25 +39,25 @@ public final class MapViewParams {
 	}
 	
 	public double geo2scrX(double x, double y) {
-		x -= centerX;
-		y -= centerY;
+		x -= centerX();
+		y -= centerY();
 		return x * cos - y * sin;
 	}
 
 	public double geo2scrY(double x, double y) {
-		x -= centerX;
-		y -= centerY;
+		x -= centerX();
+		y -= centerY();
 		return x * sin + y * cos;
 	}
 
 	public double scr2geoX(double x, double y) {
 		double x1 = x * cos + y * sin;
-		return x1 + centerX;
+		return x1 + centerX();
 	}
 
 	public double scr2geoY(double x, double y) {
 		double y1 = -x * sin + y * cos;
-		return y1 + centerY;
+		return y1 + centerY();
 	}
 
 	public double scr2lon(double x, double y) {
@@ -76,17 +76,17 @@ public final class MapViewParams {
 
 	public void setZoom(int zoom) {
 		prevzoom = this.zoom;
-		double lon = loc.getLongitude();
-		double lat = loc.getLatitude();
+//		double lon = loc.getLongitude();
+//		double lat = loc.getLatitude();
 		this.zoom = zoom;
-		animateTo(lon, lat);
+//		animateTo(lon, lat);
 	}
-
+	
 	public void animateTo(double lon, double lat) {
 		if (lat > 85 || lat < -85)
 			return;
-		centerX = Utils.lon2x(lon, zoom);
-		centerY = Utils.lat2y(lat, zoom);
+//		centerX = Utils.lon2x(lon, zoom);
+//		centerY = Utils.lat2y(lat, zoom);
 		loc = new LocationX(lon, lat);
 	}
 
@@ -97,17 +97,17 @@ public final class MapViewParams {
 		double lat = Utils.y2lat(y, zoom);
 		if (lat > 85 || lat < -85)
 			return;
-		centerX = x;
-		centerY = y;
+//		centerX = x;
+//		centerY = y;
 		loc = new LocationX(lon, lat);
 	}
 
 	public double centerX() {
-		return centerX;
+		return loc.getX(zoom);
 	}
 
 	public double centerY() {
-		return centerY;
+		return loc.getY(zoom);
 	}
 
 	public double sin() {

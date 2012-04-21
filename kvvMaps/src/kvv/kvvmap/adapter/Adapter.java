@@ -35,6 +35,7 @@ public class Adapter {
 	public static final String PATH_ROOT = ROOT + "/paths";
 	public static final String PLACEMARKS = ROOT + "/placemarks.pms";
 
+	public static int TILE_SIZE_0;
 	public static int TILE_SIZE;
 
 	public static int MAP_TILES_CACHE_SIZE;
@@ -57,13 +58,13 @@ public class Adapter {
 		handler = new Handler();
 		uiThread = Thread.currentThread();
 		freeBitmaps = new ArrayList<Bitmap>();
-		for (int i = 0; i < MAP_TILES_CACHE_SIZE; i++) {
-			Bitmap bm = Bitmap.createBitmap(TILE_SIZE, TILE_SIZE,
-					Bitmap.Config.ARGB_4444);
-			cnt++;
-			// bm.setDensity(Bitmap.DENSITY_NONE);
-			freeBitmaps.add(bm);
-		}
+		// for (int i = 0; i < MAP_TILES_CACHE_SIZE; i++) {
+		// Bitmap bm = Bitmap.createBitmap(TILE_SIZE, TILE_SIZE,
+		// Bitmap.Config.ARGB_4444);
+		// cnt++;
+		// // bm.setDensity(Bitmap.DENSITY_NONE);
+		// freeBitmaps.add(bm);
+		// }
 
 		// executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
 		executor = Executors.newFixedThreadPool(4, new ThreadFactory() {
@@ -76,6 +77,17 @@ public class Adapter {
 				return t;
 			}
 		});
+	}
+
+	public void setTileSize(int sz, int widthPixels, int heightPixels) {
+		freeBitmaps.clear();
+
+		TILE_SIZE = sz;
+
+		int cachesz = (widthPixels / Adapter.TILE_SIZE + 3)
+				* (heightPixels / Adapter.TILE_SIZE + 3);
+		MAP_TILES_CACHE_SIZE = cachesz * 2;
+		RAF_CACHE_SIZE = cachesz * 2;
 	}
 
 	public synchronized void recycleBitmap(Object img) {
