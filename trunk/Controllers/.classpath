@@ -4,9 +4,8 @@
 	<classpathentry kind="src" output="test-classes" path="test"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="RXTXcomm.jar"/>
-	<classpathentry kind="lib" path="derby.jar"/>
-	<classpathentry kind="lib" path="gson-1.7.1.jar"/>
-	<classpathentry kind="lib" path="commons-net-3.0.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-net-3.0.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gson-1.7.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/RXTXcomm.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

@@ -2,10 +2,9 @@ package kvv.controllers.server;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Level;
 
-import kvv.controllers.server.db.StateLog;
 import kvv.controllers.server.rs485.IController;
-import kvv.controllers.shared.Constants;
 
 public class ControllerWrapper implements IController {
 
@@ -19,12 +18,8 @@ public class ControllerWrapper implements IController {
 	public void setReg(int addr, int reg, int val) throws Exception {
 		try {
 			controller.setReg(addr, reg, val);
-			StateLog.logState(Controllers.get(addr).name,
-					Constants.REG_CONNECTION, 1);
-			StateLog.logState(Controllers.get(addr).name, reg, val);
 		} catch (IOException e) {
-			StateLog.logState(Controllers.get(addr).name,
-					Constants.REG_CONNECTION, 0);
+			Utils.getLogger().log(Level.WARNING, e.getMessage());
 			throw e;
 		}
 	}
@@ -34,12 +29,8 @@ public class ControllerWrapper implements IController {
 		int val;
 		try {
 			val = controller.getReg(addr, reg);
-			StateLog.logState(Controllers.get(addr).name,
-					Constants.REG_CONNECTION, 1);
-			StateLog.logState(Controllers.get(addr).name, reg, val);
 		} catch (IOException e) {
-			StateLog.logState(Controllers.get(addr).name,
-					Constants.REG_CONNECTION, 0);
+			Utils.getLogger().log(Level.WARNING, e.getMessage());
 			throw e;
 		}
 		return val;
@@ -50,16 +41,8 @@ public class ControllerWrapper implements IController {
 		Map<Integer, Integer> regs;
 		try {
 			regs = controller.getRegs(addr);
-			StateLog.logState(Controllers.get(addr).name,
-					Constants.REG_CONNECTION, 1);
-			for (Integer reg : regs.keySet()) {
-				if (reg < Constants.REG_ADC0 || reg >= Constants.REG_ADC0 + 8)
-					StateLog.logState(Controllers.get(addr).name, reg,
-							regs.get(reg));
-			}
 		} catch (IOException e) {
-			StateLog.logState(Controllers.get(addr).name,
-					Constants.REG_CONNECTION, 0);
+			Utils.getLogger().log(Level.WARNING, e.getMessage());
 			throw e;
 		}
 		return regs;

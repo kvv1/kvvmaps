@@ -24,15 +24,15 @@ public class RouterThread extends Thread {
 	@Override
 	public void run() {
 		while (!stopped) {
+			long routerCheckTime = 1000L * Integer.valueOf(Utils.getProp(
+					Constants.propsFile, "routerCheckTimeS"));
+			String routerPassword = Utils.getProp(Constants.propsFile,
+					"routerPassword");
+			String routerPublicIP = Utils.getProp(Constants.propsFile,
+					"routerPublicIP");
+			String routerLocalIP = Utils.getProp(Constants.propsFile,
+					"routerLocalIP");
 			try {
-				String routerPassword = Utils.getProp(Constants.propsFile,
-						"routerPassword");
-				String routerPublicIP = Utils.getProp(Constants.propsFile,
-						"routerPublicIP");
-				String routerLocalIP = Utils.getProp(Constants.propsFile,
-						"routerLocalIP");
-				long routerCheckTime = 1000L * Integer.valueOf(Utils.getProp(
-						Constants.propsFile, "routerCheckTimeS"));
 				tc = new TelnetClient();
 				try {
 					tc.addOptionHandler(new TerminalTypeOptionHandler("VT100",
@@ -68,8 +68,12 @@ public class RouterThread extends Thread {
 				}
 
 				tc.disconnect();
-				Thread.sleep(routerCheckTime);
 			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
+				Thread.sleep(routerCheckTime);
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}

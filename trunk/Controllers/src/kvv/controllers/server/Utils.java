@@ -18,8 +18,15 @@ import com.google.gson.Gson;
 
 public class Utils {
 
-	private static Logger logger;
+	private static volatile Logger logger;
+	private static FileHandler fh;
 
+	public static synchronized void stopLogger() {
+		logger = null;
+		fh.close();
+		fh = null;
+	}
+	
 	public static synchronized Logger getLogger() {
 		if (logger == null) {
 			logger = Logger.getLogger("LOG");

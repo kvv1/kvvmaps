@@ -86,7 +86,7 @@ public class MapViewSw extends JComponent {
 		Adapter adapter = new Adapter();
 		MapsDir mapsDir = new MapsDir(files);
 		envir = new Environment(adapter, new Paths(), new PlaceMarks(),
-				new Maps(adapter, mapsDir), mapsDir);
+				new Maps(adapter, mapsDir));
 
 		commonView = new CommonView(new IPlatformView() {
 

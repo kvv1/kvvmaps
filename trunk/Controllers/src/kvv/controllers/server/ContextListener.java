@@ -1,13 +1,8 @@
 package kvv.controllers.server;
 
-import java.io.File;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import kvv.controllers.server.db.DbConnection;
 import kvv.controllers.server.rs485.Controller;
 import kvv.controllers.server.rs485.ControllerEmul;
 import kvv.controllers.server.rs485.Rs485;
@@ -18,21 +13,6 @@ public class ContextListener implements ServletContextListener {
 	// private ServletContext context = null;
 
 	public void contextInitialized(ServletContextEvent event) {
-		// this.context = event.getServletContext();
-
-		// System.out.println(new File("a.txt").getAbsolutePath());
-
-		try {
-			File file = new File(Constants.ROOT + "DB");
-			String strUrl = "jdbc:derby:" + file.getCanonicalPath()
-					+ ";create=true";
-			DbConnection.dbConnection = DriverManager.getConnection(strUrl);
-			DbConnection.createDB();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		
 		try {
 			boolean emul = Boolean.valueOf(Utils.getProp(Constants.propsFile,
 					"emul"));
@@ -47,12 +27,14 @@ public class ContextListener implements ServletContextListener {
 			e.printStackTrace();
 		}
 
-		LogThread.instance = new LogThread();
-		
-		
-		boolean configRouter = Boolean.valueOf(Utils.getProp(Constants.propsFile,
-				"configRouter"));
-		if(configRouter)
+		boolean logThread = Boolean.valueOf(Utils.getProp(Constants.propsFile,
+				"checkControllers"));
+		if (logThread)
+			LogThread.instance = new LogThread();
+
+		boolean configRouter = Boolean.valueOf(Utils.getProp(
+				Constants.propsFile, "configRouter"));
+		if (configRouter)
 			RouterThread.instance = new RouterThread();
 
 		Scheduler.instance = new Scheduler();
@@ -77,16 +59,11 @@ public class ContextListener implements ServletContextListener {
 			RouterThread.instance.stop();
 			RouterThread.instance = null;
 		}
-		
+
 		Controllers.stopped = true;
 		Controllers.thread.stop();
-		
-		try {
-			DbConnection.dbConnection.close();
-			DbConnection.dbConnection = null;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+
+		Utils.stopLogger();
 
 		System.out.println("The Simple Web App. Has Been Removed");
 		// this.context = null;
