@@ -27,13 +27,14 @@ public class LogThread extends Thread {
 
 				for (ControllerDescr c : controllers) {
 					Thread.sleep(10000);
-					Map<Integer, Integer> map = ControllersServiceImpl.controller.getRegs(c.addr);
+					Map<Integer, Integer> map = ControllersServiceImpl.controller
+							.getRegs(c.addr);
 					List<Integer> regs = new ArrayList<Integer>(map.keySet());
 					Collections.sort(regs);
-//					System.out.print("addr:" + c.addr + " ");
-//					for(Integer reg : regs)
-//						System.out.print(reg + ":" + map.get(reg) + " ");
-//					System.out.println();
+					// System.out.print("addr:" + c.addr + " ");
+					// for(Integer reg : regs)
+					// System.out.print(reg + ":" + map.get(reg) + " ");
+					// System.out.println();
 				}
 
 			} catch (Exception e) {
@@ -41,5 +42,4 @@ public class LogThread extends Thread {
 			}
 		}
 	}
-
 }

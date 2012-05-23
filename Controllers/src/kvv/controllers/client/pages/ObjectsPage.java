@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 
 import kvv.controllers.client.CallbackAdapter;
-import kvv.controllers.client.ControllersMap;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.controls.ControlComposite;
 import kvv.controllers.client.controls.HothouseControl;

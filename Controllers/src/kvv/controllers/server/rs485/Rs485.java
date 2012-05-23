@@ -9,8 +9,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+
+import com.google.gwt.user.client.rpc.core.java.util.Arrays;
 
 import kvv.controllers.server.Utils;
 
@@ -34,7 +37,7 @@ public class Rs485 implements Transceiver {
 				SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 		serPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
 		serPort.setRTS(true);
-		
+
 		Utils.getLogger().log(Level.INFO, "created");
 	}
 
@@ -93,19 +96,23 @@ public class Rs485 implements Transceiver {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// System.out.println("===");
-				return __send(addr, data);
+				return __send(addr, data, i);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		return __send(addr, data);
+		return __send(addr, data, 3);
 	}
 
-	public synchronized byte[] __send(int addr, byte[] data) throws IOException {
+	public synchronized byte[] __send(int addr, byte[] data, int attempt)
+			throws IOException {
 		try {
 			return _send(addr, data);
 		} catch (IOException e) {
-			Utils.getLogger().log(Level.WARNING, e.getMessage());
+			Utils.getLogger().log(
+					Level.WARNING,
+					"addr=" + addr + " attempt=" + attempt + " "
+							+ e.getMessage());
 			throw e;
 		}
 	}
@@ -141,9 +148,13 @@ public class Rs485 implements Transceiver {
 				System.arraycopy(packet1, 2, resp, 0, resp.length);
 				return resp;
 			} else {
-				String msg = "wrong response packet: ";
+				String msg = "wrong response from addr: " + addr;
+				msg += ", cmd: ";
+				for (byte b : data)
+					msg += Integer.toHexString((int) b & 0xFF) + " ";
+				msg += ", response: ";
 				for (byte b : packet1)
-					msg = msg + Integer.toHexString((int) b & 0xFF) + " ";
+					msg += Integer.toHexString((int) b & 0xFF) + " ";
 				throw new IOException(msg);
 			}
 		}
