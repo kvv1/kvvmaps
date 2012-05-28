@@ -23,10 +23,11 @@ public class Utils {
 
 	public static synchronized void stopLogger() {
 		logger = null;
-		fh.close();
+		if (fh != null)
+			fh.close();
 		fh = null;
 	}
-	
+
 	public static synchronized Logger getLogger() {
 		if (logger == null) {
 			logger = Logger.getLogger("LOG");

@@ -22,7 +22,7 @@ public class ControllersPage extends Composite {
 
 	public ControllersPage(final ControllersServiceAsync controllersService) {
 
-		//vertPanel.setSpacing(10);
+		// vertPanel.setSpacing(10);
 
 		Button refreshButton = new Button("Обновить");
 		vertPanel.add(refreshButton);
@@ -39,14 +39,16 @@ public class ControllersPage extends Composite {
 					@Override
 					public void onSuccess(ControllerDescr[] result) {
 						for (ControllerDescr descr : result) {
-							switch (descr.type) {
-							case TYPE1:
-								ControlComposite control = new Type1Control(
-										descr.addr, descr.name,
-										controllersService);
-								objects.add(control);
-								vertPanel.add(control);
-								break;
+							if (descr != null) {
+								switch (descr.type) {
+								case TYPE1:
+									ControlComposite control = new Type1Control(
+											descr.addr, descr.name,
+											controllersService);
+									objects.add(control);
+									vertPanel.add(control);
+									break;
+								}
 							}
 						}
 					}

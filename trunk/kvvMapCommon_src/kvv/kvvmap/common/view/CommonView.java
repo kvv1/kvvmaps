@@ -362,24 +362,6 @@ public class CommonView implements ICommonView {
 				ViewHelper.drawLine(gc, x0, y0, viewParams, myLocation, targ,
 						COLOR.dimm(COLOR.ARROW_COLOR));
 		}
-
-		if (Adapter.debugDraw) {
-			int usedMegs = (int) (Adapter.getNativeHeapAllocatedSize() / 1048576L);
-			int freeMegs = (int) (Adapter.getNativeHeapFreeSize() / 1048576L);
-			int allMegs = (int) (Adapter.getNativeHeapSize() / 1048576L);
-			String mem = "J " + Runtime.getRuntime().totalMemory() / 1024
-					/ 1024 + " " + Runtime.getRuntime().freeMemory() / 1024
-					/ 1024 + " " + Runtime.getRuntime().maxMemory() / 1024
-					/ 1024 + " " + " N " + usedMegs + " " + freeMegs + " "
-					+ allMegs + " ";
-			gc.setTextSize(20);
-
-			ViewHelper.drawText(gc, mem, 10, 50, COLOR.RED, COLOR.WHITE);
-			//
-			// gc.setColor(COLOR.RED);
-			// gc.drawText(mem, 10, 50);
-		}
-
 	}
 
 	private final RectInt screenRect = new RectInt();

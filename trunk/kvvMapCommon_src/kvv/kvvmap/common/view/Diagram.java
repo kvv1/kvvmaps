@@ -17,16 +17,18 @@ public class Diagram {
 	private Runnable r;
 
 	private class Params {
-		Params(PathSelection sel, int w, int h) {
+		Params(PathSelection sel, int w, int h, boolean speedProfile) {
 			super();
 			this.sel = sel;
 			this.w = w;
 			this.h = h;
+			this.speedProfile = speedProfile;
 		}
 
 		final PathSelection sel;
 		final int w;
 		final int h;
+		final boolean speedProfile;
 	}
 
 	private Params params;
@@ -69,14 +71,15 @@ public class Diagram {
 					bm = adapter.allocBitmap(params.w, params.h);
 					GC gc = adapter.getGC(bm);
 					h = params.h;
-					PathDrawer.drawDiagram(gc, params.sel);
+					PathDrawer.drawDiagram(gc, params.sel, params.speedProfile);
 				}
 			}
 		}
 	}
 
-	public synchronized void set(PathSelection sel, int w, int h) {
-		this.params = new Params(sel, w, h);
+	public synchronized void set(PathSelection sel, int w, int h,
+			boolean speedProfile) {
+		this.params = new Params(sel, w, h, speedProfile);
 		if (r == null) {
 			r = new DiagramRunnable();
 			adapter.execBG(r);

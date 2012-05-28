@@ -84,9 +84,9 @@ public class Adapter {
 
 		TILE_SIZE = sz;
 
-		int cachesz = (widthPixels / Adapter.TILE_SIZE + 3)
-				* (heightPixels / Adapter.TILE_SIZE + 3);
-		MAP_TILES_CACHE_SIZE = cachesz * 2;
+		int cachesz = (widthPixels / Adapter.TILE_SIZE + 2)
+				* (heightPixels / Adapter.TILE_SIZE + 2);
+		MAP_TILES_CACHE_SIZE = cachesz;
 		RAF_CACHE_SIZE = cachesz * 2;
 	}
 

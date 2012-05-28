@@ -26,15 +26,18 @@ public class LogThread extends Thread {
 						Constants.controllersFile, ControllerDescr[].class);
 
 				for (ControllerDescr c : controllers) {
-					Thread.sleep(10000);
-					Map<Integer, Integer> map = ControllersServiceImpl.controller
-							.getRegs(c.addr);
-					List<Integer> regs = new ArrayList<Integer>(map.keySet());
-					Collections.sort(regs);
-					// System.out.print("addr:" + c.addr + " ");
-					// for(Integer reg : regs)
-					// System.out.print(reg + ":" + map.get(reg) + " ");
-					// System.out.println();
+					if (c != null) {
+						Thread.sleep(10000);
+						Map<Integer, Integer> map = ControllersServiceImpl.controller
+								.getRegs(c.addr);
+						List<Integer> regs = new ArrayList<Integer>(
+								map.keySet());
+						Collections.sort(regs);
+						// System.out.print("addr:" + c.addr + " ");
+						// for(Integer reg : regs)
+						// System.out.print(reg + ":" + map.get(reg) + " ");
+						// System.out.println();
+					}
 				}
 
 			} catch (Exception e) {

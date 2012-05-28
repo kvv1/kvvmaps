@@ -149,7 +149,7 @@ public class PathDrawer {
 		}
 	}
 
-	public static void drawDiagram(GC gc, PathSelection sel) {
+	public static void drawDiagram(GC gc, PathSelection sel, boolean speedProfile) {
 		int y = gc.getHeight();
 		int w = gc.getWidth();
 
@@ -233,7 +233,7 @@ public class PathDrawer {
 					gc.setColor(COLOR.GREEN);
 					gc.drawLine(pt.x, pt.y, prevPt.x, prevPt.y);
 
-					if (speed >= 0 && speed < 127) {
+					if (speedProfile && speed >= 0 && speed < 127) {
 						if (prevPt1 != null) {
 							gc.setColor(COLOR.YELLOW);
 							gc.drawLine(pt1.x, pt1.y, prevPt1.x, prevPt1.y);
