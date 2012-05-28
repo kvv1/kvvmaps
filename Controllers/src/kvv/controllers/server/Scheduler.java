@@ -70,7 +70,7 @@ public class Scheduler extends Thread {
 				SetCommand[].class);
 
 		for (SetCommand c : defines) {
-			if (cmd.equals(c.name))
+			if (c != null && cmd.equals(c.name))
 				exec(c);
 		}
 	}

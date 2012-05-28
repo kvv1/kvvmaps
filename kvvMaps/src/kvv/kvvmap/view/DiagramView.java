@@ -14,6 +14,7 @@ import android.view.View;
 public class DiagramView extends View implements IPlatformView {
 
 	private Diagram diagram;
+	public boolean speedProfile;
 
 	public DiagramView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -30,7 +31,7 @@ public class DiagramView extends View implements IPlatformView {
 		int h = getHeight();
 
 		if (diagram != null)
-			diagram.set(sel, w, h);
+			diagram.set(sel, w, h, speedProfile);
 
 	}
 

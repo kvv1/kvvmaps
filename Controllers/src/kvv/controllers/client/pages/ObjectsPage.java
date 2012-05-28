@@ -51,7 +51,7 @@ public class ObjectsPage extends Composite {
 	public ObjectsPage(ControllersServiceAsync controllersService) {
 
 		this.controllersService = controllersService;
-		
+
 		vertPanel.setSpacing(10);
 		// flowPanel.setBorderWidth(1);
 
@@ -71,28 +71,30 @@ public class ObjectsPage extends Composite {
 				horizPanel.setBorderWidth(1);
 				// horizPanel.setSpacing(5);
 				for (ObjectDescr descr : result) {
-					switch (descr.type) {
-					case RELAY:
-						RelayControl relayControl = new RelayControl(
-								descr.addr, descr.register, descr.name,
-								ObjectsPage.this.controllersService);
-						horizPanel.add(relayControl);
+					if (descr != null) {
+						switch (descr.type) {
+						case RELAY:
+							RelayControl relayControl = new RelayControl(
+									descr.addr, descr.register, descr.name,
+									ObjectsPage.this.controllersService);
+							horizPanel.add(relayControl);
 
-						objects.put(descr.addr, relayControl);
-						break;
-					case HOTHOUSE:
-						HothouseControl hothouseControl = new HothouseControl(
-								descr.addr, descr.name,
-								ObjectsPage.this.controllersService);
-						horizPanel.add(hothouseControl);
-						objects.put(descr.addr, hothouseControl);
-						break;
-					case SEPARATOR:
-						vertPanel.add(horizPanel);
-						horizPanel = new HorizontalPanel();
-						horizPanel.setBorderWidth(1);
-						// horizPanel.setSpacing(5);
-						break;
+							objects.put(descr.addr, relayControl);
+							break;
+						case HOTHOUSE:
+							HothouseControl hothouseControl = new HothouseControl(
+									descr.addr, descr.name,
+									ObjectsPage.this.controllersService);
+							horizPanel.add(hothouseControl);
+							objects.put(descr.addr, hothouseControl);
+							break;
+						case SEPARATOR:
+							vertPanel.add(horizPanel);
+							horizPanel = new HorizontalPanel();
+							horizPanel.setBorderWidth(1);
+							// horizPanel.setSpacing(5);
+							break;
+						}
 					}
 				}
 				vertPanel.add(horizPanel);
@@ -111,7 +113,7 @@ public class ObjectsPage extends Composite {
 				c.refresh(null);
 				// System.out.println("refr " + addr);
 			}
-			
+
 			controllersService.getRegs(addr,
 					new AsyncCallback<Map<Integer, Integer>>() {
 						@Override

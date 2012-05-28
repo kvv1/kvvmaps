@@ -116,7 +116,7 @@ public class ScheduleFile {
 
 		l: for (int i = 0; i < cmds.length; i++) {
 			for (SetCommand c : defines) {
-				if (cmds[i].equals(c.name)) {
+				if (c != null && cmds[i].equals(c.name)) {
 					res.add(c);
 					continue l;
 				}

@@ -39,8 +39,10 @@ public class Controllers {
 				ControllerDescr[] controllers = Utils.jsonRead(
 						Constants.controllersFile, ControllerDescr[].class);
 				for (ControllerDescr c : controllers) {
-					nameMap.put(c.name, c);
-					addrMap.put(c.addr, c);
+					if (c != null) {
+						nameMap.put(c.name, c);
+						addrMap.put(c.addr, c);
+					}
 				}
 			} catch (Exception e) {
 			}
@@ -60,8 +62,10 @@ public class Controllers {
 						nameMap.clear();
 						addrMap.clear();
 						for (ControllerDescr c : controllers) {
-							nameMap.put(c.name, c);
-							addrMap.put(c.addr, c);
+							if (c != null) {
+								nameMap.put(c.name, c);
+								addrMap.put(c.addr, c);
+							}
 						}
 					}
 

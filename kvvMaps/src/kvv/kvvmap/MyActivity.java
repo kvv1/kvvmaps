@@ -72,6 +72,7 @@ public class MyActivity extends Activity {
 	private static final String KINETIC_SCROLLING_SETTING = "kineticScrolling";
 	private static final String LOAD_DURING_SCROLLING_SETTING = "loadDuringScrolling";
 	private static final String LARGE_SETTING = "largeZoom";
+	private static final String SPEED_PROFILE_SETTING = "speedProfile";
 
 	public static final String PREFS_NAME = "KvvMapPrefsFile";
 
@@ -86,8 +87,9 @@ public class MyActivity extends Activity {
 	private static final int MENU_DEBUG_DRAW = 110;
 	private static final int MENU_ABOUT = 111;
 	private static final int MENU_TOGGLE_BUTTONS = 112;
+	private static final int MENU_SPEED_PROFILE = 113;
 
-	private static final int MENU_UPDATE = 113;
+	private static final int MENU_UPDATE = 114;
 
 	private MapView view;
 	private DiagramView diagramView;
@@ -607,6 +609,8 @@ public class MyActivity extends Activity {
 				settings.getBoolean(LOAD_DURING_SCROLLING_SETTING, true));
 		menu.findItem(MENU_LARGE).setChecked(
 				settings.getBoolean(LARGE_SETTING, false));
+		menu.findItem(MENU_SPEED_PROFILE).setChecked(
+				settings.getBoolean(SPEED_PROFILE_SETTING, false));
 
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -632,6 +636,8 @@ public class MyActivity extends Activity {
 				"Подгружать при прокрутке").setCheckable(true);
 		settingsSubMenu.add(Menu.NONE, MENU_LARGE, 0, "Крупный размер")
 				.setCheckable(true);
+		settingsSubMenu.add(Menu.NONE, MENU_SPEED_PROFILE, 0,
+				"Скоростной профиль").setCheckable(true);
 		menu.add(Menu.NONE, MENU_ABOUT, 0, "О программе");
 		menu.add(Menu.NONE, MENU_UPDATE, 0, "Update");
 		menu.add(Menu.NONE, MENU_QUIT, 0, "Выход");
@@ -681,6 +687,14 @@ public class MyActivity extends Activity {
 					!settings.getBoolean(LARGE_SETTING, false));
 			ed.commit();
 			setLarge(settings.getBoolean(LARGE_SETTING, false));
+			return true;
+		}
+
+		case MENU_SPEED_PROFILE: {
+			Editor ed = settings.edit();
+			ed.putBoolean(SPEED_PROFILE_SETTING,
+					!settings.getBoolean(SPEED_PROFILE_SETTING, false));
+			ed.commit();
 			return true;
 		}
 
@@ -1024,9 +1038,12 @@ public class MyActivity extends Activity {
 	}
 
 	public void pathSelected(PathSelection sel) {
-		if (diagramView != null)
+		if (diagramView != null) {
+			diagramView.speedProfile = settings.getBoolean(
+					SPEED_PROFILE_SETTING, false);
 			diagramView.pathSelected(view != null
 					&& view.getInfoLevel() == InfoLevel.HIGH ? sel : null);
+		}
 	}
 
 }

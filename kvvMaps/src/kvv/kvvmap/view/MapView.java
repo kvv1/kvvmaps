@@ -4,6 +4,7 @@ import kvv.kvvmap.MyActivity;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
+import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.pacemark.ISelectable;
@@ -12,6 +13,7 @@ import kvv.kvvmap.common.view.CommonView;
 import kvv.kvvmap.common.view.CommonView.RotationMode;
 import kvv.kvvmap.common.view.Environment;
 import kvv.kvvmap.common.view.IPlatformView;
+import kvv.kvvmap.common.view.ViewHelper;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -130,6 +132,31 @@ public class MapView extends View implements IPlatformView {
 			paint.setColor(Color.CYAN);
 			paint.setTextSize(24);
 			canvas.drawText("Загрузка карт...", 10, 100, paint);
+		}
+
+		if (Adapter.debugDraw) {
+			int usedMegs = (int) (Adapter.getNativeHeapAllocatedSize() / 1048576L);
+			int freeMegs = (int) (Adapter.getNativeHeapFreeSize() / 1048576L);
+			int allMegs = (int) (Adapter.getNativeHeapSize() / 1048576L);
+			String mem = "J " + Runtime.getRuntime().totalMemory() / 1024
+					/ 1024 + " " + Runtime.getRuntime().freeMemory() / 1024
+					/ 1024 + " " + Runtime.getRuntime().maxMemory() / 1024
+					/ 1024 + " " + " N " + usedMegs + " " + freeMegs + " "
+					+ allMegs + " ";
+			gc.setTextSize(20);
+
+			int y = getHeight() / 3;
+			ViewHelper.drawText(gc, mem, 10, y, COLOR.RED, COLOR.WHITE);
+
+			y += 20;
+
+			ViewHelper.drawText(gc, "cache=" + Adapter.MAP_TILES_CACHE_SIZE
+					+ " rawCache=" + Adapter.RAF_CACHE_SIZE, 10, y, COLOR.RED,
+					COLOR.WHITE);
+
+			//
+			// gc.setColor(COLOR.RED);
+			// gc.drawText(mem, 10, 50);
 		}
 
 	}

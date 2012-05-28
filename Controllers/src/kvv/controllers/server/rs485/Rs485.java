@@ -9,11 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
-
-import com.google.gwt.user.client.rpc.core.java.util.Arrays;
 
 import kvv.controllers.server.Utils;
 
@@ -98,7 +95,7 @@ public class Rs485 implements Transceiver {
 				// System.out.println("===");
 				return __send(addr, data, i);
 			} catch (IOException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 		return __send(addr, data, 3);

@@ -1,5 +1,6 @@
 package kvv.kvvmap.common.tiles;
 
+import android.graphics.Bitmap;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.RectInt;
@@ -19,12 +20,15 @@ public abstract class Tiles implements Recycleable {
 	// private static void log(String s) {}
 
 	private int cacheSize;
+	private int tileSize;
 
 	private void checkCacheSize() {
-		if (tileCache == null || cacheSize != Adapter.MAP_TILES_CACHE_SIZE) {
+		if (tileCache == null || cacheSize != Adapter.MAP_TILES_CACHE_SIZE
+				|| tileSize != Adapter.TILE_SIZE) {
 			if (tileCache != null)
 				tileCache.clear();
 			cacheSize = Adapter.MAP_TILES_CACHE_SIZE;
+			tileSize = Adapter.TILE_SIZE;
 			tileCache = new Cache<Long, Tile>(Adapter.MAP_TILES_CACHE_SIZE) {
 				@Override
 				protected void dispose(Tile tile) {
@@ -38,9 +42,16 @@ public abstract class Tiles implements Recycleable {
 		@Override
 		public void loaded(Tile tile) {
 			adapter.assertUIThread();
+			checkCacheSize();
+			
+			Bitmap bm = (Bitmap)tile.img.img;
+			if(bm.getWidth() != Adapter.TILE_SIZE) {
+				Adapter.log("BITMAP SIZE");
+				return;
+			}
+			
 			adapter.addRecycleable(Tiles.this);
 			// System.out.println(tile.id);
-			checkCacheSize();
 			tileCache.remove(tile.id);
 			tileCache.put(tile.id, tile);
 			Tiles.this.loaded(tile);

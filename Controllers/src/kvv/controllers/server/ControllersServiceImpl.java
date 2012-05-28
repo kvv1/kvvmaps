@@ -38,7 +38,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 				SetCommand[].class);
 		String[] res = new String[defines.length];
 		for (int i = 0; i < defines.length; i++) {
-			if (defines[i].name == null)
+			if (defines[i] != null && defines[i].name == null)
 				res[i] = null;
 			else
 				res[i] = defines[i].name;
@@ -56,7 +56,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		ObjectDescr[] res = Utils.jsonRead(Constants.objectsFile,
 				ObjectDescr[].class);
 		for (ObjectDescr obj : res) {
-			if (obj.controller != null)
+			if (obj != null && obj.controller != null)
 				obj.addr = Controllers.get(obj.controller).addr;
 		}
 		return res;
