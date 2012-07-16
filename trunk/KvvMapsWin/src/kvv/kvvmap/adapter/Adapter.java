@@ -172,4 +172,8 @@ public class Adapter {
 		return 0;
 	}
 
+	public int getBitmapWidth(Object img) {
+		return ((BufferedImage)img).getWidth();
+	}
+
 }

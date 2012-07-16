@@ -1,6 +1,5 @@
 package kvv.kvvmap.common.tiles;
 
-import android.graphics.Bitmap;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.RectInt;
@@ -44,8 +43,7 @@ public abstract class Tiles implements Recycleable {
 			adapter.assertUIThread();
 			checkCacheSize();
 			
-			Bitmap bm = (Bitmap)tile.img.img;
-			if(bm.getWidth() != Adapter.TILE_SIZE) {
+			if(adapter.getBitmapWidth(tile.img.img) != Adapter.TILE_SIZE) {
 				Adapter.log("BITMAP SIZE");
 				return;
 			}

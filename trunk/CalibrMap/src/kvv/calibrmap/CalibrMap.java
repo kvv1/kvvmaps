@@ -230,6 +230,19 @@ public class CalibrMap extends JFrame {
 				double lon0 = toLon(Integer.parseInt(parts[1]));
 				int part = Integer.parseInt(parts[2]);
 				setBounds(lon0, lat0, part - 1, 12, 12);
+			} else if (name.matches("[a-zA-Z]\\d\\d-\\d\\d\\d")) {
+				String[] parts = name.split("-");
+				double lat0 = toLat(parts[0].charAt(0));
+				double lon0 = toLon(Integer.parseInt(parts[0].substring(1, 3)));
+				int part = Integer.parseInt(parts[1]);
+				setBounds(lon0, lat0, part - 1, 12, 12);
+			} else if (name.matches("\\d\\d\\dk--[a-zA-Z]\\d\\d-\\d\\d\\d")) {
+				name = name.substring(6);
+				String[] parts = name.split("-");
+				double lat0 = toLat(parts[0].charAt(0));
+				double lon0 = toLon(Integer.parseInt(parts[0].substring(1, 3)));
+				int part = Integer.parseInt(parts[1]);
+				setBounds(lon0, lat0, part - 1, 12, 12);
 			} else if (name.matches("[a-zA-Z]-\\d\\d-\\d\\d\\d-\\d\\d\\d")) {
 				String[] parts = name.split("-");
 				double lat0 = toLat(parts[0].charAt(0));
@@ -238,13 +251,34 @@ public class CalibrMap extends JFrame {
 				int part2 = Integer.parseInt(parts[3]);
 				if (part2 == part + 1)
 					setBounds(lon0, lat0, (part - 1) / 2, 6, 12);
-			} else if (name.matches("[a-zA-Z]-\\d\\d-[ABVGabvg¿¡¬√‡·‚„]")) {
+			} else if (name.matches("[a-zA-Z]-\\d\\d-[ABVGabvg¿¡¬√‡·‚„1234]")) {
 				String[] parts = name.split("-");
 				double lat0 = toLat(parts[0].charAt(0));
 				double lon0 = toLon(Integer.parseInt(parts[1]));
 				int part = abvg2idx(parts[2].charAt(0));
 				setBounds(lon0, lat0, part, 2, 2);
+			} else if (name.matches("[a-zA-Z]\\d\\d-[ABVGabvg¿¡¬√‡·‚„1234]")) {
+				String[] parts = name.split("-");
+				double lat0 = toLat(parts[0].charAt(0));
+				double lon0 = toLon(Integer.parseInt(parts[0].substring(1, 3)));
+				int part = abvg2idx(parts[1].charAt(0));
+				setBounds(lon0, lat0, part, 2, 2);
+			} else if (name
+					.matches("\\d\\d\\dk--[a-zA-Z]\\d\\d-[ABVGabvg¿¡¬√‡·‚„1234]")) {
+				name = name.substring(6);
+				String[] parts = name.split("-");
+				double lat0 = toLat(parts[0].charAt(0));
+				double lon0 = toLon(Integer.parseInt(parts[0].substring(1, 3)));
+				int part = abvg2idx(parts[1].charAt(0));
+				setBounds(lon0, lat0, part, 2, 2);
 			} else if (name.matches("[a-zA-Z]\\d\\d-\\d\\d")) {
+				String[] parts = name.split("-");
+				double lat0 = toLat(parts[0].charAt(0));
+				double lon0 = toLon(Integer.parseInt(parts[0].substring(1, 3)));
+				int part = Integer.parseInt(parts[1]);
+				setBounds(lon0, lat0, part - 1, 6, 6);
+			} else if (name.matches("\\d\\d\\dk--[a-zA-Z]\\d\\d-\\d\\d")) {
+				name = name.substring(6);
 				String[] parts = name.split("-");
 				double lat0 = toLat(parts[0].charAt(0));
 				double lon0 = toLon(Integer.parseInt(parts[0].substring(1, 3)));
@@ -295,6 +329,14 @@ public class CalibrMap extends JFrame {
 		if (c == '‚')
 			return 2;
 		if (c == '„')
+			return 3;
+		if (c == '1')
+			return 0;
+		if (c == '2')
+			return 1;
+		if (c == '3')
+			return 2;
+		if (c == '4')
 			return 3;
 		throw new IllegalArgumentException("letter = " + c);
 	}
