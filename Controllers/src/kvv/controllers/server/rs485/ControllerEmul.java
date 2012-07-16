@@ -85,4 +85,10 @@ public class ControllerEmul implements IController {
 		}
 		return regs;
 	}
+
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+		
+	}
 }

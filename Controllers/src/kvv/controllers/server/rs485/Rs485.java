@@ -156,4 +156,9 @@ public class Rs485 implements Transceiver {
 			}
 		}
 	}
+
+	@Override
+	public void close() {
+		serPort.close();
+	}
 }

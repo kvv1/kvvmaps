@@ -86,6 +86,7 @@ public class Adapter {
 
 		int cachesz = (widthPixels / Adapter.TILE_SIZE + 2)
 				* (heightPixels / Adapter.TILE_SIZE + 2);
+		cachesz = cachesz * 3 / 2;
 		MAP_TILES_CACHE_SIZE = cachesz;
 		RAF_CACHE_SIZE = cachesz * 2;
 	}
@@ -298,5 +299,9 @@ public class Adapter {
 
 	public static long getNativeHeapSize() {
 		return Debug.getNativeHeapSize();
+	}
+
+	public int getBitmapWidth(Object img) {
+		return ((Bitmap)img).getWidth();
 	}
 }

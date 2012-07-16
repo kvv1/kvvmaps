@@ -63,6 +63,8 @@ public class ContextListener implements ServletContextListener {
 		Controllers.stopped = true;
 		Controllers.thread.stop();
 
+		ControllersServiceImpl.controller.close();
+		
 		Utils.stopLogger();
 
 		System.out.println("The Simple Web App. Has Been Removed");

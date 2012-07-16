@@ -47,4 +47,9 @@ public class ControllerWrapper implements IController {
 		}
 		return regs;
 	}
+
+	@Override
+	public void close() {
+		controller.close();
+	}
 }

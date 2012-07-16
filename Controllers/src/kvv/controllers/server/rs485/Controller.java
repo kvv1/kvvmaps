@@ -92,4 +92,9 @@ public class Controller implements IController { // 9164642959 7378866
 		}
 	}
 
+	@Override
+	public void close() {
+		rs.close();
+	}
+
 }
