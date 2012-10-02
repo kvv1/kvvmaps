@@ -1016,6 +1016,9 @@ public class MyActivity extends Activity {
 	}
 
 	private void unbindDrawables(View view) {
+		if (view == null)
+			return;
+
 		if (view.getBackground() != null) {
 			view.getBackground().setCallback(null);
 		}

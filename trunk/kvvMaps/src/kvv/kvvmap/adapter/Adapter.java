@@ -1,5 +1,6 @@
 package kvv.kvvmap.adapter;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,11 +30,25 @@ import android.os.Handler;
 import android.util.Log;
 
 public class Adapter {
-	public final static String ROOT = Environment.getExternalStorageDirectory()
-			.getAbsolutePath() + "/kvvMaps";
+	public final static String ROOT;
+
+	static {
+		if (new File(Environment.getExternalStorageDirectory()
+				.getAbsolutePath() + "/external_sd/kvvMaps").exists())
+			ROOT = Environment.getExternalStorageDirectory().getAbsolutePath()
+					+ "/external_sd/kvvMaps";
+		else
+			ROOT = Environment.getExternalStorageDirectory().getAbsolutePath()
+					+ "/kvvMaps";
+	}
+
 	public final static String MAPS_ROOT = ROOT + "/maps";
 	public static final String PATH_ROOT = ROOT + "/paths";
 	public static final String PLACEMARKS = ROOT + "/placemarks.pms";
+
+	static {
+		Log.w("KVVMAPS", "MAPS_ROOT = " + MAPS_ROOT);
+	}
 
 	public static int TILE_SIZE_0;
 	public static int TILE_SIZE;
@@ -302,6 +317,6 @@ public class Adapter {
 	}
 
 	public int getBitmapWidth(Object img) {
-		return ((Bitmap)img).getWidth();
+		return ((Bitmap) img).getWidth();
 	}
 }
