@@ -1,12 +1,15 @@
 package kvv.kvvmap.adapter;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +30,7 @@ import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.Handler;
+import android.text.format.DateFormat;
 import android.util.Log;
 
 public class Adapter {
@@ -233,6 +237,7 @@ public class Adapter {
 
 	public static void log(String string) {
 		Log.w("KVVMAPS", string);
+		appendLog(string);
 	}
 
 	public static void logMem() {
@@ -318,5 +323,28 @@ public class Adapter {
 
 	public int getBitmapWidth(Object img) {
 		return ((Bitmap) img).getWidth();
+	}
+
+	public static void appendLog(String text) {
+		text = DateFormat.format("MM/dd/yy hh:mm:ss", new Date()) + " " + text;
+
+		File logFile = new File(ROOT + "/log.txt");
+		if (!logFile.exists()) {
+			try {
+				logFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		try {
+			// BufferedWriter for performance, true to set append to file flag
+			BufferedWriter buf = new BufferedWriter(new FileWriter(logFile,
+					true));
+			buf.append(text);
+			buf.newLine();
+			buf.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

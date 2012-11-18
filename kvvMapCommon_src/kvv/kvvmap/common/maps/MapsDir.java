@@ -50,7 +50,7 @@ public class MapsDir {
 			Adapter.log("mapDir " + name + " loaded");
 			if (l != null)
 				l.mapAdded(name);
-			Adapter.logMem();
+			//Adapter.logMem();
 		}
 	}
 

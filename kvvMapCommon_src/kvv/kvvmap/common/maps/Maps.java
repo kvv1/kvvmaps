@@ -76,8 +76,8 @@ public class Maps {
 			maps.add(new MapDescr(name, cache, adapter, mapDir));
 			if (listener != null)
 				listener.mapAdded(name);
-			Adapter.log("map " + name + " loaded");
-			Adapter.logMem();
+			//Adapter.log("map " + name + " loaded");
+			//Adapter.logMem();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

@@ -41,7 +41,7 @@ public class Tracker implements LocationListener {
 	@Override
 	public void onLocationChanged(Location location) {
 		if (location != null) {
-			if (curPath != null && location.getAccuracy() < 50) {
+			if (curPath != null && location.getAccuracy() < 100) {
 				curPath.addCompact(new LocationX(location));
 //				listener.setMyLocation(new LocationX(location), false);
 			}
