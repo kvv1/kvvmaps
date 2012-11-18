@@ -174,7 +174,7 @@ public class CommonView implements ICommonView {
 		if (myLocation == null)
 			return;
 
-		if (myLocation.hasBearing())
+		if (myLocation.hasBearing() && myLocation.getSpeed() * 3.6 > 5)
 			setAngle(-myLocation.getBearing());
 
 		animateTo(myLocation);

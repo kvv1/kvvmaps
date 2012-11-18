@@ -52,7 +52,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -100,6 +99,10 @@ public class MyActivity extends Activity {
 	private SensorListener sensorListener;
 	private SharedPreferences settings;
 	public IKvvMapsService mapsService;
+	
+	private LocationManager locationManager;
+	private LocationListener locationListener;
+
 
 	private final Handler handler = new Handler();
 
@@ -144,13 +147,6 @@ public class MyActivity extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	private Runnable gpsOff = new Runnable() {
-		@Override
-		public void run() {
-			stopGPS();
-		}
-	};
-
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		Adapter.log("onWindowFocusChanged " + hasFocus);
@@ -181,7 +177,7 @@ public class MyActivity extends Activity {
 
 			wakeLock.acquire();
 
-			handler.removeCallbacks(gpsOff);
+//			handler.removeCallbacks(stopGPS);
 			if (following())
 				startGPS(false);
 			updateButtons();
@@ -193,7 +189,8 @@ public class MyActivity extends Activity {
 			((SensorManager) getSystemService(Context.SENSOR_SERVICE))
 					.unregisterListener(sensorListener);
 
-			handler.postDelayed(gpsOff, 120000);
+			stopGPS();
+			//handler.postDelayed(stopGPS, 120000);
 		}
 
 		super.onWindowFocusChanged(hasFocus);
@@ -201,7 +198,7 @@ public class MyActivity extends Activity {
 
 	@Override
 	protected void onPause() {
-		Log.w("KVVMAPS", "onPause");
+		Adapter.log("onPause");
 
 		super.onPause();
 		System.gc();
@@ -209,7 +206,6 @@ public class MyActivity extends Activity {
 
 	@Override
 	protected void onResume() {
-		Log.w("KVVMAPS", "onResume");
 		Adapter.log("onResume");
 
 		super.onResume();
@@ -217,7 +213,7 @@ public class MyActivity extends Activity {
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		Log.w("KVVMAPS", "onSaveInstanceState");
+		Adapter.log("onSaveInstanceState");
 		super.onSaveInstanceState(outState);
 	}
 
@@ -275,7 +271,7 @@ public class MyActivity extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.w("KVVMAPS", "onCreate");
+		Adapter.log("onCreate " + this);
 		super.onCreate(savedInstanceState);
 
 		settings = getSharedPreferences(PREFS_NAME, 0);
@@ -290,11 +286,6 @@ public class MyActivity extends Activity {
 		if (metrics.xdpi > 160)
 			tileSz = (int) (tileSz * metrics.xdpi / 145);
 		Adapter.TILE_SIZE_0 = tileSz;
-
-		// int cachesz = (metrics.widthPixels / Adapter.TILE_SIZE + 3)
-		// * (metrics.heightPixels / Adapter.TILE_SIZE + 3);
-		// Adapter.MAP_TILES_CACHE_SIZE = cachesz * 2;
-		// Adapter.RAF_CACHE_SIZE = cachesz * 2;
 
 		adapter = new Adapter(this);
 
@@ -850,9 +841,6 @@ public class MyActivity extends Activity {
 		alert.show();
 	}
 
-	private LocationManager locationManager;
-	private LocationListener locationListener;
-
 	public boolean isGPS() {
 		return locationListener != null;
 	}
@@ -863,20 +851,24 @@ public class MyActivity extends Activity {
 				public void onStatusChanged(String provider, int status,
 						Bundle extras) {
 					if (status == LocationProvider.OUT_OF_SERVICE) {
+						Adapter.log("GPS onStatusChanged " + status);
 						// stopFollow();
 					}
 				}
 
 				public void onProviderEnabled(String provider) {
+					Adapter.log("GPS onProviderEnabled " + provider);
 				}
 
 				public void onProviderDisabled(String provider) {
+					Adapter.log("GPS onProviderDisabled " + provider);
 					// stopFollow();
 				}
 
 				private boolean scroll = fromMenu;
 
 				public void onLocationChanged(Location location) {
+					Adapter.log("GPS onLocationChanged ");
 					LocationX loc = new LocationX(location);
 					if (view != null)
 						view.setMyLocation(loc, scroll);
@@ -889,7 +881,9 @@ public class MyActivity extends Activity {
 			};
 
 			locationManager.requestLocationUpdates(
-					LocationManager.GPS_PROVIDER, 1, 1, locationListener);
+					LocationManager.GPS_PROVIDER, 5000L, 20.0f, locationListener);
+			
+			Adapter.log("GPS requestLocationUpdates " + locationListener);
 		}
 	}
 
@@ -897,12 +891,20 @@ public class MyActivity extends Activity {
 		if (locationListener != null) {
 			altSpeed.setText("");
 			locationManager.removeUpdates(locationListener);
+			Adapter.log("GPS removeUpdates " + locationListener);
 			locationListener = null;
 			if (view != null)
 				view.dimmMyLocation();
 			updateButtons();
 		}
 	}
+
+//	private Runnable stopGPS = new Runnable() {
+//		@Override
+//		public void run() {
+//			stopGPS();
+//		}
+//	};
 
 	private void gpsOn() {
 		startGPS(true);

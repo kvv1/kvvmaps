@@ -18,7 +18,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,8 +33,6 @@ public class MapView extends View implements IPlatformView {
 	private CommonView commonView;
 
 	private MyActivity activity;
-
-	private Compass compass;
 
 	private Thread uiThread;
 
@@ -65,7 +62,7 @@ public class MapView extends View implements IPlatformView {
 		this.activity = activity;
 		commonView = new CommonView(this, envir);
 
-		Adapter.logMem();
+		//Adapter.logMem();
 
 		animateTo(new LocationX(30, 60));
 
@@ -123,10 +120,6 @@ public class MapView extends View implements IPlatformView {
 		LocationX targ = commonView.getTarget();
 		if (myLoc != null && targ != null && !commonView.isMyLocationDimmed())
 			targBearing = myLoc.bearingTo(targ);
-
-		if (compass != null)
-			compass.drawCompass(canvas, paint, new Point(getWidth()
-					- getWidth() / 10, getHeight() / 8), targBearing);
 
 		if (activity.mapsService.isLoadingMaps()) {
 			paint.setColor(Color.CYAN);
@@ -370,13 +363,10 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	public void setCompass(float[] values) {
-		if (compass != null) {
-			compass.setValues(values);
-			invalidate();
-		}
+		if (commonView == null)
+			return;
 
-		if (commonView != null
-				&& commonView.getRotationMode() == RotationMode.ROTATION_COMPASS
+		if (commonView.getRotationMode() == RotationMode.ROTATION_COMPASS
 				&& values != null && values.length >= 1) {
 			commonView.setAngle(-values[0]);
 		}
@@ -455,7 +445,6 @@ public class MapView extends View implements IPlatformView {
 		}
 
 		commonView = null;
-		compass = null;
 		activity = null;
 	}
 

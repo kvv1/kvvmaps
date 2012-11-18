@@ -19,7 +19,13 @@ public final class Tile {
 		this.id = id;
 		this.img = img;
 		this.content = context;
-		Adapter.log("Tile " + ++cnt);
+//		Adapter.log("Tile " + ++cnt);
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+//		Adapter.log("~Tile " + --cnt);
+		super.finalize();
 	}
 
 	public synchronized void draw(GC gc, int x, int y) {
@@ -41,10 +47,4 @@ public final class Tile {
 		img = null;
 	}
 	
-	@Override
-	protected void finalize() throws Throwable {
-		Adapter.log("~Tile " + --cnt);
-		super.finalize();
-	}
-
 }
