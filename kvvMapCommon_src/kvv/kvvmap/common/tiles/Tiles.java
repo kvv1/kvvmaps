@@ -1,12 +1,8 @@
 package kvv.kvvmap.common.tiles;
 
 import kvv.kvvmap.adapter.Adapter;
-import kvv.kvvmap.adapter.GC;
-import kvv.kvvmap.adapter.RectInt;
 import kvv.kvvmap.common.Cache;
 import kvv.kvvmap.common.Recycleable;
-import kvv.kvvmap.common.Utils;
-import kvv.kvvmap.common.tiles.TileLoader.TileSource;
 
 public abstract class Tiles implements Recycleable {
 
@@ -14,7 +10,7 @@ public abstract class Tiles implements Recycleable {
 	private final Adapter adapter;
 	private final TileLoader loader;
 
-	protected abstract void loaded(Tile tile);
+	protected abstract void onTileLoaded(Tile tile);
 
 	// private static void log(String s) {}
 
@@ -37,28 +33,25 @@ public abstract class Tiles implements Recycleable {
 		}
 	}
 
-	private final TileLoaderCallback callback = new TileLoaderCallback() {
-		@Override
-		public void loaded(Tile tile) {
-			adapter.assertUIThread();
-			checkCacheSize();
-			
-			if(adapter.getBitmapWidth(tile.img.img) != Adapter.TILE_SIZE) {
-				Adapter.log("BITMAP SIZE");
-				return;
-			}
-			
-			adapter.addRecycleable(Tiles.this);
-			// System.out.println(tile.id);
-			tileCache.remove(tile.id);
-			tileCache.put(tile.id, tile);
-			Tiles.this.loaded(tile);
-		}
-	};
+	public void putTile(Tile tile) {
+		adapter.assertUIThread();
+		checkCacheSize();
 
-	public Tiles(Adapter adapter, TileSource tileSource) {
+		if (adapter.getBitmapWidth(tile.img.img) != Adapter.TILE_SIZE) {
+			Adapter.log("BITMAP SIZE");
+			return;
+		}
+
+		adapter.addRecycleable(Tiles.this);
+		// System.out.println(tile.id);
+		tileCache.remove(tile.id);
+		tileCache.put(tile.id, tile);
+		Tiles.this.onTileLoaded(tile);
+	}
+
+	public Tiles(Adapter adapter, TileLoader loader) {
 		this.adapter = adapter;
-		this.loader = new TileLoader(adapter, tileSource);
+		this.loader = loader;
 	}
 
 	@Override
@@ -79,9 +72,8 @@ public abstract class Tiles implements Recycleable {
 	public void setInvalidAll() {
 		adapter.assertUIThread();
 		checkCacheSize();
-		for (long id : tileCache.keySet()) {
+		for (long id : tileCache.keySet())
 			tileCache.get(id).expired = true;
-		}
 	}
 
 	public Tile getTile(long id, int centerX, int centerY,
@@ -89,93 +81,11 @@ public abstract class Tiles implements Recycleable {
 		adapter.assertUIThread();
 		checkCacheSize();
 		Tile tile = tileCache.get(id);
-		if (tile != null) {
-			if (tile.expired && startLoadingIfNeeded) {
-				loader.load(id, callback, centerX, centerY);
-			}
-			return tile;
-		}
-		if (startLoadingIfNeeded)
-			loader.load(id, callback, centerX, centerY);
-		return null;
-	}
 
-	private final RectInt src = new RectInt();
-	private final RectInt dst = new RectInt();
+		if ((tile == null || tile.expired) && startLoadingIfNeeded)
+			loader.load(id, centerX, centerY);
 
-	public void drawTile(GC gc, int centerX, int centerY, long id, int x,
-			int y, boolean loadIfNeeded, int zoom, int prevZoom) {
-		adapter.assertUIThread();
-
-		int _sz = Adapter.TILE_SIZE;
-		int _x = 0;
-		int _y = 0;
-		int _nx = TileId.nx(id);
-		int _ny = TileId.ny(id);
-		int _z = TileId.zoom(id);
-
-		Tile tile = getTile(id, centerX, centerY, loadIfNeeded);
-		if (tile != null) {
-			src.set(_x, _y, _sz, _sz);
-			dst.set(x, y, Adapter.TILE_SIZE, Adapter.TILE_SIZE);
-			tile.draw(gc, src, dst);
-			return;
-		}
-
-		if (zoom > prevZoom) {
-			while (_z > Utils.MIN_ZOOM) {
-
-				if (_sz >= 2) {
-					_x = _x / 2 + ((_nx & 1) * Adapter.TILE_SIZE / 2);
-					_y = _y / 2 + ((_ny & 1) * Adapter.TILE_SIZE / 2);
-					_sz /= 2;
-				}
-
-				_nx /= 2;
-				_ny /= 2;
-				_z--;
-
-				tile = getTile(TileId.make(_nx, _ny, _z), centerX, centerY,
-						false);
-				if (tile != null) {
-					src.set(_x, _y, _sz, _sz);
-					dst.set(x, y, Adapter.TILE_SIZE, Adapter.TILE_SIZE);
-					tile.draw(gc, src, dst);
-					return;
-				}
-			}
-		}
-		if (zoom < prevZoom && _z < Utils.MAX_ZOOM) {
-			src.set(0, 0, Adapter.TILE_SIZE, Adapter.TILE_SIZE);
-
-			tile = getTile(TileId.make(_nx * 2, _ny * 2, _z + 1), centerX,
-					centerY, false);
-			if (tile != null) {
-				dst.set(x, y, Adapter.TILE_SIZE / 2, Adapter.TILE_SIZE / 2);
-				tile.draw(gc, src, dst);
-			}
-			tile = getTile(TileId.make(_nx * 2 + 1, _ny * 2, _z + 1), centerX,
-					centerY, false);
-			if (tile != null) {
-				dst.set(x + Adapter.TILE_SIZE / 2, y, Adapter.TILE_SIZE / 2,
-						Adapter.TILE_SIZE / 2);
-				tile.draw(gc, src, dst);
-			}
-			tile = getTile(TileId.make(_nx * 2, _ny * 2 + 1, _z + 1), centerX,
-					centerY, false);
-			if (tile != null) {
-				dst.set(x, y + Adapter.TILE_SIZE / 2, Adapter.TILE_SIZE / 2,
-						Adapter.TILE_SIZE / 2);
-				tile.draw(gc, src, dst);
-			}
-			tile = getTile(TileId.make(_nx * 2 + 1, _ny * 2 + 1, _z + 1),
-					centerX, centerY, false);
-			if (tile != null) {
-				dst.set(x + Adapter.TILE_SIZE / 2, y + Adapter.TILE_SIZE / 2,
-						Adapter.TILE_SIZE / 2, Adapter.TILE_SIZE / 2);
-				tile.draw(gc, src, dst);
-			}
-		}
+		return tile;
 	}
 
 	public void cancelLoading() {

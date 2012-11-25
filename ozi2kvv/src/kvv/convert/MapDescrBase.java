@@ -265,7 +265,9 @@ public class MapDescrBase implements MapDescr1 {
 		if (lat < 0)
 			dy = -dy;
 
-		return (int) dy / 2511;
+		int res = (int) dy / 2511;
+		
+		return res;
 	}
 
 	@Override

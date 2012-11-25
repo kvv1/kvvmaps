@@ -11,9 +11,16 @@ public class TileLoader {
 	private final Adapter adapter;
 	private final TileSource tileSource;
 
-	public TileLoader(Adapter adapter, TileSource tileSource) {
+	public interface Callback {
+		void loaded(Tile tile);
+	}
+
+	private final Callback callback;
+
+	public TileLoader(Adapter adapter, TileSource tileSource, Callback callback) {
 		this.adapter = adapter;
 		this.tileSource = tileSource;
+		this.callback = callback;
 		Adapter.log("TileLoader " + ++cnt);
 	}
 
@@ -27,14 +34,12 @@ public class TileLoader {
 	}
 
 	static class Request {
-		public Request(long id, TileLoaderCallback callback, int requestId) {
+		public Request(long id, int requestId) {
 			this.id = id;
-			this.callback = callback;
 			this.requestId = requestId;
 		}
 
 		long id;
-		TileLoaderCallback callback;
 		int requestId;
 	}
 
@@ -54,7 +59,6 @@ public class TileLoader {
 			Tile tile = tileSource.loadAsync(request.id);
 			if (tile != null) {
 				final Tile tile1 = tile;
-				final TileLoaderCallback callback = request.callback;
 				adapter.execUI(new Runnable() {
 					@Override
 					public void run() {
@@ -72,8 +76,7 @@ public class TileLoader {
 		}
 	};
 
-	public void load(Long id, final TileLoaderCallback callback, int centerX,
-			int centerY) {
+	public void load(Long id, int centerX, int centerY) {
 		adapter.assertUIThread();
 		// log("load " + getId(id));
 		synchronized (queue) {
@@ -105,7 +108,7 @@ public class TileLoader {
 			}
 
 			// log("adding " + getId(id));
-			it.add(new Request(id, callback, 0));
+			it.add(new Request(id, 0));
 
 			adapter.execBG(r);
 

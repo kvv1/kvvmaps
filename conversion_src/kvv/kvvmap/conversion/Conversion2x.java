@@ -1,8 +1,10 @@
 package kvv.kvvmap.conversion;
 
+import org.ujmp.core.MatrixFactory;
+
 import Jama.Matrix;
 
-public class Conversion2x {
+public class Conversion2x implements Conversion{
 
 	private Matrix a;
 	private Matrix b;
@@ -45,6 +47,8 @@ public class Conversion2x {
 			bForY[5] += Math.pow(y1[i], 2) * y2[i];
 		}
 
+		//org.ujmp.core.Matrix mm = new org.ujmp.core.Matrix();
+		
 		Matrix matrix = new Matrix(m);
 
 		try {
@@ -55,12 +59,14 @@ public class Conversion2x {
 		}
 	}
 
+	@Override
 	public double getX(double x, double y) {
 		return a.get(0, 0) + a.get(1, 0) * x + a.get(2, 0) * y + a.get(3, 0)
 				* Math.pow(x, 2) + a.get(4, 0) * x * y + a.get(5, 0)
 				* Math.pow(y, 2);
 	}
 
+	@Override
 	public double getY(double x, double y) {
 		return b.get(0, 0) + b.get(1, 0) * x + b.get(2, 0) * y + b.get(3, 0)
 				* Math.pow(x, 2) + b.get(4, 0) * x * y + b.get(5, 0)

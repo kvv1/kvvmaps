@@ -20,7 +20,10 @@ import kvv.kvvmap.common.pacemark.PathDrawer;
 import kvv.kvvmap.common.pacemark.PathSelection;
 import kvv.kvvmap.common.tiles.Tile;
 import kvv.kvvmap.common.tiles.TileContent;
+import kvv.kvvmap.common.tiles.TileDrawer;
 import kvv.kvvmap.common.tiles.TileId;
+import kvv.kvvmap.common.tiles.TileLoader;
+import kvv.kvvmap.common.tiles.TileLoader.Callback;
 import kvv.kvvmap.common.tiles.TileLoader.TileSource;
 import kvv.kvvmap.common.tiles.Tiles;
 
@@ -48,6 +51,9 @@ public class CommonView implements ICommonView {
 	private boolean scrolling;
 
 	private RotationMode rotationMode = RotationMode.ROTATION_NONE;
+
+	private final TileDrawer tileDrawer;
+
 
 	public enum RotationMode {
 		ROTATION_NONE, ROTATION_COMPASS, ROTATION_GPS
@@ -143,12 +149,21 @@ public class CommonView implements ICommonView {
 			}
 		};
 
-		this.tiles = new Tiles(envir.adapter, tileSource) {
+		TileLoader tileLoader = new TileLoader(envir.adapter, tileSource, new Callback() {
 			@Override
-			protected void loaded(Tile tile) {
+			public void loaded(Tile tile) {
+				tiles.putTile(tile);
+			}
+		});
+		
+		this.tiles = new Tiles(envir.adapter, tileLoader) {
+			@Override
+			protected void onTileLoaded(Tile tile) {
 				repaint();
 			}
 		};
+		
+		this.tileDrawer = new TileDrawer(envir.adapter, this.tiles);
 	}
 
 	public RotationMode getRotationMode() {
@@ -389,7 +404,7 @@ public class CommonView implements ICommonView {
 			int y = y0;
 			for (int ny = ny0; ny <= ny1; ny++, y += Adapter.TILE_SIZE) {
 				long id = TileId.make(nx, ny, getZoom());
-				tiles.drawTile(gc, centerX, centerY, id, x, y,
+				tileDrawer.drawTile(gc, centerX, centerY, id, x, y,
 						platformView.loadDuringScrolling() || !scrolling,
 						viewParams.getZoom(), viewParams.getPrevZoom());
 				tilesDrawn.add(id);

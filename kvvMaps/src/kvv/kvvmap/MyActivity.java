@@ -34,6 +34,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -57,6 +58,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -72,6 +74,12 @@ public class MyActivity extends Activity {
 	private static final String LOAD_DURING_SCROLLING_SETTING = "loadDuringScrolling";
 	private static final String LARGE_SETTING = "largeZoom";
 	private static final String SPEED_PROFILE_SETTING = "speedProfile";
+	private static final String DEBUG_DRAW_SETTING = "debugDraw";
+
+	private static final String BRIGHTNESS_KEY = "brightness";
+	private static final float DIMMED_BRIGHTNESS = 0.1f;
+	
+	
 
 	public static final String PREFS_NAME = "KvvMapPrefsFile";
 
@@ -99,10 +107,9 @@ public class MyActivity extends Activity {
 	private SensorListener sensorListener;
 	private SharedPreferences settings;
 	public IKvvMapsService mapsService;
-	
+
 	private LocationManager locationManager;
 	private LocationListener locationListener;
-
 
 	private final Handler handler = new Handler();
 
@@ -177,7 +184,7 @@ public class MyActivity extends Activity {
 
 			wakeLock.acquire();
 
-//			handler.removeCallbacks(stopGPS);
+			// handler.removeCallbacks(stopGPS);
 			if (following())
 				startGPS(false);
 			updateButtons();
@@ -190,7 +197,7 @@ public class MyActivity extends Activity {
 					.unregisterListener(sensorListener);
 
 			stopGPS();
-			//handler.postDelayed(stopGPS, 120000);
+			// handler.postDelayed(stopGPS, 120000);
 		}
 
 		super.onWindowFocusChanged(hasFocus);
@@ -241,6 +248,18 @@ public class MyActivity extends Activity {
 							view.repaint();
 					}
 				});
+
+				// WindowManager.LayoutParams layoutParams2 = getWindow()
+				// .getAttributes();
+				// layoutParams2.screenBrightness = 0.5f;
+				// getWindow().setAttributes(layoutParams2);
+
+				if (b.getFloat(BRIGHTNESS_KEY) != 0.0f) {
+					WindowManager.LayoutParams layoutParams = MyActivity.this
+							.getWindow().getAttributes();
+					layoutParams.screenBrightness = DIMMED_BRIGHTNESS;
+					MyActivity.this.getWindow().setAttributes(layoutParams);
+				}
 
 				updateButtons();
 			}
@@ -329,18 +348,15 @@ public class MyActivity extends Activity {
 		altSpeed.setText("");
 
 		((KvvMapsButton) findViewById(R.id.edit)).setup(R.drawable.edit,
-				R.drawable.edit, R.drawable.edit_dis).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						editSel();
-					}
-				});
-		;
+				R.drawable.edit_dis).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				editSel();
+			}
+		});
 
-		((KvvMapsButton) findViewById(R.id.info)).setup(R.drawable.info_off,
-				R.drawable.info, R.drawable.info).setOnClickListener(
-				new OnClickListener() {
+		((KvvMapsButton) findViewById(R.id.info)).setup(R.drawable.info)
+				.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
 						if (view != null)
@@ -351,7 +367,7 @@ public class MyActivity extends Activity {
 		;
 
 		((KvvMapsButton) findViewById(R.id.zoomin)).setup(R.drawable.zoomin,
-				R.drawable.zoomin, R.drawable.zoomin_dis).setOnClickListener(
+				R.drawable.zoomin_dis).setOnClickListener(
 				new OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -361,7 +377,7 @@ public class MyActivity extends Activity {
 		;
 
 		((KvvMapsButton) findViewById(R.id.zoomout)).setup(R.drawable.zoomout,
-				R.drawable.zoomout, R.drawable.zoomout_dis).setOnClickListener(
+				R.drawable.zoomout_dis).setOnClickListener(
 				new OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -371,7 +387,7 @@ public class MyActivity extends Activity {
 		;
 
 		((KvvMapsButton) findViewById(R.id.rotate)).setup(R.drawable.rotate,
-				R.drawable.rotate, R.drawable.rotate_dis).setOnClickListener(
+				R.drawable.rotate_dis).setOnClickListener(
 				new OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -382,9 +398,8 @@ public class MyActivity extends Activity {
 				});
 		;
 
-		((KvvMapsButton) findViewById(R.id.gps)).setup(R.drawable.gps_off,
-				R.drawable.gps_on, R.drawable.gps_off).setOnClickListener(
-				new OnClickListener() {
+		((KvvMapsButton) findViewById(R.id.gps)).setup(R.drawable.gps)
+				.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
 						if (!following()) {
@@ -399,8 +414,7 @@ public class MyActivity extends Activity {
 		;
 
 		((KvvMapsButton) findViewById(R.id.orient_gps)).setup(
-				R.drawable.orient_gps_off, R.drawable.orient_gps_on,
-				R.drawable.orient_gps_off).setOnClickListener(
+				R.drawable.orient_gps).setOnClickListener(
 				new OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -415,8 +429,7 @@ public class MyActivity extends Activity {
 		;
 
 		((KvvMapsButton) findViewById(R.id.orient_compass)).setup(
-				R.drawable.orient_compass_off, R.drawable.orient_compass_on,
-				R.drawable.orient_compass_off).setOnClickListener(
+				R.drawable.orient_compass).setOnClickListener(
 				new OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -428,13 +441,38 @@ public class MyActivity extends Activity {
 				});
 		;
 
-		((KvvMapsButton) findViewById(R.id.fixedmap)).setup(
-				R.drawable.fixedmapoff, R.drawable.fixedmapon,
-				R.drawable.fixedmapoff).setOnClickListener(
-				new OnClickListener() {
+		((KvvMapsButton) findViewById(R.id.fixedmap))
+				.setup(R.drawable.fixedmap).setOnClickListener(
+						new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								fixUnfixMap();
+							}
+						});
+		;
+
+		((KvvMapsButton) findViewById(R.id.dimm)).setup(R.drawable.dimm)
+				.setOnClickListener(new OnClickListener() {
+
 					@Override
 					public void onClick(View v) {
-						fixUnfixMap();
+						if (mapsService != null) {
+							WindowManager.LayoutParams layoutParams = getWindow()
+									.getAttributes();
+							float br = mapsService.getBundle().getFloat(
+									BRIGHTNESS_KEY);
+							if (br != 0.0f) {
+								mapsService.getBundle().putFloat(BRIGHTNESS_KEY,
+										0.0f);
+								layoutParams.screenBrightness = br;
+							} else {
+								mapsService.getBundle().putFloat(BRIGHTNESS_KEY,
+										layoutParams.screenBrightness);
+								layoutParams.screenBrightness = DIMMED_BRIGHTNESS;
+							}
+							getWindow().setAttributes(layoutParams);
+							updateButtons();
+						}
 					}
 				});
 		;
@@ -557,6 +595,10 @@ public class MyActivity extends Activity {
 				TextView text = (TextView) findViewById(R.id.mapInfo);
 				text.setText(title);
 			}
+
+			((KvvMapsButton) findViewById(R.id.dimm))
+					.setCheched(mapsService != null
+							&& mapsService.getBundle().getFloat(BRIGHTNESS_KEY) != 0.0f);
 		}
 	};
 
@@ -582,6 +624,66 @@ public class MyActivity extends Activity {
 				.values()[mapsService.getBundle().getInt("rotation", 0)];
 	}
 
+	static class Option {
+		int id;
+		String text;
+		String prefsName;
+		ContextWrapper cw;
+		boolean defaultValue;
+
+		public Option(ContextWrapper cw, int id, String text, String prefsName,
+				boolean defaultValue) {
+			this.id = id;
+			this.text = text;
+			this.prefsName = prefsName;
+			this.cw = cw;
+			this.defaultValue = defaultValue;
+		}
+
+		public boolean get() {
+			SharedPreferences settings = cw.getSharedPreferences(PREFS_NAME, 0);
+			return settings == null ? defaultValue : settings.getBoolean(
+					prefsName, defaultValue);
+		}
+
+		public void set(boolean value) {
+			SharedPreferences settings = cw.getSharedPreferences(PREFS_NAME, 0);
+			Editor prefsPrivateEditor = settings.edit();
+			prefsPrivateEditor.putBoolean(prefsName, value);
+			prefsPrivateEditor.commit();
+		}
+
+		void toggle() {
+			set(!get());
+		}
+	}
+
+	Option[] options = new Option[] {
+			new Option(this, MENU_DEBUG_DRAW, "debug info", DEBUG_DRAW_SETTING,
+					false) {
+				@Override
+				public void set(boolean value) {
+					super.set(value);
+					Adapter.debugDraw = value;
+					if (view != null)
+						view.invalidateTiles();
+				}
+			},
+			new Option(this, MENU_TOGGLE_BUTTONS, "Экранные кнопки",
+					BUTTONS_VISIBLE_SETTING, true),
+			new Option(this, MENU_KINETIC_SCROLLING, "Плавная прокрутка",
+					KINETIC_SCROLLING_SETTING, true),
+			new Option(this, MENU_LOAD_DURING_SCROLLING,
+					"Подгружать при прокрутке", LOAD_DURING_SCROLLING_SETTING,
+					true),
+			new Option(this, MENU_LARGE, "Крупный размер", LARGE_SETTING, false) {
+				public void set(boolean value) {
+					setLarge(get());
+				};
+			},
+			new Option(this, MENU_SPEED_PROFILE, "Скоростной профиль",
+					SPEED_PROFILE_SETTING, false), };
+
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 
@@ -592,16 +694,8 @@ public class MyActivity extends Activity {
 		else
 			menu.findItem(MENU_LOGGING_ONOFF).setTitle("Запись пути");
 
-		menu.findItem(MENU_DEBUG_DRAW).setChecked(Adapter.debugDraw);
-		menu.findItem(MENU_TOGGLE_BUTTONS).setChecked(buttonsVisible());
-		menu.findItem(MENU_KINETIC_SCROLLING).setChecked(
-				settings.getBoolean(KINETIC_SCROLLING_SETTING, true));
-		menu.findItem(MENU_LOAD_DURING_SCROLLING).setChecked(
-				settings.getBoolean(LOAD_DURING_SCROLLING_SETTING, true));
-		menu.findItem(MENU_LARGE).setChecked(
-				settings.getBoolean(LARGE_SETTING, false));
-		menu.findItem(MENU_SPEED_PROFILE).setChecked(
-				settings.getBoolean(SPEED_PROFILE_SETTING, false));
+		for (Option option : options)
+			menu.findItem(option.id).setChecked(option.get());
 
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -617,18 +711,10 @@ public class MyActivity extends Activity {
 
 		SubMenu settingsSubMenu = menu.addSubMenu("Настройки");
 
-		settingsSubMenu.add(Menu.NONE, MENU_DEBUG_DRAW, 0, "debug info")
-				.setCheckable(true);
-		settingsSubMenu.add(Menu.NONE, MENU_TOGGLE_BUTTONS, 0,
-				"Экранные кнопки").setCheckable(true);
-		settingsSubMenu.add(Menu.NONE, MENU_KINETIC_SCROLLING, 0,
-				"Плавная прокрутка").setCheckable(true);
-		settingsSubMenu.add(Menu.NONE, MENU_LOAD_DURING_SCROLLING, 0,
-				"Подгружать при прокрутке").setCheckable(true);
-		settingsSubMenu.add(Menu.NONE, MENU_LARGE, 0, "Крупный размер")
-				.setCheckable(true);
-		settingsSubMenu.add(Menu.NONE, MENU_SPEED_PROFILE, 0,
-				"Скоростной профиль").setCheckable(true);
+		for (Option option : options)
+			settingsSubMenu.add(Menu.NONE, option.id, 0, option.text)
+					.setCheckable(true);
+
 		menu.add(Menu.NONE, MENU_ABOUT, 0, "О программе");
 		menu.add(Menu.NONE, MENU_UPDATE, 0, "Update");
 		menu.add(Menu.NONE, MENU_QUIT, 0, "Выход");
@@ -638,6 +724,13 @@ public class MyActivity extends Activity {
 
 	/* Handles item selections */
 	public boolean onOptionsItemSelected(MenuItem item) {
+
+		for (Option option : options)
+			if (option.id == item.getItemId()) {
+				option.toggle();
+				return true;
+			}
+
 		switch (item.getItemId()) {
 		case MENU_LOGGING_ONOFF:
 			trackingOnOff();
@@ -648,47 +741,9 @@ public class MyActivity extends Activity {
 		case MENU_TRACKS:
 			paths();
 			return true;
-		case MENU_DEBUG_DRAW:
-			debugDrawOnOff();
-			return true;
-		case MENU_TOGGLE_BUTTONS:
-			buttonsOnOff();
-			return true;
 		case MENU_ABOUT:
 			about();
 			return true;
-		case MENU_KINETIC_SCROLLING: {
-			Editor ed = settings.edit();
-			ed.putBoolean(KINETIC_SCROLLING_SETTING,
-					!settings.getBoolean(KINETIC_SCROLLING_SETTING, true));
-			ed.commit();
-			return true;
-		}
-		case MENU_LOAD_DURING_SCROLLING: {
-			Editor ed = settings.edit();
-			ed.putBoolean(LOAD_DURING_SCROLLING_SETTING,
-					!settings.getBoolean(LOAD_DURING_SCROLLING_SETTING, true));
-			ed.commit();
-			return true;
-		}
-
-		case MENU_LARGE: {
-			Editor ed = settings.edit();
-			ed.putBoolean(LARGE_SETTING,
-					!settings.getBoolean(LARGE_SETTING, false));
-			ed.commit();
-			setLarge(settings.getBoolean(LARGE_SETTING, false));
-			return true;
-		}
-
-		case MENU_SPEED_PROFILE: {
-			Editor ed = settings.edit();
-			ed.putBoolean(SPEED_PROFILE_SETTING,
-					!settings.getBoolean(SPEED_PROFILE_SETTING, false));
-			ed.commit();
-			return true;
-		}
-
 		case MENU_UPDATE:
 			try {
 				updateSoftware();
@@ -747,14 +802,6 @@ public class MyActivity extends Activity {
 		return mapsService.getBundle().getString("fixedMap");
 	}
 
-	private void buttonsOnOff() {
-		Editor prefsPrivateEditor = settings.edit();
-		prefsPrivateEditor.putBoolean(BUTTONS_VISIBLE_SETTING,
-				!buttonsVisible());
-		prefsPrivateEditor.commit();
-		updateButtons();
-	}
-
 	private void about() {
 
 		try {
@@ -772,15 +819,6 @@ public class MyActivity extends Activity {
 			alertDialog.show();
 		} catch (NameNotFoundException e) {
 		}
-	}
-
-	private void debugDrawOnOff() {
-		Editor prefsPrivateEditor = settings.edit();
-		Adapter.debugDraw = !Adapter.debugDraw;
-		prefsPrivateEditor.putBoolean("debugDraw", Adapter.debugDraw);
-		prefsPrivateEditor.commit();
-		if (view != null)
-			view.invalidateTiles();
 	}
 
 	static class PathLocPair extends Pair<Path, LocationX> {
@@ -881,8 +919,9 @@ public class MyActivity extends Activity {
 			};
 
 			locationManager.requestLocationUpdates(
-					LocationManager.GPS_PROVIDER, 5000L, 20.0f, locationListener);
-			
+					LocationManager.GPS_PROVIDER, 5000L, 20.0f,
+					locationListener);
+
 			Adapter.log("GPS requestLocationUpdates " + locationListener);
 		}
 	}
@@ -899,12 +938,12 @@ public class MyActivity extends Activity {
 		}
 	}
 
-//	private Runnable stopGPS = new Runnable() {
-//		@Override
-//		public void run() {
-//			stopGPS();
-//		}
-//	};
+	// private Runnable stopGPS = new Runnable() {
+	// @Override
+	// public void run() {
+	// stopGPS();
+	// }
+	// };
 
 	private void gpsOn() {
 		startGPS(true);
