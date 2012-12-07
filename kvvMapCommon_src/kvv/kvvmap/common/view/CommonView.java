@@ -39,7 +39,7 @@ public class CommonView implements ICommonView {
 
 	private final Tiles tiles;
 
-	private final SelectionThread selectionThread = new SelectionThread();
+	private final SelectionThread selectionThread;
 	private final LongSet tilesDrawn = new LongSet();
 
 	private LocationX myLocation;
@@ -73,6 +73,7 @@ public class CommonView implements ICommonView {
 	public CommonView(IPlatformView platformView, final Environment envir) {
 		this.envir = envir;
 		this.platformView = platformView;
+		selectionThread = new SelectionThread(envir.adapter);
 
 		IPlaceMarksListener pmListener = new IPlaceMarksListener() {
 
@@ -509,7 +510,7 @@ public class CommonView implements ICommonView {
 		}
 		selectionThread.set((int) viewParams.centerX(),
 				(int) viewParams.centerY(), getScreenRect(null), getZoom(),
-				envir.adapter, envir.placemarks, envir.paths, selCallback);
+				envir.placemarks, envir.paths, selCallback);
 	}
 
 	private RectInt getScreenRectInt(RectInt rect) {
