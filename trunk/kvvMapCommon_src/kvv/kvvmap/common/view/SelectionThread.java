@@ -51,6 +51,12 @@ class SelectionThread {
 
 	private SelectionRunnable r;
 
+	private final Adapter adapter;
+
+	public SelectionThread(Adapter adapter) {
+		this.adapter = adapter;
+	}
+
 	private synchronized boolean cancelled() {
 		return cancelled || params != null;
 	}
@@ -146,8 +152,7 @@ class SelectionThread {
 	}
 
 	public synchronized void set(int x, int y, RectX screenRect, int zoom,
-			Adapter adapter, PlaceMarks placemarks, Paths paths,
-			Callback callback) {
+			PlaceMarks placemarks, Paths paths, Callback callback) {
 		this.params = new Params(x, y, screenRect, zoom, adapter, placemarks,
 				paths, callback);
 		cancelled = false;

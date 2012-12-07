@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -230,9 +232,19 @@ public class Adapter {
 		handler.post(runnable);
 	}
 
-	public void execBG(Runnable runnable) {
-		executor.execute(runnable);
-		// executor.submit(runnable);
+	public void execBG(final Runnable runnable) {
+		executor.execute(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					runnable.run();
+				} catch (Throwable e) {
+					StringWriter sw = new StringWriter();
+					e.printStackTrace(new PrintWriter(sw));
+					log(sw.toString());
+				}
+			}
+		});
 	}
 
 	public static void log(String string) {
@@ -240,28 +252,9 @@ public class Adapter {
 		appendLog(string);
 	}
 
-	public static void logMem() {
-		Adapter.log("mem: free=" + Runtime.getRuntime().freeMemory() / 1024.0
-				/ 1024 + " total=" + Runtime.getRuntime().totalMemory()
-				/ 1024.0 / 1024);
-	}
-
 	private static void recycle(Bitmap bm) {
 		bm.recycle();
-		cnt--;
-		// Adapter.log("recycle " + cnt);
-		// Adapter.log("mem: free=" + Runtime.getRuntime().freeMemory() / 1024 /
-		// 1024 + " total="
-		// + Runtime.getRuntime().totalMemory() / 1024 / 1024);
 	}
-
-	// public static void beep() {
-	// try {
-	// MyActivity.mediaPlayer.start();
-	// } catch (Exception e) {
-	// Log.e("beep", "error: " + e.getMessage(), e);
-	// }
-	// }
 
 	@Override
 	protected void finalize() throws Throwable {
