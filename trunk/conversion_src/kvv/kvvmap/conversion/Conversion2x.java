@@ -1,7 +1,5 @@
 package kvv.kvvmap.conversion;
 
-import org.ujmp.core.MatrixFactory;
-
 import Jama.Matrix;
 
 public class Conversion2x implements Conversion{
