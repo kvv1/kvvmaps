@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>ozi2kvv</name>
+	<name>TextEditor</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -14,11 +14,4 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>conversion_src</name>
-			<type>2</type>
-			<location>D:/googlecode/trunk/conversion_src</location>
-		</link>
-	</linkedResources>
 </projectDescription>
