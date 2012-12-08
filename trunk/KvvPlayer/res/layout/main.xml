@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:weightSum="10">
+	<kvv.kvvplayer.MyListView
+		android:layout_width="wrap_content" android:layout_height="fill_parent"
+		android:id="@+id/folders" android:layout_weight="9"
+		android:choiceMode="singleChoice"></kvv.kvvplayer.MyListView>
+	<FrameLayout android:id="@+id/FrameLayout01"
+		android:layout_width="fill_parent" android:layout_height="20sp">
+		<kvv.kvvplayer.MyProgressBar
+			android:layout_height="wrap_content" android:layout_width="fill_parent"
+			android:id="@+id/trackProgress"></kvv.kvvplayer.MyProgressBar>
+	</FrameLayout>
+	<ProgressBar android:layout_height="wrap_content"
+		android:layout_width="fill_parent" android:layout_weight="1"
+		android:id="@+id/ProgressBar" style="?android:attr/progressBarStyleHorizontal"
+		android:max="100"></ProgressBar>
+	<TextView android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:text="@string/hello"
+		android:id="@+id/label" android:layout_gravity="bottom"
+		android:layout_weight="1" android:textSize="20sp" />
+
+
+
+
+
+
+</LinearLayout>
