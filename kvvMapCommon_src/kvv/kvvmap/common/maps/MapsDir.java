@@ -17,10 +17,7 @@ public class MapsDir {
 	}
 
 	private final Map<String, MapDir[]> maps = new HashMap<String, MapDir[]>();
-	private MapsDirListener l;
-
-	public MapsDir() {
-	}
+	private MapsDirListener listener;
 
 	public MapsDir(File[] files) {
 		try {
@@ -29,6 +26,9 @@ public class MapsDir {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public MapsDir() {
 	}
 
 	public void addMap(File file) throws IOException {
@@ -48,8 +48,8 @@ public class MapsDir {
 		if (dirs != null) {
 			maps.put(name, dirs);
 			Adapter.log("mapDir " + name + " loaded");
-			if (l != null)
-				l.mapAdded(name);
+			if (listener != null)
+				listener.mapAdded(name);
 			//Adapter.logMem();
 		}
 	}
@@ -93,7 +93,7 @@ public class MapsDir {
 	}
 
 	public void setListener(MapsDirListener l) {
-		this.l = l;
+		this.listener = l;
 	}
 
 }

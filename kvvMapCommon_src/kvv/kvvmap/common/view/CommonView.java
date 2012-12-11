@@ -124,7 +124,7 @@ public class CommonView implements ICommonView {
 
 				// long t = System.currentTimeMillis();
 
-				Img img = envir.maps.load(TileId.nx(id), TileId.ny(id),
+				Img img = envir.maps.loadAsync(TileId.nx(id), TileId.ny(id),
 						TileId.zoom(id), content);
 				if (img == null)
 					return null;

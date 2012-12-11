@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import kvv.kvvmap.adapter.Adapter;
-import kvv.kvvmap.common.Cache;
 import kvv.kvvmap.common.Img;
 import kvv.kvvmap.common.maps.MapsDir.MapsDirListener;
 import kvv.kvvmap.common.tiles.TileContent;
@@ -19,34 +18,9 @@ public class Maps {
 	private MapsListener listener;
 
 	private final Adapter adapter;
-	//private final TileLoader tileLoader;
 	public final CopyOnWriteArrayList<MapDescrBase> maps = new CopyOnWriteArrayList<MapDescrBase>();
 
 	public volatile MapDescrBase fixedMap;
-
-	static class CacheKey {
-		public CacheKey(MapDescr mapDescr, int idx) {
-			this.mapDescr = mapDescr;
-			this.idx = idx;
-		}
-
-		private final MapDescr mapDescr;
-		private final int idx;
-
-		@Override
-		public int hashCode() {
-			return idx;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			CacheKey key = (CacheKey) obj;
-			return mapDescr == key.mapDescr && idx == key.idx;
-		}
-	}
-
-	private final Cache<CacheKey, byte[]> cache = new Cache<CacheKey, byte[]>(
-			Adapter.RAF_CACHE_SIZE);
 
 	public Maps(final Adapter adapter, final MapsDir mapsDir) {
 		this.adapter = adapter;
@@ -68,12 +42,9 @@ public class Maps {
 
 	public void addMap(String name, MapsDir mapsDir) {
 		adapter.assertUIThread();
-		synchronized (cache) {
-			cache.clear();
-		}
 		try {
 			MapDir[] mapDir = mapsDir.get(name);
-			maps.add(new MapDescr(name, cache, adapter, mapDir));
+			maps.add(new MapDescr(name, adapter, mapDir));
 			if (listener != null)
 				listener.mapAdded(name);
 			//Adapter.log("map " + name + " loaded");
@@ -183,7 +154,7 @@ public class Maps {
 	}
 	*/
 
-	public Img load(int nx, int ny, int zoom, TileContent content) {
-		return MapDescr.load(maps, fixedMap, nx, ny, zoom, content, adapter);
+	public Img loadAsync(int nx, int ny, int zoom, TileContent content) {
+		return MapDescrBase.loadAsync(maps, fixedMap, nx, ny, zoom, content, adapter);
 	}
 }

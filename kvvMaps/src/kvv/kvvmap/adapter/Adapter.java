@@ -100,7 +100,8 @@ public class Adapter {
 		});
 	}
 
-	public void setTileSize(int sz, int widthPixels, int heightPixels) {
+	public synchronized void setTileSize(int sz, int widthPixels,
+			int heightPixels) {
 		freeBitmaps.clear();
 
 		TILE_SIZE = sz;
@@ -129,9 +130,6 @@ public class Adapter {
 	public Object allocBitmap(int w, int h) {
 		try {
 			Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_4444);
-			// Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ALPHA_8);
-			// new Canvas(bm).drawColor(0);
-
 			return bm;
 		} catch (OutOfMemoryError e) {
 			int usedMegs = (int) (Debug.getNativeHeapAllocatedSize() / 1048576L);
