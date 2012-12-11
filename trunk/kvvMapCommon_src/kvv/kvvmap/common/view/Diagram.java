@@ -86,7 +86,7 @@ public class Diagram {
 		}
 	}
 
-	public void dispose() {
+	public synchronized void dispose() {
 		if (bm != null)
 			adapter.disposeBitmap(bm);
 		bm = null;

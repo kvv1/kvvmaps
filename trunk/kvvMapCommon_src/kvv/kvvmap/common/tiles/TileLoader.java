@@ -56,15 +56,14 @@ public class TileLoader {
 				request = queue.removeFirst();
 				processingRequests.add(request);
 			}
-			Tile tile = tileSource.loadAsync(request.id);
+			final Tile tile = tileSource.loadAsync(request.id);
 			if (tile != null) {
-				final Tile tile1 = tile;
 				adapter.execUI(new Runnable() {
 					@Override
 					public void run() {
 						synchronized (queue) {
 							if (processingRequests.remove(request))
-								callback.loaded(tile1);
+								callback.loaded(tile);
 						}
 					}
 				});

@@ -14,11 +14,11 @@ public class Cache<K, V> {
 		this.sz = sz;
 	}
 
-	public synchronized final Set<K> keySet() {
+	public final Set<K> keySet() {
 		return map.keySet();
 	}
 	
-	public synchronized final void remove(K key) {
+	public final void remove(K key) {
 		V v = map.get(key);
 		list.remove(key);
 		map.remove(key);
@@ -26,7 +26,7 @@ public class Cache<K, V> {
 			dispose(v);
 	}
 	
-	public synchronized final void put(K key, V value) {
+	public final void put(K key, V value) {
 		if (map.containsKey(key))
 			return;
 		if (list.size() >= sz) {
@@ -43,7 +43,7 @@ public class Cache<K, V> {
 	protected void dispose(V v) {
 	}
 
-	public synchronized final V get(K key) {
+	public final V get(K key) {
 		if (!map.containsKey(key))
 			return null;
 		list.remove(key);
@@ -51,7 +51,7 @@ public class Cache<K, V> {
 		return map.get(key);
 	}
 
-	public synchronized void clear() {
+	public void clear() {
 		for(K k : list) {
 			V v = map.get(k);
 			if(v != null)

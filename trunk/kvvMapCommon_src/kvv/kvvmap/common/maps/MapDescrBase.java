@@ -3,11 +3,37 @@ package kvv.kvvmap.common.maps;
 import java.util.Collection;
 
 import kvv.kvvmap.adapter.Adapter;
+import kvv.kvvmap.common.Cache;
 import kvv.kvvmap.common.Img;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.tiles.TileContent;
 
 public abstract class MapDescrBase {
+
+	static class CacheKey {
+		public CacheKey(MapDescr mapDescr, int idx) {
+			this.mapDescr = mapDescr;
+			this.idx = idx;
+		}
+
+		private final MapDescr mapDescr;
+		private final int idx;
+
+		@Override
+		public int hashCode() {
+			return idx;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			CacheKey key = (CacheKey) obj;
+			return mapDescr == key.mapDescr && idx == key.idx;
+		}
+	}
+
+	protected final static Cache<CacheKey, byte[]> cache = new Cache<CacheKey, byte[]>(
+			Adapter.RAF_CACHE_SIZE);
+
 
 	private final String name;
 
@@ -21,10 +47,10 @@ public abstract class MapDescrBase {
 
 	protected abstract boolean hasTile(int nx, int ny, int zoom);
 
-	protected abstract void load(int nx, int ny, int zoom, int x, int y,
+	protected abstract void loadAsync(int nx, int ny, int zoom, int x, int y,
 			int sz, Img imgBase);
 
-	public static Img load(Collection<MapDescrBase> maps,
+	public static Img loadAsync(Collection<MapDescrBase> maps,
 			MapDescrBase fixedMap, int nx, int ny, int zoom,
 			TileContent content, Adapter adapter) {
 
@@ -43,7 +69,7 @@ public abstract class MapDescrBase {
 			int zoom1 = zoom;
 
 			while (zoom1 >= Utils.MIN_ZOOM && img.transparent) {
-				fixedMap.loadInZoom(nx1, ny1, zoom1, x, y, sz, img, null);
+				fixedMap.loadInZoomAsync(nx1, ny1, zoom1, x, y, sz, img, null);
 				x = x /  2 + ((nx1 & 1) << 7);
 				y = y / 2 + ((ny1 & 1) << 7);
 				nx1 >>>= 1;
@@ -59,7 +85,7 @@ public abstract class MapDescrBase {
 
 		while (zoom >= Utils.MIN_ZOOM && img.transparent) {
 			for (MapDescrBase map : maps)
-				map.loadInZoom(nx, ny, zoom, x, y, sz, img, content);
+				map.loadInZoomAsync(nx, ny, zoom, x, y, sz, img, content);
 			x = x / 2 + ((nx & 1) << 7);
 			y = y / 2 + ((ny & 1) << 7);
 			nx >>>= 1;
@@ -74,10 +100,10 @@ public abstract class MapDescrBase {
 		return img;
 	}
 
-	private Img loadInZoom(int nx, int ny, int zoom, int x, int y, int sz,
+	private Img loadInZoomAsync(int nx, int ny, int zoom, int x, int y, int sz,
 			Img img, TileContent content) {
 		if (hasTile(nx, ny, zoom)) {
-			load(nx, ny, zoom, x, y, sz, img);
+			loadAsync(nx, ny, zoom, x, y, sz, img);
 			if (content != null && (content.zoom == -1 || content.zoom == zoom)) {
 				content.zoom = zoom;
 				content.maps.add(name);
