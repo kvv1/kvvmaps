@@ -70,8 +70,6 @@ public class Adapter {
 
 	private final Handler handler;
 
-	private static volatile int cnt;
-
 	private final ExecutorService executor;
 
 	public Adapter(Activity context) {
@@ -142,8 +140,6 @@ public class Adapter {
 	public synchronized Object allocBitmap() {
 		if (freeBitmaps.isEmpty()) {
 			Object bm = allocBitmap(TILE_SIZE, TILE_SIZE);
-			if (bm != null)
-				cnt++;
 			return bm;
 		}
 
@@ -155,7 +151,6 @@ public class Adapter {
 	public Object decodeBitmap(InputStream is) {
 		try {
 			Bitmap bm = BitmapFactory.decodeStream(is);
-			cnt++;
 			// if(bm1 == null)
 			// bm1 = BitmapFactory.decodeStream(is);
 			// return bm1;
@@ -181,7 +176,7 @@ public class Adapter {
 	}
 
 	public synchronized void recycle() {
-		// Adapter.log("--dispose free bitmaps");
+		Adapter.log("--dispose free bitmaps");
 		for (Bitmap bm : freeBitmaps) {
 			recycle(bm);
 		}
