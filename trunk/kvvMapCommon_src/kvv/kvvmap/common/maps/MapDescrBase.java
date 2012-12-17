@@ -11,12 +11,12 @@ import kvv.kvvmap.common.tiles.TileContent;
 public abstract class MapDescrBase {
 
 	static class CacheKey {
-		public CacheKey(MapDescr mapDescr, int idx) {
-			this.mapDescr = mapDescr;
+		public CacheKey(String mapDescrName, int idx) {
+			this.mapDescrName = mapDescrName;
 			this.idx = idx;
 		}
 
-		private final MapDescr mapDescr;
+		private final String mapDescrName;
 		private final int idx;
 
 		@Override
@@ -27,13 +27,12 @@ public abstract class MapDescrBase {
 		@Override
 		public boolean equals(Object obj) {
 			CacheKey key = (CacheKey) obj;
-			return mapDescr == key.mapDescr && idx == key.idx;
+			return mapDescrName.equals(key.mapDescrName) && idx == key.idx;
 		}
 	}
 
 	protected final static Cache<CacheKey, byte[]> cache = new Cache<CacheKey, byte[]>(
 			Adapter.RAF_CACHE_SIZE);
-
 
 	private final String name;
 
@@ -55,11 +54,12 @@ public abstract class MapDescrBase {
 			TileContent content, Adapter adapter) {
 
 		Img img = new Img(adapter.allocBitmap(), true);
-		if(img.img == null)
+		if (img.img == null)
 			return null;
 
-		//Object bm = adapter.allocBitmap(Utils.TILE_SIZE_G, Utils.TILE_SIZE_G);
-		
+		// Object bm = adapter.allocBitmap(Utils.TILE_SIZE_G,
+		// Utils.TILE_SIZE_G);
+
 		if (fixedMap != null) {
 			int x = 0;
 			int y = 0;
@@ -70,7 +70,7 @@ public abstract class MapDescrBase {
 
 			while (zoom1 >= Utils.MIN_ZOOM && img.transparent) {
 				fixedMap.loadInZoomAsync(nx1, ny1, zoom1, x, y, sz, img, null);
-				x = x /  2 + ((nx1 & 1) << 7);
+				x = x / 2 + ((nx1 & 1) << 7);
 				y = y / 2 + ((ny1 & 1) << 7);
 				nx1 >>>= 1;
 				ny1 >>>= 1;
@@ -94,9 +94,8 @@ public abstract class MapDescrBase {
 			sz >>>= 1;
 		}
 
+		// img.transparent = adapter.isTransparent(img.img);
 
-		//img.transparent = adapter.isTransparent(img.img);
-		
 		return img;
 	}
 
@@ -111,50 +110,40 @@ public abstract class MapDescrBase {
 		}
 		return img;
 	}
-	
-	private static final long table[] = {
-		0x0000000000000000L,
-		0x0303000000000000L,
-		0x0C0C000000000000L,
-		0x0F0F000000000000L,
-		
-		0x3030000000000000L,
-		0x3333000000000000L,
-		0x3C3C000000000000L,
-		0x3F3F000000000000L,
-		
-		0xC0C0000000000000L,
-		0xC3C3000000000000L,
-		0xCCCC000000000000L,
-		0xCFCF000000000000L,
-		
-		0xF0F0000000000000L,
-		0xF3F3000000000000L,
-		0xFCFC000000000000L,
-		0xFFFF000000000000L,
-	};
-	
+
+	private static final long table[] = { 0x0000000000000000L,
+			0x0303000000000000L, 0x0C0C000000000000L, 0x0F0F000000000000L,
+
+			0x3030000000000000L, 0x3333000000000000L, 0x3C3C000000000000L,
+			0x3F3F000000000000L,
+
+			0xC0C0000000000000L, 0xC3C3000000000000L, 0xCCCC000000000000L,
+			0xCFCF000000000000L,
+
+			0xF0F0000000000000L, 0xF3F3000000000000L, 0xFCFC000000000000L,
+			0xFFFF000000000000L, };
+
 	private static long zoom(long oldmask, int shift) {
 		oldmask >>>= shift;
 
 		long res = 0;
 
-		res = table[(int)oldmask & 0x0F];
+		res = table[(int) oldmask & 0x0F];
 		oldmask >>>= 8;
-		res = (res >>> 16) | table[(int)oldmask & 0x0F];
+		res = (res >>> 16) | table[(int) oldmask & 0x0F];
 		oldmask >>>= 8;
-		res = (res >>> 16) | table[(int)oldmask & 0x0F];
+		res = (res >>> 16) | table[(int) oldmask & 0x0F];
 		oldmask >>>= 8;
-		res = (res >>> 16) | table[(int)oldmask & 0x0F];
-		
+		res = (res >>> 16) | table[(int) oldmask & 0x0F];
+
 		return res;
 	}
 
 	private static void printMask(long mask) {
-		for(int y = 0; y < 8; y++) {
+		for (int y = 0; y < 8; y++) {
 			System.out.println();
-			for(int x = 0; x < 8; x++) {
-				if((mask & 0x8000000000000000L) != 0)
+			for (int x = 0; x < 8; x++) {
+				if ((mask & 0x8000000000000000L) != 0)
 					System.out.print("x ");
 				else
 					System.out.print(". ");
@@ -163,7 +152,7 @@ public abstract class MapDescrBase {
 		}
 		System.out.println();
 	}
-	
+
 	public static void main(String[] args) {
 		long n = 7543788578875838597L;
 		printMask(n);

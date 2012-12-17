@@ -84,19 +84,33 @@ public class MapDescr extends MapDescrBase {
 		if (off == -1)
 			return null;
 
-		CacheKey key = new CacheKey(this, off);
+		if (false) {
 
-		synchronized (cache) {
-			byte[] buf = cache.get(key);
-			if (buf == null) {
+			try {
+				return new ByteArrayInputStream(pdf[mapIdx].getBytes(off));
+			} catch (IOException e) {
+				return null;
+			}
+		} else {
+			CacheKey key = new CacheKey(getName(), off);
+			synchronized (cache) {
 				try {
-					buf = pdf[mapIdx].getBytes(off);
-					cache.put(key, buf);
-				} catch (IOException e) {
+					byte[] buf = cache.get(key);
+					if (buf == null) {
+						try {
+							buf = pdf[mapIdx].getBytes(off);
+							cache.put(key, buf);
+						} catch (IOException e) {
+							e.printStackTrace();
+							return null;
+						}
+					}
+					return new ByteArrayInputStream(buf);
+				} catch (Throwable e) {
+					e.printStackTrace();
 					return null;
 				}
 			}
-			return new ByteArrayInputStream(buf);
 		}
 	}
 

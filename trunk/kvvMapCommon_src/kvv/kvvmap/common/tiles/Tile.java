@@ -19,12 +19,12 @@ public final class Tile {
 		this.id = id;
 		this.img = img;
 		this.content = context;
-//		Adapter.log("Tile " + ++cnt);
+		Adapter.log("Tile " + ++cnt);
 	}
 
 	@Override
 	protected void finalize() throws Throwable {
-//		Adapter.log("~Tile " + --cnt);
+		Adapter.log("~Tile " + --cnt);
 		super.finalize();
 	}
 
@@ -43,6 +43,7 @@ public final class Tile {
 	}
 	
 	public synchronized void dispose() {
+		Adapter.log("Tile disposed " + cnt);
 		adapter.recycleBitmap(img.img);
 		img = null;
 	}
