@@ -3,8 +3,7 @@
 
 #define getInput() (PIND.0)
 
-#define setOutput0() (PORTD.1 = 0)
-#define setOutput1() (PORTD.1 = 1)
+#define setOutput(b) (PORTD.1 = (b))
 
 #define MAX_IN_CNT 0xE600
                          
@@ -31,11 +30,11 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
                
     outCnt++;
     if(outCnt >= outT) {
-        setOutput0();
+        setOutput(0);
         set2(0);
         outCnt = 0;
     } else if(outCnt >= outT1) {
-        setOutput1();
+        setOutput(1);
         set2(1);
     }          
     
