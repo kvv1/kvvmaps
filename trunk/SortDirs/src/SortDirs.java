@@ -1,3 +1,4 @@
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -38,7 +39,7 @@ public class SortDirs {
 			// f.setLastModified(time += 2000);
 			System.out.println(f.getName() + "\t" + f.lastModified());
 			copy(f, new File(newdir, f.getName()));
-			//f.renameTo(new File(newdir, f.getName()));
+			// f.renameTo(new File(newdir, f.getName()));
 		}
 
 		File[] dirs = dir.listFiles(new FileFilter() {
@@ -70,7 +71,7 @@ public class SortDirs {
 			InputStream in = new FileInputStream(src);
 			OutputStream out = new FileOutputStream(dst);
 
-			byte[] buf = new byte[1024];
+			byte[] buf = new byte[1024 * 1024];
 			int len;
 			while ((len = in.read(buf)) > 0) {
 				out.write(buf, 0, len);
