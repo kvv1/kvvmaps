@@ -678,6 +678,7 @@ public class MyActivity extends Activity {
 					true),
 			new Option(this, MENU_LARGE, "Крупный размер", LARGE_SETTING, false) {
 				public void set(boolean value) {
+					super.set(value);
 					setLarge(get());
 				};
 			},
