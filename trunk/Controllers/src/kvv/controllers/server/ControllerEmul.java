@@ -1,11 +1,11 @@
-package kvv.controllers.server.rs485;
+package kvv.controllers.server;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-import kvv.controllers.server.Utils;
+import kvv.controllers.controller.IController;
 import kvv.controllers.shared.Constants;
 
 public class ControllerEmul implements IController {

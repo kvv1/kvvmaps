@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 
-import kvv.controllers.server.rs485.IController;
+import kvv.controllers.controller.IController;
 
 public class ControllerWrapper implements IController {
 

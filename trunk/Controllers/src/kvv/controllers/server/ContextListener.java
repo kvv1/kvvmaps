@@ -3,14 +3,15 @@ package kvv.controllers.server;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import kvv.controllers.server.rs485.Controller;
-import kvv.controllers.server.rs485.ControllerEmul;
-import kvv.controllers.server.rs485.Rs485;
+import kvv.controllers.controller.Controller;
+import kvv.controllers.router.RouterThread;
+import kvv.controllers.rs485.Rs485;
 import kvv.controllers.shared.Constants;
 
 public class ContextListener implements ServletContextListener {
 
 	// private ServletContext context = null;
+	private static volatile RouterThread routerThread;
 
 	public void contextInitialized(ServletContextEvent event) {
 		try {
@@ -34,8 +35,17 @@ public class ContextListener implements ServletContextListener {
 
 		boolean configRouter = Boolean.valueOf(Utils.getProp(
 				Constants.propsFile, "configRouter"));
-		if (configRouter)
-			RouterThread.instance = new RouterThread();
+		if (configRouter) {
+			long routerCheckTime = 1000L * Integer.valueOf(Utils.getProp(
+					Constants.propsFile, "routerCheckTimeS"));
+			String routerPassword = Utils.getProp(Constants.propsFile,
+					"routerPassword");
+			String routerPublicIP = Utils.getProp(Constants.propsFile,
+					"routerPublicIP");
+			String routerLocalIP = Utils.getProp(Constants.propsFile,
+					"routerLocalIP");
+			routerThread = new RouterThread(routerCheckTime, routerPassword, routerPublicIP, routerLocalIP);
+		}
 
 		Scheduler.instance = new Scheduler();
 
@@ -54,10 +64,9 @@ public class ContextListener implements ServletContextListener {
 			LogThread.instance.stop();
 			LogThread.instance = null;
 		}
-		if (RouterThread.instance != null) {
-			RouterThread.instance.stopped = true;
-			RouterThread.instance.stop();
-			RouterThread.instance = null;
+		if (routerThread != null) {
+			routerThread.stopThread();
+			routerThread = null;
 		}
 
 		Controllers.stopped = true;
