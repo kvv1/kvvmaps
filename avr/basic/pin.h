@@ -70,12 +70,29 @@ inline void setPortBit(PORTPIN portpin, char offset, char b) {
 		*addr &= ~bits;
 }
 
+inline void setPortBit_0(PORTPIN portpin, char offset) {
+	int _portpin = (unsigned int) portpin;
+	volatile uint8_t* addr = (volatile uint8_t*) ((_portpin >> 8) + offset);
+	char bits = _portpin & 0xFF;
+	*addr &= ~bits;
+}
+
+inline void setPortBit_1(PORTPIN portpin, char offset) {
+	int _portpin = (unsigned int) portpin;
+	volatile uint8_t* addr = (volatile uint8_t*) ((_portpin >> 8) + offset);
+	char bits = _portpin & 0xFF;
+	*addr |= bits;
+}
+
 inline char getPortBit(PORTPIN portpin, char offset) {
 	int _portpin = (unsigned int) portpin;
 	volatile uint8_t* addr = (volatile uint8_t*) ((_portpin >> 8) + offset);
 	char bits = _portpin & 0xFF;
 	return ((*addr) & bits) != 0;
 }
+
+//void setPortBit(PORTPIN portpin, char offset, char b);
+//#define setPort(portPin, val) setPortBit1(portPin, 2, val)
 
 #define setPort(portPin, val) setPortBit(portPin, 2, val)
 #define setDDR(portPin, val) setPortBit(portPin, 1, val)

@@ -1,12 +1,10 @@
 #include "common.h"
 #include <util/atomic.h>
 
+#define TIME_UNIT 10
+
 typedef struct {
 	Message msg;
-//	ObjectHeader* obj;
-//	char cmd;
-//	int param1;
-//	int param2;
 	char periodic;
 	long period;
 	long time;
@@ -15,12 +13,6 @@ typedef struct {
 static TIMER timers[NTIMERS];
 
 void (*ledHandler)() = foo;
-
-#ifdef SINGLE_MILLIS
-void millis();
-#else
-void (*millis)() = foo;
-#endif
 
 static long time;
 
@@ -50,7 +42,7 @@ void handleTimers() {
 		for (i = 0; i < NTIMERS; i++) {
 			TIMER* timer = &timers[i];
 			if (timer->msg.target) {
-				timer->time -= 10;
+				timer->time -= TIME_UNIT;
 				if (timer->time <= 0) {
 					Message msg = timer->msg;
 					if (timer->periodic)
@@ -58,14 +50,14 @@ void handleTimers() {
 					else
 						timer->msg.target = 0;
 					msg.target->handler(&msg);
-//					sendMessage(obj, cmd, param1, param2);
 				}
 			}
 		}
 	}
 }
 
-void setTimerParam(ObjectHeader* obj, char cmd, TIMERTYPE type, long ms, int param1, int param2) {
+void setTimerParam(ObjectHeader* obj, char cmd, TIMERTYPE type, long ms,
+		int param1, int param2) {
 	int i;
 	TIMER* freeTimer = 0;
 
@@ -115,33 +107,46 @@ void killTimer(ObjectHeader* obj, char cmd) {
 #if(F_CPU == 1000000)
 #define PRESCALER 3
 #define MODULO 16
+#define TIMER_PERIOD 1
+//#define PRESCALER 4
+//#define MODULO 39
+//#define TIMER_PERIOD 10
 #endif
 #if(F_CPU == 2000000)
 #define PRESCALER 3
 #define MODULO 31
+#define TIMER_PERIOD 1
+//#define PRESCALER 4
+//#define MODULO 78
+//#define TIMER_PERIOD 10
 #endif
 #if(F_CPU == 4000000)
 #define PRESCALER 4
 #define MODULO 16
+#define TIMER_PERIOD 1
+//#define PRESCALER 5
+//#define MODULO 39
+//#define TIMER_PERIOD 10
 #endif
 #if(F_CPU == 8000000)
 #define PRESCALER 4
 #define MODULO 31
+#define TIMER_PERIOD 1
+//#define PRESCALER 5
+//#define MODULO 78
+//#define TIMER_PERIOD 10
 #endif
-
 
 ISR(TIMER0_OVF_vect) {
 	static char inHandler;
-	static char n = 10;
+	static char n = TIME_UNIT / TIMER_PERIOD;
 
 	TCNT0 = 255 - MODULO;
 
-	time++;
-
-	millis();
+	time += TIMER_PERIOD;
 
 	if (!(--n)) {
-		n = 10;
+		n = TIME_UNIT / TIMER_PERIOD;
 		if (!inHandler) {
 			inHandler = 1;
 			timerTicks++;
@@ -154,12 +159,6 @@ ISR(TIMER0_OVF_vect) {
 }
 
 void timer0_init(void) {
-	// Timer/Counter 0 initialization
-	// Clock source: System Clock
-	// Clock value: 31,250 kHz
-	// Mode: Normal top=FFh
-	// OC0A output: Disconnected
-	// OC0B output: Disconnected
 
 #if defined(__AVR_ATmega48__) || defined(__AVR_ATmega168__)
 
