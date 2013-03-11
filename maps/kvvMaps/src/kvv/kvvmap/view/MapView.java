@@ -115,11 +115,11 @@ public class MapView extends View implements IPlatformView {
 		// if (compass == null)
 		// compass = new Compass(getWidth() / 10);
 
-		Float targBearing = null;
-		LocationX myLoc = commonView.getMyLocation();
-		LocationX targ = commonView.getTarget();
-		if (myLoc != null && targ != null && !commonView.isMyLocationDimmed())
-			targBearing = myLoc.bearingTo(targ);
+//		Float targBearing = null;
+//		LocationX myLoc = commonView.getMyLocation();
+//		LocationX targ = commonView.getTarget();
+//		if (myLoc != null && targ != null && !commonView.isMyLocationDimmed())
+//			targBearing = myLoc.bearingTo(targ);
 
 		if (activity.mapsService.isLoadingMaps()) {
 			paint.setColor(Color.CYAN);

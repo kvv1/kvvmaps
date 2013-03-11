@@ -160,8 +160,10 @@ public class KvvMapsService extends Service {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static final Class[] mStartForegroundSignature = new Class[] {
 			int.class, Notification.class };
+	@SuppressWarnings("rawtypes")
 	private static final Class[] mStopForegroundSignature = new Class[] { boolean.class };
 
 	private NotificationManager mNM;
