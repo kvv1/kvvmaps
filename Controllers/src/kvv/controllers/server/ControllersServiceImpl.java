@@ -1,9 +1,11 @@
 package kvv.controllers.server;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import kvv.controllers.client.ControllersService;
-import kvv.controllers.server.rs485.IController;
+import kvv.controllers.controller.IController;
 import kvv.controllers.shared.Constants;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ObjectDescr;
@@ -36,14 +38,15 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	public String[] getCommands() throws Exception {
 		SetCommand[] defines = Utils.jsonRead(Constants.commandsFile,
 				SetCommand[].class);
-		String[] res = new String[defines.length];
-		for (int i = 0; i < defines.length; i++) {
-			if (defines[i] != null && defines[i].name == null)
-				res[i] = null;
+		List<String> res = new ArrayList<String>();
+
+		for (SetCommand setCommand : defines) {
+			if (setCommand != null && setCommand.name == null)
+				res.add(null);
 			else
-				res[i] = defines[i].name;
+				res.add(setCommand.name);
 		}
-		return res;
+		return res.toArray(new String[0]);
 	}
 
 	@Override
