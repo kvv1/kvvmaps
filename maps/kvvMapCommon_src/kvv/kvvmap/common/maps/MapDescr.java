@@ -78,6 +78,7 @@ public class MapDescr extends MapDescrBase {
 		// img.transparent &= transparent;
 	}
 
+	@SuppressWarnings("unused")
 	private synchronized InputStream getInputStreamAsync(int mapIdx, int nx,
 			int ny, int z) {
 		int off = mapDir[mapIdx].getOffset(nx, ny, z);
@@ -85,7 +86,6 @@ public class MapDescr extends MapDescrBase {
 			return null;
 
 		if (false) {
-
 			try {
 				return new ByteArrayInputStream(pdf[mapIdx].getBytes(off));
 			} catch (IOException e) {
