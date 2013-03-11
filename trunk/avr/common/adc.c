@@ -5,19 +5,16 @@
 // Read the AD conversion result
 unsigned int read_adc(unsigned char adc_input, unsigned char vref_type) {
 	int res;
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+	ADMUX = adc_input | vref_type;
+	// Delay needed for the stabilization of the ADC input voltage
+	_delay_us(10);
+	// Start the AD conversion
+	ADCSRA |= (1 << ADSC);
+	// Wait for the AD conversion to complete
+	while (ADCSRA & (1 << ADSC))
+		;
 
-		ADMUX = adc_input | vref_type;
-		// Delay needed for the stabilization of the ADC input voltage
-		_delay_us(10);
-		// Start the AD conversion
-		ADCSRA |= (1 << ADSC);
-		// Wait for the AD conversion to complete
-		while (ADCSRA & (1 << ADSC))
-			;
-
-		res = ADCW;
-	}
+	res = ADCW;
 	return res;
 }
 
@@ -33,7 +30,6 @@ unsigned int read_adc(unsigned char adc_input, unsigned char vref_type) {
 #if(F_CPU == 8000000)
 #define PRESCALER 3
 #endif
-
 
 void init_adc(char inputs, char vref_type) {
 	// ADC initialization

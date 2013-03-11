@@ -18,6 +18,8 @@
 #define SKIP_ROM		    0xCC //Пропустить процедуру сравнив. сер. номера.  //;
 static unsigned char ds18b20[2];
 
+#define DELAY(us) _delay_ms(us)
+
 //getPortBit((((int)(&(*(volatile uint8_t *)((0x10) + 0x20))) << 8) | (1<<5)), 0)
 //((*(volatile uint8_t *)((0x10) + 0x20)) & (1 << 5))
 //***************************************************************************
@@ -29,28 +31,22 @@ unsigned char oneWireInit() {
 		_delay_us(485);
 		ONE_WIRE_DDR_0(); //Hi LINE
 		_delay_us(70);
-		if (ONE_WIRE_PORTIN() == 0) //Если ведомое уст-во ответило (PRESENCE PULSE) - заканчиваем этот тайм-слот (480мкс).
-				{
-			_delay_us(440);
-			if (ONE_WIRE_PORTIN() == 0) //Если линия так и продолжает быть в низком уровне - значит это либо ошибка,
-				res = 0; //либо на линии нет устр-в, а PRESENCE был ложным и вызван просто низким уровнем на линии.
-			else
-				//В таком случае естественно возвращаем 0 (ошибка / нет устр-в на шине),
-				res = 1; //либо 1 если все в порядке и это был "настоящий" PRESENCE PULSE.
-		} else
-			//Возвращаем 0 если отсутствовал вообще какой-либо намек на PRESENCE.
-			res = 0;
+		res = (ONE_WIRE_PORTIN() == 0);
 	}
-	return res;
+	if (res == 0)
+		return 0;
+	_delay_us(440);
+	return ONE_WIRE_PORTIN() != 0;
 }
 //***************************************************************************
 void oneWireWriteByte(unsigned char data) {
 	unsigned char i;
 	unsigned char data_bit; //Переменная представляющая текущий бит для передачи.
 
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-		for (i = 0; i < 8; i++) //Цикл  передачи 8 бит.
-				{
+	for (i = 0; i < 8; i++) //Цикл  передачи 8 бит.
+			{
+		ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+
 			data_bit = data; //Определяем текущий, передаваемый бит посредством сдвига и логического "И".
 			data_bit = (data >> i) & 1; //Для первого передаваемого бита алгоритм следующий:
 										//Так как при первом выполнении цикла i=0, значит все биты переменной data (она хранит передаваемый нами байт)
@@ -64,21 +60,16 @@ void oneWireWriteByte(unsigned char data) {
 							   //Далее в зависимости от текущего бита для передачи, формируются временные последовательности,
 							   //состоящие всегда из двух частей (условно):
 
-			if (data_bit == 1) //"Первая часть" тайм-слота передачи 1.
+			if (data_bit == 1) {
 				_delay_us(1); //1мкс состояния линии "в ноль".
-			else
-				//"Первая часть" тайм-слота для передачи 0.
-				_delay_us(90); //Для передачи 0, задержим линию "в низком уровне" некоторое время.
-
-			ONE_WIRE_DDR_0(); //Возващаем линию в выс. ур.
-
-			if (data_bit == 1) //"Вторая часть" тайм-слота передачи 1, подержим линию "в единице" подольше.
+				ONE_WIRE_DDR_0(); //Возващаем линию в выс. ур.
 				_delay_us(90);
-			else
-				//"Вторая часть" тайм-слота передачи 0, краткий импульс вверх.
+			} else {
+				_delay_us(90); //Для передачи 0, задержим линию "в низком уровне" некоторое время.
+				ONE_WIRE_DDR_0(); //Возващаем линию в выс. ур.
 				_delay_us(1);
-
-			ONE_WIRE_DDR_0();; //По завершении передачи каждого бита линию необходимо переводить в выс. ур.
+			}
+			ONE_WIRE_DDR_0(); //По завершении передачи каждого бита линию необходимо переводить в выс. ур.
 			_delay_us(1); //Выдерживаем минимальную задержку между тайм-слотами (1мкс.(продолжит. либого тайм-слота = 60-120мкс)).
 		}
 	}
@@ -89,8 +80,8 @@ unsigned char oneWireReadByte(void) {
 	char i;
 	unsigned char Data = 0;
 
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-		for (i = 0; i < 8; i++) {
+	for (i = 0; i < 8; i++) {
+		ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
 			_delay_us(1);
 			ONE_WIRE_DDR_1(); //Low LINE
 			ONE_WIRE_PORT_0(); //Как всегда перед передачей или приемом либого тайм-слота "опускаем линию",
@@ -118,16 +109,18 @@ unsigned char oneWireReadByte(void) {
 //}
 //***************************************************************************
 int getTemperature() {
-	oneWireInit();
+	if (!oneWireInit())
+		return -9999;
 	oneWireWriteByte(SKIP_ROM);
 	oneWireWriteByte(CONVERT_TEMP);
 	_delay_ms(100);
-	oneWireInit();
+	if (!oneWireInit())
+		return -9999;
 	oneWireWriteByte(SKIP_ROM);
 	oneWireWriteByte(READ_SCRATCHPAD);
 	ds18b20[0] = oneWireReadByte();
 	ds18b20[1] = oneWireReadByte();
-	if(ds18b20[0] == 255 && ds18b20[1] == 255)
+	if (ds18b20[0] == 255 && ds18b20[1] == 255)
 		return -9999;
 	return ((ds18b20[1] << 8) + ds18b20[0]) >> 4;
 }

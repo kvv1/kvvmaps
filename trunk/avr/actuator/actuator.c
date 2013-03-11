@@ -119,6 +119,14 @@ static int handler(Message* msg) {
     return 0;
 }
 
+//void xxx(PORTPIN pinOut0) {
+//	setPort(pinOut0, 0);
+//}
+//
+//void yyy(PORTPIN pinOut0) {
+//	setPort1(pinOut0, 0);
+//}
+
 void actuatorInit(Actuator* actuator, PORTPIN pinOut0, PORTPIN pinOut1, PORTPIN pinIn) {
 	actuator->h.handler = handler;
 	actuator->pinOut0 = pinOut0;

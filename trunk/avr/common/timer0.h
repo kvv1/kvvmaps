@@ -6,10 +6,6 @@
 long getTimeMillis();
 long getTimeMillisCli();
 
-#ifndef SINGLE_MILLIS
-extern void (*millis)();
-#endif
-
 typedef struct {
 }*TIMERTYPE;
 
