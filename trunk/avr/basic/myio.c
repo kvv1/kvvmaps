@@ -6,7 +6,7 @@
  */
 
 #include <avr/io.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <util/atomic.h>
 
 #include "myio.h"
@@ -129,7 +129,6 @@ unsigned char tx_wr_index, tx_rd_index, tx_counter;
 unsigned int tx_wr_index,tx_rd_index,tx_counter;
 #endif
 
-// USART Transmitter interrupt service routine
 ISR (USART_TXC_vect) {
 	if (tx_counter) {
 		--tx_counter;
