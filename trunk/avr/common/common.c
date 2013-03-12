@@ -5,7 +5,7 @@
 #include "message.h"
 #include "myio.h"
 
-#include <avr/interrupt.h>
+//#include <avr/interrupt.h>
 #include <avr/sleep.h>
 
 void addFletchSum(unsigned char c, unsigned char* S) {
