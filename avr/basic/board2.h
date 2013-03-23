@@ -33,8 +33,8 @@
 #define PIN_1W P_D5
 
 #define PIN_485 P_B7
-#define TX_START() setPort(PIN_485, 1)
-#define TX_END() setPort(PIN_485, 0)
+
+#define PIN_RXD P_D0
 
 
 #define PIN_MARS_RTS P_D6

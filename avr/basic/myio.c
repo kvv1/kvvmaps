@@ -197,6 +197,7 @@ void uart_init() {
 #ifdef PIN_485
 	confPin(PIN_485, PIN_OUT, 0);
 #endif
+	confPin(PIN_RXD, PIN_IN, 1);
 
 //	UCSRA=0x02;
 //	UCSRB=0xD8;
