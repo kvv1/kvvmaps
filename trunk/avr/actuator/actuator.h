@@ -14,5 +14,6 @@ typedef struct {
 
 
 void actuatorInit(Actuator* actuator, PORTPIN pinOut0, PORTPIN pinOut1, PORTPIN pinIn);
+void actuatorGoto(Actuator* actuator, int target256);
 
 #endif

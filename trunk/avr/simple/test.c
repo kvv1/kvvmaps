@@ -12,7 +12,7 @@ int main(void) {
 	DDRB = 0x00;
 	PORTC = 0x00;
 	DDRC = 0x00;
-	PORTD = 0x00;
+	PORTD = 0x01;
 	DDRD = 0x00;
 
 	TCCR0 = 0x00;
