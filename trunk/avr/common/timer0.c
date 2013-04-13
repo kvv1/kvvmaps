@@ -39,6 +39,8 @@ void handleTimers() {
 	while (tticks) {
 		int i;
 		tticks--;
+		ds18b20_step(TIME_UNIT);
+		vmStep(TIME_UNIT);
 		for (i = 0; i < NTIMERS; i++) {
 			TIMER* timer = &timers[i];
 			if (timer->msg.target) {

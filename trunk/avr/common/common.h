@@ -16,6 +16,8 @@
 #include "led.h"
 #include "adc.h"
 #include "myio.h"
+#include "1w.h"
+#include "ee.h"
 
 #ifndef ADC_CHANS
 #define ADC_CHANS 0
@@ -23,10 +25,12 @@
 
 void foo();
 
-void addFletchSum(unsigned char c, unsigned char* S);
-unsigned char fletchSum(unsigned char *buf, unsigned char len);
+void addFletchSum(uint8_t c, uint8_t* S);
+unsigned char fletchSum(uint8_t *buf, uint8_t len);
 
 void createObjects();
+
+ee_8_decl(dummy);
 
 #endif
 

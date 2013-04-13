@@ -9,7 +9,7 @@ typedef struct {
     int pos;
     int target;
     int range;
-    int inc;
+    //int inc;
 } Actuator;
 
 

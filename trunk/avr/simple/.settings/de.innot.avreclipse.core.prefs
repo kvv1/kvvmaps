@@ -1,4 +1,4 @@
-#Sat Mar 23 17:55:17 MSK 2013
+#Thu Mar 28 15:53:15 MSK 2013
 avrtarget/ClockFrequency=2000000
 avrtarget/ExtRAMSize=0
 avrtarget/ExtendedRAM=false
@@ -7,7 +7,7 @@ avrtarget/UseEEPROM=false
 avrtarget/UseExtendedRAMforHeap=true
 avrtarget/avrdude/BitBangDelay=
 avrtarget/avrdude/Bitclock=
-avrtarget/avrdude/EEPROMFile=
+avrtarget/avrdude/EEPROMFile=${workspace_loc\:/simple/code.bin}
 avrtarget/avrdude/EEPROMFromConfig=true
 avrtarget/avrdude/FlashFile=
 avrtarget/avrdude/FlashFromConfig=true
@@ -18,7 +18,7 @@ avrtarget/avrdude/NoWrite=false
 avrtarget/avrdude/OtherOptions=
 avrtarget/avrdude/ProgrammerID=programmerconfig.1
 avrtarget/avrdude/UseCounter=false
-avrtarget/avrdude/WriteEEPROM=false
+avrtarget/avrdude/WriteEEPROM=true
 avrtarget/avrdude/WriteFlash=true
 avrtarget/perConfig=false
 eclipse.preferences.version=1

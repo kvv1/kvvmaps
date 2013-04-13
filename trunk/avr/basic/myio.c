@@ -6,7 +6,7 @@
  */
 
 #include <avr/io.h>
-//#include <stdlib.h>
+#include <stdlib.h>
 #include <util/atomic.h>
 
 #include "myio.h"
@@ -59,8 +59,8 @@
  */
 void handleRxCmd(char* cmd);
 
-#define RXBUFSIZE 16
-#define TX_BUFFER_SIZE 64
+#define RXBUFSIZE 64
+#define TX_BUFFER_SIZE 32
 
 ISR (USART_RXC_vect) {
 	static char rxBuf1[RXBUFSIZE];
@@ -121,12 +121,12 @@ ISR (USART_RXC_vect) {
 
 // USART Transmitter buffer
 
-static char tx_buffer[TX_BUFFER_SIZE];
+static char volatile tx_buffer[TX_BUFFER_SIZE];
 
 #if TX_BUFFER_SIZE<256
-unsigned char tx_wr_index, tx_rd_index, tx_counter;
+unsigned char volatile tx_wr_index, tx_rd_index, tx_counter;
 #else
-unsigned int tx_wr_index,tx_rd_index,tx_counter;
+unsigned int volatile tx_wr_index,tx_rd_index,tx_counter;
 #endif
 
 ISR (USART_TXC_vect) {

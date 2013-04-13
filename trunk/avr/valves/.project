@@ -92,5 +92,10 @@
 			<type>2</type>
 			<locationURI>WORKSPACE_LOC/common</locationURI>
 		</link>
+		<link>
+			<name>vm</name>
+			<type>2</type>
+			<locationURI>WORKSPACE_LOC/vm</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>

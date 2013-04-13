@@ -4,20 +4,22 @@
 #include "common.h"
 #include "message.h"
 #include "myio.h"
+#include "ee.h"
 
-//#include <avr/interrupt.h>
 #include <avr/sleep.h>
 
-void addFletchSum(unsigned char c, unsigned char* S) {
+ee_8(dummy);
+
+void addFletchSum(uint8_t c, uint8_t* S) {
 	*S += c;
 	if (*S < c)
 		(*S)++;
 }
 
-unsigned char fletchSum(unsigned char *buf, unsigned char len) {
-	unsigned char S = 0;
+unsigned char fletchSum(uint8_t *buf, uint8_t len) {
+	uint8_t S = 0;
 	for (; len > 0; len--) {
-		unsigned char R = *buf++;
+		uint8_t R = *buf++;
 		S += R;
 		if (S < R)
 			S++;
@@ -109,10 +111,10 @@ int main(void) {
 			if (msg.target)
 				msg.target->handler(&msg);
 		} else {
-			set_sleep_mode(SLEEP_MODE_IDLE);
-			sleep_enable();
-			sleep_cpu();
-			sleep_disable();
+//			set_sleep_mode(SLEEP_MODE_IDLE);
+//			sleep_enable();
+//			sleep_cpu();
+//			sleep_disable();
 		}
 	}
 	return 0;

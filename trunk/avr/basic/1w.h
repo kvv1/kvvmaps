@@ -7,4 +7,7 @@ unsigned char oneWireReadByte(void);
 //void startConvert();
 int getTemperature();
 
+extern int temperature;
+void ds18b20_step(int ms);
+
 #endif /* OW_H_ */

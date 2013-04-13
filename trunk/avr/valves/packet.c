@@ -3,7 +3,7 @@
 
 static char addr;
 
-void packetReceived(char* data, char len);
+void packetReceived(char* data, uint8_t len);
 
 void handleRxCmd(char* data) {
 	if (data[1] == 0 || data[1] == MY_ADDR) {
@@ -15,21 +15,41 @@ void handleRxCmd(char* data) {
 	}
 }
 
-void sendPacket(char* data, char len) {
-	unsigned char S = 0;
+void sendByte(uint8_t b, uint8_t* S) {
+	uart_putchar(b);
+	addFletchSum(b, S);
+}
 
-	uart_putchar(len + 3);
-	addFletchSum(len + 3, &S);
-
+void sendPacketStart(uint16_t len, uint8_t* S) {
+	*S = 0;
+	if(len <= 252) {
+		sendByte(len + 3, S);
+	} else {
+		len += 5;
+		sendByte(0, S);
+		sendByte(len >> 8, S);
+		sendByte(len, S);
+	}
 	uart_putchar(addr | 0x80);
-	addFletchSum(addr | 0x80, &S);
+	addFletchSum(addr | 0x80, S);
+}
 
+void sendPacketBodyPart(uint8_t* data, uint16_t len, uint8_t* S) {
 	while (len--) {
-		uart_putchar(*data);
-		addFletchSum(*data, &S);
+		sendByte(*data, S);
 		data++;
 	}
+}
 
-	uart_putchar(S);
+void sendPacketEnd(uint8_t* S) {
+	sendByte(*S, S);
+}
+
+
+void sendPacket(char* data, uint16_t len) {
+	uint8_t S = 0;
+	sendPacketStart(len, &S);
+	sendPacketBodyPart(data, len, &S);
+	sendPacketEnd(&S);
 }
 
