@@ -12,7 +12,7 @@ public class ModePage extends Composite {
 
 	private VerticalPanel panel = new VerticalPanel();
 
-	public static boolean controlMode;
+	public static boolean controlMode = true;
 
 	public ModePage() {
 

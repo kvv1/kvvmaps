@@ -2,8 +2,10 @@ package kvv.controllers.client.controls.simple;
 
 import java.util.Map;
 
+import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -16,19 +18,19 @@ public class GetRegControl extends Composite {
 
 	private final int addr;
 	private final Label label;
-	private final ControllersServiceAsync controllersService;
 	private final Label edit;
 	private final int reg;
 	private final boolean div10;
+	private final ControllersServiceAsync controllersService = GWT
+			.create(ControllersService.class);
 
 	public GetRegControl(final int addr, final int reg, final boolean div10,
-			String text, final ControllersServiceAsync controllersService) {
+			String text) {
 		this.addr = addr;
 		this.label = new Label(text);
 		this.edit = new Label();
 		this.reg = reg;
 		this.div10 = div10;
-		this.controllersService = controllersService;
 
 		edit.setWidth("40px");
 		// edit.setReadOnly(true);
@@ -44,15 +46,14 @@ public class GetRegControl extends Composite {
 		initWidget(panel);
 	}
 
-	
 	public void refresh(Map<Integer, Integer> regs) {
 		edit.setText("???");
-		
+
 		if (regs == null)
 			return;
-		
+
 		Integer _val = regs.get(reg);
-		
+
 		if (_val == null)
 			return;
 
@@ -62,8 +63,6 @@ public class GetRegControl extends Composite {
 			edit.setText(Integer.toString(_val));
 	}
 
-	
-	
 	public void refresh() {
 		edit.setText("???");
 		controllersService.getReg(addr, reg, new AsyncCallback<Integer>() {

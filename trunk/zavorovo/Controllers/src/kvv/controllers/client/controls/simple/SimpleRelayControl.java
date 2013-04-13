@@ -2,9 +2,11 @@ package kvv.controllers.client.controls.simple;
 
 import java.util.Map;
 
+import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.pages.ModePage;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -18,14 +20,13 @@ public class SimpleRelayControl extends Composite {
 
 	private final int addr;
 	private final int reg;
-	private final ControllersServiceAsync controllersService;
+	private final ControllersServiceAsync controllersService = GWT
+			.create(ControllersService.class);
 
-	public SimpleRelayControl(final int addr, final int reg,
-			final ControllersServiceAsync controllersService) {
+	public SimpleRelayControl(final int addr, final int reg) {
 
 		this.addr = addr;
 		this.reg = reg;
-		this.controllersService = controllersService;
 
 		cb.addClickHandler(new ClickHandler() {
 			@Override

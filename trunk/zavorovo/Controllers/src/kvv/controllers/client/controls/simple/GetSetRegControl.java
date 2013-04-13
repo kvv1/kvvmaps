@@ -2,9 +2,11 @@ package kvv.controllers.client.controls.simple;
 
 import java.util.Map;
 
+import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.pages.ModePage;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -22,19 +24,19 @@ public class GetSetRegControl extends Composite {
 
 	private final int addr;
 	private final Label label;
-	private final ControllersServiceAsync controllersService;
 	private final TextBox edit;
 	private final int reg;
 	private final boolean div10;
+	private final ControllersServiceAsync controllersService = GWT
+			.create(ControllersService.class);
 
 	public GetSetRegControl(final int addr, final int reg, final boolean div10,
-			String text, final ControllersServiceAsync controllersService) {
+			String text) {
 		this.addr = addr;
 		this.label = new Label(text);
 		this.edit = new TextBox();
 		this.reg = reg;
 		this.div10 = div10;
-		this.controllersService = controllersService;
 
 		edit.setWidth("40px");
 

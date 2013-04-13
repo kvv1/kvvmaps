@@ -23,4 +23,6 @@ public interface ControllersService extends RemoteService {
 	String[] getCommands() throws Exception;
 
 	void execCommand(String cmd) throws Exception;
+	
+	String upload(int addr, String name);
 }

@@ -2,10 +2,12 @@ package kvv.controllers.client.controls.simple;
 
 import java.util.Map;
 
+import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.pages.ModePage;
-import kvv.controllers.shared.Constants;
+import kvv.controllers.register.Register;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -21,12 +23,11 @@ public class RelayCheckBoxes extends Composite {
 	private final CheckBox checkBoxes[] = new CheckBox[4];
 	private final HorizontalPanel panel = new HorizontalPanel();
 
-	private final ControllersServiceAsync controllersService;
+	private final ControllersServiceAsync controllersService = GWT
+			.create(ControllersService.class);
 
-	public RelayCheckBoxes(final int addr,
-			final ControllersServiceAsync controllersService) {
+	public RelayCheckBoxes(final int addr) {
 		this.addr = addr;
-		this.controllersService = controllersService;
 
 		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		// panel.setSpacing(10);
@@ -74,7 +75,7 @@ public class RelayCheckBoxes extends Composite {
 		if (regs == null)
 			return;
 
-		Integer _val = regs.get(Constants.REG_RELAYS);
+		Integer _val = regs.get(Register.REG_RELAYS);
 
 		if (_val == null)
 			return;
@@ -93,7 +94,7 @@ public class RelayCheckBoxes extends Composite {
 		for (int i = 0; i < checkBoxes.length; i++)
 			checkBoxes[i].setEnabled(false);
 
-		controllersService.getReg(addr, Constants.REG_RELAYS,
+		controllersService.getReg(addr, Register.REG_RELAYS,
 				new AsyncCallback<Integer>() {
 					@Override
 					public void onSuccess(Integer result) {

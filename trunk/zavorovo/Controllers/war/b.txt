@@ -1,0 +1,120 @@
+reg out0(REG_RELAY0);
+reg out1(REG_RELAY1);
+reg in(REG_IN0);
+reg inpullup(REG_INPULLUP0);//
+
+proc stop1() {
+	out0 = 0;
+	out1 = 0;
+	timerUp.stop;
+	timerDown.stop;
+	timerWork.stop;
+}
+
+proc up() {
+	out0 = 0;
+	out1 = 1;
+}
+
+proc down() {
+	out0 = 1;
+	out1 = 0;
+}
+
+func getDir() = out1 - out0;
+
+const stateInitDown = 1;
+const stateInitUp = 2;
+const stateWork = 3;
+
+const timeout = 500;
+
+reg targ;
+reg pos;
+reg range;
+reg state;
+reg target;
+
+func calcTarg() = muldiv(target, range, 256);
+//func calcTarg = target * range / 256;
+
+main {
+	inpullup = 1;
+	stop1();
+	down();
+	timerDown.start_ms(timeout);
+	state = stateInitDown;
+	targ = -1;
+	target = 128;
+}
+
+onchange(target) {
+	if(state == stateWork) {
+		targ = calcTarg();
+	}
+}
+
+onchange(targ) {
+	if(state == stateWork) {
+		if (targ > pos) {
+			up();
+			timerWork.start_ms(timeout);
+		} else  { if (targ < pos) {
+			down();
+			timerWork.start_ms(timeout);
+		} }
+	}
+}
+
+onchange (in) {
+	if(state == stateInitDown) {
+		timerDown.start_ms(timeout);
+	} else if(state == stateInitUp) {
+		timerUp.start_ms(timeout);
+		pos++;
+	} else if(state == stateWork) {
+		pos = pos + getDir();
+		timerWork.start_ms(timeout);
+		if ((getDir() > 0 && pos >= targ) || (getDir() < 0 && pos <= targ))
+			stop1();
+	}
+}
+
+onchange (0) {
+	if(state == stateInitDown) {
+		timerDown.start_ms(timeout);
+	} else if(state == stateInitUp) {
+		timerUp.start_ms(timeout);
+		pos++;
+	} else if(state == stateWork) {
+		pos = pos + getDir();
+		timerWork.start_ms(timeout);
+		if ((getDir() > 0 && pos >= targ) || (getDir() < 0 && pos <= targ))
+			stop1();
+	}
+}
+
+timer timerDown {
+	stop1();
+	pos = 0;
+	up();
+	timerUp.start_ms(timeout);
+	state = stateInitUp;
+}
+
+timer timerUp {
+	stop1();
+	range = pos;
+	state = stateWork;
+	targ = calcTarg();
+}
+
+timer timerWork {
+	if (getDir() > 0) {
+		pos = range;
+	} else { if (getDir() < 0) {
+		pos = 0;
+	} }
+	stop1();
+}
+

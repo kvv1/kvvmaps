@@ -1,20 +1,18 @@
 package kvv.controllers.controller;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import kvv.controllers.rs485.Transceiver;
+import kvv.controllers.utils.Command;
 
 public class Controller implements IController { // 9164642959 7378866
 
 	private static final int ERR_OK = 0;
 	private static final int ERR_UNKNOWN_CMD = 1;
 	private static final int ERR_INVALID_PORT_NUM = 2;
-
-	private static final int CMD_SETREG = 1;
-	private static final int CMD_GETREG = 2;
-	private static final int CMD_GETREGS = 3;
 
 	private final Transceiver rs;
 
@@ -24,21 +22,24 @@ public class Controller implements IController { // 9164642959 7378866
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
-		byte[] resp = rs.send(addr, new byte[] { CMD_SETREG, (byte) reg,
-				(byte) (val >> 8), (byte) val });
+		byte[] resp = rs.send(addr,
+				new byte[] { (byte) Command.CMD_SETREG.ordinal(), (byte) reg,
+						(byte) (val >> 8), (byte) val });
 		checkErr(resp);
 	}
 
 	@Override
 	public int getReg(int addr, int reg) throws IOException {
-		byte[] resp = rs.send(addr, new byte[] { CMD_GETREG, (byte) reg });
+		byte[] resp = rs.send(addr,
+				new byte[] { (byte) Command.CMD_GETREG.ordinal(), (byte) reg });
 		checkErr(resp);
 		return resp[1] * 256 + (resp[2] & 0xFF);
 	}
 
 	@Override
 	public Map<Integer, Integer> getRegs(int addr) throws IOException {
-		byte[] resp = rs.send(addr, new byte[] { CMD_GETREGS });
+		byte[] resp = rs.send(addr,
+				new byte[] { (byte) Command.CMD_GETREGS.ordinal() });
 		checkErr(resp);
 		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
 		for (int i = 1; i < resp.length - 2; i += 3) {
@@ -47,6 +48,17 @@ public class Controller implements IController { // 9164642959 7378866
 			map.put(reg, val);
 		}
 		return map;
+	}
+
+	@Override
+	public void upload(int addr, int start, byte[] data) throws IOException {
+		ByteArrayOutputStream req = new ByteArrayOutputStream();
+		req.write((byte) Command.CMD_UPLOAD.ordinal());
+		req.write((byte) (start >> 8));
+		req.write((byte) start);
+		req.write(data);
+		byte[] resp = rs.send(addr, req.toByteArray());
+		checkErr(resp);
 	}
 
 	private static void checkErr(byte[] resp) throws IOException {
@@ -61,37 +73,25 @@ public class Controller implements IController { // 9164642959 7378866
 			throw new IOException("unknown error");
 		}
 	}
-/*
-	public static void main(String[] args) throws Exception {
 
-		Controller controller = new Controller(new Rs485("COM5"));
-		Thread.sleep(1000);
-
-		try {
-			System.out.println("addr set ok");
-			controller.setReg(1, Constants.REG_RELAYS, 9);
-			System.out.println("outs="
-					+ (int) controller.getReg(1, Constants.REG_RELAYS));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
-		// System.exit(0);
-
-		for (;;) {
-			try {
-				int t = controller.getReg(1, Constants.REG_TEMP);
-				System.out.println(t);
-			} catch (IOException e) {
-				System.err.println("error " + e.getMessage());
-			}
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-			}
-		}
-	}
-*/
+	/*
+	 * public static void main(String[] args) throws Exception {
+	 * 
+	 * Controller controller = new Controller(new Rs485("COM5"));
+	 * Thread.sleep(1000);
+	 * 
+	 * try { System.out.println("addr set ok"); controller.setReg(1,
+	 * Constants.REG_RELAYS, 9); System.out.println("outs=" + (int)
+	 * controller.getReg(1, Constants.REG_RELAYS)); } catch (IOException e1) {
+	 * e1.printStackTrace(); }
+	 * 
+	 * // System.exit(0);
+	 * 
+	 * for (;;) { try { int t = controller.getReg(1, Constants.REG_TEMP);
+	 * System.out.println(t); } catch (IOException e) {
+	 * System.err.println("error " + e.getMessage()); } try { Thread.sleep(100);
+	 * } catch (InterruptedException e) { } } }
+	 */
 	@Override
 	public void close() {
 		rs.close();

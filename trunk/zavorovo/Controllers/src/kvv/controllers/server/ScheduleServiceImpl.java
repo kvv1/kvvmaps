@@ -1,7 +1,8 @@
 package kvv.controllers.server;
 
+import kvv.controllers.server.utils.Utils;
+import kvv.controllers.utils.Constants;
 import kvv.controllers.client.ScheduleService;
-import kvv.controllers.shared.Constants;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 

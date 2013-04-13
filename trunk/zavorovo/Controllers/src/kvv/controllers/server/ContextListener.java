@@ -6,7 +6,9 @@ import javax.servlet.ServletContextListener;
 import kvv.controllers.controller.Controller;
 import kvv.controllers.router.RouterThread;
 import kvv.controllers.rs485.Rs485;
-import kvv.controllers.shared.Constants;
+import kvv.controllers.utils.Constants;
+import kvv.controllers.utils.MyLogger;
+import kvv.controllers.utils.Props;
 
 public class ContextListener implements ServletContextListener {
 
@@ -15,36 +17,39 @@ public class ContextListener implements ServletContextListener {
 
 	public void contextInitialized(ServletContextEvent event) {
 		try {
-			boolean emul = Boolean.valueOf(Utils.getProp(Constants.propsFile,
+			boolean emul = Boolean.valueOf(Props.getProp(Constants.propsFile,
 					"emul"));
 			if (emul)
 				ControllersServiceImpl.controller = new ControllerWrapper(
 						new ControllerEmul());
-			else
+			else {
+				Rs485.instance = new Rs485(Props.getProp(Constants.propsFile,
+						"COM"));
 				ControllersServiceImpl.controller = new ControllerWrapper(
-						new Controller(new Rs485(Utils.getProp(
-								Constants.propsFile, "COM"))));
+						new Controller(Rs485.instance));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		boolean logThread = Boolean.valueOf(Utils.getProp(Constants.propsFile,
+		boolean logThread = Boolean.valueOf(Props.getProp(Constants.propsFile,
 				"checkControllers"));
 		if (logThread)
 			LogThread.instance = new LogThread();
 
-		boolean configRouter = Boolean.valueOf(Utils.getProp(
+		boolean configRouter = Boolean.valueOf(Props.getProp(
 				Constants.propsFile, "configRouter"));
 		if (configRouter) {
-			long routerCheckTime = 1000L * Integer.valueOf(Utils.getProp(
+			long routerCheckTime = 1000L * Integer.valueOf(Props.getProp(
 					Constants.propsFile, "routerCheckTimeS"));
-			String routerPassword = Utils.getProp(Constants.propsFile,
+			String routerPassword = Props.getProp(Constants.propsFile,
 					"routerPassword");
-			String routerPublicIP = Utils.getProp(Constants.propsFile,
+			String routerPublicIP = Props.getProp(Constants.propsFile,
 					"routerPublicIP");
-			String routerLocalIP = Utils.getProp(Constants.propsFile,
+			String routerLocalIP = Props.getProp(Constants.propsFile,
 					"routerLocalIP");
-			routerThread = new RouterThread(routerCheckTime, routerPassword, routerPublicIP, routerLocalIP);
+			routerThread = new RouterThread(routerCheckTime, routerPassword,
+					routerPublicIP, routerLocalIP);
 		}
 
 		Scheduler.instance = new Scheduler();
@@ -72,9 +77,9 @@ public class ContextListener implements ServletContextListener {
 		Controllers.stopped = true;
 		Controllers.thread.stop();
 
-		ControllersServiceImpl.controller.close();
-		
-		Utils.stopLogger();
+		Rs485.instance.close();
+
+		MyLogger.stopLogger();
 
 		System.out.println("The Simple Web App. Has Been Removed");
 		// this.context = null;

@@ -1,14 +1,22 @@
 package kvv.controllers.server;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.controller.IController;
-import kvv.controllers.shared.Constants;
+import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ObjectDescr;
+import kvv.controllers.utils.Constants;
+import kvv.evlang.EG1;
+import kvv.evlang.ParseException;
+import kvv.evlang.Token;
+import kvv.evlang.impl.ELReader;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -69,5 +77,39 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public Map<Integer, Integer> getRegs(int addr) throws Exception {
 		return controller.getRegs(addr);
+	}
+
+	@Override
+	public String upload(int addr, String name) {
+		EG1 parser = null;
+		try {
+			if (name == null) {
+				controller.upload(addr, 0, new byte[] { 0, 0, 0 });
+			} else {
+				parser = new EG1(new ELReader(new FileReader(Constants.ROOT
+						+ "/src/" + name)));
+
+				parser.parse();
+				byte[] bytes = parser.dump();
+
+				int start = 0;
+				while (start < bytes.length) {
+					int len = Math.min(32, bytes.length - start);
+					controller.upload(addr, start,
+							Arrays.copyOfRange(bytes, start, start + len));
+					start += len;
+				}
+			}
+			return null;
+		} catch (ParseException e) {
+			Token t = parser.token;
+			return " line " + t.beginLine + " : " + e.getMessage();
+		} catch (IOException e) {
+			return e.getMessage();
+		}
+
+		// controller.upload(addr, start, data);
+		// TODO Auto-generated method stub
+
 	}
 }

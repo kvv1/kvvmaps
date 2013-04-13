@@ -1,0 +1,38 @@
+
+// #################################
+
+reg x;
+
+onset(x > 20) {
+    print x;
+}
+
+onset(x <= 20) {
+    print x;
+}
+
+timer t {
+	x = -x;
+	t.start_ms (500);
+}
+
+main {
+//	print muldiv(20000, 30000, 10000);
+
+	p(100);	
+	x = 25;
+	t.start_ms 100;
+}
+
+func f(a,b) = a - b;
+
+proc p(c) {
+	c = c + 300; 
+    print f(13+c,6);
+}
+/*
+when(REG_TIME in (23:15 ... 23:30)) {
+	REG_RELAY7 = 1;
+}
+*/
+// #################################
