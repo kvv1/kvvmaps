@@ -3,8 +3,10 @@ package kvv.controllers.server;
 import java.util.Date;
 import java.util.List;
 
-import kvv.controllers.shared.Constants;
+import kvv.controllers.server.utils.Utils;
+
 import kvv.controllers.shared.ControllerDescr;
+import kvv.controllers.utils.Constants;
 
 public class Scheduler extends Thread {
 

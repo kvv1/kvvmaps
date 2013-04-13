@@ -2,12 +2,12 @@ package kvv.controllers.client.controls;
 
 import java.util.Map;
 
-import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.controls.simple.GetRegControl;
 import kvv.controllers.client.controls.simple.GetSetRegControl;
 import kvv.controllers.client.controls.simple.HothouseCheckBox;
 import kvv.controllers.client.controls.simple.RelayCheckBoxes;
-import kvv.controllers.shared.Constants;
+import kvv.controllers.client.controls.simple.SimpleRelayControl;
+import kvv.controllers.register.Register;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -28,16 +28,14 @@ public class Type1Control extends ControlComposite {
 
 	private final RelayCheckBoxes relays;
 	private final HothouseCheckBox hothouseCheckBox;
-	
-	public Type1Control(int addr, String name,
-			ControllersServiceAsync controllersService) {
 
-		super(addr, controllersService);
-		
+	public Type1Control(int addr, String name) {
 
-		relays = new RelayCheckBoxes(addr, controllersService);
-		hothouseCheckBox = new HothouseCheckBox(addr, "Теплица",
-				controllersService);
+		super(addr);
+
+		relays = new RelayCheckBoxes(addr);
+
+		hothouseCheckBox = new HothouseCheckBox(addr, "Теплица");
 
 		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		panel.setSpacing(10);
@@ -54,20 +52,19 @@ public class Type1Control extends ControlComposite {
 
 		panel.add(relays);
 
-		tempVal = new GetRegControl(addr, Constants.REG_TEMP, true, "T=", 
-				controllersService);
+		tempVal = new GetRegControl(addr, Register.REG_TEMP, true, "T=");
 		panel.add(tempVal);
 
-		tempPref = new GetSetRegControl(addr, Constants.REG_TEMP_PREF, true,
-				"T опт=", controllersService);
+		tempPref = new GetSetRegControl(addr, Register.REG_TEMP_PREF, true,
+				"T опт=");
 		panel.add(tempPref);
 
-		tempMax = new GetSetRegControl(addr, Constants.REG_TEMP_PREF_2, true,
-				"T макс=", controllersService);
+		tempMax = new GetSetRegControl(addr, Register.REG_TEMP_PREF_2, true,
+				"T макс=");
 		panel.add(tempMax);
 
 		panel.add(hothouseCheckBox);
-
+		
 		Button refreshButton = new Button("Обновить");
 		panel.add(refreshButton);
 

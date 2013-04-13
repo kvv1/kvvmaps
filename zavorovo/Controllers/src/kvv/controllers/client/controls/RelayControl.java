@@ -2,7 +2,6 @@ package kvv.controllers.client.controls;
 
 import java.util.Map;
 
-import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.controls.simple.SimpleRelayControl;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -17,16 +16,15 @@ public class RelayControl extends ControlComposite {
 	private final HorizontalPanel panel = new HorizontalPanel();
 	private SimpleRelayControl cb;
 
-	public RelayControl(int addr, final int reg, String name,
-			ControllersServiceAsync controllersService) {
-		super(addr, controllersService);
+	public RelayControl(int addr, final int reg, String name) {
+		super(addr);
 
 		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		panel.setSpacing(10);
 
 		panel.add(new Label(name));
 
-		cb = new SimpleRelayControl(addr, reg, controllersService);
+		cb = new SimpleRelayControl(addr, reg);
 		panel.add(cb);
 
 		Button refreshButton = new Button("Обновить");

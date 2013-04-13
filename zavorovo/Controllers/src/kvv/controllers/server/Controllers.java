@@ -3,8 +3,9 @@ package kvv.controllers.server;
 import java.util.HashMap;
 import java.util.Map;
 
-import kvv.controllers.shared.Constants;
+import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.ControllerDescr;
+import kvv.controllers.utils.Constants;
 
 public class Controllers {
 	private final static Map<String, ControllerDescr> nameMap = new HashMap<String, ControllerDescr>();

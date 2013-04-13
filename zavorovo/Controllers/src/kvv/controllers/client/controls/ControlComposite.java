@@ -2,18 +2,20 @@ package kvv.controllers.client.controls;
 
 import java.util.Map;
 
+import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 
 public abstract class ControlComposite extends Composite {
 	public final int addr;
-	private final ControllersServiceAsync controllersService;
+	private final ControllersServiceAsync controllersService = GWT
+			.create(ControllersService.class);
 
-	public ControlComposite(int addr, ControllersServiceAsync controllersService) {
+	public ControlComposite(int addr) {
 		this.addr = addr;
-		this.controllersService = controllersService;
 	}
 
 	public abstract void refresh(Map<Integer, Integer> result);

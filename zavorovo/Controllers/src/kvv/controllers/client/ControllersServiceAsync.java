@@ -23,4 +23,6 @@ public interface ControllersServiceAsync {
 
 	void getRegs(int addr, AsyncCallback<Map<Integer, Integer>> callback);
 
+	void upload(int addr, String name, AsyncCallback<String> callback);
+
 }

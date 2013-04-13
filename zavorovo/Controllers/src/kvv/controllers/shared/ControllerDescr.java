@@ -7,6 +7,7 @@ public class ControllerDescr implements Serializable {
 
 	public enum Type {
 		TYPE1,
+		TYPE2,
 	}
 
 	public ControllerDescr() {

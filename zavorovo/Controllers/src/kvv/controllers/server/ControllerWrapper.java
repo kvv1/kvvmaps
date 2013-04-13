@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import kvv.controllers.controller.IController;
+import kvv.controllers.utils.MyLogger;
 
 public class ControllerWrapper implements IController {
 
@@ -19,37 +20,43 @@ public class ControllerWrapper implements IController {
 		try {
 			controller.setReg(addr, reg, val);
 		} catch (IOException e) {
-			Utils.getLogger().log(Level.WARNING, e.getMessage());
+			MyLogger.getLogger().log(Level.WARNING, e.getMessage());
 			throw e;
 		}
 	}
 
 	@Override
 	public int getReg(int addr, int reg) throws Exception {
-		int val;
 		try {
-			val = controller.getReg(addr, reg);
+			return controller.getReg(addr, reg);
 		} catch (IOException e) {
-			Utils.getLogger().log(Level.WARNING, e.getMessage());
+			MyLogger.getLogger().log(Level.WARNING, e.getMessage());
 			throw e;
 		}
-		return val;
 	}
 
 	@Override
 	public Map<Integer, Integer> getRegs(int addr) throws Exception {
-		Map<Integer, Integer> regs;
 		try {
-			regs = controller.getRegs(addr);
+			return controller.getRegs(addr);
 		} catch (IOException e) {
-			Utils.getLogger().log(Level.WARNING, e.getMessage());
+			MyLogger.getLogger().log(Level.WARNING, e.getMessage());
 			throw e;
 		}
-		return regs;
 	}
 
 	@Override
 	public void close() {
 		controller.close();
+	}
+
+	@Override
+	public void upload(int addr, int start, byte[] data) throws IOException {
+		try {
+			controller.upload(addr, start, data);
+		} catch (IOException e) {
+			MyLogger.getLogger().log(Level.WARNING, e.getMessage());
+			throw e;
+		}
 	}
 }

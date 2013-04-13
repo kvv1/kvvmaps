@@ -14,7 +14,7 @@
 
 	<servlet-mapping>
 		<servlet-name>controllerServletBase</servlet-name>
-		<url-pattern>/controllers/controllerbase</url-pattern>
+		<url-pattern>/controller</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -45,6 +45,16 @@
 	<servlet-mapping>
 		<servlet-name>logServlet</servlet-name>
 		<url-pattern>/controllers/log</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>sourcesServlet</servlet-name>
+		<servlet-class>kvv.controllers.server.SourcesServiceImpl</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>sourcesServlet</servlet-name>
+		<url-pattern>/controllers/sources</url-pattern>
 	</servlet-mapping>
 
 	<listener>

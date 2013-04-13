@@ -2,11 +2,10 @@ package kvv.controllers.client.controls;
 
 import java.util.Map;
 
-import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.controls.simple.GetRegControl;
 import kvv.controllers.client.controls.simple.GetSetRegControl;
 import kvv.controllers.client.controls.simple.RelayCheckBoxes;
-import kvv.controllers.shared.Constants;
+import kvv.controllers.register.Register;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -26,18 +25,17 @@ public class HothouseControl extends ControlComposite {
 	private final GetSetRegControl maxTempWidget;
 	private final RelayCheckBoxes relays;
 
-	public HothouseControl(final int addr, String name,
-			ControllersServiceAsync controllersService) {
+	public HothouseControl(final int addr, String name) {
 
-		super(addr, controllersService);
+		super(addr);
 
-		currentTempWidget = new GetRegControl(addr, Constants.REG_TEMP, true,
-				"T = ", controllersService);
-		optTempWidget = new GetSetRegControl(addr, Constants.REG_TEMP_PREF,
-				true, "T опт = ", controllersService);
-		maxTempWidget = new GetSetRegControl(addr, Constants.REG_TEMP_PREF_2,
-				true, "T мах = ", controllersService);
-		relays = new RelayCheckBoxes(addr, controllersService);
+		currentTempWidget = new GetRegControl(addr, Register.REG_TEMP, true,
+				"T = ");
+		optTempWidget = new GetSetRegControl(addr, Register.REG_TEMP_PREF,
+				true, "T опт = ");
+		maxTempWidget = new GetSetRegControl(addr, Register.REG_TEMP_PREF_2,
+				true, "T мах = ");
+		relays = new RelayCheckBoxes(addr);
 
 		panel.setSpacing(10);
 

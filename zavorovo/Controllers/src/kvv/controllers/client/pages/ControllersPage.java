@@ -4,11 +4,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import kvv.controllers.client.CallbackAdapter;
+import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.controls.ControlComposite;
 import kvv.controllers.client.controls.Type1Control;
+import kvv.controllers.client.controls.Type2Control;
 import kvv.controllers.shared.ControllerDescr;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -20,7 +23,10 @@ public class ControllersPage extends Composite {
 	private VerticalPanel vertPanel = new VerticalPanel();
 	private final Set<ControlComposite> objects = new HashSet<ControlComposite>();
 
-	public ControllersPage(final ControllersServiceAsync controllersService) {
+	private final ControllersServiceAsync controllersService = GWT
+			.create(ControllersService.class);
+
+	public ControllersPage() {
 
 		// vertPanel.setSpacing(10);
 
@@ -41,13 +47,20 @@ public class ControllersPage extends Composite {
 						for (ControllerDescr descr : result) {
 							if (descr != null) {
 								switch (descr.type) {
-								case TYPE1:
+								case TYPE1: {
 									ControlComposite control = new Type1Control(
-											descr.addr, descr.name,
-											controllersService);
+											descr.addr, descr.name);
 									objects.add(control);
 									vertPanel.add(control);
 									break;
+								}
+								case TYPE2: {
+									ControlComposite control = new Type2Control(
+											descr.addr, descr.name);
+									objects.add(control);
+									vertPanel.add(control);
+									break;
+								}
 								}
 							}
 						}

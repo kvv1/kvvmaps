@@ -2,10 +2,12 @@ package kvv.controllers.client.controls.simple;
 
 import java.util.Map;
 
+import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.pages.ModePage;
-import kvv.controllers.shared.Constants;
+import kvv.controllers.register.Register;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -18,14 +20,13 @@ public class HothouseCheckBox extends Composite {
 	private final CheckBox tempRegCheckBox;
 
 	private final int addr;
-	private final ControllersServiceAsync controllersService;
+	private final ControllersServiceAsync controllersService = GWT
+			.create(ControllersService.class);
 
-	public HothouseCheckBox(final int addr, String text,
-			final ControllersServiceAsync controllersService) {
+	public HothouseCheckBox(final int addr, String text) {
 		this.addr = addr;
 		this.tempRegCheckBox = new CheckBox(text);
 		tempRegCheckBox.setEnabled(false);
-		this.controllersService = controllersService;
 
 		tempRegCheckBox.addClickHandler(new ClickHandler() {
 			@Override
@@ -39,7 +40,7 @@ public class HothouseCheckBox extends Composite {
 				tempRegCheckBox.setEnabled(false);
 				final boolean checked = ((CheckBox) event.getSource())
 						.getValue();
-				controllersService.setReg(addr, Constants.REG_TEMP_PREF_ON,
+				controllersService.setReg(addr, Register.REG_TEMP_PREF_ON,
 						checked ? 1 : 0, new AsyncCallback<Void>() {
 							@Override
 							public void onSuccess(Void result) {
@@ -62,7 +63,7 @@ public class HothouseCheckBox extends Composite {
 		if (regs == null)
 			return;
 
-		Integer _val = regs.get(Constants.REG_TEMP_PREF_ON);
+		Integer _val = regs.get(Register.REG_TEMP_PREF_ON);
 
 		if (_val == null)
 			return;
@@ -73,7 +74,7 @@ public class HothouseCheckBox extends Composite {
 
 	public void refresh() {
 		tempRegCheckBox.setEnabled(false);
-		controllersService.getReg(addr, Constants.REG_TEMP_PREF_ON,
+		controllersService.getReg(addr, Register.REG_TEMP_PREF_ON,
 				new AsyncCallback<Integer>() {
 					@Override
 					public void onSuccess(Integer result) {

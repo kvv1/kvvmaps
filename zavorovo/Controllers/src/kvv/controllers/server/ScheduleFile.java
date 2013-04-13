@@ -12,7 +12,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import kvv.controllers.shared.Constants;
+import kvv.controllers.utils.Constants;
+
+
 
 public class ScheduleFile {
 	public boolean enabled;

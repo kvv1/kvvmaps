@@ -6,12 +6,14 @@ import java.util.Map;
 import java.util.Set;
 
 import kvv.controllers.client.CallbackAdapter;
+import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.controls.ControlComposite;
 import kvv.controllers.client.controls.HothouseControl;
 import kvv.controllers.client.controls.RelayControl;
 import kvv.controllers.shared.ObjectDescr;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -42,15 +44,14 @@ class MultiMap<K, V> {
 }
 
 public class ObjectsPage extends Composite {
-	private final ControllersServiceAsync controllersService;
+	private final ControllersServiceAsync controllersService = GWT
+			.create(ControllersService.class);
 
 	private final VerticalPanel vertPanel = new VerticalPanel();
 
 	private final MultiMap<Integer, ControlComposite> objects = new MultiMap<Integer, ControlComposite>();
 
-	public ObjectsPage(ControllersServiceAsync controllersService) {
-
-		this.controllersService = controllersService;
+	public ObjectsPage() {
 
 		vertPanel.setSpacing(10);
 		// flowPanel.setBorderWidth(1);
@@ -75,16 +76,14 @@ public class ObjectsPage extends Composite {
 						switch (descr.type) {
 						case RELAY:
 							RelayControl relayControl = new RelayControl(
-									descr.addr, descr.register, descr.name,
-									ObjectsPage.this.controllersService);
+									descr.addr, descr.register, descr.name);
 							horizPanel.add(relayControl);
 
 							objects.put(descr.addr, relayControl);
 							break;
 						case HOTHOUSE:
 							HothouseControl hothouseControl = new HothouseControl(
-									descr.addr, descr.name,
-									ObjectsPage.this.controllersService);
+									descr.addr, descr.name);
 							horizPanel.add(hothouseControl);
 							objects.put(descr.addr, hothouseControl);
 							break;

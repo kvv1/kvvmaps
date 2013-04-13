@@ -11,6 +11,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import kvv.controllers.utils.Utils;
+
 public class Rs485 implements Transceiver {
 	private final static int BAUD = 9600;
 
@@ -18,6 +20,8 @@ public class Rs485 implements Transceiver {
 	private SerialPort serPort;
 	private InputStream inStream;
 	private OutputStream outStream;
+
+	public static Rs485 instance;
 
 	public Rs485(String comid) throws Exception {
 		pID = CommPortIdentifier.getPortIdentifier(comid);
@@ -33,20 +37,6 @@ public class Rs485 implements Transceiver {
 		serPort.setRTS(true);
 	}
 
-	static public byte fletchSum(byte[] buf, int offset, int len) {
-		int S = 0;
-		for (; len > 0; len--) {
-			byte b = buf[offset++];
-			int R = b & 0xFF;
-			S += R;
-			S = S & 0xFF;
-			if (S < R)
-				S++;
-		}
-		// if(S = 255) S = 0;
-		return (byte) S;
-	}
-
 	private List<Byte> inputBuffer = new ArrayList<Byte>();
 
 	private class Listener implements SerialPortEventListener {
@@ -59,15 +49,20 @@ public class Rs485 implements Transceiver {
 					while (inStream.available() > 0) {
 						long time = System.currentTimeMillis();
 						if (time - lastTime > 200) {
+							//System.out.println("sz " + inputBuffer.size());
 							inputBuffer.clear();
 						}
 						lastTime = time;
 						int ch = inStream.read();
-						// System.out.print(ch + " ");
+						//System.out.print(ch + " ");
 						inputBuffer.add((byte) ch);
 						byte byte0 = inputBuffer.get(0);
 						int sz = inputBuffer.size();
-						if (sz == byte0) {
+						if (byte0 != 0
+								&& sz == (byte0 & 255)
+								|| byte0 == 0
+								&& sz == ((inputBuffer.get(1) << 8) + (inputBuffer
+										.get(2) & 255))) {
 							synchronized (inputBuffer) {
 								inputBuffer.notify();
 							}
@@ -90,7 +85,7 @@ public class Rs485 implements Transceiver {
 				// System.out.println("===");
 				return __send(addr, data, i);
 			} catch (IOException e) {
-				//e.printStackTrace();
+				// e.printStackTrace();
 			}
 		}
 		return __send(addr, data, 3);
@@ -110,7 +105,8 @@ public class Rs485 implements Transceiver {
 		packet[0] = (byte) packet.length;
 		packet[1] = (byte) addr;
 		System.arraycopy(data, 0, packet, 2, data.length);
-		packet[packet.length - 1] = fletchSum(packet, 0, packet.length - 1);
+		packet[packet.length - 1] = Utils.fletchSum(packet, 0,
+				packet.length - 1);
 
 		inputBuffer.clear();
 		outStream.write(packet);
@@ -128,12 +124,20 @@ public class Rs485 implements Transceiver {
 				packet1[i] = inputBuffer.get(i);
 
 			if (packet1.length > 2
-					&& packet1[0] == packet1.length
+					&& (packet1[0] & 255) == packet1.length
 					&& packet1[1] == (byte) (addr | 0x80)
-					&& packet1[packet1.length - 1] == fletchSum(packet1, 0,
-							packet1.length - 1)) {
+					&& packet1[packet1.length - 1] == Utils.fletchSum(packet1,
+							0, packet1.length - 1)) {
 				byte[] resp = new byte[packet1.length - 3];
 				System.arraycopy(packet1, 2, resp, 0, resp.length);
+				return resp;
+			} else if (packet1.length > 4  
+							&& packet1[0] == 0
+							&& packet1.length == ((packet1[1] << 8) + (packet1[2] & 255)) && packet1[3] == (byte) (addr | 0x80)
+					&& packet1[packet1.length - 1] == Utils.fletchSum(packet1,
+							0, packet1.length - 1)) {
+				byte[] resp = new byte[packet1.length - 5];
+				System.arraycopy(packet1, 4, resp, 0, resp.length);
 				return resp;
 			} else {
 				String msg = "wrong response from addr: " + addr;
