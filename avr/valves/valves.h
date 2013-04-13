@@ -1,0 +1,16 @@
+/*
+ * valves.h
+ *
+ *  Created on: 04.04.2013
+ *      Author: kvv
+ */
+
+#ifndef VALVES_H_
+#define VALVES_H_
+
+void handleCmd(char* cmd, uint8_t cmdlen);
+void startStopTemperatureControl();
+
+
+
+#endif /* VALVES_H_ */

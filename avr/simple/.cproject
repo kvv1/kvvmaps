@@ -40,6 +40,7 @@
 								<option id="de.innot.avreclipse.compiler.option.incpath.1185489701" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="../."/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/basic}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/vm}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1857586180" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
@@ -63,8 +64,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="basic" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="vm|basic" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="basic"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="vm"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

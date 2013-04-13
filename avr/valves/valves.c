@@ -1,13 +1,15 @@
 #include "common.h"
 #include "packet.h"
 #include "commands.h"
+#include "valves.h"
+#include "vm.h"
 
 #include <util/delay.h>
 
 #include "1w.h"
 
 int getTemperature10() {
-	int t = getTemperature();
+	int t = temperature;
 	if (t == -9999)
 		return TEMPERATURE_INVALID;
 	return 10 * t;
@@ -41,8 +43,8 @@ static int handler(Message* msg) {
 			if (t <= getPrefTemp())
 				setPort(OUT2, 0);
 		}
-	}
 		break;
+	}
 	case MSG_TIMER_STOP:
 		setPort(OUT0, 0);
 		setPort(OUT1, 0);
@@ -54,19 +56,13 @@ static int handler(Message* msg) {
 static ObjectHeader obj = { handler };
 
 void createObjects() {
-	//print1("t=%d ", getTemp10());
 	initCommands();
-
-//	confPin(PIN_485, PIN_OUT, 0);
-	confPin(OUT0, PIN_OUT, 0);
-	confPin(OUT1, PIN_OUT, 0);
-	confPin(OUT2, PIN_OUT, 0);
-	confPin(OUT3, PIN_OUT, 0);
-
-	startStopTemperatureControl();
+	initVM();
+	if (getTempOn())
+		startStopTemperatureControl(); // sets OUT0 = OUT1 = 0 !!!
 }
 
-void packetReceived(char* data, char len) {
+void packetReceived(char* data, uint8_t len) {
 	postMessage(&obj, MSG_CMD, (int) data, len);
 }
 

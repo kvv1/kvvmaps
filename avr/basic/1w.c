@@ -14,8 +14,6 @@
 #define RECALL_E2           0xB8 // оманда действует обратным образом предыдущей.
 #define READ_POWER_SUPPLY   0xB4 //ѕроверка используемого режима питани€ (обычное \ паразитное питание).
 #define SKIP_ROM		    0xCC //ѕропустить процедуру сравнив. сер. номера.  //;
-static unsigned char ds18b20[2];
-
 //***************************************************************************
 unsigned char oneWireInit() {
 	char res;
@@ -63,7 +61,7 @@ unsigned char oneWireReadByte(void) {
 		ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
 			_delay_us(1);
 			W1_LOW();
-			// ак всегда перед передачей или приемом либого тайм-слота "опускаем линию",
+			// ак всегда перед передачей или приемом любого тайм-слота "опускаем линию",
 			_delay_us(5); //дава€ ведомому устр-ву пон€ть что мы готовы к приему данных.
 
 			W1_HIGH();
@@ -82,12 +80,16 @@ unsigned char oneWireReadByte(void) {
 }
 
 //***************************************************************************
-int getTemperature() {
+int startConversion() {
 	if (!oneWireInit())
-		return -9999;
+		return 0;
 	oneWireWriteByte(SKIP_ROM);
 	oneWireWriteByte(CONVERT_TEMP);
-	_delay_ms(100);
+	return 1;
+}
+
+int getConversionResult() {
+	unsigned char ds18b20[2];
 	if (!oneWireInit())
 		return -9999;
 	oneWireWriteByte(SKIP_ROM);
@@ -99,3 +101,70 @@ int getTemperature() {
 	return ((ds18b20[1] << 8) + ds18b20[0]) >> 4;
 }
 
+int getTemperature() {
+	if (!startConversion())
+		return -9999;
+	_delay_ms(100);
+	return getConversionResult();
+}
+
+int temperature = -9999;
+void ds18b20_step(int ms) {
+	static int state;
+	static int time;
+	static unsigned char ds18b20[2];
+
+	switch (state) {
+	case 0:
+		if (!oneWireInit()) {
+			temperature = -9999;
+			state = 0;
+			break;
+		}
+		state++;
+		break;
+	case 1:
+		oneWireWriteByte(SKIP_ROM);
+		state++;
+		break;
+	case 2:
+		oneWireWriteByte(CONVERT_TEMP);
+		time = 0;
+		state++;
+		break;
+	case 3:
+		time += ms;
+		if (time < 100)
+			break;
+		state++;
+		break;
+	case 4:
+		if (!oneWireInit()) {
+			temperature = -9999;
+			state = 0;
+			break;
+		}
+		state++;
+		break;
+	case 5:
+		oneWireWriteByte(SKIP_ROM);
+		state++;
+		break;
+	case 6:
+		oneWireWriteByte(READ_SCRATCHPAD);
+		state++;
+		break;
+	case 7:
+		ds18b20[0] = oneWireReadByte();
+		state++;
+		break;
+	case 8:
+		ds18b20[1] = oneWireReadByte();
+		if (ds18b20[0] == 255 && ds18b20[1] == 255)
+			temperature = -9999;
+		else
+			temperature = ((ds18b20[1] << 8) + ds18b20[0]) >> 4;
+		state = 0;
+		break;
+	}
+}

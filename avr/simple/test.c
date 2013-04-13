@@ -63,9 +63,17 @@ int main(void) {
 
 	print0("simple\n");
 
+	//vmMain();
+
 	while (1) {
-		int t = getTemperature();
-		print1("%d\n", t);
+		_delay_ms(500);
+
+		print0("012345678901234567890123456789abcdefgh\n");
+
+		ds18b20_step(500);
+		print1("%d ", temperature);
+//		int t = getTemperature();
+//		print1("%d\n", t);
 	};
 
 	return 0;
