@@ -30,8 +30,8 @@ public class Controllers implements EntryPoint {
 		tabs.add(new CommandsPage(), "Команды");
 		tabs.add(new SchelulePage(), "Расписание");
 		tabs.add(new ModePage(), "Режимы работы");
-		tabs.add(new LogPage(), "Log");
 		tabs.add(new SourcesPage(), "Sources");
+		tabs.add(new LogPage(), "Log");
 
 		tabs.selectTab(0);
 
