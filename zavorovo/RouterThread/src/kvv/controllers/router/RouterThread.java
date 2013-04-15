@@ -16,13 +16,15 @@ public class RouterThread extends Thread {
 	private final String routerPassword;
 	private final String routerPublicIP;
 	private final String routerLocalIP;
+	private final String routerGatewayIP;
 
 	public RouterThread(long routerCheckTime, String routerPassword,
-			String routerPublicIP, String routerLocalIP) {
+			String routerPublicIP, String routerLocalIP, String routerGatewayIP) {
 		this.routerCheckTime = routerCheckTime;
 		this.routerPassword = routerPassword;
 		this.routerPublicIP = routerPublicIP;
 		this.routerLocalIP = routerLocalIP;
+		this.routerGatewayIP = routerGatewayIP;
 
 		setDaemon(true);
 		setPriority(Thread.MIN_PRIORITY);
@@ -46,7 +48,7 @@ public class RouterThread extends Thread {
 					System.err.println("Error registering option handlers: "
 							+ e.getMessage());
 				}
-				tc.connect("192.168.1.1", 23);
+				tc.connect(routerGatewayIP, 23);
 				OutputStream outstr = tc.getOutputStream();
 				InputStream instr = tc.getInputStream();
 
@@ -62,14 +64,24 @@ public class RouterThread extends Thread {
 
 				if (iptables.contains("POSTROUTING")
 						&& !iptables.contains("to:" + routerLocalIP + ":80")) {
-					// getResponse("iptables -t nat -F", outstr, instr);
 
-					System.out.println("ROUTER adding rule.");
+					System.out.println("ROUTER adding rule 80.");
 
 					getResponse("iptables -t nat -I PREROUTING -p tcp -d "
 							+ routerPublicIP
 							+ " --dport 80 -j DNAT --to-destination "
 							+ routerLocalIP + ":80", outstr, instr);
+				}
+
+				if (iptables.contains("POSTROUTING")
+						&& !iptables.contains("to:" + routerLocalIP + ":3389")) {
+
+					System.out.println("ROUTER adding rule 3389.");
+
+					getResponse("iptables -t nat -I PREROUTING -p tcp -d "
+							+ routerPublicIP
+							+ " --dport 33389 -j DNAT --to-destination "
+							+ routerLocalIP + ":3389", outstr, instr);
 				}
 
 				tc.disconnect();

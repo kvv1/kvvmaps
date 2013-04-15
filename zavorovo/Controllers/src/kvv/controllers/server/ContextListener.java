@@ -48,8 +48,10 @@ public class ContextListener implements ServletContextListener {
 					"routerPublicIP");
 			String routerLocalIP = Props.getProp(Constants.propsFile,
 					"routerLocalIP");
+			String routerGatewayIP = Props.getProp(Constants.propsFile,
+					"routerGatewayIP");
 			routerThread = new RouterThread(routerCheckTime, routerPassword,
-					routerPublicIP, routerLocalIP);
+					routerPublicIP, routerLocalIP, routerGatewayIP);
 		}
 
 		Scheduler.instance = new Scheduler();
