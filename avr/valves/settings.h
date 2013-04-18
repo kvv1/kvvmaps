@@ -8,7 +8,7 @@ enum {
 };
 
 #define BINARY_DATA           
-#define MY_ADDR 29      
+#define MY_ADDR 7
 
 #define PERIOD 10000
 #define PULSE 3000
