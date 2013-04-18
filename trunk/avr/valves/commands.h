@@ -8,10 +8,10 @@
 #define ERR_CODESIZE 5
 #define ERR_TOO_LONG_PACKET 6
 
-#define CMD_SETREG 1
-#define CMD_GETREG 2
-#define CMD_GETREGS 3
-#define CMD_UPLOAD 4
+#define CMD_SETREG 1 // cmd reg valHi valLo -> ERR_OK
+#define CMD_GETREG 2 // cmd reg -> ERR_OK valHi valLo
+#define CMD_GETREGS 3 // cmd -> ERR_OK [reg valHi valLo]*
+#define CMD_UPLOAD 4 // cmd addrHi addrLo [byte]*
 #define CMD_DOWNLOAD 5
 
 #define REG_RELAY0 0

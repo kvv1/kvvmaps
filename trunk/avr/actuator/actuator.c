@@ -62,7 +62,7 @@ static int handler(Message* msg) {
 		down(this);
 		break;
 	case MSG_ACTUATOR_SENSOR_DOWN:
-		trace0("s_d\r\n");
+		//trace0("s_d\r\n");
 		setTimer(h, MSG_ACTUATOR_TIMER_DOWN, TIMER_NORMAL,
 				ACTUATOR_SENSOR_TIMEOUT);
 		break;
@@ -76,7 +76,7 @@ static int handler(Message* msg) {
 		up(this);
 		break;
 	case MSG_ACTUATOR_SENSOR_UP:
-		trace0("s_u\r\n");
+		//trace0("s_u\r\n");
 		setTimer(h, MSG_ACTUATOR_TIMER_UP, TIMER_NORMAL,
 				ACTUATOR_SENSOR_TIMEOUT);
 		this->pos++;
@@ -96,7 +96,7 @@ static int handler(Message* msg) {
 		if (!this->range)
 			break;
 
-		stop(this);
+
 		targ = calcTarget(this, this->target);
 		trace1("pos %d\r\n", this->pos);
 		trace1("range %d\r\n", this->range);
@@ -104,9 +104,11 @@ static int handler(Message* msg) {
 		//this->target = 10;
 		if (targ > this->pos) {
 			trace0("u\r\n");
+			stop(this);
 			up(this);
 		} else if (targ < this->pos) {
 			trace0("d\r\n");
+			stop(this);
 			down(this);
 		}
 		setTimer(h, MSG_ACTUATOR_TIMER, TIMER_NORMAL, ACTUATOR_SENSOR_TIMEOUT);
@@ -115,7 +117,7 @@ static int handler(Message* msg) {
 	case MSG_ACTUATOR_SENSOR: {
 		int targ = calcTarget(this, this->target);
 		int inc = getDir(this);
-		trace0("s\r\n");
+		//trace0("s\r\n");
 		this->pos += inc;
 		setTimer(h, MSG_ACTUATOR_TIMER, TIMER_NORMAL, ACTUATOR_SENSOR_TIMEOUT);
 		if ((inc > 0 && this->pos >= targ) || (inc < 0 && this->pos <= targ))

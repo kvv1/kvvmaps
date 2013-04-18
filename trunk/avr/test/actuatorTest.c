@@ -4,8 +4,8 @@
 
 static Actuator actuator;
 
-#define TEMP_MAX 28
-#define TEMP_MIN 24
+#define TEMP_MAX 35
+#define TEMP_MIN 25
 
 static int handler(Message* msg) {
 	static int tSaved = 1000;
@@ -41,7 +41,7 @@ static ObjectHeader tController = { handler };
 void createObjects() {
 	trace0("createObjects\r\n");
 	actuatorInit(&actuator, OUT0, OUT1, IN0);
-	setTimer(&tController, 0, TIMER_PERIODIC, 3000);
+	setTimer(&tController, 0, TIMER_PERIODIC, 1000);
 }
 
 void handleRxCmd(char* cmd) {

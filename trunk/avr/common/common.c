@@ -111,10 +111,10 @@ int main(void) {
 			if (msg.target)
 				msg.target->handler(&msg);
 		} else {
-//			set_sleep_mode(SLEEP_MODE_IDLE);
-//			sleep_enable();
-//			sleep_cpu();
-//			sleep_disable();
+			set_sleep_mode(SLEEP_MODE_IDLE);
+			sleep_enable();
+			sleep_cpu();
+			sleep_disable();
 		}
 	}
 	return 0;
