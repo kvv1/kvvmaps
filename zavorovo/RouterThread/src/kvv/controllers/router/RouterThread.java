@@ -31,6 +31,7 @@ public class RouterThread extends Thread {
 		start();
 	}
 
+	@SuppressWarnings("deprecation")
 	public void stopThread() {
 		stopped = true;
 		stop();

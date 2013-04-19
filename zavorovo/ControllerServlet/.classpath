@@ -10,5 +10,6 @@
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="lib" path="C:/Program Files/Apache Software Foundation/Tomcat 7.0/lib/servlet-api.jar"/>
 	<classpathentry kind="lib" path="RXTXcomm.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ControllerUtils"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

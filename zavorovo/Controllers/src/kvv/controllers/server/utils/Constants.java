@@ -1,10 +1,6 @@
-package kvv.controllers.utils;
+package kvv.controllers.server.utils;
 
 public class Constants {
-
-	public static final int REG_CONNECTION = -1;
-
-
 	public static final String ROOT = "c:/zavorovo/";
 	public static final String scheduleFile = ROOT + "schedule.txt";
 	public static final String commandsFile = ROOT + "commands.txt";

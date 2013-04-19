@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import kvv.controllers.controller.IController;
-import kvv.controllers.utils.MyLogger;
+import kvv.controllers.server.utils.MyLogger;
 
 public class ControllerWrapper implements IController {
 

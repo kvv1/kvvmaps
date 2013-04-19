@@ -6,7 +6,6 @@ import kvv.controllers.client.controls.simple.GetRegControl;
 import kvv.controllers.client.controls.simple.GetSetRegControl;
 import kvv.controllers.client.controls.simple.HothouseCheckBox;
 import kvv.controllers.client.controls.simple.RelayCheckBoxes;
-import kvv.controllers.client.controls.simple.SimpleRelayControl;
 import kvv.controllers.register.Register;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -64,7 +63,7 @@ public class Type1Control extends ControlComposite {
 		panel.add(tempMax);
 
 		panel.add(hothouseCheckBox);
-		
+
 		Button refreshButton = new Button("Обновить");
 		panel.add(refreshButton);
 
