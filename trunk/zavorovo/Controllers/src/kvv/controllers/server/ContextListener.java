@@ -5,7 +5,6 @@ import javax.servlet.ServletContextListener;
 
 import kvv.controllers.controller.Controller;
 import kvv.controllers.router.RouterThread;
-import kvv.controllers.rs485.Rs485;
 import kvv.controllers.utils.Constants;
 import kvv.controllers.utils.MyLogger;
 import kvv.controllers.utils.Props;
@@ -23,10 +22,12 @@ public class ContextListener implements ServletContextListener {
 				ControllersServiceImpl.controller = new ControllerWrapper(
 						new ControllerEmul());
 			else {
-				Rs485.instance = new Rs485(Props.getProp(Constants.propsFile,
-						"COM"));
+				String controllerURL = Props.getProp(Constants.propsFile,
+						"controllerURL");
+				if (controllerURL == null)
+					controllerURL = "http://localhost/controllers/controller";
 				ControllersServiceImpl.controller = new ControllerWrapper(
-						new Controller(Rs485.instance));
+						new Controller(controllerURL));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -78,8 +79,6 @@ public class ContextListener implements ServletContextListener {
 
 		Controllers.stopped = true;
 		Controllers.thread.stop();
-
-		Rs485.instance.close();
 
 		MyLogger.stopLogger();
 
