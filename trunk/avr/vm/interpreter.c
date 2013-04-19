@@ -53,10 +53,6 @@ static int ntimers;
 static int nevents;
 static int nfuncs;
 
-#define STACK_SIZE 16
-static int16_t stack[STACK_SIZE];
-static int16_t* stackPtr = stack + STACK_SIZE;
-
 #define MAX_TIMERS 16
 #define MAX_EVENTS 16
 
@@ -64,22 +60,6 @@ static int32_t vmTimerCnts[MAX_TIMERS];
 static int16_t vmEventStates[MAX_EVENTS];
 
 static void vmExec(uint16_t ip);
-
-static int16_t vmPop() {
-	if (stackPtr == stack + STACK_SIZE) {
-		vmSetStatus(VMSTATUS_STACK_UNDERFLOW);
-		return 0;
-	}
-	return *stackPtr++;
-}
-
-static void vmPush(int16_t v) {
-	if (stackPtr == stack) {
-		vmSetStatus(VMSTATUS_STACK_OVERFLOW);
-		return;
-	}
-	*(--stackPtr) = v;
-}
 
 static uint16_t getUint16(uint16_t addr) {
 	return (vmReadByte(addr) << 8) | vmReadByte(addr + 1);
@@ -121,10 +101,11 @@ static void vmInit() {
 	codeOffset = ptr;
 
 	stackPtr = stack + STACK_SIZE;
+
 	memset(vmTimerCnts, 0, sizeof(vmTimerCnts));
 	memset(vmEventStates, 0, sizeof(vmEventStates));
 
-	vmSetStatus(VMSTATUS_RUNNING);
+	setState( VMSTATUS_RUNNING);
 	vmExec(vmGetFuncCode(0) + codeOffset);
 }
 
@@ -178,10 +159,10 @@ static void vmExec(uint16_t ip) {
 		uint8_t c = vmReadByte(ip++);
 
 		if ((c & 0xC0) == (GETREGSHORT & 0xFF)) {
-			vmPush(vmGetReg(c & 0x3F));
+			vmPush(_getReg(c & 0x3F));
 			continue;
 		} else if ((c & 0xC0) == (SETREGSHORT & 0xFF)) {
-			vmSetReg(c & 0x3F, vmPop());
+			_setReg(c & 0x3F, vmPop());
 			continue;
 		} else if ((c & 0xC0) == (LITSHORT & 0xFF)) {
 			int16_t v = (int16_t) (((int8_t) ((c & 0x3F) << 2)) >> 2);
@@ -263,10 +244,10 @@ static void vmExec(uint16_t ip) {
 			break;
 		}
 		case SETREG:
-			vmSetReg(vmReadByte(ip++), vmPop());
+			_setReg(vmReadByte(ip++), vmPop());
 			break;
 		case GETREG:
-			vmPush(vmGetReg(vmReadByte(ip++)));
+			vmPush(_getReg(vmReadByte(ip++)));
 			break;
 		case SETTIMER_S:
 			vmTimerCnts[vmReadByte(ip++)] = (int32_t) vmPop() * 1000;
@@ -352,12 +333,12 @@ static void vmExec(uint16_t ip) {
 			break;
 		case INC: {
 			uint8_t reg = vmReadByte(ip++);
-			vmSetReg(reg, vmGetReg(reg) + 1);
+			_setReg(reg, _getReg(reg) + 1);
 			break;
 		}
 		case DEC: {
 			uint8_t reg = vmReadByte(ip++);
-			vmSetReg(reg, vmGetReg(reg) - 1);
+			_setReg(reg, _getReg(reg) - 1);
 			break;
 		}
 		case MULDIV: {
@@ -368,7 +349,7 @@ static void vmExec(uint16_t ip) {
 			break;
 		}
 		default:
-			vmSetStatus(VMSTATUS_INVALID_BYTECODE);
+			setState( VMSTATUS_INVALID_BYTECODE);
 			break;
 		}
 	}
@@ -391,26 +372,21 @@ int vmCheckCode() {
 	for (i = 0; i < len; i++)
 		addFletchSum(vmReadByte(i), &S);
 
-	if(S != vmReadByte(len))
+	if (S != vmReadByte(len))
 		return 0;
 
 	return len + 1;
 }
 
-void vmStart(int status) {
+void vmStart(int8_t b) {
 	if (!vmCheckCode()) {
-		vmSetStatus(VMSTATUS_WRONG_CHECKSUM);
+		setState( VMSTATUS_WRONG_CHECKSUM);
 		return;
 	}
-	if (status == VMSTATUS_RUNNING) {
-		if (vmGetStatus() != VMSTATUS_PAUSED)
-			vmInit();
-		else
-			vmSetStatus(VMSTATUS_RUNNING);
-	} else if (status == VMSTATUS_PAUSED && vmGetStatus() != VMSTATUS_RUNNING) {
-		vmSetStatus(VMSTATUS_PAUSED);
+	if (b) {
+		vmInit();
 	} else {
-		vmSetStatus(VMSTATUS_STOPPED);
+		setState( VMSTATUS_STOPPED);
 	}
 }
 

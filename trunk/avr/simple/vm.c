@@ -15,12 +15,14 @@ EEMEM uint8_t code[] = { 0x00, 0x54, 0x03, 0x00, 0x0D, 0x00, 0x11, 0x00, 0x14,
 
 static int16_t regs[256];
 
-int16_t vmGetReg(uint8_t reg) {
-	return regs[reg];
+int8_t vmGetReg(uint8_t reg, int16_t* val) {
+	*val = regs[reg];
+	return 1;
 }
 
-void vmSetReg(uint8_t reg, int16_t val) {
+int8_t vmSetReg(uint8_t reg, int16_t val) {
 	regs[reg] = val;
+	return 1;
 }
 
 uint8_t vmReadByte(uint16_t addr) {
@@ -29,16 +31,6 @@ uint8_t vmReadByte(uint16_t addr) {
 
 void vmPrintInt(int16_t n) {
 	print1("%d ", n);
-}
-
-static int status;
-
-int vmGetStatus() {
-	return status;
-}
-
-void vmSetStatus(int st) {
-	status = st;
 }
 
 #define VM_STEP 10

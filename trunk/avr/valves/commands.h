@@ -4,14 +4,14 @@
 #define ERR_UNKNOWN_CMD 1
 #define ERR_INVALID_PORT_NUM 2
 #define ERR_WRONG_CMD_FORMAT 3
-#define ERR_NO_RESPONSE 4
+//#define ERR_NO_RESPONSE 4
 #define ERR_CODESIZE 5
 #define ERR_TOO_LONG_PACKET 6
 
 #define CMD_SETREG 1 // cmd reg valHi valLo -> ERR_OK
 #define CMD_GETREG 2 // cmd reg -> ERR_OK valHi valLo
-#define CMD_GETREGS 3 // cmd -> ERR_OK [reg valHi valLo]*
-#define CMD_UPLOAD 4 // cmd addrHi addrLo [byte]*
+#define CMD_GETREGS 3 // cmd -> ERR_OK (reg valHi valLo)*
+#define CMD_UPLOAD 4 // cmd addrHi addrLo (byte)*
 #define CMD_DOWNLOAD 5
 
 #define REG_RELAY0 0
@@ -30,8 +30,9 @@
 #define REG_TEMP_PREF 10
 #define REG_TEMP_PREF_ON 11
 #define REG_TEMP_PREF_2 12
-#define REG_VM 13
-#define REG_INS 14
+#define REG_VMONOFF 13
+#define REG_VMSTATE 14
+#define REG_INPUTS 15
 
 #define REG_ADC0 16
 #define REG_ADC1 17
