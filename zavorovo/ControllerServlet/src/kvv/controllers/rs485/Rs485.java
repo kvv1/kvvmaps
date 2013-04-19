@@ -5,14 +5,13 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import kvv.controllers.utils.Constants;
-import kvv.controllers.utils.Props;
+import java.util.Properties;
 
 public class Rs485 {
 	private final static int BAUD = 9600;
@@ -26,7 +25,11 @@ public class Rs485 {
 	
 	public static synchronized Rs485 getInstance() throws Exception {
 		if(instance == null) {
-			String com = Props.getProp(Constants.propsFile, "COM");
+			Properties props = new Properties();
+			FileInputStream is = new FileInputStream("c:/zavorovo/controller.properties");
+			props.load(is);
+			is.close();
+			String com = props.getProperty("COM");
 			if(com == null)
 				return null;
 			instance = new Rs485(com);

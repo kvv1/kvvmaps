@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import kvv.controllers.rs485.Rs485;
-import kvv.controllers.utils.ErrorCode;
 
 @SuppressWarnings("serial")
 public class ControllerServlet extends HttpServlet {
