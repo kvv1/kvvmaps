@@ -142,6 +142,7 @@ char setReg(int reg, int val) {
 		setTempOn(val);
 		startStopTemperatureControl();
 	} else if (reg == REG_VMONOFF) {
+		setvmonoff(val);
 		startVM(val);
 	} else if (reg >= REG_EEPROM0 && reg < REG_EEPROM0 + REG_EEPROM_CNT) {
 		eeprom_update_word((uint16_t*) eepromRegisters + (reg - REG_EEPROM0),
@@ -192,7 +193,6 @@ void handleCmd(char* cmd, uint8_t cmdlen) {
 			sendError(ERR_WRONG_CMD_FORMAT);
 			return;
 		}
-#if 1
 
 		uint8_t S = 0;
 		int len = 1 + 3 * sizeof(regs) / sizeof(regs[0]);
@@ -218,27 +218,6 @@ void handleCmd(char* cmd, uint8_t cmdlen) {
 		}
 
 		sendPacketEnd(&S);
-#else
-
-		static char buf[64];
-		char* p = buf;
-		char i;
-
-		*(p++) = ERR_OK;
-
-		appendReg(&p, REG_RELAYS);
-		appendReg(&p, REG_INS);
-		appendReg(&p, REG_TEMP_PREF);
-		appendReg(&p, REG_TEMP_PREF_2);
-		appendReg(&p, REG_TEMP_PREF_ON);
-		appendReg(&p, REG_TEMP);
-		appendReg(&p, REG_VM);
-
-		for (i = 0; i < REG_ADC_CNT; i++)
-		appendReg(&p, REG_ADC0 + i);
-
-		sendPacket(buf, p - buf);
-#endif
 		break;
 	}
 	case CMD_UPLOAD: {

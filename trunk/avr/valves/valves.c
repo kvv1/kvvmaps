@@ -23,6 +23,7 @@ static int handler(Message* msg) {
 		char* cmd = (char*) msg->param1;
 		char cmdlen = msg->param2;
 		handleCmd(cmd, cmdlen);
+		eepromWriteAllowed = 0;
 		break;
 	}
 	case MSG_TIMER_WORK: {
@@ -60,6 +61,7 @@ static ObjectHeader obj = { handler };
 void createObjects() {
 	initCommands();
 	initVM();
+	eepromWriteAllowed = 0;
 	if (getTempOn())
 		startStopTemperatureControl(); // sets OUT0 = OUT1 = 0 !!!
 }

@@ -23,7 +23,7 @@ int vmCheckCode(); // returns codefile length
 
 int8_t vmGetStatus();
 
-void setState(int s);
+void setState(int8_t s);
 int16_t _getReg(uint8_t reg);
 void _setReg(uint8_t reg, int16_t val);
 int16_t vmPop();

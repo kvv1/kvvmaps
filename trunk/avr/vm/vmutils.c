@@ -3,7 +3,7 @@
 
 static int8_t state;
 
-void setState(int s) {
+void setState(int8_t s) {
 	state = s;
 }
 
