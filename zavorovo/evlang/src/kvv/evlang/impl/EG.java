@@ -111,9 +111,8 @@ public class EG extends Context {
 			controller.upload(a, bytes);
 
 			if (run) {
-				controller.setReg(a, Register.REG_VM,
-						VMStatus.VMSTATUS_RUNNING.ordinal());
-				int status = controller.getReg(a, Register.REG_VM);
+				controller.setReg(a, Register.REG_VMONOFF, 1);
+				int status = controller.getReg(a, Register.REG_VMSTATE);
 				if (status != VMStatus.VMSTATUS_RUNNING.ordinal()) {
 					System.out.println(url + ", addr=" + addr + " "
 							+ VMStatus.values()[status]);

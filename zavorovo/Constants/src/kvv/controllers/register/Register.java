@@ -16,8 +16,9 @@ public class Register {
 	public static final int REG_TEMP_PREF = 10;
 	public static final int REG_TEMP_PREF_ON = 11;
 	public static final int REG_TEMP_PREF_2 = 12;
-	public static final int REG_VM = 13;
-	public static final int REG_INS = 14;
+	public static final int REG_VMONOFF = 13;
+	public static final int REG_VMSTATE = 14;
+	public static final int REG_INPUTS = 15;
 
 	public static final int REG_ADC0 = 16;
 	public static final int REG_ADC1 = 17;

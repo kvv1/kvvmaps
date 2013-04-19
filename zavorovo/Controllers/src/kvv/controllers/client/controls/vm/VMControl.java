@@ -55,10 +55,10 @@ public class VMControl extends ControlComposite {
 
 		this.name = name;
 
-		vmCheckBox = new SimpleRelayControl(addr, Register.REG_VM);
+		vmCheckBox = new SimpleRelayControl(addr, Register.REG_VMONOFF);
 		panel.setWidget(0, 0, vmCheckBox);
 
-		vmState = new GetRegControl(addr, Register.REG_VM, false, "VM=");
+		vmState = new GetRegControl(addr, Register.REG_VMSTATE, false, "VM=");
 		panel.setWidget(1, 0, vmState);
 
 		eeprom0 = new GetSetRegControl(addr, Register.REG_EEPROM0, false, "");
