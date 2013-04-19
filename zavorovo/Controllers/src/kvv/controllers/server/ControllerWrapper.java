@@ -59,4 +59,14 @@ public class ControllerWrapper implements IController {
 			throw e;
 		}
 	}
+
+	@Override
+	public void upload(int addr, byte[] data) throws IOException {
+		try {
+			controller.upload(addr, data);
+		} catch (IOException e) {
+			MyLogger.getLogger().log(Level.WARNING, e.getMessage());
+			throw e;
+		}
+	}
 }

@@ -3,7 +3,6 @@ package kvv.controllers.server;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -91,14 +90,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 
 				parser.parse();
 				byte[] bytes = parser.dump();
-
-				int start = 0;
-				while (start < bytes.length) {
-					int len = Math.min(32, bytes.length - start);
-					controller.upload(addr, start,
-							Arrays.copyOfRange(bytes, start, start + len));
-					start += len;
-				}
+				controller.upload(addr, bytes);
 			}
 			return null;
 		} catch (ParseException e) {
@@ -107,9 +99,5 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		} catch (IOException e) {
 			return e.getMessage();
 		}
-
-		// controller.upload(addr, start, data);
-		// TODO Auto-generated method stub
-
 	}
 }
