@@ -11,7 +11,10 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Rs485 implements Transceiver {
+import kvv.controllers.utils.Constants;
+import kvv.controllers.utils.Props;
+
+public class Rs485 {
 	private final static int BAUD = 9600;
 
 	private CommPortIdentifier pID;
@@ -19,7 +22,23 @@ public class Rs485 implements Transceiver {
 	private InputStream inStream;
 	private OutputStream outStream;
 
-	public static Rs485 instance;
+	private static Rs485 instance;
+	
+	public static synchronized Rs485 getInstance() throws Exception {
+		if(instance == null) {
+			String com = Props.getProp(Constants.propsFile, "COM");
+			if(com == null)
+				return null;
+			instance = new Rs485(com);
+		}
+		return instance;
+	}
+
+	public static synchronized void closeInstance() {
+		if (instance != null)
+			instance.close();
+		instance = null;
+	}
 
 	public Rs485(String comid) throws Exception {
 		pID = CommPortIdentifier.getPortIdentifier(comid);
@@ -76,7 +95,6 @@ public class Rs485 implements Transceiver {
 
 	private Listener listener = new Listener();
 
-	@Override
 	public byte[] send(int addr, byte[] data) throws IOException {
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -150,7 +168,6 @@ public class Rs485 implements Transceiver {
 		}
 	}
 
-	@Override
 	public void close() {
 		serPort.close();
 	}
