@@ -8,16 +8,6 @@
 	<!-- Servlets -->
 
 	<servlet>
-		<servlet-name>controllerServletBase</servlet-name>
-		<servlet-class>kvv.controllers.server.controller.ControllerServlet</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>controllerServletBase</servlet-name>
-		<url-pattern>/controller</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>controllerServlet</servlet-name>
 		<servlet-class>kvv.controllers.server.ControllersServiceImpl</servlet-class>
 	</servlet>
