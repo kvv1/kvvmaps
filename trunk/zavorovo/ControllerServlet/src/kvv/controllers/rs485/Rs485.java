@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import kvv.controllers.utils.FletchSum;
+
 public class Rs485 {
 	private final static int BAUD = 9600;
 
@@ -22,15 +24,16 @@ public class Rs485 {
 	private OutputStream outStream;
 
 	private static Rs485 instance;
-	
+
 	public static synchronized Rs485 getInstance() throws Exception {
-		if(instance == null) {
+		if (instance == null) {
 			Properties props = new Properties();
-			FileInputStream is = new FileInputStream("c:/zavorovo/controller.properties");
+			FileInputStream is = new FileInputStream(
+					"c:/zavorovo/controller.properties");
 			props.load(is);
 			is.close();
 			String com = props.getProperty("COM");
-			if(com == null)
+			if (com == null)
 				return null;
 			instance = new Rs485(com);
 		}
@@ -124,7 +127,8 @@ public class Rs485 {
 		packet[0] = (byte) packet.length;
 		packet[1] = (byte) addr;
 		System.arraycopy(data, 0, packet, 2, data.length);
-		packet[packet.length - 1] = fletchSum(packet, 0, packet.length - 1);
+		packet[packet.length - 1] = FletchSum.fletchSum(packet, 0,
+				packet.length - 1);
 
 		inputBuffer.clear();
 		outStream.write(packet);
@@ -144,8 +148,8 @@ public class Rs485 {
 			if (packet1.length > 2
 					&& (packet1[0] & 255) == packet1.length
 					&& packet1[1] == (byte) (addr | 0x80)
-					&& packet1[packet1.length - 1] == fletchSum(packet1, 0,
-							packet1.length - 1)) {
+					&& packet1[packet1.length - 1] == FletchSum.fletchSum(
+							packet1, 0, packet1.length - 1)) {
 				byte[] resp = new byte[packet1.length - 3];
 				System.arraycopy(packet1, 2, resp, 0, resp.length);
 				return resp;
@@ -153,8 +157,8 @@ public class Rs485 {
 					&& packet1[0] == 0
 					&& packet1.length == ((packet1[1] << 8) + (packet1[2] & 255))
 					&& packet1[3] == (byte) (addr | 0x80)
-					&& packet1[packet1.length - 1] == fletchSum(packet1, 0,
-							packet1.length - 1)) {
+					&& packet1[packet1.length - 1] == FletchSum.fletchSum(
+							packet1, 0, packet1.length - 1)) {
 				byte[] resp = new byte[packet1.length - 5];
 				System.arraycopy(packet1, 4, resp, 0, resp.length);
 				return resp;
@@ -174,19 +178,4 @@ public class Rs485 {
 	public void close() {
 		serPort.close();
 	}
-
-	static private byte fletchSum(byte[] buf, int offset, int len) {
-		int S = 0;
-		for (; len > 0; len--) {
-			byte b = buf[offset++];
-			int R = b & 0xFF;
-			S += R;
-			S = S & 0xFF;
-			if (S < R)
-				S++;
-		}
-		// if(S = 255) S = 0;
-		return (byte) S;
-	}
-
 }

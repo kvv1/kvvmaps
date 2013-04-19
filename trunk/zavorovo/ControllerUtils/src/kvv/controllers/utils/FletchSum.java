@@ -1,6 +1,6 @@
 package kvv.controllers.utils;
 
-public class Utils {
+public class FletchSum {
 	static public byte fletchSum(byte[] buf, int offset, int len) {
 		int S = 0;
 		for (; len > 0; len--) {

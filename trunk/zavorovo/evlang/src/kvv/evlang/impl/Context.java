@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import kvv.controllers.register.Register;
-import kvv.controllers.utils.Utils;
+import kvv.controllers.utils.FletchSum;
 import kvv.evlang.ParseException;
 import kvv.evlang.rt.RTContext;
 import kvv.evlang.rt.VM;
@@ -356,7 +356,7 @@ public class Context {
 		baos1.write(baos.size() >>> 8);
 		baos1.write(baos.size());
 		baos1.write(baos.toByteArray());
-		baos1.write(Utils.fletchSum(baos1.toByteArray(), 0, baos1.size()));
+		baos1.write(FletchSum.fletchSum(baos1.toByteArray(), 0, baos1.size()));
 
 		return baos1.toByteArray();
 	}

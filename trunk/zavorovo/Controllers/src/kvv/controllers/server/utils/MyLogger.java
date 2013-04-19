@@ -1,4 +1,4 @@
-package kvv.controllers.utils;
+package kvv.controllers.server.utils;
 
 import java.io.IOException;
 import java.util.logging.FileHandler;

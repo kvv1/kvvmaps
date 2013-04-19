@@ -8,10 +8,10 @@ import java.util.Map;
 
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.controller.IController;
+import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ObjectDescr;
-import kvv.controllers.utils.Constants;
 import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
 import kvv.evlang.Token;
