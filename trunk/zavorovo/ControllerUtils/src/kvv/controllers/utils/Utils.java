@@ -31,7 +31,7 @@ public class Utils {
 			sep = ",";
 		}
 
-		//System.out.println(url1);
+		// System.out.println(url1);
 
 		HttpURLConnection conn = null;
 		conn = (HttpURLConnection) new URL(url1).openConnection();
@@ -44,7 +44,6 @@ public class Utils {
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		for (String s : resp.split(",")) {
-
 			int a = Integer.parseInt(s);
 			outputStream.write(a);
 		}
