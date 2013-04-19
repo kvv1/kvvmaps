@@ -235,8 +235,8 @@ void handleCmd(char* cmd, uint8_t cmdlen) {
 		}
 
 		startVM(0);
-
-		eeprom_update_block(cmd + 3, code + addr, len);
+		if (eepromWriteAllowed == EE_MAGIC)
+			eeprom_update_block(cmd + 3, code + addr, len);
 		getdummy();
 		sendOk();
 		break;
