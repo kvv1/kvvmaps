@@ -16,6 +16,7 @@ int getTemperature10() {
 }
 
 static int handler(Message* msg) {
+
 	ObjectHeader* this = msg->target;
 	switch (msg->cmd) {
 	case MSG_CMD: {
@@ -50,6 +51,7 @@ static int handler(Message* msg) {
 		setPort(OUT1, 0);
 		break;
 	}
+
 	return 0;
 }
 

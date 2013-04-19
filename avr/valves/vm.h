@@ -15,9 +15,14 @@
 extern EEMEM uint8_t code[VMCODE_SIZE];
 
 void initVM();
-void startVM(int start);
+void startVM(int8_t start);
 
-int vmGetStatus();
+int8_t vmGetStatus();
 void vmStep(int ms);
+
+int vmCheckCode(); // returns codefile length
+uint8_t vmReadByte(uint16_t addr);
+
+ee_8_decl(vmonoff);
 
 #endif /* VM_H_ */

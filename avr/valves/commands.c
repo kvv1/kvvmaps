@@ -91,7 +91,7 @@ char getReg(int reg, int* val) {
 		*val = getPin(PORT(reg - REG_RELAY0)) ? 1 : 0;
 	} else if (reg == REG_RELAYS) {
 		*val = getRelays();
-	} else if (reg == REG_INS) {
+	} else if (reg == REG_INPUTS) {
 		*val = getIns();
 	} else if (reg == REG_TEMP_PREF) {
 		*val = getPrefTemp();
@@ -101,7 +101,9 @@ char getReg(int reg, int* val) {
 		*val = getTempOn();
 	} else if (reg == REG_TEMP) {
 		*val = getTemperature10();
-	} else if (reg == REG_VM) {
+	} else if (reg == REG_VMONOFF) {
+		*val = getvmonoff();
+	} else if (reg == REG_VMSTATE) {
 		*val = vmGetStatus();
 	} else if (reg >= REG_ADC0 && reg < REG_ADC0 + REG_ADC_CNT) {
 		*val = read_adc(pgm_read_byte(&(adcs[reg - REG_ADC0])), AVCC_VREF_TYPE);
@@ -139,7 +141,7 @@ char setReg(int reg, int val) {
 	} else if (reg == REG_TEMP_PREF_ON) {
 		setTempOn(val);
 		startStopTemperatureControl();
-	} else if (reg == REG_VM) {
+	} else if (reg == REG_VMONOFF) {
 		startVM(val);
 	} else if (reg >= REG_EEPROM0 && reg < REG_EEPROM0 + REG_EEPROM_CNT) {
 		eeprom_update_word((uint16_t*) eepromRegisters + (reg - REG_EEPROM0),
@@ -154,10 +156,10 @@ char setReg(int reg, int val) {
 	return 1;
 }
 
-static uint8_t regs[] PROGMEM = { REG_RELAYS, REG_INS, REG_TEMP_PREF,
-		REG_TEMP_PREF_2, REG_TEMP_PREF_ON, REG_TEMP, REG_VM, REG_ADC0, REG_ADC1,
-		REG_ADC2, REG_ADC3, REG_RAM0, REG_RAM1, REG_RAM2, REG_RAM3, REG_EEPROM0,
-		REG_EEPROM1, REG_EEPROM2, REG_EEPROM3, };
+static uint8_t regs[] PROGMEM = { REG_RELAYS, REG_INPUTS, REG_TEMP_PREF,
+		REG_TEMP_PREF_2, REG_TEMP_PREF_ON, REG_TEMP, REG_VMONOFF, REG_VMSTATE,
+		REG_ADC0, REG_ADC1, REG_ADC2, REG_ADC3, REG_RAM0, REG_RAM1, REG_RAM2,
+		REG_RAM3, REG_EEPROM0, REG_EEPROM1, REG_EEPROM2, REG_EEPROM3, };
 
 void handleCmd(char* cmd, uint8_t cmdlen) {
 //	print2("handleCmd %d %d ", *cmd, cmdlen);
@@ -253,7 +255,7 @@ void handleCmd(char* cmd, uint8_t cmdlen) {
 			return;
 		}
 
-		startVM(VMSTATUS_STOPPED);
+		startVM(0);
 
 		eeprom_update_block(cmd + 3, code + addr, len);
 		getdummy();
@@ -274,7 +276,7 @@ void handleCmd(char* cmd, uint8_t cmdlen) {
 
 		len--;
 
-		for(int i = 0; i < len; i++){
+		for (int i = 0; i < len; i++) {
 			uint8_t b = vmReadByte(i);
 			sendPacketBodyPart(&b, 1, &S);
 		}
