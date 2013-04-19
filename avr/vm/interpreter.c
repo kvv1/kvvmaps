@@ -82,6 +82,11 @@ static uint16_t vmGetFuncCode(uint8_t func) {
 }
 
 static void vmInit() {
+	if (!vmCheckCode()) {
+		setState(VMSTATUS_WRONG_CHECKSUM);
+		return;
+	}
+
 	uint16_t ptr = 2;
 	nevents = vmReadByte(ptr);
 	ptr++;
@@ -105,7 +110,7 @@ static void vmInit() {
 	memset(vmTimerCnts, 0, sizeof(vmTimerCnts));
 	memset(vmEventStates, 0, sizeof(vmEventStates));
 
-	setState( VMSTATUS_RUNNING);
+	setState(VMSTATUS_RUNNING);
 	vmExec(vmGetFuncCode(0) + codeOffset);
 }
 
@@ -237,12 +242,11 @@ static void vmExec(uint16_t ip) {
 				stack[fp + 1 - n] = vmPop();
 			break;
 		}
-		case LIT: {
-			uint8_t hi = vmReadByte(ip++);
-			uint8_t lo = vmReadByte(ip++);
-			vmPush((hi << 8) | lo);
+		case LIT:
+			vmPush(getUint16(ip));
+			ip += 2;
 			break;
-		}
+
 		case SETREG:
 			_setReg(vmReadByte(ip++), vmPop());
 			break;
@@ -349,7 +353,7 @@ static void vmExec(uint16_t ip) {
 			break;
 		}
 		default:
-			setState( VMSTATUS_INVALID_BYTECODE);
+			setState(VMSTATUS_INVALID_BYTECODE);
 			break;
 		}
 	}
@@ -362,7 +366,7 @@ static void addFletchSum(uint8_t c, uint8_t* S) {
 }
 
 int vmCheckCode() {
-	uint16_t len = (vmReadByte(0) << 8) + (vmReadByte(1) & 0xFF) + 2;
+	uint16_t len = getUint16(0) + 2;
 	uint8_t S = 0;
 	int i;
 
@@ -379,14 +383,10 @@ int vmCheckCode() {
 }
 
 void vmStart(int8_t b) {
-	if (!vmCheckCode()) {
-		setState( VMSTATUS_WRONG_CHECKSUM);
-		return;
-	}
 	if (b) {
 		vmInit();
 	} else {
-		setState( VMSTATUS_STOPPED);
+		setState(VMSTATUS_STOPPED);
 	}
 }
 
