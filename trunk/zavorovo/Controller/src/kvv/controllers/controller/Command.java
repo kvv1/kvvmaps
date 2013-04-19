@@ -1,4 +1,4 @@
-package kvv.controllers.utils;
+package kvv.controllers.controller;
 
 public enum Command {
 	CMD_NOCMD, // 0
