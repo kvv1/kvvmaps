@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,6 +61,18 @@ public class Controller implements IController { // 9164642959 7378866
 		byte[] resp = send(url, addr, req.toByteArray());
 		checkErr(resp);
 	}
+
+	@Override
+	public void upload(int addr, byte[] data) throws IOException {
+		int start = 0;
+		while (start < data.length) {
+			int len = Math.min(32, data.length - start);
+			upload(addr, start,
+					Arrays.copyOfRange(data, start, start + len));
+			start += len;
+		}
+	}
+
 
 	private static void checkErr(byte[] resp) throws IOException {
 		ErrorCode code = ErrorCode.values()[resp[0]];

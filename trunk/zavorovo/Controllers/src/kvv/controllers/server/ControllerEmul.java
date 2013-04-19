@@ -97,4 +97,9 @@ public class ControllerEmul implements IController {
 	public void upload(int addr, int start, byte[] data) throws IOException {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public void upload(int addr, byte[] data) throws IOException {
+		throw new UnsupportedOperationException();
+	}
 }

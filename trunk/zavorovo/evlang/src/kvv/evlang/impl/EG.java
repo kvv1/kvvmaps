@@ -1,18 +1,14 @@
 package kvv.evlang.impl;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.HttpURLConnection;
 
+import kvv.controllers.controller.Controller;
 import kvv.controllers.register.Register;
-import kvv.controllers.utils.Command;
-import kvv.controllers.utils.ErrorCode;
-import kvv.controllers.utils.Utils;
 import kvv.controllers.utils.cmdline.BooleanParam;
 import kvv.controllers.utils.cmdline.CmdLine;
 import kvv.controllers.utils.cmdline.StringParam;
@@ -97,8 +93,11 @@ public class EG extends Context {
 	private static void upload(String url, String addr, byte[] bytes,
 			boolean run) {
 
-		HttpURLConnection conn = null;
+		Controller controller = null;
+
 		try {
+			controller = new Controller(url);
+
 			int a;
 			try {
 				a = Integer.parseInt(addr);
@@ -109,44 +108,12 @@ public class EG extends Context {
 						+ "'");
 			}
 
-			int start = 0;
-			while (start < bytes.length) {
-				int len = Math.min(32, bytes.length - start);
-				ByteArrayOutputStream stream = new ByteArrayOutputStream();
-				stream.write(Command.CMD_UPLOAD.ordinal());
-				stream.write(start >> 8);
-				stream.write(start & 255);
-				stream.write(bytes, start, len);
-				byte[] resp = Utils.send(url, a, stream.toByteArray());
-
-				if (resp[0] != ErrorCode.ERR_OK.ordinal()) {
-					System.out.println(url + ", addr=" + addr + " "
-							+ ErrorCode.values()[resp[0]].name());
-					return;
-				}
-				start += len;
-			}
+			controller.upload(a, bytes);
 
 			if (run) {
-				byte[] resp = Utils.send(url, a, new byte[] {
-						(byte) Command.CMD_SETREG.ordinal(), Register.REG_VM,
-						(byte) (VMStatus.VMSTATUS_RUNNING.ordinal() >> 8),
-						(byte) (VMStatus.VMSTATUS_RUNNING.ordinal() & 255) });
-				if (resp[0] != ErrorCode.ERR_OK.ordinal()) {
-					System.out.println(url + ", addr=" + addr + " "
-							+ ErrorCode.values()[resp[0]].name());
-					return;
-				}
-				resp = Utils.send(url, a, new byte[] {
-						(byte) Command.CMD_GETREG.ordinal(), Register.REG_VM });
-
-				if (resp[0] != ErrorCode.ERR_OK.ordinal()) {
-					System.out.println(url + ", addr=" + addr + " "
-							+ ErrorCode.values()[resp[0]].name());
-					return;
-				}
-
-				int status = (resp[1] << 8) + (resp[2] % 0xFF);
+				controller.setReg(a, Register.REG_VM,
+						VMStatus.VMSTATUS_RUNNING.ordinal());
+				int status = controller.getReg(a, Register.REG_VM);
 				if (status != VMStatus.VMSTATUS_RUNNING.ordinal()) {
 					System.out.println(url + ", addr=" + addr + " "
 							+ VMStatus.values()[status]);
@@ -158,8 +125,8 @@ public class EG extends Context {
 			System.out.println(e.getClass().getSimpleName() + " "
 					+ e.getMessage());
 		} finally {
-			if (conn != null)
-				conn.disconnect();
+			if (controller != null)
+				controller.close();
 		}
 	}
 }
