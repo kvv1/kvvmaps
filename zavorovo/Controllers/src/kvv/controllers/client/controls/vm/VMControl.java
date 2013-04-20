@@ -12,6 +12,7 @@ import kvv.controllers.client.controls.simple.GetRegControl;
 import kvv.controllers.client.controls.simple.GetSetRegControl;
 import kvv.controllers.client.controls.simple.SimpleRelayControl;
 import kvv.controllers.register.Register;
+import kvv.controllers.register.SourceDescr;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -55,7 +56,7 @@ public class VMControl extends ControlComposite {
 
 		this.name = name;
 
-		vmCheckBox = new SimpleRelayControl(addr, Register.REG_VMONOFF);
+		vmCheckBox = new SimpleRelayControl(addr, Register.REG_VMONOFF, null);
 		panel.setWidget(0, 0, vmCheckBox);
 
 		vmState = new GetRegControl(addr, Register.REG_VMSTATE, false, "VM=");
@@ -99,14 +100,7 @@ public class VMControl extends ControlComposite {
 									Window.alert(result);
 									return;
 								}
-
-								sourcesService.setSourceFile(name, file,
-										new CallbackAdapter<Void>() {
-											@Override
-											public void onSuccess(Void result) {
-												refresh();
-											}
-										});
+								refresh();
 							}
 						});
 
@@ -144,12 +138,13 @@ public class VMControl extends ControlComposite {
 					files.addItem("<no source>");
 					for (String name : result)
 						files.addItem(name);
-					sourcesService.getSourceFile(name,
-							new CallbackAdapter<String>() {
+					sourcesService.getSourceDescr(name,
+							new CallbackAdapter<SourceDescr>() {
 								@Override
-								public void onSuccess(String result) {
+								public void onSuccess(SourceDescr result) {
 									for (int i = 0; i < files.getItemCount(); i++)
-										if (files.getItemText(i).equals(result)) {
+										if (result != null && files.getItemText(i).equals(
+												result.filename)) {
 											files.setSelectedIndex(i);
 											break;
 										}

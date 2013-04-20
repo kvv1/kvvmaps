@@ -4,41 +4,34 @@ import java.util.Map;
 
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
+import kvv.controllers.client.controls.ControlComposite;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 
-public class GetRegControl extends Composite {
+public class GetRegControl extends ControlComposite {
 
 	private final HorizontalPanel panel = new HorizontalPanel();
 
-	private final int addr;
 	private final Label label;
 	private final Label edit;
 	private final int reg;
 	private final boolean div10;
-	private final ControllersServiceAsync controllersService = GWT
-			.create(ControllersService.class);
 
 	public GetRegControl(final int addr, final int reg, final boolean div10,
 			String text) {
-		this.addr = addr;
+		super(addr);
 		this.label = new Label(text);
 		this.edit = new Label();
 		this.reg = reg;
 		this.div10 = div10;
 
 		edit.setWidth("40px");
-		// edit.setReadOnly(true);
 		edit.setText("???");
 
 		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		// panel.setSpacing(10);
-		// panel.setBorderWidth(1);
 
 		panel.add(label);
 		panel.add(edit);
@@ -62,22 +55,4 @@ public class GetRegControl extends Composite {
 		else
 			edit.setText(Integer.toString(_val));
 	}
-
-	public void refresh() {
-		edit.setText("???");
-		controllersService.getReg(addr, reg, new AsyncCallback<Integer>() {
-			@Override
-			public void onSuccess(Integer result) {
-				if (div10)
-					edit.setText(Float.toString((float) result / 10));
-				else
-					edit.setText(Integer.toString(result));
-			}
-
-			@Override
-			public void onFailure(Throwable caught) {
-			}
-		});
-	}
-
 }

@@ -2,6 +2,7 @@
 // #################################
 
 reg x;
+reg y("text", edit);
 
 onset(x > 20) {
     print x;

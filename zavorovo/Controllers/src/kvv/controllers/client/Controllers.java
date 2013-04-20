@@ -2,6 +2,7 @@ package kvv.controllers.client;
 
 import kvv.controllers.client.pages.CommandsPage;
 import kvv.controllers.client.pages.ControllersPage;
+import kvv.controllers.client.pages.FormsPage;
 import kvv.controllers.client.pages.LogPage;
 import kvv.controllers.client.pages.ModePage;
 import kvv.controllers.client.pages.ObjectsPage;
@@ -32,6 +33,7 @@ public class Controllers implements EntryPoint {
 		tabs.add(new ModePage(), "Режимы работы");
 		tabs.add(new SourcesPage(), "Sources");
 		tabs.add(new LogPage(), "Log");
+		tabs.add(new FormsPage(), "Forms");
 
 		tabs.selectTab(0);
 

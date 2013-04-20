@@ -1,5 +1,7 @@
 package kvv.controllers.client;
 
+import kvv.controllers.register.SourceDescr;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface SourcesServiceAsync {
@@ -12,9 +14,7 @@ public interface SourcesServiceAsync {
 
 	void getSourceFiles(AsyncCallback<String[]> callback);
 
-	void getSourceFile(String controllerName, AsyncCallback<String> callback);
-
-	void setSourceFile(String controllerName, String name,
-			AsyncCallback<Void> callback);
+	void getSourceDescr(String controllerName,
+			AsyncCallback<SourceDescr> callback);
 
 }

@@ -24,7 +24,7 @@ public class RelayControl extends ControlComposite {
 
 		panel.add(new Label(name));
 
-		cb = new SimpleRelayControl(addr, reg);
+		cb = new SimpleRelayControl(addr, reg, "");
 		panel.add(cb);
 
 		Button refreshButton = new Button("Обновить");

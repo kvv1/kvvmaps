@@ -4,7 +4,9 @@ import java.util.Map;
 
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
+import kvv.controllers.client.controls.ControlComposite;
 import kvv.controllers.client.pages.ModePage;
+import kvv.controllers.register.Register;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -12,21 +14,29 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Composite;
 
-public class SimpleRelayControl extends Composite {
+public class SimpleRelayControl extends ControlComposite {
 
-	private final CheckBox cb = new CheckBox();
+	private final CheckBox cb;
 
-	private final int addr;
-	private final int reg;
+	private final int regForRefresh;
+	private final int bit;
 	private final ControllersServiceAsync controllersService = GWT
 			.create(ControllersService.class);
 
-	public SimpleRelayControl(final int addr, final int reg) {
+	public SimpleRelayControl(final int addr, final int reg, String label) {
+		super(addr);
 
-		this.addr = addr;
-		this.reg = reg;
+		cb = new CheckBox(label);
+
+		if (reg >= Register.REG_RELAY0
+				&& reg < Register.REG_RELAY0 + Register.REG_RELAY_CNT) {
+			regForRefresh = Register.REG_RELAYS;
+			bit = reg - Register.REG_RELAY0;
+		} else {
+			regForRefresh = reg;
+			bit = 0;
+		}
 
 		cb.addClickHandler(new ClickHandler() {
 			@Override
@@ -58,28 +68,12 @@ public class SimpleRelayControl extends Composite {
 		initWidget(cb);
 	}
 
-	public void refresh() {
-		cb.setEnabled(false);
-
-		controllersService.getReg(addr, reg, new AsyncCallback<Integer>() {
-			@Override
-			public void onSuccess(Integer result) {
-				cb.setEnabled(true);
-				cb.setValue(result != 0);
-			}
-
-			@Override
-			public void onFailure(Throwable caught) {
-			}
-		});
-	}
-
 	public void refresh(Map<Integer, Integer> result) {
 		if (result == null) {
 			cb.setEnabled(false);
 		} else {
 			cb.setEnabled(true);
-			cb.setValue(result.get(reg) != 0);
+			cb.setValue(((result.get(regForRefresh) >> bit) & 1) != 0);
 		}
 	}
 }

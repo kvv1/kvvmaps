@@ -8,3 +8,5 @@ main {
 onchange (in) {
 	REG_RELAY2 = in;
 }
+
+reg r1("")
