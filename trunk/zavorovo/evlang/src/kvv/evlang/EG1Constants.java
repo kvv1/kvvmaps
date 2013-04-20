@@ -41,43 +41,51 @@ public interface EG1Constants {
   /** RegularExpression Id. */
   int REG = 21;
   /** RegularExpression Id. */
-  int TIMER = 22;
+  int EEREG = 22;
   /** RegularExpression Id. */
-  int ONSET = 23;
+  int TIMER = 23;
   /** RegularExpression Id. */
-  int ONCHANGE = 24;
+  int ONSET = 24;
   /** RegularExpression Id. */
-  int CONST = 25;
+  int ONCHANGE = 25;
   /** RegularExpression Id. */
-  int IF = 26;
+  int CONST = 26;
   /** RegularExpression Id. */
-  int ELSE = 27;
+  int IF = 27;
   /** RegularExpression Id. */
-  int START_S = 28;
+  int ELSE = 28;
   /** RegularExpression Id. */
-  int START_MS = 29;
+  int START_S = 29;
   /** RegularExpression Id. */
-  int STOP = 30;
+  int START_MS = 30;
   /** RegularExpression Id. */
-  int MAIN = 31;
+  int STOP = 31;
   /** RegularExpression Id. */
-  int PRINT = 32;
+  int MAIN = 32;
   /** RegularExpression Id. */
-  int DEC = 33;
+  int PRINT = 33;
   /** RegularExpression Id. */
-  int INC = 34;
+  int DEC = 34;
   /** RegularExpression Id. */
-  int PROC = 35;
+  int INC = 35;
   /** RegularExpression Id. */
-  int FUNC = 36;
+  int PROC = 36;
   /** RegularExpression Id. */
-  int MULDIV = 37;
+  int FUNC = 37;
   /** RegularExpression Id. */
-  int ID = 38;
+  int MULDIV = 38;
   /** RegularExpression Id. */
-  int NUMBER = 39;
+  int CHECKBOX = 39;
   /** RegularExpression Id. */
-  int DIGIT = 40;
+  int EDIT = 40;
+  /** RegularExpression Id. */
+  int ID = 41;
+  /** RegularExpression Id. */
+  int STRING = 42;
+  /** RegularExpression Id. */
+  int NUMBER = 43;
+  /** RegularExpression Id. */
+  int DIGIT = 44;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -106,6 +114,7 @@ public interface EG1Constants {
     "\"/\"",
     "\"eeprom\"",
     "\"reg\"",
+    "\"eereg\"",
     "\"timer\"",
     "\"onset\"",
     "\"onchange\"",
@@ -122,7 +131,10 @@ public interface EG1Constants {
     "\"proc\"",
     "\"func\"",
     "\"muldiv\"",
+    "\"checkbox\"",
+    "\"edit\"",
     "<ID>",
+    "<STRING>",
     "<NUMBER>",
     "<DIGIT>",
     "\"(\"",

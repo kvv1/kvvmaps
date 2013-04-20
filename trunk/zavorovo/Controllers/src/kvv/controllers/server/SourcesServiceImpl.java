@@ -2,14 +2,15 @@ package kvv.controllers.server;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 
 import kvv.controllers.client.SourcesService;
+import kvv.controllers.register.SourceDescr;
 import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
 
+import com.google.gson.Gson;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")
@@ -44,7 +45,7 @@ public class SourcesServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public String getSourceFile(String controllerName) {
+	public SourceDescr getSourceDescr(String controllerName) {
 		Properties props = new Properties();
 		try {
 			FileReader fr = new FileReader(Constants.srcFile);
@@ -53,29 +54,8 @@ public class SourcesServiceImpl extends RemoteServiceServlet implements
 		} catch (IOException e) {
 			return null;
 		}
-		return props.getProperty(controllerName);
+		return new Gson().fromJson(props.getProperty(controllerName),
+				SourceDescr.class);
 	}
 
-	@Override
-	public void setSourceFile(String controllerName, String name) {
-		Properties props = new Properties();
-		try {
-			FileReader fr = new FileReader(Constants.srcFile);
-			props.load(fr);
-			fr.close();
-		} catch (IOException e) {
-		}
-		try {
-			if (name != null)
-				props.setProperty(controllerName, name);
-			else
-				props.remove(controllerName);
-
-			FileWriter fw = new FileWriter(Constants.srcFile);
-			props.store(fw, "");
-			fw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 }

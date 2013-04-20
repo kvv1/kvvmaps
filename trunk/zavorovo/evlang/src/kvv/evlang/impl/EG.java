@@ -6,9 +6,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import kvv.controllers.controller.Controller;
+import kvv.controllers.register.RegType;
 import kvv.controllers.register.Register;
+import kvv.controllers.register.RegisterDescr;
 import kvv.controllers.utils.cmdline.BooleanParam;
 import kvv.controllers.utils.cmdline.CmdLine;
 import kvv.controllers.utils.cmdline.StringParam;
@@ -128,4 +132,34 @@ public class EG extends Context {
 				controller.close();
 		}
 	}
+
+	protected void newRegister(Token regName, Token regNum, Token uiName,
+			Token uiType, boolean forceEE) throws ParseException {
+		checkName(regName.image);
+		RegisterDescr registerDescr;
+		if (regNum == null) {
+			if (forceEE)
+				registerDescr = new RegisterDescr(nextEEReg++, true, true);
+			else
+				registerDescr = new RegisterDescr(nextReg++);
+		} else {
+			registerDescr = registers.get(regNum.image);
+			if (registerDescr == null)
+				throw new ParseException(regNum.image + " - ?");
+		}
+		if (uiName != null)
+			registerDescr = new RegisterDescr(registerDescr,
+					uiName.image.replace("\"", ""),
+					RegType.valueOf(uiType.image));
+		registers.put(regName.image, registerDescr);
+	}
+
+	public RegisterDescr[] getRegisterDescription() {
+		List<RegisterDescr> regs = new ArrayList<RegisterDescr>();
+		for (RegisterDescr rd : registers.values())
+			if (rd.text != null)
+				regs.add(rd);
+		return regs.toArray(new RegisterDescr[0]);
+	}
+
 }

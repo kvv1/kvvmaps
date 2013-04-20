@@ -10,6 +10,8 @@ public class Register {
 	public static final int REG_RELAY6 = 6;
 	public static final int REG_RELAY7 = 7;
 
+	public static final int REG_RELAY_CNT = 4;
+
 	public static final int REG_RELAYS = 8;
 
 	public static final int REG_TEMP = 9;

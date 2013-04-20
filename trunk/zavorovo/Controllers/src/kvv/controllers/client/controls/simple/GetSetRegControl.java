@@ -2,8 +2,10 @@ package kvv.controllers.client.controls.simple;
 
 import java.util.Map;
 
+import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
+import kvv.controllers.client.controls.ControlComposite;
 import kvv.controllers.client.pages.ModePage;
 
 import com.google.gwt.core.client.GWT;
@@ -12,17 +14,15 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class GetSetRegControl extends Composite {
+public class GetSetRegControl extends ControlComposite {
 
 	private final HorizontalPanel panel = new HorizontalPanel();
 
-	private final int addr;
 	private final Label label;
 	private final TextBox edit;
 	private final int reg;
@@ -32,7 +32,7 @@ public class GetSetRegControl extends Composite {
 
 	public GetSetRegControl(final int addr, final int reg, final boolean div10,
 			String text) {
-		this.addr = addr;
+		super(addr);
 		this.label = new Label(text);
 		this.edit = new TextBox();
 		this.reg = reg;
@@ -61,18 +61,14 @@ public class GetSetRegControl extends Composite {
 					int val = div10 ? Integer.valueOf(edit.getText()) * 10
 							: Integer.valueOf(edit.getText());
 					controllersService.setReg(addr, reg, val,
-							new AsyncCallback<Void>() {
+							new CallbackAdapter<Void>() {
 								@Override
 								public void onSuccess(Void result) {
 									edit.setEnabled(true);
 								}
-
-								@Override
-								public void onFailure(Throwable caught) {
-									edit.setText("---");
-								}
 							});
 				} catch (NumberFormatException e) {
+					refresh();
 				}
 			}
 		});
@@ -99,24 +95,4 @@ public class GetSetRegControl extends Composite {
 			edit.setText(Integer.toString(_val));
 		edit.setEnabled(true);
 	}
-
-	public void refresh() {
-		edit.setEnabled(false);
-		edit.setText("???");
-		controllersService.getReg(addr, reg, new AsyncCallback<Integer>() {
-			@Override
-			public void onSuccess(Integer result) {
-				if (div10)
-					edit.setText(Float.toString((float) result / 10));
-				else
-					edit.setText(Integer.toString(result));
-				edit.setEnabled(true);
-			}
-
-			@Override
-			public void onFailure(Throwable caught) {
-			}
-		});
-	}
-
 }

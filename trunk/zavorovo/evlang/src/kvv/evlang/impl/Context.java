@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import kvv.controllers.register.Register;
+import kvv.controllers.register.RegisterDescr;
 import kvv.controllers.utils.FletchSum;
 import kvv.evlang.ParseException;
 import kvv.evlang.rt.RTContext;
@@ -22,52 +23,60 @@ import kvv.evlang.rt.VM;
 public class Context {
 	protected Map<String, Integer> constants = new HashMap<String, Integer>();
 
-	protected Map<String, Integer> registers = new HashMap<String, Integer>();
+	protected Map<String, RegisterDescr> registers = new LinkedHashMap<String, RegisterDescr>();
 	protected int nextReg = Register.REG_RAM0;
+	protected int nextEEReg = Register.REG_EEPROM0;
 
 	{
-		registers.put("REG_RELAY0", Register.REG_RELAY0);
-		registers.put("REG_RELAY1", Register.REG_RELAY1);
-		registers.put("REG_RELAY2", Register.REG_RELAY2);
-		registers.put("REG_RELAY3", Register.REG_RELAY3);
-		registers.put("REG_RELAY4", Register.REG_RELAY4);
-		registers.put("REG_RELAY5", Register.REG_RELAY5);
-		registers.put("REG_RELAY6", Register.REG_RELAY6);
-		registers.put("REG_RELAY7", Register.REG_RELAY7);
-		registers.put("REG_TEMPERATURE", Register.REG_TEMP);
+		registers.put("REG_RELAY0", new RegisterDescr(Register.REG_RELAY0));
+		registers.put("REG_RELAY1", new RegisterDescr(Register.REG_RELAY1));
+		registers.put("REG_RELAY2", new RegisterDescr(Register.REG_RELAY2));
+		registers.put("REG_RELAY3", new RegisterDescr(Register.REG_RELAY3));
+		registers.put("REG_RELAY4", new RegisterDescr(Register.REG_RELAY4));
+		registers.put("REG_RELAY5", new RegisterDescr(Register.REG_RELAY5));
+		registers.put("REG_RELAY6", new RegisterDescr(Register.REG_RELAY6));
+		registers.put("REG_RELAY7", new RegisterDescr(Register.REG_RELAY7));
+		registers.put("REG_TEMPERATURE", new RegisterDescr(Register.REG_TEMP, true, false));
 
-		registers.put("REG_EEPROM0", Register.REG_EEPROM0);
-		registers.put("REG_EEPROM1", Register.REG_EEPROM1);
-		registers.put("REG_EEPROM2", Register.REG_EEPROM2);
-		registers.put("REG_EEPROM3", Register.REG_EEPROM3);
-		registers.put("REG_EEPROM4", Register.REG_EEPROM4);
-		registers.put("REG_EEPROM5", Register.REG_EEPROM5);
-		registers.put("REG_EEPROM6", Register.REG_EEPROM6);
-		registers.put("REG_EEPROM7", Register.REG_EEPROM7);
+		// registers.put("REG_EEPROM0", Register.REG_EEPROM0);
+		// registers.put("REG_EEPROM1", Register.REG_EEPROM1);
+		// registers.put("REG_EEPROM2", Register.REG_EEPROM2);
+		// registers.put("REG_EEPROM3", Register.REG_EEPROM3);
+		// registers.put("REG_EEPROM4", Register.REG_EEPROM4);
+		// registers.put("REG_EEPROM5", Register.REG_EEPROM5);
+		// registers.put("REG_EEPROM6", Register.REG_EEPROM6);
+		// registers.put("REG_EEPROM7", Register.REG_EEPROM7);
 
-		registers.put("REG_IN0", Register.REG_IN0);
-		registers.put("REG_IN1", Register.REG_IN1);
-		registers.put("REG_IN2", Register.REG_IN2);
-		registers.put("REG_IN3", Register.REG_IN3);
-		registers.put("REG_IN4", Register.REG_IN4);
-		registers.put("REG_IN5", Register.REG_IN5);
-		registers.put("REG_IN6", Register.REG_IN6);
-		registers.put("REG_IN7", Register.REG_IN7);
+		registers.put("REG_IN0", new RegisterDescr(Register.REG_IN0, true, false));
+		registers.put("REG_IN1", new RegisterDescr(Register.REG_IN1, true, false));
+		registers.put("REG_IN2", new RegisterDescr(Register.REG_IN2, true, false));
+		registers.put("REG_IN3", new RegisterDescr(Register.REG_IN3, true, false));
+		registers.put("REG_IN4", new RegisterDescr(Register.REG_IN4, true, false));
+		registers.put("REG_IN5", new RegisterDescr(Register.REG_IN5, true, false));
+		registers.put("REG_IN6", new RegisterDescr(Register.REG_IN6, true, false));
+		registers.put("REG_IN7", new RegisterDescr(Register.REG_IN7, true, false));
 
-		registers.put("REG_INPULLUP0", Register.REG_INPULLUP0);
-		registers.put("REG_INPULLUP1", Register.REG_INPULLUP1);
-		registers.put("REG_INPULLUP2", Register.REG_INPULLUP2);
-		registers.put("REG_INPULLUP3", Register.REG_INPULLUP3);
-		registers.put("REG_INPULLUP4", Register.REG_INPULLUP4);
-		registers.put("REG_INPULLUP5", Register.REG_INPULLUP5);
-		registers.put("REG_INPULLUP6", Register.REG_INPULLUP6);
-		registers.put("REG_INPULLUP7", Register.REG_INPULLUP7);
+		registers.put("REG_INPULLUP0",
+				new RegisterDescr(Register.REG_INPULLUP0));
+		registers.put("REG_INPULLUP1",
+				new RegisterDescr(Register.REG_INPULLUP1));
+		registers.put("REG_INPULLUP2",
+				new RegisterDescr(Register.REG_INPULLUP2));
+		registers.put("REG_INPULLUP3",
+				new RegisterDescr(Register.REG_INPULLUP3));
+		registers.put("REG_INPULLUP4",
+				new RegisterDescr(Register.REG_INPULLUP4));
+		registers.put("REG_INPULLUP5",
+				new RegisterDescr(Register.REG_INPULLUP5));
+		registers.put("REG_INPULLUP6",
+				new RegisterDescr(Register.REG_INPULLUP6));
+		registers.put("REG_INPULLUP7",
+				new RegisterDescr(Register.REG_INPULLUP7));
 
 	}
 
-	protected void checkROReg(int reg) throws ParseException {
-		if (reg >= Register.REG_EEPROM0
-				&& reg < Register.REG_EEPROM0 + Register.REG_EEPROM_CNT)
+	protected void checkROReg(RegisterDescr descr) throws ParseException {
+		if (descr.readonly)
 			throw new ParseException("register is read only");
 	}
 

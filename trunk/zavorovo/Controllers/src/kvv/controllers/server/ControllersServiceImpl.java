@@ -1,13 +1,16 @@
 package kvv.controllers.server;
 
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.controller.IController;
+import kvv.controllers.register.SourceDescr;
 import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.ControllerDescr;
@@ -17,6 +20,7 @@ import kvv.evlang.ParseException;
 import kvv.evlang.Token;
 import kvv.evlang.impl.ELReader;
 
+import com.google.gson.Gson;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")
@@ -79,25 +83,59 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public String upload(int addr, String name) {
+	public String upload(int addr, String fileName) {
 		EG1 parser = null;
 		try {
-			if (name == null) {
+			if (fileName == null) {
 				controller.upload(addr, 0, new byte[] { 0, 0, 0 });
+				storeSourceDescr(addr, null);
 			} else {
 				parser = new EG1(new ELReader(new FileReader(Constants.ROOT
-						+ "/src/" + name)));
+						+ "/src/" + fileName)));
 
 				parser.parse();
 				byte[] bytes = parser.dump();
 				controller.upload(addr, bytes);
+
+				SourceDescr sourceDescr = new SourceDescr(fileName,
+						parser.getRegisterDescription());
+
+				String gson = new Gson().toJson(sourceDescr);
+				System.out.println(gson);
+
+				storeSourceDescr(addr, gson);
 			}
 			return null;
 		} catch (ParseException e) {
 			Token t = parser.token;
 			return " line " + t.beginLine + " : " + e.getMessage();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			return e.getMessage();
 		}
+	}
+
+	private void storeSourceDescr(int addr, String gson) throws Exception {
+		Properties props = new Properties();
+		try {
+			FileReader fr = new FileReader(Constants.srcFile);
+			props.load(fr);
+			fr.close();
+		} catch (IOException e) {
+		}
+		try {
+			ControllerDescr controllerDescr = Controllers.get(addr);
+
+			if (gson != null)
+				props.setProperty(controllerDescr.name, gson);
+			else
+				props.remove(controllerDescr.name);
+
+			FileWriter fw = new FileWriter(Constants.srcFile);
+			props.store(fw, "");
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 }
