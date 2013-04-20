@@ -48,6 +48,13 @@ public class Rs485 {
 
 	public Rs485(String comid) throws Exception {
 		pID = CommPortIdentifier.getPortIdentifier(comid);
+		init();
+	}
+
+	private void init() throws Exception {
+		if (serPort != null)
+			serPort.close();
+
 		serPort = (SerialPort) pID.open("PortReader", 2000);
 		inStream = serPort.getInputStream();
 		outStream = serPort.getOutputStream();
@@ -101,28 +108,29 @@ public class Rs485 {
 
 	private Listener listener = new Listener();
 
-	public byte[] send(int addr, byte[] data) throws IOException {
+	public synchronized byte[] send(int addr, byte[] data) throws Exception {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// System.out.println("===");
 				return __send(addr, data, i);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				// e.printStackTrace();
 			}
 		}
 		return __send(addr, data, 3);
 	}
 
-	public synchronized byte[] __send(int addr, byte[] data, int attempt)
-			throws IOException {
+	private synchronized byte[] __send(int addr, byte[] data, int attempt)
+			throws Exception {
 		try {
 			return _send(addr, data);
 		} catch (IOException e) {
+			init();
 			throw e;
 		}
 	}
 
-	public synchronized byte[] _send(int addr, byte[] data) throws IOException {
+	private synchronized byte[] _send(int addr, byte[] data) throws IOException {
 		byte[] packet = new byte[1 + 1 + data.length + 1];
 		packet[0] = (byte) packet.length;
 		packet[1] = (byte) addr;
