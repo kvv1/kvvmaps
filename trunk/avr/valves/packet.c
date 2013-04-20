@@ -10,7 +10,7 @@ void handleRxCmd(char* data) {
 		char len = data[0];
 		addr = data[1];
 		if (fletchSum((unsigned char*) data, len - 1) == data[len - 1]) {
-			eepromWriteAllowed = EE_MAGIC;
+			ee_magic = MAGIC16;
 			packetReceived(data + 2, len - 3);
 		}
 	}
