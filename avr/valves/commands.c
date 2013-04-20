@@ -6,7 +6,6 @@
 #include "vm.h"
 #include "vmstatus.h"
 
-#include <avr/eeprom.h>
 #include <avr/pgmspace.h>
 
 #include "ee.h"
@@ -162,7 +161,7 @@ static uint8_t regs[] PROGMEM = { REG_RELAYS, REG_INPUTS, REG_TEMP_PREF,
 		REG_ADC0, REG_ADC1, REG_ADC2, REG_ADC3, REG_RAM0, REG_RAM1, REG_RAM2,
 		REG_RAM3, REG_EEPROM0, REG_EEPROM1, REG_EEPROM2, REG_EEPROM3, };
 
-void handleCmd(char* cmd, uint8_t cmdlen) {
+void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 //	print2("handleCmd %d %d ", *cmd, cmdlen);
 	switch (cmd[0]) {
 	case CMD_SETREG: {
@@ -235,9 +234,7 @@ void handleCmd(char* cmd, uint8_t cmdlen) {
 		}
 
 		startVM(0);
-		if (eepromWriteAllowed == EE_MAGIC)
-			eeprom_update_block(cmd + 3, code + addr, len);
-		getdummy();
+		EEPROM_writeBlock((int) code + addr, len, cmd + 3);
 		sendOk();
 		break;
 	}

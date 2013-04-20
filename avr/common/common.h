@@ -30,7 +30,5 @@ unsigned char fletchSum(uint8_t *buf, uint8_t len);
 
 void createObjects();
 
-ee_8_decl(dummy);
-
 #endif
 

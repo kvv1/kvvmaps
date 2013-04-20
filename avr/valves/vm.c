@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <avr/io.h>
 #include <util/delay.h>
-#include <avr/eeprom.h>
+
 EEMEM uint8_t code[VMCODE_SIZE];
 
 ee_8(vmonoff);
@@ -36,7 +36,7 @@ int8_t vmSetReg(uint8_t reg, int16_t val) {
 }
 
 uint8_t vmReadByte(uint16_t addr) {
-	return eeprom_read_byte(code + addr);
+	return EEPROM_read((uint16_t)code + addr);
 }
 
 void vmPrintInt(int16_t n) {

@@ -8,9 +8,6 @@
 
 #include <avr/sleep.h>
 
-ee_8(dummy);
-int32_t eepromWriteAllowed;
-
 void addFletchSum(uint8_t c, uint8_t* S) {
 	*S += c;
 	if (*S < c)
@@ -38,7 +35,7 @@ void init_adc(char inputs, unsigned char vref_type);
 void timer0_init();
 
 int main(void) {
-	eepromWriteAllowed = EE_MAGIC;
+	ee_magic = MAGIC16;
 
 	//	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 //	sleep_enable();

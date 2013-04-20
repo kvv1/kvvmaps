@@ -4,8 +4,11 @@
 
 #include <util/delay.h>
 
+#include <util/atomic.h>
+
 #include "1w.h"
 #include "myio.h"
+#include "ee.h"
 
 int main(void) {
 	PORTB = 0x00;
@@ -62,6 +65,12 @@ int main(void) {
 	sei();
 
 	print0("simple\n");
+
+	ee_magic = MAGIC16;
+	EEPROM_write(300, 33);
+	ee_magic = 0;
+	char b = EEPROM_read(300);
+	print1("byte = %d\n", b);
 
 	//vmMain();
 

@@ -86,10 +86,5 @@
 			<type>2</type>
 			<locationURI>WORKSPACE_LOC/basic</locationURI>
 		</link>
-		<link>
-			<name>vm</name>
-			<type>2</type>
-			<locationURI>WORKSPACE_LOC/vm</locationURI>
-		</link>
 	</linkedResources>
 </projectDescription>

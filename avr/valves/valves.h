@@ -8,7 +8,7 @@
 #ifndef VALVES_H_
 #define VALVES_H_
 
-void handleCmd(char* cmd, uint8_t cmdlen);
+void handleCmd(uint8_t* cmd, uint8_t cmdlen);
 void startStopTemperatureControl();
 
 
