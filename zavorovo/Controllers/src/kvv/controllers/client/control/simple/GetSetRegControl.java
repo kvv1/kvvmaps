@@ -2,7 +2,6 @@ package kvv.controllers.client.control.simple;
 
 import java.util.Map;
 
-import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
@@ -12,6 +11,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -60,10 +60,14 @@ public class GetSetRegControl extends ControlComposite {
 					int val = div10 ? Integer.valueOf(edit.getText()) * 10
 							: Integer.valueOf(edit.getText());
 					controllersService.setReg(addr, reg, val,
-							new CallbackAdapter<Void>() {
+							new AsyncCallback<Void>() {
 								@Override
 								public void onSuccess(Void result) {
 									edit.setEnabled(true);
+								}
+
+								@Override
+								public void onFailure(Throwable caught) {
 								}
 							});
 				} catch (NumberFormatException e) {

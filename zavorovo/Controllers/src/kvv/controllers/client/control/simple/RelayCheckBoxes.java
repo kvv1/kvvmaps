@@ -15,7 +15,7 @@ public class RelayCheckBoxes extends ControlComposite {
 		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		// panel.setSpacing(10);
 
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < Register.REG_RELAY_CNT; i++) {
 			SimpleRelayControl checkBox = new SimpleRelayControl(addr,
 					Register.REG_RELAY0 + i, null);
 			add(checkBox);

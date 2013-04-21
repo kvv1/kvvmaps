@@ -35,19 +35,7 @@ public class Controllers {
 		{
 			setDaemon(true);
 			setPriority(MIN_PRIORITY);
-
-			try {
-				ControllerDescr[] controllers = Utils.jsonRead(
-						Constants.controllersFile, ControllerDescr[].class);
-				for (ControllerDescr c : controllers) {
-					if (c != null) {
-						nameMap.put(c.name, c);
-						addrMap.put(c.addr, c);
-					}
-				}
-			} catch (Exception e) {
-			}
-
+			update();
 			start();
 		}
 
@@ -56,26 +44,31 @@ public class Controllers {
 			while (!stopped) {
 				try {
 					sleep(5000);
-					ControllerDescr[] controllers = Utils.jsonRead(
-							Constants.controllersFile, ControllerDescr[].class);
-
-					synchronized (Controllers.class) {
-						nameMap.clear();
-						addrMap.clear();
-						for (ControllerDescr c : controllers) {
-							if (c != null) {
-								nameMap.put(c.name, c);
-								addrMap.put(c.addr, c);
-							}
-						}
-					}
-
-				} catch (Exception e) {
-					e.printStackTrace();
+				} catch (InterruptedException e) {
 				}
+				update();
 			}
-
 		};
 	};
+
+	private static void update() {
+		try {
+			ControllerDescr[] controllers = Utils.jsonRead(
+					Constants.controllersFile, ControllerDescr[].class);
+
+			synchronized (Controllers.class) {
+				nameMap.clear();
+				addrMap.clear();
+				for (ControllerDescr c : controllers) {
+					if (c != null) {
+						nameMap.put(c.name, c);
+						addrMap.put(c.addr, c);
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 }
