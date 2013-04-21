@@ -1,6 +1,6 @@
 package kvv.controllers.register;
 
-public class Register {
+public class Register { 
 	public static final int REG_RELAY0 = 0;
 	public static final int REG_RELAY1 = 1;
 	public static final int REG_RELAY2 = 2;
