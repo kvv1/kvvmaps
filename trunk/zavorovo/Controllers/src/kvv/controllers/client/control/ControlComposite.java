@@ -1,4 +1,4 @@
-package kvv.controllers.client.controls;
+package kvv.controllers.client.control;
 
 import java.util.ArrayList;
 import java.util.Collection;

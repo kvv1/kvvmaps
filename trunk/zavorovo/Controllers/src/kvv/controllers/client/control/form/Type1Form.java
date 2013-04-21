@@ -1,9 +1,10 @@
-package kvv.controllers.client.controls.form;
+package kvv.controllers.client.control.form;
 
-import kvv.controllers.client.controls.ControlComposite;
-import kvv.controllers.client.controls.simple.GetRegControl;
-import kvv.controllers.client.controls.simple.RelayCheckBoxes;
-import kvv.controllers.client.controls.vm.VMControl;
+import kvv.controllers.client.control.ControlComposite;
+import kvv.controllers.client.control.simple.GetRegControl;
+import kvv.controllers.client.control.simple.GetSetRegControl;
+import kvv.controllers.client.control.simple.RelayCheckBoxes;
+import kvv.controllers.client.control.simple.SimpleRelayControl;
 import kvv.controllers.register.Register;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -15,24 +16,23 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 
-public class Type2Form extends ControlComposite {
+public class Type1Form extends ControlComposite {
 
-	public Type2Form(int addr, String name) {
+	public Type1Form(int addr, String name) {
 
 		super(addr);
 
 		HorizontalPanel panel = new HorizontalPanel();
+
 		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		panel.setSpacing(10);
 
 		Label nameLabel = new Label(name);
 		nameLabel.setWidth("100px");
-
 		panel.add(nameLabel);
 
 		Label addrLabel = new Label("addr = " + addr);
 		addrLabel.setWidth("70px");
-
 		panel.add(addrLabel);
 
 		RelayCheckBoxes relays = new RelayCheckBoxes(addr);
@@ -44,13 +44,23 @@ public class Type2Form extends ControlComposite {
 		add(tempVal);
 		panel.add(tempVal);
 
-		VMControl vmControl = new VMControl(addr, name);
-		add(vmControl);
-		panel.add(vmControl);
+		GetSetRegControl tempPref = new GetSetRegControl(addr,
+				Register.REG_TEMP_PREF, true, "T опт=");
+		add(tempPref);
+		panel.add(tempPref);
+
+		GetSetRegControl tempMax = new GetSetRegControl(addr,
+				Register.REG_TEMP_PREF_2, true, "T макс=");
+		add(tempMax);
+		panel.add(tempMax);
+
+		SimpleRelayControl hothouseCheckBox = new SimpleRelayControl(addr,
+				Register.REG_TEMP_PREF_ON, "Теплица");
+		add(hothouseCheckBox);
+		panel.add(hothouseCheckBox);
 
 		Button refreshButton = new Button("Обновить");
 		panel.add(refreshButton);
-
 		refreshButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {

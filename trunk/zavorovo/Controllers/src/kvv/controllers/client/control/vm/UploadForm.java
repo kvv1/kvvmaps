@@ -1,4 +1,4 @@
-package kvv.controllers.client.controls.vm;
+package kvv.controllers.client.control.vm;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;

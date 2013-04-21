@@ -1,11 +1,11 @@
-package kvv.controllers.client.controls.simple;
+package kvv.controllers.client.control.simple;
 
 import java.util.Map;
 
 import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
-import kvv.controllers.client.controls.ControlComposite;
+import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.pages.ModePage;
 
 import com.google.gwt.core.client.GWT;

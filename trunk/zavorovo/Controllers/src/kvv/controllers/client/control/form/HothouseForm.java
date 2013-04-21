@@ -1,9 +1,9 @@
-package kvv.controllers.client.controls.form;
+package kvv.controllers.client.control.form;
 
-import kvv.controllers.client.controls.ControlComposite;
-import kvv.controllers.client.controls.simple.GetRegControl;
-import kvv.controllers.client.controls.simple.GetSetRegControl;
-import kvv.controllers.client.controls.simple.RelayCheckBoxes;
+import kvv.controllers.client.control.ControlComposite;
+import kvv.controllers.client.control.simple.GetRegControl;
+import kvv.controllers.client.control.simple.GetSetRegControl;
+import kvv.controllers.client.control.simple.RelayCheckBoxes;
 import kvv.controllers.register.Register;
 
 import com.google.gwt.event.dom.client.ClickEvent;
