@@ -31,20 +31,6 @@ public class VMControl extends ControlComposite {
 	private final SourcesServiceAsync sourcesService = GWT
 			.create(SourcesService.class);
 
-	private final SimpleRelayControl vmCheckBox;
-
-	private final GetRegControl vmState;
-
-	private final GetSetRegControl eeprom0;
-	private final GetSetRegControl eeprom1;
-	private final GetSetRegControl eeprom2;
-	private final GetSetRegControl eeprom3;
-
-	private final GetRegControl ram0;
-	private final GetRegControl ram1;
-	private final GetRegControl ram2;
-	private final GetRegControl ram3;
-
 	private final ListBox files;
 
 	private final Grid panel = new Grid(2, 6);
@@ -56,28 +42,48 @@ public class VMControl extends ControlComposite {
 
 		this.name = name;
 
-		vmCheckBox = new SimpleRelayControl(addr, Register.REG_VMONOFF, null);
+		SimpleRelayControl vmCheckBox = new SimpleRelayControl(addr,
+				Register.REG_VMONOFF, null);
+		add(vmCheckBox);
 		panel.setWidget(0, 0, vmCheckBox);
 
-		vmState = new GetRegControl(addr, Register.REG_VMSTATE, false, "VM=");
+		GetRegControl vmState = new GetRegControl(addr, Register.REG_VMSTATE,
+				false, "VM=");
+		add(vmState);
 		panel.setWidget(1, 0, vmState);
 
-		eeprom0 = new GetSetRegControl(addr, Register.REG_EEPROM0, false, "");
+		GetSetRegControl eeprom0 = new GetSetRegControl(addr,
+				Register.REG_EEPROM0, false, "");
+		add(eeprom0);
 		panel.setWidget(0, 1, eeprom0);
-		eeprom1 = new GetSetRegControl(addr, Register.REG_EEPROM1, false, "");
+		GetSetRegControl eeprom1 = new GetSetRegControl(addr,
+				Register.REG_EEPROM1, false, "");
+		add(eeprom1);
 		panel.setWidget(0, 2, eeprom1);
-		eeprom2 = new GetSetRegControl(addr, Register.REG_EEPROM2, false, "");
+		GetSetRegControl eeprom2 = new GetSetRegControl(addr,
+				Register.REG_EEPROM2, false, "");
+		add(eeprom2);
 		panel.setWidget(0, 3, eeprom2);
-		eeprom3 = new GetSetRegControl(addr, Register.REG_EEPROM3, false, "");
+		GetSetRegControl eeprom3 = new GetSetRegControl(addr,
+				Register.REG_EEPROM3, false, "");
+		add(eeprom3);
 		panel.setWidget(0, 4, eeprom3);
 
-		ram0 = new GetRegControl(addr, Register.REG_RAM0, false, "");
+		GetRegControl ram0 = new GetRegControl(addr, Register.REG_RAM0, false,
+				"");
+		add(ram0);
 		panel.setWidget(1, 1, ram0);
-		ram1 = new GetRegControl(addr, Register.REG_RAM1, false, "");
+		GetRegControl ram1 = new GetRegControl(addr, Register.REG_RAM1, false,
+				"");
+		add(ram1);
 		panel.setWidget(1, 2, ram1);
-		ram2 = new GetRegControl(addr, Register.REG_RAM2, false, "");
+		GetRegControl ram2 = new GetRegControl(addr, Register.REG_RAM2, false,
+				"");
+		add(ram2);
 		panel.setWidget(1, 3, ram2);
-		ram3 = new GetRegControl(addr, Register.REG_RAM3, false, "");
+		GetRegControl ram3 = new GetRegControl(addr, Register.REG_RAM3, false,
+				"");
+		add(ram3);
 		panel.setWidget(1, 4, ram3);
 
 		files = new ListBox();
@@ -117,16 +123,7 @@ public class VMControl extends ControlComposite {
 	}
 
 	public void refresh(Map<Integer, Integer> result) {
-		vmCheckBox.refresh(result);
-		vmState.refresh(result);
-		ram0.refresh(result);
-		ram1.refresh(result);
-		ram2.refresh(result);
-		ram3.refresh(result);
-		eeprom0.refresh(result);
-		eeprom1.refresh(result);
-		eeprom2.refresh(result);
-		eeprom3.refresh(result);
+		super.refresh(result);
 
 		files.setEnabled(false);
 		if (result != null)
@@ -143,8 +140,9 @@ public class VMControl extends ControlComposite {
 								@Override
 								public void onSuccess(SourceDescr result) {
 									for (int i = 0; i < files.getItemCount(); i++)
-										if (result != null && files.getItemText(i).equals(
-												result.filename)) {
+										if (result != null
+												&& files.getItemText(i).equals(
+														result.filename)) {
 											files.setSelectedIndex(i);
 											break;
 										}

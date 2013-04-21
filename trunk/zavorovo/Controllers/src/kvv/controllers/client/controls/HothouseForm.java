@@ -1,7 +1,5 @@
 package kvv.controllers.client.controls;
 
-import java.util.Map;
-
 import kvv.controllers.client.controls.simple.GetRegControl;
 import kvv.controllers.client.controls.simple.GetSetRegControl;
 import kvv.controllers.client.controls.simple.RelayCheckBoxes;
@@ -16,26 +14,28 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class HothouseControl extends ControlComposite {
+public class HothouseForm extends ControlComposite {
 
-	private final VerticalPanel panel = new VerticalPanel();
-
-	private final GetRegControl currentTempWidget;
-	private final GetSetRegControl optTempWidget;
-	private final GetSetRegControl maxTempWidget;
-	private final RelayCheckBoxes relays;
-
-	public HothouseControl(final int addr, String name) {
+	public HothouseForm(final int addr, String name) {
 
 		super(addr);
 
-		currentTempWidget = new GetRegControl(addr, Register.REG_TEMP, true,
-				"T = ");
-		optTempWidget = new GetSetRegControl(addr, Register.REG_TEMP_PREF,
-				true, "T опт = ");
-		maxTempWidget = new GetSetRegControl(addr, Register.REG_TEMP_PREF_2,
-				true, "T мах = ");
-		relays = new RelayCheckBoxes(addr);
+		GetRegControl currentTempWidget = new GetRegControl(addr,
+				Register.REG_TEMP, true, "T = ");
+		add(currentTempWidget);
+
+		GetSetRegControl optTempWidget = new GetSetRegControl(addr,
+				Register.REG_TEMP_PREF, true, "T опт = ");
+		add(optTempWidget);
+
+		GetSetRegControl maxTempWidget = new GetSetRegControl(addr,
+				Register.REG_TEMP_PREF_2, true, "T мах = ");
+		add(maxTempWidget);
+
+		RelayCheckBoxes relays = new RelayCheckBoxes(addr);
+		add(relays);
+
+		VerticalPanel panel = new VerticalPanel();
 
 		panel.setSpacing(10);
 
@@ -81,12 +81,4 @@ public class HothouseControl extends ControlComposite {
 
 		initWidget(panel);
 	}
-
-	public void refresh(Map<Integer, Integer> regs) {
-		relays.refresh(regs);
-		currentTempWidget.refresh(regs);
-		optTempWidget.refresh(regs);
-		maxTempWidget.refresh(regs);
-	}
-
 }
