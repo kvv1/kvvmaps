@@ -1,4 +1,4 @@
-package kvv.controllers.client.pages;
+package kvv.controllers.client.page;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

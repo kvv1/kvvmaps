@@ -1,4 +1,4 @@
-package kvv.controllers.client.pages;
+package kvv.controllers.client.page;
 
 import java.util.HashMap;
 import java.util.HashSet;
