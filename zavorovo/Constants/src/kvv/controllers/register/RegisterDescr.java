@@ -5,6 +5,7 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class RegisterDescr implements Serializable {
 	public int reg;
+	public String name;
 	public String text;
 	public boolean readonly;
 	public boolean editable;
@@ -23,11 +24,12 @@ public class RegisterDescr implements Serializable {
 		this.editable = editable;
 	}
 
-	public RegisterDescr(RegisterDescr descr, String text, RegType type) {
+	public RegisterDescr(RegisterDescr descr, String name, String text, RegType type) {
 		this.reg = descr.reg;
 		this.readonly = descr.readonly;
 		this.editable = descr.editable;
 		this.type = type;
 		this.text = text;
+		this.name = name;
 	}
 }

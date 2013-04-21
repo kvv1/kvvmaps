@@ -148,7 +148,7 @@ public class EG extends Context {
 				throw new ParseException(regNum.image + " - ?");
 		}
 		if (uiName != null)
-			registerDescr = new RegisterDescr(registerDescr,
+			registerDescr = new RegisterDescr(registerDescr, regName.image,
 					uiName.image.replace("\"", ""),
 					RegType.valueOf(uiType.image));
 		registers.put(regName.image, registerDescr);
