@@ -6,9 +6,9 @@ import java.util.Set;
 import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
-import kvv.controllers.client.controls.ControlComposite;
-import kvv.controllers.client.controls.form.Type1Form;
-import kvv.controllers.client.controls.form.Type2Form;
+import kvv.controllers.client.control.ControlComposite;
+import kvv.controllers.client.control.form.Type1Form;
+import kvv.controllers.client.control.form.Type2Form;
 import kvv.controllers.shared.ControllerDescr;
 
 import com.google.gwt.core.client.GWT;

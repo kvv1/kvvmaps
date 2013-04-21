@@ -1,7 +1,7 @@
-package kvv.controllers.client.controls.form;
+package kvv.controllers.client.control.form;
 
-import kvv.controllers.client.controls.ControlComposite;
-import kvv.controllers.client.controls.simple.SimpleRelayControl;
+import kvv.controllers.client.control.ControlComposite;
+import kvv.controllers.client.control.simple.SimpleRelayControl;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

@@ -1,4 +1,4 @@
-package kvv.controllers.client.controls.vm;
+package kvv.controllers.client.control.vm;
 
 import java.util.Map;
 
@@ -7,10 +7,10 @@ import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.SourcesService;
 import kvv.controllers.client.SourcesServiceAsync;
-import kvv.controllers.client.controls.ControlComposite;
-import kvv.controllers.client.controls.simple.GetRegControl;
-import kvv.controllers.client.controls.simple.GetSetRegControl;
-import kvv.controllers.client.controls.simple.SimpleRelayControl;
+import kvv.controllers.client.control.ControlComposite;
+import kvv.controllers.client.control.simple.GetRegControl;
+import kvv.controllers.client.control.simple.GetSetRegControl;
+import kvv.controllers.client.control.simple.SimpleRelayControl;
 import kvv.controllers.register.Register;
 import kvv.controllers.register.SourceDescr;
 
