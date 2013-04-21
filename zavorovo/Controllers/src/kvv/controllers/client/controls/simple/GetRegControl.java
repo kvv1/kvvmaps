@@ -2,11 +2,8 @@ package kvv.controllers.client.controls.simple;
 
 import java.util.Map;
 
-import kvv.controllers.client.ControllersService;
-import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.controls.ControlComposite;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;

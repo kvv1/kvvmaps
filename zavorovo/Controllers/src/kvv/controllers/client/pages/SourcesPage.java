@@ -3,6 +3,7 @@ package kvv.controllers.client.pages;
 import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.SourcesService;
 import kvv.controllers.client.SourcesServiceAsync;
+import kvv.controllers.client.pages.source.SourcePage;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

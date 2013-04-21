@@ -1,4 +1,4 @@
-package kvv.controllers.client.pages;
+package kvv.controllers.client.pages.source;
 
 import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.SourcesService;

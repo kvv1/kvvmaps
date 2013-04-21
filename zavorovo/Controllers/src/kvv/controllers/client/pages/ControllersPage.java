@@ -7,8 +7,8 @@ import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.controls.ControlComposite;
-import kvv.controllers.client.controls.Type1Control;
-import kvv.controllers.client.controls.Type2Control;
+import kvv.controllers.client.controls.Type1Form;
+import kvv.controllers.client.controls.Type2Form;
 import kvv.controllers.shared.ControllerDescr;
 
 import com.google.gwt.core.client.GWT;
@@ -48,14 +48,14 @@ public class ControllersPage extends Composite {
 							if (descr != null) {
 								switch (descr.type) {
 								case TYPE1: {
-									ControlComposite control = new Type1Control(
+									ControlComposite control = new Type1Form(
 											descr.addr, descr.name);
 									objects.add(control);
 									vertPanel.add(control);
 									break;
 								}
 								case TYPE2: {
-									ControlComposite control = new Type2Control(
+									ControlComposite control = new Type2Form(
 											descr.addr, descr.name);
 									objects.add(control);
 									vertPanel.add(control);

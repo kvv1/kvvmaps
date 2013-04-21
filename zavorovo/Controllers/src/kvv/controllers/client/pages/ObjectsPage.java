@@ -1,7 +1,5 @@
 package kvv.controllers.client.pages;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,8 +7,8 @@ import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.controls.ControlComposite;
-import kvv.controllers.client.controls.HothouseControl;
-import kvv.controllers.client.controls.RelayControl;
+import kvv.controllers.client.controls.HothouseForm;
+import kvv.controllers.client.controls.RelayForm;
 import kvv.controllers.shared.ObjectDescr;
 
 import com.google.gwt.core.client.GWT;
@@ -21,27 +19,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-
-class MultiMap<K, V> {
-	private HashMap<K, HashSet<V>> map = new HashMap<K, HashSet<V>>();
-
-	public void put(K key, V value) {
-		HashSet<V> set = map.get(key);
-		if (set == null) {
-			set = new HashSet<V>();
-			map.put(key, set);
-		}
-		set.add(value);
-	}
-
-	public Set<V> get(K key) {
-		return map.get(key);
-	}
-
-	public Set<K> keySet() {
-		return map.keySet();
-	}
-}
 
 public class ObjectsPage extends Composite {
 	private final ControllersServiceAsync controllersService = GWT
@@ -75,14 +52,14 @@ public class ObjectsPage extends Composite {
 					if (descr != null) {
 						switch (descr.type) {
 						case RELAY:
-							RelayControl relayControl = new RelayControl(
+							RelayForm relayControl = new RelayForm(
 									descr.addr, descr.register, descr.name);
 							horizPanel.add(relayControl);
 
 							objects.put(descr.addr, relayControl);
 							break;
 						case HOTHOUSE:
-							HothouseControl hothouseControl = new HothouseControl(
+							HothouseForm hothouseControl = new HothouseForm(
 									descr.addr, descr.name);
 							horizPanel.add(hothouseControl);
 							objects.put(descr.addr, hothouseControl);
