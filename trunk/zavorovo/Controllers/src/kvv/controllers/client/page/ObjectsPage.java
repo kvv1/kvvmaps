@@ -52,8 +52,8 @@ public class ObjectsPage extends Composite {
 					if (descr != null) {
 						switch (descr.type) {
 						case RELAY:
-							RelayForm relayControl = new RelayForm(
-									descr.addr, descr.register, descr.name);
+							RelayForm relayControl = new RelayForm(descr.addr,
+									descr.register, descr.name);
 							horizPanel.add(relayControl);
 
 							objects.put(descr.addr, relayControl);
@@ -84,11 +84,9 @@ public class ObjectsPage extends Composite {
 
 	public void refresh() {
 		for (final Integer addr : objects.keySet()) {
-			Set<ControlComposite> set = objects.get(addr);
-			for (ControlComposite c : set) {
+			final Set<ControlComposite> set = objects.get(addr);
+			for (ControlComposite c : set)
 				c.refresh(null);
-				// System.out.println("refr " + addr);
-			}
 
 			controllersService.getRegs(addr,
 					new AsyncCallback<Map<Integer, Integer>>() {
@@ -98,13 +96,10 @@ public class ObjectsPage extends Composite {
 
 						@Override
 						public void onSuccess(Map<Integer, Integer> result) {
-							Set<ControlComposite> set = objects.get(addr);
-							for (ControlComposite c : set) {
+							for (ControlComposite c : set)
 								c.refresh(result);
-							}
 						}
 					});
 		}
-
 	}
 }

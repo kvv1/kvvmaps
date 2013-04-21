@@ -8,7 +8,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
@@ -34,14 +33,14 @@ public class SchelulePage extends Composite {
 		onoff.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				if(!ModePage.controlMode) {
+				if (!ModePage.controlMode) {
 					onoff.setValue(!((CheckBox) event.getSource()).getValue());
 					Window.alert("Режим управления не включен");
 					return;
 				}
 			}
 		});
-		
+
 		submit.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -74,11 +73,7 @@ public class SchelulePage extends Composite {
 
 	private void update() {
 		scheduleService.setSchedule(text.getText(), onoff.getValue(),
-				new AsyncCallback<Void>() {
-					@Override
-					public void onFailure(Throwable caught) {
-					}
-
+				new CallbackAdapter<Void>() {
 					@Override
 					public void onSuccess(Void result) {
 						refresh();
