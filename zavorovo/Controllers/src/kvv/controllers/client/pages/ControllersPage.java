@@ -7,8 +7,8 @@ import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.controls.ControlComposite;
-import kvv.controllers.client.controls.Type1Form;
-import kvv.controllers.client.controls.Type2Form;
+import kvv.controllers.client.controls.form.Type1Form;
+import kvv.controllers.client.controls.form.Type2Form;
 import kvv.controllers.shared.ControllerDescr;
 
 import com.google.gwt.core.client.GWT;

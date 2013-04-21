@@ -1,5 +1,6 @@
-package kvv.controllers.client.controls;
+package kvv.controllers.client.controls.form;
 
+import kvv.controllers.client.controls.ControlComposite;
 import kvv.controllers.client.controls.simple.GetRegControl;
 import kvv.controllers.client.controls.simple.GetSetRegControl;
 import kvv.controllers.client.controls.simple.RelayCheckBoxes;
