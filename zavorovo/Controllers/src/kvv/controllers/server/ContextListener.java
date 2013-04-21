@@ -7,7 +7,7 @@ import kvv.controllers.controller.Controller;
 import kvv.controllers.router.RouterThread;
 import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.MyLogger;
-import kvv.controllers.server.utils.Props;
+import kvv.controllers.server.utils.Utils;
 
 public class ContextListener implements ServletContextListener {
 
@@ -16,13 +16,13 @@ public class ContextListener implements ServletContextListener {
 
 	public void contextInitialized(ServletContextEvent event) {
 		try {
-			boolean emul = Boolean.valueOf(Props.getProp(Constants.propsFile,
+			boolean emul = Boolean.valueOf(Utils.getProp(Constants.propsFile,
 					"emul"));
 			if (emul)
 				ControllersServiceImpl.controller = new ControllerWrapper(
 						new ControllerEmul());
 			else {
-				String controllerURL = Props.getProp(Constants.propsFile,
+				String controllerURL = Utils.getProp(Constants.propsFile,
 						"controllerURL");
 				if (controllerURL == null)
 					controllerURL = "http://localhost/controllers/controller";
@@ -33,23 +33,23 @@ public class ContextListener implements ServletContextListener {
 			e.printStackTrace();
 		}
 
-		boolean logThread = Boolean.valueOf(Props.getProp(Constants.propsFile,
+		boolean logThread = Boolean.valueOf(Utils.getProp(Constants.propsFile,
 				"checkControllers"));
 		if (logThread)
 			LogThread.instance = new LogThread();
 
-		boolean configRouter = Boolean.valueOf(Props.getProp(
+		boolean configRouter = Boolean.valueOf(Utils.getProp(
 				Constants.propsFile, "configRouter"));
 		if (configRouter) {
-			long routerCheckTime = 1000L * Integer.valueOf(Props.getProp(
+			long routerCheckTime = 1000L * Integer.valueOf(Utils.getProp(
 					Constants.propsFile, "routerCheckTimeS"));
-			String routerPassword = Props.getProp(Constants.propsFile,
+			String routerPassword = Utils.getProp(Constants.propsFile,
 					"routerPassword");
-			String routerPublicIP = Props.getProp(Constants.propsFile,
+			String routerPublicIP = Utils.getProp(Constants.propsFile,
 					"routerPublicIP");
-			String routerLocalIP = Props.getProp(Constants.propsFile,
+			String routerLocalIP = Utils.getProp(Constants.propsFile,
 					"routerLocalIP");
-			String routerGatewayIP = Props.getProp(Constants.propsFile,
+			String routerGatewayIP = Utils.getProp(Constants.propsFile,
 					"routerGatewayIP");
 			routerThread = new RouterThread(routerCheckTime, routerPassword,
 					routerPublicIP, routerLocalIP, routerGatewayIP);
