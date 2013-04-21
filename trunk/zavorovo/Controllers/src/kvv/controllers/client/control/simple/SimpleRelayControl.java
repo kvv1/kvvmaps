@@ -5,7 +5,7 @@ import java.util.Map;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
-import kvv.controllers.client.pages.ModePage;
+import kvv.controllers.client.page.ModePage;
 import kvv.controllers.register.Register;
 
 import com.google.gwt.core.client.GWT;

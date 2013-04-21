@@ -1,13 +1,13 @@
 package kvv.controllers.client;
 
-import kvv.controllers.client.pages.CommandsPage;
-import kvv.controllers.client.pages.ControllersPage;
-import kvv.controllers.client.pages.FormsPage;
-import kvv.controllers.client.pages.LogPage;
-import kvv.controllers.client.pages.ModePage;
-import kvv.controllers.client.pages.ObjectsPage;
-import kvv.controllers.client.pages.SchelulePage;
-import kvv.controllers.client.pages.SourcesPage;
+import kvv.controllers.client.page.CommandsPage;
+import kvv.controllers.client.page.ControllersPage;
+import kvv.controllers.client.page.FormsPage;
+import kvv.controllers.client.page.LogPage;
+import kvv.controllers.client.page.ModePage;
+import kvv.controllers.client.page.ObjectsPage;
+import kvv.controllers.client.page.SchelulePage;
+import kvv.controllers.client.page.SourcesPage;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.RootPanel;
