@@ -5,7 +5,6 @@
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gson-1.7.1.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/RouterThread"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Constants"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/evlang"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Controller"/>

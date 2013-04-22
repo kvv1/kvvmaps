@@ -15,6 +15,16 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>BusServlet</servlet-name>
+		<servlet-class>kvv.controllers.controller.BusServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>BusServlet</servlet-name>
+		<url-pattern>/bus</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>testServlet</servlet-name>
 		<servlet-class>kvv.controllers.controller.TestServlet</servlet-class>
 	</servlet>

@@ -8,16 +8,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import kvv.controllers.protocol.zavorovo.ZavorovoProtocol;
+import kvv.controllers.rs485.PacketTransmiter;
 
 @SuppressWarnings("serial")
-public class ControllerServlet extends HttpServlet {
+public class BusServlet extends HttpServlet {
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
 		resp.setContentType("text/html");
-		int addr = Integer.parseInt(req.getParameter("addr"));
+		boolean waitResponse = Boolean.valueOf(req.getParameter("response"));
 		String sbody = req.getParameter("body");
 		String[] body1 = sbody.split(",");
 		byte[] body = new byte[body1.length];
@@ -27,8 +28,7 @@ public class ControllerServlet extends HttpServlet {
 
 		byte[] res;
 		try {
-			res = ZavorovoProtocol.send(addr, body);
-			// res = ZavorovoProtocolOld.getInstance().send(addr, body);
+			res = PacketTransmiter.getInstance().sendPacket(body, waitResponse);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new IOException(e);
