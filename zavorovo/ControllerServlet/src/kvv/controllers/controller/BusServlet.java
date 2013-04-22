@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import kvv.controllers.rs485.PacketTransmiter;
+import kvv.controllers.rs485.PacketTransceiver;
 
 @SuppressWarnings("serial")
 public class BusServlet extends HttpServlet {
@@ -28,7 +28,7 @@ public class BusServlet extends HttpServlet {
 
 		byte[] res;
 		try {
-			res = PacketTransmiter.getInstance().sendPacket(body, waitResponse);
+			res = PacketTransceiver.getInstance().sendPacket(body, waitResponse);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new IOException(e);
