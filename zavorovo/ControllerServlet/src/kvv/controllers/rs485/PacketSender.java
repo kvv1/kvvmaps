@@ -48,9 +48,10 @@ public class PacketSender {
 	private long lastReceiveTime;
 	private long sendTime;
 
-	public synchronized byte[] sendPacket(byte[] data) throws IOException {
+	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse)
+			throws IOException {
 		try {
-			return _sendPacket(data);
+			return _sendPacket(data, waitResponse);
 		} catch (Exception e) {
 			try {
 				init();
@@ -61,7 +62,8 @@ public class PacketSender {
 		}
 	}
 
-	private synchronized byte[] _sendPacket(byte[] data) throws Exception {
+	private synchronized byte[] _sendPacket(byte[] data, boolean waitResponse)
+			throws Exception {
 		synchronized (inputBuffer) {
 			inputBuffer.clear();
 		}
@@ -69,6 +71,9 @@ public class PacketSender {
 		sendTime = System.currentTimeMillis();
 		outStream.write(data);
 		outStream.flush();
+
+		if (!waitResponse)
+			return null;
 
 		while (true) {
 			long time = System.currentTimeMillis();

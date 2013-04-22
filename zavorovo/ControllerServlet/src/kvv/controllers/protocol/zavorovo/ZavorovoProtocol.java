@@ -55,7 +55,9 @@ public class ZavorovoProtocol {
 		packet[packet.length - 1] = FletchSum.fletchSum(packet, 0,
 				packet.length - 1);
 
-		byte[] packet1 = packetSender.sendPacket(packet);
+		byte[] packet1 = packetSender.sendPacket(packet, addr != 0);
+		if (addr == 0)
+			return null;
 
 		if (packet1.length > 2
 				&& (packet1[0] & 255) == packet1.length
