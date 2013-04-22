@@ -4,15 +4,11 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import kvv.controllers.controller.Controller;
-import kvv.controllers.router.RouterThread;
 import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.MyLogger;
 import kvv.controllers.server.utils.Utils;
 
 public class ContextListener implements ServletContextListener {
-
-	// private ServletContext context = null;
-	private static volatile RouterThread routerThread;
 
 	public void contextInitialized(ServletContextEvent event) {
 		try {
@@ -38,23 +34,6 @@ public class ContextListener implements ServletContextListener {
 		if (logThread)
 			LogThread.instance = new LogThread();
 
-		boolean configRouter = Boolean.valueOf(Utils.getProp(
-				Constants.propsFile, "configRouter"));
-		if (configRouter) {
-			long routerCheckTime = 1000L * Integer.valueOf(Utils.getProp(
-					Constants.propsFile, "routerCheckTimeS"));
-			String routerPassword = Utils.getProp(Constants.propsFile,
-					"routerPassword");
-			String routerPublicIP = Utils.getProp(Constants.propsFile,
-					"routerPublicIP");
-			String routerLocalIP = Utils.getProp(Constants.propsFile,
-					"routerLocalIP");
-			String routerGatewayIP = Utils.getProp(Constants.propsFile,
-					"routerGatewayIP");
-			routerThread = new RouterThread(routerCheckTime, routerPassword,
-					routerPublicIP, routerLocalIP, routerGatewayIP);
-		}
-
 		Scheduler.instance = new Scheduler();
 
 		System.out.println("The Simple Web App. Is Ready");
@@ -71,10 +50,6 @@ public class ContextListener implements ServletContextListener {
 			LogThread.instance.stopped = true;
 			LogThread.instance.stop();
 			LogThread.instance = null;
-		}
-		if (routerThread != null) {
-			routerThread.stopThread();
-			routerThread = null;
 		}
 
 		Controllers.stopped = true;

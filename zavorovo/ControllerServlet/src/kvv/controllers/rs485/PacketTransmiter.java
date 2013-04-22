@@ -5,13 +5,17 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
-public class PacketSender {
+import kvv.controllers.protocol.zavorovo.ZavorovoProtocol;
+
+public class PacketTransmiter {
 	private final static int BAUD = 9600;
 
 	private static final long PACKET_TIMEOUT = 500;
@@ -23,7 +27,30 @@ public class PacketSender {
 	private InputStream inStream;
 	private OutputStream outStream;
 
-	public PacketSender(String comid) throws Exception {
+	private static PacketTransmiter instance;
+
+	public static synchronized PacketTransmiter getInstance() throws Exception {
+		if (instance == null) {
+			Properties props = new Properties();
+			FileInputStream is = new FileInputStream(
+					"c:/zavorovo/controller.properties");
+			props.load(is);
+			is.close();
+			String com = props.getProperty("COM");
+			if (com == null)
+				return null;
+			instance = new PacketTransmiter(com);
+		}
+		return instance;
+	}
+
+	public static synchronized void closeInstance() {
+		if (instance != null)
+			instance.close();
+		instance = null;
+	}
+	
+	public PacketTransmiter(String comid) throws Exception {
 		pID = CommPortIdentifier.getPortIdentifier(comid);
 		init();
 	}
