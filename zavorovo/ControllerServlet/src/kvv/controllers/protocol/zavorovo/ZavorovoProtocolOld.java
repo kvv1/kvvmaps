@@ -1,4 +1,4 @@
-package kvv.controllers.rs485;
+package kvv.controllers.protocol.zavorovo;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
@@ -15,7 +15,7 @@ import java.util.Properties;
 
 import kvv.controllers.utils.FletchSum;
 
-public class Rs485 {
+public class ZavorovoProtocolOld {
 	private final static int BAUD = 9600;
 
 	private CommPortIdentifier pID;
@@ -23,9 +23,9 @@ public class Rs485 {
 	private InputStream inStream;
 	private OutputStream outStream;
 
-	private static Rs485 instance;
+	private static ZavorovoProtocolOld instance;
 
-	public static synchronized Rs485 getInstance() throws Exception {
+	public static synchronized ZavorovoProtocolOld getInstance() throws Exception {
 		if (instance == null) {
 			Properties props = new Properties();
 			FileInputStream is = new FileInputStream(
@@ -35,7 +35,7 @@ public class Rs485 {
 			String com = props.getProperty("COM");
 			if (com == null)
 				return null;
-			instance = new Rs485(com);
+			instance = new ZavorovoProtocolOld(com);
 		}
 		return instance;
 	}
@@ -46,7 +46,7 @@ public class Rs485 {
 		instance = null;
 	}
 
-	public Rs485(String comid) throws Exception {
+	public ZavorovoProtocolOld(String comid) throws Exception {
 		pID = CommPortIdentifier.getPortIdentifier(comid);
 		init();
 	}

@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import kvv.controllers.rs485.Rs485;
+import kvv.controllers.protocol.zavorovo.ZavorovoProtocol;
 
 @SuppressWarnings("serial")
 public class ControllerServlet extends HttpServlet {
@@ -27,7 +27,8 @@ public class ControllerServlet extends HttpServlet {
 
 		byte[] res;
 		try {
-			res = Rs485.getInstance().send(addr, body);
+			res = ZavorovoProtocol.getInstance().send(addr, body);
+//			res = ZavorovoProtocol.getInstance().send(addr, body);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new IOException(e);
