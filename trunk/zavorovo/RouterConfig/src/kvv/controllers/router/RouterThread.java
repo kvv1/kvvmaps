@@ -118,7 +118,7 @@ public class RouterThread extends Thread {
 			}
 		}
 
-		System.err.print("\n" + cmd + " --> " + sb);
+		//System.err.print("\n" + cmd + " --> " + sb);
 		return sb.toString();
 	}
 }
