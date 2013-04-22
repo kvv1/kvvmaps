@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import kvv.controllers.utils.FletchSum;
+
 public class Controller implements IController { // 9164642959 7378866
 
 	private final String url;
@@ -64,12 +66,10 @@ public class Controller implements IController { // 9164642959 7378866
 		int start = 0;
 		while (start < data.length) {
 			int len = Math.min(32, data.length - start);
-			upload(addr, start,
-					Arrays.copyOfRange(data, start, start + len));
+			upload(addr, start, Arrays.copyOfRange(data, start, start + len));
 			start += len;
 		}
 	}
-
 
 	private static void checkErr(byte[] resp) throws IOException {
 		ErrorCode code = ErrorCode.values()[resp[0]];
@@ -85,9 +85,9 @@ public class Controller implements IController { // 9164642959 7378866
 	public void close() {
 	}
 
-	public static byte[] send(String url, int addr, byte[] bytes)
+	public static byte[] send1(String url, int addr, byte[] bytes)
 			throws IOException {
-		String url1 = url + "?addr=" + addr + "&body=";
+		String url1 = url + "/controller?addr=" + addr + "&body=";
 		String sep = "";
 		for (byte b : bytes) {
 			url1 += sep + ((int) b & 255);
@@ -110,4 +110,66 @@ public class Controller implements IController { // 9164642959 7378866
 		return outputStream.toByteArray();
 	}
 
+	public static byte[] send(String url, int addr, byte[] bytes)
+			throws IOException {
+		byte[] packet = new byte[1 + 1 + bytes.length + 1];
+		packet[0] = (byte) packet.length;
+		packet[1] = (byte) addr;
+		System.arraycopy(bytes, 0, packet, 2, bytes.length);
+		packet[packet.length - 1] = FletchSum.fletchSum(packet, 0,
+				packet.length - 1);
+
+		byte[] packet1 = sendBus(url, packet, addr != 0);
+
+		if (addr == 0)
+			return null;
+
+		if (packet1.length > 2
+				&& (packet1[0] & 255) == packet1.length
+				&& packet1[1] == (byte) (addr | 0x80)
+				&& packet1[packet1.length - 1] == FletchSum.fletchSum(packet1,
+						0, packet1.length - 1)) {
+			return Arrays.copyOfRange(packet1, 2, packet1.length - 1);
+//			
+//			byte[] resp = new byte[packet1.length - 3];
+//			System.arraycopy(packet1, 2, resp, 0, resp.length);
+//			return resp;
+		} else {
+			String msg = "wrong response from addr: " + addr;
+			msg += ", cmd: ";
+			for (byte b : bytes)
+				msg += Integer.toHexString((int) b & 0xFF) + " ";
+			msg += ", response: ";
+			for (byte b : packet1)
+				msg += Integer.toHexString((int) b & 0xFF) + " ";
+			throw new IOException(msg);
+		}
+	}
+
+	public static byte[] sendBus(String url, byte[] bytes, boolean response)
+			throws IOException {
+		String url1 = url + "?" + (response ? "response=true&" : "")
+				+ "body=";
+		String sep = "";
+		for (byte b : bytes) {
+			url1 += sep + ((int) b & 255);
+			sep = ",";
+		}
+
+		HttpURLConnection conn = null;
+		conn = (HttpURLConnection) new URL(url1).openConnection();
+		conn.setRequestMethod("GET");
+		conn.connect();
+
+		String resp = new BufferedReader(new InputStreamReader(
+				conn.getInputStream())).readLine();
+
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		for (String s : resp.split(",")) {
+			int a = Integer.parseInt(s.trim());
+			outputStream.write(a);
+		}
+		return outputStream.toByteArray();
+
+	}
 }

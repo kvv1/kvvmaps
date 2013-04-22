@@ -19,9 +19,9 @@ public class ContextListener implements ServletContextListener {
 						new ControllerEmul());
 			else {
 				String controllerURL = Utils.getProp(Constants.propsFile,
-						"controllerURL");
+						"busURL");
 				if (controllerURL == null)
-					controllerURL = "http://localhost/controllers/controller";
+					controllerURL = "http://localhost/controllers";
 				ControllersServiceImpl.controller = new ControllerWrapper(
 						new Controller(controllerURL));
 			}

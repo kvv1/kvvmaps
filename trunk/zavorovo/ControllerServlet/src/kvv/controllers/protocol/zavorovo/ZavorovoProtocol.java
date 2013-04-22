@@ -2,7 +2,7 @@ package kvv.controllers.protocol.zavorovo;
 
 import java.io.IOException;
 
-import kvv.controllers.rs485.PacketTransmiter;
+import kvv.controllers.rs485.PacketTransceiver;
 import kvv.controllers.utils.FletchSum;
 
 public class ZavorovoProtocol {
@@ -12,6 +12,7 @@ public class ZavorovoProtocol {
 			try {
 				return _send(addr, data);
 			} catch (Exception e) {
+				System.err.println(e.getMessage());
 			}
 		}
 		try {
@@ -21,17 +22,18 @@ public class ZavorovoProtocol {
 		}
 	}
 
-	private static synchronized byte[] _send(int addr, byte[] data)
+	private static synchronized byte[] _send(int addr, byte[] bytes)
 			throws Exception {
-		byte[] packet = new byte[1 + 1 + data.length + 1];
+		byte[] packet = new byte[1 + 1 + bytes.length + 1];
 		packet[0] = (byte) packet.length;
 		packet[1] = (byte) addr;
-		System.arraycopy(data, 0, packet, 2, data.length);
+		System.arraycopy(bytes, 0, packet, 2, bytes.length);
 		packet[packet.length - 1] = FletchSum.fletchSum(packet, 0,
 				packet.length - 1);
 
-		byte[] packet1 = PacketTransmiter.getInstance().sendPacket(packet,
+		byte[] packet1 = PacketTransceiver.getInstance().sendPacket(packet,
 				addr != 0);
+
 		if (addr == 0)
 			return null;
 
@@ -46,7 +48,7 @@ public class ZavorovoProtocol {
 		} else {
 			String msg = "wrong response from addr: " + addr;
 			msg += ", cmd: ";
-			for (byte b : data)
+			for (byte b : bytes)
 				msg += Integer.toHexString((int) b & 0xFF) + " ";
 			msg += ", response: ";
 			for (byte b : packet1)

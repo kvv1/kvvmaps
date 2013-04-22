@@ -15,7 +15,7 @@ import java.util.Properties;
 
 import kvv.controllers.protocol.zavorovo.ZavorovoProtocol;
 
-public class PacketTransmiter {
+public class PacketTransceiver {
 	private final static int BAUD = 9600;
 
 	private static final long PACKET_TIMEOUT = 500;
@@ -27,9 +27,9 @@ public class PacketTransmiter {
 	private InputStream inStream;
 	private OutputStream outStream;
 
-	private static PacketTransmiter instance;
+	private static PacketTransceiver instance;
 
-	public static synchronized PacketTransmiter getInstance() throws Exception {
+	public static synchronized PacketTransceiver getInstance() throws Exception {
 		if (instance == null) {
 			Properties props = new Properties();
 			FileInputStream is = new FileInputStream(
@@ -39,7 +39,7 @@ public class PacketTransmiter {
 			String com = props.getProperty("COM");
 			if (com == null)
 				return null;
-			instance = new PacketTransmiter(com);
+			instance = new PacketTransceiver(com);
 		}
 		return instance;
 	}
@@ -50,7 +50,7 @@ public class PacketTransmiter {
 		instance = null;
 	}
 	
-	public PacketTransmiter(String comid) throws Exception {
+	public PacketTransceiver(String comid) throws Exception {
 		pID = CommPortIdentifier.getPortIdentifier(comid);
 		init();
 	}
