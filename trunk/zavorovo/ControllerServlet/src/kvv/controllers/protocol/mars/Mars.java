@@ -1,4 +1,4 @@
-package kvv.controllers.rs485;
+package kvv.controllers.protocol.mars;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
@@ -70,8 +70,8 @@ public class Mars {
 		rs.serPort.setRTS(false);
 
 		if (JOptionPane.OK_OPTION != JOptionPane.showConfirmDialog(null,
-				"Включите питание и нажмите ОК",
-				"Программирование радиомодема", JOptionPane.WARNING_MESSAGE))
+				"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ",
+				"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", JOptionPane.WARNING_MESSAGE))
 			return;
 
 		
