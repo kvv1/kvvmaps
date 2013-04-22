@@ -1,5 +1,5 @@
 set WARDIR=WebContent
-set WARFILE=controllers.war
+set WARFILE=rs485.war
 
 del %WARFILE%
 
