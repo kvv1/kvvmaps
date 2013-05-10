@@ -15,6 +15,7 @@ import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ObjectDescr;
+import kvv.controllers.shared.SetCommand;
 import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
 import kvv.evlang.Token;
