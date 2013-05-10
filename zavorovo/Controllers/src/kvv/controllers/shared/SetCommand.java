@@ -1,4 +1,4 @@
-package kvv.controllers.server;
+package kvv.controllers.shared;
 
 public class SetCommand {
 	public String name;

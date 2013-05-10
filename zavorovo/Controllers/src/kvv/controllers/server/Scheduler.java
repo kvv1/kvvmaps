@@ -7,6 +7,7 @@ import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
 
 import kvv.controllers.shared.ControllerDescr;
+import kvv.controllers.shared.SetCommand;
 
 public class Scheduler extends Thread {
 
