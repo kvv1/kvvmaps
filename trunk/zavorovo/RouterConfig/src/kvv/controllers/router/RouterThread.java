@@ -1,7 +1,9 @@
 package kvv.controllers.router;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 import org.apache.commons.net.telnet.InvalidTelnetOptionException;
 import org.apache.commons.net.telnet.TelnetClient;
@@ -10,21 +12,23 @@ import org.apache.commons.net.telnet.TerminalTypeOptionHandler;
 public class RouterThread extends Thread {
 	private volatile boolean stopped;
 
-	private TelnetClient tc = null;
-
 	private final long routerCheckTime;
 	private final String routerPassword;
 	private final String routerPublicIP;
 	private final String routerLocalIP;
 	private final String routerGatewayIP;
 
+	private final List<String> additionalCommands;
+
 	public RouterThread(long routerCheckTime, String routerPassword,
-			String routerPublicIP, String routerLocalIP, String routerGatewayIP) {
+			String routerPublicIP, String routerLocalIP,
+			String routerGatewayIP, List<String> additionalCommands) {
 		this.routerCheckTime = routerCheckTime;
 		this.routerPassword = routerPassword;
 		this.routerPublicIP = routerPublicIP;
 		this.routerLocalIP = routerLocalIP;
 		this.routerGatewayIP = routerGatewayIP;
+		this.additionalCommands = additionalCommands;
 
 		setDaemon(true);
 		setPriority(Thread.MIN_PRIORITY);
@@ -36,10 +40,11 @@ public class RouterThread extends Thread {
 		stopped = true;
 		stop();
 	}
-	
+
 	@Override
 	public void run() {
 		while (!stopped) {
+			TelnetClient tc = null;
 			try {
 				tc = new TelnetClient();
 				try {
@@ -68,33 +73,50 @@ public class RouterThread extends Thread {
 
 					System.out.println("ROUTER adding rule 80.");
 
-					getResponse("iptables -t nat -I PREROUTING -p tcp -d "
+					String cmd = "iptables -t nat -I PREROUTING -p tcp -d "
 							+ routerPublicIP
 							+ " --dport 80 -j DNAT --to-destination "
-							+ routerLocalIP + ":80", outstr, instr);
+							+ routerLocalIP + ":80";
+					getResponseWithEcho(cmd, outstr, instr);
+
+					for (String additionalCommand : additionalCommands) {
+						Thread.sleep(2000);
+						getResponseWithEcho(additionalCommand, outstr, instr);
+					}
 				}
 
 				if (iptables.contains("POSTROUTING")
 						&& !iptables.contains("to:" + routerLocalIP + ":3389")) {
+					Thread.sleep(2000);
 
 					System.out.println("ROUTER adding rule 3389.");
 
-					getResponse("iptables -t nat -I PREROUTING -p tcp -d "
-							+ routerPublicIP
-							+ " --dport 33389 -j DNAT --to-destination "
-							+ routerLocalIP + ":3389", outstr, instr);
+					getResponseWithEcho(
+							"iptables -t nat -I PREROUTING -p tcp -d "
+									+ routerPublicIP
+									+ " --dport 33389 -j DNAT --to-destination "
+									+ routerLocalIP + ":3389", outstr, instr);
 				}
 
-				tc.disconnect();
+				Thread.sleep(routerCheckTime * 1000);
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
-			try {
-				Thread.sleep(routerCheckTime * 1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			} finally {
+				try {
+					if (tc != null)
+						tc.disconnect();
+				} catch (IOException e) {
+				}
 			}
 		}
+	}
+
+	private String getResponseWithEcho(String cmd, OutputStream os,
+			InputStream is) throws Exception {
+		System.out.println("ROUTER COMMAND: " + cmd);
+		String resp = getResponse(cmd, os, is);
+		System.out.println("ROUTER RESPONSE: " + resp);
+		return resp;
 	}
 
 	private String getResponse(String cmd, OutputStream os, InputStream is)
@@ -118,7 +140,7 @@ public class RouterThread extends Thread {
 			}
 		}
 
-		//System.err.print("\n" + cmd + " --> " + sb);
+		// System.err.print("\n" + cmd + " --> " + sb);
 		return sb.toString();
 	}
 }

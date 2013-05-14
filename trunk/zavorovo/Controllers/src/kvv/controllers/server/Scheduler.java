@@ -7,7 +7,8 @@ import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
 
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.SetCommand;
+import kvv.controllers.shared.Command;
+import kvv.controllers.shared.Register;
 
 public class Scheduler extends Thread {
 
@@ -36,14 +37,14 @@ public class Scheduler extends Thread {
 					if (time != lastTime) {
 						ScheduleFile schedFile = new ScheduleFile();
 						schedFile.load();
-						SetCommand[] defines = Utils.jsonRead(
-								Constants.commandsFile, SetCommand[].class);
+						Command[] defines = Utils.jsonRead(
+								Constants.commandsFile, Command[].class);
 						if (schedFile.enabled && schedFile.lines != null) {
 							for (String line : schedFile.lines) {
-								List<SetCommand> commands = ScheduleFile
+								List<Command> commands = ScheduleFile
 										.parseLine(line, date, defines);
 								if (commands != null) {
-									for (SetCommand cmd : commands) {
+									for (Command cmd : commands) {
 										exec(cmd);
 										sleep(2000);
 									}
@@ -59,22 +60,29 @@ public class Scheduler extends Thread {
 		}
 	}
 
-	private static void exec(SetCommand cmd) throws Exception {
-		ControllerDescr d = Controllers.get(cmd.controller);
-		if (d == null)
-			return;
+	private static void exec(Command cmd) throws Exception {
+		Register register = Registers.getRegister(cmd.register);
 
-		ControllersServiceImpl.controller.setReg(d.addr, cmd.register,
+		ControllerDescr d = Controllers.get(register.controller);
+		// if (d == null)
+		// return;
+
+		ControllersServiceImpl.controller.setReg(d.addr, register.register,
 				cmd.value);
 	}
 
 	public static void exec(String cmd) throws Exception {
-		SetCommand[] defines = Utils.jsonRead(Constants.commandsFile,
-				SetCommand[].class);
+		Command[] defines = Utils.jsonRead(Constants.commandsFile,
+				Command[].class);
 
-		for (SetCommand c : defines) {
-			if (c != null && cmd.equals(c.name))
-				exec(c);
+		try {
+			for (Command c : defines) {
+				if (c != null && cmd.equals(c.name))
+					exec(c);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
 		}
 	}
 }

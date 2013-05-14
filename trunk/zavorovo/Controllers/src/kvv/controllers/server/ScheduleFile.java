@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 import kvv.controllers.server.utils.Constants;
-import kvv.controllers.shared.SetCommand;
+import kvv.controllers.shared.Command;
 
 
 
@@ -76,8 +76,8 @@ public class ScheduleFile {
 	private static DateFormat tf = DateFormat.getTimeInstance(DateFormat.SHORT);
 
 	@SuppressWarnings("deprecation")
-	public static synchronized List<SetCommand> parseLine(String line,
-			Date date, SetCommand[] defines) {
+	public static synchronized List<Command> parseLine(String line,
+			Date date, Command[] defines) {
 		if (line.trim().startsWith("#") || line.trim().length() == 0)
 			return Collections.emptyList();
 
@@ -115,10 +115,10 @@ public class ScheduleFile {
 
 		String[] cmds = commands.trim().split("\\s+", -1);
 
-		List<SetCommand> res = new ArrayList<SetCommand>();
+		List<Command> res = new ArrayList<Command>();
 
 		l: for (int i = 0; i < cmds.length; i++) {
-			for (SetCommand c : defines) {
+			for (Command c : defines) {
 				if (c != null && cmds[i].equals(c.name)) {
 					res.add(c);
 					continue l;

@@ -15,7 +15,7 @@ import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ObjectDescr;
-import kvv.controllers.shared.SetCommand;
+import kvv.controllers.shared.Command;
 import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
 import kvv.evlang.Token;
@@ -48,11 +48,11 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public String[] getCommands() throws Exception {
-		SetCommand[] defines = Utils.jsonRead(Constants.commandsFile,
-				SetCommand[].class);
+		Command[] defines = Utils.jsonRead(Constants.commandsFile,
+				Command[].class);
 		List<String> res = new ArrayList<String>();
 
-		for (SetCommand setCommand : defines) {
+		for (Command setCommand : defines) {
 			if (setCommand != null && setCommand.name == null)
 				res.add(null);
 			else
