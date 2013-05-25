@@ -9,14 +9,6 @@
     <url-pattern>/test</url-pattern>
   </servlet-mapping>
   <servlet>
-    <servlet-name>controllerServletBase</servlet-name>
-    <servlet-class>kvv.controllers.controller.ControllerServlet</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>controllerServletBase</servlet-name>
-    <url-pattern>/controller</url-pattern>
-  </servlet-mapping>
-  <servlet>
     <servlet-name>BusServlet</servlet-name>
     <servlet-class>kvv.controllers.controller.BusServlet</servlet-class>
   </servlet>

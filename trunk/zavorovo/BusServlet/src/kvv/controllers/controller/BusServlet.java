@@ -22,13 +22,13 @@ public class BusServlet extends HttpServlet {
 		String sbody = req.getParameter("body");
 		String[] body1 = sbody.split(",");
 		byte[] body = new byte[body1.length];
-		for (int i = 0; i < body1.length; i++) {
+		for (int i = 0; i < body1.length; i++)
 			body[i] = (byte) Integer.parseInt(body1[i]);
-		}
 
 		byte[] res;
 		try {
-			res = PacketTransceiver.getInstance().sendPacket(body, waitResponse);
+			res = PacketTransceiver.getInstance()
+					.sendPacket(body, waitResponse);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new IOException(e);
