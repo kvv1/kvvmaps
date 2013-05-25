@@ -85,31 +85,6 @@ public class Controller implements IController { // 9164642959 7378866
 	public void close() {
 	}
 
-	public static byte[] send1(String url, int addr, byte[] bytes)
-			throws IOException {
-		String url1 = url + "/controller?addr=" + addr + "&body=";
-		String sep = "";
-		for (byte b : bytes) {
-			url1 += sep + ((int) b & 255);
-			sep = ",";
-		}
-
-		HttpURLConnection conn = null;
-		conn = (HttpURLConnection) new URL(url1).openConnection();
-		conn.setRequestMethod("GET");
-		conn.connect();
-
-		String resp = new BufferedReader(new InputStreamReader(
-				conn.getInputStream())).readLine();
-
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		for (String s : resp.split(",")) {
-			int a = Integer.parseInt(s.trim());
-			outputStream.write(a);
-		}
-		return outputStream.toByteArray();
-	}
-
 	public static byte[] send(String url, int addr, byte[] bytes)
 			throws IOException {
 		byte[] packet = new byte[1 + 1 + bytes.length + 1];
@@ -130,10 +105,6 @@ public class Controller implements IController { // 9164642959 7378866
 				&& packet1[packet1.length - 1] == FletchSum.fletchSum(packet1,
 						0, packet1.length - 1)) {
 			return Arrays.copyOfRange(packet1, 2, packet1.length - 1);
-//			
-//			byte[] resp = new byte[packet1.length - 3];
-//			System.arraycopy(packet1, 2, resp, 0, resp.length);
-//			return resp;
 		} else {
 			String msg = "wrong response from addr: " + addr;
 			msg += ", cmd: ";
@@ -148,8 +119,7 @@ public class Controller implements IController { // 9164642959 7378866
 
 	public static byte[] sendBus(String url, byte[] bytes, boolean response)
 			throws IOException {
-		String url1 = url + "?" + (response ? "response=true&" : "")
-				+ "body=";
+		String url1 = url + "?" + (response ? "response=true&" : "") + "body=";
 		String sep = "";
 		for (byte b : bytes) {
 			url1 += sep + ((int) b & 255);

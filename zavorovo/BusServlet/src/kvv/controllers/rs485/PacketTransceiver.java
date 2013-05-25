@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import kvv.controllers.protocol.zavorovo.ZavorovoProtocol;
-
 public class PacketTransceiver {
 	private final static int BAUD = 9600;
 
