@@ -98,7 +98,7 @@ public class RouterThread extends Thread {
 									+ routerLocalIP + ":3389", outstr, instr);
 				}
 
-				Thread.sleep(routerCheckTime * 1000);
+				Thread.sleep(routerCheckTime);
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
