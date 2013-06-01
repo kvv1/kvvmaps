@@ -77,7 +77,7 @@ public interface EG1Constants {
   /** RegularExpression Id. */
   int CHECKBOX = 39;
   /** RegularExpression Id. */
-  int EDIT = 40;
+  int TEXT = 40;
   /** RegularExpression Id. */
   int ID = 41;
   /** RegularExpression Id. */
@@ -132,7 +132,7 @@ public interface EG1Constants {
     "\"func\"",
     "\"muldiv\"",
     "\"checkbox\"",
-    "\"edit\"",
+    "\"text\"",
     "<ID>",
     "<STRING>",
     "<NUMBER>",

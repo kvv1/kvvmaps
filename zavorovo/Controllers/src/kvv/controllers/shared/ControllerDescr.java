@@ -8,6 +8,7 @@ public class ControllerDescr implements Serializable {
 	public enum Type {
 		TYPE1,
 		TYPE2,
+		MU110_8
 	}
 
 	public ControllerDescr() {
@@ -16,4 +17,5 @@ public class ControllerDescr implements Serializable {
 	public String name;
 	public int addr;
 	public Type type;
+	public boolean ui;
 }

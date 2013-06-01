@@ -15,7 +15,7 @@ import java.util.Set;
 
 import kvv.controllers.register.Register;
 import kvv.controllers.register.RegisterDescr;
-import kvv.controllers.utils.FletchSum;
+import kvv.controllers.register.RegisterUI;
 import kvv.evlang.ParseException;
 import kvv.evlang.rt.RTContext;
 import kvv.evlang.rt.VM;
@@ -36,7 +36,8 @@ public class Context {
 		registers.put("REG_RELAY5", new RegisterDescr(Register.REG_RELAY5));
 		registers.put("REG_RELAY6", new RegisterDescr(Register.REG_RELAY6));
 		registers.put("REG_RELAY7", new RegisterDescr(Register.REG_RELAY7));
-		registers.put("REG_TEMPERATURE", new RegisterDescr(Register.REG_TEMP, true, false));
+		registers.put("REG_TEMPERATURE", new RegisterDescr(Register.REG_TEMP,
+				true, false));
 
 		// registers.put("REG_EEPROM0", Register.REG_EEPROM0);
 		// registers.put("REG_EEPROM1", Register.REG_EEPROM1);
@@ -47,14 +48,22 @@ public class Context {
 		// registers.put("REG_EEPROM6", Register.REG_EEPROM6);
 		// registers.put("REG_EEPROM7", Register.REG_EEPROM7);
 
-		registers.put("REG_IN0", new RegisterDescr(Register.REG_IN0, true, false));
-		registers.put("REG_IN1", new RegisterDescr(Register.REG_IN1, true, false));
-		registers.put("REG_IN2", new RegisterDescr(Register.REG_IN2, true, false));
-		registers.put("REG_IN3", new RegisterDescr(Register.REG_IN3, true, false));
-		registers.put("REG_IN4", new RegisterDescr(Register.REG_IN4, true, false));
-		registers.put("REG_IN5", new RegisterDescr(Register.REG_IN5, true, false));
-		registers.put("REG_IN6", new RegisterDescr(Register.REG_IN6, true, false));
-		registers.put("REG_IN7", new RegisterDescr(Register.REG_IN7, true, false));
+		registers.put("REG_IN0", new RegisterDescr(Register.REG_IN0, true,
+				false));
+		registers.put("REG_IN1", new RegisterDescr(Register.REG_IN1, true,
+				false));
+		registers.put("REG_IN2", new RegisterDescr(Register.REG_IN2, true,
+				false));
+		registers.put("REG_IN3", new RegisterDescr(Register.REG_IN3, true,
+				false));
+		registers.put("REG_IN4", new RegisterDescr(Register.REG_IN4, true,
+				false));
+		registers.put("REG_IN5", new RegisterDescr(Register.REG_IN5, true,
+				false));
+		registers.put("REG_IN6", new RegisterDescr(Register.REG_IN6, true,
+				false));
+		registers.put("REG_IN7", new RegisterDescr(Register.REG_IN7, true,
+				false));
 
 		registers.put("REG_INPULLUP0",
 				new RegisterDescr(Register.REG_INPULLUP0));
@@ -335,9 +344,22 @@ public class Context {
 		System.out.println("maxstack = " + maxStack);
 	}
 
+	public static byte[] dumpNull() throws IOException {
+		return new byte[0];
+	}
+
 	public byte[] dump() throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);
+
+		RegisterUI[] regs = getRegisterDescriptions();
+		dos.writeByte(regs.length);
+		for (RegisterUI reg : regs) {
+			dos.writeByte(reg.reg);
+			dos.writeByte(reg.type.ordinal());
+			dos.writeByte(reg.text.length());
+			dos.writeBytes(reg.text);
+		}
 
 		dos.writeByte(events.size());
 		for (Event e : events) {
@@ -360,14 +382,7 @@ public class Context {
 			dos.write(b);
 
 		dos.close();
-
-		ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
-		baos1.write(baos.size() >>> 8);
-		baos1.write(baos.size());
-		baos1.write(baos.toByteArray());
-		baos1.write(FletchSum.fletchSum(baos1.toByteArray(), 0, baos1.size()));
-
-		return baos1.toByteArray();
+		return baos.toByteArray();
 	}
 
 	public void run() {
@@ -388,6 +403,14 @@ public class Context {
 
 		new VM(context);
 
+	}
+
+	public RegisterUI[] getRegisterDescriptions() {
+		List<RegisterUI> regs = new ArrayList<RegisterUI>();
+		for (RegisterDescr rd : registers.values())
+			if (rd.text != null)
+				regs.add(new RegisterUI(rd.reg, rd.type, rd.text));
+		return regs.toArray(new RegisterUI[0]);
 	}
 
 }

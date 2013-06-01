@@ -2,10 +2,10 @@ package kvv.controllers.client.control;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
+import kvv.controllers.register.AllRegs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -28,25 +28,28 @@ public class ControlComposite extends Composite {
 		children.add(child);
 	}
 
-	public void refresh(Map<Integer, Integer> result) {
+	public void removeChildren() {
+		children.clear();
+	}
+	
+	public void refresh(AllRegs result) {
 		for (ControlComposite controlComposite : children)
 			controlComposite.refresh(result);
 	}
 
 	public void refresh() {
 		refresh(null);
-		controllersService.getRegs(addr,
-				new AsyncCallback<Map<Integer, Integer>>() {
+		controllersService.getRegs(addr, new AsyncCallback<AllRegs>() {
 
-					@Override
-					public void onSuccess(Map<Integer, Integer> result) {
-						refresh(result);
-					}
+			@Override
+			public void onSuccess(AllRegs result) {
+				refresh(result);
+			}
 
-					@Override
-					public void onFailure(Throwable caught) {
-					}
-				});
+			@Override
+			public void onFailure(Throwable caught) {
+			}
+		});
 	}
 
 }

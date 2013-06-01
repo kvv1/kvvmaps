@@ -3,12 +3,12 @@ package kvv.controllers.utils;
 public class CRC16 {
 	private final static short CRC16_INIT = -1;
 
-	public static short crc16(byte[] buf) {
+	public static short crc16(byte[] buf, int offset, int len) {
 		short crc_val = CRC16_INIT;
 
-		for (byte b : buf) {
+		for (int i = 0; i < len; i++) {
+			byte b = buf[i];
 			crc_val ^= b & 0xFF;
-
 			int j = 8;
 			while (j-- > 0) {
 				boolean carry = (crc_val & 0x0001) != 0;

@@ -6,8 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import kvv.controllers.controller.Controller;
 import kvv.controllers.register.RegType;
@@ -133,8 +131,8 @@ public class EG extends Context {
 		}
 	}
 
-	protected void newRegister(Token regName, Token regNum, Token uiName,
-			Token uiType, boolean forceEE) throws ParseException {
+	protected void newRegister(Token regName, Token regNum, boolean forceEE)
+			throws ParseException {
 		checkName(regName.image);
 		RegisterDescr registerDescr;
 		if (regNum == null) {
@@ -147,19 +145,20 @@ public class EG extends Context {
 			if (registerDescr == null)
 				throw new ParseException(regNum.image + " - ?");
 		}
-		if (uiName != null)
-			registerDescr = new RegisterDescr(registerDescr, regName.image,
-					uiName.image.replace("\"", ""),
-					RegType.valueOf(uiType.image));
 		registers.put(regName.image, registerDescr);
 	}
 
-	public RegisterDescr[] getRegisterDescription() {
-		List<RegisterDescr> regs = new ArrayList<RegisterDescr>();
-		for (RegisterDescr rd : registers.values())
-			if (rd.text != null)
-				regs.add(rd);
-		return regs.toArray(new RegisterDescr[0]);
+	protected void setUI(String regName, String uiName, RegType uiType)
+			throws ParseException {
+		RegisterDescr registerDescr = registers.get(regName);
+		if (registerDescr == null)
+			throw new ParseException(regName + " - ?");
+		registerDescr.text = uiName;
+
+		if (uiType == RegType.textRW && !registerDescr.editable)
+			uiType = RegType.textRO;
+
+		registerDescr.type = uiType;
 	}
 
 }

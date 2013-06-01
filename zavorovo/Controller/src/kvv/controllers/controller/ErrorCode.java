@@ -5,7 +5,4 @@ public enum ErrorCode {
 	ERR_UNKNOWN_CMD, // 1
 	ERR_INVALID_PORT_NUM, // 2
 	ERR_WRONG_CMD_FORMAT, // 3
-	__UNUSED__, // 4
-	ERR_CODESIZE, // 5
-	ERR_TOO_LONG_PACKET, //6
 }

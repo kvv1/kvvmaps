@@ -5,12 +5,12 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class SourceDescr implements Serializable {
 	public String filename;
-	public RegisterDescr[] registers;
+	public RegisterUI[] registers;
 
 	public SourceDescr() {
 	}
 
-	public SourceDescr(String filename, RegisterDescr[] registers) {
+	public SourceDescr(String filename, RegisterUI[] registers) {
 		this.filename = filename;
 		this.registers = registers;
 	}

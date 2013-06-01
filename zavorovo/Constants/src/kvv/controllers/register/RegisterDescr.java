@@ -1,18 +1,13 @@
 package kvv.controllers.register;
 
-import java.io.Serializable;
 
-@SuppressWarnings("serial")
-public class RegisterDescr implements Serializable {
+public class RegisterDescr{
 	public int reg;
 	public String name;
 	public String text;
 	public boolean readonly;
 	public boolean editable;
 	public RegType type;
-
-	public RegisterDescr() {
-	}
 
 	public RegisterDescr(int reg) {
 		this.reg = reg;

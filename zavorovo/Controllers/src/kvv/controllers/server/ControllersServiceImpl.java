@@ -4,21 +4,26 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.controller.IController;
+import kvv.controllers.register.AllRegs;
+import kvv.controllers.register.Register;
+import kvv.controllers.register.RegisterUI;
 import kvv.controllers.register.SourceDescr;
 import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
-import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.ObjectDescr;
 import kvv.controllers.shared.Command;
+import kvv.controllers.shared.ControllerDescr;
+import kvv.controllers.shared.ControllerDescr.Type;
+import kvv.controllers.shared.ObjectDescr;
 import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
 import kvv.evlang.Token;
+import kvv.evlang.impl.Context;
 import kvv.evlang.impl.ELReader;
 
 import com.google.gson.Gson;
@@ -37,6 +42,9 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws Exception {
+		ControllerDescr controllerDescr = Controllers.get(addr);
+		if (controllerDescr.type == Type.MU110_8)
+			val = val == 0 ? 0 : 1000;
 		controller.setReg(addr, reg, val);
 	}
 
@@ -79,8 +87,21 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public Map<Integer, Integer> getRegs(int addr) throws Exception {
-		return controller.getRegs(addr);
+	public AllRegs getRegs(int addr) throws Exception {
+		ControllerDescr controllerDescr = Controllers.get(addr);
+		if (controllerDescr.type == Type.MU110_8) {
+			HashMap<Integer, Integer> res = new HashMap<Integer, Integer>();
+			int[] vals = controller.getRegs(addr, 0, 8);
+			for (int i = 0; i < 8; i++)
+				res.put(i, vals[i]);
+			return new AllRegs(new ArrayList<RegisterUI>(), res);
+		} else {
+			AllRegs allRegs = controller.getAllRegs(addr);
+			int relays = allRegs.values.get(Register.REG_RELAYS);
+			for (int i = 0; i < Register.REG_RELAY_CNT; i++)
+				allRegs.values.put(Register.REG_RELAY0 + i, (relays >> i) & 1);
+			return allRegs;
+		}
 	}
 
 	@Override
@@ -88,7 +109,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		EG1 parser = null;
 		try {
 			if (fileName == null) {
-				controller.upload(addr, 0, new byte[] { 0, 0, 0 });
+				controller.upload(addr, Context.dumpNull());
 				storeSourceDescr(addr, null);
 			} else {
 				parser = new EG1(new ELReader(new FileReader(Constants.ROOT
@@ -99,7 +120,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 				controller.upload(addr, bytes);
 
 				SourceDescr sourceDescr = new SourceDescr(fileName,
-						parser.getRegisterDescription());
+						parser.getRegisterDescriptions());
 
 				String gson = new Gson().toJson(sourceDescr);
 				System.out.println(gson);

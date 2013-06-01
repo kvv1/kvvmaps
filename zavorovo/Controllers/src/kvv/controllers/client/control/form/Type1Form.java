@@ -35,7 +35,7 @@ public class Type1Form extends ControlComposite {
 		addrLabel.setWidth("70px");
 		panel.add(addrLabel);
 
-		RelayCheckBoxes relays = new RelayCheckBoxes(addr);
+		RelayCheckBoxes relays = new RelayCheckBoxes(addr, Register.REG_RELAY0, Register.REG_RELAY_CNT);
 		add(relays);
 		panel.add(relays);
 

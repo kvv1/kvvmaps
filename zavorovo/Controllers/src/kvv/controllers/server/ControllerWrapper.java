@@ -1,10 +1,10 @@
 package kvv.controllers.server;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.logging.Level;
 
 import kvv.controllers.controller.IController;
+import kvv.controllers.register.AllRegs;
 import kvv.controllers.server.utils.MyLogger;
 
 public class ControllerWrapper implements IController {
@@ -36,9 +36,9 @@ public class ControllerWrapper implements IController {
 	}
 
 	@Override
-	public Map<Integer, Integer> getRegs(int addr) throws Exception {
+	public AllRegs getAllRegs(int addr) throws Exception {
 		try {
-			return controller.getRegs(addr);
+			return controller.getAllRegs(addr);
 		} catch (IOException e) {
 			MyLogger.getLogger().log(Level.WARNING, e.getMessage());
 			throw e;
@@ -51,9 +51,9 @@ public class ControllerWrapper implements IController {
 	}
 
 	@Override
-	public void upload(int addr, int start, byte[] data) throws IOException {
+	public void upload(int addr, byte[] data) throws IOException {
 		try {
-			controller.upload(addr, start, data);
+			controller.upload(addr, data);
 		} catch (IOException e) {
 			MyLogger.getLogger().log(Level.WARNING, e.getMessage());
 			throw e;
@@ -61,9 +61,9 @@ public class ControllerWrapper implements IController {
 	}
 
 	@Override
-	public void upload(int addr, byte[] data) throws IOException {
+	public int[] getRegs(int addr, int reg, int n) throws Exception {
 		try {
-			controller.upload(addr, data);
+			return controller.getRegs(addr, reg, n);
 		} catch (IOException e) {
 			MyLogger.getLogger().log(Level.WARNING, e.getMessage());
 			throw e;

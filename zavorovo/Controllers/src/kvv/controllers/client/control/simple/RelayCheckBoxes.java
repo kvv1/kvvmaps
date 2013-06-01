@@ -8,16 +8,16 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 
 public class RelayCheckBoxes extends ControlComposite {
 
-	public RelayCheckBoxes(final int addr) {
+	public RelayCheckBoxes(final int addr, int reg0, int n) {
 		super(addr);
 
 		HorizontalPanel panel = new HorizontalPanel();
 		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		// panel.setSpacing(10);
 
-		for (int i = 0; i < Register.REG_RELAY_CNT; i++) {
+		for (int i = 0; i < n; i++) {
 			SimpleRelayControl checkBox = new SimpleRelayControl(addr,
-					Register.REG_RELAY0 + i, null);
+					reg0 + i, null);
 			add(checkBox);
 			panel.add(checkBox);
 		}

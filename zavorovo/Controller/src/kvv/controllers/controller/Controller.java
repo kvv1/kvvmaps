@@ -6,11 +6,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 
-import kvv.controllers.utils.FletchSum;
+import kvv.controllers.register.AllRegs;
+import kvv.controllers.register.RegType;
+import kvv.controllers.register.RegisterUI;
+import kvv.controllers.utils.ADU;
+import kvv.controllers.utils.CRC16;
+import kvv.controllers.utils.RTU;
 
 public class Controller implements IController { // 9164642959 7378866
 
@@ -22,43 +27,67 @@ public class Controller implements IController { // 9164642959 7378866
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
-		byte[] resp = send(url, addr,
-				new byte[] { (byte) Command.CMD_SETREG.ordinal(), (byte) reg,
-						(byte) (val >> 8), (byte) val });
-		checkErr(resp);
+		byte[] req = new byte[] { (byte) Command.CMD_MODBUS_SETREGS,
+				(byte) (reg >> 8), (byte) reg, 0, 1, 2, (byte) (val >> 8),
+				(byte) val };
+		byte[] resp = send(url, addr, req);
+
+		if (addr == 0)
+			return;
+
+		checkErr(Command.CMD_MODBUS_SETREGS, resp);
 	}
 
 	@Override
 	public int getReg(int addr, int reg) throws IOException {
-		byte[] resp = send(url, addr,
-				new byte[] { (byte) Command.CMD_GETREG.ordinal(), (byte) reg });
-		checkErr(resp);
+		byte[] req = new byte[] { (byte) Command.CMD_MODBUS_GETREGS,
+				(byte) (reg >> 8), (byte) reg, 0, 1 };
+		byte[] resp = send(url, addr, req);
 		return resp[1] * 256 + (resp[2] & 0xFF);
 	}
 
 	@Override
-	public Map<Integer, Integer> getRegs(int addr) throws IOException {
+	public int[] getRegs(int addr, int reg, int n) throws Exception {
+		byte[] req = new byte[] { (byte) Command.CMD_MODBUS_GETREGS,
+				(byte) (reg >> 8), (byte) reg, 0, (byte) n };
+		byte[] resp = send(url, addr, req);
+		checkErr(Command.CMD_MODBUS_GETREGS, resp);
+
+		int[] res = new int[n];
+		for (int i = 0; i < resp[1] / 2; i++) {
+			res[i] = resp[i * 2 + 2] * 256 + (resp[i * 2 + 3] & 0xFF);
+		}
+		return res;
+	}
+
+	@Override
+	public AllRegs getAllRegs(int addr) throws IOException {
 		byte[] resp = send(url, addr,
-				new byte[] { (byte) Command.CMD_GETREGS.ordinal() });
-		checkErr(resp);
-		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
-		for (int i = 1; i < resp.length - 2; i += 3) {
+				new byte[] { (byte) Command.CMD_GETALLREGS });
+		checkErr(Command.CMD_GETALLREGS, resp);
+
+		ArrayList<RegisterUI> ui = new ArrayList<RegisterUI>();
+
+		int i = 1;
+		int nUI = resp[i++];
+		while (nUI-- > 0) {
+			int reg = resp[i++] & 0xFF;
+			RegType type = RegType.values()[resp[i++]];
+			int nameLen = resp[i++] & 0xFF;
+			StringBuilder sb = new StringBuilder();
+			while (nameLen-- > 0)
+				sb.append((char) resp[i++]);
+			ui.add(new RegisterUI(reg, type, sb.toString()));
+		}
+
+		HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
+		for (; i < resp.length - 2; i += 3) {
 			int reg = resp[i];
 			int val = resp[i + 1] * 256 + (resp[i + 2] & 0xFF);
 			map.put(reg, val);
 		}
-		return map;
-	}
 
-	@Override
-	public void upload(int addr, int start, byte[] data) throws IOException {
-		ByteArrayOutputStream req = new ByteArrayOutputStream();
-		req.write((byte) Command.CMD_UPLOAD.ordinal());
-		req.write((byte) (start >> 8));
-		req.write((byte) start);
-		req.write(data);
-		byte[] resp = send(url, addr, req.toByteArray());
-		checkErr(resp);
+		return new AllRegs(ui, map);
 	}
 
 	@Override
@@ -69,10 +98,35 @@ public class Controller implements IController { // 9164642959 7378866
 			upload(addr, start, Arrays.copyOfRange(data, start, start + len));
 			start += len;
 		}
+
+		ByteArrayOutputStream req = new ByteArrayOutputStream();
+		req.write((byte) Command.CMD_UPLOAD_END);
+
+		req.write((byte) (data.length >> 8));
+		req.write((byte) data.length);
+
+		short crc = CRC16.crc16(data, 0, data.length);
+		req.write((byte) (crc >> 8));
+		req.write((byte) crc);
+
+		byte[] resp = send(url, addr, req.toByteArray());
+		checkErr(Command.CMD_UPLOAD_END, resp);
 	}
 
-	private static void checkErr(byte[] resp) throws IOException {
-		ErrorCode code = ErrorCode.values()[resp[0]];
+	private void upload(int addr, int start, byte[] data) throws IOException {
+		ByteArrayOutputStream req = new ByteArrayOutputStream();
+		req.write((byte) Command.CMD_UPLOAD);
+		req.write((byte) (start >> 8));
+		req.write((byte) start);
+		req.write(data);
+		byte[] resp = send(url, addr, req.toByteArray());
+		checkErr(Command.CMD_UPLOAD, resp);
+	}
+
+	private static void checkErr(int cmd, byte[] resp) throws IOException {
+		if (resp[0] == cmd)
+			return;
+		ErrorCode code = ErrorCode.values()[resp[1]];
 		switch (code) {
 		case ERR_OK:
 			return;
@@ -85,36 +139,33 @@ public class Controller implements IController { // 9164642959 7378866
 	public void close() {
 	}
 
+	// public static RTU send(String url, int addr, RTU rtu)
+	// throws IOException {
+	//
+	// ADU
+	//
+	// }
+
 	public static byte[] send(String url, int addr, byte[] bytes)
 			throws IOException {
-		byte[] packet = new byte[1 + 1 + bytes.length + 1];
-		packet[0] = (byte) packet.length;
-		packet[1] = (byte) addr;
-		System.arraycopy(bytes, 0, packet, 2, bytes.length);
-		packet[packet.length - 1] = FletchSum.fletchSum(packet, 0,
-				packet.length - 1);
 
-		byte[] packet1 = sendBus(url, packet, addr != 0);
-
+		ADU adu = new ADU(addr, new RTU(bytes));
+		byte[] packetReceived = sendBus(url, adu.toBytes(), addr != 0);
 		if (addr == 0)
 			return null;
+		ADU resp = ADU.fromBytes(packetReceived);
+		if (resp != null && resp.addr == addr)
+			return resp.rtu.toBytes();
 
-		if (packet1.length > 2
-				&& (packet1[0] & 255) == packet1.length
-				&& packet1[1] == (byte) (addr | 0x80)
-				&& packet1[packet1.length - 1] == FletchSum.fletchSum(packet1,
-						0, packet1.length - 1)) {
-			return Arrays.copyOfRange(packet1, 2, packet1.length - 1);
-		} else {
-			String msg = "wrong response from addr: " + addr;
-			msg += ", cmd: ";
-			for (byte b : bytes)
-				msg += Integer.toHexString((int) b & 0xFF) + " ";
-			msg += ", response: ";
-			for (byte b : packet1)
-				msg += Integer.toHexString((int) b & 0xFF) + " ";
-			throw new IOException(msg);
-		}
+		// error
+		String msg = "wrong response from addr: " + addr;
+		msg += ", cmd: ";
+		for (byte b : bytes)
+			msg += Integer.toHexString((int) b & 0xFF) + " ";
+		msg += ", response: ";
+		for (byte b : packetReceived)
+			msg += Integer.toHexString((int) b & 0xFF) + " ";
+		throw new IOException(msg);
 	}
 
 	public static byte[] sendBus(String url, byte[] bytes, boolean response)
@@ -142,4 +193,5 @@ public class Controller implements IController { // 9164642959 7378866
 		return outputStream.toByteArray();
 
 	}
+
 }

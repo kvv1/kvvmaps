@@ -1,7 +1,5 @@
 package kvv.controllers.client.control.vm;
 
-import java.util.Map;
-
 import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
@@ -11,6 +9,7 @@ import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.control.simple.GetRegControl;
 import kvv.controllers.client.control.simple.GetSetRegControl;
 import kvv.controllers.client.control.simple.SimpleRelayControl;
+import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.Register;
 import kvv.controllers.register.SourceDescr;
 
@@ -122,7 +121,8 @@ public class VMControl extends ControlComposite {
 		initWidget(p);
 	}
 
-	public void refresh(Map<Integer, Integer> result) {
+	@Override
+	public void refresh(AllRegs result) {
 		super.refresh(result);
 
 		files.setEnabled(false);

@@ -15,9 +15,9 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 
-public class Type2Form extends ControlComposite {
+public class MU110_8Form extends ControlComposite {
 
-	public Type2Form(int addr, String name) {
+	public MU110_8Form(int addr, String name) {
 
 		super(addr);
 
@@ -35,18 +35,9 @@ public class Type2Form extends ControlComposite {
 
 		panel.add(addrLabel);
 
-		RelayCheckBoxes relays = new RelayCheckBoxes(addr, Register.REG_RELAY0, Register.REG_RELAY_CNT);
+		RelayCheckBoxes relays = new RelayCheckBoxes(addr, 0, 8);
 		add(relays);
 		panel.add(relays);
-
-		GetRegControl tempVal = new GetRegControl(addr, Register.REG_TEMP,
-				true, "T=");
-		add(tempVal);
-		panel.add(tempVal);
-
-		VMControl vmControl = new VMControl(addr, name);
-		add(vmControl);
-		panel.add(vmControl);
 
 		Button refreshButton = new Button("Обновить");
 		panel.add(refreshButton);

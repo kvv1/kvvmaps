@@ -29,6 +29,8 @@ public class EG1 extends EG implements EG1Constants {
     case MAIN:
     case PROC:
     case FUNC:
+    case CHECKBOX:
+    case TEXT:
       line();
       file();
       break;
@@ -47,6 +49,10 @@ public class EG1 extends EG implements EG1Constants {
     case REG:
     case EEREG:
       register();
+      break;
+    case CHECKBOX:
+    case TEXT:
+      uiDecl();
       break;
     case TIMER:
       timer();
@@ -172,16 +178,27 @@ public class EG1 extends EG implements EG1Constants {
     constants.put(name.image, Integer.parseInt(value.image));
   }
 
-  final public Token uitype() throws ParseException {
+  final public void uiDecl() throws ParseException {
+  Token name;
+  Token text;
+  RegType type;
+    type = uitype();
+    name = jj_consume_token(ID);
+    text = jj_consume_token(STRING);
+    jj_consume_token(48);
+    setUI(name.image, text.image, type);
+  }
+
+  final public RegType uitype() throws ParseException {
   Token t;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case CHECKBOX:
       t = jj_consume_token(CHECKBOX);
-    {if (true) return t;}
+    {if (true) return RegType.checkbox;}
       break;
-    case EDIT:
-      t = jj_consume_token(EDIT);
-    {if (true) return t;}
+    case TEXT:
+      t = jj_consume_token(TEXT);
+    {if (true) return RegType.textRW;}
       break;
     default:
       jj_la1[5] = jj_gen;
@@ -194,8 +211,6 @@ public class EG1 extends EG implements EG1Constants {
   final public void register() throws ParseException {
   Token regName;
   Token regNum = null;
-  Token uiName = null;
-  Token uiType = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case REG:
       jj_consume_token(REG);
@@ -203,53 +218,24 @@ public class EG1 extends EG implements EG1Constants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case 45:
         jj_consume_token(45);
-        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case ID:
-          regNum = jj_consume_token(ID);
-          switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-          case 49:
-            jj_consume_token(49);
-            uiName = jj_consume_token(STRING);
-            jj_consume_token(49);
-            uiType = uitype();
-            break;
-          default:
-            jj_la1[6] = jj_gen;
-            ;
-          }
-          break;
-        case STRING:
-          uiName = jj_consume_token(STRING);
-          jj_consume_token(49);
-          uiType = uitype();
-          break;
-        default:
-          jj_la1[7] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
-        }
+        regNum = jj_consume_token(ID);
         jj_consume_token(46);
         break;
       default:
-        jj_la1[8] = jj_gen;
+        jj_la1[6] = jj_gen;
         ;
       }
       jj_consume_token(48);
-    newRegister(regName, regNum, uiName, uiType, false);
+    newRegister(regName, regNum, false);
       break;
     case EEREG:
       jj_consume_token(EEREG);
       regName = jj_consume_token(ID);
-      jj_consume_token(45);
-      uiName = jj_consume_token(STRING);
-      jj_consume_token(49);
-      uiType = uitype();
-      jj_consume_token(46);
       jj_consume_token(48);
-    newRegister(regName, null, uiName, uiType, true);
+    newRegister(regName, null, true);
       break;
     default:
-      jj_la1[9] = jj_gen;
+      jj_la1[7] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -309,7 +295,7 @@ public class EG1 extends EG implements EG1Constants {
         ;
         break;
       default:
-        jj_la1[10] = jj_gen;
+        jj_la1[8] = jj_gen;
         break label_2;
       }
       temp = stmt();
@@ -344,7 +330,7 @@ public class EG1 extends EG implements EG1Constants {
     {if (true) return res;}
       break;
     default:
-      jj_la1[11] = jj_gen;
+      jj_la1[9] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -441,7 +427,7 @@ public class EG1 extends EG implements EG1Constants {
         {if (true) return res;}
         break;
       default:
-        jj_la1[12] = jj_gen;
+        jj_la1[10] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -480,7 +466,7 @@ public class EG1 extends EG implements EG1Constants {
         argList = argList();
         break;
       default:
-        jj_la1[13] = jj_gen;
+        jj_la1[11] = jj_gen;
         ;
       }
       jj_consume_token(46);
@@ -493,7 +479,7 @@ public class EG1 extends EG implements EG1Constants {
       {if (true) return res;}
       break;
     default:
-      jj_la1[14] = jj_gen;
+      jj_la1[12] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -511,7 +497,7 @@ public class EG1 extends EG implements EG1Constants {
         ;
         break;
       default:
-        jj_la1[15] = jj_gen;
+        jj_la1[13] = jj_gen;
         break label_3;
       }
       jj_consume_token(OR);
@@ -534,7 +520,7 @@ public class EG1 extends EG implements EG1Constants {
         ;
         break;
       default:
-        jj_la1[16] = jj_gen;
+        jj_la1[14] = jj_gen;
         break label_4;
       }
       jj_consume_token(AND);
@@ -562,7 +548,7 @@ public class EG1 extends EG implements EG1Constants {
         ;
         break;
       default:
-        jj_la1[17] = jj_gen;
+        jj_la1[15] = jj_gen;
         break label_5;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -603,7 +589,7 @@ public class EG1 extends EG implements EG1Constants {
         res.add(BC.GE);
         break;
       default:
-        jj_la1[18] = jj_gen;
+        jj_la1[16] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -624,7 +610,7 @@ public class EG1 extends EG implements EG1Constants {
         ;
         break;
       default:
-        jj_la1[19] = jj_gen;
+        jj_la1[17] = jj_gen;
         break label_6;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -641,7 +627,7 @@ public class EG1 extends EG implements EG1Constants {
         res.add(BC.SUB);
         break;
       default:
-        jj_la1[20] = jj_gen;
+        jj_la1[18] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -662,7 +648,7 @@ public class EG1 extends EG implements EG1Constants {
         ;
         break;
       default:
-        jj_la1[21] = jj_gen;
+        jj_la1[19] = jj_gen;
         break label_7;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -679,7 +665,7 @@ public class EG1 extends EG implements EG1Constants {
         res.add(BC.DIV);
         break;
       default:
-        jj_la1[22] = jj_gen;
+        jj_la1[20] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -711,7 +697,7 @@ public class EG1 extends EG implements EG1Constants {
     {if (true) return res;}
       break;
     default:
-      jj_la1[23] = jj_gen;
+      jj_la1[21] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -730,7 +716,7 @@ public class EG1 extends EG implements EG1Constants {
         ;
         break;
       default:
-        jj_la1[24] = jj_gen;
+        jj_la1[22] = jj_gen;
         break label_8;
       }
       jj_consume_token(49);
@@ -769,14 +755,14 @@ public class EG1 extends EG implements EG1Constants {
           argList = argList();
           break;
         default:
-          jj_la1[25] = jj_gen;
+          jj_la1[23] = jj_gen;
           ;
         }
         jj_consume_token(46);
       call = true;
         break;
       default:
-        jj_la1[26] = jj_gen;
+        jj_la1[24] = jj_gen;
         ;
       }
     if (call)
@@ -836,7 +822,7 @@ public class EG1 extends EG implements EG1Constants {
     {if (true) return res;}
       break;
     default:
-      jj_la1[27] = jj_gen;
+      jj_la1[25] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -918,7 +904,7 @@ public class EG1 extends EG implements EG1Constants {
   private Token jj_scanpos, jj_lastpos;
   private int jj_la;
   private int jj_gen;
-  final private int[] jj_la1 = new int[28];
+  final private int[] jj_la1 = new int[26];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -926,10 +912,10 @@ public class EG1 extends EG implements EG1Constants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x7e00001,0x7e00000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x600000,0x8000000,0x8000000,0xe0000000,0x28000,0x0,0x100,0x80,0x7e00,0x7e00,0x30000,0x30000,0xc0000,0xc0000,0x28000,0x0,0x28000,0x0,0x0,};
+      jj_la1_0 = new int[] {0x7e00001,0x7e00000,0x0,0x0,0x0,0x0,0x0,0x600000,0x8000000,0x8000000,0xe0000000,0x28000,0x0,0x100,0x80,0x7e00,0x7e00,0x30000,0x30000,0xc0000,0xc0000,0x28000,0x0,0x28000,0x0,0x0,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x31,0x31,0x200,0x200,0x20000,0x180,0x20000,0x600,0x2000,0x0,0x40202,0x40202,0x0,0x2a40,0x10a00c,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2a40,0x20000,0x2a40,0x2000,0x2a40,};
+      jj_la1_1 = new int[] {0x1b1,0x1b1,0x200,0x200,0x20000,0x180,0x2000,0x0,0x40202,0x40202,0x0,0x2a40,0x10a00c,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2a40,0x20000,0x2a40,0x2000,0x2a40,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[1];
   private boolean jj_rescan = false;
@@ -946,7 +932,7 @@ public class EG1 extends EG implements EG1Constants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -961,7 +947,7 @@ public class EG1 extends EG implements EG1Constants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -972,7 +958,7 @@ public class EG1 extends EG implements EG1Constants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -983,7 +969,7 @@ public class EG1 extends EG implements EG1Constants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -993,7 +979,7 @@ public class EG1 extends EG implements EG1Constants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1003,7 +989,7 @@ public class EG1 extends EG implements EG1Constants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1120,7 +1106,7 @@ public class EG1 extends EG implements EG1Constants {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 28; i++) {
+    for (int i = 0; i < 26; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
