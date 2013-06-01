@@ -7,7 +7,6 @@
 #include <stdint.h>
 #include <avr/io.h>
 #include <util/delay.h>
-
 EEMEM uint8_t code[VMCODE_SIZE];
 
 ee_8(vmonoff);
@@ -24,6 +23,15 @@ void startVM(int8_t start) {
 		for (i = REG_RAM0; i < REG_RAM0 + REG_RAM_CNT; i++)
 			setReg(i, 0);
 	}
+
+	if (start && !checkCode()) {
+		if(getCodeLen() == 0)
+			vmSetStatus(VMSTATUS_STOPPED);
+		else
+			vmSetStatus(VMSTATUS_WRONG_CHECKSUM);
+		return;
+	}
+
 	vmStart(start);
 }
 
@@ -36,7 +44,7 @@ int8_t vmSetReg(uint8_t reg, int16_t val) {
 }
 
 uint8_t vmReadByte(uint16_t addr) {
-	return EEPROM_read((uint16_t)code + addr);
+	return EEPROM_read((uint16_t) code + addr);
 }
 
 void vmPrintInt(int16_t n) {

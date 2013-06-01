@@ -57,57 +57,66 @@
  usartListener = l;
  }
  */
-void handleRxCmd(char* cmd);
+void handleRxCmd(char* cmd, unsigned char len);
 
-#define RXBUFSIZE 64
+#define RXBUFSIZE 40
 #define TX_BUFFER_SIZE 32
 
-ISR (USART_RXC_vect) {
-	static char rxBuf1[RXBUFSIZE];
-	static char rxBuf2[RXBUFSIZE];
+static char rxBuf1[RXBUFSIZE];
+static char rxBuf2[RXBUFSIZE];
 
-	static unsigned char rxIdx;
-	static char* buf = rxBuf1;
-	static char* oldBuf = rxBuf2;
-
-	char status = UCSRA;
-	char data = UDR;
+static unsigned char rxIdx;
+static char* buf = rxBuf1;
+static char* oldBuf = rxBuf2;
 
 #ifdef BINARY_DATA
 
-	static long lastTime;
+static char receiveTimer;
 
-	if ((status & (FRAMING_ERROR | PARITY_ERROR | DATA_OVERRUN)) == 0) {
-		long time = getTimeMillisCli();
-		if (time - lastTime > 2)
-			rxIdx = 0;
-		lastTime = time;
-
-		buf[rxIdx] = data;
-		if (rxIdx < RXBUFSIZE - 1)
-			rxIdx++;
-
-		if (rxIdx == buf[0]) {
+void iomillisCli() {
+	if (receiveTimer != 0) {
+		receiveTimer--;
+		if (receiveTimer == 0) {
 			char* temp = buf;
+			unsigned char len = rxIdx;
 			buf = oldBuf;
 			oldBuf = temp;
 			rxIdx = 0;
 			NONATOMIC_BLOCK(NONATOMIC_FORCEOFF) {
-				handleRxCmd(oldBuf);
+				handleRxCmd(oldBuf, len);
 			}
 		}
+	}
+}
+
+#else
+void iomillisCli() {
+}
+#endif
+
+ISR (USART_RXC_vect) {
+	char status = UCSRA;
+	char data = UDR;
+
+#ifdef BINARY_DATA
+	if ((status & (FRAMING_ERROR | PARITY_ERROR | DATA_OVERRUN)) == 0) {
+		buf[rxIdx] = data;
+		if (rxIdx < RXBUFSIZE - 1)
+			rxIdx++;
+		receiveTimer = 3;
 	}
 #else
 	if ((status & (FRAMING_ERROR | PARITY_ERROR | DATA_OVERRUN)) == 0) {
 		if (data < ' ') {
 			if (rxIdx > 0) {
 				char* temp = buf;
+				unsigned char len = rxIdx;
 				buf = oldBuf;
 				oldBuf = temp;
 				oldBuf[rxIdx] = '\0';
 				rxIdx = 0;
 				NONATOMIC_BLOCK(NONATOMIC_FORCEOFF) {
-					handleRxCmd(oldBuf);
+					handleRxCmd(oldBuf, len);
 				}
 			}
 		} else {

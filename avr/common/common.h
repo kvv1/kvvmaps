@@ -25,8 +25,14 @@
 
 void foo();
 
-void addFletchSum(uint8_t c, uint8_t* S);
-unsigned char fletchSum(uint8_t *buf, uint8_t len);
+//void addFletchSum(uint8_t c, uint8_t* S);
+//unsigned char fletchSum(uint8_t *buf, uint8_t len);
+
+#define CRC16_INIT 0xffff
+uint16_t crc16_step(uint8_t c, uint16_t crc_val);
+uint16_t crc16(uint8_t * buf, int nbytes);
+
+
 
 void createObjects();
 

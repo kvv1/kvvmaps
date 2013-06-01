@@ -19,11 +19,11 @@ void vmPrintInt(int16_t n);
 
 void vmStart(int8_t b);
 void vmStep(int ms);
-int vmCheckCode(); // returns codefile length
+//int vmCheckCode(); // returns codefile length
 
 int8_t vmGetStatus();
 
-void setState(int8_t s);
+void vmSetStatus(int8_t s);
 int16_t _getReg(uint8_t reg);
 void _setReg(uint8_t reg, int16_t val);
 int16_t vmPop();
@@ -32,5 +32,7 @@ void vmPush(int16_t v);
 extern int16_t stack[STACK_SIZE];
 extern int16_t* stackPtr;
 
+int getUIStart();
+int getUIEnd();
 
 #endif /* INTERPRETER_H_ */

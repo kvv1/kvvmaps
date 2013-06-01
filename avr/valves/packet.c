@@ -1,56 +1,48 @@
 #include "common.h"
 #include "packet.h"
 
-static char addr;
+static char targetAddr;
 
 void packetReceived(char* data, uint8_t len);
 
-void handleRxCmd(char* data) {
-	if (data[1] == 0 || data[1] == MY_ADDR) {
-		char len = data[0];
-		addr = data[1];
-		if (fletchSum((unsigned char*) data, len - 1) == data[len - 1]) {
+void handleRxCmd(char* data, unsigned char len) {
+	if (len < 3)
+		return;
+	if (data[0] == 0 || data[0] == MY_ADDR) {
+		uint16_t sum = crc16(data, len - 2);
+		if (data[len - 2] == (char) sum && data[len - 1] == (char) (sum >> 8)) {
+			targetAddr = data[0];
 			ee_magic = MAGIC16;
-			packetReceived(data + 2, len - 3);
+			packetReceived(data + 1, len - 3);
 		}
 	}
 }
 
-void sendByte(uint8_t b, uint8_t* S) {
-	uart_putchar(b);
-	addFletchSum(b, S);
+uint16_t sendByte(uint8_t b, uint16_t S) {
+	if (targetAddr != 0)
+		uart_putchar(b);
+	return crc16_step(b, S);
 }
 
-void sendPacketStart(uint16_t len, uint8_t* S) {
-	*S = 0;
-	if(len <= 252) {
-		sendByte(len + 3, S);
-	} else {
-		len += 5;
-		sendByte(0, S);
-		sendByte(len >> 8, S);
-		sendByte(len, S);
-	}
-	uart_putchar(addr | 0x80);
-	addFletchSum(addr | 0x80, S);
+uint16_t sendPacketStart() {
+	return sendByte(targetAddr, CRC16_INIT);
 }
 
-void sendPacketBodyPart(uint8_t* data, uint16_t len, uint8_t* S) {
-	while (len--) {
-		sendByte(*data, S);
-		data++;
-	}
+uint16_t sendPacketBodyPart(uint8_t* data, uint16_t len, uint16_t S) {
+	while (len--)
+		S = sendByte(*(data++), S);
+	return S;
 }
 
-void sendPacketEnd(uint8_t* S) {
-	sendByte(*S, S);
+void sendPacketEnd(uint16_t S) {
+	sendByte(S, S);
+	sendByte(S >> 8, S);
 }
 
-
-void sendPacket(char* data, uint16_t len) {
-	uint8_t S = 0;
-	sendPacketStart(len, &S);
-	sendPacketBodyPart(data, len, &S);
-	sendPacketEnd(&S);
+void sendPacket(uint8_t* data, uint16_t len) {
+	uint16_t S = CRC16_INIT;
+	S = sendPacketStart(S);
+	S = sendPacketBodyPart(data, len, S);
+	sendPacketEnd(S);
 }
 

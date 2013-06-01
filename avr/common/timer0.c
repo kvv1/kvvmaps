@@ -146,6 +146,7 @@ ISR(TIMER0_OVF_vect) {
 	TCNT0 = 255 - MODULO;
 
 	time += TIMER_PERIOD;
+	iomillisCli();
 
 	if (!(--n)) {
 		n = TIME_UNIT / TIMER_PERIOD;

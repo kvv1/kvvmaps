@@ -14,6 +14,9 @@ ee_8(TempOn);
 ee_16(PrefTemp);
 ee_16(PrefTemp2);
 
+ee_16(CodeLen);
+ee_16(CodeCRC);
+
 static PORTPIN ports[] PROGMEM = { OUT0, OUT1, OUT2, OUT3, OUT0, OUT1, OUT2,
 		OUT3 };
 static PORTPIN pins[] PROGMEM = { IN0, IN1, IN0, IN1, IN0, IN1, IN0, IN1 };
@@ -30,6 +33,11 @@ void initCommands() {
 	while (n--)
 		confPin(PORT(n), PIN_OUT, 0);
 
+	if (getCodeLen() == 0xFFFF) {
+		setCodeLen(0);
+		setCodeCRC(CRC16_INIT);
+	}
+
 	if (getTempOn() == 255)
 		setTempOn(0);
 
@@ -40,21 +48,23 @@ void initCommands() {
 		setPrefTemp2(400);
 }
 
-void sendOk() {
-	char n = ERR_OK;
-	sendPacket(&n, 1);
+int checkCode() {
+	uint16_t S = CRC16_INIT;
+	uint16_t len = getCodeLen();
+	for (int i = 0; i < len; i++)
+		S = crc16_step(vmReadByte(i), S);
+	return S == getCodeCRC();
 }
 
-void sendOkWord(int n) {
-	char buf[3];
-	buf[0] = ERR_OK;
-	buf[1] = n >> 8;
-	buf[2] = n;
-	sendPacket(buf, 3);
+static void sendOk(uint8_t cmd) {
+	sendPacket(&cmd, 1);
 }
 
-void sendError(char err) {
-	sendPacket(&err, 1);
+static void sendError(uint8_t cmd, uint8_t err) {
+	uint16_t S = sendPacketStart();
+	S = sendByte(cmd | 0x80, S);
+	S = sendByte(err, S); // unsupported function
+	sendPacketEnd(S);
 }
 
 static int getRelays() {
@@ -119,15 +129,6 @@ char getReg(int reg, int* val) {
 	return 1;
 }
 
-//static char appendReg(char**p, char reg) {
-//	int val;
-//	char res = getReg(reg, &val);
-//	*((*p)++) = reg;
-//	*((*p)++) = val >> 8;
-//	*((*p)++) = val;
-//	return res;
-//}
-
 char setReg(int reg, int val) {
 	if (reg >= REG_RELAY0 && reg < REG_RELAY0 + REG_RELAY_CNT) {
 		setPort(PORT(reg - REG_RELAY0), val);
@@ -163,47 +164,58 @@ static uint8_t regs[] PROGMEM = { REG_RELAYS, REG_INPUTS, REG_TEMP_PREF,
 
 void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 //	print2("handleCmd %d %d ", *cmd, cmdlen);
-	switch (cmd[0]) {
-	case CMD_SETREG: {
-		int reg = cmd[1];
-		int val = ((int) cmd[2] << 8) + cmd[3];
-		if (cmdlen != 4) {
-			sendError(ERR_WRONG_CMD_FORMAT);
-		} else if (setReg(reg, val)) {
-			sendOk();
+	uint8_t command = cmd[0];
+	switch (command) {
+	case CMD_MODBUS_SETREGS: {
+		int reg = (cmd[1] << 8) + cmd[2];
+		int n = cmd[4];
+		uint8_t* data = cmd + 6;
+		char res = 1;
+		while (n--) {
+			res &= setReg(reg++, (data[0] << 8) | data[1]);
+			data += 2;
+		}
+		uint16_t S = sendPacketStart();
+		if (res) {
+			S = sendPacketBodyPart(cmd, 5, S);
 		} else {
-			sendError(ERR_INVALID_PORT_NUM);
+			static uint8_t resp[] = { CMD_MODBUS_SETREGS | 0x80, 2 };
+			S = sendPacketBodyPart(resp, 2, S);
 		}
+		sendPacketEnd(S);
 		break;
 	}
-	case CMD_GETREG: {
-		int val;
-		char reg = cmd[1];
-		if (cmdlen != 2) {
-			sendError(ERR_WRONG_CMD_FORMAT);
-		} else if (getReg(reg, &val))
-			sendOkWord(val);
-		else
-			sendError(ERR_INVALID_PORT_NUM);
+	case CMD_MODBUS_GETREGS: {
+		int reg = (cmd[1] << 8) + cmd[2];
+		int n = cmd[4];
+		uint16_t S = sendPacketStart();
+		S = sendByte(command, S);
+		S = sendByte(n * 2, S);
+		while (n--) {
+			int val;
+			getReg(reg++, &val);
+			S = sendByte(val >> 8, S);
+			S = sendByte(val, S);
+		}
+		sendPacketEnd(S);
 		break;
 	}
-	case CMD_GETREGS: {
+	case CMD_GETALLREGS: {
 		if (cmdlen != 1) {
-			sendError(ERR_WRONG_CMD_FORMAT);
+			sendError(command, ERR_WRONG_CMD_FORMAT);
 			return;
 		}
 
-		uint8_t S = 0;
-		int len = 1 + 3 * sizeof(regs) / sizeof(regs[0]);
+		uint16_t S = sendPacketStart();
+		S = sendByte(command, S);
 
-		if (len > 250) {
-			sendError(ERR_TOO_LONG_PACKET);
-			return;
+		if (getCodeLen() == 0)
+			S = sendByte(0, S);
+		else {
+			int uiEnd = getUIEnd();
+			for (int i = getUIStart(); i < uiEnd; i++)
+				S = sendByte(vmReadByte(i), S);
 		}
-
-		sendPacketStart(len, &S);
-		uint8_t errcode = ERR_OK;
-		sendPacketBodyPart(&errcode, 1, &S);
 
 		for (int i = 0; i < sizeof(regs) / sizeof(regs[0]); i++) {
 			uint8_t reg = pgm_read_byte(regs + i);
@@ -213,56 +225,63 @@ void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 			buf[0] = reg;
 			buf[1] = val >> 8;
 			buf[2] = val;
-			sendPacketBodyPart(buf, 3, &S);
+			S = sendPacketBodyPart(buf, 3, S);
 		}
 
-		sendPacketEnd(&S);
+		sendPacketEnd(S);
 		break;
 	}
 	case CMD_UPLOAD: {
 		uint16_t addr;
 		int len = cmdlen - 3;
 		if (len < 0) {
-			sendError(ERR_WRONG_CMD_FORMAT);
+			sendError(command, ERR_WRONG_CMD_FORMAT);
 			return;
 		}
 		addr = (cmd[1] << 8) + cmd[2];
 
 		if (addr + len > VMCODE_SIZE) {
-			sendError(ERR_CODESIZE);
+			sendError(command, ERR_WRONG_CMD_FORMAT);
 			return;
 		}
 
+		setvmonoff(0);
 		startVM(0);
 		EEPROM_writeBlock((int) code + addr, len, cmd + 3);
-		sendOk();
+		sendOk(command);
 		break;
 	}
-	case CMD_DOWNLOAD: {
-		if (cmdlen != 1) {
-			sendError(ERR_WRONG_CMD_FORMAT);
+	case CMD_UPLOAD_END: {
+		uint16_t codeLen = (cmd[1] << 8) + cmd[2];
+		uint16_t codeCRC = (cmd[3] << 8) + cmd[4];
+		if (codeLen == 0) {
+			setCodeLen(codeLen);
+			sendOk(command);
 			return;
 		}
 
-		uint8_t S = 0;
-		int len = 1 + vmCheckCode();
-		sendPacketStart(len, &S);
-		uint8_t errcode = ERR_OK;
-		sendPacketBodyPart(&errcode, 1, &S);
-
-		len--;
-
-		for (int i = 0; i < len; i++) {
-			uint8_t b = vmReadByte(i);
-			sendPacketBodyPart(&b, 1, &S);
+		if (codeLen > VMCODE_SIZE) {
+			setCodeLen(0);
+			sendError(command, ERR_WRONG_CMD_FORMAT);
+			return;
 		}
 
-		sendPacketEnd(&S);
+		setCodeLen(codeLen);
+		setCodeCRC(codeCRC);
+
+		if (!checkCode()) {
+			setCodeLen(0);
+			sendError(command, ERR_WRONG_CMD_FORMAT);
+			return;
+		}
+
+		sendOk(command);
 		break;
 	}
-	default:
-		sendError(ERR_UNKNOWN_CMD);
+	default: {
+		sendError(command, ERR_UNKNOWN_CMD);
 		break;
+	}
 	}
 }
 
