@@ -20,8 +20,10 @@ void startVM(int8_t start);
 int8_t vmGetStatus();
 void vmStep(int ms);
 
-int vmCheckCode(); // returns codefile length
 uint8_t vmReadByte(uint16_t addr);
+
+int getUIStart();
+int getUIEnd();
 
 ee_8_decl(vmonoff);
 

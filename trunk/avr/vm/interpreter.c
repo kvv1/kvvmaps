@@ -81,13 +81,24 @@ static uint16_t vmGetFuncCode(uint8_t func) {
 	return getUint16(funcs + func * 2);
 }
 
-static void vmInit() {
-	if (!vmCheckCode()) {
-		setState(VMSTATUS_WRONG_CHECKSUM);
-		return;
-	}
+int getUIStart() {
+	return 0;
+}
 
-	uint16_t ptr = 2;
+int getUIEnd() {
+	uint16_t ptr = 0;
+	int nUI = vmReadByte(ptr);
+	ptr++;
+	while (nUI--) {
+		ptr++; // reg
+		ptr++; // type
+		ptr += vmReadByte(ptr) + 1; // text
+	}
+	return ptr;
+}
+
+static void vmInit() {
+	uint16_t ptr = getUIEnd();
 	nevents = vmReadByte(ptr);
 	ptr++;
 	events = ptr;
@@ -110,7 +121,7 @@ static void vmInit() {
 	memset(vmTimerCnts, 0, sizeof(vmTimerCnts));
 	memset(vmEventStates, 0, sizeof(vmEventStates));
 
-	setState(VMSTATUS_RUNNING);
+	vmSetStatus(VMSTATUS_RUNNING);
 	vmExec(vmGetFuncCode(0) + codeOffset);
 }
 
@@ -353,40 +364,17 @@ static void vmExec(uint16_t ip) {
 			break;
 		}
 		default:
-			setState(VMSTATUS_INVALID_BYTECODE);
+			vmSetStatus(VMSTATUS_INVALID_BYTECODE);
 			break;
 		}
 	}
-}
-
-static void addFletchSum(uint8_t c, uint8_t* S) {
-	*S += c;
-	if (*S < c)
-		(*S)++;
-}
-
-int vmCheckCode() {
-	uint16_t len = getUint16(0) + 2;
-	uint8_t S = 0;
-	int i;
-
-	if (len == 0 || len >= 512)
-		return 0;
-
-	for (i = 0; i < len; i++)
-		addFletchSum(vmReadByte(i), &S);
-
-	if (S != vmReadByte(len))
-		return 0;
-
-	return len + 1;
 }
 
 void vmStart(int8_t b) {
 	if (b) {
 		vmInit();
 	} else {
-		setState(VMSTATUS_STOPPED);
+		vmSetStatus(VMSTATUS_STOPPED);
 	}
 }
 

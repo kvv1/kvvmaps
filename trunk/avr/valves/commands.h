@@ -1,18 +1,16 @@
 #include "ee.h"
 
-#define ERR_OK 0
+//#define ERR_OK 0
 #define ERR_UNKNOWN_CMD 1
 #define ERR_INVALID_PORT_NUM 2
 #define ERR_WRONG_CMD_FORMAT 3
-//#define ERR_NO_RESPONSE 4
-#define ERR_CODESIZE 5
-#define ERR_TOO_LONG_PACKET 6
 
-#define CMD_SETREG 1 // cmd reg valHi valLo -> ERR_OK
-#define CMD_GETREG 2 // cmd reg -> ERR_OK valHi valLo
-#define CMD_GETREGS 3 // cmd -> ERR_OK (reg valHi valLo)*
-#define CMD_UPLOAD 4 // cmd addrHi addrLo (byte)*
-#define CMD_DOWNLOAD 5
+#define CMD_MODBUS_GETREGS 3
+#define CMD_MODBUS_SETREGS 16
+#define CMD_GETALLREGS 103 // cmd -> ERR_OK (reg valHi valLo)*
+#define CMD_UPLOAD 104 // cmd addrHi addrLo (byte)*
+#define CMD_UPLOAD_END 105
+#define CMD_GETUI 106 //
 
 #define REG_RELAY0 0
 #define REG_RELAY1 1
@@ -83,6 +81,8 @@
 
 char getReg(int reg, int* val);
 char setReg(int reg, int val);
+
+int checkCode();
 
 #define TEMPERATURE_INVALID (-9999)
 int getTemperature10();

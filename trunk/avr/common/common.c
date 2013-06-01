@@ -7,7 +7,7 @@
 #include "ee.h"
 
 #include <avr/sleep.h>
-
+/*
 void addFletchSum(uint8_t c, uint8_t* S) {
 	*S += c;
 	if (*S < c)
@@ -25,9 +25,7 @@ unsigned char fletchSum(uint8_t *buf, uint8_t len) {
 	//if(S = 255) S = 0;
 	return S;
 }
-
-#define CRC16_INIT 0xffff
-
+*/
 uint16_t crc16_step(uint8_t c, uint16_t crc_val) {
 	crc_val ^= (uint16_t) c;
 

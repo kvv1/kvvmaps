@@ -3,7 +3,7 @@
 
 static int8_t state;
 
-void setState(int8_t s) {
+void vmSetStatus(int8_t s) {
 	state = s;
 }
 
@@ -15,14 +15,14 @@ int16_t _getReg(uint8_t reg) {
 	int16_t val;
 	char res = vmGetReg(reg, &val);
 	if (!res)
-		setState(VMSTATUS_INVALID_REGISTER);
+		vmSetStatus(VMSTATUS_INVALID_REGISTER);
 	return val;
 }
 
 void _setReg(uint8_t reg, int16_t val) {
 	char res = vmSetReg(reg, val);
 	if (!res)
-		setState(VMSTATUS_INVALID_REGISTER);
+		vmSetStatus(VMSTATUS_INVALID_REGISTER);
 }
 
 int16_t stack[STACK_SIZE];
@@ -31,7 +31,7 @@ int16_t* stackPtr = stack + STACK_SIZE;
 
 int16_t vmPop() {
 	if (stackPtr == stack + STACK_SIZE) {
-		setState(VMSTATUS_STACK_UNDERFLOW);
+		vmSetStatus(VMSTATUS_STACK_UNDERFLOW);
 		return 0;
 	}
 	return *stackPtr++;
@@ -39,7 +39,7 @@ int16_t vmPop() {
 
 void vmPush(int16_t v) {
 	if (stackPtr == stack) {
-		setState(VMSTATUS_STACK_OVERFLOW);
+		vmSetStatus(VMSTATUS_STACK_OVERFLOW);
 		return;
 	}
 	*(--stackPtr) = v;
