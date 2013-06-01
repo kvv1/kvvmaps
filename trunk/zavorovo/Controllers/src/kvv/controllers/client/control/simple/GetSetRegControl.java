@@ -1,11 +1,10 @@
 package kvv.controllers.client.control.simple;
 
-import java.util.Map;
-
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.page.ModePage;
+import kvv.controllers.register.AllRegs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -80,14 +79,15 @@ public class GetSetRegControl extends ControlComposite {
 		initWidget(panel);
 	}
 
-	public void refresh(Map<Integer, Integer> regs) {
+	@Override
+	public void refresh(AllRegs regs) {
 		edit.setEnabled(false);
 		edit.setText("???");
 
 		if (regs == null)
 			return;
 
-		Integer _val = regs.get(reg);
+		Integer _val = regs.values.get(reg);
 
 		if (_val == null)
 			return;

@@ -1,7 +1,6 @@
 package kvv.controllers.client;
 
-import java.util.Map;
-
+import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ObjectDescr;
 
@@ -14,7 +13,7 @@ public interface ControllersService extends RemoteService {
 
 	void setReg(int addr, int reg, int val) throws Exception;
 	
-	Map<Integer, Integer> getRegs(int addr) throws Exception;
+	AllRegs getRegs(int addr) throws Exception;
 
 	ControllerDescr[] getControllers() throws Exception;
 

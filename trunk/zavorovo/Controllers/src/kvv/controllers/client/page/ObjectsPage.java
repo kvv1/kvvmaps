@@ -1,6 +1,5 @@
 package kvv.controllers.client.page;
 
-import java.util.Map;
 import java.util.Set;
 
 import kvv.controllers.client.CallbackAdapter;
@@ -9,6 +8,7 @@ import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.control.form.HothouseForm;
 import kvv.controllers.client.control.form.RelayForm;
+import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.ObjectDescr;
 
 import com.google.gwt.core.client.GWT;
@@ -88,18 +88,17 @@ public class ObjectsPage extends Composite {
 			for (ControlComposite c : set)
 				c.refresh(null);
 
-			controllersService.getRegs(addr,
-					new AsyncCallback<Map<Integer, Integer>>() {
-						@Override
-						public void onFailure(Throwable caught) {
-						}
+			controllersService.getRegs(addr, new AsyncCallback<AllRegs>() {
+				@Override
+				public void onFailure(Throwable caught) {
+				}
 
-						@Override
-						public void onSuccess(Map<Integer, Integer> result) {
-							for (ControlComposite c : set)
-								c.refresh(result);
-						}
-					});
+				@Override
+				public void onSuccess(AllRegs result) {
+					for (ControlComposite c : set)
+						c.refresh(result);
+				}
+			});
 		}
 	}
 }

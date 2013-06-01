@@ -1,8 +1,7 @@
 package kvv.controllers.client.control.simple;
 
-import java.util.Map;
-
 import kvv.controllers.client.control.ControlComposite;
+import kvv.controllers.register.AllRegs;
 
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -36,13 +35,14 @@ public class GetRegControl extends ControlComposite {
 		initWidget(panel);
 	}
 
-	public void refresh(Map<Integer, Integer> regs) {
+	@Override
+	public void refresh(AllRegs regs) {
 		edit.setText("???");
 
 		if (regs == null)
 			return;
 
-		Integer _val = regs.get(reg);
+		Integer _val = regs.values.get(reg);
 
 		if (_val == null)
 			return;

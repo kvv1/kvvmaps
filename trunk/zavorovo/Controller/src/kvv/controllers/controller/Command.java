@@ -1,10 +1,11 @@
 package kvv.controllers.controller;
 
-public enum Command {
-	CMD_NOCMD, // 0
-	CMD_SETREG, // 1
-	CMD_GETREG, // 2
-	CMD_GETREGS, // 3
-	CMD_UPLOAD, // 4
-	CMD_DOWNLOAD, // 5
+public class Command {
+	public static final int CMD_MODBUS_SETREGS = 16;
+	public static final int CMD_MODBUS_GETREGS = 3;
+	
+	public static final int CMD_GETALLREGS = 103;
+	public static final int CMD_UPLOAD = 104;
+	public static final int CMD_UPLOAD_END = 105;
+	public static final int CMD_GETUI = 106;
 }

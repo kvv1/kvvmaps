@@ -1,7 +1,6 @@
 package kvv.controllers.client;
 
-import java.util.Map;
-
+import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ObjectDescr;
 
@@ -21,7 +20,7 @@ public interface ControllersServiceAsync {
 
 	void getObjects(AsyncCallback<ObjectDescr[]> callback);
 
-	void getRegs(int addr, AsyncCallback<Map<Integer, Integer>> callback);
+	void getRegs(int addr, AsyncCallback<AllRegs> callback);
 
 	void upload(int addr, String name, AsyncCallback<String> callback);
 

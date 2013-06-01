@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import kvv.controllers.register.AllRegs;
 import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
 
@@ -30,10 +31,10 @@ public class LogThread extends Thread {
 				for (ControllerDescr c : controllers) {
 					if (c != null) {
 						Thread.sleep(10000);
-						Map<Integer, Integer> map = ControllersServiceImpl.controller
-								.getRegs(c.addr);
+						AllRegs allRegs = ControllersServiceImpl.controller
+								.getAllRegs(c.addr);
 						List<Integer> regs = new ArrayList<Integer>(
-								map.keySet());
+								allRegs.values.keySet());
 						Collections.sort(regs);
 						// System.out.print("addr:" + c.addr + " ");
 						// for(Integer reg : regs)

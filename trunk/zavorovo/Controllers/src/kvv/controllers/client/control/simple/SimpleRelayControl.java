@@ -1,12 +1,10 @@
 package kvv.controllers.client.control.simple;
 
-import java.util.Map;
-
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.page.ModePage;
-import kvv.controllers.register.Register;
+import kvv.controllers.register.AllRegs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -20,7 +18,6 @@ public class SimpleRelayControl extends ControlComposite {
 	private final CheckBox cb;
 
 	private final int regForRefresh;
-	private final int bit;
 	private final ControllersServiceAsync controllersService = GWT
 			.create(ControllersService.class);
 
@@ -28,15 +25,7 @@ public class SimpleRelayControl extends ControlComposite {
 		super(addr);
 
 		cb = new CheckBox(label);
-
-		if (reg >= Register.REG_RELAY0
-				&& reg < Register.REG_RELAY0 + Register.REG_RELAY_CNT) {
-			regForRefresh = Register.REG_RELAYS;
-			bit = reg - Register.REG_RELAY0;
-		} else {
-			regForRefresh = reg;
-			bit = 0;
-		}
+		regForRefresh = reg;
 
 		cb.addClickHandler(new ClickHandler() {
 			@Override
@@ -68,12 +57,13 @@ public class SimpleRelayControl extends ControlComposite {
 		initWidget(cb);
 	}
 
-	public void refresh(Map<Integer, Integer> result) {
+	@Override
+	public void refresh(AllRegs result) {
 		if (result == null) {
 			cb.setEnabled(false);
 		} else {
 			cb.setEnabled(true);
-			cb.setValue(((result.get(regForRefresh) >> bit) & 1) != 0);
+			cb.setValue(result.values.get(regForRefresh) != 0);
 		}
 	}
 }

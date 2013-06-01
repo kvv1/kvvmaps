@@ -33,7 +33,7 @@ public class HothouseForm extends ControlComposite {
 				Register.REG_TEMP_PREF_2, true, "T мах = ");
 		add(maxTempWidget);
 
-		RelayCheckBoxes relays = new RelayCheckBoxes(addr);
+		RelayCheckBoxes relays = new RelayCheckBoxes(addr, Register.REG_RELAY0, Register.REG_RELAY_CNT);
 		add(relays);
 
 		VerticalPanel panel = new VerticalPanel();

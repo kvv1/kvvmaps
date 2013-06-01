@@ -7,6 +7,7 @@ import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
+import kvv.controllers.client.control.form.MU110_8Form;
 import kvv.controllers.client.control.form.Type1Form;
 import kvv.controllers.client.control.form.Type2Form;
 import kvv.controllers.shared.ControllerDescr;
@@ -56,6 +57,13 @@ public class ControllersPage extends Composite {
 								}
 								case TYPE2: {
 									ControlComposite control = new Type2Form(
+											descr.addr, descr.name);
+									objects.add(control);
+									vertPanel.add(control);
+									break;
+								}
+								case MU110_8: {
+									ControlComposite control = new MU110_8Form(
 											descr.addr, descr.name);
 									objects.add(control);
 									vertPanel.add(control);
