@@ -35,6 +35,13 @@ class Form extends ControlComposite {
 	}
 
 	public void refreshUI(AllRegs result) {
+		removeChildren();
+		panel.clear(); 
+		panel.add(new Label(name + "(" + addr + ")"));
+
+		if(result == null)
+			return;
+		
 		Grid grid = new Grid(result.ui.size(), 2);
 		panel.add(grid);
 
@@ -85,9 +92,7 @@ class Form extends ControlComposite {
 	}
 
 	public void refreshUI() {
-		removeChildren();
-		panel.clear(); 
-		panel.add(new Label(name + "(" + addr + ")"));
+		refreshUI(null);
 
 		controllersService.getRegs(addr, new AsyncCallback<AllRegs>() {
 

@@ -84,6 +84,8 @@ public class Context {
 
 	}
 
+	protected List<RegisterUI> registerUIs = new ArrayList<RegisterUI>();
+	
 	protected void checkROReg(RegisterDescr descr) throws ParseException {
 		if (descr.readonly)
 			throw new ParseException("register is read only");
@@ -406,11 +408,7 @@ public class Context {
 	}
 
 	public RegisterUI[] getRegisterDescriptions() {
-		List<RegisterUI> regs = new ArrayList<RegisterUI>();
-		for (RegisterDescr rd : registers.values())
-			if (rd.text != null)
-				regs.add(new RegisterUI(rd.reg, rd.type, rd.text));
-		return regs.toArray(new RegisterUI[0]);
+		return registerUIs.toArray(new RegisterUI[0]);
 	}
 
 }

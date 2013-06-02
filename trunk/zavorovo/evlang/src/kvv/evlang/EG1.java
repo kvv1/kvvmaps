@@ -186,7 +186,7 @@ public class EG1 extends EG implements EG1Constants {
     name = jj_consume_token(ID);
     text = jj_consume_token(STRING);
     jj_consume_token(48);
-    setUI(name.image, text.image, type);
+    setUI(name.image, text.image.replace("\u005c"", ""), type);
   }
 
   final public RegType uitype() throws ParseException {

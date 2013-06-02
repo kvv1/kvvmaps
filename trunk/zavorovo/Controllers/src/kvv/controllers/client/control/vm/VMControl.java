@@ -11,7 +11,6 @@ import kvv.controllers.client.control.simple.GetSetRegControl;
 import kvv.controllers.client.control.simple.SimpleRelayControl;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.Register;
-import kvv.controllers.register.SourceDescr;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -135,14 +134,14 @@ public class VMControl extends ControlComposite {
 					files.addItem("<no source>");
 					for (String name : result)
 						files.addItem(name);
-					sourcesService.getSourceDescr(name,
-							new CallbackAdapter<SourceDescr>() {
+					sourcesService.getSourceFileName(name,
+							new CallbackAdapter<String>() {
 								@Override
-								public void onSuccess(SourceDescr result) {
+								public void onSuccess(String result) {
 									for (int i = 0; i < files.getItemCount(); i++)
 										if (result != null
 												&& files.getItemText(i).equals(
-														result.filename)) {
+														result)) {
 											files.setSelectedIndex(i);
 											break;
 										}

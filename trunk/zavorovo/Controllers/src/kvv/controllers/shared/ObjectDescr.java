@@ -6,9 +6,7 @@ public class ObjectDescr implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public enum Type {
-		HOTHOUSE,
-		RELAY,
-		SEPARATOR,
+		FORM, RELAY,
 	}
 
 	public ObjectDescr() {
@@ -17,6 +15,7 @@ public class ObjectDescr implements Serializable {
 	public String name;
 	public String controller;
 	public int addr;
-	public int register;
+	public String register;
+	public int reg;
 	public Type type;
 }

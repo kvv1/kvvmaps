@@ -1,6 +1,8 @@
 package kvv.controllers.server;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import kvv.controllers.server.utils.Constants;
@@ -11,15 +13,19 @@ public class Controllers {
 	private final static Map<String, ControllerDescr> nameMap = new HashMap<String, ControllerDescr>();
 	private final static Map<Integer, ControllerDescr> addrMap = new HashMap<Integer, ControllerDescr>();
 
+	private final static List<ControllerDescr> controllers = new ArrayList<ControllerDescr>();
+
 	static {
 		try {
-			ControllerDescr[] controllers = Utils.jsonRead(
+			ControllerDescr[] controllers1 = Utils.jsonRead(
 					Constants.controllersFile, ControllerDescr[].class);
 
 			nameMap.clear();
 			addrMap.clear();
-			for (ControllerDescr c : controllers) {
+
+			for (ControllerDescr c : controllers1) {
 				if (c != null) {
+					controllers.add(c);
 					nameMap.put(c.name, c);
 					addrMap.put(c.addr, c);
 				}
@@ -42,5 +48,9 @@ public class Controllers {
 			throw new Exception("Контроллер с адресом " + addr
 					+ " не определен");
 		return d;
+	}
+
+	public static ControllerDescr[] getControllers() {
+		return controllers.toArray(new ControllerDescr[0]);
 	}
 }
