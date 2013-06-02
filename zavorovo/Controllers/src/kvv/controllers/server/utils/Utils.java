@@ -2,11 +2,12 @@ package kvv.controllers.server.utils;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Writer;
 import java.util.Properties;
 
 import com.google.gson.Gson;
@@ -26,7 +27,8 @@ public class Utils {
 	}
 
 	public static String readFile(String file) throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(file));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				new FileInputStream(file), "Windows-1251"));
 		String line = null;
 		StringBuilder stringBuilder = new StringBuilder();
 		while ((line = reader.readLine()) != null) {
@@ -38,7 +40,8 @@ public class Utils {
 	}
 
 	public static void writeFile(String name, String text) throws IOException {
-		FileWriter wr = new FileWriter(name);
+		Writer wr = new OutputStreamWriter(new FileOutputStream(name),
+				"Windows-1251");
 		wr.write(text);
 		wr.close();
 	}

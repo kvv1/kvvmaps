@@ -74,10 +74,11 @@ public class Controller implements IController { // 9164642959 7378866
 			int reg = resp[i++] & 0xFF;
 			RegType type = RegType.values()[resp[i++]];
 			int nameLen = resp[i++] & 0xFF;
-			StringBuilder sb = new StringBuilder();
-			while (nameLen-- > 0)
-				sb.append((char) resp[i++]);
-			ui.add(new RegisterUI(reg, type, sb.toString()));
+
+			byte[] buf = Arrays.copyOfRange(resp, i, i + nameLen);
+			i += nameLen;
+			
+			ui.add(new RegisterUI(reg, type, new String(buf, "Windows-1251")));
 		}
 
 		HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();

@@ -23,7 +23,7 @@ import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
 import kvv.evlang.Token;
 import kvv.evlang.impl.Context;
-import kvv.evlang.impl.ELReader;
+import kvv.evlang.impl.MyReader;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -116,8 +116,10 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 				controller.upload(addr, Context.dumpNull());
 				storeSourceDescr(addr, null);
 			} else {
-				parser = new EG1(new ELReader(new FileReader(Constants.ROOT
-						+ "/src/" + fileName)));
+//				parser = new EG1(new ELReader(new FileReader(Constants.ROOT
+//						+ "/src/" + fileName)));
+				parser = new EG1(new MyReader(Constants.ROOT
+						+ "/src/" + fileName));
 
 				parser.parse();
 				byte[] bytes = parser.dump();
