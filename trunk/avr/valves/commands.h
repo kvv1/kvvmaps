@@ -25,9 +25,6 @@
 #define REG_RELAYS 8
 
 #define REG_TEMP 9
-#define REG_TEMP_PREF 10
-#define REG_TEMP_PREF_ON 11
-#define REG_TEMP_PREF_2 12
 #define REG_VMONOFF 13
 #define REG_VMSTATE 14
 #define REG_INPUTS 15
@@ -88,8 +85,4 @@ int checkCode();
 int getTemperature10();
 
 void initCommands();
-
-ee_8_decl(TempOn);
-ee_16_decl(PrefTemp);
-ee_16_decl(PrefTemp2);
 
