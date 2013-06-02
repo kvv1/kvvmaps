@@ -11,6 +11,7 @@ import kvv.controllers.controller.Controller;
 import kvv.controllers.register.RegType;
 import kvv.controllers.register.Register;
 import kvv.controllers.register.RegisterDescr;
+import kvv.controllers.register.RegisterUI;
 import kvv.controllers.utils.cmdline.BooleanParam;
 import kvv.controllers.utils.cmdline.CmdLine;
 import kvv.controllers.utils.cmdline.StringParam;
@@ -153,12 +154,11 @@ public class EG extends Context {
 		RegisterDescr registerDescr = registers.get(regName);
 		if (registerDescr == null)
 			throw new ParseException(regName + " - ?");
-		registerDescr.text = uiName;
-
+		
 		if (uiType == RegType.textRW && !registerDescr.editable)
 			uiType = RegType.textRO;
 
-		registerDescr.type = uiType;
+		registerUIs.add(new RegisterUI(registerDescr.reg, uiType, uiName));
 	}
 
 }

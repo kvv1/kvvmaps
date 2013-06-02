@@ -6,7 +6,6 @@ import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
-import kvv.controllers.client.control.form.HothouseForm;
 import kvv.controllers.client.control.form.RelayForm;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.ObjectDescr;
@@ -49,26 +48,22 @@ public class ObjectsPage extends Composite {
 				horizPanel.setBorderWidth(1);
 				// horizPanel.setSpacing(5);
 				for (ObjectDescr descr : result) {
-					if (descr != null) {
+					if (descr == null) {
+						vertPanel.add(horizPanel);
+						horizPanel = new HorizontalPanel();
+						horizPanel.setBorderWidth(1);
+					} else {
 						switch (descr.type) {
 						case RELAY:
 							RelayForm relayControl = new RelayForm(descr.addr,
-									descr.register, descr.name);
+									descr.reg, descr.name);
 							horizPanel.add(relayControl);
-
 							objects.put(descr.addr, relayControl);
 							break;
-						case HOTHOUSE:
-							HothouseForm hothouseControl = new HothouseForm(
-									descr.addr, descr.name);
-							horizPanel.add(hothouseControl);
-							objects.put(descr.addr, hothouseControl);
-							break;
-						case SEPARATOR:
-							vertPanel.add(horizPanel);
-							horizPanel = new HorizontalPanel();
-							horizPanel.setBorderWidth(1);
-							// horizPanel.setSpacing(5);
+						case FORM:
+							Form form = new Form(descr.addr, descr.name);
+							horizPanel.add(form);
+							objects.put(descr.addr, form);
 							break;
 						}
 					}
@@ -85,18 +80,26 @@ public class ObjectsPage extends Composite {
 	public void refresh() {
 		for (final Integer addr : objects.keySet()) {
 			final Set<ControlComposite> set = objects.get(addr);
-			for (ControlComposite c : set)
-				c.refresh(null);
+			for (ControlComposite c : set) {
+				if (c instanceof Form)
+					((Form) c).refreshUI(null);
+				else
+					c.refresh(null);
+			}
 
 			controllersService.getRegs(addr, new AsyncCallback<AllRegs>() {
 				@Override
-				public void onFailure(Throwable caught) {
+				public void onSuccess(AllRegs result) {
+					for (ControlComposite c : set) {
+						if (c instanceof Form)
+							((Form) c).refreshUI(result);
+						else
+							c.refresh(result);
+					}
 				}
 
 				@Override
-				public void onSuccess(AllRegs result) {
-					for (ControlComposite c : set)
-						c.refresh(result);
+				public void onFailure(Throwable caught) {
 				}
 			});
 		}

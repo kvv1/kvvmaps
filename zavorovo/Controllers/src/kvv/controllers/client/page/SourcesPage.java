@@ -8,16 +8,21 @@ import kvv.controllers.client.page.source.SourcePage;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class SourcesPage extends Composite {
 	private final SourcesServiceAsync sourcesService = GWT
 			.create(SourcesService.class);
+
+	private ListBox files = new ListBox();
+	private TabPanel tabs = new TabPanel();
 
 	public SourcesPage() {
 		HorizontalPanel panel = new HorizontalPanel();
@@ -29,27 +34,22 @@ public class SourcesPage extends Composite {
 		Button buttonDel = new Button("Delete");
 		buttonDel.setWidth("100%");
 
-		final ListBox files = new ListBox();
 		files.setWidth("100%");
 		files.setVisibleItemCount(20);
 
-		sourcesService.getSourceFiles(new CallbackAdapter<String[]>() {
-			@Override
-			public void onSuccess(String[] result) {
-				for (String name : result)
-					files.addItem(name);
-			}
-		});
+		refreshFiles();
 
 		VerticalPanel buttons = new VerticalPanel();
 		buttons.setWidth("100px");
 
+		final TextBox newFileName = new TextBox();
+		buttons.add(newFileName);
+		buttons.add(buttonNew);
+
 		buttons.add(files);
 		buttons.add(buttonOpen);
-		buttons.add(buttonNew);
 		buttons.add(buttonDel);
 
-		final TabPanel tabs = new TabPanel();
 		tabs.setHeight("200px");
 		tabs.setWidth("800px");
 
@@ -59,35 +59,85 @@ public class SourcesPage extends Composite {
 		buttonOpen.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				int idx = files.getSelectedIndex();
-				if (idx < 0)
+				String name = getSelectedFile();
+				openFile(name);
+			}
+		});
+
+		buttonDel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				String name = getSelectedFile();
+				if (!Window.confirm("Удалить " + name + "?"))
 					return;
-				String name = files.getItemText(idx);
-
-				for (int i = 0; i < tabs.getWidgetCount(); i++)
-					if (((SourcePage) tabs.getWidget(i)).getName().equals(name)) {
-						tabs.selectTab(i);
-						return;
-					}
-
-				final SourcePage page = new SourcePage(name) {
+				sourcesService.delSourceFile(name, new CallbackAdapter<Void>() {
 					@Override
-					protected void onClose() {
-						for (int i = 0; i < tabs.getWidgetCount(); i++)
-							if (((SourcePage) tabs.getWidget(i)).getName()
-									.equals(getName())) {
-								tabs.remove(i);
-								return;
-							}
+					public void onSuccess(Void result) {
+						refreshFiles();
 					}
-				};
+				});
+			}
+		});
 
-				tabs.add(page, name);
-				tabs.selectTab(tabs.getWidgetCount() - 1);
+		buttonNew.addClickHandler(new ClickHandler() {
 
+			@Override
+			public void onClick(ClickEvent event) {
+				final String name = newFileName.getText();
+				sourcesService.createSource(name,
+						new CallbackAdapter<String>() {
+							@Override
+							public void onSuccess(String result) {
+								refreshFiles();
+								openFile(name);
+							}
+						});
 			}
 		});
 
 		initWidget(panel);
+	}
+
+	private String getSelectedFile() {
+		int idx = files.getSelectedIndex();
+		if (idx < 0)
+			return null;
+		return files.getItemText(idx);
+	}
+
+	private void openFile(String name) {
+		for (int i = 0; i < tabs.getWidgetCount(); i++)
+			if (((SourcePage) tabs.getWidget(i)).getName().equals(name)) {
+				tabs.selectTab(i);
+				return;
+			}
+
+		final SourcePage page = new SourcePage(name) {
+			@Override
+			protected void onClose() {
+				for (int i = 0; i < tabs.getWidgetCount(); i++)
+					if (((SourcePage) tabs.getWidget(i)).getName().equals(
+							getName())) {
+						tabs.remove(i);
+						return;
+					}
+			}
+		};
+
+		tabs.add(page, name);
+		tabs.selectTab(tabs.getWidgetCount() - 1);
+
+	}
+
+	private void refreshFiles() {
+		files.clear();
+		sourcesService.getSourceFiles(new CallbackAdapter<String[]>() {
+			@Override
+			public void onSuccess(String[] result) {
+				for (String name : result)
+					files.addItem(name);
+			}
+		});
+
 	}
 }

@@ -6,11 +6,9 @@ import java.io.IOException;
 import java.util.Properties;
 
 import kvv.controllers.client.SourcesService;
-import kvv.controllers.register.SourceDescr;
 import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
 
-import com.google.gson.Gson;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")
@@ -23,39 +21,49 @@ public class SourcesServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public String getSource(String name) {
+	public String createSource(String name) throws Exception {
 		try {
-			return Utils.readFile(Constants.ROOT + "/src/" + name);
+			Utils.writeFile(Constants.ROOT + "/src/" + name, "main {\r\n}\r\n");
+			return "";
 		} catch (IOException e) {
-			return "!!! error reading file !!!";
+			throw new Exception("Error creating file");
 		}
 	}
 
 	@Override
-	public void setSource(String name, String text) {
+	public String getSource(String name) throws Exception {
+		try {
+			return Utils.readFile(Constants.ROOT + "/src/" + name);
+		} catch (IOException e) {
+			throw new Exception("Error reading file");
+		}
+	}
+
+	@Override
+	public void setSource(String name, String text) throws Exception {
 		try {
 			Utils.writeFile(Constants.ROOT + "/src/" + name, text);
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new Exception("Error writing file");
 		}
 	}
 
 	@Override
 	public void delSourceFile(String name) {
+		new File(Constants.ROOT + "/src/" + name).delete();
 	}
 
 	@Override
-	public SourceDescr getSourceDescr(String controllerName) {
-		Properties props = new Properties();
+	public String getSourceFileName(String controllerName) throws Exception {
 		try {
+			Properties props = new Properties();
 			FileReader fr = new FileReader(Constants.srcFile);
 			props.load(fr);
 			fr.close();
+			return props.getProperty(controllerName);
 		} catch (IOException e) {
-			return null;
+			throw new Exception(e.getMessage());
 		}
-		return new Gson().fromJson(props.getProperty(controllerName),
-				SourceDescr.class);
 	}
 
 }

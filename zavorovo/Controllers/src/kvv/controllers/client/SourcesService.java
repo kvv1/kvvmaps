@@ -1,15 +1,19 @@
 package kvv.controllers.client;
 
-import kvv.controllers.register.SourceDescr;
-
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("sources")
-public interface SourcesService extends RemoteService{
+public interface SourcesService extends RemoteService {
 	String[] getSourceFiles();
-	String getSource(String name);
-	void setSource(String name, String text);
+
+	String getSource(String name) throws Exception;
+
+	void setSource(String name, String text) throws Exception;
+
 	void delSourceFile(String name);
-	SourceDescr getSourceDescr(String controllerName);
+
+	String getSourceFileName(String controllerName) throws Exception;
+
+	String createSource(String text) throws Exception;
 }

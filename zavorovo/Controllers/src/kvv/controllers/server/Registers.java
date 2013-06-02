@@ -15,14 +15,19 @@ public class Registers {
 			Register[] registers = Utils.jsonRead(Constants.registersFile,
 					Register[].class);
 			for (Register register : registers)
-				map.put(register.name, register);
+				if (register != null)
+					map.put(register.name, register);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public synchronized static Register getRegister(String name) {
-		return map.get(name);
+	public synchronized static Register getRegister(String name)
+			throws Exception {
+		Register reg = map.get(name);
+		if (reg == null)
+			throw new Exception("Регистр " + name + " не определен");
+		return reg;
 	}
 
 }

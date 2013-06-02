@@ -13,7 +13,6 @@ import kvv.controllers.controller.IController;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.Register;
 import kvv.controllers.register.RegisterUI;
-import kvv.controllers.register.SourceDescr;
 import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.Command;
@@ -26,7 +25,6 @@ import kvv.evlang.Token;
 import kvv.evlang.impl.Context;
 import kvv.evlang.impl.ELReader;
 
-import com.google.gson.Gson;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")
@@ -50,8 +48,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public ControllerDescr[] getControllers() throws Exception {
-		return Utils.jsonRead(Constants.controllersFile,
-				ControllerDescr[].class);
+		return Controllers.getControllers();
 	}
 
 	@Override
@@ -61,7 +58,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		List<String> res = new ArrayList<String>();
 
 		for (Command setCommand : defines) {
-			if (setCommand != null && setCommand.name == null)
+			if (setCommand == null || setCommand.name == null)
 				res.add(null);
 			else
 				res.add(setCommand.name);
@@ -79,11 +76,18 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		ObjectDescr[] res = Utils.jsonRead(Constants.objectsFile,
 				ObjectDescr[].class);
 		for (ObjectDescr obj : res) {
-			if (obj != null && obj.controller != null)
+			if (obj == null)
+				continue;
+			if (obj.controller != null)
 				obj.addr = Controllers.get(obj.controller).addr;
+			if (obj.register != null) {
+				kvv.controllers.shared.Register reg = Registers
+						.getRegister(obj.register);
+				obj.reg = reg.register;
+				obj.addr = Controllers.get(reg.controller).addr;
+			}
 		}
 		return res;
-
 	}
 
 	@Override
@@ -119,13 +123,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 				byte[] bytes = parser.dump();
 				controller.upload(addr, bytes);
 
-				SourceDescr sourceDescr = new SourceDescr(fileName,
-						parser.getRegisterDescriptions());
-
-				String gson = new Gson().toJson(sourceDescr);
-				System.out.println(gson);
-
-				storeSourceDescr(addr, gson);
+				storeSourceDescr(addr, fileName);
 			}
 			return null;
 		} catch (ParseException e) {

@@ -11,6 +11,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -82,6 +84,24 @@ public abstract class SourcePage extends Composite {
 				updateUI();
 			}
 		});
+
+		KeyDownHandler DEFAULT_TEXTAREA_TAB_HANDLER = new KeyDownHandler() {
+			@Override
+			public final void onKeyDown(KeyDownEvent event) {
+				if (event.getNativeKeyCode() == 9) {
+					event.preventDefault();
+					event.stopPropagation();
+					final TextArea ta = (TextArea) event.getSource();
+					final int index = ta.getCursorPos();
+					final String text = ta.getText();
+					ta.setText(text.substring(0, index) + "\t"
+							+ text.substring(index));
+					ta.setCursorPos(index + 1);
+				}
+			}
+		};
+
+		text.addKeyDownHandler(DEFAULT_TEXTAREA_TAB_HANDLER);
 
 		sourcesService.getSource(name, new CallbackAdapter<String>() {
 			@Override
