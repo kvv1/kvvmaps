@@ -10,10 +10,6 @@
 
 #include "ee.h"
 
-ee_8(TempOn);
-ee_16(PrefTemp);
-ee_16(PrefTemp2);
-
 ee_16(CodeLen);
 ee_16(CodeCRC);
 
@@ -37,15 +33,6 @@ void initCommands() {
 		setCodeLen(0);
 		setCodeCRC(CRC16_INIT);
 	}
-
-	if (getTempOn() == 255)
-		setTempOn(0);
-
-	if (getPrefTemp() == 0xFFFF)
-		setPrefTemp(300);
-
-	if (getPrefTemp2() == 0xFFFF)
-		setPrefTemp2(400);
 }
 
 int checkCode() {
@@ -102,12 +89,6 @@ char getReg(int reg, int* val) {
 		*val = getRelays();
 	} else if (reg == REG_INPUTS) {
 		*val = getIns();
-	} else if (reg == REG_TEMP_PREF) {
-		*val = getPrefTemp();
-	} else if (reg == REG_TEMP_PREF_2) {
-		*val = getPrefTemp2();
-	} else if (reg == REG_TEMP_PREF_ON) {
-		*val = getTempOn();
 	} else if (reg == REG_TEMP) {
 		*val = getTemperature10();
 	} else if (reg == REG_VMONOFF) {
@@ -134,13 +115,6 @@ char setReg(int reg, int val) {
 		setPort(PORT(reg - REG_RELAY0), val);
 	} else if (reg == REG_RELAYS) {
 		setRelays(val);
-	} else if (reg == REG_TEMP_PREF) {
-		setPrefTemp(val);
-	} else if (reg == REG_TEMP_PREF_2) {
-		setPrefTemp2(val);
-	} else if (reg == REG_TEMP_PREF_ON) {
-		setTempOn(val);
-		startStopTemperatureControl();
 	} else if (reg == REG_VMONOFF) {
 		setvmonoff(val);
 		startVM(val);
@@ -157,10 +131,11 @@ char setReg(int reg, int val) {
 	return 1;
 }
 
-static uint8_t regs[] PROGMEM = { REG_RELAYS, REG_INPUTS, REG_TEMP_PREF,
-		REG_TEMP_PREF_2, REG_TEMP_PREF_ON, REG_TEMP, REG_VMONOFF, REG_VMSTATE,
-		REG_ADC0, REG_ADC1, REG_ADC2, REG_ADC3, REG_RAM0, REG_RAM1, REG_RAM2,
-		REG_RAM3, REG_EEPROM0, REG_EEPROM1, REG_EEPROM2, REG_EEPROM3, };
+static uint8_t regs[] PROGMEM
+		= { REG_RELAYS, REG_INPUTS, REG_TEMP, REG_VMONOFF, REG_VMSTATE,
+				REG_ADC0, REG_ADC1, REG_ADC2, REG_ADC3, REG_RAM0, REG_RAM1,
+				REG_RAM2, REG_RAM3, REG_EEPROM0, REG_EEPROM1, REG_EEPROM2,
+				REG_EEPROM3, };
 
 void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 //	print2("handleCmd %d %d ", *cmd, cmdlen);

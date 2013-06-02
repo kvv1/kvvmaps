@@ -17,7 +17,6 @@ int getTemperature10() {
 
 static int handler(Message* msg) {
 
-	ObjectHeader* this = msg->target;
 	switch (msg->cmd) {
 	case MSG_CMD: {
 		uint8_t* cmd = (uint8_t*) msg->param1;
@@ -26,31 +25,6 @@ static int handler(Message* msg) {
 		ee_magic = 0;
 		break;
 	}
-	case MSG_TIMER_WORK: {
-		int t = getTemperature10();
-		if (t != TEMPERATURE_INVALID) {
-			if (t < getPrefTemp()) {
-				setPort(OUT0, 1);
-				setTimer(this, MSG_TIMER_STOP, TIMER_NORMAL, PULSE);
-			}
-
-			if (t > getPrefTemp()) {
-				setPort(OUT1, 1);
-				setTimer(this, MSG_TIMER_STOP, TIMER_NORMAL, PULSE);
-			}
-
-			if (t > getPrefTemp2())
-				setPort(OUT2, 1);
-
-			if (t <= getPrefTemp())
-				setPort(OUT2, 0);
-		}
-		break;
-	}
-	case MSG_TIMER_STOP:
-		setPort(OUT0, 0);
-		setPort(OUT1, 0);
-		break;
 	}
 
 	return 0;
@@ -62,22 +36,9 @@ void createObjects() {
 	initCommands();
 	initVM();
 	ee_magic = 0;
-	if (getTempOn())
-		startStopTemperatureControl(); // sets OUT0 = OUT1 = 0 !!!
 }
 
 void packetReceived(char* data, uint8_t len) {
 	postMessage(&obj, MSG_CMD, (int) data, len);
-}
-
-void startStopTemperatureControl() {
-	if (getTempOn()) {
-		postMessage(&obj, MSG_TIMER_WORK, 0, 0);
-		setTimer(&obj, MSG_TIMER_WORK, TIMER_PERIODIC, PERIOD);
-	} else {
-		killTimer(&obj, MSG_TIMER_WORK);
-		killTimer(&obj, MSG_TIMER_STOP);
-		postMessage(&obj, MSG_TIMER_STOP, 0, 0);
-	}
 }
 
