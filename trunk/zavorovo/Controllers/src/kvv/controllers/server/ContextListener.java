@@ -4,9 +4,9 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import kvv.controllers.controller.Controller;
-import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.MyLogger;
 import kvv.controllers.server.utils.Utils;
+import kvv.controllers.utils.Constants;
 
 public class ContextListener implements ServletContextListener {
 

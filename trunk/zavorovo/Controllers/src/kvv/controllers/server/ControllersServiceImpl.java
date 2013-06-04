@@ -13,12 +13,12 @@ import kvv.controllers.controller.IController;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.Register;
 import kvv.controllers.register.RegisterUI;
-import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.Command;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerDescr.Type;
 import kvv.controllers.shared.ObjectDescr;
+import kvv.controllers.utils.Constants;
 import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
 import kvv.evlang.Token;
@@ -81,7 +81,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 			if (obj.controller != null)
 				obj.addr = Controllers.get(obj.controller).addr;
 			if (obj.register != null) {
-				kvv.controllers.shared.Register reg = Registers
+				kvv.controllers.shared.Register reg = Controllers
 						.getRegister(obj.register);
 				obj.reg = reg.register;
 				obj.addr = Controllers.get(reg.controller).addr;

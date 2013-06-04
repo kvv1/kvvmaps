@@ -1,4 +1,4 @@
-package kvv.controllers.server.utils;
+package kvv.controllers.controller;
 
 import java.io.IOException;
 import java.util.logging.FileHandler;
@@ -8,7 +8,7 @@ import java.util.logging.SimpleFormatter;
 
 import kvv.controllers.utils.Constants;
 
-public class MyLogger {
+public class BusLogger {
 	private static volatile Logger logger;
 	private static FileHandler fh;
 
@@ -23,7 +23,7 @@ public class MyLogger {
 		if (logger == null) {
 			logger = Logger.getLogger("LOG");
 			try {
-				fh = new FileHandler(Constants.logFile, true);
+				fh = new FileHandler(Constants.rs485LogFile, true);
 				logger.addHandler(fh);
 				logger.setLevel(Level.ALL);
 				SimpleFormatter formatter = new SimpleFormatter();
@@ -36,4 +36,5 @@ public class MyLogger {
 		}
 		return logger;
 	}
+
 }

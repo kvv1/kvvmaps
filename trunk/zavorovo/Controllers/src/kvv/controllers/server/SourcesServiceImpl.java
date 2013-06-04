@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.Properties;
 
 import kvv.controllers.client.SourcesService;
-import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
+import kvv.controllers.utils.Constants;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 

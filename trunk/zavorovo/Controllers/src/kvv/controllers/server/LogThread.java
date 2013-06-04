@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import kvv.controllers.register.AllRegs;
-import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
 
 import kvv.controllers.shared.ControllerDescr;
+import kvv.controllers.utils.Constants;
 
 public class LogThread extends Thread {
 	public static volatile LogThread instance;

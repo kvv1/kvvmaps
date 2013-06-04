@@ -12,6 +12,7 @@ public class ContextListener implements ServletContextListener {
 
 	public void contextDestroyed(ServletContextEvent event) {
 		PacketTransceiver.closeInstance();
+		BusLogger.stopLogger();
 	}
 
 }

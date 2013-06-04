@@ -30,9 +30,12 @@ public class BusServlet extends HttpServlet {
 			res = PacketTransceiver.getInstance()
 					.sendPacket(body, waitResponse);
 		} catch (Exception e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 			throw new IOException(e);
 		}
+
+		if (res == null)
+			return;
 
 		String sep = "";
 		PrintWriter wr = resp.getWriter();
