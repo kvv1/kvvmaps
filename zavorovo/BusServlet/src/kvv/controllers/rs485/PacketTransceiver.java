@@ -12,6 +12,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+
+import kvv.controllers.controller.BusLogger;
 
 public class PacketTransceiver {
 	private final static int BAUD = 9600;
@@ -24,6 +27,9 @@ public class PacketTransceiver {
 	private SerialPort serPort;
 	private InputStream inStream;
 	private OutputStream outStream;
+	private List<Byte> inputBuffer = new ArrayList<Byte>();
+	private long lastReceiveTime;
+	private long sendTime;
 
 	private static PacketTransceiver instance;
 
@@ -47,7 +53,7 @@ public class PacketTransceiver {
 			instance.close();
 		instance = null;
 	}
-	
+
 	public PacketTransceiver(String comid) throws Exception {
 		pID = CommPortIdentifier.getPortIdentifier(comid);
 		init();
@@ -69,14 +75,24 @@ public class PacketTransceiver {
 		serPort.setRTS(true);
 	}
 
-	private List<Byte> inputBuffer = new ArrayList<Byte>();
-	private long lastReceiveTime;
-	private long sendTime;
-
 	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse)
 			throws IOException {
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				return _sendPacket(data, waitResponse);
+			} catch (IOException e) {
+				BusLogger.getLogger().log(Level.WARNING,
+						"attempt " + (i + 1) + ": " + e.getMessage());
+			}
+		}
+		return _sendPacket(data, waitResponse);
+	}
+
+	private synchronized byte[] _sendPacket(byte[] data, boolean waitResponse)
+			throws IOException {
 		try {
-			return _sendPacket(data, waitResponse);
+			return __sendPacket(data, waitResponse);
 		} catch (Exception e) {
 			try {
 				init();
@@ -87,7 +103,7 @@ public class PacketTransceiver {
 		}
 	}
 
-	private synchronized byte[] _sendPacket(byte[] data, boolean waitResponse)
+	private synchronized byte[] __sendPacket(byte[] data, boolean waitResponse)
 			throws Exception {
 		synchronized (inputBuffer) {
 			inputBuffer.clear();
@@ -104,11 +120,14 @@ public class PacketTransceiver {
 			long time = System.currentTimeMillis();
 			if (time > sendTime + PACKET_TIMEOUT)
 				throw new IOException("PACKET_TIMEOUT");
-			if (!inputBuffer.isEmpty() && time > lastReceiveTime + BYTE_TIMEOUT) {
-				byte[] response = new byte[inputBuffer.size()];
-				for (int i = 0; i < inputBuffer.size(); i++)
-					response[i] = inputBuffer.get(i);
-				return response;
+			synchronized (inputBuffer) {
+				if (!inputBuffer.isEmpty()
+						&& time > lastReceiveTime + BYTE_TIMEOUT) {
+					byte[] response = new byte[inputBuffer.size()];
+					for (int i = 0; i < inputBuffer.size(); i++)
+						response[i] = inputBuffer.get(i);
+					return response;
+				}
 			}
 			Thread.sleep(2);
 		}

@@ -2,6 +2,7 @@ package kvv.controllers.client.control.simple;
 
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.register.AllRegs;
+import kvv.controllers.register.Register;
 
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;

@@ -77,7 +77,7 @@ public class Controller implements IController { // 9164642959 7378866
 
 			byte[] buf = Arrays.copyOfRange(resp, i, i + nameLen);
 			i += nameLen;
-			
+
 			ui.add(new RegisterUI(reg, type, new String(buf, "Windows-1251")));
 		}
 
@@ -182,6 +182,9 @@ public class Controller implements IController { // 9164642959 7378866
 		conn = (HttpURLConnection) new URL(url1).openConnection();
 		conn.setRequestMethod("GET");
 		conn.connect();
+
+		if (!response)
+			return null;
 
 		String resp = new BufferedReader(new InputStreamReader(
 				conn.getInputStream())).readLine();

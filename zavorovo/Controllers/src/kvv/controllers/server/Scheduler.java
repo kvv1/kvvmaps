@@ -3,12 +3,13 @@ package kvv.controllers.server;
 import java.util.Date;
 import java.util.List;
 
-import kvv.controllers.server.utils.Constants;
 import kvv.controllers.server.utils.Utils;
 
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.Command;
 import kvv.controllers.shared.Register;
+import kvv.controllers.shared.ControllerDescr.Type;
+import kvv.controllers.utils.Constants;
 
 public class Scheduler extends Thread {
 
@@ -61,11 +62,14 @@ public class Scheduler extends Thread {
 	}
 
 	private static void exec(Command cmd) throws Exception {
-		Register register = Registers.getRegister(cmd.register);
+		Register register = Controllers.getRegister(cmd.register);
 
 		ControllerDescr d = Controllers.get(register.controller);
 		// if (d == null)
 		// return;
+		ControllerDescr controllerDescr = Controllers.get(d.addr);
+		if (controllerDescr.type == Type.MU110_8)
+			cmd.value = cmd.value == 0 ? 0 : 1000;
 
 		ControllersServiceImpl.controller.setReg(d.addr, register.register,
 				cmd.value);
