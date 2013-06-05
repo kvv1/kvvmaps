@@ -1,10 +1,15 @@
 package kvv.controllers.server;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.text.DateFormat;
 import java.text.ParsePosition;
 import java.util.ArrayList;
@@ -12,21 +17,19 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import kvv.controllers.shared.Command;
+import kvv.controllers.server.Scheduler.Command;
 import kvv.controllers.utils.Constants;
-
-
 
 public class ScheduleFile {
 	public boolean enabled;
 	public String[] lines;
 
 	public void save() {
-		FileOutputStream scheduleOS;
 		PrintWriter schwr = null;
 		try {
-			scheduleOS = new FileOutputStream(Constants.scheduleFile);
-			schwr = new PrintWriter(scheduleOS);
+			Writer wr = new OutputStreamWriter(new FileOutputStream(
+					Constants.scheduleFile), "Windows-1251");
+			schwr = new PrintWriter(wr);
 			schwr.println(enabled);
 			if (lines != null) {
 				for (String line : lines) {
@@ -35,6 +38,7 @@ public class ScheduleFile {
 				}
 			}
 		} catch (FileNotFoundException e) {
+		} catch (UnsupportedEncodingException e) {
 		} finally {
 			schwr.close();
 		}
@@ -44,10 +48,11 @@ public class ScheduleFile {
 		enabled = false;
 		lines = null;
 
-		FileReader schrd = null;
+		Reader schrd = null;
 
 		try {
-			schrd = new FileReader(Constants.scheduleFile);
+			schrd = new InputStreamReader(new FileInputStream(
+					Constants.scheduleFile), "Windows-1251");
 
 			StringBuffer sb = new StringBuffer();
 			int ch;
@@ -76,8 +81,7 @@ public class ScheduleFile {
 	private static DateFormat tf = DateFormat.getTimeInstance(DateFormat.SHORT);
 
 	@SuppressWarnings("deprecation")
-	public static synchronized List<Command> parseLine(String line,
-			Date date, Command[] defines) {
+	public static synchronized List<Command> parseLine(String line, Date date) {
 		if (line.trim().startsWith("#") || line.trim().length() == 0)
 			return Collections.emptyList();
 
@@ -117,13 +121,13 @@ public class ScheduleFile {
 
 		List<Command> res = new ArrayList<Command>();
 
-		l: for (int i = 0; i < cmds.length; i++) {
-			for (Command c : defines) {
-				if (c != null && cmds[i].equals(c.name)) {
-					res.add(c);
-					continue l;
-				}
+		try {
+			for (String cmd : cmds) {
+				String[] cmdParts = cmd.split("=");
+				res.add(new Command(Controllers.getRegister(cmdParts[0]),
+						Integer.parseInt(cmdParts[1])));
 			}
+		} catch (Exception e) {
 			return null;
 		}
 

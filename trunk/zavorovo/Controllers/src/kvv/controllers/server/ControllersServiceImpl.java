@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Properties;
 
 import kvv.controllers.client.ControllersService;
@@ -14,7 +13,6 @@ import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.Register;
 import kvv.controllers.register.RegisterUI;
 import kvv.controllers.server.utils.Utils;
-import kvv.controllers.shared.Command;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerDescr.Type;
 import kvv.controllers.shared.ObjectDescr;
@@ -49,26 +47,6 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public ControllerDescr[] getControllers() throws Exception {
 		return Controllers.getControllers();
-	}
-
-	@Override
-	public String[] getCommands() throws Exception {
-		Command[] defines = Utils.jsonRead(Constants.commandsFile,
-				Command[].class);
-		List<String> res = new ArrayList<String>();
-
-		for (Command setCommand : defines) {
-			if (setCommand == null || setCommand.name == null)
-				res.add(null);
-			else
-				res.add(setCommand.name);
-		}
-		return res.toArray(new String[0]);
-	}
-
-	@Override
-	public void execCommand(String cmd) throws Exception {
-		Scheduler.exec(cmd);
 	}
 
 	@Override

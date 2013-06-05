@@ -1,8 +1,5 @@
 package kvv.controllers.server;
 
-import kvv.controllers.server.utils.Utils;
-import kvv.controllers.shared.Command;
-import kvv.controllers.utils.Constants;
 import kvv.controllers.client.ScheduleService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -35,15 +32,12 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 	public void setSchedule(String text, boolean on) throws Exception {
 		ScheduleFile sched = new ScheduleFile();
 
-		Command[] defines = Utils.jsonRead(
-				Constants.commandsFile, Command[].class);
-
 		sched.enabled = on;
 
 		String[] lines = text.split("[\\r\\n]+", -1);
 		sched.lines = lines;
 		for (int i = 0; i < lines.length; i++) {
-			if (ScheduleFile.parseLine(lines[i], null, defines) == null)
+			if (ScheduleFile.parseLine(lines[i], null) == null)
 				lines[i] = "#ERR " + lines[i];
 		}
 

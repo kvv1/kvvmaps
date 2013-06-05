@@ -3,15 +3,21 @@ package kvv.controllers.server;
 import java.util.Date;
 import java.util.List;
 
-import kvv.controllers.server.utils.Utils;
-
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.Command;
-import kvv.controllers.shared.Register;
 import kvv.controllers.shared.ControllerDescr.Type;
-import kvv.controllers.utils.Constants;
+import kvv.controllers.shared.Register;
 
 public class Scheduler extends Thread {
+
+	static public class Command {
+		public Register register;
+		public int value;
+
+		public Command(Register register, int value) {
+			this.register = register;
+			this.value = value;
+		}
+	}
 
 	public Scheduler() {
 		setDaemon(true);
@@ -38,12 +44,10 @@ public class Scheduler extends Thread {
 					if (time != lastTime) {
 						ScheduleFile schedFile = new ScheduleFile();
 						schedFile.load();
-						Command[] defines = Utils.jsonRead(
-								Constants.commandsFile, Command[].class);
 						if (schedFile.enabled && schedFile.lines != null) {
 							for (String line : schedFile.lines) {
 								List<Command> commands = ScheduleFile
-										.parseLine(line, date, defines);
+										.parseLine(line, date);
 								if (commands != null) {
 									for (Command cmd : commands) {
 										exec(cmd);
@@ -62,31 +66,12 @@ public class Scheduler extends Thread {
 	}
 
 	private static void exec(Command cmd) throws Exception {
-		Register register = Controllers.getRegister(cmd.register);
-
-		ControllerDescr d = Controllers.get(register.controller);
-		// if (d == null)
-		// return;
-		ControllerDescr controllerDescr = Controllers.get(d.addr);
+		ControllerDescr controllerDescr = Controllers.get(cmd.register.addr);
 		if (controllerDescr.type == Type.MU110_8)
 			cmd.value = cmd.value == 0 ? 0 : 1000;
 
-		ControllersServiceImpl.controller.setReg(d.addr, register.register,
-				cmd.value);
+		ControllersServiceImpl.controller.setReg(cmd.register.addr,
+				cmd.register.register, cmd.value);
 	}
 
-	public static void exec(String cmd) throws Exception {
-		Command[] defines = Utils.jsonRead(Constants.commandsFile,
-				Command[].class);
-
-		try {
-			for (Command c : defines) {
-				if (c != null && cmd.equals(c.name))
-					exec(c);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
-	}
 }
