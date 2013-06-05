@@ -14,10 +14,6 @@ public interface ControllersServiceAsync {
 
 	void getControllers(AsyncCallback<ControllerDescr[]> callback);
 
-	void getCommands(AsyncCallback<String[]> callback);
-
-	void execCommand(String cmd, AsyncCallback<Void> callback);
-
 	void getObjects(AsyncCallback<ObjectDescr[]> callback);
 
 	void getRegs(int addr, AsyncCallback<AllRegs> callback);
