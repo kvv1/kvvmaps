@@ -9,7 +9,6 @@ import kvv.controllers.register.AllRegs;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 
@@ -37,9 +36,8 @@ public class SimpleRelayControl extends ControlComposite {
 					return;
 				}
 					
-				if (!ModePage.controlMode) {
+				if (!ModePage.check()) {
 					cb.setValue(!((CheckBox) event.getSource()).getValue());
-					Window.alert("Режим управления не включен");
 					return;
 				}
 				final boolean checked = ((CheckBox) event.getSource())

@@ -38,24 +38,22 @@ public class Scheduler extends Thread {
 	@SuppressWarnings("deprecation")
 	@Override
 	public void run() {
-		Schedule schedule = null;
-		ArrayList<Register> regs = null;
 		int regIndex = 0;
 		while (!stopped) {
 			try {
 				synchronized (this) {
-					if (regs == null || regIndex >= regs.size()) {
+					Schedule schedule = ScheduleFile.load();
+					ArrayList<Register> regs = new ArrayList<Register>(
+							schedule.map.keySet());
+					Collections.sort(regs, new Comparator<Register>() {
+						@Override
+						public int compare(Register o1, Register o2) {
+							return o1.name.compareTo(o2.name);
+						}
+					});
+
+					if (regIndex >= regs.size())
 						regIndex = 0;
-						schedule = ScheduleFile.load();
-						regs = new ArrayList<Register>(schedule.map.keySet());
-						Collections.sort(regs, new Comparator<Register>() {
-							@Override
-							public int compare(Register o1, Register o2) {
-								return o1.name.compareTo(o2.name);
-							}
-						});
-						sleep(1000);
-					}
 
 					if (regs.size() > regIndex) {
 						Register reg = regs.get(regIndex);

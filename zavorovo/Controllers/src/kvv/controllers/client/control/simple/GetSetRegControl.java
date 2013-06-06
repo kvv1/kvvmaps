@@ -9,7 +9,6 @@ import kvv.controllers.register.AllRegs;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -50,10 +49,9 @@ public class GetSetRegControl extends ControlComposite {
 		setButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				if (!ModePage.controlMode) {
-					Window.alert("Режим управления не включен");
+				if (!ModePage.check())
 					return;
-				}
+
 				edit.setEnabled(false);
 				try {
 					int val = div10 ? Integer.valueOf(edit.getText()) * 10
