@@ -11,10 +11,10 @@ import kvv.controllers.shared.RegisterSchedule;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AutoRelayControl extends ControlComposite {
@@ -27,8 +27,7 @@ public class AutoRelayControl extends ControlComposite {
 	HorizontalPanel schedulePanel = new HorizontalPanel();
 	ScheduleCanvas scheduleCanvas = new ScheduleCanvas();
 
-	RadioButton autoButton;
-	RadioButton manualButton;
+	CheckBox autoButton;
 	SimpleRelayControl relayControl;
 
 	Register reg;
@@ -37,20 +36,18 @@ public class AutoRelayControl extends ControlComposite {
 		super(addr);
 		this.reg = reg;
 
-		//framePanel.setBorderWidth(1);
+		// framePanel.setBorderWidth(1);
 		framePanel.add(horizontalPanel);
 
 		horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		horizontalPanel.add(schedulePanel);
 
-		autoButton = new RadioButton("reg" + reg.name, "Авто");
-		manualButton = new RadioButton("reg" + reg.name, "Ручн.");
+		autoButton = new CheckBox("Авто");
 		relayControl = new SimpleRelayControl(addr, reg.register, "");
+		add(relayControl);
 
 		autoButton.setValue(false);
-		manualButton.setValue(true);
 		autoButton.setEnabled(false);
-		manualButton.setEnabled(false);
 
 		VerticalPanel panel = new VerticalPanel();
 		VerticalPanel labelPanel = new VerticalPanel();
@@ -58,9 +55,8 @@ public class AutoRelayControl extends ControlComposite {
 		labelPanel.add(new Label(reg.name));
 		panel.add(labelPanel);
 		HorizontalPanel panel1 = new HorizontalPanel();
+		panel1.setWidth("100%");
 		panel1.add(autoButton);
-		panel1.add(manualButton);
-		add(relayControl);
 		panel1.add(relayControl);
 		panel.add(panel1);
 		horizontalPanel.add(panel);
@@ -68,6 +64,11 @@ public class AutoRelayControl extends ControlComposite {
 		ClickHandler clickHandler = new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				if (!ModePage.check()) {
+					autoButton.setValue(!autoButton.getValue());
+					return;
+				}
+
 				final boolean auto = autoButton.getValue();
 				scheduleService.enable(reg.name, auto,
 						new CallbackAdapter<Void>() {
@@ -80,17 +81,14 @@ public class AutoRelayControl extends ControlComposite {
 		};
 
 		autoButton.addClickHandler(clickHandler);
-		manualButton.addClickHandler(clickHandler);
 
 		initWidget(framePanel);
 	}
 
 	public void refreshSchedule(RegisterSchedule registerSchedule) {
 		autoButton.setEnabled(true);
-		manualButton.setEnabled(true);
 		scheduleCanvas.refresh(registerSchedule.items);
 		autoButton.setValue(registerSchedule.enabled);
-		manualButton.setValue(!registerSchedule.enabled);
 		relayControl.setEnabled(!registerSchedule.enabled);
 	}
 

@@ -9,6 +9,7 @@ import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.control.simple.GetRegControl;
 import kvv.controllers.client.control.simple.GetSetRegControl;
 import kvv.controllers.client.control.simple.SimpleRelayControl;
+import kvv.controllers.client.page.ModePage;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.Register;
 
@@ -90,6 +91,9 @@ public class VMControl extends ControlComposite {
 		upl.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				if (ModePage.check())
+					return;
+
 				final String file;
 				if (files.getSelectedIndex() <= 0)
 					file = null;

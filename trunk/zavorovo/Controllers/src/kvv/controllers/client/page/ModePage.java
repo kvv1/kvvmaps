@@ -19,6 +19,12 @@ public class ModePage extends Composite {
 		controlMode = Boolean.parseBoolean(Cookies.getCookie("ControlMode"));
 	}
 
+	public static boolean check() {
+		if (!controlMode)
+			Window.alert("Режим управления не включен");
+		return controlMode;
+	}
+
 	public ModePage() {
 
 		final TextBox password = new TextBox();
