@@ -13,7 +13,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 
-public class SimpleRelayControl extends ControlComposite {
+public class AutoRelayControl extends ControlComposite {
 
 	private final CheckBox cb;
 
@@ -21,9 +21,7 @@ public class SimpleRelayControl extends ControlComposite {
 	private final ControllersServiceAsync controllersService = GWT
 			.create(ControllersService.class);
 
-	private boolean enabled = true;
-
-	public SimpleRelayControl(final int addr, final int reg, String label) {
+	public AutoRelayControl(final int addr, final int reg, String label) {
 		super(addr);
 
 		cb = new CheckBox(label);
@@ -32,11 +30,6 @@ public class SimpleRelayControl extends ControlComposite {
 		cb.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				if (!enabled) {
-					cb.setValue(!cb.getValue());
-					return;
-				}
-					
 				if (!ModePage.controlMode) {
 					cb.setValue(!((CheckBox) event.getSource()).getValue());
 					Window.alert("Режим управления не включен");
@@ -64,10 +57,6 @@ public class SimpleRelayControl extends ControlComposite {
 		initWidget(cb);
 	}
 
-	public void setEnabled(boolean en) {
-		enabled = en;
-	}
-	
 	@Override
 	public void refresh(AllRegs result) {
 		if (result == null) {

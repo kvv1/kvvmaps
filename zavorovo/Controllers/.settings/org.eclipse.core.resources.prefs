@@ -1,5 +1,6 @@
-#Sun Apr 21 23:25:02 MSD 2013
+#Wed Jun 05 20:06:45 MSD 2013
 eclipse.preferences.version=1
 encoding//src/kvv/controllers/client/page/ControllersPage.java=UTF-8
-encoding//src/kvv/controllers/client/page/SchelulePage.java=UTF-8
+encoding//src/kvv/controllers/client/page/GSchedulePage.java=UTF-8
+encoding//src/kvv/controllers/client/page/SchedulePage.java=UTF-8
 encoding/<project>=UTF-8

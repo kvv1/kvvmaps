@@ -1,6 +1,9 @@
 package kvv.controllers.server;
 
 import kvv.controllers.client.ScheduleService;
+import kvv.controllers.server.utils.Utils;
+import kvv.controllers.shared.Schedule;
+import kvv.controllers.utils.Constants;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -9,38 +12,32 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 		ScheduleService {
 
 	@Override
-	public String getSchedule() {
-		ScheduleFile sched = new ScheduleFile();
-		sched.load();
-		String text = "";
-		if (sched.lines != null) {
-			for (String line : sched.lines) {
-				text = text + line + "\r\n";
-			}
-		}
-		return text;
+	public Schedule getSchedule() {
+		return ScheduleFile.load();
 	}
 
 	@Override
-	public boolean isOn() {
-		ScheduleFile sched = new ScheduleFile();
-		sched.load();
-		return sched.enabled;
-	}
-
-	@Override
-	public void setSchedule(String text, boolean on) throws Exception {
-		ScheduleFile sched = new ScheduleFile();
+	public Schedule setSchedule(String text, boolean on) throws Exception {
+		Schedule sched = new Schedule(on);
 
 		sched.enabled = on;
+		sched.text = "";
 
 		String[] lines = text.split("[\\r\\n]+", -1);
-		sched.lines = lines;
 		for (int i = 0; i < lines.length; i++) {
 			if (ScheduleFile.parseLine(lines[i], null) == null)
 				lines[i] = "#ERR " + lines[i];
+			sched.text += lines[i] + "\r\n";
 		}
 
-		sched.save();
+		sched.lines = lines;
+
+		ScheduleFile.save(sched);
+		return getSchedule();
+	}
+
+	@Override
+	public void enable(String regName, boolean b) {
+		Utils.changeProp(Constants.scheduleProps, regName, "" + b);
 	}
 }
