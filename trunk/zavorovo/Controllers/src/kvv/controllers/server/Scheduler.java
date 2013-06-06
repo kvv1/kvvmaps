@@ -1,19 +1,25 @@
 package kvv.controllers.server;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerDescr.Type;
 import kvv.controllers.shared.Register;
+import kvv.controllers.shared.RegisterSchedule;
+import kvv.controllers.shared.Schedule;
 
 public class Scheduler extends Thread {
 
-	static public class Command {
+	static public class ScheduleLine {
+		public Date date;
 		public Register register;
 		public int value;
 
-		public Command(Register register, int value) {
+		public ScheduleLine(Date date, Register register, int value) {
+			this.date = date;
 			this.register = register;
 			this.value = value;
 		}
@@ -32,32 +38,40 @@ public class Scheduler extends Thread {
 	@SuppressWarnings("deprecation")
 	@Override
 	public void run() {
-		long lastTime = 0;
+		Schedule schedule = null;
+		ArrayList<Register> regs = null;
+		int regIndex = 0;
 		while (!stopped) {
 			try {
-				sleep(2000);
 				synchronized (this) {
-					Date date = new Date();
-					date.setSeconds(0);
-					date.setTime(date.getTime() - date.getTime() % 1000);
-					long time = date.getTime();
-					if (time != lastTime) {
-						ScheduleFile schedFile = new ScheduleFile();
-						schedFile.load();
-						if (schedFile.enabled && schedFile.lines != null) {
-							for (String line : schedFile.lines) {
-								List<Command> commands = ScheduleFile
-										.parseLine(line, date);
-								if (commands != null) {
-									for (Command cmd : commands) {
-										exec(cmd);
-										sleep(2000);
-									}
-								}
+					if (regs == null || regIndex >= regs.size()) {
+						regIndex = 0;
+						schedule = ScheduleFile.load();
+						regs = new ArrayList<Register>(schedule.map.keySet());
+						Collections.sort(regs, new Comparator<Register>() {
+							@Override
+							public int compare(Register o1, Register o2) {
+								return o1.name.compareTo(o2.name);
 							}
-						}
-						lastTime = time;
+						});
+						sleep(1000);
 					}
+
+					if (regs.size() > regIndex) {
+						Register reg = regs.get(regIndex);
+						RegisterSchedule registerSchedule = schedule.map
+								.get(reg);
+						if (registerSchedule.enabled) {
+							Date date = new Date();
+							int minutes = date.getHours() * 60
+									+ date.getMinutes();
+							int value = registerSchedule.getValue(minutes);
+							exec(reg, value);
+							sleep(1000);
+						}
+					}
+
+					regIndex++;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -65,13 +79,13 @@ public class Scheduler extends Thread {
 		}
 	}
 
-	private static void exec(Command cmd) throws Exception {
-		ControllerDescr controllerDescr = Controllers.get(cmd.register.addr);
+	private static void exec(Register register, int value) throws Exception {
+		ControllerDescr controllerDescr = Controllers.get(register.addr);
 		if (controllerDescr.type == Type.MU110_8)
-			cmd.value = cmd.value == 0 ? 0 : 1000;
+			value = value == 0 ? 0 : 1000;
 
-		ControllersServiceImpl.controller.setReg(cmd.register.addr,
-				cmd.register.register, cmd.value);
+		ControllersServiceImpl.controller.setReg(register.addr,
+				register.register, value);
 	}
 
 }

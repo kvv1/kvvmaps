@@ -9,25 +9,37 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class RelayForm extends ControlComposite {
 
 	public RelayForm(int addr, final int reg, String name) {
 		super(addr);
 
-		HorizontalPanel panel = new HorizontalPanel();
-		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		panel.setSpacing(10);
+		VerticalPanel verticalPanel = new VerticalPanel();
 
-		panel.add(new Label(name));
+		verticalPanel.add(new Label(name));
 
+		HorizontalPanel horizontalPanel = new HorizontalPanel();
+		horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		horizontalPanel.setSpacing(10);
+
+		VerticalPanel panel = new VerticalPanel();
+		panel.add(new RadioButton("group", "Авто"));
+		HorizontalPanel panel1 = new HorizontalPanel();
+		panel1.add(new RadioButton("group", "Ручн."));
 		SimpleRelayControl cb = new SimpleRelayControl(addr, reg, "");
 		add(cb);
-		
-		panel.add(cb);
+		panel1.add(cb);
+		panel.add(panel1);
+
+		horizontalPanel.add(panel);
+
+		verticalPanel.add(horizontalPanel);
 
 		Button refreshButton = new Button("Обновить");
-		panel.add(refreshButton);
+		verticalPanel.add(refreshButton);
 
 		refreshButton.addClickHandler(new ClickHandler() {
 			@Override
@@ -36,7 +48,7 @@ public class RelayForm extends ControlComposite {
 			}
 		});
 
-		initWidget(panel);
+		initWidget(verticalPanel);
 	}
 
 }

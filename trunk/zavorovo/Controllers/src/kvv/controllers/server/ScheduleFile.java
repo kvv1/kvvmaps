@@ -1,137 +1,130 @@
 package kvv.controllers.server;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.text.DateFormat;
 import java.text.ParsePosition;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
-import kvv.controllers.server.Scheduler.Command;
+import kvv.controllers.server.Scheduler.ScheduleLine;
+import kvv.controllers.server.utils.Utils;
+import kvv.controllers.shared.Register;
+import kvv.controllers.shared.RegisterSchedule;
+import kvv.controllers.shared.Schedule;
+import kvv.controllers.shared.ScheduleItem;
 import kvv.controllers.utils.Constants;
 
 public class ScheduleFile {
-	public boolean enabled;
-	public String[] lines;
-
-	public void save() {
-		PrintWriter schwr = null;
+	public static void save(Schedule schedule) {
 		try {
-			Writer wr = new OutputStreamWriter(new FileOutputStream(
-					Constants.scheduleFile), "Windows-1251");
-			schwr = new PrintWriter(wr);
-			schwr.println(enabled);
-			if (lines != null) {
-				for (String line : lines) {
-					if (line.trim().length() > 0)
-						schwr.println(line);
-				}
-			}
-		} catch (FileNotFoundException e) {
-		} catch (UnsupportedEncodingException e) {
-		} finally {
-			schwr.close();
-		}
-	}
-
-	public void load() {
-		enabled = false;
-		lines = null;
-
-		Reader schrd = null;
-
-		try {
-			schrd = new InputStreamReader(new FileInputStream(
-					Constants.scheduleFile), "Windows-1251");
-
-			StringBuffer sb = new StringBuffer();
-			int ch;
-			while ((ch = schrd.read()) != -1)
-				sb.append((char) ch);
-
-			String[] res = sb.toString().split("[\\r\\n]+", -1);
-			if (res.length > 0) {
-				enabled = Boolean.parseBoolean(res[0].trim());
-				lines = new String[res.length - 1];
-				System.arraycopy(res, 1, lines, 0, res.length - 1);
-			}
-		} catch (FileNotFoundException e) {
+			String text = "" + schedule.enabled + "\r\n" + schedule.text;
+			Utils.writeFile(Constants.scheduleFile, text);
 		} catch (IOException e) {
 		} finally {
-			if (schrd != null)
-				try {
-					schrd.close();
-				} catch (IOException e) {
-				}
 		}
 	}
 
-	private static DateFormat df = DateFormat.getDateTimeInstance(
-			DateFormat.SHORT, DateFormat.SHORT);
-	private static DateFormat tf = DateFormat.getTimeInstance(DateFormat.SHORT);
+	public static Schedule load() {
+		Schedule schedule = new Schedule(false);
+
+		try {
+			String text = Utils.readFile(Constants.scheduleFile);
+			schedule.text = "";
+			String[] lines = text.split("[\\r\\n]+", -1);
+			if (lines.length > 0) {
+				schedule.enabled = Boolean.parseBoolean(lines[0].trim());
+				schedule.lines = Arrays.copyOfRange(lines, 1, lines.length);
+
+				for (String line : schedule.lines) {
+					List<ScheduleLine> scheduleLine = ScheduleFile.parseLine(
+							line, null);
+					if (scheduleLine == null)
+						continue;
+
+					schedule.text += line + "\r\n";
+
+					for (ScheduleLine l : scheduleLine)
+						add(schedule, l.date, l.register, l.value);
+				}
+			}
+			Properties props = Utils.getProps(Constants.scheduleProps);
+			if (props != null)
+				for (Register reg : schedule.map.keySet()) {
+					RegisterSchedule registerSchedule = schedule.map.get(reg);
+					boolean auto = Boolean.valueOf(props.getProperty(reg.name));
+					registerSchedule.enabled = auto;
+				}
+
+		} catch (IOException e) {
+		}
+
+		return schedule;
+	}
 
 	@SuppressWarnings("deprecation")
-	public static synchronized List<Command> parseLine(String line, Date date) {
+	private static RegisterSchedule add(Schedule schedule, Date date,
+			Register register, int value) {
+		RegisterSchedule registerSchedule = schedule.map.get(register);
+		if (registerSchedule == null) {
+			registerSchedule = new RegisterSchedule();
+			schedule.map.put(register, registerSchedule);
+		}
+		registerSchedule.items.add(new ScheduleItem(date.getHours() * 60
+				+ date.getMinutes(), value));
+		Collections.sort(registerSchedule.items,
+				new Comparator<ScheduleItem>() {
+					@Override
+					public int compare(ScheduleItem o1, ScheduleItem o2) {
+						return o1.minutes - o2.minutes;
+					}
+				});
+		return registerSchedule;
+	}
+
+	// private static DateFormat df = DateFormat.getDateTimeInstance(
+	// DateFormat.SHORT, DateFormat.SHORT);
+	private static final DateFormat tf = DateFormat
+			.getTimeInstance(DateFormat.SHORT);
+
+	@SuppressWarnings("deprecation")
+	public static synchronized List<ScheduleLine> parseLine(String line,
+			Date date) {
 		if (line.trim().startsWith("#") || line.trim().length() == 0)
 			return Collections.emptyList();
 
-		String commands = null;
-
-		ParsePosition pp = new ParsePosition(0);
-		Date d = df.parse(line, pp);
-
-		if (d != null
-				&& (line.length() == pp.getIndex() || line
-						.charAt(pp.getIndex()) == ' ')) {
-			if (date == null
-					|| (d.getYear() == date.getYear()
-							&& d.getMonth() == date.getMonth()
-							&& d.getDate() == date.getDate()
-							&& d.getHours() == date.getHours() && d
-							.getMinutes() == date.getMinutes()))
-				commands = line.substring(pp.getIndex());
-		} else {
-			pp = new ParsePosition(0);
-			d = tf.parse(line, pp);
-			if (d != null
-					&& (line.length() == pp.getIndex() || line.charAt(pp
-							.getIndex()) == ' ')) {
-				if (date == null
-						|| (d != null && d.getMinutes() == date.getMinutes() && d
-								.getHours() == date.getHours())) {
-					commands = line.substring(pp.getIndex());
-				}
-			}
-		}
-
-		if (commands == null)
+		String[] fields = line.trim().split("\\s+", -1);
+		if (fields.length < 1)
 			return null;
 
-		String[] cmds = commands.trim().split("\\s+", -1);
+		ParsePosition pp = new ParsePosition(0);
+		Date d = tf.parse(fields[0], pp);
+		if (d == null || pp.getIndex() != fields[0].length())
+			return null;
 
-		List<Command> res = new ArrayList<Command>();
+		List<ScheduleLine> res = new ArrayList<ScheduleLine>();
 
 		try {
-			for (String cmd : cmds) {
+			for (String cmd : Arrays.copyOfRange(fields, 1, fields.length)) {
 				String[] cmdParts = cmd.split("=");
-				res.add(new Command(Controllers.getRegister(cmdParts[0]),
-						Integer.parseInt(cmdParts[1])));
+				res.add(new ScheduleLine(d, Controllers
+						.getRegister(cmdParts[0]), Integer
+						.parseInt(cmdParts[1])));
 			}
 		} catch (Exception e) {
 			return null;
 		}
 
-		return res;
+		if (date == null
+				|| (d.getMinutes() == date.getMinutes() && d.getHours() == date
+						.getHours()))
+			return res;
+
+		return null;
 	}
 
 }

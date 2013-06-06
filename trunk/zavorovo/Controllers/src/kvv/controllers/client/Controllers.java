@@ -1,10 +1,11 @@
 package kvv.controllers.client;
 
 import kvv.controllers.client.page.ControllersPage;
+import kvv.controllers.client.page.GSchedulePage;
 import kvv.controllers.client.page.LogPage;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.client.page.ObjectsPage;
-import kvv.controllers.client.page.SchelulePage;
+import kvv.controllers.client.page.SchedulePage;
 import kvv.controllers.client.page.SourcesPage;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -26,7 +27,8 @@ public class Controllers implements EntryPoint {
 
 		tabs.add(new ObjectsPage(), "Объекты");
 		tabs.add(new ControllersPage(), "Контроллеры");
-		tabs.add(new SchelulePage(), "Расписание");
+		tabs.add(new SchedulePage(), "Расписание");
+		tabs.add(new GSchedulePage(), "ГРасписание");
 		tabs.add(new ModePage(), "Режимы работы");
 		tabs.add(new SourcesPage(), "Sources");
 		tabs.add(new LogPage(), "Log");

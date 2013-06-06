@@ -55,10 +55,10 @@ public class ObjectsPage extends Composite {
 					} else {
 						switch (descr.type) {
 						case RELAY:
-							RelayForm relayControl = new RelayForm(descr.addr,
-									descr.reg, descr.name);
-							horizPanel.add(relayControl);
-							objects.put(descr.addr, relayControl);
+//							RelayForm relayControl = new RelayForm(descr.addr,
+//									descr.reg, descr.name);
+//							horizPanel.add(relayControl);
+//							objects.put(descr.addr, relayControl);
 							break;
 						case FORM:
 							Form form = new Form(descr.addr, descr.name);

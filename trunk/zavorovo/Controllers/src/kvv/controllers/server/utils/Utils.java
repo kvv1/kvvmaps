@@ -46,20 +46,45 @@ public class Utils {
 		wr.close();
 	}
 
-	public static Properties getProps(String file) throws IOException {
-		Properties props = new Properties();
-		FileInputStream is = new FileInputStream(file);
-		props.load(is);
-		is.close();
-		return props;
+	public static synchronized Properties getProps(String file) {
+		try {
+			Properties props = new Properties();
+			InputStreamReader rd = new InputStreamReader(new FileInputStream(
+					file), "Windows-1251");
+			props.load(rd);
+			rd.close();
+			return props;
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
-	public static String getProp(String file, String prop) {
+	public static synchronized String getProp(String file, String prop) {
+		Properties props = getProps(file);
+		if (props == null)
+			return null;
+		return props.getProperty(prop);
+	}
+
+	public static synchronized boolean changeProp(String file, String prop,
+			String value) {
 		try {
-			Properties props = getProps(file);
-			return props.getProperty(prop);
-		} catch (Throwable e) {
+			Properties props = new Properties();
+			try {
+				InputStreamReader rd = new InputStreamReader(
+						new FileInputStream(file), "Windows-1251");
+				props.load(rd);
+				rd.close();
+			} catch (Exception e) {
+			}
+			props.setProperty(prop, value);
+			OutputStreamWriter wr = new OutputStreamWriter(
+					new FileOutputStream(file), "Windows-1251");
+			props.store(wr, "");
+			wr.close();
+			return true;
+		} catch (IOException e) {
+			return false;
 		}
-		return null;
 	}
 }

@@ -1,5 +1,7 @@
 package kvv.controllers.client.page;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,5 +24,16 @@ class MultiMap<K, V> {
 
 	public Set<K> keySet() {
 		return map.keySet();
+	}
+
+	public void clear() {
+		map.clear();
+	}
+
+	public Collection<V> values() {
+		Collection<V> res = new ArrayList<V>();
+		for (HashSet<V> v : map.values())
+			res.addAll(v);
+		return res;
 	}
 }
