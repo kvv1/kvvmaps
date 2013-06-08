@@ -60,6 +60,10 @@ public class Controllers {
 		return d;
 	}
 
+	public synchronized static Map<String, Register> getRegisters() {
+		return registers;
+	}
+
 	public synchronized static Register getRegister(String name)
 			throws Exception {
 		Register reg = registers.get(name);

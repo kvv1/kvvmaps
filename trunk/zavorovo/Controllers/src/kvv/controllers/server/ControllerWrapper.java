@@ -16,10 +16,17 @@ public class ControllerWrapper implements IController {
 	}
 
 	@Override
+	public void close() {
+		controller.close();
+	}
+
+	@Override
 	public void setReg(int addr, int reg, int val) throws Exception {
 		try {
 			controller.setReg(addr, reg, val);
+			Logger.log(addr, reg, val);
 		} catch (IOException e) {
+			Logger.log(addr, null);
 			MyLogger.getLogger().log(Level.WARNING, e.getMessage());
 			throw e;
 		}
@@ -38,16 +45,14 @@ public class ControllerWrapper implements IController {
 	@Override
 	public AllRegs getAllRegs(int addr) throws Exception {
 		try {
-			return controller.getAllRegs(addr);
+			AllRegs allRegs = controller.getAllRegs(addr);
+			Logger.log(addr, allRegs.values);
+			return allRegs;
 		} catch (IOException e) {
+			Logger.log(addr, null);
 			MyLogger.getLogger().log(Level.WARNING, e.getMessage());
 			throw e;
 		}
-	}
-
-	@Override
-	public void close() {
-		controller.close();
 	}
 
 	@Override
