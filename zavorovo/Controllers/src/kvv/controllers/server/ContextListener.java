@@ -21,10 +21,7 @@ public class ContextListener implements ServletContextListener {
 			e.printStackTrace();
 		}
 
-		boolean logThread = Boolean.valueOf(Utils.getProp(Constants.propsFile,
-				"checkControllers"));
-		if (logThread)
-			LogThread.instance = new LogThread();
+		Logger.instance = new Logger();
 
 		Scheduler.instance = new Scheduler();
 
@@ -38,10 +35,10 @@ public class ContextListener implements ServletContextListener {
 			Scheduler.instance.stop();
 			Scheduler.instance = null;
 		}
-		if (LogThread.instance != null) {
-			LogThread.instance.stopped = true;
-			LogThread.instance.stop();
-			LogThread.instance = null;
+		if (Logger.instance != null) {
+			Logger.instance.stopped = true;
+			Logger.instance.stop();
+			Logger.instance = null;
 		}
 
 		MyLogger.stopLogger();

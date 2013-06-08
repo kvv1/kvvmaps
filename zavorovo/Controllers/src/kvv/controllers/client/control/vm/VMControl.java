@@ -91,7 +91,7 @@ public class VMControl extends ControlComposite {
 		upl.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				if (ModePage.check())
+				if (!ModePage.check())
 					return;
 
 				final String file;
