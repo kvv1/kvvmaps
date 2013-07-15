@@ -100,6 +100,7 @@ public class Logger extends Thread {
 
 	public static void log(int addr, Map<Integer, Integer> newMap) {
 		if (newMap != null) {
+			newMap = new HashMap<Integer, Integer>(newMap);
 			Map<String, Register> regs = Controllers.getRegisters();
 			List<Integer> arr = new ArrayList<Integer>();
 			for (Register r : regs.values())
@@ -107,9 +108,9 @@ public class Logger extends Thread {
 			newMap.keySet().retainAll(arr);
 		}
 
-//		if (newMap != null && newMap.isEmpty()) {
-//			return;
-//		}
+		// if (newMap != null && newMap.isEmpty()) {
+		// return;
+		// }
 
 		Map<Integer, Integer> lastMap = lastValues.get(addr);
 
