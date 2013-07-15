@@ -31,6 +31,7 @@ public class ScheduleFile {
 
 	public static Schedule load() {
 		Schedule schedule = new Schedule(false);
+		schedule.date = new Date();
 
 		try {
 			String text = Utils.readFile(Constants.scheduleFile);

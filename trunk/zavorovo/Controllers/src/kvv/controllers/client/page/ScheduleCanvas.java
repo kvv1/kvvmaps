@@ -7,24 +7,28 @@ import kvv.controllers.shared.ScheduleItem;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Image;
 
 public class ScheduleCanvas extends Composite {
-	private Canvas canvas = Canvas.createIfSupported();
-	private Context2d context = canvas.getContext2d();
-	private int tenMinutesWidth = 6;
-	private int registerHeight = 20;
-	private int topMargin = 4;
-	private int bottomMargin = 16;
+	private final Canvas canvas = Canvas.createIfSupported();
+	private final Context2d context = canvas.getContext2d();
+	private static final int tenMinutesWidth = 6;
+	private static final int registerHeight = 20;
+	private static final int topMargin = 4;
+	private static final int bottomMargin = 16;
 
-	int width;
-	int height;
+	private static final int width = tenMinutesWidth * 6 * 24;
+	private static final int height = registerHeight + bottomMargin + topMargin;
 
-	public ScheduleCanvas() {
+	static Image bgImage;
+
+	public ScheduleCanvas(final MouseMoveHandler mouseMoveHandler) {
 		initWidget(canvas);
-
-		width = getW();
-		height = getH();
 
 		canvas.setWidth(width + "px");
 		canvas.setHeight(height + "px");
@@ -32,66 +36,62 @@ public class ScheduleCanvas extends Composite {
 		canvas.setCoordinateSpaceHeight(height);
 
 		fillBackground();
+
+		if (mouseMoveHandler != null) {
+			canvas.addMouseMoveHandler(mouseMoveHandler);
+			canvas.addMouseOutHandler(new MouseOutHandler() {
+				@Override
+				public void onMouseOut(MouseOutEvent event) {
+					mouseMoveHandler.onMouseMove(null);
+				}
+			});
+		}
+
 	}
 
-	int getW() {
-		return tenMinutesWidth * 6 * 24;
-	}
-
-	int getH() {
-		return registerHeight + bottomMargin + topMargin;
-	}
-
-	int getRegY() {
+	private static int getRegY() {
 		return topMargin;
 	}
 
-	int getY(int val, int minVal, int maxVal, int range) {
+	private static int getY(int val, int minVal, int maxVal, int range) {
 		return registerHeight - range * (val - minVal) / (maxVal - minVal);
 	}
 
 	private void fillBackground() {
+		ImageElement imageElement = ImageElement.as(bgImage.getElement());
+		context.drawImage(imageElement, 0, 0);
+	}
+
+	public void drawMarker(int x) {
+		refresh();
+
 		context.save();
-		context.setFillStyle("#808080");
-		context.fillRect(0, 0, width, height);
+		context.beginPath();
+		context.setStrokeStyle("blue");
+		context.setLineWidth(2);
+
+		context.lineTo(x, 0);
+		context.lineTo(x, height);
+
 		context.stroke();
+		context.closePath();
 		context.restore();
 	}
 
-	public void refresh(ArrayList<ScheduleItem> items) {
+	private ArrayList<ScheduleItem> items;
+	private Date date;
+
+	public void refresh(ArrayList<ScheduleItem> items, Date date) {
+		this.items = items;
+		this.date = date;
+		refresh();
+	}
+
+	private boolean refresh() {
 		fillBackground();
 
-		context.save();
-		context.beginPath();
-		context.setStrokeStyle("black");
-		context.setLineWidth(1);
-
-		for (int x = tenMinutesWidth; x < tenMinutesWidth * 6 * 24; x += tenMinutesWidth) {
-			context.moveTo(x, getRegY());
-			context.lineTo(x, getRegY() + registerHeight);
-		}
-		context.stroke();
-		context.restore();
-
-		context.save();
-		context.beginPath();
-		context.setLineWidth(2);
-		for (int h = 1; h < 24; h++) {
-			int x = h * tenMinutesWidth * 6;
-			context.moveTo(x, getRegY());
-			context.lineTo(x, height - bottomMargin);
-		}
-		context.stroke();
-		context.restore();
-
-		context.save();
-		context.beginPath();
-		// context.setLineWidth(1);
-		for (int h = 1; h < 24; h++) {
-			int x = h * tenMinutesWidth * 6;
-			context.strokeText("" + h, x - 5, height - 3);
-		}
-		context.restore();
+		if (items == null)
+			return false;
 
 		int val = 0;
 		int minVal = Integer.MAX_VALUE;
@@ -126,10 +126,10 @@ public class ScheduleCanvas extends Composite {
 				getY(val, minVal, maxVal, registerHeight));
 
 		context.stroke();
+		context.closePath();
 		context.beginPath();
 		context.setStrokeStyle("yellow");
 
-		Date date = new Date();
 		@SuppressWarnings("deprecation")
 		int minutes = date.getHours() * 60 + date.getMinutes();
 
@@ -137,7 +137,60 @@ public class ScheduleCanvas extends Composite {
 		context.lineTo(minutes * tenMinutesWidth / 10, registerHeight);
 
 		context.stroke();
+		context.closePath();
 		context.restore();
 
+		return true;
 	}
+
+	static {
+		Canvas bgCanvas = Canvas.createIfSupported();
+		Context2d context = bgCanvas.getContext2d();
+
+		bgCanvas.setWidth(width + "px");
+		bgCanvas.setHeight(height + "px");
+		bgCanvas.setCoordinateSpaceWidth(width);
+		bgCanvas.setCoordinateSpaceHeight(height);
+
+		context.save();
+		context.setFillStyle("#808080");
+		context.fillRect(0, 0, width, height);
+		context.stroke();
+		context.restore();
+
+		context.save();
+		context.beginPath();
+		context.setStrokeStyle("black");
+		context.setLineWidth(1);
+
+		for (int x = tenMinutesWidth; x < tenMinutesWidth * 6 * 24; x += tenMinutesWidth) {
+			context.moveTo(x, getRegY());
+			context.lineTo(x, getRegY() + registerHeight);
+		}
+		context.stroke();
+		context.restore();
+
+		context.save();
+		context.beginPath();
+		context.setLineWidth(2);
+		for (int h = 1; h < 24; h++) {
+			int x = h * tenMinutesWidth * 6;
+			context.moveTo(x, getRegY());
+			context.lineTo(x, height - bottomMargin);
+		}
+		context.stroke();
+		context.restore();
+
+		context.save();
+		context.beginPath();
+		// context.setLineWidth(1);
+		for (int h = 1; h < 24; h++) {
+			int x = h * tenMinutesWidth * 6;
+			context.strokeText("" + h, x - 5, height - 3);
+		}
+		context.restore();
+
+		bgImage = new Image(bgCanvas.toDataUrl());
+	}
+
 }

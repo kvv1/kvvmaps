@@ -19,6 +19,8 @@ import kvv.controllers.shared.Schedule;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -62,6 +64,19 @@ public class GSchedulePage extends Composite {
 
 		initWidget(vertPanel);
 
+		final MouseMoveHandler mouseMoveHandler = new MouseMoveHandler() {
+
+			@Override
+			public void onMouseMove(MouseMoveEvent event) {
+				for (AutoRelayControl control : objects.values()) {
+					if (event == null)
+						control.drawMarker(-1);
+					else
+						control.drawMarker(event.getX());
+				}
+			}
+		};
+
 		scheduleService.getSchedule(new CallbackAdapter<Schedule>() {
 			@Override
 			public void onSuccess(final Schedule schedule) {
@@ -87,7 +102,7 @@ public class GSchedulePage extends Composite {
 								for (Register reg : regs) {
 									try {
 										AutoRelayControl control = new AutoRelayControl(
-												reg.addr, reg);
+												reg.addr, reg, mouseMoveHandler);
 										itemPanel.add(control);
 										objects.put(reg.addr, control);
 									} catch (Exception e) {
@@ -109,7 +124,7 @@ public class GSchedulePage extends Composite {
 		for (AutoRelayControl c : objects.values()) {
 			RegisterSchedule registerSchedule = schedule.map.get(c.reg);
 			if (registerSchedule != null)
-				c.refreshSchedule(registerSchedule);
+				c.refreshSchedule(registerSchedule, schedule.date);
 		}
 	}
 

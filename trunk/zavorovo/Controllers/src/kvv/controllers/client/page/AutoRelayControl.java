@@ -1,5 +1,7 @@
 package kvv.controllers.client.page;
 
+import java.util.Date;
+
 import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
@@ -11,6 +13,7 @@ import kvv.controllers.shared.RegisterSchedule;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -22,19 +25,22 @@ public class AutoRelayControl extends ControlComposite {
 	private final ScheduleServiceAsync scheduleService = GWT
 			.create(ScheduleService.class);
 
-	HorizontalPanel framePanel = new HorizontalPanel();
-	HorizontalPanel horizontalPanel = new HorizontalPanel();
-	HorizontalPanel schedulePanel = new HorizontalPanel();
-	ScheduleCanvas scheduleCanvas = new ScheduleCanvas();
+	private final HorizontalPanel framePanel = new HorizontalPanel();
+	private final HorizontalPanel horizontalPanel = new HorizontalPanel();
+	private final HorizontalPanel schedulePanel = new HorizontalPanel();
+	private final ScheduleCanvas scheduleCanvas;
 
-	CheckBox autoButton;
-	SimpleRelayControl relayControl;
+	private final CheckBox autoButton;
+	private final SimpleRelayControl relayControl;
 
-	Register reg;
+	final Register reg;
 
-	public AutoRelayControl(int addr, final Register reg) {
+	public AutoRelayControl(int addr, final Register reg,
+			MouseMoveHandler mouseMoveHandler) {
 		super(addr);
 		this.reg = reg;
+
+		scheduleCanvas = new ScheduleCanvas(mouseMoveHandler);
 
 		// framePanel.setBorderWidth(1);
 		framePanel.add(horizontalPanel);
@@ -85,9 +91,9 @@ public class AutoRelayControl extends ControlComposite {
 		initWidget(framePanel);
 	}
 
-	public void refreshSchedule(RegisterSchedule registerSchedule) {
+	public void refreshSchedule(RegisterSchedule registerSchedule, Date date) {
 		autoButton.setEnabled(true);
-		scheduleCanvas.refresh(registerSchedule.items);
+		scheduleCanvas.refresh(registerSchedule.items, date);
 		autoButton.setValue(registerSchedule.enabled);
 		relayControl.setEnabled(!registerSchedule.enabled);
 	}
@@ -96,5 +102,9 @@ public class AutoRelayControl extends ControlComposite {
 		schedulePanel.clear();
 		if (value)
 			schedulePanel.add(scheduleCanvas);
+	}
+
+	public void drawMarker(int x) {
+		scheduleCanvas.drawMarker(x);
 	}
 }
