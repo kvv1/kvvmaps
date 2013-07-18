@@ -40,21 +40,21 @@ public class Scheduler extends Thread {
 	public void run() {
 		int regIndex = 0;
 		while (!stopped) {
-			try {
-				synchronized (this) {
-					Schedule schedule = ScheduleFile.load();
-					ArrayList<Register> regs = new ArrayList<Register>(
-							schedule.map.keySet());
-					Collections.sort(regs, new Comparator<Register>() {
-						@Override
-						public int compare(Register o1, Register o2) {
-							return o1.name.compareTo(o2.name);
-						}
-					});
+			synchronized (this) {
+				Schedule schedule = ScheduleFile.load();
+				ArrayList<Register> regs = new ArrayList<Register>(
+						schedule.map.keySet());
+				Collections.sort(regs, new Comparator<Register>() {
+					@Override
+					public int compare(Register o1, Register o2) {
+						return o1.name.compareTo(o2.name);
+					}
+				});
 
-					if (regIndex >= regs.size())
-						regIndex = 0;
+				if (regIndex >= regs.size())
+					regIndex = 0;
 
+				try {
 					if (regs.size() > regIndex) {
 						Register reg = regs.get(regIndex);
 						RegisterSchedule registerSchedule = schedule.map
@@ -68,11 +68,11 @@ public class Scheduler extends Thread {
 							sleep(1000);
 						}
 					}
-
-					regIndex++;
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
+
+				regIndex++;
 			}
 		}
 	}
