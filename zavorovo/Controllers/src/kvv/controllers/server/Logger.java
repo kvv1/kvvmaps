@@ -35,14 +35,18 @@ public class Logger extends Thread {
 						Constants.controllersFile, ControllerDescr[].class);
 
 				for (ControllerDescr c : controllers) {
-					if (c != null) {
-						Thread.sleep(1000);
-						if (c.type == Type.MU110_8)
-							ControllersServiceImpl.controller.getRegs(c.addr,
-									0, 8);
-						else
-							ControllersServiceImpl.controller
-									.getAllRegs(c.addr);
+					try {
+						if (c != null) {
+							Thread.sleep(1000);
+							if (c.type == Type.MU110_8)
+								ControllersServiceImpl.controller.getRegs(
+										c.addr, 0, 8);
+							else
+								ControllersServiceImpl.controller
+										.getAllRegs(c.addr);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
 
