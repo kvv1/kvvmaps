@@ -20,6 +20,10 @@ public class BusServlet extends HttpServlet {
 		resp.setContentType("text/html");
 		boolean waitResponse = Boolean.valueOf(req.getParameter("response"));
 		String sbody = req.getParameter("body");
+		int attempts = 3;
+		String sAttempts = req.getParameter("attempts");
+		if (sAttempts != null)
+			attempts = Integer.parseInt(sAttempts);
 		String[] body1 = sbody.split(",");
 		byte[] body = new byte[body1.length];
 		for (int i = 0; i < body1.length; i++)
@@ -28,7 +32,7 @@ public class BusServlet extends HttpServlet {
 		byte[] res;
 		try {
 			res = PacketTransceiver.getInstance()
-					.sendPacket(body, waitResponse);
+					.sendPacket(body, waitResponse, attempts);
 		} catch (Exception e) {
 			// e.printStackTrace();
 			throw new IOException(e);

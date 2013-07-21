@@ -19,9 +19,9 @@ import kvv.controllers.controller.BusLogger;
 public class PacketTransceiver {
 	private final static int BAUD = 9600;
 
-	private static final long PACKET_TIMEOUT = 500;
+	private static final long PACKET_TIMEOUT = 200;
 
-	private static final long BYTE_TIMEOUT = 100;
+	private static final long BYTE_TIMEOUT = 50;
 
 	private CommPortIdentifier pID;
 	private SerialPort serPort;
@@ -75,10 +75,10 @@ public class PacketTransceiver {
 		serPort.setRTS(true);
 	}
 
-	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse)
-			throws IOException {
+	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse,
+			int attempts) throws IOException {
 
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < attempts - 1; i++) {
 			try {
 				return _sendPacket(data, waitResponse);
 			} catch (IOException e) {

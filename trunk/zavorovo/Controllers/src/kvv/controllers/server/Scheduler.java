@@ -67,6 +67,8 @@ public class Scheduler extends Thread {
 							exec(reg, value);
 							sleep(1000);
 						}
+					} else {
+						sleep(1000);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
