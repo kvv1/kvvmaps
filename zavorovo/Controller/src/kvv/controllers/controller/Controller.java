@@ -9,6 +9,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.RegType;
@@ -30,7 +32,7 @@ public class Controller implements IController { // 9164642959 7378866
 		byte[] req = new byte[] { (byte) Command.CMD_MODBUS_SETREGS,
 				(byte) (reg >> 8), (byte) reg, 0, 1, 2, (byte) (val >> 8),
 				(byte) val };
-		byte[] resp = send(url, addr, req);
+		byte[] resp = send(addr, req);
 
 		if (addr == 0)
 			return;
@@ -42,7 +44,7 @@ public class Controller implements IController { // 9164642959 7378866
 	public int getReg(int addr, int reg) throws IOException {
 		byte[] req = new byte[] { (byte) Command.CMD_MODBUS_GETREGS,
 				(byte) (reg >> 8), (byte) reg, 0, 1 };
-		byte[] resp = send(url, addr, req);
+		byte[] resp = send(addr, req);
 		return resp[1] * 256 + (resp[2] & 0xFF);
 	}
 
@@ -50,7 +52,7 @@ public class Controller implements IController { // 9164642959 7378866
 	public int[] getRegs(int addr, int reg, int n) throws Exception {
 		byte[] req = new byte[] { (byte) Command.CMD_MODBUS_GETREGS,
 				(byte) (reg >> 8), (byte) reg, 0, (byte) n };
-		byte[] resp = send(url, addr, req);
+		byte[] resp = send(addr, req);
 		checkErr(Command.CMD_MODBUS_GETREGS, resp);
 
 		int[] res = new int[n];
@@ -62,8 +64,7 @@ public class Controller implements IController { // 9164642959 7378866
 
 	@Override
 	public AllRegs getAllRegs(int addr) throws IOException {
-		byte[] resp = send(url, addr,
-				new byte[] { (byte) Command.CMD_GETALLREGS });
+		byte[] resp = send(addr, new byte[] { (byte) Command.CMD_GETALLREGS });
 		checkErr(Command.CMD_GETALLREGS, resp);
 
 		ArrayList<RegisterUI> ui = new ArrayList<RegisterUI>();
@@ -110,7 +111,7 @@ public class Controller implements IController { // 9164642959 7378866
 		req.write((byte) (crc >> 8));
 		req.write((byte) crc);
 
-		byte[] resp = send(url, addr, req.toByteArray());
+		byte[] resp = send(addr, req.toByteArray());
 		checkErr(Command.CMD_UPLOAD_END, resp);
 	}
 
@@ -120,7 +121,7 @@ public class Controller implements IController { // 9164642959 7378866
 		req.write((byte) (start >> 8));
 		req.write((byte) start);
 		req.write(data);
-		byte[] resp = send(url, addr, req.toByteArray());
+		byte[] resp = send(addr, req.toByteArray());
 		checkErr(Command.CMD_UPLOAD, resp);
 	}
 
@@ -147,16 +148,32 @@ public class Controller implements IController { // 9164642959 7378866
 	//
 	// }
 
-	public static byte[] send(String url, int addr, byte[] bytes)
-			throws IOException {
+	private Set<Integer> failedAddrs = new HashSet<Integer>();
+
+	public byte[] send(int addr, byte[] bytes) throws IOException {
 
 		ADU adu = new ADU(addr, new RTU(bytes));
-		byte[] packetReceived = sendBus(url, adu.toBytes(), addr != 0);
+
+		byte[] packetReceived;
+
+		try {
+			boolean failed = failedAddrs.contains(addr);
+			packetReceived = sendBus(url, adu.toBytes(), addr != 0, failed ? 1
+					: null);
+		} catch (IOException e) {
+			failedAddrs.add(addr);
+			throw e;
+		}
+
+		failedAddrs.remove(addr);
+		
 		if (addr == 0)
 			return null;
 		ADU resp = ADU.fromBytes(packetReceived);
 		if (resp != null && resp.addr == addr)
 			return resp.rtu.toBytes();
+
+		failedAddrs.add(addr);
 
 		// error
 		String msg = "wrong response from addr: " + addr;
@@ -169,9 +186,12 @@ public class Controller implements IController { // 9164642959 7378866
 		throw new IOException(msg);
 	}
 
-	public static byte[] sendBus(String url, byte[] bytes, boolean response)
-			throws IOException {
-		String url1 = url + "?" + (response ? "response=true&" : "") + "body=";
+	public static byte[] sendBus(String url, byte[] bytes, boolean response,
+			Integer attempts) throws IOException {
+		String url1 = url + "?response=" + response;
+		if (attempts != null)
+			url1 += "&attempts=" + attempts;
+		url1 += "&body=";
 		String sep = "";
 		for (byte b : bytes) {
 			url1 += sep + ((int) b & 255);
