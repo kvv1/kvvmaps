@@ -8,6 +8,7 @@ enum {
 };
 
 #define BINARY_DATA           
+//#define MY_ADDR 31
 #define MY_ADDR 20
 
 #define TX_START() setPort(PIN_485, 1)
