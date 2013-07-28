@@ -109,6 +109,7 @@ int getTemperature() {
 }
 
 int temperature = -9999;
+
 void ds18b20_step(int ms) {
 	static int state;
 	static int time;
@@ -134,7 +135,7 @@ void ds18b20_step(int ms) {
 		break;
 	case 3:
 		time += ms;
-		if (time < 100)
+		if (time < 200)
 			break;
 		state++;
 		break;
