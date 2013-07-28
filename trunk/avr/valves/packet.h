@@ -1,4 +1,4 @@
-void packetReceived(char* data, uint8_t len);
+void packetReceived(uint8_t* data, uint8_t len);
 void sendPacket(uint8_t* data, uint16_t len);
 
 uint16_t sendPacketStart();
