@@ -1,6 +1,8 @@
 #ifndef _ACTUATOR_
 #define _ACTUATOR_
 
+#include "object.h"
+
 typedef struct {
     ObjectHeader h;
     PORTPIN pinOut0;

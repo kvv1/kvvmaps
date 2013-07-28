@@ -1,4 +1,5 @@
 #include "common.h"
+#include "timer.h"
 #include "actuator.h"
 #include "1w.h"
 
@@ -45,4 +46,8 @@ void createObjects() {
 }
 
 void handleRxCmd(char* cmd) {
+}
+
+int main() {
+	return commonMain();
 }

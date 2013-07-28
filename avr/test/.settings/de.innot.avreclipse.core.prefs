@@ -1,5 +1,5 @@
-#Mon May 13 18:24:00 MSD 2013
-avrtarget/ClockFrequency=2000000
+#Sat Jul 20 22:27:40 MSD 2013
+avrtarget/ClockFrequency=8000000
 avrtarget/ExtRAMSize=0
 avrtarget/ExtendedRAM=false
 avrtarget/MCUType=atmega8

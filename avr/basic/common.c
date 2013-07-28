@@ -2,7 +2,6 @@
 #include <util/atomic.h>
 #include <util/delay.h>
 #include "common.h"
-#include "message.h"
 #include "myio.h"
 #include "ee.h"
 
@@ -50,12 +49,10 @@ uint16_t crc16(uint8_t * buf, int nbytes) {
 void foo() {
 }
 
-void handleTimers();
-
 void init_adc(char inputs, unsigned char vref_type);
 void timer0_init();
 
-int main(void) {
+int commonMain(void) {
 	ee_magic = MAGIC16;
 
 	//	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
@@ -125,18 +122,25 @@ int main(void) {
 	createObjects();
 
 	while (1) {
-		Message msg;
-		handleTimers();
-		handlePins();
-		if (getMessage(&msg)) {
-			if (msg.target)
-				msg.target->handler(&msg);
-		} else {
-			set_sleep_mode(SLEEP_MODE_IDLE);
-			sleep_enable();
-			sleep_cpu();
-			sleep_disable();
+		char tticks = getClearTimerTicks();
+		while (tticks) {
+			tticks--;
+			ds18b20_step(TIME_UNIT);
+			vmStep(TIME_UNIT);
+			handleTimers(TIME_UNIT);
 		}
+		handleIO();
+		handlePins();
+		handleMessages();
+//		if (getMessage(&msg)) {
+//			if (msg.target)
+//				msg.target->handler(&msg);
+//		} else {
+//			set_sleep_mode(SLEEP_MODE_IDLE);
+//			sleep_enable();
+//			sleep_cpu();
+//			sleep_disable();
+//		}
 	}
 	return 0;
 }

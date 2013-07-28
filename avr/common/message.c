@@ -70,6 +70,16 @@ char getMessage(Message* msg) {
 
 	return 1;
 }
+
+void handleMessages() {
+	Message msg;
+	if (getMessage(&msg)) {
+		if (msg.target)
+			msg.target->handler(&msg);
+	}
+}
+
+
 /*
  void removeMessage(char cmd, struct _ObjectHeader* target) {
  char sreg_val = qcli();

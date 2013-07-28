@@ -62,65 +62,53 @@ void handleRxCmd(char* cmd, unsigned char len);
 #define RXBUFSIZE 40
 #define TX_BUFFER_SIZE 32
 
-static char rxBuf1[RXBUFSIZE];
-static char rxBuf2[RXBUFSIZE];
-
+static char rxBuf[RXBUFSIZE];
 static unsigned char rxIdx;
-static char* buf = rxBuf1;
-static char* oldBuf = rxBuf2;
+static char rxBufReady;
 
 #ifdef BINARY_DATA
 
 static char receiveTimer;
 
-void iomillisCli() {
-	if (receiveTimer != 0) {
-		receiveTimer--;
-		if (receiveTimer == 0) {
-			char* temp = buf;
-			unsigned char len = rxIdx;
-			buf = oldBuf;
-			oldBuf = temp;
-			rxIdx = 0;
-			NONATOMIC_BLOCK(NONATOMIC_FORCEOFF) {
-				handleRxCmd(oldBuf, len);
-			}
-		}
-	}
+void ioMillisCli() {
+	if (receiveTimer != 0)
+		if (--receiveTimer == 0)
+			rxBufReady = 1;
 }
 
 #else
-void iomillisCli() {
+void ioMillisCli() {
 }
 #endif
+
+void handleIO() {
+	if (rxBufReady) {
+		handleRxCmd(rxBuf, rxIdx);
+		rxIdx = 0;
+		rxBufReady = 0;
+	}
+}
 
 ISR (USART_RXC_vect) {
 	char status = UCSRA;
 	char data = UDR;
 
 #ifdef BINARY_DATA
-	if ((status & (FRAMING_ERROR | PARITY_ERROR | DATA_OVERRUN)) == 0) {
-		buf[rxIdx] = data;
+//	PORTD |= (1 << 2);
+	if (!rxBufReady
+			&& (status & (FRAMING_ERROR | PARITY_ERROR | DATA_OVERRUN)) == 0) {
+		rxBuf[rxIdx] = data;
 		if (rxIdx < RXBUFSIZE - 1)
 			rxIdx++;
 		receiveTimer = 3;
 	}
+//	PORTD &= ~(1 << 2);
 #else
-	if ((status & (FRAMING_ERROR | PARITY_ERROR | DATA_OVERRUN)) == 0) {
+	if (!rxBufReady && (status & (FRAMING_ERROR | PARITY_ERROR | DATA_OVERRUN)) == 0) {
 		if (data < ' ') {
-			if (rxIdx > 0) {
-				char* temp = buf;
-				unsigned char len = rxIdx;
-				buf = oldBuf;
-				oldBuf = temp;
-				oldBuf[rxIdx] = '\0';
-				rxIdx = 0;
-				NONATOMIC_BLOCK(NONATOMIC_FORCEOFF) {
-					handleRxCmd(oldBuf, len);
-				}
-			}
+			rxBufReady = 1;
 		} else {
-			buf[rxIdx] = data;
+			rxBuf[rxIdx] = data;
 			if (rxIdx < RXBUFSIZE - 1)
 			rxIdx++;
 		}
