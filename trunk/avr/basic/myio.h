@@ -12,11 +12,14 @@
 
 void uart_init();
 
+void handleIO();
+void ioMillisCli();
+
 void uart_putchar(char c);
 
-void print2( char* format, int n1, int n2);
-void print1( char* format, int n1);
-void print0( char* format);
+void print2(char* format, int n1, int n2);
+void print1(char* format, int n1);
+void print0(char* format);
 
 #ifdef TRACE
 #define trace0(x) print0(x)
@@ -27,6 +30,5 @@ void print0( char* format);
 #define trace1(x,y)
 #define trace2(x,y,z)
 #endif
-
 
 #endif /* MYIO_H_ */

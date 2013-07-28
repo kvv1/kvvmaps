@@ -1,4 +1,6 @@
 #include "common.h"
+#include "message.h"
+#include "timer.h"
 #include "actuator.h"
 
 //#define trace0(a)

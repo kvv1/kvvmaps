@@ -1,10 +1,17 @@
-#ifndef __TIMER0__
-#define __TIMER0__
+/*
+ * timer.h
+ *
+ *  Created on: 28.07.2013
+ *      Author: kvv
+ */
+
+#ifndef TIMER_H_
+#define TIMER_H_
 
 #include "object.h"
 
-long getTimeMillis();
-long getTimeMillisCli();
+//long getTimeMillis();
+//long getTimeMillisCli();
 
 typedef struct {
 }*TIMERTYPE;
@@ -19,4 +26,6 @@ void setTimerParam(ObjectHeader* obj, char cmd, TIMERTYPE type, long ms, int par
 		int param2);
 void killTimer(ObjectHeader* obj, char cmd);
 
-#endif
+void handleTimers(int ms);
+
+#endif /* TIMER_H_ */

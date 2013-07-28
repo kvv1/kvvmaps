@@ -77,7 +77,7 @@ int main(void) {
 	while (1) {
 		_delay_ms(500);
 
-		print0("012345678901234567890123456789abcdefgh\n");
+		//print0("012345678901234567890123456789abcdefgh\n");
 
 		ds18b20_step(500);
 		print1("%d ", temperature);
