@@ -3,8 +3,6 @@
 
 static char targetAddr;
 
-void packetReceived(char* data, uint8_t len);
-
 void handleRxCmd(char* data, unsigned char len) {
 	if (len < 3)
 		return;
