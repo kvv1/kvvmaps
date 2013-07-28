@@ -24,6 +24,11 @@ uint16_t sendByte(uint8_t b, uint16_t S) {
 	return crc16_step(b, S);
 }
 
+uint16_t sendWord(uint16_t w, uint16_t S) {
+	S = sendByte(w >> 8, S);
+	return sendByte(w, S);
+}
+
 uint16_t sendPacketStart() {
 	return sendByte(targetAddr, CRC16_INIT);
 }
@@ -45,4 +50,10 @@ void sendPacket(uint8_t* data, uint16_t len) {
 	S = sendPacketBodyPart(data, len, S);
 	sendPacketEnd(S);
 }
+
+int fetch(void* a) {
+	return (*((uint8_t*) a) << 8) | *((uint8_t*) a + 1);
+}
+
+
 

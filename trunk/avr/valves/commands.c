@@ -132,36 +132,35 @@ char setReg(int reg, int val) {
 }
 
 static uint8_t regs[] PROGMEM
-		= { REG_RELAYS, REG_INPUTS, REG_TEMP, REG_VMONOFF, REG_VMSTATE,
-				REG_ADC0, REG_ADC1, REG_ADC2, REG_ADC3, REG_RAM0, REG_RAM1,
-				REG_RAM2, REG_RAM3, REG_EEPROM0, REG_EEPROM1, REG_EEPROM2,
-				REG_EEPROM3, };
+= { REG_RELAYS, REG_INPUTS, REG_TEMP, REG_VMONOFF, REG_VMSTATE, REG_ADC0,
+		REG_ADC1, REG_ADC2, REG_ADC3, REG_RAM0, REG_RAM1, REG_RAM2, REG_RAM3,
+		REG_EEPROM0, REG_EEPROM1, REG_EEPROM2, REG_EEPROM3, };
 
 void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 //	print2("handleCmd %d %d ", *cmd, cmdlen);
 	uint8_t command = cmd[0];
 	switch (command) {
 	case CMD_MODBUS_SETREGS: {
-		int reg = (cmd[1] << 8) + cmd[2];
+		int reg = fetch(cmd + 1);//(cmd[1] << 8) + cmd[2];
 		int n = cmd[4];
 		uint8_t* data = cmd + 6;
 		char res = 1;
 		while (n--) {
-			res &= setReg(reg++, (data[0] << 8) | data[1]);
+			res &= setReg(reg++, fetch(data)/*(data[0] << 8) | data[1]*/);
 			data += 2;
 		}
 		uint16_t S = sendPacketStart();
 		if (res) {
 			S = sendPacketBodyPart(cmd, 5, S);
 		} else {
-			static uint8_t resp[] = { CMD_MODBUS_SETREGS | 0x80, 2 };
-			S = sendPacketBodyPart(resp, 2, S);
+			S = sendByte(CMD_MODBUS_SETREGS | 0x80, S);
+			S = sendByte(2, S);
 		}
 		sendPacketEnd(S);
 		break;
 	}
 	case CMD_MODBUS_GETREGS: {
-		int reg = (cmd[1] << 8) + cmd[2];
+		int reg = fetch(cmd + 1);//(cmd[1] << 8) + cmd[2];
 		int n = cmd[4];
 		uint16_t S = sendPacketStart();
 		S = sendByte(command, S);
@@ -169,8 +168,9 @@ void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 		while (n--) {
 			int val;
 			getReg(reg++, &val);
-			S = sendByte(val >> 8, S);
-			S = sendByte(val, S);
+			S = sendWord(val, S);
+			//S = sendByte(val >> 8, S);
+			//S = sendByte(val, S);
 		}
 		sendPacketEnd(S);
 		break;
@@ -196,11 +196,10 @@ void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 			uint8_t reg = pgm_read_byte(regs + i);
 			int16_t val;
 			getReg(reg, &val);
-			uint8_t buf[3];
-			buf[0] = reg;
-			buf[1] = val >> 8;
-			buf[2] = val;
-			S = sendPacketBodyPart(buf, 3, S);
+			S = sendByte(reg, S);
+			S = sendWord(val, S);
+			//S = sendByte(val >> 8, S);
+			//S = sendByte(val, S);
 		}
 
 		sendPacketEnd(S);
@@ -213,7 +212,7 @@ void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 			sendError(command, ERR_WRONG_CMD_FORMAT);
 			return;
 		}
-		addr = (cmd[1] << 8) + cmd[2];
+		addr = fetch(cmd + 1); //(cmd[1] << 8) + cmd[2];
 
 		if (addr + len > VMCODE_SIZE) {
 			sendError(command, ERR_WRONG_CMD_FORMAT);
@@ -227,8 +226,8 @@ void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 		break;
 	}
 	case CMD_UPLOAD_END: {
-		uint16_t codeLen = (cmd[1] << 8) + cmd[2];
-		uint16_t codeCRC = (cmd[3] << 8) + cmd[4];
+		uint16_t codeLen = fetch(cmd+1); //(cmd[1] << 8) + cmd[2];
+		uint16_t codeCRC = fetch(cmd+3); //(cmd[3] << 8) + cmd[4];
 		if (codeLen == 0) {
 			setCodeLen(codeLen);
 			sendOk(command);
