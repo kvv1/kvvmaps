@@ -5,10 +5,9 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import kvv.controllers.server.utils.Utils;
@@ -56,25 +55,22 @@ public class Logger extends Thread {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
-	private static PrintStream getLogStream() {
-		Date date = new Date();
-		date.setHours(0);
-		date.setMinutes(0);
-		date.setSeconds(0);
-
+	private static PrintStream getLogStream(Date date) {
 		try {
 			new File(Constants.ROOT + "/history").mkdir();
 			DateFormat df = new SimpleDateFormat("yyyy_MM_dd");
-			return new PrintStream(new FileOutputStream(Constants.ROOT
-					+ "/history/" + df.format(date), true), true,
-					"Windows-1251");
+			PrintStream ps = new PrintStream(new FileOutputStream(
+					Constants.ROOT + "/history/" + df.format(date), true),
+					true, "Windows-1251");
+			return ps;
 		} catch (Exception e) {
 			return null;
 		}
 	}
 
-	static DateFormat df = new SimpleDateFormat("yyyy_MM_dd");
+	private static DateFormat df = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+	private static Map<String, Integer> lastValues = new HashMap<String, Integer>();
+	private static Date lastDate;
 
 	public static void main(String[] args) {
 		Date date = new Date();
@@ -83,63 +79,62 @@ public class Logger extends Thread {
 
 	}
 
-	private static void logMap(int addr, Map<Integer, Integer> map) {
-		PrintStream ps = getLogStream();
-		if (ps == null)
-			return;
+	@SuppressWarnings("deprecation")
+	private static synchronized void logValue(String register, Integer value) {
+		Date date = new Date();
+		Date date1 = new Date(date.getTime());
+		date.setHours(0);
+		date.setMinutes(0);
+		date.setSeconds(0);
 
-		if (map == null)
-			ps.println(df.format(new Date()) + " " + addr);
-		else {
-			ps.print(df.format(new Date()) + " " + addr);
-			for (Integer a : map.keySet())
-				ps.print(" " + a + "=" + map.get(a));
-			ps.println();
+		if (!date.equals(lastDate)) {
+			PrintStream ps = getLogStream(date);
+			logValues(ps, date, lastValues);
+			ps.close();
+			lastDate = date;
 		}
 
-		ps.close();
+		Integer lastValue = lastValues.get(register);
+		if (value == null && lastValue != null || value != null
+				&& !value.equals(lastValue)) {
+			PrintStream ps = getLogStream(date);
+			logValue(ps, date1, register, value);
+			ps.close();
+		}
+
 	}
 
-	static Map<Integer, Map<Integer, Integer>> lastValues = new HashMap<Integer, Map<Integer, Integer>>();
-
-	public static void log(int addr, Map<Integer, Integer> newMap) {
-		if (newMap != null) {
-			newMap = new HashMap<Integer, Integer>(newMap);
-			Map<String, Register> regs = Controllers.getRegisters();
-			List<Integer> arr = new ArrayList<Integer>();
-			for (Register r : regs.values())
-				arr.add(r.register);
-			newMap.keySet().retainAll(arr);
+	private static void logValue(PrintStream ps, Date date, String register,
+			Integer value) {
+		if (value == null)
+			ps.println(df.format(date) + " " + register);
+		else {
+			ps.println(df.format(date) + " " + register + "=" + value);
 		}
+	}
 
-		// if (newMap != null && newMap.isEmpty()) {
-		// return;
-		// }
-
-		Map<Integer, Integer> lastMap = lastValues.get(addr);
-
-		if (newMap == null && lastMap != null) {
-			logMap(addr, null);
-			lastValues.put(addr, null);
-		} else if (newMap != null && lastMap == null) {
-			logMap(addr, newMap);
-			lastValues.put(addr, newMap);
-		} else if (newMap != null) {
-			Map<Integer, Integer> map = new HashMap<Integer, Integer>();
-			for (Integer a : newMap.keySet())
-				if (!newMap.get(a).equals(lastMap.get(a))) {
-					map.put(a, newMap.get(a));
-					lastMap.put(a, newMap.get(a));
-				}
-			if (!map.isEmpty())
-				logMap(addr, map);
-		}
+	private static void logValues(PrintStream ps, Date date,
+			Map<String, Integer> values) {
+		for (String reg : values.keySet())
+			logValue(ps, date, reg, values.get(reg));
 	}
 
 	public static void log(int addr, int reg, int val) {
-		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
-		map.put(reg, val);
-		log(addr, map);
+		Register register = Controllers.getRegister(addr, reg);
+		if (register == null)
+			return;
+		logValue(register.name, val);
+	}
+
+	public static void log(int addr, Map<Integer, Integer> values) {
+		if (values == null) {
+			Collection<Register> regs = Controllers.getRegisters(addr);
+			for (Register reg : regs)
+				logValue(reg.name, null);
+			return;
+		}
+		for (int reg : values.keySet())
+			log(addr, reg, values.get(reg));
 	}
 
 }
