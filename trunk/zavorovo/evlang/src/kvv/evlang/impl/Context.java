@@ -48,6 +48,15 @@ public class Context {
 		// registers.put("REG_EEPROM6", Register.REG_EEPROM6);
 		// registers.put("REG_EEPROM7", Register.REG_EEPROM7);
 
+		registers.put("REG_ADC0", new RegisterDescr(Register.REG_ADC0, true,
+				false));
+		registers.put("REG_ADC1", new RegisterDescr(Register.REG_ADC1, true,
+				false));
+		registers.put("REG_ADC2", new RegisterDescr(Register.REG_ADC2, true,
+				false));
+		registers.put("REG_ADC3", new RegisterDescr(Register.REG_ADC3, true,
+				false));
+
 		registers.put("REG_IN0", new RegisterDescr(Register.REG_IN0, true,
 				false));
 		registers.put("REG_IN1", new RegisterDescr(Register.REG_IN1, true,
@@ -85,7 +94,7 @@ public class Context {
 	}
 
 	protected List<RegisterUI> registerUIs = new ArrayList<RegisterUI>();
-	
+
 	protected void checkROReg(RegisterDescr descr) throws ParseException {
 		if (descr.readonly)
 			throw new ParseException("register is read only");
