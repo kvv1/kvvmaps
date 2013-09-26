@@ -11,6 +11,7 @@ public class EG1 extends EG implements EG1Constants {
   public void parse() throws ParseException
   {
     file();
+    buildInit();
     check();
     checkStack();
   }
@@ -26,11 +27,10 @@ public class EG1 extends EG implements EG1Constants {
     case ONSET:
     case ONCHANGE:
     case CONST:
-    case MAIN:
-    case PROC:
-    case FUNC:
     case CHECKBOX:
     case TEXT:
+    case INT:
+    case VOID:
       line();
       file();
       break;
@@ -63,14 +63,11 @@ public class EG1 extends EG implements EG1Constants {
     case ONCHANGE:
       onchange();
       break;
-    case PROC:
+    case VOID:
       proc();
       break;
-    case FUNC:
+    case INT:
       func();
-      break;
-    case MAIN:
-      main();
       break;
     default:
       jj_la1[1] = jj_gen;
@@ -82,88 +79,85 @@ public class EG1 extends EG implements EG1Constants {
   final public void proc() throws ParseException {
   Token name;
   Code bytes;
-    jj_consume_token(PROC);
+    locals = new LocalListDef();
+    jj_consume_token(VOID);
     name = jj_consume_token(ID);
-    jj_consume_token(45);
+    jj_consume_token(44);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case ID:
-      args = argListDef();
+    case INT:
+      argListDef();
       break;
     default:
       jj_la1[2] = jj_gen;
       ;
     }
-    jj_consume_token(46);
+    jj_consume_token(45);
     bytes = stmtBlock();
-    if (args.getArgCnt() == 0) bytes.add(BC.RET);
-    else bytes.add(BC.RET_N);
-    bytes.add(args.getArgCnt());
-    Func func = getCreateFunc(name.image, args.getArgCnt(), false);
-    func.code = new CodeRef(bytes);
-    args.clear();
-    System.out.println("proc " + name.image + " " + bytes.size());
+    Code.proc(this, name.image, bytes);
   }
 
   final public void func() throws ParseException {
   Token name;
-  Code bytes;
-    jj_consume_token(FUNC);
+  Expr bytes;
+    locals = new LocalListDef();
+    jj_consume_token(INT);
     name = jj_consume_token(ID);
-    jj_consume_token(45);
+    jj_consume_token(44);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case ID:
-      args = argListDef();
+    case INT:
+      argListDef();
       break;
     default:
       jj_la1[3] = jj_gen;
       ;
     }
+    jj_consume_token(45);
     jj_consume_token(46);
-    jj_consume_token(47);
     bytes = expr();
-    jj_consume_token(48);
-    if (args.getArgCnt() == 0) bytes.add(BC.RETI);
-    else bytes.add(BC.RETI_N);
-    bytes.add(args.getArgCnt());
-    Func func = getCreateFunc(name.image, args.getArgCnt(), true);
-    func.code = new CodeRef(bytes);
-    args.clear();
-    System.out.println("func " + name.image + " " + bytes.size());
+    jj_consume_token(47);
+    Code.func(this, name.image, bytes.getCode());
   }
 
-  final public ArgListDef argListDef() throws ParseException {
-  ArgListDef args = new ArgListDef();
+  final public void argListDef() throws ParseException {
   Token arg;
+    jj_consume_token(INT);
     arg = jj_consume_token(ID);
-    args.add(arg.image);
+    locals.add(arg.image);
     label_1:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 49:
+      case 48:
         ;
         break;
       default:
         jj_la1[4] = jj_gen;
         break label_1;
       }
-      jj_consume_token(49);
+      jj_consume_token(48);
+      jj_consume_token(INT);
       arg = jj_consume_token(ID);
-      args.add(arg.image);
+      locals.add(arg.image);
     }
-    args.endOfArgs();
-    {if (true) return args;}
-    throw new Error("Missing return statement in function");
+    locals.endOfArgs();
   }
 
-  final public void main() throws ParseException {
-  Code code;
-    jj_consume_token(MAIN);
-    code = stmtBlock();
-    code.add(BC.RET);
-    Func func = new Func("", 0, 0, false);
-    func.code = new CodeRef(code);
-    funcValues.set(0, func);
-    System.out.println("main " + code.size());
+  final public void localListDef() throws ParseException {
+  Token arg;
+    label_2:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case INT:
+        ;
+        break;
+      default:
+        jj_la1[5] = jj_gen;
+        break label_2;
+      }
+      jj_consume_token(INT);
+      arg = jj_consume_token(ID);
+      jj_consume_token(47);
+      locals.add(arg.image);
+    }
   }
 
   final public void constant() throws ParseException {
@@ -171,11 +165,11 @@ public class EG1 extends EG implements EG1Constants {
   Token value;
     jj_consume_token(CONST);
     name = jj_consume_token(ID);
-    jj_consume_token(47);
+    jj_consume_token(46);
     value = jj_consume_token(NUMBER);
-    jj_consume_token(48);
+    jj_consume_token(47);
     checkName(name.image);
-    constants.put(name.image, Integer.parseInt(value.image));
+    constants.put(name.image, Short.parseShort(value.image));
   }
 
   final public void uiDecl() throws ParseException {
@@ -185,7 +179,7 @@ public class EG1 extends EG implements EG1Constants {
     type = uitype();
     name = jj_consume_token(ID);
     text = jj_consume_token(STRING);
-    jj_consume_token(48);
+    jj_consume_token(47);
     setUI(name.image, text.image.replace("\u005c"", ""), type);
   }
 
@@ -201,7 +195,7 @@ public class EG1 extends EG implements EG1Constants {
     {if (true) return RegType.textRW;}
       break;
     default:
-      jj_la1[5] = jj_gen;
+      jj_la1[6] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -211,31 +205,34 @@ public class EG1 extends EG implements EG1Constants {
   final public void register() throws ParseException {
   Token regName;
   Token regNum = null;
+  Token initVal = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case REG:
       jj_consume_token(REG);
       regName = jj_consume_token(ID);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 45:
-        jj_consume_token(45);
+      case 44:
+        jj_consume_token(44);
         regNum = jj_consume_token(ID);
-        jj_consume_token(46);
+        jj_consume_token(45);
         break;
       default:
-        jj_la1[6] = jj_gen;
+        jj_la1[7] = jj_gen;
         ;
       }
-      jj_consume_token(48);
-    newRegister(regName, regNum, false);
+      jj_consume_token(47);
+    newRegister(regName.image, regNum == null ? null : regNum.image, false, null);
       break;
     case EEREG:
       jj_consume_token(EEREG);
       regName = jj_consume_token(ID);
-      jj_consume_token(48);
-    newRegister(regName, null, true);
+      jj_consume_token(46);
+      initVal = jj_consume_token(NUMBER);
+      jj_consume_token(47);
+    newRegister(regName.image, null, true, Short.parseShort(initVal.image));
       break;
     default:
-      jj_la1[7] = jj_gen;
+      jj_la1[8] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -244,64 +241,61 @@ public class EG1 extends EG implements EG1Constants {
   final public void timer() throws ParseException {
   Token name;
   Code bytes;
+    locals = new LocalListDef();
     jj_consume_token(TIMER);
     name = jj_consume_token(ID);
     bytes = stmtBlock();
-    bytes.add(BC.RET);
-    Timer timer = getCreateTimer(name.image);
-    timer.handler = new CodeRef(bytes);
-    System.out.println("timer " + name.image + " " + bytes.size());
+    Code.timer(this, name.image, bytes);
   }
 
   final public void onset() throws ParseException {
-  Code cond;
+  Expr cond;
   Code bytes;
+    locals = new LocalListDef();
     jj_consume_token(ONSET);
-    jj_consume_token(45);
+    jj_consume_token(44);
     cond = expr();
-    jj_consume_token(46);
+    jj_consume_token(45);
     bytes = stmtBlock();
-    cond.add(BC.RETI);
-    bytes.add(BC.RET);
-    events.add(new Event(cond, bytes, EventType.SET));
-    System.out.println("onset " + cond.size() + " " + bytes.size());
+    Code.onset(this, cond.getCode(), bytes);
   }
 
   final public void onchange() throws ParseException {
-  Code cond;
+  Expr cond;
   Code bytes;
+    locals = new LocalListDef();
     jj_consume_token(ONCHANGE);
-    jj_consume_token(45);
+    jj_consume_token(44);
     cond = expr();
-    jj_consume_token(46);
+    jj_consume_token(45);
     bytes = stmtBlock();
-    cond.add(BC.RETI);
-    bytes.add(BC.RET);
-    events.add(new Event(cond, bytes, EventType.CHANGE));
-    System.out.println("onchange " + cond.size() + " " + bytes.size());
+    Code.onchange(this, cond.getCode(), bytes);
   }
 
   final public Code stmtBlock() throws ParseException {
   Code bytes = new Code();
   Code temp;
-    jj_consume_token(50);
-    label_2:
+  int localpos = locals.getSize();
+    jj_consume_token(49);
+    localListDef();
+    label_3:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case IF:
       case PRINT:
       case ID:
-      case 50:
+      case 49:
         ;
         break;
       default:
-        jj_la1[8] = jj_gen;
-        break label_2;
+        jj_la1[9] = jj_gen;
+        break label_3;
       }
       temp = stmt();
       bytes.addAll(temp);
     }
-    jj_consume_token(51);
+    jj_consume_token(50);
+    locals.setSize(localpos);
     {if (true) return bytes;}
     throw new Error("Missing return statement in function");
   }
@@ -310,6 +304,7 @@ public class EG1 extends EG implements EG1Constants {
   Code res;
   Token name;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case PRINT:
     case ID:
       res = assign();
     {if (true) return res;}
@@ -318,19 +313,12 @@ public class EG1 extends EG implements EG1Constants {
       res = ifStmt();
     {if (true) return res;}
       break;
-    case 50:
+    case 49:
       res = stmtBlock();
     {if (true) return res;}
       break;
-    case PRINT:
-      jj_consume_token(PRINT);
-      res = expr();
-      jj_consume_token(48);
-    res.add(BC.PRINT);
-    {if (true) return res;}
-      break;
     default:
-      jj_la1[9] = jj_gen;
+      jj_la1[10] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -338,13 +326,13 @@ public class EG1 extends EG implements EG1Constants {
   }
 
   final public Code ifStmt() throws ParseException {
-  Code res;
+  Expr res;
   Code stmt;
   Code stmt2 = null;
     jj_consume_token(IF);
-    jj_consume_token(45);
+    jj_consume_token(44);
     res = expr();
-    jj_consume_token(46);
+    jj_consume_token(45);
     stmt = stmt();
     if (jj_2_1(2)) {
       jj_consume_token(ELSE);
@@ -352,261 +340,156 @@ public class EG1 extends EG implements EG1Constants {
     } else {
       ;
     }
-    if (stmt2 != null)
-    {
-      res.add(BC.QBRANCH);
-      res.add(stmt.size() + 2);
-      res.addAll(stmt);
-      res.add(BC.BRANCH);
-      res.add(stmt2.size());
-      res.addAll(stmt2);
-    }
-    else
-    {
-      res.add(BC.QBRANCH);
-      res.add(stmt.size());
-      res.addAll(stmt);
-    }
-    {if (true) return res;}
+    {if (true) return Code.ifstmt(res, stmt, stmt2);}
     throw new Error("Missing return statement in function");
   }
 
   final public Code assign() throws ParseException {
-  Code res;
+  Expr res;
   Token name;
-  List < Code > argList = new ArrayList < Code > ();
-  Timer timer;
-    name = jj_consume_token(ID);
+  List < Expr > argList = new ArrayList < Expr > ();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 47:
-      jj_consume_token(47);
+    case PRINT:
+      jj_consume_token(PRINT);
       res = expr();
-      jj_consume_token(48);
-      Integer val = args.get(name.image);
-      if (val != null)
-      {
-        res.compileSetLocal(val - args.getArgCnt());
-      }
-      else
-      {
-        RegisterDescr descr = registers.get(name.image);
-        if (descr == null) {if (true) throw new ParseException(name.image + " - ?");}
-        checkROReg(descr);
-        res.compileSetreg(descr.reg);
-      }
-      {if (true) return res;}
+      jj_consume_token(47);
+    {if (true) return Code.print(res);}
       break;
-    case 52:
-      jj_consume_token(52);
+    case ID:
+      name = jj_consume_token(ID);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case START_S:
-        jj_consume_token(START_S);
+      case 46:
+        jj_consume_token(46);
         res = expr();
-        jj_consume_token(48);
-        timer = getCreateTimer(name.image);
-        res.add(BC.SETTIMER_S);
-        res.add(timer.n);
-        {if (true) return res;}
+        jj_consume_token(47);
+      {if (true) return Code.assign(this, name.image, res);}
         break;
-      case START_MS:
-        jj_consume_token(START_MS);
-        res = expr();
-        jj_consume_token(48);
-        timer = getCreateTimer(name.image);
-        res.add(BC.SETTIMER_MS);
-        res.add(timer.n);
-        {if (true) return res;}
+      case 51:
+        jj_consume_token(51);
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case START_S:
+          jj_consume_token(START_S);
+          res = expr();
+          jj_consume_token(47);
+        {if (true) return Code.start_s(this, name.image, res);}
+          break;
+        case START_MS:
+          jj_consume_token(START_MS);
+          res = expr();
+          jj_consume_token(47);
+        {if (true) return Code.start_ms(this, name.image, res);}
+          break;
+        case STOP:
+          jj_consume_token(STOP);
+          jj_consume_token(47);
+        {if (true) return Code.stop(this, name.image);}
+          break;
+        default:
+          jj_la1[11] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
+        }
         break;
-      case STOP:
-        jj_consume_token(STOP);
-        jj_consume_token(48);
-        timer = getCreateTimer(name.image);
-        res = new Code();
-        res.add(BC.STOPTIMER);
-        res.add(timer.n);
-        {if (true) return res;}
+      case DEC:
+        jj_consume_token(DEC);
+        jj_consume_token(47);
+      {if (true) return Code.dec(this, name.image);}
+        break;
+      case INC:
+        jj_consume_token(INC);
+        jj_consume_token(47);
+      {if (true) return Code.inc(this, name.image);}
+        break;
+      case 44:
+        jj_consume_token(44);
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case NOT:
+        case MINUS:
+        case MULDIV:
+        case ID:
+        case NUMBER:
+        case 44:
+          argList = argList();
+          break;
+        default:
+          jj_la1[12] = jj_gen;
+          ;
+        }
+        jj_consume_token(45);
+        jj_consume_token(47);
+      {if (true) return Code.callp(this, name.image, argList);}
         break;
       default:
-        jj_la1[10] = jj_gen;
+        jj_la1[13] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
-    case DEC:
-      jj_consume_token(DEC);
-      jj_consume_token(48);
-      RegisterDescr descr = registers.get(name.image);
-      if (descr == null) {if (true) throw new ParseException(name.image + " - ?");}
-      checkROReg(descr);
-      res = new Code();
-      res.add(BC.DEC);
-      res.add(descr.reg);
-      {if (true) return res;}
-      break;
-    case INC:
-      jj_consume_token(INC);
-      jj_consume_token(48);
-      descr = registers.get(name.image);
-      if (descr == null) {if (true) throw new ParseException(name.image + " - ?");}
-      checkROReg(descr);
-      res = new Code();
-      res.add(BC.INC);
-      res.add(descr.reg);
-      {if (true) return res;}
-      break;
-    case 45:
-      jj_consume_token(45);
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case NOT:
-      case MINUS:
-      case MULDIV:
-      case ID:
-      case NUMBER:
-      case 45:
-        argList = argList();
-        break;
-      default:
-        jj_la1[11] = jj_gen;
-        ;
-      }
-      jj_consume_token(46);
-      jj_consume_token(48);
-      Func func = getCreateFunc(name.image, argList.size(), false);
-      res = new Code();
-      for (Code c : argList) res.addAll(c);
-      res.add(BC.CALLP);
-      res.add(func.n);
-      {if (true) return res;}
-      break;
     default:
-      jj_la1[12] = jj_gen;
+      jj_la1[14] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
     throw new Error("Missing return statement in function");
   }
 
-  final public Code expr() throws ParseException {
-  Code res;
-  Code temp;
+  final public Expr expr() throws ParseException {
+  Expr res;
+  Expr temp;
     res = logAndExpr();
-    label_3:
+    label_4:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case OR:
         ;
         break;
       default:
-        jj_la1[13] = jj_gen;
-        break label_3;
+        jj_la1[15] = jj_gen;
+        break label_4;
       }
       jj_consume_token(OR);
       temp = logAndExpr();
-      res.addAll(temp);
-      res.add(BC.OR);
+      res = Expr.or(res, temp);
     }
     {if (true) return res;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Code logAndExpr() throws ParseException {
-  Code res;
-  Code temp;
+  final public Expr logAndExpr() throws ParseException {
+  Expr res;
+  Expr temp;
     res = boolExpr();
-    label_4:
+    label_5:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case AND:
         ;
         break;
       default:
-        jj_la1[14] = jj_gen;
-        break label_4;
+        jj_la1[16] = jj_gen;
+        break label_5;
       }
       jj_consume_token(AND);
       temp = boolExpr();
-      res.addAll(temp);
-      res.add(BC.AND);
+      res = Expr.and(res, temp);
     }
     {if (true) return res;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Code boolExpr() throws ParseException {
-  Code res;
-  Code temp;
+  final public Expr boolExpr() throws ParseException {
+  Expr res;
+  Expr temp;
     res = intExpr();
-    label_5:
-    while (true) {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case EQ:
-      case NEQ:
-      case LT:
-      case LE:
-      case GT:
-      case GE:
-        ;
-        break;
-      default:
-        jj_la1[15] = jj_gen;
-        break label_5;
-      }
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case EQ:
-        jj_consume_token(EQ);
-        temp = intExpr();
-        res.addAll(temp);
-        res.add(BC.EQ);
-        break;
-      case NEQ:
-        jj_consume_token(NEQ);
-        temp = intExpr();
-        res.addAll(temp);
-        res.add(BC.NEQ);
-        break;
-      case LT:
-        jj_consume_token(LT);
-        temp = intExpr();
-        res.addAll(temp);
-        res.add(BC.LT);
-        break;
-      case LE:
-        jj_consume_token(LE);
-        temp = intExpr();
-        res.addAll(temp);
-        res.add(BC.LE);
-        break;
-      case GT:
-        jj_consume_token(GT);
-        temp = intExpr();
-        res.addAll(temp);
-        res.add(BC.GT);
-        break;
-      case GE:
-        jj_consume_token(GE);
-        temp = intExpr();
-        res.addAll(temp);
-        res.add(BC.GE);
-        break;
-      default:
-        jj_la1[16] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-    }
-    {if (true) return res;}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Code intExpr() throws ParseException {
-  Code res;
-  Code temp;
-    res = term();
     label_6:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case PLUS:
-      case MINUS:
+      case EQ:
+      case NEQ:
+      case LT:
+      case LE:
+      case GT:
+      case GE:
         ;
         break;
       default:
@@ -614,17 +497,35 @@ public class EG1 extends EG implements EG1Constants {
         break label_6;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case PLUS:
-        jj_consume_token(PLUS);
-        temp = term();
-        res.addAll(temp);
-        res.add(BC.ADD);
+      case EQ:
+        jj_consume_token(EQ);
+        temp = intExpr();
+        res = Expr.eq(res, temp);
         break;
-      case MINUS:
-        jj_consume_token(MINUS);
-        temp = term();
-        res.addAll(temp);
-        res.add(BC.SUB);
+      case NEQ:
+        jj_consume_token(NEQ);
+        temp = intExpr();
+        res = Expr.neq(res, temp);
+        break;
+      case LT:
+        jj_consume_token(LT);
+        temp = intExpr();
+        res = Expr.lt(res, temp);
+        break;
+      case LE:
+        jj_consume_token(LE);
+        temp = intExpr();
+        res = Expr.le(res, temp);
+        break;
+      case GT:
+        jj_consume_token(GT);
+        temp = intExpr();
+        res = Expr.gt(res, temp);
+        break;
+      case GE:
+        jj_consume_token(GE);
+        temp = intExpr();
+        res = Expr.ge(res, temp);
         break;
       default:
         jj_la1[18] = jj_gen;
@@ -636,15 +537,15 @@ public class EG1 extends EG implements EG1Constants {
     throw new Error("Missing return statement in function");
   }
 
-  final public Code term() throws ParseException {
-  Code res;
-  Code temp;
-    res = unary();
+  final public Expr intExpr() throws ParseException {
+  Expr res;
+  Expr temp;
+    res = term();
     label_7:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case MULTIPLY:
-      case DIVIDE:
+      case PLUS:
+      case MINUS:
         ;
         break;
       default:
@@ -652,17 +553,15 @@ public class EG1 extends EG implements EG1Constants {
         break label_7;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case MULTIPLY:
-        jj_consume_token(MULTIPLY);
-        temp = unary();
-        res.addAll(temp);
-        res.add(BC.MUL);
+      case PLUS:
+        jj_consume_token(PLUS);
+        temp = term();
+        res = Expr.add(res, temp);
         break;
-      case DIVIDE:
-        jj_consume_token(DIVIDE);
-        temp = unary();
-        res.addAll(temp);
-        res.add(BC.DIV);
+      case MINUS:
+        jj_consume_token(MINUS);
+        temp = term();
+        res = Expr.sub(res, temp);
         break;
       default:
         jj_la1[20] = jj_gen;
@@ -674,52 +573,86 @@ public class EG1 extends EG implements EG1Constants {
     throw new Error("Missing return statement in function");
   }
 
-  final public Code unary() throws ParseException {
-  Code res;
+  final public Expr term() throws ParseException {
+  Expr res;
+  Expr temp;
+    res = unary();
+    label_8:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case MULTIPLY:
+      case DIVIDE:
+        ;
+        break;
+      default:
+        jj_la1[21] = jj_gen;
+        break label_8;
+      }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case MULTIPLY:
+        jj_consume_token(MULTIPLY);
+        temp = unary();
+        res = Expr.mul(res, temp);
+        break;
+      case DIVIDE:
+        jj_consume_token(DIVIDE);
+        temp = unary();
+        res = Expr.div(res, temp);
+        break;
+      default:
+        jj_la1[22] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    }
+    {if (true) return res;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Expr unary() throws ParseException {
+  Expr res;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NOT:
       jj_consume_token(NOT);
       res = element();
-    res.add(BC.NOT);
-    {if (true) return res;}
+    {if (true) return Expr.not(res);}
       break;
     case MINUS:
       jj_consume_token(MINUS);
       res = element();
-    res.add(BC.NEGATE);
-    {if (true) return res;}
+    {if (true) return Expr.negate(res);}
       break;
     case MULDIV:
     case ID:
     case NUMBER:
-    case 45:
+    case 44:
       res = element();
     {if (true) return res;}
       break;
     default:
-      jj_la1[21] = jj_gen;
+      jj_la1[23] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
     throw new Error("Missing return statement in function");
   }
 
-  final public List < Code > argList() throws ParseException {
-  List < Code > res = new ArrayList < Code > ();
-  Code arg;
+  final public List < Expr > argList() throws ParseException {
+  List < Expr > res = new ArrayList < Expr > ();
+  Expr arg;
     arg = expr();
     res.add(arg);
-    label_8:
+    label_9:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 49:
+      case 48:
         ;
         break;
       default:
-        jj_la1[22] = jj_gen;
-        break label_8;
+        jj_la1[24] = jj_gen;
+        break label_9;
       }
-      jj_consume_token(49);
+      jj_consume_token(48);
       arg = expr();
       res.add(arg);
     }
@@ -727,102 +660,70 @@ public class EG1 extends EG implements EG1Constants {
     throw new Error("Missing return statement in function");
   }
 
-  final public Code element() throws ParseException {
+  final public Expr element() throws ParseException {
   Token t;
-  Code res = new Code();
-  boolean call = false;
-  List < Code > argList = new ArrayList < Code > ();
+  List < Expr > argList = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NUMBER:
       t = jj_consume_token(NUMBER);
-    res = new Code();
-    short s = Short.parseShort(t.image);
-    res.compileLit(s);
-    {if (true) return res;}
+    {if (true) return new Expr(Short.parseShort(t.image));}
       break;
     case ID:
       t = jj_consume_token(ID);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 45:
-        jj_consume_token(45);
+      case 44:
+        jj_consume_token(44);
+      argList = new ArrayList < Expr > ();
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case NOT:
         case MINUS:
         case MULDIV:
         case ID:
         case NUMBER:
-        case 45:
+        case 44:
           argList = argList();
           break;
         default:
-          jj_la1[23] = jj_gen;
+          jj_la1[25] = jj_gen;
           ;
         }
-        jj_consume_token(46);
-      call = true;
+        jj_consume_token(45);
         break;
       default:
-        jj_la1[24] = jj_gen;
+        jj_la1[26] = jj_gen;
         ;
       }
-    if (call)
+    if (argList != null)
     {
-      Func func = getCreateFunc(t.image, argList.size(), true);
-      res = new Code();
-      for (Code c : argList) res.addAll(c);
-      res.add(BC.CALLF);
-      res.add(func.n);
-      {if (true) return res;}
+      {if (true) return new Expr(this, t.image, argList);}
     }
     else
     {
-      res = new Code();
-      Integer val = args.get(t.image);
-      if (val != null)
-      {
-        res.compileGetLocal(val - args.getArgCnt());
-      }
-      else
-      {
-        RegisterDescr descr = registers.get(t.image);
-        if (descr != null)
-        {
-          res.compileGetreg(descr.reg);
-        }
-        else
-        {
-          val = constants.get(t.image);
-          if (val == null) {if (true) throw new ParseException(t.image + " - ?");}
-          res.compileLit((short) (int) val);
-        }
-      }
-      {if (true) return res;}
+      {if (true) return new Expr(this, t.image);}
     }
       break;
     case MULDIV:
-    Code temp;
-    Code temp1;
+    Expr res;
+    Expr temp;
+    Expr temp1;
       jj_consume_token(MULDIV);
-      jj_consume_token(45);
+      jj_consume_token(44);
       res = expr();
-      jj_consume_token(49);
+      jj_consume_token(48);
       temp = expr();
-      jj_consume_token(49);
+      jj_consume_token(48);
       temp1 = expr();
-      jj_consume_token(46);
-    res.addAll(temp);
-    res.addAll(temp1);
-    res.add(BC.MULDIV);
-    {if (true) return res;}
-      break;
-    case 45:
       jj_consume_token(45);
+    {if (true) return Expr.muldiv(res, temp, temp1);}
+      break;
+    case 44:
+      jj_consume_token(44);
       res = expr();
-      jj_consume_token(46);
+      jj_consume_token(45);
     {if (true) return res;}
       break;
     default:
-      jj_la1[25] = jj_gen;
+      jj_la1[27] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -836,34 +737,37 @@ public class EG1 extends EG implements EG1Constants {
     finally { jj_save(0, xla); }
   }
 
-  private boolean jj_3R_14() {
-    if (jj_scan_token(ID)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_13() {
-    if (jj_scan_token(PRINT)) return true;
-    return false;
-  }
-
   private boolean jj_3R_12() {
-    if (jj_3R_16()) return true;
+    if (jj_3R_15()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_16() {
+    if (jj_scan_token(49)) return true;
     return false;
   }
 
   private boolean jj_3_1() {
     if (jj_scan_token(ELSE)) return true;
-    if (jj_3R_9()) return true;
+    if (jj_3R_10()) return true;
     return false;
   }
 
-  private boolean jj_3R_16() {
-    if (jj_scan_token(50)) return true;
+  private boolean jj_3R_10() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_11()) {
+    jj_scanpos = xsp;
+    if (jj_3R_12()) {
+    jj_scanpos = xsp;
+    if (jj_3R_13()) return true;
+    }
+    }
     return false;
   }
 
   private boolean jj_3R_11() {
-    if (jj_3R_15()) return true;
+    if (jj_3R_14()) return true;
     return false;
   }
 
@@ -872,24 +776,28 @@ public class EG1 extends EG implements EG1Constants {
     return false;
   }
 
-  private boolean jj_3R_9() {
+  private boolean jj_3R_18() {
+    if (jj_scan_token(ID)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_17() {
+    if (jj_scan_token(PRINT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_14() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_10()) {
+    if (jj_3R_17()) {
     jj_scanpos = xsp;
-    if (jj_3R_11()) {
-    jj_scanpos = xsp;
-    if (jj_3R_12()) {
-    jj_scanpos = xsp;
-    if (jj_3R_13()) return true;
-    }
-    }
+    if (jj_3R_18()) return true;
     }
     return false;
   }
 
-  private boolean jj_3R_10() {
-    if (jj_3R_14()) return true;
+  private boolean jj_3R_13() {
+    if (jj_3R_16()) return true;
     return false;
   }
 
@@ -904,7 +812,7 @@ public class EG1 extends EG implements EG1Constants {
   private Token jj_scanpos, jj_lastpos;
   private int jj_la;
   private int jj_gen;
-  final private int[] jj_la1 = new int[26];
+  final private int[] jj_la1 = new int[28];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -912,10 +820,10 @@ public class EG1 extends EG implements EG1Constants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x7e00001,0x7e00000,0x0,0x0,0x0,0x0,0x0,0x600000,0x8000000,0x8000000,0xe0000000,0x28000,0x0,0x100,0x80,0x7e00,0x7e00,0x30000,0x30000,0xc0000,0xc0000,0x28000,0x0,0x28000,0x0,0x0,};
+      jj_la1_0 = new int[] {0x7e00001,0x7e00000,0x0,0x0,0x0,0x0,0x0,0x0,0x600000,0x8000000,0x8000000,0xe0000000,0x28000,0x0,0x0,0x100,0x80,0x7e00,0x7e00,0x30000,0x30000,0xc0000,0xc0000,0x28000,0x0,0x28000,0x0,0x0,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x1b1,0x1b1,0x200,0x200,0x20000,0x180,0x2000,0x0,0x40202,0x40202,0x0,0x2a40,0x10a00c,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2a40,0x20000,0x2a40,0x2000,0x2a40,};
+      jj_la1_1 = new int[] {0xf0,0xf0,0x40,0x40,0x10000,0x40,0x30,0x1000,0x0,0x20101,0x20101,0x0,0x1508,0x85006,0x101,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1508,0x10000,0x1508,0x1000,0x1508,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[1];
   private boolean jj_rescan = false;
@@ -932,7 +840,7 @@ public class EG1 extends EG implements EG1Constants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -947,7 +855,7 @@ public class EG1 extends EG implements EG1Constants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -958,7 +866,7 @@ public class EG1 extends EG implements EG1Constants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -969,7 +877,7 @@ public class EG1 extends EG implements EG1Constants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -979,7 +887,7 @@ public class EG1 extends EG implements EG1Constants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -989,7 +897,7 @@ public class EG1 extends EG implements EG1Constants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1101,12 +1009,12 @@ public class EG1 extends EG implements EG1Constants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[53];
+    boolean[] la1tokens = new boolean[52];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 26; i++) {
+    for (int i = 0; i < 28; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -1118,7 +1026,7 @@ public class EG1 extends EG implements EG1Constants {
         }
       }
     }
-    for (int i = 0; i < 53; i++) {
+    for (int i = 0; i < 52; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

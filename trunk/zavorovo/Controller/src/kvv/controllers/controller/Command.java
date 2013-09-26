@@ -8,4 +8,5 @@ public class Command {
 	public static final int CMD_UPLOAD = 104;
 	public static final int CMD_UPLOAD_END = 105;
 	public static final int CMD_GETUI = 106;
+	public static final int CMD_VMINIT = 107;
 }

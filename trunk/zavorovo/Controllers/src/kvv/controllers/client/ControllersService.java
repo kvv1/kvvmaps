@@ -3,6 +3,7 @@ package kvv.controllers.client;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ObjectDescr;
+import kvv.controllers.shared.Register;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -20,4 +21,8 @@ public interface ControllersService extends RemoteService {
 	ObjectDescr[] getObjects() throws Exception;
 	
 	String upload(int addr, String name);
+
+	Register[] getRegisters() throws Exception;
+
+	void vmInit(int addr) throws Exception;
 }

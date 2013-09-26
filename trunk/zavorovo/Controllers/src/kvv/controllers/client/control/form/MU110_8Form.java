@@ -30,12 +30,12 @@ public class MU110_8Form extends ControlComposite {
 
 		panel.add(nameLabel);
 
-		Label addrLabel = new Label("addr = " + addr);
+		Label addrLabel = new Label("addr=" + addr);
 		addrLabel.setWidth("70px");
 
 		panel.add(addrLabel);
 
-		RelayCheckBoxes relays = new RelayCheckBoxes(addr, 0, 8);
+		RelayCheckBoxes relays = new RelayCheckBoxes(addr, 0, null, 8);
 		add(relays);
 		panel.add(relays);
 

@@ -1,5 +1,6 @@
 package kvv.controllers.client.page;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import kvv.controllers.client.CallbackAdapter;
@@ -7,6 +8,7 @@ import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.control.simple.SimpleRelayControl;
+import kvv.controllers.shared.LogItem;
 import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
 
@@ -40,7 +42,7 @@ public class AutoRelayControl extends ControlComposite {
 		super(addr);
 		this.reg = reg;
 
-		scheduleCanvas = new ScheduleCanvas(mouseMoveHandler);
+		scheduleCanvas = new ScheduleCanvas(reg, mouseMoveHandler);
 
 		// framePanel.setBorderWidth(1);
 		framePanel.add(horizontalPanel);
@@ -91,11 +93,15 @@ public class AutoRelayControl extends ControlComposite {
 		initWidget(framePanel);
 	}
 
-	public void refreshSchedule(RegisterSchedule registerSchedule, Date date) {
-		autoButton.setEnabled(true);
-		scheduleCanvas.refresh(registerSchedule.items, date);
-		autoButton.setValue(registerSchedule.enabled);
-		relayControl.setEnabled(!registerSchedule.enabled);
+	public void refreshSchedule(RegisterSchedule registerSchedule, ArrayList<LogItem> logItems, Date date) {
+		if (registerSchedule != null) {
+			autoButton.setEnabled(true);
+			autoButton.setValue(registerSchedule.enabled);
+			relayControl.setEnabled(!registerSchedule.enabled);
+		}
+
+		scheduleCanvas.refresh(registerSchedule == null ? null
+				: registerSchedule.items, logItems, date);
 	}
 
 	public void enableSchedule(boolean value) {

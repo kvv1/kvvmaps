@@ -1,6 +1,7 @@
 package kvv.controllers.client;
 
 import kvv.controllers.register.AllRegs;
+import kvv.controllers.shared.Register;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ObjectDescr;
 
@@ -19,5 +20,9 @@ public interface ControllersServiceAsync {
 	void getRegs(int addr, AsyncCallback<AllRegs> callback);
 
 	void upload(int addr, String name, AsyncCallback<String> callback);
+
+	void getRegisters(AsyncCallback<Register[]> callback);
+
+	void vmInit(int addr, AsyncCallback<Void> callback);
 
 }

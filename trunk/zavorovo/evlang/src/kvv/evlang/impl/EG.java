@@ -8,10 +8,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import kvv.controllers.controller.Controller;
-import kvv.controllers.register.RegType;
 import kvv.controllers.register.Register;
-import kvv.controllers.register.RegisterDescr;
-import kvv.controllers.register.RegisterUI;
 import kvv.controllers.utils.cmdline.BooleanParam;
 import kvv.controllers.utils.cmdline.CmdLine;
 import kvv.controllers.utils.cmdline.StringParam;
@@ -130,35 +127,6 @@ public class EG extends Context {
 			if (controller != null)
 				controller.close();
 		}
-	}
-
-	protected void newRegister(Token regName, Token regNum, boolean forceEE)
-			throws ParseException {
-		checkName(regName.image);
-		RegisterDescr registerDescr;
-		if (regNum == null) {
-			if (forceEE)
-				registerDescr = new RegisterDescr(nextEEReg++, true, true);
-			else
-				registerDescr = new RegisterDescr(nextReg++);
-		} else {
-			registerDescr = registers.get(regNum.image);
-			if (registerDescr == null)
-				throw new ParseException(regNum.image + " - ?");
-		}
-		registers.put(regName.image, registerDescr);
-	}
-
-	protected void setUI(String regName, String uiName, RegType uiType)
-			throws ParseException {
-		RegisterDescr registerDescr = registers.get(regName);
-		if (registerDescr == null)
-			throw new ParseException(regName + " - ?");
-		
-		if (uiType == RegType.textRW && !registerDescr.editable)
-			uiType = RegType.textRO;
-
-		registerUIs.add(new RegisterUI(registerDescr.reg, uiType, uiName));
 	}
 
 }

@@ -3,16 +3,35 @@ package kvv.controllers.client.page;
 import java.util.ArrayList;
 import java.util.Date;
 
+import kvv.controllers.client.CallbackAdapter;
+import kvv.controllers.client.ScheduleService;
+import kvv.controllers.client.ScheduleServiceAsync;
+import kvv.controllers.server.Logger;
+import kvv.controllers.shared.Log;
+import kvv.controllers.shared.LogItem;
+import kvv.controllers.shared.Register;
 import kvv.controllers.shared.ScheduleItem;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ScheduleCanvas extends Composite {
 	private final Canvas canvas = Canvas.createIfSupported();
@@ -25,9 +44,22 @@ public class ScheduleCanvas extends Composite {
 	private static final int width = tenMinutesWidth * 6 * 24;
 	private static final int height = registerHeight + bottomMargin + topMargin;
 
-	static Image bgImage;
+	private static Image bgImage;
 
-	public ScheduleCanvas(final MouseMoveHandler mouseMoveHandler) {
+	public static class Range {
+		int from;
+		int to;
+	};
+
+	private Range sel;
+	private Register reg;
+
+	private final ScheduleServiceAsync scheduleService = GWT
+	.create(ScheduleService.class);
+
+	public ScheduleCanvas(final Register reg, final MouseMoveHandler mouseMoveHandler) {
+		this.reg = reg;
+		
 		initWidget(canvas);
 
 		canvas.setWidth(width + "px");
@@ -47,6 +79,69 @@ public class ScheduleCanvas extends Composite {
 			});
 		}
 
+		canvas.addMouseDownHandler(new MouseDownHandler() {
+
+			@Override
+			public void onMouseDown(MouseDownEvent event) {
+				sel = new Range();
+				sel.from = sel.to = x2sec(event.getX());
+			}
+		});
+
+		canvas.addMouseUpHandler(new MouseUpHandler() {
+
+			@Override
+			public void onMouseUp(MouseUpEvent event) {
+				final DialogBox dialog = new DialogBox();
+				final Button ok = new Button("OK");
+				ok.addClickHandler(new ClickHandler() {
+					public void onClick(ClickEvent event) {
+						dialog.hide();
+					}
+				});
+
+				final VerticalPanel panel = new VerticalPanel();
+				panel.setSpacing(10);
+				panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
+				final Range sel1 = sel;
+				
+				scheduleService.getLog(new CallbackAdapter<Log>() {
+					@Override
+					public void onSuccess(Log log) {
+						panel.add(new Chart(sel1, log.items.get(reg)));
+						panel.add(ok);
+					}
+				});
+				
+
+				dialog.setWidget(panel);
+
+				dialog.show();
+
+				sel = null;
+				refresh();
+			}
+		});
+
+		canvas.addMouseMoveHandler(new MouseMoveHandler() {
+
+			@Override
+			public void onMouseMove(MouseMoveEvent event) {
+				if (sel != null) {
+					sel.to = Math.max(sel.from, x2sec(event.getX()));
+					refresh();
+				}
+			}
+		});
+	}
+
+	private int x2sec(int x) {
+		return x * 10 * 60 / tenMinutesWidth;
+	}
+
+	private int sec2x(int sec) {
+		return sec * tenMinutesWidth / 10 / 60;
 	}
 
 	private static int getRegY() {
@@ -80,9 +175,12 @@ public class ScheduleCanvas extends Composite {
 
 	private ArrayList<ScheduleItem> items;
 	private Date date;
+	private ArrayList<LogItem> logItems;
 
-	public void refresh(ArrayList<ScheduleItem> items, Date date) {
+	public void refresh(ArrayList<ScheduleItem> items,
+			ArrayList<LogItem> logItems, Date date) {
 		this.items = items;
+		this.logItems = logItems;
 		this.date = date;
 		refresh();
 	}
@@ -90,17 +188,23 @@ public class ScheduleCanvas extends Composite {
 	private boolean refresh() {
 		fillBackground();
 
-		if (items == null)
-			return false;
-
 		int val = 0;
 		int minVal = Integer.MAX_VALUE;
 		int maxVal = Integer.MIN_VALUE;
-		for (ScheduleItem item : items) {
-			val = item.value;
-			minVal = Math.min(minVal, val);
-			maxVal = Math.max(maxVal, val);
-		}
+
+		if (items != null)
+			for (ScheduleItem item : items) {
+				val = item.value;
+				minVal = Math.min(minVal, val);
+				maxVal = Math.max(maxVal, val);
+			}
+
+		if (logItems != null)
+			for (LogItem logItem : logItems) {
+				int logVal = logItem.value;
+				minVal = Math.min(minVal, logVal);
+				maxVal = Math.max(maxVal, logVal);
+			}
 
 		if (minVal > maxVal) {
 			minVal = 0;
@@ -108,33 +212,84 @@ public class ScheduleCanvas extends Composite {
 			val = 0;
 		}
 
+		if (minVal == maxVal)
+			maxVal = minVal + 1;
+
 		context.save();
-		context.beginPath();
-		context.setStrokeStyle("#00FF00");
-		context.setLineWidth(2);
 		context.translate(0, getRegY());
 
-		context.moveTo(0, getY(val, minVal, maxVal, registerHeight));
-		for (ScheduleItem item : items) {
-			context.lineTo(item.minutes * tenMinutesWidth / 10,
-					getY(val, minVal, maxVal, registerHeight));
-			context.lineTo(item.minutes * tenMinutesWidth / 10,
-					getY(item.value, minVal, maxVal, registerHeight));
-			val = item.value;
-		}
-		context.lineTo(60 * 24 * tenMinutesWidth / 10,
-				getY(val, minVal, maxVal, registerHeight));
+		if (items != null) {
+			context.beginPath();
+			context.setStrokeStyle("#00FF00");
+			context.setLineWidth(2);
 
-		context.stroke();
-		context.closePath();
+			context.moveTo(0, getY(val, minVal, maxVal, registerHeight));
+			for (ScheduleItem item : items) {
+				context.lineTo(sec2x(item.minutes * 60),
+						getY(val, minVal, maxVal, registerHeight));
+				context.lineTo(sec2x(item.minutes * 60),
+						getY(item.value, minVal, maxVal, registerHeight));
+				val = item.value;
+			}
+			context.lineTo(sec2x(60 * 24 * 60),
+					getY(val, minVal, maxVal, registerHeight));
+
+			context.stroke();
+			context.closePath();
+		}
+
+		if (sel != null) {
+			context.beginPath();
+			context.setStrokeStyle("#FFFF00");
+			context.setLineWidth(2);
+			context.moveTo(sec2x(sel.from), -2);
+			context.lineTo(sec2x(sel.to), -2);
+			context.stroke();
+			context.closePath();
+		}
+
+		if (logItems != null) {
+			context.beginPath();
+			context.setStrokeStyle("#00FFFF");
+			context.setLineWidth(2);
+
+			Integer lastValue = null;
+
+			for (LogItem logItem : logItems) {
+				int x = sec2x(logItem.seconds);
+
+				if (lastValue != null)
+					context.lineTo(x,
+							getY(lastValue, minVal, maxVal, registerHeight));
+
+				if (logItem.value != null) {
+					if (lastValue == null)
+						context.moveTo(
+								x,
+								getY(logItem.value, minVal, maxVal,
+										registerHeight));
+					else
+						context.lineTo(
+								x,
+								getY(logItem.value, minVal, maxVal,
+										registerHeight));
+				}
+
+				lastValue = logItem.value;
+			}
+
+			context.stroke();
+			context.closePath();
+		}
+
 		context.beginPath();
 		context.setStrokeStyle("yellow");
 
 		@SuppressWarnings("deprecation")
 		int minutes = date.getHours() * 60 + date.getMinutes();
 
-		context.lineTo(minutes * tenMinutesWidth / 10, 0);
-		context.lineTo(minutes * tenMinutesWidth / 10, registerHeight);
+		context.lineTo(sec2x(minutes * 60), 0);
+		context.lineTo(sec2x(minutes * 60), registerHeight);
 
 		context.stroke();
 		context.closePath();

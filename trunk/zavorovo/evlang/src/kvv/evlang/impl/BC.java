@@ -12,7 +12,7 @@ public enum BC {
 	INC(0, 1), DEC(0, 1), //
 	CALLP(0, 1), CALLF(0, 1), //
 	MULDIV(-2, 0), //
-	GETLOCAL(1, 1), SETLOCAL(-1, 1);
+	GETLOCAL(1, 1), SETLOCAL(-1, 1), ENTER(0,1);
 
 	public int stackBalance;
 	public int args;

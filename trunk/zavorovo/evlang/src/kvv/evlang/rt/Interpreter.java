@@ -33,7 +33,7 @@ public class Interpreter {
 		public void setAt(int off, int n) {
 			data[off] = n;
 		}
-}
+	}
 
 	private Stack stack = new Stack();
 
@@ -60,7 +60,7 @@ public class Interpreter {
 
 		List<Byte> code = context.codeArr;
 
-		int fp = 0;
+		int fp = stack.getSP();
 
 		while (true) {
 			int right;
@@ -93,16 +93,16 @@ public class Interpreter {
 				fp = stack.getSP();
 				break;
 			case RET:
+				stack.sp = fp;
 				if (stack.isEmpty())
 					return;
-				stack.sp = fp;
 				fp = stack.pop();
 				ip = stack.pop();
 				break;
 			case RET_N:
+				stack.sp = fp;
 				if (stack.isEmpty())
 					return;
-				stack.sp = fp;
 				fp = stack.pop();
 				int ip1 = stack.pop();
 				int n = code.get(ip++);
@@ -112,11 +112,11 @@ public class Interpreter {
 				break;
 			case RETI:
 				int res = stack.pop();
+				stack.sp = fp;
 				if (stack.isEmpty()) {
 					stack.push(res);
 					return;
 				}
-				stack.sp = fp;
 				fp = stack.pop();
 				ip = stack.pop();
 				stack.push(res);
@@ -134,17 +134,22 @@ public class Interpreter {
 				break;
 			case GETLOCAL:
 				n = code.get(ip++);
-				if(n < 0)
-					stack.push(stack.getAt(fp + 1 - n));
+				if (n >= 0)
+					stack.push(stack.getAt(fp + 2 + n));
 				else
-					throw new IllegalArgumentException();
+					stack.push(stack.getAt(fp + n));
 				break;
 			case SETLOCAL:
 				n = code.get(ip++);
-				if(n < 0)
-					stack.setAt(fp + 1 - n, stack.pop());
+				if (n >= 0)
+					stack.setAt(fp + 2 + n, stack.pop());
 				else
-					throw new IllegalArgumentException();
+					stack.setAt(fp + n, stack.pop());
+				break;
+			case ENTER:
+				n = code.get(ip++);
+				while (n-- > 0)
+					stack.push(0);
 				break;
 			case ADD:
 				stack.push(stack.pop() + stack.pop());

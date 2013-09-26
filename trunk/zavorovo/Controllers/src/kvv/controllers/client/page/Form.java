@@ -67,7 +67,7 @@ class Form extends ControlComposite {
 				break;
 			case textRO: {
 				ControlComposite control;
-				control = new GetRegControl(addr, reg.reg, false, "");
+				control = new GetRegControl(addr, reg.reg, 1, "");
 				grid.setWidget(row, 0, new Label(reg.text));
 				grid.setWidget(row, 1, control);
 				add(control);

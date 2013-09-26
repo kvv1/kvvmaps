@@ -23,7 +23,8 @@ public class SourcesServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public String createSource(String name) throws Exception {
 		try {
-			Utils.writeFile(Constants.ROOT + "/src/" + name, "main {\r\n}\r\n");
+			Utils.writeFile(Constants.ROOT + "/src/" + name,
+					"void main() {\r\n}\r\n");
 			return "";
 		} catch (IOException e) {
 			throw new Exception("Error creating file");

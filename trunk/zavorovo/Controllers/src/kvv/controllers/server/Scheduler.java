@@ -51,10 +51,11 @@ public class Scheduler extends Thread {
 					}
 				});
 
-				if (regIndex >= regs.size())
-					regIndex = 0;
-
 				try {
+					if (regIndex >= regs.size()) {
+						regIndex = 0;
+						sleep(1000);
+					}
 					if (regs.size() > regIndex) {
 						Register reg = regs.get(regIndex);
 						RegisterSchedule registerSchedule = schedule.map
@@ -67,8 +68,6 @@ public class Scheduler extends Thread {
 							exec(reg, value);
 							sleep(1000);
 						}
-					} else {
-						sleep(1000);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();

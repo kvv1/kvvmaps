@@ -55,22 +55,25 @@ public class Logger extends Thread {
 		}
 	}
 
+	public static File getLogFile(Date date) {
+		DateFormat df = new SimpleDateFormat("yyyy_MM_dd");
+		return new File(Constants.ROOT + "/history/" + df.format(date));
+	}
+
 	private static PrintStream getLogStream(Date date) {
 		try {
 			new File(Constants.ROOT + "/history").mkdir();
-			DateFormat df = new SimpleDateFormat("yyyy_MM_dd");
 			PrintStream ps = new PrintStream(new FileOutputStream(
-					Constants.ROOT + "/history/" + df.format(date), true),
-					true, "Windows-1251");
+					getLogFile(date), true), true, "Windows-1251");
 			return ps;
 		} catch (Exception e) {
 			return null;
 		}
 	}
 
-	private static DateFormat df = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+	private static DateFormat df = new SimpleDateFormat("HH:mm:ss");
 	private static Map<String, Integer> lastValues = new HashMap<String, Integer>();
-	private static Date lastDate;
+	private static Date lastFileDate;
 
 	public static void main(String[] args) {
 		Date date = new Date();
@@ -82,23 +85,27 @@ public class Logger extends Thread {
 	@SuppressWarnings("deprecation")
 	private static synchronized void logValue(String register, Integer value) {
 		Date date = new Date();
-		Date date1 = new Date(date.getTime());
-		date.setHours(0);
-		date.setMinutes(0);
-		date.setSeconds(0);
+		// Date fileDate = new Date(date.getTime());
+		Date fileDate = new Date(date.getYear(), date.getMonth(),
+				date.getDate());
+		fileDate.setHours(0);
+		fileDate.setMinutes(0);
+		fileDate.setSeconds(0);
 
-		if (!date.equals(lastDate)) {
-			PrintStream ps = getLogStream(date);
-			logValues(ps, date, lastValues);
+		// date = new Date(date.getYear(), date.getMonth(), date.getDate());
+
+		if (!fileDate.equals(lastFileDate)) {
+			PrintStream ps = getLogStream(fileDate);
+			logValues(ps, fileDate, lastValues);
 			ps.close();
-			lastDate = date;
+			lastFileDate = fileDate;
 		}
 
 		Integer lastValue = lastValues.get(register);
 		if (value == null && lastValue != null || value != null
 				&& !value.equals(lastValue)) {
-			PrintStream ps = getLogStream(date);
-			logValue(ps, date1, register, value);
+			PrintStream ps = getLogStream(fileDate);
+			logValue(ps, date, register, value);
 			ps.close();
 		}
 
@@ -111,6 +118,7 @@ public class Logger extends Thread {
 		else {
 			ps.println(df.format(date) + " " + register + "=" + value);
 		}
+		lastValues.put(register, value);
 	}
 
 	private static void logValues(PrintStream ps, Date date,

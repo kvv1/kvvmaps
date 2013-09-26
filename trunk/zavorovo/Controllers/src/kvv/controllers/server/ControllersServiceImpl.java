@@ -50,6 +50,12 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
+	public kvv.controllers.shared.Register[] getRegisters() throws Exception {
+		return Controllers.getRegisters().values()
+				.toArray(new kvv.controllers.shared.Register[0]);
+	}
+
+	@Override
 	public ObjectDescr[] getObjects() throws Exception {
 		ObjectDescr[] res = Utils.jsonRead(Constants.objectsFile,
 				ObjectDescr[].class);
@@ -94,10 +100,10 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 				controller.upload(addr, Context.dumpNull());
 				storeSourceDescr(addr, null);
 			} else {
-//				parser = new EG1(new ELReader(new FileReader(Constants.ROOT
-//						+ "/src/" + fileName)));
-				parser = new EG1(new MyReader(Constants.ROOT
-						+ "/src/" + fileName));
+				// parser = new EG1(new ELReader(new FileReader(Constants.ROOT
+				// + "/src/" + fileName)));
+				parser = new EG1(new MyReader(Constants.ROOT + "/src/"
+						+ fileName));
 
 				parser.parse();
 				byte[] bytes = parser.dump();
@@ -111,6 +117,15 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 			return " line " + t.beginLine + " : " + e.getMessage();
 		} catch (Exception e) {
 			return e.getMessage();
+		}
+	}
+
+	@Override
+	public void vmInit(int addr) throws Exception {
+		try {
+			controller.vmInit(addr);
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
 		}
 	}
 
@@ -138,4 +153,5 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		}
 
 	}
+
 }

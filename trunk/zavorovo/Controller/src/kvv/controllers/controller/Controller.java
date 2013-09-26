@@ -125,6 +125,14 @@ public class Controller implements IController { // 9164642959 7378866
 		checkErr(Command.CMD_UPLOAD, resp);
 	}
 
+	@Override
+	public void vmInit(int addr) throws IOException {
+		ByteArrayOutputStream req = new ByteArrayOutputStream();
+		req.write((byte) Command.CMD_VMINIT);
+		byte[] resp = send(addr, req.toByteArray());
+		checkErr(Command.CMD_VMINIT, resp);
+	}
+	
 	private static void checkErr(int cmd, byte[] resp) throws IOException {
 		if (resp[0] == cmd)
 			return;

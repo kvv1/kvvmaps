@@ -11,5 +11,6 @@ public interface IController {
 	public AllRegs getAllRegs(int addr) throws Exception;
 	public void upload(int addr, byte[] data) throws IOException;
 	public void close();
+	void vmInit(int addr) throws IOException;
 
 }
