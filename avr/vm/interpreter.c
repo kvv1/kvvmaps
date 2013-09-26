@@ -39,6 +39,7 @@ enum {
 	MULDIV,
 	GETLOCAL,
 	SETLOCAL,
+	ENTER,
 };
 
 #define GETREGSHORT 0x80
@@ -97,7 +98,7 @@ int getUIEnd() {
 	return ptr;
 }
 
-static void vmInit() {
+static void initVars() {
 	uint16_t ptr = getUIEnd();
 	nevents = vmReadByte(ptr);
 	ptr++;
@@ -120,9 +121,21 @@ static void vmInit() {
 
 	memset(vmTimerCnts, 0, sizeof(vmTimerCnts));
 	memset(vmEventStates, 0, sizeof(vmEventStates));
+}
 
+void vmInit() {
+	if (vmGetStatus() != VMSTATUS_STOPPED)
+		return;
+	initVars();
 	vmSetStatus(VMSTATUS_RUNNING);
 	vmExec(vmGetFuncCode(0) + codeOffset);
+	vmSetStatus(VMSTATUS_STOPPED);
+}
+
+static void vmMain() {
+	initVars();
+	vmSetStatus(VMSTATUS_RUNNING);
+	vmExec(vmGetFuncCode(1) + codeOffset);
 }
 
 static int16_t eval(uint16_t ip) {
@@ -166,7 +179,7 @@ void vmStep(int ms) {
 
 static void vmExec(uint16_t ip) {
 
-	uint16_t fp = 0;
+	uint16_t fp = stackPtr - stack;
 
 	for (;;) {
 		if (vmGetStatus() != VMSTATUS_RUNNING)
@@ -197,30 +210,30 @@ static void vmExec(uint16_t ip) {
 			break;
 		}
 		case RET:
+			vmSetStack(stack + fp);
 			if (stackPtr == stack + STACK_SIZE)
 				return;
-			stackPtr = stack + fp;
 			fp = vmPop();
 			ip = vmPop();
 			break;
 		case RET_N: {
 			uint16_t ip1;
+			vmSetStack(stack + fp);
 			if (stackPtr == stack + STACK_SIZE)
 				return;
-			stackPtr = stack + fp;
 			fp = vmPop();
 			ip1 = vmPop();
-			stackPtr += vmReadByte(ip++);
+			vmChangeStack(-vmReadByte(ip++));
 			ip = ip1;
 			break;
 		}
 		case RETI: {
 			int16_t res = vmPop();
+			vmSetStack(stack + fp);
 			if (stackPtr == stack + STACK_SIZE) {
 				vmPush(res);
 				return;
 			}
-			stackPtr = stack + fp;
 			fp = vmPop();
 			ip = vmPop();
 			vmPush(res);
@@ -229,28 +242,35 @@ static void vmExec(uint16_t ip) {
 		case RETI_N: {
 			uint16_t ip1;
 			int16_t res = vmPop();
+			vmSetStack(stack + fp);
 			if (stackPtr == stack + STACK_SIZE) {
 				vmPush(res);
 				return;
 			}
-			stackPtr = stack + fp;
 			fp = vmPop();
 			ip1 = vmPop();
-			stackPtr += vmReadByte(ip++);
+			vmChangeStack(-vmReadByte(ip++));
 			ip = ip1;
 			vmPush(res);
 			break;
 		}
 		case GETLOCAL: {
 			int n = (int8_t) vmReadByte(ip++);
-			if (n < 0)
-				vmPush(stack[fp + 1 - n]);
+			if (n >= 0)
+				n += 2;
+			vmPush(stack[fp + n]);
 			break;
 		}
 		case SETLOCAL: {
 			int n = (int8_t) vmReadByte(ip++);
-			if (n < 0)
-				stack[fp + 1 - n] = vmPop();
+			if (n >= 0)
+				n += 2;
+			stack[fp + n] = vmPop();
+			break;
+		}
+		case ENTER: {
+			int n = vmReadByte(ip++);
+			vmChangeStack(n);
 			break;
 		}
 		case LIT:
@@ -372,7 +392,7 @@ static void vmExec(uint16_t ip) {
 
 void vmStart(int8_t b) {
 	if (b) {
-		vmInit();
+		vmMain();
 	} else {
 		vmSetStatus(VMSTATUS_STOPPED);
 	}

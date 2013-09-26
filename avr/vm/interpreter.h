@@ -17,6 +17,7 @@ uint8_t vmReadByte(uint16_t addr);
 
 void vmPrintInt(int16_t n);
 
+void vmInit();
 void vmStart(int8_t b);
 void vmStep(int ms);
 //int vmCheckCode(); // returns codefile length
@@ -28,7 +29,10 @@ int16_t _getReg(uint8_t reg);
 void _setReg(uint8_t reg, int16_t val);
 int16_t vmPop();
 void vmPush(int16_t v);
-#define STACK_SIZE 16
+void vmSetStack(int16_t* ptr);
+void vmChangeStack(int16_t n);
+
+#define STACK_SIZE 32
 extern int16_t stack[STACK_SIZE];
 extern int16_t* stackPtr;
 

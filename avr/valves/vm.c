@@ -25,7 +25,7 @@ void startVM(int8_t start) {
 	}
 
 	if (start && !checkCode()) {
-		if(getCodeLen() == 0)
+		if (getCodeLen() == 0)
 			vmSetStatus(VMSTATUS_STOPPED);
 		else
 			vmSetStatus(VMSTATUS_WRONG_CHECKSUM);

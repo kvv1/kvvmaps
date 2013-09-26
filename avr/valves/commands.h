@@ -11,6 +11,7 @@
 #define CMD_UPLOAD 104 // cmd addrHi addrLo (byte)*
 #define CMD_UPLOAD_END 105
 #define CMD_GETUI 106 //
+#define CMD_VMINIT 107 //
 
 #define REG_RELAY0 0
 #define REG_RELAY1 1
@@ -25,6 +26,8 @@
 #define REG_RELAYS 8
 
 #define REG_TEMP 9
+#define REG_TEMP2 10
+
 #define REG_VMONOFF 13
 #define REG_VMSTATE 14
 #define REG_INPUTS 15
@@ -44,6 +47,15 @@
 #define REG_IN6 30
 #define REG_IN7 31
 #define REG_IN_CNT 4
+
+#define REG_PWM0 32
+#define REG_PWM1 33
+#define REG_PWM2 34
+#define REG_PWM3 35
+#define REG_PWM4 36
+#define REG_PWM5 37
+#define REG_PWM6 38
+#define REG_PWM7 39
 
 #define REG_EEPROM0 48
 #define REG_EEPROM1 49
@@ -81,8 +93,7 @@ char setReg(int reg, int val);
 
 int checkCode();
 
-#define TEMPERATURE_INVALID (-9999)
-int getTemperature10();
-
 void initCommands();
 
+ee_16_decl(CodeLen);
+ee_16_decl(CodeCRC);

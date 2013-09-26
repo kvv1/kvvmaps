@@ -15,7 +15,7 @@
 //	return res;
 //}
 
-static char timerTicks;
+static volatile char timerTicks;
 
 char getClearTimerTicks() {
 	char tticks;

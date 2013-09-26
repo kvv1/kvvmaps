@@ -10,6 +10,6 @@
 #define handlePins()
 #define handleTimers(ms)
 #define vmStep(ms)
-
+#define handlePWM(ms)
 
 #endif

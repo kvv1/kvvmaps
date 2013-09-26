@@ -16,6 +16,7 @@ extern EEMEM uint8_t code[VMCODE_SIZE];
 
 void initVM();
 void startVM(int8_t start);
+void vmInit();
 
 int8_t vmGetStatus();
 void vmStep(int ms);

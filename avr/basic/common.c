@@ -4,6 +4,7 @@
 #include "common.h"
 #include "myio.h"
 #include "ee.h"
+#include "1w.h"
 
 #include <avr/sleep.h>
 /*
@@ -125,9 +126,11 @@ int commonMain(void) {
 		char tticks = getClearTimerTicks();
 		while (tticks) {
 			tticks--;
-			ds18b20_step(TIME_UNIT);
+			ds18b20_step(0, TIME_UNIT);
+			ds18b20_step(1, TIME_UNIT);
 			vmStep(TIME_UNIT);
 			handleTimers(TIME_UNIT);
+			handlePWM(TIME_UNIT);
 		}
 		handleIO();
 		handlePins();

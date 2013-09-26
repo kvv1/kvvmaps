@@ -31,6 +31,7 @@
 #define LED2_DDR DDRD.7
 
 #define PIN_1W P_D5
+#define PIN_1W_1 P_C1
 
 #define PIN_485 P_B7
 

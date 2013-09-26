@@ -10,9 +10,11 @@
 #include "myio.h"
 #include "ee.h"
 
+#include "dht11.h"
+
 int main(void) {
 	PORTB = 0x00;
-	DDRB = 0x00;
+	DDRB = 0xFF;
 	PORTC = 0x00;
 	DDRC = 0x00;
 	PORTD = 0x01;
@@ -57,8 +59,8 @@ int main(void) {
 	ACSR = 0x80;
 	SFIOR = 0x00;
 
-	DDRB = 0x80;
-	PORTB = 0x80;
+	DDRB = (1 << 7) | (1 << 6);
+	PORTB = (1 << 7);
 
 	uart_init();
 
@@ -66,23 +68,36 @@ int main(void) {
 
 	print0("simple\n");
 
-	ee_magic = MAGIC16;
-	EEPROM_write(300, 33);
-	ee_magic = 0;
-	char b = EEPROM_read(300);
-	print1("byte = %d\n", b);
+//	ee_magic = MAGIC16;
+//	EEPROM_write(300, 33);
+//	ee_magic = 0;
+//	char b = EEPROM_read(300);
+//	print1("byte = %d\n", b);
 
-	//vmMain();
+//vmMain();
+	_delay_ms(2000);
 
 	while (1) {
-		_delay_ms(500);
+		_delay_ms(50);
 
 		//print0("012345678901234567890123456789abcdefgh\n");
 
-		ds18b20_step(500);
-		print1("%d ", temperature);
-//		int t = getTemperature();
+//		ds18b20_step(500);
+//		print1("%d ", temperature);
+
+//		int t;
+//		int h;
+//		int res = dht_read(DHT22, &t, &h);
+//		print1("%d   ", res);
+//		print2("t=%d h=%d\n", t, h);
+
+//		int t = oneWireGetTemperature(0);
+//		print1("%d ", t);
+//		t = oneWireGetTemperature(1);
 //		print1("%d\n", t);
+
+		PORTB = PORTB ^ (1 << 6);
+
 	};
 
 	return 0;

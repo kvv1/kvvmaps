@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 static uint8_t code[512];
 static int16_t regs[256];
@@ -26,6 +27,9 @@ void vmPrintInt(int16_t n) {
 	fflush(stdout);
 }
 
+void onVMStatusChanged() {
+}
+
 #define VM_STEP 10
 
 #define CRC16_INIT 0xffff
@@ -44,7 +48,7 @@ uint16_t crc16_step(uint8_t c, uint16_t crc_val) {
 	return crc_val;
 }
 
-int main(void) {
+int _main(void) {
 	uint8_t data[] = { 0x10, 0x05, 0x00, 0x02, 0xFF, 0x00 };
 
 	//printf("%04X\n", crc16(data, sizeof(data)));
@@ -52,11 +56,13 @@ int main(void) {
 	return 0;
 }
 
-int _main(void) {
+int main(void) {
 	FILE* file = fopen("d:/vm/code.bin", "rb");
 
 	fread(code, sizeof(code), 1, file);
 	fclose(file);
+
+	vmInit();
 
 	vmStart(1);
 //	vmInit();
