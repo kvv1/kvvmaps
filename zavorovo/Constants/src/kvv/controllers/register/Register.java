@@ -1,6 +1,6 @@
 package kvv.controllers.register;
 
-public class Register { 
+public class Register {
 	public static final int REG_RELAY0 = 0;
 	public static final int REG_RELAY1 = 1;
 	public static final int REG_RELAY2 = 2;
@@ -15,6 +15,7 @@ public class Register {
 	public static final int REG_RELAYS = 8;
 
 	public static final int REG_TEMP = 9;
+	public static final int REG_TEMP2 = 10;
 
 	public static final int REG_VMONOFF = 13;
 	public static final int REG_VMSTATE = 14;
@@ -34,6 +35,15 @@ public class Register {
 	public static final int REG_IN6 = 30;
 	public static final int REG_IN7 = 31;
 
+	public static final int REG_PWM0 = 32;
+	public static final int REG_PWM1 = 33;
+	public static final int REG_PWM2 = 34;
+	public static final int REG_PWM3 = 35;
+	public static final int REG_PWM4 = 36;
+	public static final int REG_PWM5 = 37;
+	public static final int REG_PWM6 = 38;
+	public static final int REG_PWM7 = 39;
+
 	public static final int REG_EEPROM0 = 48;
 	public static final int REG_EEPROM1 = 49;
 	public static final int REG_EEPROM2 = 50;
@@ -52,6 +62,7 @@ public class Register {
 	public static final int REG_RAM5 = 61;
 	public static final int REG_RAM6 = 62;
 	public static final int REG_RAM7 = 63;
+	public static final int REG_RAM_CNT = 8;
 
 	public static final int REG_INPULLUP0 = 248;
 	public static final int REG_INPULLUP1 = 249;

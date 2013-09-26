@@ -2,7 +2,9 @@
 // #################################
 
 reg x;
-reg y("text", edit);
+reg y;
+
+eereg ee = 44;
 
 onset(x > 20) {
     print x;
@@ -17,17 +19,37 @@ timer t {
 	t.start_ms (500);
 }
 
-main {
+void main() {
 //	print muldiv(20000, 30000, 10000);
 
+	int z0;
+	int z1;
+
+	print ee;
+
+	{
+		int z2;
+		int z3;
+		z0 = 22;
+		z3 = 33;
+	}
+
+	{
+		int z2;
+		int z3;
+		print z3;
+	}
+
 	p(100);	
+		print z0;
 	x = 25;
 	t.start_ms 100;
 }
 
-func f(a,b) = a - b;
+int f(int a, int b) = a - b;
 
-proc p(c) {
+void p(int c) {
+	int d;
 	c = c + 300; 
     print f(13+c,6);
 }

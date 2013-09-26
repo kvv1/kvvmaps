@@ -32,22 +32,35 @@ public class VMControl extends ControlComposite {
 
 	private final ListBox files;
 
-	private final Grid panel = new Grid(2, 6);
-
 	private final String name;
 
 	public VMControl(final int addr, final String name) {
 		super(addr);
-
 		this.name = name;
+
+		Grid panel = new Grid(2, 6);
+
+		HorizontalPanel vmStatePanel = new HorizontalPanel();
 
 		SimpleRelayControl vmCheckBox = new SimpleRelayControl(addr,
 				Register.REG_VMONOFF, null);
 		add(vmCheckBox);
-		panel.setWidget(0, 0, vmCheckBox);
+		vmStatePanel.add(vmCheckBox);
+
+		Button vmInit = new Button("Init");
+		vmInit.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				controllersService.vmInit(addr, new CallbackAdapter<Void>());
+				refresh();
+			}
+		});
+		vmStatePanel.add(vmInit);
+
+		panel.setWidget(0, 0, vmStatePanel);
 
 		GetRegControl vmState = new GetRegControl(addr, Register.REG_VMSTATE,
-				false, "VM=");
+				1, "VM=");
 		add(vmState);
 		panel.setWidget(1, 0, vmState);
 
@@ -68,20 +81,16 @@ public class VMControl extends ControlComposite {
 		add(eeprom3);
 		panel.setWidget(0, 4, eeprom3);
 
-		GetRegControl ram0 = new GetRegControl(addr, Register.REG_RAM0, false,
-				"");
+		GetRegControl ram0 = new GetRegControl(addr, Register.REG_RAM0, 1, "");
 		add(ram0);
 		panel.setWidget(1, 1, ram0);
-		GetRegControl ram1 = new GetRegControl(addr, Register.REG_RAM1, false,
-				"");
+		GetRegControl ram1 = new GetRegControl(addr, Register.REG_RAM1, 1, "");
 		add(ram1);
 		panel.setWidget(1, 2, ram1);
-		GetRegControl ram2 = new GetRegControl(addr, Register.REG_RAM2, false,
-				"");
+		GetRegControl ram2 = new GetRegControl(addr, Register.REG_RAM2, 1, "");
 		add(ram2);
 		panel.setWidget(1, 3, ram2);
-		GetRegControl ram3 = new GetRegControl(addr, Register.REG_RAM3, false,
-				"");
+		GetRegControl ram3 = new GetRegControl(addr, Register.REG_RAM3, 1, "");
 		add(ram3);
 		panel.setWidget(1, 4, ram3);
 

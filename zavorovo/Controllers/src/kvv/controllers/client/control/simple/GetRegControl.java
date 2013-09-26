@@ -2,7 +2,6 @@ package kvv.controllers.client.control.simple;
 
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.Register;
 
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -15,15 +14,15 @@ public class GetRegControl extends ControlComposite {
 	private final Label label;
 	private final Label edit;
 	private final int reg;
-	private final boolean div10;
+	private final float mul;
 
-	public GetRegControl(final int addr, final int reg, final boolean div10,
+	public GetRegControl(final int addr, final int reg, final float mul,
 			String text) {
 		super(addr);
 		this.label = new Label(text);
 		this.edit = new Label();
 		this.reg = reg;
-		this.div10 = div10;
+		this.mul = mul;
 
 		edit.setWidth("40px");
 		edit.setText("???");
@@ -48,9 +47,18 @@ public class GetRegControl extends ControlComposite {
 		if (_val == null)
 			return;
 
-		if (div10)
-			edit.setText(Float.toString((float) _val / 10));
-		else
+		if (mul != 1) {
+			String s = "" + (_val * mul);
+			int idx = s.indexOf('.');
+			if (idx != -1) {
+				idx += 3;
+				if (idx > s.length())
+					idx = s.length();
+				s = s.substring(0, idx);
+			}
+			edit.setText(s);
+		} else {
 			edit.setText(Integer.toString(_val));
+		}
 	}
 }

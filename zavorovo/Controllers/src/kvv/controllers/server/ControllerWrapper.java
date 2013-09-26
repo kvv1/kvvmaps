@@ -74,4 +74,14 @@ public class ControllerWrapper implements IController {
 			throw e;
 		}
 	}
+
+	@Override
+	public void vmInit(int addr) throws IOException {
+		try {
+			controller.vmInit(addr);
+		} catch (IOException e) {
+			MyLogger.getLogger().log(Level.WARNING, e.getMessage());
+			throw e;
+		}
+	}
 }

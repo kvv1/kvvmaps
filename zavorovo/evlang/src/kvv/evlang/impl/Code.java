@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import kvv.controllers.register.RegisterDescr;
+import kvv.evlang.ParseException;
+import kvv.evlang.impl.Event.EventType;
+
 public class Code {
 	public List<Byte> code = new ArrayList<Byte>();
 
@@ -16,13 +20,25 @@ public class Code {
 		}
 	}
 
-	public void add(BC c) {
+	public void insertEnter(int n) throws ParseException {
+		if (n < 0)
+			throw new ParseException("ERROR");
+		if (n != 0) {
+			List<Byte> code1 = new ArrayList<Byte>();
+			code1.add((byte) BC.ENTER.ordinal());
+			code1.add((byte) n);
+			code1.addAll(code);
+			code = code1;
+		}
+	}
+
+	void add(BC c) {
 		code.add((byte) c.ordinal());
 		Integer n = histo.get(c);
 		histo.put(c, n == null ? 1 : n + 1);
 	}
 
-	public void add(int c) {
+	void add(int c) {
 		code.add((byte) c);
 	}
 
@@ -30,11 +46,11 @@ public class Code {
 		code.addAll(c.code);
 	}
 
-	public int size() {
+	private int size() {
 		return code.size();
 	}
 
-	public void compileLit(short s) {
+	void compileLit(short s) {
 		if (s >= -32 && s < 32) {
 			add(BC.LITSHORT + (s & 0x3F));
 		} else {
@@ -44,7 +60,7 @@ public class Code {
 		}
 	}
 
-	public void compileGetreg(int reg) {
+	void compileGetreg(int reg) {
 		if (reg < 64) {
 			add(BC.GETREGSHORT + reg);
 		} else {
@@ -53,7 +69,7 @@ public class Code {
 		}
 	}
 
-	public void compileSetreg(int reg) {
+	void compileSetreg(int reg) {
 		if (reg < 64) {
 			add(BC.SETREGSHORT + reg);
 		} else {
@@ -62,13 +78,183 @@ public class Code {
 		}
 	}
 
-	public void compileGetLocal(int loc) {
+	void compileGetLocal(int loc) {
 		add(BC.GETLOCAL);
 		add(loc);
 	}
 
-	public void compileSetLocal(int loc) {
+	private void compileSetLocal(int loc) {
 		add(BC.SETLOCAL);
 		add(loc);
+	}
+
+	public static Code dec(Context context, String name) throws ParseException {
+		RegisterDescr descr = context.registers.get(name);
+		if (descr == null)
+			throw new ParseException(name + " - ?");
+		context.checkROReg(descr);
+		Code res = new Code();
+		res.add(BC.DEC);
+		res.add(descr.reg);
+		return res;
+	}
+
+	public static Code inc(Context context, String name) throws ParseException {
+		RegisterDescr descr = context.registers.get(name);
+		if (descr == null)
+			throw new ParseException(name + " - ?");
+		context.checkROReg(descr);
+		Code res = new Code();
+		res.add(BC.INC);
+		res.add(descr.reg);
+		return res;
+	}
+
+	public static Code callp(Context context, String name, List<Expr> argList)
+			throws ParseException {
+		Func func = context.getCreateFunc(name, argList.size(), false);
+		Code res = new Code();
+		for (Expr c : argList)
+			res.addAll(c.getCode());
+		res.add(BC.CALLP);
+		res.add(func.n);
+		return res;
+	}
+
+	public static Code stop(Context context, String name) throws ParseException {
+		Timer timer = context.getCreateTimer(name);
+		Code res = new Code();
+		res.add(BC.STOPTIMER);
+		res.add(timer.n);
+		return res;
+	}
+
+	public static Code start_ms(Context context, String name, Expr t)
+			throws ParseException {
+		Timer timer = context.getCreateTimer(name);
+		Code res = t.getCode();
+		res.add(BC.SETTIMER_MS);
+		res.add(timer.n);
+		return res;
+	}
+
+	public static Code start_s(Context context, String name, Expr t)
+			throws ParseException {
+		Timer timer = context.getCreateTimer(name);
+		Code res = t.getCode();
+		res.add(BC.SETTIMER_S);
+		res.add(timer.n);
+		return res;
+	}
+
+	public static Code print(Expr n) throws ParseException {
+		Code res = n.getCode();
+		res.add(BC.PRINT);
+		return res;
+	}
+
+	public static Code assign(Context context, String name, Expr t)
+			throws ParseException {
+		Code res = t.getCode();
+		Integer val = context.locals.get(name);
+		if (val != null) {
+			res.compileSetLocal(context.locals.getArgCnt() - val - 1);
+		} else {
+			RegisterDescr descr = context.registers.get(name);
+			if (descr == null)
+				throw new ParseException(name + " - ?");
+			context.checkROReg(descr);
+			res.compileSetreg(descr.reg);
+		}
+		return res;
+	}
+
+	public static Code ifstmt(Expr cond, Code stmt, Code stmt2) {
+		Code res = cond.getCode();
+		if (stmt2 != null) {
+			res.add(BC.QBRANCH);
+			res.add(stmt.size() + 2);
+			res.addAll(stmt);
+			res.add(BC.BRANCH);
+			res.add(stmt2.size());
+			res.addAll(stmt2);
+		} else {
+			res.add(BC.QBRANCH);
+			res.add(stmt.size());
+			res.addAll(stmt);
+		}
+		return res;
+	}
+
+	public static void proc(Context context, String name, Code bytes)
+			throws ParseException {
+
+		bytes.insertEnter(context.locals.getMax() - context.locals.getArgCnt());
+
+		if (name.equals("main") && context.locals.getArgCnt() == 0) {
+			bytes.add(BC.RET);
+			Func func = new Func(0, false);
+			func.code = new CodeRef(context, bytes);
+			context.funcDefList.setMain(func);
+			System.out.println("main " + bytes.size());
+			return;
+		}
+
+		if (context.locals.getArgCnt() == 0)
+			bytes.add(BC.RET);
+		else
+			bytes.add(BC.RET_N);
+		bytes.add(context.locals.getArgCnt());
+		Func func = context.getCreateFunc(name, context.locals.getArgCnt(),
+				false);
+		func.code = new CodeRef(context, bytes);
+		System.out.println("proc " + name + " " + bytes.size());
+	}
+
+	public static void func(Context context, String name, Code bytes)
+			throws ParseException {
+		bytes.insertEnter(context.locals.getMax() - context.locals.getArgCnt());
+
+		if (context.locals.getArgCnt() == 0)
+			bytes.add(BC.RETI);
+		else
+			bytes.add(BC.RETI_N);
+		bytes.add(context.locals.getArgCnt());
+		Func func = context.getCreateFunc(name, context.locals.getArgCnt(),
+				true);
+		func.code = new CodeRef(context, bytes);
+		System.out.println("func " + name + " " + bytes.size());
+	}
+
+	public static void timer(Context context, String name, Code bytes)
+			throws ParseException {
+		bytes.insertEnter(context.locals.getMax() - context.locals.getArgCnt());
+
+		bytes.add(BC.RET);
+		Timer timer = context.getCreateTimer(name);
+		timer.handler = new CodeRef(context, bytes);
+		System.out.println("timer " + name + " " + bytes.size());
+	}
+
+	public static void onset(Context context, Code cond, Code bytes)
+			throws ParseException {
+		bytes.insertEnter(context.locals.getMax() - context.locals.getArgCnt());
+
+		cond.add(BC.RETI);
+		bytes.add(BC.RET);
+		context.events.add(new Event(new CodeRef(context, cond), new CodeRef(
+				context, bytes), EventType.SET));
+		System.out.println("onset " + cond.size() + " " + bytes.size());
+	}
+
+	public static void onchange(Context context, Code cond, Code bytes)
+			throws ParseException {
+		bytes.insertEnter(context.locals.getMax() - context.locals.getArgCnt());
+
+		cond.add(BC.RETI);
+		bytes.add(BC.RET);
+		context.events.add(new Event(new CodeRef(context, cond), new CodeRef(
+				context, bytes), EventType.CHANGE));
+		System.out.println("onchange " + cond.size() + " " + bytes.size());
 	}
 }

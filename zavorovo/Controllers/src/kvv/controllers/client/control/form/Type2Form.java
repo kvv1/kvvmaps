@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class Type2Form extends ControlComposite {
 
@@ -30,19 +31,34 @@ public class Type2Form extends ControlComposite {
 
 		panel.add(nameLabel);
 
-		Label addrLabel = new Label("addr = " + addr);
+		Label addrLabel = new Label("addr=" + addr);
 		addrLabel.setWidth("70px");
 
 		panel.add(addrLabel);
 
-		RelayCheckBoxes relays = new RelayCheckBoxes(addr, Register.REG_RELAY0, Register.REG_RELAY_CNT);
+		RelayCheckBoxes relays = new RelayCheckBoxes(addr, Register.REG_RELAY0,
+				Register.REG_PWM0, Register.REG_RELAY_CNT);
 		add(relays);
 		panel.add(relays);
 
+		VerticalPanel tempPanel = new VerticalPanel();
+		
 		GetRegControl tempVal = new GetRegControl(addr, Register.REG_TEMP,
-				true, "T=");
+				1, "T1=");
 		add(tempVal);
-		panel.add(tempVal);
+		tempPanel.add(tempVal);
+
+		GetRegControl tempVal2 = new GetRegControl(addr, Register.REG_TEMP2,
+				1, "T2=");
+		add(tempVal2);
+		tempPanel.add(tempVal2);
+
+		panel.add(tempPanel);
+
+		GetRegControl vVal = new GetRegControl(addr, Register.REG_ADC3,
+				0.0202f, "V=");
+		add(vVal);
+		panel.add(vVal);
 
 		VMControl vmControl = new VMControl(addr, name);
 		add(vmControl);

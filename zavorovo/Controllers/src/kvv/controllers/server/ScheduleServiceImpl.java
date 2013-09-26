@@ -1,7 +1,10 @@
 package kvv.controllers.server;
 
+import java.util.Date;
+
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.server.utils.Utils;
+import kvv.controllers.shared.Log;
 import kvv.controllers.shared.Schedule;
 import kvv.controllers.utils.Constants;
 
@@ -39,5 +42,12 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public void enable(String regName, boolean b) {
 		Utils.changeProp(Constants.scheduleProps, regName, "" + b);
+	}
+
+	@Override
+	public Log getLog() {
+		Date d = new Date();
+//		d.setDate(d.getDate()-1);
+		return LogFile.load(d);
 	}
 }

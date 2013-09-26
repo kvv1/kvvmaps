@@ -2,8 +2,8 @@ package kvv.evlang.rt;
 
 import java.util.List;
 
-import kvv.evlang.impl.Context.CodeRef;
-import kvv.evlang.impl.Context.EventType;
+import kvv.evlang.impl.CodeRef;
+import kvv.evlang.impl.Event.EventType;
 
 
 public class RTContext {

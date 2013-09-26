@@ -61,31 +61,29 @@ public interface EG1Constants {
   /** RegularExpression Id. */
   int STOP = 31;
   /** RegularExpression Id. */
-  int MAIN = 32;
+  int PRINT = 32;
   /** RegularExpression Id. */
-  int PRINT = 33;
+  int DEC = 33;
   /** RegularExpression Id. */
-  int DEC = 34;
+  int INC = 34;
   /** RegularExpression Id. */
-  int INC = 35;
+  int MULDIV = 35;
   /** RegularExpression Id. */
-  int PROC = 36;
+  int CHECKBOX = 36;
   /** RegularExpression Id. */
-  int FUNC = 37;
+  int TEXT = 37;
   /** RegularExpression Id. */
-  int MULDIV = 38;
+  int INT = 38;
   /** RegularExpression Id. */
-  int CHECKBOX = 39;
+  int VOID = 39;
   /** RegularExpression Id. */
-  int TEXT = 40;
+  int ID = 40;
   /** RegularExpression Id. */
-  int ID = 41;
+  int STRING = 41;
   /** RegularExpression Id. */
-  int STRING = 42;
+  int NUMBER = 42;
   /** RegularExpression Id. */
-  int NUMBER = 43;
-  /** RegularExpression Id. */
-  int DIGIT = 44;
+  int DIGIT = 43;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -124,15 +122,14 @@ public interface EG1Constants {
     "\"start_s\"",
     "\"start_ms\"",
     "\"stop\"",
-    "\"main\"",
     "\"print\"",
     "\"--\"",
     "\"++\"",
-    "\"proc\"",
-    "\"func\"",
     "\"muldiv\"",
     "\"checkbox\"",
     "\"text\"",
+    "\"int\"",
+    "\"void\"",
     "<ID>",
     "<STRING>",
     "<NUMBER>",

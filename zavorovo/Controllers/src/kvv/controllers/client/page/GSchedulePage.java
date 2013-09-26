@@ -10,6 +10,7 @@ import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.register.AllRegs;
+import kvv.controllers.shared.Log;
 import kvv.controllers.shared.ObjectDescr;
 import kvv.controllers.shared.ObjectDescr.Type;
 import kvv.controllers.shared.Register;
@@ -81,50 +82,73 @@ public class GSchedulePage extends Composite {
 			@Override
 			public void onSuccess(final Schedule schedule) {
 				controllersService
-						.getObjects(new AsyncCallback<ObjectDescr[]>() {
+						.getObjects(new CallbackAdapter<ObjectDescr[]>() {
 							@Override
-							public void onSuccess(ObjectDescr[] objectDescrs) {
-								ArrayList<Register> regs = new ArrayList<Register>();
-								for (ObjectDescr objectDescr : objectDescrs)
-									if (objectDescr != null
-											&& objectDescr.type == Type.RELAY) {
-										Register reg = new Register(
-												objectDescr.register,
-												objectDescr.controller,
-												objectDescr.addr,
-												objectDescr.reg);
-										regs.add(reg);
-									}
-								for (Register reg : schedule.map.keySet())
-									if (!regs.contains(reg))
-										regs.add(reg);
+							public void onSuccess(
+									final ObjectDescr[] objectDescrs) {
+								controllersService
+										.getRegisters(new CallbackAdapter<Register[]>() {
+											@Override
+											public void onSuccess(
+													Register[] registers) {
+												ArrayList<Register> regs = new ArrayList<Register>();
+												for (ObjectDescr objectDescr : objectDescrs)
+													if (objectDescr != null
+															&& objectDescr.type == Type.RELAY) {
+														Register reg = new Register(
+																objectDescr.register,
+																objectDescr.controller,
+																objectDescr.addr,
+																objectDescr.reg);
+														regs.add(reg);
+													}
 
-								for (Register reg : regs) {
-									try {
-										AutoRelayControl control = new AutoRelayControl(
-												reg.addr, reg, mouseMoveHandler);
-										itemPanel.add(control);
-										objects.put(reg.addr, control);
-									} catch (Exception e) {
-									}
-								}
-								refreshSchedule(schedule);
-								refreshData();
-							}
+												for (Register reg : schedule.map
+														.keySet())
+													if (!regs.contains(reg))
+														regs.add(reg);
 
-							@Override
-							public void onFailure(Throwable caught) {
+												for (Register reg : registers)
+													if (!regs.contains(reg))
+														regs.add(reg);
+
+												for (Register reg : regs) {
+													try {
+														AutoRelayControl control = new AutoRelayControl(
+																reg.addr, reg,
+																mouseMoveHandler);
+														itemPanel.add(control);
+														objects.put(reg.addr,
+																control);
+													} catch (Exception e) {
+													}
+												}
+
+												scheduleService
+														.getLog(new CallbackAdapter<Log>() {
+															@Override
+															public void onSuccess(
+																	Log log) {
+																refreshSchedule(
+																		schedule,
+																		log);
+															}
+
+														});
+												refreshData();
+											}
+										});
 							}
 						});
 			}
 		});
 	}
 
-	private void refreshSchedule(Schedule schedule) {
+	private void refreshSchedule(Schedule schedule, Log log) {
 		for (AutoRelayControl c : objects.values()) {
 			RegisterSchedule registerSchedule = schedule.map.get(c.reg);
-			if (registerSchedule != null)
-				c.refreshSchedule(registerSchedule, schedule.date);
+			c.refreshSchedule(registerSchedule, log.items.get(c.reg),
+					schedule.date);
 		}
 	}
 
@@ -152,8 +176,13 @@ public class GSchedulePage extends Composite {
 	private void refresh() {
 		scheduleService.getSchedule(new CallbackAdapter<Schedule>() {
 			@Override
-			public void onSuccess(Schedule result) {
-				refreshSchedule(result);
+			public void onSuccess(final Schedule schedule) {
+				scheduleService.getLog(new CallbackAdapter<Log>() {
+					@Override
+					public void onSuccess(Log log) {
+						refreshSchedule(schedule, log);
+					}
+				});
 			}
 		});
 		refreshData();

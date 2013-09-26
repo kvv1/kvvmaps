@@ -3,7 +3,6 @@ package kvv.evlang.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,15 +12,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import kvv.controllers.register.RegType;
 import kvv.controllers.register.Register;
 import kvv.controllers.register.RegisterDescr;
 import kvv.controllers.register.RegisterUI;
 import kvv.evlang.ParseException;
+import kvv.evlang.impl.Event.EventType;
 import kvv.evlang.rt.RTContext;
 import kvv.evlang.rt.VM;
 
 public class Context {
-	protected Map<String, Integer> constants = new HashMap<String, Integer>();
+	protected Map<String, Short> constants = new HashMap<String, Short>();
 
 	protected Map<String, RegisterDescr> registers = new LinkedHashMap<String, RegisterDescr>();
 	protected int nextReg = Register.REG_RAM0;
@@ -37,6 +38,8 @@ public class Context {
 		registers.put("REG_RELAY6", new RegisterDescr(Register.REG_RELAY6));
 		registers.put("REG_RELAY7", new RegisterDescr(Register.REG_RELAY7));
 		registers.put("REG_TEMPERATURE", new RegisterDescr(Register.REG_TEMP,
+				true, false));
+		registers.put("REG_TEMPERATURE2", new RegisterDescr(Register.REG_TEMP2,
 				true, false));
 
 		// registers.put("REG_EEPROM0", Register.REG_EEPROM0);
@@ -100,203 +103,61 @@ public class Context {
 			throw new ParseException("register is read only");
 	}
 
-	public static class ArgListDef {
-		private Map<String, Integer> args = new LinkedHashMap<String, Integer>();
-		private int argCnt;
-
-		public void add(String name) {
-			args.put(name, args.size());
-		}
-
-		public void endOfArgs() {
-			argCnt = args.size();
-		}
-
-		public int getArgCnt() {
-			return argCnt;
-		}
-
-		public void clear() {
-			args.clear();
-			argCnt = 0;
-		}
-
-		public Integer get(String name) {
-			return args.get(name);
-		}
-	}
-
-	public ArgListDef args = new ArgListDef();
+	public LocalListDef locals = new LocalListDef();
 
 	List<Byte> codeArr = new ArrayList<Byte>();
 
-	public class CodeRef {
-		public int off;
-		public int len;
-
-		public CodeRef() {
-		}
-
-		public CodeRef(Code code) {
-			this.off = codeArr.size();
-			this.len = code.size();
-			codeArr.addAll(code.code);
-		}
-
-		public int check(int expected, String msg) throws ParseException {
-			int maxStack = 0;
-			int stack = 0;
-			for (int i = off; i < off + len; i++) {
-				int bc1 = codeArr.get(i) & 0xC0;
-				if (bc1 == BC.GETREGSHORT) {
-					EG.dumpStream.print("GETREGSHORT ");
-					stack++;
-				} else if (bc1 == BC.SETREGSHORT) {
-					EG.dumpStream.print("SETREGSHORT ");
-					stack--;
-				} else if (bc1 == BC.LITSHORT) {
-					EG.dumpStream.print("LITSHORT ");
-					stack += 1;
-				} else {
-					bc1 = codeArr.get(i);
-
-					BC bc = BC.values()[bc1];
-
-					EG.dumpStream.print(bc.name() + " ");
-
-					if (bc == BC.CALLF || bc == BC.CALLP) {
-						PrintStream ps = EG.dumpStream;
-						EG.dumpStream = EG.nullStream;
-						Func f = funcValues.get(codeArr.get(i + 1));
-						maxStack = Math.max(maxStack,
-								stack + 2 + f.getMaxStack());
-						stack -= f.args;
-						if (f.f)
-							stack++;
-						i += bc.args;
-						EG.dumpStream = ps;
-					} else if (bc == BC.RET || bc == BC.RETI || bc == BC.RET_N
-							|| bc == BC.RETI_N) {
-						break;
-					} else {
-						stack += bc.stackBalance;
-						i += bc.args;
-					}
-				}
-				if (stack < 0)
-					throw new ParseException(msg + " stack underflow");
-
-				maxStack = Math.max(maxStack, stack);
-			}
-			if (stack != expected)
-				throw new ParseException(msg + " stack error");
-
-			return maxStack;
-		}
-	}
-
-	public class Func {
-		public int n;
-		public CodeRef code;
-		public boolean f;
-		public String name;
-		public int args;
-
-		public int maxStack = -1;
-
-		public Func(String name, int args, int n, boolean f) {
-			this.name = name;
-			this.args = args;
-			this.n = n;
-			this.f = f;
-		}
-
-		int getMaxStack() throws ParseException {
-			String msg = (f ? "function" : "procedure") + " '" + name + "'";
-			if (maxStack < 0) {
-				EG.dumpStream.print(msg + " ");
-				maxStack = code.check(f ? 1 : 0, msg);
-				EG.dumpStream.println("maxStack: " + maxStack);
-			}
-			return maxStack;
-		}
-	}
-
-	protected List<Func> funcValues = new ArrayList<Func>();
-	{
-		funcValues.add(null);
-	}
-
-	protected Map<String, Func> funcs = new LinkedHashMap<String, Func>();
+	public FuncDefList funcDefList = new FuncDefList();
 
 	public Func getCreateFunc(String name, int args, boolean f)
 			throws ParseException {
-		Func func = funcs.get(name);
+		Func func = funcDefList.get(name);
 		if (func == null) {
 			checkName(name);
-			func = new Func(name, args, funcValues.size(), f);
-			funcs.put(name, func);
-			funcValues.add(func);
-		} else if (func.f != f) {
+			func = new Func(args, f);
+			funcDefList.put(name, func);
+		} else if (func.retSize != f) {
 			throw new ParseException(name + " - ?");
 		} else if (func.args != args)
 			throw new ParseException(name + " argument number error");
 		return func;
 	}
 
-	public enum EventType {
-		SET, CHANGE
+	protected void newRegister(String regName, String regNum, boolean forceEE,
+			Short initValue) throws ParseException {
+		checkName(regName);
+		RegisterDescr registerDescr;
+		if (regNum == null) {
+			if (forceEE)
+				registerDescr = new RegisterDescr(nextEEReg++, true, true,
+						initValue);
+			else
+				registerDescr = new RegisterDescr(nextReg++, false, false,
+						initValue);
+			if (nextEEReg > Register.REG_EEPROM0 + Register.REG_EEPROM_CNT
+					|| nextReg > Register.REG_RAM0 + Register.REG_RAM_CNT)
+				throw new ParseException("too many registers used");
+		} else {
+			registerDescr = registers.get(regNum);
+			if (registerDescr == null)
+				throw new ParseException(regNum + " - ?");
+		}
+		registers.put(regName, registerDescr);
 	}
 
-	public class Event {
-		public CodeRef cond;
-		public CodeRef handler;
+	protected void setUI(String regName, String uiName, RegType uiType)
+			throws ParseException {
+		RegisterDescr registerDescr = registers.get(regName);
+		if (registerDescr == null)
+			throw new ParseException(regName + " - ?");
 
-		public EventType type;
+		if (uiType == RegType.textRW && !registerDescr.editable)
+			uiType = RegType.textRO;
 
-		public Event(Code cond, Code handler, EventType type) {
-			this.cond = new CodeRef(cond);
-			this.handler = new CodeRef(handler);
-			this.type = type;
-		}
-
-		public int getCondMaxStack() throws ParseException {
-			String msg = "event cond";
-			EG.dumpStream.print(msg + " ");
-			int maxStack = cond.check(1, msg);
-			EG.dumpStream.println("maxStack: " + maxStack);
-			return maxStack;
-		}
-
-		public int getHandlerMaxStack() throws ParseException {
-			String msg = "event handler";
-			EG.dumpStream.print(msg + " ");
-			int maxStack = handler.check(0, msg);
-			EG.dumpStream.println("maxStack: " + maxStack);
-			return maxStack;
-		}
+		registerUIs.add(new RegisterUI(registerDescr.reg, uiType, uiName));
 	}
 
 	public Collection<Event> events = new ArrayList<Event>();
-
-	public class Timer {
-		public int n;
-		public CodeRef handler;
-		public String name;
-
-		public Timer(String name, int n) {
-			this.name = name;
-			this.n = n;
-		}
-
-		public int getMaxStack() throws ParseException {
-			String msg = "timer '" + name + "'";
-			EG.dumpStream.print(msg + " ");
-			int maxStack = handler.check(0, msg);
-			EG.dumpStream.println("maxStack: " + maxStack);
-			return maxStack;
-		}
-	}
 
 	protected Map<String, Timer> timers = new LinkedHashMap<String, Timer>();
 	protected int nextTimer = 0;
@@ -325,12 +186,29 @@ public class Context {
 				throw new ParseException("timer '" + t.name + "' not defined");
 		}
 
-		for (Func f : funcValues) {
+		for (Func f : funcDefList.values()) {
 			if (f.code == null)
-				throw new ParseException((f.f ? "function" : "procedure")
+				throw new ParseException((f.retSize ? "function" : "procedure")
 						+ " '" + f.name + "' not defined");
 		}
 
+	}
+
+	public void buildInit() {
+		Code code = new Code();
+
+		for (RegisterDescr reg : registers.values()) {
+			if (reg.initValue != null) {
+				code.compileLit(reg.initValue);
+				code.compileSetreg(reg.reg);
+			}
+		}
+
+		code.add(BC.RET);
+
+		Func func = new Func(0, false);
+		func.code = new CodeRef(this, code);
+		funcDefList.setInit(func);
 	}
 
 	public void checkStack() throws ParseException {
@@ -341,7 +219,7 @@ public class Context {
 			maxStack = Math.max(maxStack, stack);
 		}
 
-		for (Func f : funcValues) {
+		for (Func f : funcDefList.values()) {
 			int stack = f.getMaxStack();
 			maxStack = Math.max(maxStack, stack);
 		}
@@ -384,8 +262,8 @@ public class Context {
 			dos.writeShort(t.handler.off);
 		}
 
-		dos.writeByte(funcValues.size());
-		for (Func f : funcValues) {
+		dos.writeByte(funcDefList.size());
+		for (Func f : funcDefList.values()) {
 			dos.writeShort(f.code.off);
 		}
 
@@ -405,8 +283,8 @@ public class Context {
 		for (Timer t : timers.values())
 			rtTimers[t.n] = new RTContext.Timer(t.handler);
 
-		RTContext.Func rtFuncs[] = new RTContext.Func[funcValues.size()];
-		for (Func f : funcValues)
+		RTContext.Func rtFuncs[] = new RTContext.Func[funcDefList.size()];
+		for (Func f : funcDefList.values())
 			rtFuncs[f.n] = new RTContext.Func(f.code);
 
 		RTContext context = new RTContext(codeArr, rtTimers,
