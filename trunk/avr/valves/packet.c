@@ -7,8 +7,9 @@ void handleRxCmd(char* data, unsigned char len) {
 	if (len < 3)
 		return;
 	if (data[0] == 0 || data[0] == MY_ADDR) {
-		uint16_t sum = crc16(data, len - 2);
-		if (data[len - 2] == (char) sum && data[len - 1] == (char) (sum >> 8)) {
+		uint16_t sum = crc16((uint8_t*) data, len - 2);
+		if ((data[len - 2] == (char) sum)
+				&& (data[len - 1] == (char) (sum >> 8))) {
 			targetAddr = data[0];
 			ee_magic = MAGIC16;
 			packetReceived(data + 1, len - 3);
@@ -52,6 +53,4 @@ void sendPacket(uint8_t* data, uint16_t len) {
 int fetch(void* a) {
 	return (*((uint8_t*) a) << 8) | *((uint8_t*) a + 1);
 }
-
-
 

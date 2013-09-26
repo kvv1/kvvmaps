@@ -8,13 +8,6 @@
 
 #include "1w.h"
 
-int getTemperature10() {
-	int t = temperature;
-	if (t == -9999)
-		return TEMPERATURE_INVALID;
-	return 10 * t;
-}
-
 void createObjects() {
 	initCommands();
 	initVM();

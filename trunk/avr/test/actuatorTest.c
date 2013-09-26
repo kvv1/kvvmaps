@@ -10,7 +10,7 @@ static Actuator actuator;
 
 static int handler(Message* msg) {
 	static int tSaved = 1000;
-	int t = getTemperature();
+	int t = oneWireGetTemperature(0);
 	int targ256;
 
 	if (tSaved == 1000)
@@ -46,6 +46,9 @@ void createObjects() {
 }
 
 void handleRxCmd(char* cmd) {
+}
+
+void handlePWM(int ms) {
 }
 
 int main() {

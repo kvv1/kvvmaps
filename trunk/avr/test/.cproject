@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="de.innot.avreclipse.configuration.app.release.1896284748">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="de.innot.avreclipse.configuration.app.release.1896284748" moduleId="org.eclipse.cdt.core.settings" name="Release">
@@ -33,6 +31,9 @@
 								<option id="de.innot.avreclipse.assembler.option.debug.level.2005347239" name="Generate Debugging Info" superClass="de.innot.avreclipse.assembler.option.debug.level" value="de.innot.avreclipse.assembler.option.debug.level.none" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.asm.option.include.paths.1661260985" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="D:/googlecode/trunk/avr/test"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/test/actuator}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/test/basic}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/test/common}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.962251463" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
@@ -41,9 +42,9 @@
 								<option id="de.innot.avreclipse.compiler.option.optimize.1736518851" name="Optimization Level" superClass="de.innot.avreclipse.compiler.option.optimize" value="de.innot.avreclipse.compiler.optimize.size" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.compiler.option.incpath.1906478382" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="D:/googlecode/trunk/avr/test"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/actuator}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/basic}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/common}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/test/actuator}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/test/basic}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/test/common}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1261256731" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
@@ -52,6 +53,9 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.1535427589" name="Optimization Level" superClass="de.innot.avreclipse.cppcompiler.option.optimize" value="de.innot.avreclipse.cppcompiler.optimize.size" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.incpath.2141312093" name="Include Paths (-I)" superClass="de.innot.avreclipse.cppcompiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="D:/googlecode/trunk/avr/test"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/test/actuator}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/test/basic}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/test/common}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.624306579" superClass="de.innot.avreclipse.cppcompiler.input"/>
 							</tool>
@@ -74,9 +78,9 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry excluding="basic|actuator|common" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="common"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="basic"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="actuator"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="common"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
