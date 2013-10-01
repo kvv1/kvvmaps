@@ -3,18 +3,11 @@ package kvv.controllers.client.page;
 import java.util.ArrayList;
 import java.util.Date;
 
-import kvv.controllers.client.CallbackAdapter;
-import kvv.controllers.client.ScheduleService;
-import kvv.controllers.client.ScheduleServiceAsync;
-import kvv.controllers.server.Logger;
-import kvv.controllers.shared.Log;
-import kvv.controllers.shared.LogItem;
-import kvv.controllers.shared.Register;
+import kvv.controllers.shared.HistoryItem;
 import kvv.controllers.shared.ScheduleItem;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -52,14 +45,9 @@ public class ScheduleCanvas extends Composite {
 	};
 
 	private Range sel;
-	private Register reg;
 
-	private final ScheduleServiceAsync scheduleService = GWT
-	.create(ScheduleService.class);
+	public ScheduleCanvas(final MouseMoveHandler mouseMoveHandler) {
 
-	public ScheduleCanvas(final Register reg, final MouseMoveHandler mouseMoveHandler) {
-		this.reg = reg;
-		
 		initWidget(canvas);
 
 		canvas.setWidth(width + "px");
@@ -105,15 +93,17 @@ public class ScheduleCanvas extends Composite {
 				panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
 				final Range sel1 = sel;
-				
-				scheduleService.getLog(new CallbackAdapter<Log>() {
-					@Override
-					public void onSuccess(Log log) {
-						panel.add(new Chart(sel1, log.items.get(reg)));
-						panel.add(ok);
-					}
-				});
-				
+
+				panel.add(new Chart(sel1, logItems));
+				panel.add(ok);
+
+				// scheduleService.getLog(new CallbackAdapter<Log>() {
+				// @Override
+				// public void onSuccess(Log log) {
+				// panel.add(new Chart(sel1, log.items.get(reg)));
+				// panel.add(ok);
+				// }
+				// });
 
 				dialog.setWidget(panel);
 
@@ -175,10 +165,10 @@ public class ScheduleCanvas extends Composite {
 
 	private ArrayList<ScheduleItem> items;
 	private Date date;
-	private ArrayList<LogItem> logItems;
+	private ArrayList<HistoryItem> logItems;
 
 	public void refresh(ArrayList<ScheduleItem> items,
-			ArrayList<LogItem> logItems, Date date) {
+			ArrayList<HistoryItem> logItems, Date date) {
 		this.items = items;
 		this.logItems = logItems;
 		this.date = date;
@@ -200,7 +190,7 @@ public class ScheduleCanvas extends Composite {
 			}
 
 		if (logItems != null)
-			for (LogItem logItem : logItems) {
+			for (HistoryItem logItem : logItems) {
 				int logVal = logItem.value;
 				minVal = Math.min(minVal, logVal);
 				maxVal = Math.max(maxVal, logVal);
@@ -255,7 +245,7 @@ public class ScheduleCanvas extends Composite {
 
 			Integer lastValue = null;
 
-			for (LogItem logItem : logItems) {
+			for (HistoryItem logItem : logItems) {
 				int x = sec2x(logItem.seconds);
 
 				if (lastValue != null)
@@ -282,17 +272,21 @@ public class ScheduleCanvas extends Composite {
 			context.closePath();
 		}
 
-		context.beginPath();
-		context.setStrokeStyle("yellow");
+		if (date != null) {
+			context.beginPath();
+			context.setStrokeStyle("yellow");
+			context.setLineWidth(2);
 
-		@SuppressWarnings("deprecation")
-		int minutes = date.getHours() * 60 + date.getMinutes();
+			@SuppressWarnings("deprecation")
+			int minutes = date.getHours() * 60 + date.getMinutes();
 
-		context.lineTo(sec2x(minutes * 60), 0);
-		context.lineTo(sec2x(minutes * 60), registerHeight);
+			context.lineTo(sec2x(minutes * 60), 0);
+			context.lineTo(sec2x(minutes * 60), registerHeight);
 
-		context.stroke();
-		context.closePath();
+			context.stroke();
+			context.closePath();
+		}
+
 		context.restore();
 
 		return true;

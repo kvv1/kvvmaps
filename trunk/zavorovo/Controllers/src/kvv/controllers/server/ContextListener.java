@@ -21,7 +21,7 @@ public class ContextListener implements ServletContextListener {
 			e.printStackTrace();
 		}
 
-		Logger.instance = new Logger();
+		HistoryLogger.instance = new HistoryLogger();
 
 		Scheduler.instance = new Scheduler();
 
@@ -35,10 +35,10 @@ public class ContextListener implements ServletContextListener {
 			Scheduler.instance.stop();
 			Scheduler.instance = null;
 		}
-		if (Logger.instance != null) {
-			Logger.instance.stopped = true;
-			Logger.instance.stop();
-			Logger.instance = null;
+		if (HistoryLogger.instance != null) {
+			HistoryLogger.instance.stopped = true;
+			HistoryLogger.instance.stop();
+			HistoryLogger.instance = null;
 		}
 
 		MyLogger.stopLogger();

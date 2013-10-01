@@ -10,14 +10,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerDescr.Type;
 import kvv.controllers.shared.Register;
 import kvv.controllers.utils.Constants;
 
-public class Logger extends Thread {
-	public static volatile Logger instance;
+public class HistoryLogger extends Thread {
+	public static volatile HistoryLogger instance;
 	public volatile boolean stopped;
 
 	{
@@ -30,20 +29,17 @@ public class Logger extends Thread {
 	public void run() {
 		while (!stopped) {
 			try {
-				ControllerDescr[] controllers = Utils.jsonRead(
-						Constants.controllersFile, ControllerDescr[].class);
-
+				ControllerDescr[] controllers = Controllers.getInstance()
+						.getControllers();
 				for (ControllerDescr c : controllers) {
 					try {
-						if (c != null) {
-							Thread.sleep(1000);
-							if (c.type == Type.MU110_8)
-								ControllersServiceImpl.controller.getRegs(
-										c.addr, 0, 8);
-							else
-								ControllersServiceImpl.controller
-										.getAllRegs(c.addr);
-						}
+						Thread.sleep(1000);
+						if (c.type == Type.MU110_8)
+							ControllersServiceImpl.controller.getRegs(c.addr,
+									0, 8);
+						else
+							ControllersServiceImpl.controller
+									.getAllRegs(c.addr);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -127,8 +123,8 @@ public class Logger extends Thread {
 			logValue(ps, date, reg, values.get(reg));
 	}
 
-	public static void log(int addr, int reg, int val) {
-		Register register = Controllers.getRegister(addr, reg);
+	public static void log(int addr, int reg, Integer val) {
+		Register register = Controllers.getInstance().getRegister(addr, reg);
 		if (register == null)
 			return;
 		logValue(register.name, val);
@@ -136,7 +132,8 @@ public class Logger extends Thread {
 
 	public static void log(int addr, Map<Integer, Integer> values) {
 		if (values == null) {
-			Collection<Register> regs = Controllers.getRegisters(addr);
+			Collection<Register> regs = Controllers.getInstance().getRegisters(
+					addr);
 			for (Register reg : regs)
 				logValue(reg.name, null);
 			return;

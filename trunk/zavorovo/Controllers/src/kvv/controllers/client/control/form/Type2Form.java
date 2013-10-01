@@ -55,10 +55,10 @@ public class Type2Form extends ControlComposite {
 
 		panel.add(tempPanel);
 
-		GetRegControl vVal = new GetRegControl(addr, Register.REG_ADC3,
-				0.0202f, "V=");
-		add(vVal);
-		panel.add(vVal);
+//		GetRegControl vVal = new GetRegControl(addr, Register.REG_ADC3,
+//				0.0202f, "V=");
+//		add(vVal);
+//		panel.add(vVal);
 
 		VMControl vmControl = new VMControl(addr, name);
 		add(vmControl);

@@ -79,7 +79,8 @@ public class Scheduler extends Thread {
 	}
 
 	private static void exec(Register register, int value) throws Exception {
-		ControllerDescr controllerDescr = Controllers.get(register.addr);
+		ControllerDescr controllerDescr = Controllers.getInstance().get(
+				register.addr);
 		if (controllerDescr.type == Type.MU110_8)
 			value = value == 0 ? 0 : 1000;
 

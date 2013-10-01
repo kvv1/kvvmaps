@@ -19,7 +19,7 @@ import kvv.controllers.controller.BusLogger;
 public class PacketTransceiver {
 	private final static int BAUD = 9600;
 
-	private static final long PACKET_TIMEOUT = 300;
+	private static final long PACKET_TIMEOUT = 400;
 
 	private static final long BYTE_TIMEOUT = 50;
 
