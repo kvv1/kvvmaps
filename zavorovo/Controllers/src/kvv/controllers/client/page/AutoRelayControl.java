@@ -8,7 +8,7 @@ import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.control.simple.SimpleRelayControl;
-import kvv.controllers.shared.LogItem;
+import kvv.controllers.shared.HistoryItem;
 import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
 
@@ -42,13 +42,14 @@ public class AutoRelayControl extends ControlComposite {
 		super(addr);
 		this.reg = reg;
 
-		scheduleCanvas = new ScheduleCanvas(reg, mouseMoveHandler);
+		scheduleCanvas = new ScheduleCanvas(mouseMoveHandler);
 
 		// framePanel.setBorderWidth(1);
 		framePanel.add(horizontalPanel);
 
 		horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		horizontalPanel.add(schedulePanel);
+		enableSchedule(true);
 
 		autoButton = new CheckBox("Авто");
 		relayControl = new SimpleRelayControl(addr, reg.register, "");
@@ -93,7 +94,8 @@ public class AutoRelayControl extends ControlComposite {
 		initWidget(framePanel);
 	}
 
-	public void refreshSchedule(RegisterSchedule registerSchedule, ArrayList<LogItem> logItems, Date date) {
+	public void refreshSchedule(RegisterSchedule registerSchedule,
+			ArrayList<HistoryItem> logItems, Date date) {
 		if (registerSchedule != null) {
 			autoButton.setEnabled(true);
 			autoButton.setValue(registerSchedule.enabled);

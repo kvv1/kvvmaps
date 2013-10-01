@@ -112,7 +112,7 @@ public class ScheduleFile {
 		try {
 			for (String cmd : Arrays.copyOfRange(fields, 1, fields.length)) {
 				String[] cmdParts = cmd.split("=");
-				res.add(new ScheduleLine(d, Controllers
+				res.add(new ScheduleLine(d, Controllers.getInstance()
 						.getRegister(cmdParts[0]), Integer
 						.parseInt(cmdParts[1])));
 			}

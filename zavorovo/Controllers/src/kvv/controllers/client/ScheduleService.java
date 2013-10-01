@@ -1,6 +1,8 @@
 package kvv.controllers.client;
 
-import kvv.controllers.shared.Log;
+import java.util.Date;
+
+import kvv.controllers.shared.History;
 import kvv.controllers.shared.Schedule;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -14,5 +16,5 @@ public interface ScheduleService extends RemoteService {
 
 	void enable(String regName, boolean b);
 
-	Log getLog();
+	History getLog(Date date);
 }

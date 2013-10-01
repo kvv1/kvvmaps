@@ -1,6 +1,8 @@
 package kvv.controllers.client;
 
-import kvv.controllers.shared.Log;
+import java.util.Date;
+
+import kvv.controllers.shared.History;
 import kvv.controllers.shared.Schedule;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -12,5 +14,5 @@ public interface ScheduleServiceAsync {
 
 	void enable(String regName, boolean b, AsyncCallback<Void> callback);
 
-	void getLog(AsyncCallback<Log> callback);
+	void getLog(Date date, AsyncCallback<History> callback);
 }

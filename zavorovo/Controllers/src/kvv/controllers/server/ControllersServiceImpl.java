@@ -10,7 +10,6 @@ import java.util.Properties;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.controller.IController;
 import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.Register;
 import kvv.controllers.register.RegisterUI;
 import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.ControllerDescr;
@@ -38,7 +37,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws Exception {
-		ControllerDescr controllerDescr = Controllers.get(addr);
+		ControllerDescr controllerDescr = Controllers.getInstance().get(addr);
 		if (controllerDescr.type == Type.MU110_8)
 			val = val == 0 ? 0 : 1000;
 		controller.setReg(addr, reg, val);
@@ -46,12 +45,12 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public ControllerDescr[] getControllers() throws Exception {
-		return Controllers.getControllers();
+		return Controllers.getInstance().getControllers();
 	}
 
 	@Override
 	public kvv.controllers.shared.Register[] getRegisters() throws Exception {
-		return Controllers.getRegisters().values()
+		return Controllers.getInstance().getRegisters().values()
 				.toArray(new kvv.controllers.shared.Register[0]);
 	}
 
@@ -63,12 +62,12 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 			if (obj == null)
 				continue;
 			if (obj.controller != null)
-				obj.addr = Controllers.get(obj.controller).addr;
+				obj.addr = Controllers.getInstance().get(obj.controller).addr;
 			if (obj.register != null) {
-				kvv.controllers.shared.Register reg = Controllers
+				kvv.controllers.shared.Register reg = Controllers.getInstance()
 						.getRegister(obj.register);
 				obj.reg = reg.register;
-				obj.addr = Controllers.get(reg.controller).addr;
+				obj.addr = Controllers.getInstance().get(reg.controller).addr;
 			}
 		}
 		return res;
@@ -76,18 +75,15 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public AllRegs getRegs(int addr) throws Exception {
-		ControllerDescr controllerDescr = Controllers.get(addr);
+		ControllerDescr controllerDescr = Controllers.getInstance().get(addr);
 		if (controllerDescr.type == Type.MU110_8) {
-			HashMap<Integer, Integer> res = new HashMap<Integer, Integer>();
+			HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
 			int[] vals = controller.getRegs(addr, 0, 8);
 			for (int i = 0; i < 8; i++)
-				res.put(i, vals[i]);
-			return new AllRegs(new ArrayList<RegisterUI>(), res);
+				map.put(i, vals[i]);
+			return new AllRegs(new ArrayList<RegisterUI>(), map);
 		} else {
 			AllRegs allRegs = controller.getAllRegs(addr);
-			int relays = allRegs.values.get(Register.REG_RELAYS);
-			for (int i = 0; i < Register.REG_RELAY_CNT; i++)
-				allRegs.values.put(Register.REG_RELAY0 + i, (relays >> i) & 1);
 			return allRegs;
 		}
 	}
@@ -138,7 +134,8 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		} catch (IOException e) {
 		}
 		try {
-			ControllerDescr controllerDescr = Controllers.get(addr);
+			ControllerDescr controllerDescr = Controllers.getInstance().get(
+					addr);
 
 			if (gson != null)
 				props.setProperty(controllerDescr.name, gson);

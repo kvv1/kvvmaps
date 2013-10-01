@@ -1,6 +1,7 @@
 package kvv.controllers.client.page;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Set;
 
 import kvv.controllers.client.CallbackAdapter;
@@ -10,7 +11,7 @@ import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.register.AllRegs;
-import kvv.controllers.shared.Log;
+import kvv.controllers.shared.History;
 import kvv.controllers.shared.ObjectDescr;
 import kvv.controllers.shared.ObjectDescr.Type;
 import kvv.controllers.shared.Register;
@@ -24,8 +25,10 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class GSchedulePage extends Composite {
@@ -36,7 +39,13 @@ public class GSchedulePage extends Composite {
 			.create(ControllersService.class);
 
 	private final MultiMap<Integer, AutoRelayControl> objects = new MultiMap<Integer, AutoRelayControl>();
-	VerticalPanel itemPanel = new VerticalPanel();
+	private final VerticalPanel itemPanel = new VerticalPanel();
+
+	private final RadioButton historyOff = new RadioButton("history", "Выкл");
+	private final RadioButton historyToday = new RadioButton("history",
+			"Сегодня");
+	private final RadioButton historyYesterday = new RadioButton("history",
+			"Вчера");
 
 	public GSchedulePage() {
 
@@ -48,18 +57,47 @@ public class GSchedulePage extends Composite {
 			}
 		});
 
-		final CheckBox enableSchedule = new CheckBox("Показывать расписание");
-		enableSchedule.addClickHandler(new ClickHandler() {
+		// final CheckBox enableSchedule = new
+		// CheckBox("Показывать расписание");
+		// enableSchedule.addClickHandler(new ClickHandler() {
+		//
+		// @Override
+		// public void onClick(ClickEvent event) {
+		// for (AutoRelayControl c : objects.values())
+		// c.enableSchedule(enableSchedule.getValue());
+		// }
+		// });
 
+		historyOff.setValue(true);
+
+		ClickHandler historyClickHandler = new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				for (AutoRelayControl c : objects.values())
-					c.enableSchedule(enableSchedule.getValue());
+				refresh();
 			}
-		});
+		};
 
-		vertPanel.add(refreshButton);
-		vertPanel.add(enableSchedule);
+		historyOff.addClickHandler(historyClickHandler);
+		historyToday.addClickHandler(historyClickHandler);
+		historyYesterday.addClickHandler(historyClickHandler);
+
+		HorizontalPanel historyRadioPanel = new HorizontalPanel();
+		historyRadioPanel.add(historyOff);
+		historyRadioPanel.add(historyToday);
+		historyRadioPanel.add(historyYesterday);
+
+		CaptionPanel historyPanel = new CaptionPanel("Показывать историю");
+		historyPanel.add(historyRadioPanel);
+
+		HorizontalPanel horizontalPanel = new HorizontalPanel();
+		horizontalPanel.setSpacing(10);
+
+		horizontalPanel.add(refreshButton);
+		horizontalPanel.add(historyPanel);
+
+		// horizontalPanel.add(enableSchedule);
+
+		vertPanel.add(horizontalPanel);
 
 		vertPanel.add(itemPanel);
 
@@ -125,16 +163,17 @@ public class GSchedulePage extends Composite {
 												}
 
 												scheduleService
-														.getLog(new CallbackAdapter<Log>() {
-															@Override
-															public void onSuccess(
-																	Log log) {
-																refreshSchedule(
-																		schedule,
-																		log);
-															}
+														.getLog(getDateForHistory(schedule.date),
+																new CallbackAdapter<History>() {
+																	@Override
+																	public void onSuccess(
+																			History log) {
+																		refreshSchedule(
+																				schedule,
+																				log);
+																	}
 
-														});
+																});
 												refreshData();
 											}
 										});
@@ -144,11 +183,11 @@ public class GSchedulePage extends Composite {
 		});
 	}
 
-	private void refreshSchedule(Schedule schedule, Log log) {
+	private void refreshSchedule(Schedule schedule, History log) {
 		for (AutoRelayControl c : objects.values()) {
 			RegisterSchedule registerSchedule = schedule.map.get(c.reg);
-			c.refreshSchedule(registerSchedule, log.items.get(c.reg),
-					schedule.date);
+			c.refreshSchedule(registerSchedule,
+					log == null ? null : log.items.get(c.reg), schedule.date);
 		}
 	}
 
@@ -177,15 +216,27 @@ public class GSchedulePage extends Composite {
 		scheduleService.getSchedule(new CallbackAdapter<Schedule>() {
 			@Override
 			public void onSuccess(final Schedule schedule) {
-				scheduleService.getLog(new CallbackAdapter<Log>() {
-					@Override
-					public void onSuccess(Log log) {
-						refreshSchedule(schedule, log);
-					}
-				});
+				scheduleService.getLog(getDateForHistory(schedule.date),
+						new CallbackAdapter<History>() {
+							@Override
+							public void onSuccess(History log) {
+								refreshSchedule(schedule, log);
+							}
+						});
 			}
 		});
 		refreshData();
+	}
+
+	@SuppressWarnings("deprecation")
+	private Date getDateForHistory(Date now) {
+		if (historyToday.getValue())
+			return now;
+		if (historyYesterday.getValue()) {
+			Date d = new Date(now.getYear(), now.getMonth(), now.getDate());
+			return new Date(d.getTime() - 60000); // any time yesterday
+		}
+		return null;
 	}
 
 }

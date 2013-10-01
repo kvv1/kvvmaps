@@ -3,7 +3,7 @@ package kvv.controllers.client.page;
 import java.util.ArrayList;
 
 import kvv.controllers.client.page.ScheduleCanvas.Range;
-import kvv.controllers.shared.LogItem;
+import kvv.controllers.shared.HistoryItem;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -15,12 +15,12 @@ public class Chart extends Composite {
 	int chartWidth = width - 40;
 	int chartHeight = height - 40;
 
-	public Chart(Range sel, ArrayList<LogItem> logItems) {
+	public Chart(Range sel, ArrayList<HistoryItem> logItems) {
 
 		int min = Integer.MAX_VALUE;
 		int max = Integer.MIN_VALUE;
 		
-		for(LogItem item : logItems) {
+		for(HistoryItem item : logItems) {
 			if(item.seconds >= sel.from && item.seconds < sel.to && item.value != null) {
 				min = Math.min(min, item.value);
 				max = Math.max(max, item.value);

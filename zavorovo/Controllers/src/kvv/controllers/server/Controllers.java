@@ -12,14 +12,27 @@ import kvv.controllers.shared.Register;
 import kvv.controllers.utils.Constants;
 
 public class Controllers {
-	private final static Map<String, ControllerDescr> nameMap = new HashMap<String, ControllerDescr>();
-	private final static Map<Integer, ControllerDescr> addrMap = new HashMap<Integer, ControllerDescr>();
 
-	private final static List<ControllerDescr> controllers = new ArrayList<ControllerDescr>();
-	private static Map<String, Register> registers = new HashMap<String, Register>();
-	private static Map<Integer, Register> ar2register = new HashMap<Integer, Register>();
+	private static Controllers instance;
 
-	static {
+	public static synchronized Controllers getInstance() {
+		if (instance == null)
+			instance = new Controllers();
+		return instance;
+	}
+
+	public static synchronized void reload() {
+		instance = null;
+	}
+
+	private final Map<String, ControllerDescr> nameMap = new HashMap<String, ControllerDescr>();
+	private final Map<Integer, ControllerDescr> addrMap = new HashMap<Integer, ControllerDescr>();
+
+	private final List<ControllerDescr> controllers = new ArrayList<ControllerDescr>();
+	private final Map<String, Register> registers = new HashMap<String, Register>();
+	private final Map<Integer, Register> ar2register = new HashMap<Integer, Register>();
+
+	{
 		try {
 			ControllerDescr[] controllers1 = Utils.jsonRead(
 					Constants.controllersFile, ControllerDescr[].class);
@@ -49,14 +62,14 @@ public class Controllers {
 		}
 	}
 
-	public static ControllerDescr get(String name) throws Exception {
+	public ControllerDescr get(String name) throws Exception {
 		ControllerDescr d = nameMap.get(name);
 		if (d == null)
 			throw new Exception("Контроллер с именем " + name + " не определен");
 		return d;
 	}
 
-	public static ControllerDescr get(int addr) throws Exception {
+	public ControllerDescr get(int addr) throws Exception {
 		ControllerDescr d = addrMap.get(addr);
 		if (d == null)
 			throw new Exception("Контроллер с адресом " + addr
@@ -64,23 +77,22 @@ public class Controllers {
 		return d;
 	}
 
-	public synchronized static Map<String, Register> getRegisters() {
+	public Map<String, Register> getRegisters() {
 		return registers;
 	}
 
-	public synchronized static Register getRegister(String name)
-			throws Exception {
+	public Register getRegister(String name) throws Exception {
 		Register reg = registers.get(name);
 		if (reg == null)
 			throw new Exception("Регистр " + name + " не определен");
 		return reg;
 	}
 
-	public synchronized static Register getRegister(int addr, int reg) {
+	public Register getRegister(int addr, int reg) {
 		return ar2register.get((addr << 16) + reg);
 	}
 
-	public static Collection<Register> getRegisters(int addr) {
+	public Collection<Register> getRegisters(int addr) {
 		Collection<Register> regs = new ArrayList<Register>();
 		for (Register reg : registers.values())
 			if (reg.addr == addr)
@@ -88,7 +100,7 @@ public class Controllers {
 		return regs;
 	}
 
-	public static ControllerDescr[] getControllers() {
+	public ControllerDescr[] getControllers() {
 		return controllers.toArray(new ControllerDescr[0]);
 	}
 

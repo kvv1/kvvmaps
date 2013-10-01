@@ -9,18 +9,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import kvv.controllers.shared.Log;
-import kvv.controllers.shared.LogItem;
+import kvv.controllers.shared.History;
+import kvv.controllers.shared.HistoryItem;
 import kvv.controllers.shared.Register;
 
-public class LogFile {
+public class HistoryFile {
 
 	@SuppressWarnings("deprecation")
-	public static Log load(Date date) {
-		Log log = new Log();
+	public static History load(Date date) {
+		History history = new History();
 
 		try {
-			File file = Logger.getLogFile(date);
+			File file = HistoryLogger.getLogFile(date);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					new FileInputStream(file), "Windows-1251"));
 
@@ -38,19 +38,20 @@ public class LogFile {
 				String[] reg_value = parts[1].split("=");
 
 				try {
-					Register reg = Controllers.getRegister(reg_value[0]);
+					Register reg = Controllers.getInstance().getRegister(
+							reg_value[0]);
 
 					Integer value = reg_value.length > 0 ? Integer
 							.parseInt(reg_value[1]) : null;
 
-					ArrayList<LogItem> logItems = log.items.get(reg);
+					ArrayList<HistoryItem> logItems = history.items.get(reg);
 
 					if (logItems == null) {
-						logItems = new ArrayList<LogItem>();
-						log.items.put(reg, logItems);
+						logItems = new ArrayList<HistoryItem>();
+						history.items.put(reg, logItems);
 					}
 
-					logItems.add(new LogItem(seconds, value));
+					logItems.add(new HistoryItem(seconds, value));
 
 				} catch (Exception e) {
 				}
@@ -61,12 +62,6 @@ public class LogFile {
 			return null;
 		}
 
-		return log;
+		return history;
 	}
-
-	public static void main(String[] args) {
-		String[] res = "T= ".split("=");
-		res = null;
-	}
-
 }
