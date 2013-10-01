@@ -1,4 +1,4 @@
-package kvv.controllers.server;
+package kvv.controllers.server.history;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import kvv.controllers.server.Controllers;
+import kvv.controllers.server.ControllersServiceImpl;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerDescr.Type;
 import kvv.controllers.shared.Register;

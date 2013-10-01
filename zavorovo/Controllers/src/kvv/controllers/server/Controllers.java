@@ -1,5 +1,6 @@
 package kvv.controllers.server;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -102,6 +103,15 @@ public class Controllers {
 
 	public ControllerDescr[] getControllers() {
 		return controllers.toArray(new ControllerDescr[0]);
+	}
+
+	public static void save(String text) throws IOException {
+		Utils.writeFile(Constants.controllersFile, text);
+		reload();
+	}
+
+	public static String load() throws IOException {
+		return Utils.readFile(Constants.controllersFile);
 	}
 
 }

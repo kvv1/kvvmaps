@@ -1,5 +1,6 @@
 package kvv.controllers.client;
 
+import kvv.controllers.client.page.ControllersDescrPage;
 import kvv.controllers.client.page.ControllersPage;
 import kvv.controllers.client.page.GSchedulePage;
 import kvv.controllers.client.page.LogPage;
@@ -32,6 +33,9 @@ public class Controllers implements EntryPoint {
 		tabs.add(new ModePage(), "Режимы работы");
 		tabs.add(new SourcesPage(), "Sources");
 		tabs.add(new LogPage(), "Log");
+
+		if (ModePage.check())
+			tabs.add(new ControllersDescrPage(), "Конфигурация");
 
 		tabs.selectTab(0);
 

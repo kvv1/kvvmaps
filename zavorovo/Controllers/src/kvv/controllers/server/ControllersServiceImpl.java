@@ -151,4 +151,31 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 
 	}
 
+	@Override
+	public void save(String text) throws Exception {
+		try {
+			Controllers.save(text);
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	@Override
+	public String load() throws Exception {
+		try {
+			return Controllers.load();
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	@Override
+	public String loadObjects() throws Exception {
+		try {
+			return Utils.readFile(Constants.objectsFile);
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
 }

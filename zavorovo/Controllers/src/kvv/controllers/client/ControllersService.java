@@ -13,16 +13,22 @@ public interface ControllersService extends RemoteService {
 	int getReg(int addr, int reg) throws Exception;
 
 	void setReg(int addr, int reg, int val) throws Exception;
-	
+
 	AllRegs getRegs(int addr) throws Exception;
 
 	ControllerDescr[] getControllers() throws Exception;
 
 	ObjectDescr[] getObjects() throws Exception;
-	
+
 	String upload(int addr, String name);
 
 	Register[] getRegisters() throws Exception;
 
 	void vmInit(int addr) throws Exception;
+
+	void save(String text) throws Exception;
+
+	String load() throws Exception;
+
+	String loadObjects() throws Exception;
 }

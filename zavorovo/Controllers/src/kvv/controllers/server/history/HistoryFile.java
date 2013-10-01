@@ -1,4 +1,4 @@
-package kvv.controllers.server;
+package kvv.controllers.server.history;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.History;
 import kvv.controllers.shared.HistoryItem;
 import kvv.controllers.shared.Register;

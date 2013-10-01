@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import kvv.controllers.controller.IController;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.Register;
+import kvv.controllers.server.history.HistoryLogger;
 import kvv.controllers.server.utils.MyLogger;
 
 public class ControllerWrapper implements IController {
