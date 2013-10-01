@@ -3,6 +3,7 @@ package kvv.controllers.server;
 import java.util.Date;
 
 import kvv.controllers.client.ScheduleService;
+import kvv.controllers.server.history.HistoryFile;
 import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.History;
 import kvv.controllers.shared.Schedule;

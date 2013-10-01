@@ -1,9 +1,9 @@
 package kvv.controllers.client;
 
 import kvv.controllers.register.AllRegs;
-import kvv.controllers.shared.Register;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ObjectDescr;
+import kvv.controllers.shared.Register;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -24,5 +24,11 @@ public interface ControllersServiceAsync {
 	void getRegisters(AsyncCallback<Register[]> callback);
 
 	void vmInit(int addr, AsyncCallback<Void> callback);
+
+	void save(String text, AsyncCallback<Void> callbackAdapter);
+
+	void load(AsyncCallback<String> callbackAdapter);
+
+	void loadObjects(AsyncCallback<String> callbackAdapter);
 
 }
