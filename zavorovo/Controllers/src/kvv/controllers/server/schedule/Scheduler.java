@@ -1,29 +1,20 @@
-package kvv.controllers.server;
+package kvv.controllers.server.schedule;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 
+import kvv.controllers.server.Controllers;
+import kvv.controllers.server.ControllersServiceImpl;
+import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerDescr.Type;
 import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
+import kvv.controllers.utils.Constants;
 
 public class Scheduler extends Thread {
-
-	static public class ScheduleLine {
-		public Date date;
-		public Register register;
-		public int value;
-
-		public ScheduleLine(Date date, Register register, int value) {
-			this.date = date;
-			this.register = register;
-			this.value = value;
-		}
-	}
 
 	public Scheduler() {
 		setDaemon(true);
@@ -41,15 +32,20 @@ public class Scheduler extends Thread {
 		int regIndex = 0;
 		while (!stopped) {
 			synchronized (this) {
-				Schedule schedule = ScheduleFile.load();
-				ArrayList<Register> regs = new ArrayList<Register>(
-						schedule.map.keySet());
-				Collections.sort(regs, new Comparator<Register>() {
-					@Override
-					public int compare(Register o1, Register o2) {
-						return o1.name.compareTo(o2.name);
+				Schedule schedule;
+				try {
+					schedule = Utils.jsonRead(Constants.scheduleFile,
+							Schedule.class);
+				} catch (Exception e1) {
+					try {
+						sleep(1000);
+					} catch (InterruptedException e) {
 					}
-				});
+					break;
+				}
+				ArrayList<String> regs = new ArrayList<String>(
+						schedule.map.keySet());
+				Collections.sort(regs);
 
 				try {
 					if (regIndex >= regs.size()) {
@@ -57,9 +53,10 @@ public class Scheduler extends Thread {
 						sleep(1000);
 					}
 					if (regs.size() > regIndex) {
-						Register reg = regs.get(regIndex);
+						Register reg = Controllers.getInstance().getRegister(
+								regs.get(regIndex));
 						RegisterSchedule registerSchedule = schedule.map
-								.get(reg);
+								.get(reg.name);
 						if (registerSchedule.enabled) {
 							Date date = new Date();
 							int minutes = date.getHours() * 60

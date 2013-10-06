@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import kvv.controllers.server.Controllers;
-import kvv.controllers.shared.History;
-import kvv.controllers.shared.HistoryItem;
 import kvv.controllers.shared.Register;
+import kvv.controllers.shared.history.History;
+import kvv.controllers.shared.history.HistoryItem;
 
 public class HistoryFile {
 
@@ -39,8 +39,7 @@ public class HistoryFile {
 				String[] reg_value = parts[1].split("=");
 
 				try {
-					Register reg = Controllers.getInstance().getRegister(
-							reg_value[0]);
+					String reg = reg_value[0];
 
 					Integer value = reg_value.length > 0 ? Integer
 							.parseInt(reg_value[1]) : null;

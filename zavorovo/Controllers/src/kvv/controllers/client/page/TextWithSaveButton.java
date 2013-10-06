@@ -8,6 +8,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -25,8 +26,11 @@ public abstract class TextWithSaveButton extends Composite {
 
 	protected abstract void save(String text, AsyncCallback<Void> callback);
 
-	public TextWithSaveButton() {
-		text.setSize("800px", "600px");
+	public TextWithSaveButton(String caption, int width, int height) {
+		text.setSize(width + "px", height + "px");
+
+		if (caption != null)
+			vertPanel.add(new Label(caption));
 
 		vertPanel.add(text);
 		vertPanel.add(save);
@@ -49,6 +53,8 @@ public abstract class TextWithSaveButton extends Composite {
 
 		initWidget(vertPanel);
 	}
+
+	// setS
 
 	public void setText(String result) {
 		text.setText(result);

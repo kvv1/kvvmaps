@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 
 import kvv.controllers.client.ControllersService;
@@ -14,7 +15,7 @@ import kvv.controllers.register.RegisterUI;
 import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerDescr.Type;
-import kvv.controllers.shared.ObjectDescr;
+import kvv.controllers.shared.Register;
 import kvv.controllers.utils.Constants;
 import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
@@ -49,28 +50,26 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public kvv.controllers.shared.Register[] getRegisters() throws Exception {
-		return Controllers.getInstance().getRegisters().values()
-				.toArray(new kvv.controllers.shared.Register[0]);
+	public Register[] getRegisters() throws Exception {
+		try {
+			String[] regNames = Utils.jsonRead(Constants.registersFile,
+					String[].class);
+			List<Register> res = new ArrayList<Register>();
+			for (String name : regNames)
+				res.add(Controllers.getInstance().getRegister(name));
+			return res.toArray(new Register[0]);
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
 	}
 
 	@Override
-	public ObjectDescr[] getObjects() throws Exception {
-		ObjectDescr[] res = Utils.jsonRead(Constants.objectsFile,
-				ObjectDescr[].class);
-		for (ObjectDescr obj : res) {
-			if (obj == null)
-				continue;
-			if (obj.controller != null)
-				obj.addr = Controllers.getInstance().get(obj.controller).addr;
-			if (obj.register != null) {
-				kvv.controllers.shared.Register reg = Controllers.getInstance()
-						.getRegister(obj.register);
-				obj.reg = reg.register;
-				obj.addr = Controllers.getInstance().get(reg.controller).addr;
-			}
+	public String[] getObjects() throws Exception {
+		try {
+			return Utils.jsonRead(Constants.objectsFile, String[].class);
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
 		}
-		return res;
 	}
 
 	@Override
@@ -173,6 +172,33 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	public String loadObjects() throws Exception {
 		try {
 			return Utils.readFile(Constants.objectsFile);
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	@Override
+	public String loadRegisters() throws Exception {
+		try {
+			return Utils.readFile(Constants.registersFile);
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	@Override
+	public void saveRegisters(String text) throws Exception {
+		try {
+			Utils.writeFile(Constants.registersFile, text);
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	@Override
+	public void saveObjects(String text) throws Exception {
+		try {
+			Utils.writeFile(Constants.objectsFile, text);
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}

@@ -11,6 +11,7 @@ import java.io.Writer;
 import java.util.Properties;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class Utils {
 	public static <T> T jsonRead(String file, Class<T> clazz) throws Exception {
@@ -23,6 +24,19 @@ public class Utils {
 		} finally {
 			if (reader != null)
 				reader.close();
+		}
+	}
+
+	public static <T> void jsonWrite(String file, T src) throws Exception {
+		Writer writer = null;
+		try {
+			writer = new OutputStreamWriter(new FileOutputStream(file),
+					"Windows-1251");
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			writer.write(gson.toJson(src));
+		} finally {
+			if (writer != null)
+				writer.close();
 		}
 	}
 

@@ -3,8 +3,10 @@ package kvv.controllers.client.page;
 import java.util.ArrayList;
 import java.util.Date;
 
-import kvv.controllers.shared.HistoryItem;
+import kvv.controllers.client.page.AutoRelayControl.SaveScheduleHandler;
+import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.ScheduleItem;
+import kvv.controllers.shared.history.HistoryItem;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -21,10 +23,8 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ScheduleCanvas extends Composite {
 	private final Canvas canvas = Canvas.createIfSupported();
@@ -39,16 +39,43 @@ public class ScheduleCanvas extends Composite {
 
 	private static Image bgImage;
 
+	private final Button saveButton = new Button("Сохранить");
+
 	public static class Range {
 		int from;
 		int to;
 	};
 
-	private Range sel;
+	//
+	// private Range sel;
 
-	public ScheduleCanvas(final MouseMoveHandler mouseMoveHandler) {
+	private final int minVal;
+	private final int maxVal;
 
-		initWidget(canvas);
+	public ScheduleCanvas(final String regName, final int minVal,
+			final int maxVal, final MouseMoveHandler mouseMoveHandler,
+			final SaveScheduleHandler saveScheduleHandler) {
+		this.minVal = minVal;
+		this.maxVal = maxVal;
+
+		HorizontalPanel panel = new HorizontalPanel();
+		panel.add(canvas);
+		panel.add(saveButton);
+		initWidget(panel);
+
+		saveButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				registerSchedule.compact();
+				if(registerSchedule.items.size() == 0)
+					registerSchedule = null;
+				saveScheduleHandler.save(regName, registerSchedule);
+				setDirty(false);
+				refresh();
+			}
+		});
+
+		setDirty(false);
 
 		canvas.setWidth(width + "px");
 		canvas.setHeight(height + "px");
@@ -71,8 +98,34 @@ public class ScheduleCanvas extends Composite {
 
 			@Override
 			public void onMouseDown(MouseDownEvent event) {
-				sel = new Range();
-				sel.from = sel.to = x2sec(event.getX());
+				int m = x2sec(event.getX()) / 60;
+				int minute = (m + 5) / 10 * 10;
+				int y0 = getY(0, 0, 1, registerHeight) + getRegY();
+				int y1 = getY(1, 0, 1, registerHeight) + getRegY();
+
+				if (Math.abs(event.getY() - y0) < 3) {
+					if (registerSchedule == null)
+						registerSchedule = new RegisterSchedule();
+					registerSchedule.add(minute, minVal);
+					if(registerSchedule.items.size() == 0)
+						registerSchedule = null;
+					saveScheduleHandler.save(regName, registerSchedule);
+//					setDirty(true);
+					refresh();
+				}
+				if (Math.abs(event.getY() - y1) < 3) {
+					if (registerSchedule == null)
+						registerSchedule = new RegisterSchedule();
+					registerSchedule.add(minute, maxVal);
+					if(registerSchedule.items.size() == 0)
+						registerSchedule = null;
+					saveScheduleHandler.save(regName, registerSchedule);
+//					setDirty(true);
+					refresh();
+				}
+
+				// sel = new Range();
+				// sel.from = sel.to = x2sec(event.getX());
 			}
 		});
 
@@ -80,37 +133,29 @@ public class ScheduleCanvas extends Composite {
 
 			@Override
 			public void onMouseUp(MouseUpEvent event) {
-				final DialogBox dialog = new DialogBox();
-				final Button ok = new Button("OK");
-				ok.addClickHandler(new ClickHandler() {
-					public void onClick(ClickEvent event) {
-						dialog.hide();
-					}
-				});
-
-				final VerticalPanel panel = new VerticalPanel();
-				panel.setSpacing(10);
-				panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-
-				final Range sel1 = sel;
-
-				panel.add(new Chart(sel1, logItems));
-				panel.add(ok);
-
-				// scheduleService.getLog(new CallbackAdapter<Log>() {
-				// @Override
-				// public void onSuccess(Log log) {
-				// panel.add(new Chart(sel1, log.items.get(reg)));
-				// panel.add(ok);
+				// final DialogBox dialog = new DialogBox();
+				// final Button ok = new Button("OK");
+				// ok.addClickHandler(new ClickHandler() {
+				// public void onClick(ClickEvent event) {
+				// dialog.hide();
 				// }
 				// });
-
-				dialog.setWidget(panel);
-
-				dialog.show();
-
-				sel = null;
-				refresh();
+				//
+				// final VerticalPanel panel = new VerticalPanel();
+				// panel.setSpacing(10);
+				// panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+				//
+				// final Range sel1 = sel;
+				//
+				// panel.add(new Chart(sel1, logItems));
+				// panel.add(ok);
+				//
+				// dialog.setWidget(panel);
+				//
+				// dialog.show();
+				//
+				// sel = null;
+				// refresh();
 			}
 		});
 
@@ -118,12 +163,16 @@ public class ScheduleCanvas extends Composite {
 
 			@Override
 			public void onMouseMove(MouseMoveEvent event) {
-				if (sel != null) {
-					sel.to = Math.max(sel.from, x2sec(event.getX()));
-					refresh();
-				}
+				// if (sel != null) {
+				// sel.to = Math.max(sel.from, x2sec(event.getX()));
+				// refresh();
+				// }
 			}
 		});
+	}
+
+	private void setDirty(boolean b) {
+		saveButton.setVisible(b);
 	}
 
 	private int x2sec(int x) {
@@ -163,13 +212,13 @@ public class ScheduleCanvas extends Composite {
 		context.restore();
 	}
 
-	private ArrayList<ScheduleItem> items;
+	private RegisterSchedule registerSchedule;
 	private Date date;
 	private ArrayList<HistoryItem> logItems;
 
-	public void refresh(ArrayList<ScheduleItem> items,
+	public void refresh(RegisterSchedule registerSchedule,
 			ArrayList<HistoryItem> logItems, Date date) {
-		this.items = items;
+		this.registerSchedule = registerSchedule;
 		this.logItems = logItems;
 		this.date = date;
 		refresh();
@@ -178,47 +227,24 @@ public class ScheduleCanvas extends Composite {
 	private boolean refresh() {
 		fillBackground();
 
-		int val = 0;
-		int minVal = Integer.MAX_VALUE;
-		int maxVal = Integer.MIN_VALUE;
-
-		if (items != null)
-			for (ScheduleItem item : items) {
-				val = item.value;
-				minVal = Math.min(minVal, val);
-				maxVal = Math.max(maxVal, val);
-			}
-
-		if (logItems != null)
-			for (HistoryItem logItem : logItems) {
-				int logVal = logItem.value;
-				minVal = Math.min(minVal, logVal);
-				maxVal = Math.max(maxVal, logVal);
-			}
-
-		if (minVal > maxVal) {
-			minVal = 0;
-			maxVal = 1;
-			val = 0;
-		}
-
-		if (minVal == maxVal)
-			maxVal = minVal + 1;
-
 		context.save();
 		context.translate(0, getRegY());
 
-		if (items != null) {
+		if (registerSchedule != null) {
+			int val = registerSchedule.getValue(0);
 			context.beginPath();
 			context.setStrokeStyle("#00FF00");
+			context.setFillStyle("#00FF00");
 			context.setLineWidth(2);
 
 			context.moveTo(0, getY(val, minVal, maxVal, registerHeight));
-			for (ScheduleItem item : items) {
-				context.lineTo(sec2x(item.minutes * 60),
-						getY(val, minVal, maxVal, registerHeight));
-				context.lineTo(sec2x(item.minutes * 60),
-						getY(item.value, minVal, maxVal, registerHeight));
+			for (ScheduleItem item : registerSchedule.items) {
+				int x = sec2x(item.minutes * 60);
+				int y = getY(val, minVal, maxVal, registerHeight);
+				context.lineTo(x, y);
+				y = getY(item.value, minVal, maxVal, registerHeight);
+				context.lineTo(x, y);
+				context.fillRect(x - 3, y - 3, 6, 6);
 				val = item.value;
 			}
 			context.lineTo(sec2x(60 * 24 * 60),
@@ -228,15 +254,15 @@ public class ScheduleCanvas extends Composite {
 			context.closePath();
 		}
 
-		if (sel != null) {
-			context.beginPath();
-			context.setStrokeStyle("#FFFF00");
-			context.setLineWidth(2);
-			context.moveTo(sec2x(sel.from), -2);
-			context.lineTo(sec2x(sel.to), -2);
-			context.stroke();
-			context.closePath();
-		}
+		// if (sel != null) {
+		// context.beginPath();
+		// context.setStrokeStyle("#FFFF00");
+		// context.setLineWidth(2);
+		// context.moveTo(sec2x(sel.from), -2);
+		// context.lineTo(sec2x(sel.to), -2);
+		// context.stroke();
+		// context.closePath();
+		// }
 
 		if (logItems != null) {
 			context.beginPath();

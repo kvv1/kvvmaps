@@ -31,7 +31,7 @@ public class ControlComposite extends Composite {
 	public void removeChildren() {
 		children.clear();
 	}
-	
+
 	public void refresh(AllRegs result) {
 		for (ControlComposite controlComposite : children)
 			controlComposite.refresh(result);
@@ -39,17 +39,18 @@ public class ControlComposite extends Composite {
 
 	public void refresh() {
 		refresh(null);
-		controllersService.getRegs(addr, new AsyncCallback<AllRegs>() {
+		controllersService.getRegs(addr,
+				new AsyncCallback<AllRegs>() {
 
-			@Override
-			public void onSuccess(AllRegs result) {
-				refresh(result);
-			}
+					@Override
+					public void onSuccess(AllRegs result) {
+						refresh(result);
+					}
 
-			@Override
-			public void onFailure(Throwable caught) {
-			}
-		});
+					@Override
+					public void onFailure(Throwable caught) {
+					}
+				});
 	}
 
 }
