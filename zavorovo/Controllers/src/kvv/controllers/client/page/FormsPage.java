@@ -13,10 +13,10 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class ObjectsPage extends Composite {
+public class FormsPage extends Composite {
 	private List<Form> objects = new ArrayList<Form>();
 
-	public ObjectsPage() {
+	public FormsPage() {
 		final VerticalPanel vertPanel = new VerticalPanel();
 		vertPanel.setSpacing(10);
 		// flowPanel.setBorderWidth(1);

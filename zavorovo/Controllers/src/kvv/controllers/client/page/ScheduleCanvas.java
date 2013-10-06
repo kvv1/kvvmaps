@@ -3,7 +3,7 @@ package kvv.controllers.client.page;
 import java.util.ArrayList;
 import java.util.Date;
 
-import kvv.controllers.client.page.AutoRelayControl.SaveScheduleHandler;
+import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.ScheduleItem;
 import kvv.controllers.shared.history.HistoryItem;
@@ -26,7 +26,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 
-public class ScheduleCanvas extends Composite {
+public abstract class ScheduleCanvas extends Composite {
 	private final Canvas canvas = Canvas.createIfSupported();
 	private final Context2d context = canvas.getContext2d();
 	private static final int tenMinutesWidth = 6;
@@ -52,11 +52,13 @@ public class ScheduleCanvas extends Composite {
 	private final int minVal;
 	private final int maxVal;
 
-	public ScheduleCanvas(final String regName, final int minVal,
-			final int maxVal, final MouseMoveHandler mouseMoveHandler,
-			final SaveScheduleHandler saveScheduleHandler) {
-		this.minVal = minVal;
-		this.maxVal = maxVal;
+	protected abstract void save(String regName,
+			RegisterSchedule registerSchedule);
+
+	public ScheduleCanvas(final Register reg,
+			final MouseMoveHandler mouseMoveHandler) {
+		minVal = reg.min;
+		maxVal = reg.max;
 
 		HorizontalPanel panel = new HorizontalPanel();
 		panel.add(canvas);
@@ -67,9 +69,9 @@ public class ScheduleCanvas extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				registerSchedule.compact();
-				if(registerSchedule.items.size() == 0)
+				if (registerSchedule.items.size() == 0)
 					registerSchedule = null;
-				saveScheduleHandler.save(regName, registerSchedule);
+				save(reg.name, registerSchedule);
 				setDirty(false);
 				refresh();
 			}
@@ -104,23 +106,29 @@ public class ScheduleCanvas extends Composite {
 				int y1 = getY(1, 0, 1, registerHeight) + getRegY();
 
 				if (Math.abs(event.getY() - y0) < 3) {
+					if (!ModePage.check())
+						return;
+
 					if (registerSchedule == null)
 						registerSchedule = new RegisterSchedule();
 					registerSchedule.add(minute, minVal);
-					if(registerSchedule.items.size() == 0)
+					if (registerSchedule.items.size() == 0)
 						registerSchedule = null;
-					saveScheduleHandler.save(regName, registerSchedule);
-//					setDirty(true);
+					save(reg.name, registerSchedule);
+					// setDirty(true);
 					refresh();
 				}
 				if (Math.abs(event.getY() - y1) < 3) {
+					if (!ModePage.check())
+						return;
+
 					if (registerSchedule == null)
 						registerSchedule = new RegisterSchedule();
 					registerSchedule.add(minute, maxVal);
-					if(registerSchedule.items.size() == 0)
+					if (registerSchedule.items.size() == 0)
 						registerSchedule = null;
-					saveScheduleHandler.save(regName, registerSchedule);
-//					setDirty(true);
+					save(reg.name, registerSchedule);
+					// setDirty(true);
 					refresh();
 				}
 

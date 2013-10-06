@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class GSchedulePage extends Composite {
+public class RegistersPage extends Composite {
 	private VerticalPanel vertPanel = new VerticalPanel();
 	private final ScheduleServiceAsync scheduleService = GWT
 			.create(ScheduleService.class);
@@ -44,7 +44,7 @@ public class GSchedulePage extends Composite {
 	private final RadioButton historyYesterday = new RadioButton("history",
 			"Вчера");
 
-	public GSchedulePage() {
+	public RegistersPage() {
 
 		Button refreshButton = new Button("Обновить");
 		refreshButton.addClickHandler(new ClickHandler() {
