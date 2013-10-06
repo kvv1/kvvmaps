@@ -22,28 +22,21 @@ public class RegisterSchedule implements Serializable {
 	}
 
 	public void add(int minutes, int value) {
-		if (items.size() == 0) {
-			if (value != 0) {
-				items.add(new ScheduleItem(minutes, value));
-				items.add(new ScheduleItem(minutes + 10, 0));
+		for (int i = 0; i < items.size(); i++) {
+			ScheduleItem item = items.get(i);
+			if (item.minutes == minutes) {
+				if (item.value == value)
+					items.remove(i);
+				else
+					item.value = value;
+				return;
 			}
-		} else {
-			for (int i = 0; i < items.size(); i++) {
-				ScheduleItem item = items.get(i);
-				if (item.minutes == minutes) {
-					if (item.value == value)
-						items.remove(i);
-					else
-						item.value = value;
-					return;
-				}
-				if (item.minutes > minutes) {
-					items.add(i, new ScheduleItem(minutes, value));
-					return;
-				}
+			if (item.minutes > minutes) {
+				items.add(i, new ScheduleItem(minutes, value));
+				return;
 			}
-			items.add(new ScheduleItem(minutes, value));
 		}
+		items.add(new ScheduleItem(minutes, value));
 	}
 
 	public void compact() {

@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class ControllersDescrPage extends Composite {
+public class ConfigurationPage extends Composite {
 	private HorizontalPanel hpanel = new HorizontalPanel();
 	private VerticalPanel vpanel = new VerticalPanel();
 	private TextWithSaveButton controllers = new TextWithSaveButton(
@@ -43,7 +43,7 @@ public class ControllersDescrPage extends Composite {
 	private final ControllersServiceAsync controllersService = GWT
 			.create(ControllersService.class);
 
-	public ControllersDescrPage() {
+	public ConfigurationPage() {
 
 		controllersService.load(new CallbackAdapter<String>() {
 			@Override

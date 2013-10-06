@@ -37,29 +37,18 @@ public class AutoRelayControl extends ControlComposite {
 
 	final Register reg;
 
-	static public interface SaveScheduleHandler {
-		void save(String regName, RegisterSchedule registerSchedule);
-	}
-
 	public AutoRelayControl(final Register reg,
 			MouseMoveHandler mouseMoveHandler) {
 		super(reg.addr);
 		this.reg = reg;
 
-		scheduleCanvas = new ScheduleCanvas(reg.name, 0, 1, mouseMoveHandler,
-				new SaveScheduleHandler() {
-					@Override
-					public void save(String regName,
-							final RegisterSchedule registerSchedule) {
-						scheduleService.update(regName, registerSchedule,
-								new CallbackAdapter<Void>() {
-									@Override
-									public void onSuccess(Void result) {
-										refreshButtons(registerSchedule);
-									}
-								});
-					}
-				});
+		scheduleCanvas = new ScheduleCanvas(reg, mouseMoveHandler) {
+			public void save(String regName,
+					final RegisterSchedule registerSchedule) {
+				scheduleService.update(regName, registerSchedule,
+						new CallbackAdapter<Void>());
+			}
+		};
 
 		// framePanel.setBorderWidth(1);
 		framePanel.add(horizontalPanel);
