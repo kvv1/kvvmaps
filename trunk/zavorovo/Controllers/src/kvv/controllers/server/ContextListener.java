@@ -5,6 +5,7 @@ import javax.servlet.ServletContextListener;
 
 import kvv.controllers.controller.Controller;
 import kvv.controllers.server.history.HistoryLogger;
+import kvv.controllers.server.schedule.Scheduler;
 import kvv.controllers.server.utils.MyLogger;
 import kvv.controllers.server.utils.Utils;
 import kvv.controllers.utils.Constants;

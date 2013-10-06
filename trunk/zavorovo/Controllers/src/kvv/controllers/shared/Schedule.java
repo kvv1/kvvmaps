@@ -1,22 +1,15 @@
 package kvv.controllers.shared;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import kvv.controllers.shared.history.HistoryItem;
+
 @SuppressWarnings("serial")
 public class Schedule implements Serializable {
-	public boolean enabled;
-	public String[] lines;
-	public String text;
-	public Date date;
-	public HashMap<Register, RegisterSchedule> map = new HashMap<Register, RegisterSchedule>();
-
-	public Schedule() {
-	}
-
-	public Schedule(boolean enabled) {
-		this.enabled = enabled;
-	}
-
+	public Date date = new Date();
+	public HashMap<String, RegisterSchedule> map = new HashMap<String, RegisterSchedule>();
+	public HashMap<String, ArrayList<HistoryItem>> history = new HashMap<String, ArrayList<HistoryItem>>();
 }

@@ -1,4 +1,4 @@
-package kvv.controllers.shared;
+package kvv.controllers.shared.history;
 
 import java.io.Serializable;
 

@@ -1,6 +1,5 @@
 package kvv.controllers.client.page;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
 
@@ -11,12 +10,10 @@ import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.register.AllRegs;
-import kvv.controllers.shared.History;
-import kvv.controllers.shared.ObjectDescr;
-import kvv.controllers.shared.ObjectDescr.Type;
 import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
+import kvv.controllers.shared.history.History;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -116,82 +113,40 @@ public class GSchedulePage extends Composite {
 			}
 		};
 
+		for (Register reg : ControllersPage.registers) {
+			try {
+				AutoRelayControl control = new AutoRelayControl(reg,
+						mouseMoveHandler);
+				itemPanel.add(control);
+				objects.put(reg.addr, control);
+			} catch (Exception e) {
+			}
+		}
+
+		refresh();
+	}
+
+	private void refresh() {
 		scheduleService.getSchedule(new CallbackAdapter<Schedule>() {
 			@Override
 			public void onSuccess(final Schedule schedule) {
-				controllersService
-						.getObjects(new CallbackAdapter<ObjectDescr[]>() {
+				scheduleService.getHistory(getDateForHistory(schedule.date),
+						new CallbackAdapter<History>() {
 							@Override
-							public void onSuccess(
-									final ObjectDescr[] objectDescrs) {
-								controllersService
-										.getRegisters(new CallbackAdapter<Register[]>() {
-											@Override
-											public void onSuccess(
-													Register[] registers) {
-												ArrayList<Register> regs = new ArrayList<Register>();
-												for (ObjectDescr objectDescr : objectDescrs)
-													if (objectDescr != null
-															&& objectDescr.type == Type.RELAY) {
-														Register reg = new Register(
-																objectDescr.register,
-																objectDescr.controller,
-																objectDescr.addr,
-																objectDescr.reg);
-														regs.add(reg);
-													}
-
-												for (Register reg : schedule.map
-														.keySet())
-													if (!regs.contains(reg))
-														regs.add(reg);
-
-												for (Register reg : registers)
-													if (!regs.contains(reg))
-														regs.add(reg);
-
-												for (Register reg : regs) {
-													try {
-														AutoRelayControl control = new AutoRelayControl(
-																reg.addr, reg,
-																mouseMoveHandler);
-														itemPanel.add(control);
-														objects.put(reg.addr,
-																control);
-													} catch (Exception e) {
-													}
-												}
-
-												scheduleService
-														.getLog(getDateForHistory(schedule.date),
-																new CallbackAdapter<History>() {
-																	@Override
-																	public void onSuccess(
-																			History log) {
-																		refreshSchedule(
-																				schedule,
-																				log);
-																	}
-
-																});
-												refreshData();
-											}
-										});
+							public void onSuccess(History log) {
+								for (AutoRelayControl c : objects.values()) {
+									RegisterSchedule registerSchedule = schedule.map
+											.get(c.reg.name);
+									c.refreshSchedule(
+											registerSchedule,
+											log == null ? null : log.items
+													.get(c.reg.name),
+											schedule.date);
+								}
 							}
 						});
 			}
 		});
-	}
-
-	private void refreshSchedule(Schedule schedule, History log) {
-		for (AutoRelayControl c : objects.values()) {
-			RegisterSchedule registerSchedule = schedule.map.get(c.reg);
-			c.refreshSchedule(registerSchedule,
-					log == null ? null : log.items.get(c.reg), schedule.date);
-		}
-	}
-
-	private void refreshData() {
 		for (final Integer addr : objects.keySet()) {
 			final Set<AutoRelayControl> set = objects.get(addr);
 			for (ControlComposite c : set)
@@ -200,9 +155,8 @@ public class GSchedulePage extends Composite {
 			controllersService.getRegs(addr, new AsyncCallback<AllRegs>() {
 				@Override
 				public void onSuccess(AllRegs result) {
-					for (AutoRelayControl c : set) {
+					for (AutoRelayControl c : set)
 						c.refresh(result);
-					}
 				}
 
 				@Override
@@ -210,22 +164,6 @@ public class GSchedulePage extends Composite {
 				}
 			});
 		}
-	}
-
-	private void refresh() {
-		scheduleService.getSchedule(new CallbackAdapter<Schedule>() {
-			@Override
-			public void onSuccess(final Schedule schedule) {
-				scheduleService.getLog(getDateForHistory(schedule.date),
-						new CallbackAdapter<History>() {
-							@Override
-							public void onSuccess(History log) {
-								refreshSchedule(schedule, log);
-							}
-						});
-			}
-		});
-		refreshData();
 	}
 
 	@SuppressWarnings("deprecation")

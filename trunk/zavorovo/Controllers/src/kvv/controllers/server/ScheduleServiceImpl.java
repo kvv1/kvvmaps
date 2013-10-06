@@ -5,8 +5,9 @@ import java.util.Date;
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.server.history.HistoryFile;
 import kvv.controllers.server.utils.Utils;
-import kvv.controllers.shared.History;
+import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
+import kvv.controllers.shared.history.History;
 import kvv.controllers.utils.Constants;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -16,40 +17,55 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 		ScheduleService {
 
 	@Override
-	public Schedule getSchedule() {
-		return ScheduleFile.load();
-	}
-
-	@Override
-	public Schedule setSchedule(String text, boolean on) throws Exception {
-		Schedule sched = new Schedule(on);
-
-		sched.enabled = on;
-		sched.text = "";
-
-		String[] lines = text.split("[\\r\\n]+", -1);
-		for (int i = 0; i < lines.length; i++) {
-			if (ScheduleFile.parseLine(lines[i], null) == null)
-				lines[i] = "#ERR " + lines[i];
-			sched.text += lines[i] + "\r\n";
+	public synchronized Schedule getSchedule() throws Exception {
+		try {
+			Schedule schedule = Utils.jsonRead(Constants.scheduleFile,
+					Schedule.class);
+			schedule.date = new Date();
+			return schedule;
+		} catch (Exception e) {
+			return new Schedule();
 		}
-
-		sched.lines = lines;
-
-		ScheduleFile.save(sched);
-		return getSchedule();
 	}
 
 	@Override
-	public void enable(String regName, boolean b) {
-		Utils.changeProp(Constants.scheduleProps, regName, "" + b);
+	public synchronized void setSchedule(Schedule sched) throws Exception {
+		try {
+			sched.date = null;
+			Utils.jsonWrite(Constants.scheduleFile, sched);
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
 	}
 
 	@Override
-	public History getLog(Date date) {
+	public synchronized void update(String regName,
+			RegisterSchedule registerSchedule) throws Exception {
+
+		Schedule schedule = getSchedule();
+		if (registerSchedule != null)
+			schedule.map.put(regName, registerSchedule);
+		else
+			schedule.map.remove(regName);
+		setSchedule(schedule);
+	}
+
+	@Override
+	public synchronized void enable(String regName, boolean b) throws Exception {
+		Schedule schedule = getSchedule();
+		RegisterSchedule registerSchedule = schedule.map.get(regName);
+		if (registerSchedule != null) {
+			registerSchedule.enabled = b;
+			setSchedule(schedule);
+		}
+	}
+
+	@Override
+	public History getHistory(Date date) {
 		if (date == null)
 			return null;
 		History log = HistoryFile.load(date);
 		return log;
 	}
+
 }

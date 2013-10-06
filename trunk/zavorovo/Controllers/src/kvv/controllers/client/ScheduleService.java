@@ -2,19 +2,22 @@ package kvv.controllers.client;
 
 import java.util.Date;
 
-import kvv.controllers.shared.History;
+import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
+import kvv.controllers.shared.history.History;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("schedule")
 public interface ScheduleService extends RemoteService {
-	Schedule getSchedule();
+	Schedule getSchedule() throws Exception;
 
-	Schedule setSchedule(String text, boolean on) throws Exception;
+	void enable(String regName, boolean b) throws Exception;
 
-	void enable(String regName, boolean b);
+	History getHistory(Date date);
 
-	History getLog(Date date);
+	void setSchedule(Schedule sched) throws Exception;
+
+	void update(String regName, RegisterSchedule registerSchedule) throws Exception;
 }

@@ -3,7 +3,7 @@ package kvv.controllers.client.page;
 import java.util.ArrayList;
 
 import kvv.controllers.client.page.ScheduleCanvas.Range;
-import kvv.controllers.shared.HistoryItem;
+import kvv.controllers.shared.history.HistoryItem;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
