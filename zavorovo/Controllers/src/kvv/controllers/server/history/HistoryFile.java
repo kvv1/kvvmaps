@@ -9,8 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import kvv.controllers.server.Controllers;
-import kvv.controllers.shared.Register;
 import kvv.controllers.shared.history.History;
 import kvv.controllers.shared.history.HistoryItem;
 
@@ -28,7 +26,7 @@ public class HistoryFile {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				String[] parts = line.trim().split(" ");
-				if (parts == null || parts.length != 2)
+				if (parts == null || parts.length == 0)
 					continue;
 
 				DateFormat df = new SimpleDateFormat("HH:mm:ss");
@@ -36,26 +34,32 @@ public class HistoryFile {
 				int seconds = date1.getHours() * 3600 + date1.getMinutes() * 60
 						+ date1.getSeconds();
 
-				String[] reg_value = parts[1].split("=");
+				if (parts.length == 1) {
+					for (ArrayList<HistoryItem> logItems : history.items
+							.values())
+						logItems.add(new HistoryItem(seconds, null));
+				} else {
+					String[] reg_value = parts[1].split("=");
 
-				try {
-					String reg = reg_value[0];
+					try {
+						String reg = reg_value[0];
 
-					Integer value = reg_value.length > 0 ? Integer
-							.parseInt(reg_value[1]) : null;
+						Integer value = reg_value.length > 0 ? Integer
+								.parseInt(reg_value[1]) : null;
 
-					ArrayList<HistoryItem> logItems = history.items.get(reg);
+						ArrayList<HistoryItem> logItems = history.items
+								.get(reg);
 
-					if (logItems == null) {
-						logItems = new ArrayList<HistoryItem>();
-						history.items.put(reg, logItems);
+						if (logItems == null) {
+							logItems = new ArrayList<HistoryItem>();
+							history.items.put(reg, logItems);
+						}
+
+						logItems.add(new HistoryItem(seconds, value));
+
+					} catch (Exception e) {
 					}
-
-					logItems.add(new HistoryItem(seconds, value));
-
-				} catch (Exception e) {
 				}
-
 			}
 			reader.close();
 		} catch (Exception e) {

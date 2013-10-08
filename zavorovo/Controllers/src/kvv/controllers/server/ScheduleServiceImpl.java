@@ -1,9 +1,11 @@
 package kvv.controllers.server;
 
+import java.io.IOException;
 import java.util.Date;
 
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.server.history.HistoryFile;
+import kvv.controllers.server.history.HistoryLogger;
 import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
@@ -66,6 +68,15 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 			return null;
 		History log = HistoryFile.load(date);
 		return log;
+	}
+
+	@Override
+	public String loadHistoryFile() {
+		try {
+			return Utils.readFile(HistoryLogger.getLogFile(new Date()).getAbsolutePath());
+		} catch (IOException e) {
+			return null;
+		}
 	}
 
 }

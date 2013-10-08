@@ -8,8 +8,8 @@ public class Register implements Serializable {
 	public String controller;
 	public int addr;
 	public int register;
-	public Integer min;
-	public Integer max;
+	public int[] scaleLevels;
+	public Integer height;
 
 	@Override
 	public int hashCode() {

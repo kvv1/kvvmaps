@@ -37,11 +37,7 @@ public class ContextListener implements ServletContextListener {
 			Scheduler.instance.stop();
 			Scheduler.instance = null;
 		}
-		if (HistoryLogger.instance != null) {
-			HistoryLogger.instance.stopped = true;
-			HistoryLogger.instance.stop();
-			HistoryLogger.instance = null;
-		}
+		HistoryLogger.stopLogger();
 
 		MyLogger.stopLogger();
 

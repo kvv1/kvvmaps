@@ -21,6 +21,12 @@ public class HistoryLogger extends Thread {
 	public static volatile HistoryLogger instance;
 	public volatile boolean stopped;
 
+	public static synchronized void stopLogger() {
+		if (instance == null)
+			return;
+		instance.stopped = true;
+	}
+
 	{
 		setDaemon(true);
 		setPriority(Thread.MIN_PRIORITY);
@@ -34,8 +40,10 @@ public class HistoryLogger extends Thread {
 				ControllerDescr[] controllers = Controllers.getInstance()
 						.getControllers();
 				for (ControllerDescr c : controllers) {
+					if (stopped)
+						break;
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(500);
 						if (c.type == Type.MU110_8)
 							ControllersServiceImpl.controller.getRegs(c.addr,
 									0, 8);
@@ -50,6 +58,14 @@ public class HistoryLogger extends Thread {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+
+		synchronized (getClass()) {
+			Date date = new Date();
+			PrintStream ps = getLogStream(date);
+			ps.println(df.format(date));
+			ps.close();
+			instance = null;
 		}
 	}
 
@@ -81,7 +97,7 @@ public class HistoryLogger extends Thread {
 	}
 
 	@SuppressWarnings("deprecation")
-	private static synchronized void logValue(String register, Integer value) {
+	private void logValue(String register, Integer value) {
 		Date date = new Date();
 		// Date fileDate = new Date(date.getTime());
 		Date fileDate = new Date(date.getYear(), date.getMonth(),
@@ -109,7 +125,7 @@ public class HistoryLogger extends Thread {
 
 	}
 
-	private static void logValue(PrintStream ps, Date date, String register,
+	private void logValue(PrintStream ps, Date date, String register,
 			Integer value) {
 		if (value == null)
 			ps.println(df.format(date) + " " + register);
@@ -119,25 +135,29 @@ public class HistoryLogger extends Thread {
 		lastValues.put(register, value);
 	}
 
-	private static void logValues(PrintStream ps, Date date,
+	private void logValues(PrintStream ps, Date date,
 			Map<String, Integer> values) {
 		for (String reg : values.keySet())
 			logValue(ps, date, reg, values.get(reg));
 	}
 
-	public static void log(int addr, int reg, Integer val) {
+	public static synchronized void log(int addr, int reg, Integer val) {
+		if (instance == null)
+			return;
 		Register register = Controllers.getInstance().getRegister(addr, reg);
 		if (register == null)
 			return;
-		logValue(register.name, val);
+		instance.logValue(register.name, val);
 	}
 
-	public static void log(int addr, Map<Integer, Integer> values) {
+	public static synchronized void log(int addr, Map<Integer, Integer> values) {
+		if (instance == null)
+			return;
 		if (values == null) {
 			Collection<Register> regs = Controllers.getInstance().getRegisters(
 					addr);
 			for (Register reg : regs)
-				logValue(reg.name, null);
+				instance.logValue(reg.name, null);
 			return;
 		}
 		for (int reg : values.keySet())

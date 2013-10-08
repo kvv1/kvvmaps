@@ -1,7 +1,6 @@
 package kvv.controllers.client.page;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
@@ -30,14 +29,12 @@ public abstract class ScheduleCanvas extends Composite {
 	private final Canvas canvas = Canvas.createIfSupported();
 	private final Context2d context = canvas.getContext2d();
 	private static final int tenMinutesWidth = 6;
-	private static final int registerHeight = 20;
 	private static final int topMargin = 4;
-	private static final int bottomMargin = 16;
+	private static final int bottomMargin = 14;
 
-	private static final int width = tenMinutesWidth * 6 * 24;
-	private static final int height = registerHeight + bottomMargin + topMargin;
+	private static final int width = tenMinutesWidth * 6 * 24 + 30;
 
-	private static Image bgImage;
+	private Image bgImage;
 
 	private final Button saveButton = new Button("Сохранить");
 
@@ -51,14 +48,29 @@ public abstract class ScheduleCanvas extends Composite {
 
 	private final int minVal;
 	private final int maxVal;
+	private final int[] scaleLevels;
+
+	private final int registerHeight;
+	private final int height;
 
 	protected abstract void save(String regName,
 			RegisterSchedule registerSchedule);
 
 	public ScheduleCanvas(final Register reg,
 			final MouseMoveHandler mouseMoveHandler) {
-		minVal = reg.min;
-		maxVal = reg.max;
+		scaleLevels = reg.scaleLevels;
+
+		minVal = scaleLevels[0];
+		maxVal = scaleLevels[scaleLevels.length - 1];
+
+		if (reg.height == null)
+			registerHeight = 18;
+		else
+			registerHeight = reg.height;
+
+		height = registerHeight + bottomMargin + topMargin;
+
+		createBG();
 
 		HorizontalPanel panel = new HorizontalPanel();
 		panel.add(canvas);
@@ -102,8 +114,8 @@ public abstract class ScheduleCanvas extends Composite {
 			public void onMouseDown(MouseDownEvent event) {
 				int m = x2sec(event.getX()) / 60;
 				int minute = (m + 5) / 10 * 10;
-				int y0 = getY(0, 0, 1, registerHeight) + getRegY();
-				int y1 = getY(1, 0, 1, registerHeight) + getRegY();
+				double y0 = getY(minVal) + getRegY();
+				double y1 = getY(maxVal) + getRegY();
 
 				if (Math.abs(event.getY() - y0) < 3) {
 					if (!ModePage.check())
@@ -195,8 +207,9 @@ public abstract class ScheduleCanvas extends Composite {
 		return topMargin;
 	}
 
-	private static int getY(int val, int minVal, int maxVal, int range) {
-		return registerHeight - range * (val - minVal) / (maxVal - minVal);
+	private double getY(int val) {
+		return registerHeight - (double) registerHeight * (val - minVal)
+				/ (maxVal - minVal);
 	}
 
 	private void fillBackground() {
@@ -210,7 +223,7 @@ public abstract class ScheduleCanvas extends Composite {
 		context.save();
 		context.beginPath();
 		context.setStrokeStyle("blue");
-		context.setLineWidth(2);
+		context.setLineWidth(1);
 
 		context.lineTo(x, 0);
 		context.lineTo(x, height);
@@ -221,14 +234,16 @@ public abstract class ScheduleCanvas extends Composite {
 	}
 
 	private RegisterSchedule registerSchedule;
-	private Date date;
+	private int curSeconds;
+	private int historyEndSeconds;
 	private ArrayList<HistoryItem> logItems;
 
 	public void refresh(RegisterSchedule registerSchedule,
-			ArrayList<HistoryItem> logItems, Date date) {
+			ArrayList<HistoryItem> logItems, int curSeconds, int historyEndSeconds) {
 		this.registerSchedule = registerSchedule;
 		this.logItems = logItems;
-		this.date = date;
+		this.curSeconds = curSeconds;
+		this.historyEndSeconds = historyEndSeconds;
 		refresh();
 	}
 
@@ -245,18 +260,17 @@ public abstract class ScheduleCanvas extends Composite {
 			context.setFillStyle("#00FF00");
 			context.setLineWidth(2);
 
-			context.moveTo(0, getY(val, minVal, maxVal, registerHeight));
+			context.moveTo(0, getY(val));
 			for (ScheduleItem item : registerSchedule.items) {
 				int x = sec2x(item.minutes * 60);
-				int y = getY(val, minVal, maxVal, registerHeight);
+				double y = getY(val);
 				context.lineTo(x, y);
-				y = getY(item.value, minVal, maxVal, registerHeight);
+				y = getY(item.value);
 				context.lineTo(x, y);
 				context.fillRect(x - 3, y - 3, 6, 6);
 				val = item.value;
 			}
-			context.lineTo(sec2x(60 * 24 * 60),
-					getY(val, minVal, maxVal, registerHeight));
+			context.lineTo(sec2x(60 * 24 * 60), getY(val));
 
 			context.stroke();
 			context.closePath();
@@ -277,56 +291,49 @@ public abstract class ScheduleCanvas extends Composite {
 			context.setStrokeStyle("#00FFFF");
 			context.setLineWidth(2);
 
-			Integer lastValue = null;
+			HistoryItem lastValue = null;
 
 			for (HistoryItem logItem : logItems) {
-				int x = sec2x(logItem.seconds);
-
-				if (lastValue != null)
-					context.lineTo(x,
-							getY(lastValue, minVal, maxVal, registerHeight));
-
-				if (logItem.value != null) {
-					if (lastValue == null)
-						context.moveTo(
-								x,
-								getY(logItem.value, minVal, maxVal,
-										registerHeight));
-					else
-						context.lineTo(
-								x,
-								getY(logItem.value, minVal, maxVal,
-										registerHeight));
-				}
-
-				lastValue = logItem.value;
+				drawLogItem(logItem.seconds, logItem, lastValue);
+				lastValue = logItem;
 			}
+			drawLogItem(historyEndSeconds, lastValue, lastValue);
 
 			context.stroke();
 			context.closePath();
 		}
 
-		if (date != null) {
-			context.beginPath();
-			context.setStrokeStyle("yellow");
-			context.setLineWidth(2);
+		context.beginPath();
+		context.setStrokeStyle("yellow");
+		context.setLineWidth(2);
 
-			@SuppressWarnings("deprecation")
-			int minutes = date.getHours() * 60 + date.getMinutes();
+		context.lineTo(sec2x(curSeconds), 0);
+		context.lineTo(sec2x(curSeconds), registerHeight);
 
-			context.lineTo(sec2x(minutes * 60), 0);
-			context.lineTo(sec2x(minutes * 60), registerHeight);
-
-			context.stroke();
-			context.closePath();
-		}
+		context.stroke();
+		context.closePath();
 
 		context.restore();
 
 		return true;
 	}
 
-	static {
+	private void drawLogItem(int seconds, HistoryItem logItem,
+			HistoryItem lastValue) {
+		int x = sec2x(seconds);
+
+		if (lastValue != null && lastValue.value != null)
+			context.lineTo(x, getY(lastValue.value));
+
+		if (logItem.value != null) {
+			if (lastValue == null || lastValue.value == null)
+				context.moveTo(x, getY(logItem.value));
+			else
+				context.lineTo(x, getY(logItem.value));
+		}
+	}
+
+	private void createBG() {
 		Canvas bgCanvas = Canvas.createIfSupported();
 		Context2d context = bgCanvas.getContext2d();
 
@@ -346,18 +353,42 @@ public abstract class ScheduleCanvas extends Composite {
 		context.setStrokeStyle("black");
 		context.setLineWidth(1);
 
-		for (int x = tenMinutesWidth; x < tenMinutesWidth * 6 * 24; x += tenMinutesWidth) {
+		for (int x = tenMinutesWidth; x <= tenMinutesWidth * 6 * 24; x += tenMinutesWidth) {
 			context.moveTo(x, getRegY());
 			context.lineTo(x, getRegY() + registerHeight);
 		}
+
+		if (scaleLevels.length != 2 || scaleLevels[0] != 0
+				|| scaleLevels[1] != 1)
+			for (int level : scaleLevels) {
+				double y = getY(level) + getRegY();
+				context.moveTo(0, y);
+				context.lineTo(tenMinutesWidth * 6 * 24, y);
+			}
+
+		context.stroke();
+		context.restore();
+
+		context.save();
+		context.beginPath();
+		context.setLineWidth(1);
+
+		if (scaleLevels.length != 2 || scaleLevels[0] != 0
+				|| scaleLevels[1] != 1)
+			for (int level : scaleLevels) {
+				double y = getY(level) + getRegY();
+				context.strokeText("" + level, tenMinutesWidth * 6 * 24 + 4,
+						y + 4);
+			}
+
 		context.stroke();
 		context.restore();
 
 		context.save();
 		context.beginPath();
 		context.setLineWidth(2);
-		for (int h = 1; h < 24; h++) {
-			int x = h * tenMinutesWidth * 6;
+		for (int hour = 1; hour <= 24; hour++) {
+			int x = hour * tenMinutesWidth * 6;
 			context.moveTo(x, getRegY());
 			context.lineTo(x, height - bottomMargin);
 		}
@@ -367,9 +398,9 @@ public abstract class ScheduleCanvas extends Composite {
 		context.save();
 		context.beginPath();
 		// context.setLineWidth(1);
-		for (int h = 1; h < 24; h++) {
-			int x = h * tenMinutesWidth * 6;
-			context.strokeText("" + h, x - 5, height - 3);
+		for (int hour = 1; hour < 24; hour++) {
+			int x = hour * tenMinutesWidth * 6;
+			context.strokeText("" + hour, x - 5, height - 3);
 		}
 		context.restore();
 
