@@ -46,7 +46,11 @@ public class AutoRelayControl extends ControlComposite {
 			public void save(String regName,
 					final RegisterSchedule registerSchedule) {
 				scheduleService.update(regName, registerSchedule,
-						new CallbackAdapter<Void>());
+						new CallbackAdapter<Void>() {
+							public void onSuccess(Void result) {
+								refreshButtons(registerSchedule);
+							};
+						});
 			}
 		};
 
@@ -71,8 +75,8 @@ public class AutoRelayControl extends ControlComposite {
 		panel.add(labelPanel);
 		HorizontalPanel panel1 = new HorizontalPanel();
 		panel1.setWidth("100%");
-		panel1.add(autoButton);
 		panel1.add(relayControl);
+		panel1.add(autoButton);
 		panel.add(panel1);
 		horizontalPanel.add(panel);
 
@@ -111,9 +115,9 @@ public class AutoRelayControl extends ControlComposite {
 	}
 
 	public void refreshSchedule(RegisterSchedule registerSchedule,
-			ArrayList<HistoryItem> logItems, Date date) {
+			ArrayList<HistoryItem> logItems, int markerSeconds, int historyEndSeconds) {
 		refreshButtons(registerSchedule);
-		scheduleCanvas.refresh(registerSchedule, logItems, date);
+		scheduleCanvas.refresh(registerSchedule, logItems, markerSeconds, historyEndSeconds);
 	}
 
 	public void enableSchedule(boolean value) {

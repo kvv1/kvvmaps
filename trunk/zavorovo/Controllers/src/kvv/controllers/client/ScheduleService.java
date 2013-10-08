@@ -20,4 +20,6 @@ public interface ScheduleService extends RemoteService {
 	void setSchedule(Schedule sched) throws Exception;
 
 	void update(String regName, RegisterSchedule registerSchedule) throws Exception;
+
+	String loadHistoryFile();
 }

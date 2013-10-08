@@ -46,10 +46,8 @@ public class Controllers {
 							if (reg != null) {
 								reg.controller = c.name;
 								reg.addr = c.addr;
-								if (reg.min == null)
-									reg.min = 0;
-								if (reg.max == null)
-									reg.max = 1;
+								if (reg.scaleLevels == null)
+									reg.scaleLevels = new int[] { 0, 1 };
 								registers.put(reg.name, reg);
 								ar2register.put(
 										(reg.addr << 16) + reg.register, reg);

@@ -18,4 +18,6 @@ public interface ScheduleServiceAsync {
 	void getHistory(Date date, AsyncCallback<History> callback);
 
 	void update(String regName, RegisterSchedule registerSchedule, AsyncCallback<Void> callback);
+
+	void loadHistoryFile(AsyncCallback<String> asyncCallback);
 }

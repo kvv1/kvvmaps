@@ -1,5 +1,6 @@
 package kvv.controllers.client.page;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
 import kvv.controllers.shared.history.History;
+import kvv.controllers.shared.history.HistoryItem;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -26,6 +28,7 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class RegistersPage extends Composite {
@@ -86,11 +89,28 @@ public class RegistersPage extends Composite {
 		CaptionPanel historyPanel = new CaptionPanel("Показывать историю");
 		historyPanel.add(historyRadioPanel);
 
-		HorizontalPanel horizontalPanel = new HorizontalPanel();
+		final HorizontalPanel horizontalPanel = new HorizontalPanel();
 		horizontalPanel.setSpacing(10);
 
 		horizontalPanel.add(refreshButton);
 		horizontalPanel.add(historyPanel);
+		
+//		Button bb = new Button("zzz");
+//		bb.addClickHandler(new ClickHandler() {
+//			@Override
+//			public void onClick(ClickEvent event) {
+//				scheduleService.loadHistoryFile(new CallbackAdapter<String>() {
+//					@Override
+//					public void onSuccess(String result) {
+//						TextArea txt = new TextArea();
+//						txt.setText(result);
+//						txt.setSize("600px", "600px");
+//						horizontalPanel.add(txt);
+//					}
+//				});
+//			}
+//		});
+//		horizontalPanel.add(bb);
 
 		// horizontalPanel.add(enableSchedule);
 
@@ -130,18 +150,29 @@ public class RegistersPage extends Composite {
 		scheduleService.getSchedule(new CallbackAdapter<Schedule>() {
 			@Override
 			public void onSuccess(final Schedule schedule) {
-				scheduleService.getHistory(getDateForHistory(schedule.date),
+				final Date dateForHistory = getDateForHistory(schedule.date);
+				scheduleService.getHistory(dateForHistory,
 						new CallbackAdapter<History>() {
 							@Override
 							public void onSuccess(History log) {
 								for (AutoRelayControl c : objects.values()) {
 									RegisterSchedule registerSchedule = schedule.map
 											.get(c.reg.name);
-									c.refreshSchedule(
-											registerSchedule,
-											log == null ? null : log.items
-													.get(c.reg.name),
-											schedule.date);
+									ArrayList<HistoryItem> logItems = log == null ? null
+											: log.items.get(c.reg.name);
+									@SuppressWarnings("deprecation")
+									int markerSeconds = schedule.date
+											.getHours()
+											* 3600
+											+ schedule.date.getMinutes()
+											* 60
+											+ schedule.date.getSeconds();
+									int historyEndSeconds = schedule.date
+											.equals(dateForHistory) ? markerSeconds
+											: 24 * 3600;
+									c.refreshSchedule(registerSchedule,
+											logItems, markerSeconds,
+											historyEndSeconds);
 								}
 							}
 						});
