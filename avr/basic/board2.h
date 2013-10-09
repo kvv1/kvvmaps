@@ -40,6 +40,6 @@
 
 #define PIN_MARS_RTS P_D6
 
-//#define INT_VREF_TYPE 0xC0 // INTERNAL
+#define INT_VREF_TYPE 0xC0 // INTERNAL
 #define AVCC_VREF_TYPE 0x40 // AVCC
 
