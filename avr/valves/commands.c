@@ -182,10 +182,10 @@ char setReg(int reg, int val) {
 }
 
 static uint8_t regs[] PROGMEM
-= { REG_RELAYS, REG_INPUTS, REG_TEMP, REG_TEMP2, REG_VMONOFF, REG_VMSTATE, REG_ADC0,
-		REG_ADC1, REG_ADC2, REG_ADC3, REG_RAM0, REG_RAM1, REG_RAM2, REG_RAM3,
-		REG_PWM0, REG_PWM1, REG_PWM2, REG_PWM3, REG_EEPROM0, REG_EEPROM1,
-		REG_EEPROM2, REG_EEPROM3, };
+= { REG_RELAYS, REG_INPUTS, REG_TEMP, REG_TEMP2, REG_VMONOFF, REG_VMSTATE,
+		REG_ADC0, REG_ADC1, REG_ADC2, REG_ADC3, REG_RAM0, REG_RAM1, REG_RAM2,
+		REG_RAM3, REG_PWM0, REG_PWM1, REG_PWM2, REG_PWM3, REG_EEPROM0,
+		REG_EEPROM1, REG_EEPROM2, REG_EEPROM3, };
 
 void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 //	print2("handleCmd %d %d ", *cmd, cmdlen);
@@ -247,8 +247,6 @@ void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 			getReg(reg, &val);
 			S = sendByte(reg, S);
 			S = sendWord(val, S);
-			//S = sendByte(val >> 8, S);
-			//S = sendByte(val, S);
 		}
 
 		sendPacketEnd(S);
