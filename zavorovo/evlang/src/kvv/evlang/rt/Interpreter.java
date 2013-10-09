@@ -84,8 +84,7 @@ public class Interpreter {
 
 			BC bc = BC.values()[c];
 			switch (bc) {
-			case CALLP:
-			case CALLF:
+			case CALL:
 				int addr = context.funcs[code.get(ip++)].code.off;
 				stack.push(ip);
 				ip = addr;
