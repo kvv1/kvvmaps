@@ -116,7 +116,7 @@ public class Code {
 		Code res = new Code();
 		for (Expr c : argList)
 			res.addAll(c.getCode());
-		res.add(BC.CALLP);
+		res.add(BC.CALL);
 		res.add(func.n);
 		if (func.retSize != 0)
 			res.add(BC.DROP);

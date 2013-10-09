@@ -30,7 +30,7 @@ public class Expr {
 		code = new Code();
 		for (Expr c : argList)
 			code.addAll(c.getCode());
-		code.add(BC.CALLF);
+		code.add(BC.CALL);
 		code.add(func.n);
 	}
 

@@ -41,7 +41,7 @@ public class CodeRef {
 
 				EG.dumpStream.print(bc.name() + " ");
 
-				if (bc == BC.CALLF || bc == BC.CALLP) {
+				if (bc == BC.CALL) {
 					PrintStream ps = EG.dumpStream;
 					EG.dumpStream = EG.nullStream;
 					Func f = context.funcDefList
@@ -57,14 +57,13 @@ public class CodeRef {
 					stack += locals;
 				} else if (bc == BC.RET || bc == BC.RETI || bc == BC.RET_N
 						|| bc == BC.RETI_N) {
-					if (bc == BC.RET_N
-							|| bc == BC.RETI_N)
-						i++;
-//					stack -= locals;
+					i += bc.args;
+					// stack -= locals;
 					if (stack - locals != expected)
 						throw new ParseException(msg + " stack error");
-					
-					break;
+
+					stack += bc.stackBalance;
+					// break;
 				} else {
 					stack += bc.stackBalance;
 					i += bc.args;
@@ -75,8 +74,8 @@ public class CodeRef {
 
 			maxStack = Math.max(maxStack, stack);
 		}
-//		if (stack != expected)
-//			throw new ParseException(msg + " stack error");
+		// if (stack != expected)
+		// throw new ParseException(msg + " stack error");
 
 		return maxStack;
 	}
