@@ -77,13 +77,15 @@ public interface EG1Constants {
   /** RegularExpression Id. */
   int VOID = 39;
   /** RegularExpression Id. */
-  int ID = 40;
+  int RETURN = 40;
   /** RegularExpression Id. */
-  int STRING = 41;
+  int ID = 41;
   /** RegularExpression Id. */
-  int NUMBER = 42;
+  int STRING = 42;
   /** RegularExpression Id. */
-  int DIGIT = 43;
+  int NUMBER = 43;
+  /** RegularExpression Id. */
+  int DIGIT = 44;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -130,15 +132,16 @@ public interface EG1Constants {
     "\"text\"",
     "\"int\"",
     "\"void\"",
+    "\"return\"",
     "<ID>",
     "<STRING>",
     "<NUMBER>",
     "<DIGIT>",
     "\"(\"",
     "\")\"",
-    "\"=\"",
     "\";\"",
     "\",\"",
+    "\"=\"",
     "\"{\"",
     "\"}\"",
     "\".\"",

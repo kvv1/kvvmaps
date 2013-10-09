@@ -19,6 +19,9 @@ timer t {
 	t.start_ms (500);
 }
 
+void p(int c);
+int f(int a, int b);
+
 void main() {
 //	print muldiv(20000, 30000, 10000);
 
@@ -44,9 +47,14 @@ void main() {
 		print z0;
 	x = 25;
 	t.start_ms 100;
+	
+	f(0,0);
 }
 
-int f(int a, int b) = a - b;
+int f(int a, int b) {
+	print 666; 
+	return a - b; 
+}
 
 void p(int c) {
 	int d;

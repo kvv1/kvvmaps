@@ -24,7 +24,9 @@ public class Expr {
 
 	public Expr(Context context, String funcName, List<Expr> argList)
 			throws ParseException {
-		Func func = context.getCreateFunc(funcName, argList.size(), true);
+		Func func = context.getFunc(funcName, argList.size());
+		if (func.retSize != 1)
+			throw new ParseException(funcName + " - ?");
 		code = new Code();
 		for (Expr c : argList)
 			code.addAll(c.getCode());
@@ -37,10 +39,11 @@ public class Expr {
 	}
 
 	public Expr(Context context, String name) throws ParseException {
-		Integer val = context.locals.get(name);
+		Integer val = context.currentFunc.locals.get(name);
 		if (val != null) {
 			code = new Code();
-			code.compileGetLocal(context.locals.getArgCnt() - val - 1);
+			code.compileGetLocal(context.currentFunc.locals.getArgCnt() - val
+					- 1);
 		} else {
 			RegisterDescr descr = context.registers.get(name);
 			if (descr != null) {

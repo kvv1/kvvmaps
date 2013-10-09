@@ -112,12 +112,14 @@ public class Code {
 
 	public static Code callp(Context context, String name, List<Expr> argList)
 			throws ParseException {
-		Func func = context.getCreateFunc(name, argList.size(), false);
+		Func func = context.getFunc(name, argList.size());
 		Code res = new Code();
 		for (Expr c : argList)
 			res.addAll(c.getCode());
 		res.add(BC.CALLP);
 		res.add(func.n);
+		if (func.retSize != 0)
+			res.add(BC.DROP);
 		return res;
 	}
 
@@ -153,12 +155,41 @@ public class Code {
 		return res;
 	}
 
+	public static Code ret(Context context, Expr n) throws ParseException {
+		if (n != null) {
+			if (context.currentFunc.retSize == 0)
+				throw new ParseException("'return;' expected");
+			Code bytes = n.getCode();
+			int argCnt = context.currentFunc.locals.getArgCnt();
+			if (argCnt == 0)
+				bytes.add(BC.RETI);
+			else {
+				bytes.add(BC.RETI_N);
+				bytes.add(argCnt);
+			}
+			return bytes;
+		} else {
+			if (context.currentFunc.retSize != 0)
+				throw new ParseException("'return <expr>;' expected");
+			Code bytes = new Code();
+			int argCnt = context.currentFunc.locals.getArgCnt();
+			if (argCnt == 0)
+				bytes.add(BC.RET);
+			else {
+				bytes.add(BC.RET_N);
+				bytes.add(argCnt);
+			}
+			return bytes;
+		}
+	}
+
 	public static Code assign(Context context, String name, Expr t)
 			throws ParseException {
 		Code res = t.getCode();
-		Integer val = context.locals.get(name);
+		Integer val = context.currentFunc.locals.get(name);
 		if (val != null) {
-			res.compileSetLocal(context.locals.getArgCnt() - val - 1);
+			res.compileSetLocal(context.currentFunc.locals.getArgCnt() - val
+					- 1);
 		} else {
 			RegisterDescr descr = context.registers.get(name);
 			if (descr == null)
@@ -186,49 +217,35 @@ public class Code {
 		return res;
 	}
 
-	public static void proc(Context context, String name, Code bytes)
-			throws ParseException {
-
-		bytes.insertEnter(context.locals.getMax() - context.locals.getArgCnt());
-
-		if (name.equals("main") && context.locals.getArgCnt() == 0) {
-			bytes.add(BC.RET);
-			Func func = new Func(0, false);
-			func.code = new CodeRef(context, bytes);
-			context.funcDefList.setMain(func);
-			System.out.println("main " + bytes.size());
-			return;
-		}
-
-		if (context.locals.getArgCnt() == 0)
-			bytes.add(BC.RET);
-		else
-			bytes.add(BC.RET_N);
-		bytes.add(context.locals.getArgCnt());
-		Func func = context.getCreateFunc(name, context.locals.getArgCnt(),
-				false);
-		func.code = new CodeRef(context, bytes);
-		System.out.println("proc " + name + " " + bytes.size());
+	public static void procDecl(Context context, int retSize, String name,
+			LocalListDef locals) throws ParseException {
+		Func func = context.getCreateFunc(name, locals, retSize);
+		context.currentFunc = func;
 	}
 
-	public static void func(Context context, String name, Code bytes)
-			throws ParseException {
-		bytes.insertEnter(context.locals.getMax() - context.locals.getArgCnt());
+	private void insertEnter(Context context) throws ParseException {
+		insertEnter(context.currentFunc.locals.getMax()
+				- context.currentFunc.locals.getArgCnt());
+	}
 
-		if (context.locals.getArgCnt() == 0)
-			bytes.add(BC.RETI);
+	public static void procCode(Context context, Code bytes)
+			throws ParseException {
+
+		bytes.insertEnter(context);
+
+		if (context.currentFunc.retSize == 0)
+			bytes.addAll(ret(context, null));
 		else
-			bytes.add(BC.RETI_N);
-		bytes.add(context.locals.getArgCnt());
-		Func func = context.getCreateFunc(name, context.locals.getArgCnt(),
-				true);
-		func.code = new CodeRef(context, bytes);
-		System.out.println("func " + name + " " + bytes.size());
+			bytes.addAll(ret(context, new Expr((short) 0)));
+
+		context.currentFunc.code = new CodeRef(context, bytes);
+		System.out.println("proc " + context.currentFunc.name + " "
+				+ bytes.size());
 	}
 
 	public static void timer(Context context, String name, Code bytes)
 			throws ParseException {
-		bytes.insertEnter(context.locals.getMax() - context.locals.getArgCnt());
+		bytes.insertEnter(context);
 
 		bytes.add(BC.RET);
 		Timer timer = context.getCreateTimer(name);
@@ -238,7 +255,7 @@ public class Code {
 
 	public static void onset(Context context, Code cond, Code bytes)
 			throws ParseException {
-		bytes.insertEnter(context.locals.getMax() - context.locals.getArgCnt());
+		bytes.insertEnter(context);
 
 		cond.add(BC.RETI);
 		bytes.add(BC.RET);
@@ -249,7 +266,7 @@ public class Code {
 
 	public static void onchange(Context context, Code cond, Code bytes)
 			throws ParseException {
-		bytes.insertEnter(context.locals.getMax() - context.locals.getArgCnt());
+		bytes.insertEnter(context);
 
 		cond.add(BC.RETI);
 		bytes.add(BC.RET);

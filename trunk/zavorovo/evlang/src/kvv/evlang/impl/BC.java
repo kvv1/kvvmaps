@@ -8,11 +8,12 @@ public enum BC {
 	ADD(-1, 0), SUB(-1, 0), MUL(-1, 0), DIV(-1, 0), NEGATE(0, 0), //
 	OR(-1, 0), AND(-1, 0), NOT(0, 0), //
 	LT(-1, 0), LE(-1, 0), GT(-1, 0), GE(-1, 0), EQ(-1, 0), NEQ(-1, 0), //
-	PRINT(-1, 0), //
+	DROP(-1, 0), //
 	INC(0, 1), DEC(0, 1), //
 	CALLP(0, 1), CALLF(0, 1), //
 	MULDIV(-2, 0), //
-	GETLOCAL(1, 1), SETLOCAL(-1, 1), ENTER(0,1);
+	GETLOCAL(1, 1), SETLOCAL(-1, 1), ENTER(0,1), //
+	PRINT(-1, 0);
 
 	public int stackBalance;
 	public int args;
