@@ -114,6 +114,7 @@ int commonMain(void) {
 #endif
 
 	timer0_init();
+	//init_adc(ADC_CHANS, INT_VREF_TYPE);
 	init_adc(ADC_CHANS, AVCC_VREF_TYPE);
 	uart_init();
 
