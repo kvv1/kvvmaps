@@ -14,13 +14,17 @@ public class FuncDefList {
 		funcs1.put(0, null);
 		funcs1.put(1, null);
 	}
-	
+
 	public Func get(String name) {
 		return funcs.get(name);
 	}
 
-	public void put(String name, Func func) {
-		add(func, funcs.size(), name);
+	public void put(Func func) {
+		if (func.retSize == 0 && func.name.equals("main")
+				&& func.locals.getArgCnt() == 0)
+			setMain(func);
+		else
+			add(func, func.name, funcs.size());
 	}
 
 	public int size() {
@@ -35,19 +39,18 @@ public class FuncDefList {
 		return funcs1.get(idx);
 	}
 
-	private void add(Func func, int n, String name) {
+	private void add(Func func, String name, int n) {
 		func.n = n;
-		func.name = name;
 		funcs1.put(n, func);
 		funcs.put(name, func);
 	}
-	
-	public void setMain(Func func) {
-		add(func, 1, "<main>");
+
+	private void setMain(Func func) {
+		add(func, "<main>", 1);
 	}
 
 	public void setInit(Func func) {
-		add(func, 0, "<init>");
+		add(func, "<init>", 0);
 	}
 
 	public static void main(String[] args) {
@@ -57,12 +60,12 @@ public class FuncDefList {
 		map.put("c", "c");
 		map.put("d", "d");
 		map.put("e", "e");
-		
+
 		map.put("a", "a");
-		
-		for(String s : map.values()) {
+
+		for (String s : map.values()) {
 			System.out.println(s);
 		}
 	}
-	
+
 }

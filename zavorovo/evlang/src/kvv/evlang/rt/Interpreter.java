@@ -226,6 +226,9 @@ public class Interpreter {
 				if (stack.pop() == 0)
 					ip += off;
 				break;
+			case DROP:
+				stack.pop();
+				break;
 			case PRINT:
 				System.out.print(stack.pop() + " ");
 				break;

@@ -103,22 +103,33 @@ public class Context {
 			throw new ParseException("register is read only");
 	}
 
-	public LocalListDef locals = new LocalListDef();
+	public Func currentFunc;
+	// public LocalListDef locals = new LocalListDef();
+	// public boolean isFunc;
 
-	List<Byte> codeArr = new ArrayList<Byte>();
+	public List<Byte> codeArr = new ArrayList<Byte>();
 
 	public FuncDefList funcDefList = new FuncDefList();
 
-	public Func getCreateFunc(String name, int args, boolean f)
+	public Func getFunc(String name, int argCnt) throws ParseException {
+		Func func = funcDefList.get(name);
+		if (func == null)
+			throw new ParseException(name + " - ?");
+		else if (func.locals.getArgCnt() != argCnt)
+			throw new ParseException(name + " argument number error");
+		return func;
+	}
+
+	public Func getCreateFunc(String name, LocalListDef locals, int retSize)
 			throws ParseException {
 		Func func = funcDefList.get(name);
 		if (func == null) {
 			checkName(name);
-			func = new Func(args, f);
-			funcDefList.put(name, func);
-		} else if (func.retSize != f) {
+			func = new Func(name, locals, retSize);
+			funcDefList.put(func);
+		} else if (func.retSize != retSize) {
 			throw new ParseException(name + " - ?");
-		} else if (func.args != args)
+		} else if (func.locals.getArgCnt() != locals.getArgCnt())
 			throw new ParseException(name + " argument number error");
 		return func;
 	}
@@ -188,8 +199,8 @@ public class Context {
 
 		for (Func f : funcDefList.values()) {
 			if (f.code == null)
-				throw new ParseException((f.retSize ? "function" : "procedure")
-						+ " '" + f.name + "' not defined");
+				throw new ParseException((f.retSize != 0 ? "function"
+						: "procedure") + " '" + f.name + "' not defined");
 		}
 
 	}
@@ -206,7 +217,7 @@ public class Context {
 
 		code.add(BC.RET);
 
-		Func func = new Func(0, false);
+		Func func = new Func("<init>", new LocalListDef(), 0);
 		func.code = new CodeRef(this, code);
 		funcDefList.setInit(func);
 	}
