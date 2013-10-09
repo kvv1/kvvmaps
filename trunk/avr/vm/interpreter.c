@@ -31,15 +31,16 @@ enum {
 	GE,
 	EQ,
 	NEQ,
-	PRINT,
+	DROP,
 	INC,
 	DEC,
-	CALLP,
-	CALLF,
+	CALL,
+	RESERVED,
 	MULDIV,
 	GETLOCAL,
 	SETLOCAL,
 	ENTER,
+	PRINT,
 };
 
 #define GETREGSHORT 0x80
@@ -200,8 +201,7 @@ static void vmExec(uint16_t ip) {
 		}
 
 		switch (c) {
-		case CALLF:
-		case CALLP: {
+		case CALL: {
 			uint16_t addr = vmGetFuncCode(vmReadByte(ip++)) + codeOffset;
 			vmPush(ip);
 			ip = addr;
@@ -362,6 +362,9 @@ static void vmExec(uint16_t ip) {
 			break;
 		case NEQ:
 			vmPush(vmPop() != vmPop());
+			break;
+		case DROP:
+			vmPrintInt(vmPop());
 			break;
 		case PRINT:
 			vmPrintInt(vmPop());
