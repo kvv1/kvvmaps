@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="C:/Program Files/Apache Software Foundation/Tomcat 7.0/lib/servlet-api.jar"/>
 	<classpathentry kind="lib" path="RXTXcomm.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ControllerUtils"/>
+	<classpathentry kind="lib" path="/Controllers/war/WEB-INF/lib/gson-1.7.1.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
