@@ -17,6 +17,9 @@ public class BusServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
+		if(true)
+		return;
+		
 		resp.setContentType("text/html");
 		boolean waitResponse = Boolean.valueOf(req.getParameter("response"));
 		String sbody = req.getParameter("body");
