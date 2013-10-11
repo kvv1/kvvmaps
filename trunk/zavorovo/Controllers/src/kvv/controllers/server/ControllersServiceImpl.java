@@ -12,11 +12,11 @@ import kvv.controllers.client.ControllersService;
 import kvv.controllers.controller.IController;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.RegisterUI;
-import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerDescr.Type;
 import kvv.controllers.shared.Register;
 import kvv.controllers.utils.Constants;
+import kvv.controllers.utils.Utils;
 import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
 import kvv.evlang.Token;
@@ -80,7 +80,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 			int[] vals = controller.getRegs(addr, 0, 8);
 			for (int i = 0; i < 8; i++)
 				map.put(i, vals[i]);
-			return new AllRegs(new ArrayList<RegisterUI>(), map);
+			return new AllRegs(addr, new ArrayList<RegisterUI>(), map);
 		} else {
 			AllRegs allRegs = controller.getAllRegs(addr);
 			return allRegs;

@@ -19,9 +19,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class Type2Form extends ControlComposite {
 
 	public Type2Form(int addr, String name) {
-
-		super(addr);
-
 		HorizontalPanel panel = new HorizontalPanel();
 		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		panel.setSpacing(10);
@@ -42,23 +39,23 @@ public class Type2Form extends ControlComposite {
 		panel.add(relays);
 
 		VerticalPanel tempPanel = new VerticalPanel();
-		
-		GetRegControl tempVal = new GetRegControl(addr, Register.REG_TEMP,
-				1, "T1=");
+
+		GetRegControl tempVal = new GetRegControl(addr, Register.REG_TEMP, 1,
+				"T1=");
 		add(tempVal);
 		tempPanel.add(tempVal);
 
-		GetRegControl tempVal2 = new GetRegControl(addr, Register.REG_TEMP2,
-				1, "T2=");
+		GetRegControl tempVal2 = new GetRegControl(addr, Register.REG_TEMP2, 1,
+				"T2=");
 		add(tempVal2);
 		tempPanel.add(tempVal2);
 
 		panel.add(tempPanel);
 
-//		GetRegControl vVal = new GetRegControl(addr, Register.REG_ADC3,
-//				0.0202f, "V=");
-//		add(vVal);
-//		panel.add(vVal);
+		// GetRegControl vVal = new GetRegControl(addr, Register.REG_ADC3,
+		// 0.0202f, "V=");
+		// add(vVal);
+		// panel.add(vVal);
 
 		VMControl vmControl = new VMControl(addr, name);
 		add(vmControl);

@@ -2,9 +2,9 @@ package kvv.controllers.client;
 
 import java.util.Date;
 
+import kvv.controllers.history.shared.History;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
-import kvv.controllers.shared.history.History;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 

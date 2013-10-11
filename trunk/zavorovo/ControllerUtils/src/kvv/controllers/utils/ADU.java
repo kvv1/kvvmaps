@@ -3,9 +3,8 @@ package kvv.controllers.utils;
 import java.util.Arrays;
 
 public class ADU {
-	public int addr;
-	public RTU rtu;
-	public short crc16;
+	public final int addr;
+	public final RTU rtu;
 
 	public ADU(int addr, RTU rtu) {
 		this.addr = addr;

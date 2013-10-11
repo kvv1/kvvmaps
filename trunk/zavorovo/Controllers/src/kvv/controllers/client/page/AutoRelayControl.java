@@ -1,16 +1,17 @@
 package kvv.controllers.client.page;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
+import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.control.ControlComposite;
+import kvv.controllers.client.control.simple.GetRegControl;
 import kvv.controllers.client.control.simple.SimpleRelayControl;
+import kvv.controllers.history.shared.HistoryItem;
 import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
-import kvv.controllers.shared.history.HistoryItem;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -33,13 +34,12 @@ public class AutoRelayControl extends ControlComposite {
 	private final ScheduleCanvas scheduleCanvas;
 
 	private final CheckBox autoButton;
-	private final SimpleRelayControl relayControl;
+	private final ChildComposite relayControl;
 
-	final Register reg;
+	public final Register reg;
 
 	public AutoRelayControl(final Register reg,
 			MouseMoveHandler mouseMoveHandler) {
-		super(reg.addr);
 		this.reg = reg;
 
 		scheduleCanvas = new ScheduleCanvas(reg, mouseMoveHandler) {
@@ -62,21 +62,29 @@ public class AutoRelayControl extends ControlComposite {
 		enableSchedule(true);
 
 		autoButton = new CheckBox("Авто");
-		relayControl = new SimpleRelayControl(addr, reg.register, "");
+
+		if (reg.scaleLevels.length <= 2) {
+			relayControl = new SimpleRelayControl(reg.addr, reg.register, "");
+		} else {
+			relayControl = new GetRegControl(reg.addr, reg.register, 1, null);
+		}
 		add(relayControl);
 
 		autoButton.setValue(false);
 		autoButton.setEnabled(false);
 
 		VerticalPanel panel = new VerticalPanel();
+		//panel.setBorderWidth(1);
 		VerticalPanel labelPanel = new VerticalPanel();
 		labelPanel.setWidth("200px");
 		labelPanel.add(new Label(reg.name));
 		panel.add(labelPanel);
 		HorizontalPanel panel1 = new HorizontalPanel();
-		panel1.setWidth("100%");
+		//panel1.setBorderWidth(1);
+		// panel1.setWidth("200px");
 		panel1.add(relayControl);
 		panel1.add(autoButton);
+		panel1.setCellWidth(relayControl, "40px");
 		panel.add(panel1);
 		horizontalPanel.add(panel);
 
@@ -115,9 +123,11 @@ public class AutoRelayControl extends ControlComposite {
 	}
 
 	public void refreshSchedule(RegisterSchedule registerSchedule,
-			ArrayList<HistoryItem> logItems, int markerSeconds, int historyEndSeconds) {
+			ArrayList<HistoryItem> logItems, int markerSeconds,
+			int historyEndSeconds) {
 		refreshButtons(registerSchedule);
-		scheduleCanvas.refresh(registerSchedule, logItems, markerSeconds, historyEndSeconds);
+		scheduleCanvas.refresh(registerSchedule, logItems, markerSeconds,
+				historyEndSeconds);
 	}
 
 	public void enableSchedule(boolean value) {

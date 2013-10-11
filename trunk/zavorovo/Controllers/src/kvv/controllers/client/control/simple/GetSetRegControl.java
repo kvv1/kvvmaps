@@ -2,7 +2,7 @@ package kvv.controllers.client.control.simple;
 
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
-import kvv.controllers.client.control.ControlComposite;
+import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.register.AllRegs;
 
@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class GetSetRegControl extends ControlComposite {
+public class GetSetRegControl extends ChildComposite {
 
 	private final HorizontalPanel panel = new HorizontalPanel();
 

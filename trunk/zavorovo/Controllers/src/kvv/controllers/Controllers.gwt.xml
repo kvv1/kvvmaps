@@ -12,6 +12,7 @@
 
   <!-- Other module inherits                                      -->
   <inherits name='kvv.controllers.Constants'/>
+  <inherits name='kvv.controllers.History'/>
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='kvv.controllers.client.Controllers'/>

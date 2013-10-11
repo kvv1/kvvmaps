@@ -2,10 +2,10 @@ package kvv.controllers.client.page;
 
 import java.util.ArrayList;
 
+import kvv.controllers.history.shared.HistoryItem;
 import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.ScheduleItem;
-import kvv.controllers.shared.history.HistoryItem;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -113,6 +113,10 @@ public abstract class ScheduleCanvas extends Composite {
 			@Override
 			public void onMouseDown(MouseDownEvent event) {
 				int m = x2sec(event.getX()) / 60;
+				
+				if((m < 0 || m >= 24 * 60))
+					return;
+				
 				int minute = (m + 5) / 10 * 10;
 				double y0 = getY(minVal) + getRegY();
 				double y1 = getY(maxVal) + getRegY();

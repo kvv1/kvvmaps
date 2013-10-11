@@ -1,10 +1,7 @@
 package kvv.controllers.client.control.form;
 
 import kvv.controllers.client.control.ControlComposite;
-import kvv.controllers.client.control.simple.GetRegControl;
 import kvv.controllers.client.control.simple.RelayCheckBoxes;
-import kvv.controllers.client.control.vm.VMControl;
-import kvv.controllers.register.Register;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -18,9 +15,6 @@ import com.google.gwt.user.client.ui.Label;
 public class MU110_8Form extends ControlComposite {
 
 	public MU110_8Form(int addr, String name) {
-
-		super(addr);
-
 		HorizontalPanel panel = new HorizontalPanel();
 		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		panel.setSpacing(10);
