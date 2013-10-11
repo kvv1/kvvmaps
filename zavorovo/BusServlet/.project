@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>BusServlet</name>
+	<name>rs485</name>
 	<comment></comment>
 	<projects>
+		<project>ControllerUtils</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

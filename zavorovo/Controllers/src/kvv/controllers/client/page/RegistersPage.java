@@ -2,43 +2,34 @@ package kvv.controllers.client.page;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Set;
 
 import kvv.controllers.client.CallbackAdapter;
-import kvv.controllers.client.ControllersService;
-import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
-import kvv.controllers.register.AllRegs;
+import kvv.controllers.history.shared.History;
+import kvv.controllers.history.shared.HistoryItem;
 import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
-import kvv.controllers.shared.history.History;
-import kvv.controllers.shared.history.HistoryItem;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class RegistersPage extends Composite {
+public class RegistersPage extends ControlComposite {
 	private VerticalPanel vertPanel = new VerticalPanel();
 	private final ScheduleServiceAsync scheduleService = GWT
 			.create(ScheduleService.class);
-	private final ControllersServiceAsync controllersService = GWT
-			.create(ControllersService.class);
 
-	private final MultiMap<Integer, AutoRelayControl> objects = new MultiMap<Integer, AutoRelayControl>();
+	private final ArrayList<AutoRelayControl> objects = new ArrayList<AutoRelayControl>();
 	private final VerticalPanel itemPanel = new VerticalPanel();
 
 	private final RadioButton historyOff = new RadioButton("history", "Выкл");
@@ -94,23 +85,23 @@ public class RegistersPage extends Composite {
 
 		horizontalPanel.add(refreshButton);
 		horizontalPanel.add(historyPanel);
-		
-//		Button bb = new Button("zzz");
-//		bb.addClickHandler(new ClickHandler() {
-//			@Override
-//			public void onClick(ClickEvent event) {
-//				scheduleService.loadHistoryFile(new CallbackAdapter<String>() {
-//					@Override
-//					public void onSuccess(String result) {
-//						TextArea txt = new TextArea();
-//						txt.setText(result);
-//						txt.setSize("600px", "600px");
-//						horizontalPanel.add(txt);
-//					}
-//				});
-//			}
-//		});
-//		horizontalPanel.add(bb);
+
+		// Button bb = new Button("zzz");
+		// bb.addClickHandler(new ClickHandler() {
+		// @Override
+		// public void onClick(ClickEvent event) {
+		// scheduleService.loadHistoryFile(new CallbackAdapter<String>() {
+		// @Override
+		// public void onSuccess(String result) {
+		// TextArea txt = new TextArea();
+		// txt.setText(result);
+		// txt.setSize("600px", "600px");
+		// horizontalPanel.add(txt);
+		// }
+		// });
+		// }
+		// });
+		// horizontalPanel.add(bb);
 
 		// horizontalPanel.add(enableSchedule);
 
@@ -124,7 +115,7 @@ public class RegistersPage extends Composite {
 
 			@Override
 			public void onMouseMove(MouseMoveEvent event) {
-				for (AutoRelayControl control : objects.values()) {
+				for (AutoRelayControl control : objects) {
 					if (event == null)
 						control.drawMarker(-1);
 					else
@@ -138,7 +129,8 @@ public class RegistersPage extends Composite {
 				AutoRelayControl control = new AutoRelayControl(reg,
 						mouseMoveHandler);
 				itemPanel.add(control);
-				objects.put(reg.addr, control);
+				add(control);
+				objects.add(control);
 			} catch (Exception e) {
 			}
 		}
@@ -146,7 +138,8 @@ public class RegistersPage extends Composite {
 		refresh();
 	}
 
-	private void refresh() {
+	public void refresh() {
+		super.refresh();
 		scheduleService.getSchedule(new CallbackAdapter<Schedule>() {
 			@Override
 			public void onSuccess(final Schedule schedule) {
@@ -155,7 +148,7 @@ public class RegistersPage extends Composite {
 						new CallbackAdapter<History>() {
 							@Override
 							public void onSuccess(History log) {
-								for (AutoRelayControl c : objects.values()) {
+								for (AutoRelayControl c : objects) {
 									RegisterSchedule registerSchedule = schedule.map
 											.get(c.reg.name);
 									ArrayList<HistoryItem> logItems = log == null ? null
@@ -178,23 +171,6 @@ public class RegistersPage extends Composite {
 						});
 			}
 		});
-		for (final Integer addr : objects.keySet()) {
-			final Set<AutoRelayControl> set = objects.get(addr);
-			for (ControlComposite c : set)
-				c.refresh(null);
-
-			controllersService.getRegs(addr, new AsyncCallback<AllRegs>() {
-				@Override
-				public void onSuccess(AllRegs result) {
-					for (AutoRelayControl c : set)
-						c.refresh(result);
-				}
-
-				@Override
-				public void onFailure(Throwable caught) {
-				}
-			});
-		}
 	}
 
 	@SuppressWarnings("deprecation")

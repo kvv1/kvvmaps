@@ -9,15 +9,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.RegType;
 import kvv.controllers.register.RegisterUI;
-import kvv.controllers.utils.ADU;
 import kvv.controllers.utils.CRC16;
-import kvv.controllers.utils.RTU;
+
+import com.google.gson.Gson;
 
 public class Controller implements IController { // 9164642959 7378866
 
@@ -89,7 +87,7 @@ public class Controller implements IController { // 9164642959 7378866
 			map.put(reg, val);
 		}
 
-		return new AllRegs(ui, map);
+		return new AllRegs(addr, ui, map);
 	}
 
 	@Override
@@ -149,81 +147,19 @@ public class Controller implements IController { // 9164642959 7378866
 	public void close() {
 	}
 
-	// public static RTU send(String url, int addr, RTU rtu)
-	// throws IOException {
-	//
-	// ADU
-	//
-	// }
-
-	private Set<Integer> failedAddrs = new HashSet<Integer>();
-
 	public byte[] send(int addr, byte[] bytes) throws IOException {
-
-		ADU adu = new ADU(addr, new RTU(bytes));
-
-		byte[] packetReceived;
-
-		try {
-			boolean failed = failedAddrs.contains(addr);
-			packetReceived = sendBus(url, adu.toBytes(), addr != 0, failed ? 1
-					: null);
-		} catch (IOException e) {
-			failedAddrs.add(addr);
-			throw e;
-		}
-
-		failedAddrs.remove(addr);
-		
-		if (addr == 0)
-			return null;
-		ADU resp = ADU.fromBytes(packetReceived);
-		if (resp != null && resp.addr == addr)
-			return resp.rtu.toBytes();
-
-		failedAddrs.add(addr);
-
-		// error
-		String msg = "wrong response from addr: " + addr;
-		msg += ", cmd: ";
-		for (byte b : bytes)
-			msg += Integer.toHexString((int) b & 0xFF) + " ";
-		msg += ", response: ";
-		for (byte b : packetReceived)
-			msg += Integer.toHexString((int) b & 0xFF) + " ";
-		throw new IOException(msg);
-	}
-
-	public static byte[] sendBus(String url, byte[] bytes, boolean response,
-			Integer attempts) throws IOException {
-		String url1 = url + "?response=" + response;
-		if (attempts != null)
-			url1 += "&attempts=" + attempts;
-		url1 += "&body=";
-		String sep = "";
-		for (byte b : bytes) {
-			url1 += sep + ((int) b & 255);
-			sep = ",";
-		}
-
+		String url1 = url + "/RTU?addr=" + addr + "&body=" + new Gson().toJson(bytes);
 		HttpURLConnection conn = null;
 		conn = (HttpURLConnection) new URL(url1).openConnection();
 		conn.setRequestMethod("GET");
 		conn.connect();
 
-		if (!response)
+		if (addr == 0)
 			return null;
 
 		String resp = new BufferedReader(new InputStreamReader(
 				conn.getInputStream())).readLine();
-
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		for (String s : resp.split(",")) {
-			int a = Integer.parseInt(s.trim());
-			outputStream.write(a);
-		}
-		return outputStream.toByteArray();
-
+		
+		return new Gson().fromJson(resp, byte[].class);
 	}
-
 }

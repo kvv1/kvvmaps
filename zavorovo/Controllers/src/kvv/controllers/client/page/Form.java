@@ -2,6 +2,7 @@ package kvv.controllers.client.page;
 
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
+import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.control.simple.GetRegControl;
 import kvv.controllers.client.control.simple.GetSetRegControl;
@@ -21,14 +22,16 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 class Form extends ControlComposite {
 
 	private final VerticalPanel panel = new VerticalPanel();
-	
+
 	private final ControllersServiceAsync controllersService = GWT
-	.create(ControllersService.class);
+			.create(ControllersService.class);
 
 	private final String name;
-	
+
+	private final int addr;
+
 	public Form(int addr, String name) {
-		super(addr);
+		this.addr = addr;
 		this.name = name;
 		initWidget(panel);
 		refreshUI();
@@ -36,12 +39,12 @@ class Form extends ControlComposite {
 
 	public void refreshUI(AllRegs result) {
 		removeChildren();
-		panel.clear(); 
+		panel.clear();
 		panel.add(new Label(name + "(" + addr + ")"));
 
-		if(result == null)
+		if (result == null)
 			return;
-		
+
 		Grid grid = new Grid(result.ui.size(), 2);
 		panel.add(grid);
 
@@ -59,22 +62,22 @@ class Form extends ControlComposite {
 		for (RegisterUI reg : result.ui) {
 			switch (reg.type) {
 			case checkbox:
-				SimpleRelayControl cb = new SimpleRelayControl(addr,
-						reg.reg, null);
+				SimpleRelayControl cb = new SimpleRelayControl(addr, reg.reg,
+						null);
 				grid.setWidget(row, 0, new Label(reg.text));
 				grid.setWidget(row, 1, cb);
 				add(cb);
 				break;
 			case textRO: {
-				ControlComposite control;
-				control = new GetRegControl(addr, reg.reg, 1, "");
+				ChildComposite control;
+				control = new GetRegControl(addr, reg.reg, 1, null);
 				grid.setWidget(row, 0, new Label(reg.text));
 				grid.setWidget(row, 1, control);
 				add(control);
 				break;
 			}
 			case textRW: {
-				ControlComposite control;
+				ChildComposite control;
 				control = new GetSetRegControl(addr, reg.reg, false, "");
 				grid.setWidget(row, 0, new Label(reg.text));
 				grid.setWidget(row, 1, control);
@@ -87,7 +90,6 @@ class Form extends ControlComposite {
 			row++;
 		}
 
-		
 		refresh(result);
 	}
 

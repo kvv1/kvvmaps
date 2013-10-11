@@ -2,7 +2,7 @@ package kvv.controllers.client.control.simple;
 
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
-import kvv.controllers.client.control.ControlComposite;
+import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.register.AllRegs;
 
@@ -12,7 +12,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 
-public class SimpleRelayControl extends ControlComposite {
+public class SimpleRelayControl extends ChildComposite {
 
 	private final CheckBox cb;
 
@@ -35,7 +35,7 @@ public class SimpleRelayControl extends ControlComposite {
 					cb.setValue(!cb.getValue());
 					return;
 				}
-					
+
 				if (!ModePage.check()) {
 					cb.setValue(!((CheckBox) event.getSource()).getValue());
 					return;
@@ -62,10 +62,11 @@ public class SimpleRelayControl extends ControlComposite {
 		initWidget(cb);
 	}
 
+	@Override
 	public void setEnabled(boolean en) {
 		enabled = en;
 	}
-	
+
 	@Override
 	public void refresh(AllRegs result) {
 		if (result == null) {

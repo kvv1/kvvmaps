@@ -35,7 +35,6 @@ public class VMControl extends ControlComposite {
 	private final String name;
 
 	public VMControl(final int addr, final String name) {
-		super(addr);
 		this.name = name;
 
 		Grid panel = new Grid(2, 6);

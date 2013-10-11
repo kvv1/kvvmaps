@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.util.Date;
 
 import kvv.controllers.client.ScheduleService;
-import kvv.controllers.server.history.HistoryFile;
+import kvv.controllers.history.HistoryFile;
+import kvv.controllers.history.shared.History;
 import kvv.controllers.server.history.HistoryLogger;
-import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
-import kvv.controllers.shared.history.History;
 import kvv.controllers.utils.Constants;
+import kvv.controllers.utils.Utils;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -73,7 +73,8 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public String loadHistoryFile() {
 		try {
-			return Utils.readFile(HistoryLogger.getLogFile(new Date()).getAbsolutePath());
+			return Utils.readFile(HistoryFile.getLogFile(new Date())
+					.getAbsolutePath());
 		} catch (IOException e) {
 			return null;
 		}

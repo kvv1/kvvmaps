@@ -6,13 +6,13 @@ import java.util.Date;
 
 import kvv.controllers.server.Controllers;
 import kvv.controllers.server.ControllersServiceImpl;
-import kvv.controllers.server.utils.Utils;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerDescr.Type;
 import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
 import kvv.controllers.utils.Constants;
+import kvv.controllers.utils.Utils;
 
 public class Scheduler extends Thread {
 

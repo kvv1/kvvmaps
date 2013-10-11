@@ -1,4 +1,4 @@
-package kvv.controllers.server.utils;
+package kvv.controllers.utils;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -14,7 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class Utils {
-	public static <T> T jsonRead(String file, Class<T> clazz) throws Exception {
+	public static <T> T jsonRead(String file, Class<T> clazz) throws IOException {
 		Reader reader = null;
 		try {
 			reader = new InputStreamReader(new FileInputStream(file),

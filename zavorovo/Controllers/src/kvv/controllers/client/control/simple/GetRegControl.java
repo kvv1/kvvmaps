@@ -1,13 +1,13 @@
 package kvv.controllers.client.control.simple;
 
-import kvv.controllers.client.control.ControlComposite;
+import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.register.AllRegs;
 
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 
-public class GetRegControl extends ControlComposite {
+public class GetRegControl extends ChildComposite {
 
 	private final HorizontalPanel panel = new HorizontalPanel();
 
@@ -19,17 +19,21 @@ public class GetRegControl extends ControlComposite {
 	public GetRegControl(final int addr, final int reg, final float mul,
 			String text) {
 		super(addr);
-		this.label = new Label(text);
-		this.edit = new Label();
 		this.reg = reg;
 		this.mul = mul;
 
-		edit.setWidth("40px");
-		edit.setText("???");
-
 		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
-		panel.add(label);
+		if (text != null) {
+			this.label = new Label(text);
+			panel.add(label);
+		} else {
+			label = null;
+		}
+
+		this.edit = new Label();
+		edit.setWidth("40px");
+		edit.setText("???");
 		panel.add(edit);
 
 		initWidget(panel);

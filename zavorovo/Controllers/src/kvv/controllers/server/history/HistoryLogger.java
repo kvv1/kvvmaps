@@ -1,21 +1,16 @@
 package kvv.controllers.server.history;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import kvv.controllers.history.HistoryFile;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.server.ControllersServiceImpl;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerDescr.Type;
 import kvv.controllers.shared.Register;
-import kvv.controllers.utils.Constants;
 
 public class HistoryLogger extends Thread {
 	public static volatile HistoryLogger instance;
@@ -61,40 +56,13 @@ public class HistoryLogger extends Thread {
 		}
 
 		synchronized (getClass()) {
-			Date date = new Date();
-			PrintStream ps = getLogStream(date);
-			ps.println(df.format(date));
-			ps.close();
+			HistoryFile.logValue(new Date(), null, null);
 			instance = null;
 		}
 	}
 
-	public static File getLogFile(Date date) {
-		DateFormat df = new SimpleDateFormat("yyyy_MM_dd");
-		return new File(Constants.ROOT + "/history/" + df.format(date));
-	}
-
-	private static PrintStream getLogStream(Date date) {
-		try {
-			new File(Constants.ROOT + "/history").mkdir();
-			PrintStream ps = new PrintStream(new FileOutputStream(
-					getLogFile(date), true), true, "Windows-1251");
-			return ps;
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
-	private static DateFormat df = new SimpleDateFormat("HH:mm:ss");
 	private static Map<String, Integer> lastValues = new HashMap<String, Integer>();
 	private static Date lastFileDate;
-
-	public static void main(String[] args) {
-		Date date = new Date();
-
-		System.out.println(df.format(date));
-
-	}
 
 	@SuppressWarnings("deprecation")
 	private void logValue(String register, Integer value) {
@@ -109,36 +77,25 @@ public class HistoryLogger extends Thread {
 		// date = new Date(date.getYear(), date.getMonth(), date.getDate());
 
 		if (!fileDate.equals(lastFileDate)) {
-			PrintStream ps = getLogStream(fileDate);
-			logValues(ps, fileDate, lastValues);
-			ps.close();
+			logValues(fileDate, lastValues);
 			lastFileDate = fileDate;
 		}
 
 		Integer lastValue = lastValues.get(register);
 		if (value == null && lastValue != null || value != null
-				&& !value.equals(lastValue)) {
-			PrintStream ps = getLogStream(fileDate);
-			logValue(ps, date, register, value);
-			ps.close();
-		}
+				&& !value.equals(lastValue))
+			logValue(date, register, value);
 
 	}
 
-	private void logValue(PrintStream ps, Date date, String register,
-			Integer value) {
-		if (value == null)
-			ps.println(df.format(date) + " " + register);
-		else {
-			ps.println(df.format(date) + " " + register + "=" + value);
-		}
+	private void logValue(Date date, String register, Integer value) {
+		HistoryFile.logValue(date, register, value);
 		lastValues.put(register, value);
 	}
 
-	private void logValues(PrintStream ps, Date date,
-			Map<String, Integer> values) {
+	private void logValues(Date date, Map<String, Integer> values) {
 		for (String reg : values.keySet())
-			logValue(ps, date, reg, values.get(reg));
+			logValue(date, reg, values.get(reg));
 	}
 
 	public static synchronized void log(int addr, int reg, Integer val) {
