@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import kvv.kvvplayer.R.id;
 import android.app.Activity;
 import android.content.Context;
 import android.media.MediaPlayer;
@@ -16,6 +17,12 @@ import android.os.Handler;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
@@ -23,7 +30,7 @@ import android.widget.TextView;
 
 public class KvvPlayerActivity extends Activity {
 
-	private final static String root = "/sdcard/kvvplayer/";
+	private final static String root = "/sdcard/external_sd/books/";
 
 	private MediaPlayer mp = new MediaPlayer();
 
@@ -43,7 +50,7 @@ public class KvvPlayerActivity extends Activity {
 	private TextView label;
 	private ListView folders1;
 	private ProgressBar progress;
-	private MyProgressBar trackProgress;
+	private ProgressBar trackProgress;
 	private TelephonyManager telephonyManager;
 
 	private Handler handler = new Handler();
@@ -71,7 +78,7 @@ public class KvvPlayerActivity extends Activity {
 		label = (TextView) findViewById(R.id.label);
 		folders1 = (ListView) findViewById(R.id.folders);
 		progress = (ProgressBar) findViewById(R.id.ProgressBar);
-		trackProgress = (MyProgressBar) findViewById(R.id.trackProgress);
+		trackProgress = (ProgressBar) findViewById(R.id.TrackProgress);
 
 		addFiles(new File(root));
 		Collections.sort(folders, new Comparator<Folder>() {
@@ -99,7 +106,7 @@ public class KvvPlayerActivity extends Activity {
 
 		folders1.setAdapter(adapter);
 
-		folders1.setFocusable(false);
+		// folders1.setFocusable(false);
 		// folders1.setFocusableInTouchMode(false);
 		// folders1.setSelected(true);
 
@@ -107,6 +114,114 @@ public class KvvPlayerActivity extends Activity {
 			@Override
 			public void onCompletion(MediaPlayer mp) {
 				next(true);
+			}
+		});
+
+		final Runnable seekForwardRunnable = new Runnable() {
+			@Override
+			public void run() {
+				seekForward();
+				handler.postDelayed(this, 200);
+			}
+		};
+
+		final Runnable seekBackRunnable = new Runnable() {
+			@Override
+			public void run() {
+				seekBack();
+				handler.postDelayed(this, 200);
+			}
+		};
+
+		Button seekForward = (Button) findViewById(id.seekforwark);
+		// seekForward.setOnClickListener(new OnClickListener() {
+		//
+		// @Override
+		// public void onClick(View arg0) {
+		// // TODO Auto-generated method stub
+		//
+		// }
+		// })
+		seekForward.setOnLongClickListener(new OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				handler.postDelayed(seekForwardRunnable, 200);
+				return true;
+			}
+		});
+
+		seekForward.setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					handler.removeCallbacks(seekForwardRunnable);
+					handler.removeCallbacks(seekBackRunnable);
+				}
+				return false;
+			}
+		});
+
+		Button seekBack = (Button) findViewById(id.seekback);
+		seekBack.setOnLongClickListener(new OnLongClickListener() {
+
+			@Override
+			public boolean onLongClick(View v) {
+				handler.postDelayed(seekBackRunnable, 200);
+				return true;
+			}
+		});
+
+		seekBack.setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					handler.removeCallbacks(seekForwardRunnable);
+					handler.removeCallbacks(seekBackRunnable);
+				}
+				return false;
+			}
+		});
+
+		Button prevDir = (Button) findViewById(id.prevdir);
+		prevDir.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				prevFolder();
+			}
+		});
+
+		Button nextDir = (Button) findViewById(id.nextdir);
+		nextDir.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				nextFolder();
+			}
+		});
+
+		Button prev = (Button) findViewById(id.prev);
+		prev.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				prev();
+			}
+		});
+
+		Button next = (Button) findViewById(id.next);
+		next.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				next(false);
+			}
+		});
+
+		Button pause = (Button) findViewById(id.pause);
+		pause.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (mp.isPlaying())
+					mp.pause();
+				else
+					mp.start();
 			}
 		});
 
@@ -128,8 +243,8 @@ public class KvvPlayerActivity extends Activity {
 
 	private void setProgress() {
 		progress.setProgress(mp.getCurrentPosition() * 100 / mp.getDuration());
-		trackProgress.setMax(folders.get(currentFolder).files.size());
-		trackProgress.setCurrent(currentTrack);
+		trackProgress.setProgress(currentTrack * 100
+				/ folders.get(currentFolder).files.size());
 	}
 
 	private Runnable timerHandler = new Runnable() {
@@ -179,11 +294,13 @@ public class KvvPlayerActivity extends Activity {
 		}
 	}
 
+	int STEP = 10000;
+
 	private void seekBack() {
 		if (mp.isPlaying()) {
 			int cur = mp.getCurrentPosition();
 
-			if (cur < 2000 && (currentFolder != 0 || currentTrack != 0)) {
+			if (cur < STEP && (currentFolder != 0 || currentTrack != 0)) {
 				try {
 					boolean playing = mp.isPlaying();
 					mp.stop();
@@ -199,11 +316,11 @@ public class KvvPlayerActivity extends Activity {
 					if (playing)
 						mp.start();
 					setLabels();
-					cur = mp.getDuration() - (2000 - cur);
+					cur = mp.getDuration() - (STEP - cur);
 				} catch (Exception e) {
 				}
 			}
-			mp.seekTo(Math.max(0, cur - 2000));
+			mp.seekTo(Math.max(0, cur - STEP));
 		}
 		setProgress();
 	}
@@ -212,8 +329,8 @@ public class KvvPlayerActivity extends Activity {
 		if (mp.isPlaying()) {
 			int dur = mp.getDuration();
 			int cur = mp.getCurrentPosition();
-			if (cur + 2000 < dur)
-				mp.seekTo(cur + 2000);
+			if (cur + STEP < dur)
+				mp.seekTo(cur + STEP);
 		}
 		setProgress();
 	}
@@ -236,7 +353,7 @@ public class KvvPlayerActivity extends Activity {
 		prevSel = currentFolder;
 
 		HashMap<String, Object> sel = (HashMap<String, Object>) folders1
-				.getSelectedItem();
+				.getItemAtPosition(currentFolder);
 		sel.put("icon", R.drawable.active);
 
 		folders1.invalidateViews();
