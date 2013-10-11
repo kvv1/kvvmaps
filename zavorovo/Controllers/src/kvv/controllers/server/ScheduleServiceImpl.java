@@ -6,7 +6,6 @@ import java.util.Date;
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.history.HistoryFile;
 import kvv.controllers.history.shared.History;
-import kvv.controllers.server.history.HistoryLogger;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
 import kvv.controllers.utils.Constants;
