@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import kvv.controllers.register.RegisterDescr;
 import kvv.evlang.ParseException;
 import kvv.evlang.impl.Event.EventType;
 

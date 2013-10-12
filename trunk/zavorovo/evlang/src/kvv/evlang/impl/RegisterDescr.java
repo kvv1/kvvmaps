@@ -1,4 +1,4 @@
-package kvv.controllers.register;
+package kvv.evlang.impl;
 
 public class RegisterDescr {
 	public int reg;

@@ -2,7 +2,6 @@ package kvv.evlang.impl;
 
 import java.util.List;
 
-import kvv.controllers.register.RegisterDescr;
 import kvv.evlang.ParseException;
 
 public class Expr {

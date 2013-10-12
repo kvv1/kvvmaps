@@ -14,7 +14,6 @@ import java.util.Set;
 
 import kvv.controllers.register.RegType;
 import kvv.controllers.register.Register;
-import kvv.controllers.register.RegisterDescr;
 import kvv.controllers.register.RegisterUI;
 import kvv.evlang.ParseException;
 import kvv.evlang.impl.Event.EventType;
