@@ -6,8 +6,6 @@ import java.util.Date;
 
 import kvv.controllers.server.Controllers;
 import kvv.controllers.server.ControllersServiceImpl;
-import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.ControllerDescr.Type;
 import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
@@ -67,7 +65,6 @@ public class Scheduler extends Thread {
 						}
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
 				}
 
 				regIndex++;
@@ -76,10 +73,10 @@ public class Scheduler extends Thread {
 	}
 
 	private static void exec(Register register, int value) throws Exception {
-		ControllerDescr controllerDescr = Controllers.getInstance().get(
-				register.addr);
-		if (controllerDescr.type == Type.MU110_8)
-			value = value == 0 ? 0 : 1000;
+		// ControllerDescr controllerDescr = Controllers.getInstance().get(
+		// register.addr);
+		// if (controllerDescr.type == Type.MU110_8)
+		// value = value == 0 ? 0 : 1000;
 
 		ControllersServiceImpl.controller.setReg(register.addr,
 				register.register, value);

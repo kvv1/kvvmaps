@@ -38,10 +38,11 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws Exception {
-		ControllerDescr controllerDescr = Controllers.getInstance().get(addr);
-		if (controllerDescr.type == Type.MU110_8)
-			val = val == 0 ? 0 : 1000;
-		controller.setReg(addr, reg, val);
+		try {
+			controller.setReg(addr, reg, val);
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
 	}
 
 	@Override
@@ -74,16 +75,21 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public AllRegs getRegs(int addr) throws Exception {
-		ControllerDescr controllerDescr = Controllers.getInstance().get(addr);
-		if (controllerDescr.type == Type.MU110_8) {
-			HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
-			int[] vals = controller.getRegs(addr, 0, 8);
-			for (int i = 0; i < 8; i++)
-				map.put(i, vals[i]);
-			return new AllRegs(addr, new ArrayList<RegisterUI>(), map);
-		} else {
-			AllRegs allRegs = controller.getAllRegs(addr);
-			return allRegs;
+		try {
+			ControllerDescr controllerDescr = Controllers.getInstance().get(
+					addr);
+			if (controllerDescr.type == Type.MU110_8) {
+				HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
+				int[] vals = controller.getRegs(addr, 0, 8);
+				for (int i = 0; i < 8; i++)
+					map.put(i, vals[i]);
+				return new AllRegs(addr, new ArrayList<RegisterUI>(), map);
+			} else {
+				AllRegs allRegs = controller.getAllRegs(addr);
+				return allRegs;
+			}
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
 		}
 	}
 

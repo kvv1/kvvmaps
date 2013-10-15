@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -30,12 +31,7 @@ public class Controller implements IController { // 9164642959 7378866
 		byte[] req = new byte[] { (byte) Command.CMD_MODBUS_SETREGS,
 				(byte) (reg >> 8), (byte) reg, 0, 1, 2, (byte) (val >> 8),
 				(byte) val };
-		byte[] resp = send(addr, req);
-
-		if (addr == 0)
-			return;
-
-		checkErr(Command.CMD_MODBUS_SETREGS, resp);
+		send(addr, req);
 	}
 
 	@Override
@@ -47,11 +43,10 @@ public class Controller implements IController { // 9164642959 7378866
 	}
 
 	@Override
-	public int[] getRegs(int addr, int reg, int n) throws Exception {
+	public int[] getRegs(int addr, int reg, int n) throws IOException {
 		byte[] req = new byte[] { (byte) Command.CMD_MODBUS_GETREGS,
 				(byte) (reg >> 8), (byte) reg, 0, (byte) n };
 		byte[] resp = send(addr, req);
-		checkErr(Command.CMD_MODBUS_GETREGS, resp);
 
 		int[] res = new int[n];
 		for (int i = 0; i < resp[1] / 2; i++) {
@@ -63,7 +58,6 @@ public class Controller implements IController { // 9164642959 7378866
 	@Override
 	public AllRegs getAllRegs(int addr) throws IOException {
 		byte[] resp = send(addr, new byte[] { (byte) Command.CMD_GETALLREGS });
-		checkErr(Command.CMD_GETALLREGS, resp);
 
 		ArrayList<RegisterUI> ui = new ArrayList<RegisterUI>();
 
@@ -109,8 +103,7 @@ public class Controller implements IController { // 9164642959 7378866
 		req.write((byte) (crc >> 8));
 		req.write((byte) crc);
 
-		byte[] resp = send(addr, req.toByteArray());
-		checkErr(Command.CMD_UPLOAD_END, resp);
+		send(addr, req.toByteArray());
 	}
 
 	private void upload(int addr, int start, byte[] data) throws IOException {
@@ -119,47 +112,72 @@ public class Controller implements IController { // 9164642959 7378866
 		req.write((byte) (start >> 8));
 		req.write((byte) start);
 		req.write(data);
-		byte[] resp = send(addr, req.toByteArray());
-		checkErr(Command.CMD_UPLOAD, resp);
+		send(addr, req.toByteArray());
 	}
 
 	@Override
 	public void vmInit(int addr) throws IOException {
 		ByteArrayOutputStream req = new ByteArrayOutputStream();
 		req.write((byte) Command.CMD_VMINIT);
-		byte[] resp = send(addr, req.toByteArray());
-		checkErr(Command.CMD_VMINIT, resp);
-	}
-	
-	private static void checkErr(int cmd, byte[] resp) throws IOException {
-		if (resp[0] == cmd)
-			return;
-		ErrorCode code = ErrorCode.values()[resp[1]];
-		switch (code) {
-		case ERR_OK:
-			return;
-		default:
-			throw new IOException(code.name());
-		}
+		send(addr, req.toByteArray());
 	}
 
 	@Override
 	public void close() {
 	}
 
+	public static class NoResponseException extends IOException {
+		private static final long serialVersionUID = 1L;
+
+		public NoResponseException(String string) {
+			super(string);
+		}
+	}
+
 	public byte[] send(int addr, byte[] bytes) throws IOException {
-		String url1 = url + "/RTU?addr=" + addr + "&body=" + new Gson().toJson(bytes);
+		String url1 = url + "/PDU?addr=" + addr + "&body="
+				+ new Gson().toJson(bytes);
 		HttpURLConnection conn = null;
-		conn = (HttpURLConnection) new URL(url1).openConnection();
-		conn.setRequestMethod("GET");
-		conn.connect();
 
-		if (addr == 0)
-			return null;
+		Reader r = null;
+		try {
+			conn = (HttpURLConnection) new URL(url1).openConnection();
+			conn.setRequestMethod("GET");
+			conn.connect();
+			byte[] res = null;
+			r = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			if (addr != 0) {
+				res = new Gson().fromJson(r, byte[].class);
+				if (res == null)
+					throw new NoResponseException("no response");
+				if (res.length == 0)
+					throw new IOException("response PDU len = 0");
+				if (res[0] != bytes[0]) {
+					if (res[0] != (bytes[0] | 0x80) || res.length < 2)
+						throw new IOException("response PDU format error");
+					throw new IOException("response PDU error "
+							+ ErrorCode.values()[res[1]].name());
+				}
+			}
+			return res;
+		} catch (NoResponseException e) {
+			throw e;
+		} catch (IOException e) {
+			MyLogger.log(e.getMessage());
+			throw e;
+		} catch (Exception e) {
+			MyLogger.log(e.getMessage());
+			throw new IOException(e);
+		} finally {
+			if (conn != null)
+				conn.disconnect();
+			if (r != null)
+				r.close();
+		}
+	}
 
-		String resp = new BufferedReader(new InputStreamReader(
-				conn.getInputStream())).readLine();
-		
-		return new Gson().fromJson(resp, byte[].class);
+	public static void main(String[] args) {
+		String s = new Gson().fromJson("", String.class);
+		System.out.println(s);
 	}
 }

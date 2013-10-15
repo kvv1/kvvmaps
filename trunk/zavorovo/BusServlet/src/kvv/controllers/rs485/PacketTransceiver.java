@@ -75,17 +75,8 @@ public class PacketTransceiver {
 		serPort.setRTS(true);
 	}
 
-	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse,
-			int attempts) throws IOException {
-
-		for (int i = 0; i < attempts - 1; i++) {
-			try {
-				return _sendPacket(data, waitResponse);
-			} catch (IOException e) {
-				BusLogger.getLogger().log(Level.WARNING,
-						"attempt " + (i + 1) + ": " + e.getMessage());
-			}
-		}
+	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse)
+			throws IOException {
 		return _sendPacket(data, waitResponse);
 	}
 
@@ -156,6 +147,5 @@ public class PacketTransceiver {
 	public void close() {
 		serPort.close();
 	}
-	
-	
+
 }

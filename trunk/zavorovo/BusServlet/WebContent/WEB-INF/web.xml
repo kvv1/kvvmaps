@@ -9,12 +9,12 @@
     <url-pattern>/test</url-pattern>
   </servlet-mapping>
   <servlet>
-    <servlet-name>RTUServlet</servlet-name>
-    <servlet-class>kvv.controllers.controller.RTUServlet</servlet-class>
+    <servlet-name>PDUServlet</servlet-name>
+    <servlet-class>kvv.controllers.controller.PDUServlet</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>RTUServlet</servlet-name>
-    <url-pattern>/RTU</url-pattern>
+    <servlet-name>PDUServlet</servlet-name>
+    <url-pattern>/PDU</url-pattern>
   </servlet-mapping>
   <servlet>
     <servlet-name>BusServlet</servlet-name>

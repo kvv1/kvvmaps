@@ -54,7 +54,7 @@ public class HistoryFile {
 					try {
 						String reg = reg_value[0];
 
-						Integer value = reg_value.length > 0 ? Integer
+						Integer value = reg_value.length > 1 ? Integer
 								.parseInt(reg_value[1]) : null;
 
 						ArrayList<HistoryItem> logItems = history.items
