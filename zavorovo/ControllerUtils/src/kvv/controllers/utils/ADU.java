@@ -4,15 +4,15 @@ import java.util.Arrays;
 
 public class ADU {
 	public final int addr;
-	public final RTU rtu;
+	public final PDU pdu;
 
-	public ADU(int addr, RTU rtu) {
+	public ADU(int addr, PDU pdu) {
 		this.addr = addr;
-		this.rtu = rtu;
+		this.pdu = pdu;
 	}
 
 	public byte[] toBytes() {
-		byte[] rtuBytes = rtu.toBytes();
+		byte[] rtuBytes = pdu.toBytes();
 		byte[] res = new byte[rtuBytes.length + 3];
 		res[0] = (byte) addr;
 		System.arraycopy(rtuBytes, 0, res, 1, rtuBytes.length);
@@ -27,7 +27,7 @@ public class ADU {
 		if ((data[data.length - 2] & 0xFF) != (sum & 0xFF)
 				|| (data[data.length - 1] & 0xFF) != ((sum >> 8) & 0xFF))
 			return null;
-		ADU res = new ADU(data[0], new RTU(Arrays.copyOfRange(data, 1,
+		ADU res = new ADU(data[0], new PDU(Arrays.copyOfRange(data, 1,
 				data.length - 2)));
 		return res;
 	}

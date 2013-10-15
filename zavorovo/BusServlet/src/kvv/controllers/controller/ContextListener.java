@@ -8,11 +8,12 @@ import kvv.controllers.rs485.PacketTransceiver;
 public class ContextListener implements ServletContextListener {
 
 	public void contextInitialized(ServletContextEvent event) {
+		BusLogger.log("STARTED");
 	}
 
 	public void contextDestroyed(ServletContextEvent event) {
 		PacketTransceiver.closeInstance();
-		BusLogger.stopLogger();
+		BusLogger.log("STOPPED");
 	}
 
 }

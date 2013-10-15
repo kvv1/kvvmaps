@@ -36,6 +36,7 @@ public class LogPage extends Composite {
 	}
 
 	private void update() {
+		text.setText("loading...");
 		logService.getLog(new CallbackAdapter<String>() {
 			@Override
 			public void onSuccess(String result) {

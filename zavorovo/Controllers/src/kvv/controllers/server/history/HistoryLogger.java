@@ -30,6 +30,9 @@ public class HistoryLogger extends Thread {
 
 	@Override
 	public void run() {
+		synchronized (getClass()) {
+			HistoryFile.logValue(new Date(), null, null);
+		}
 		while (!stopped) {
 			try {
 				ControllerDescr[] controllers = Controllers.getInstance()
@@ -46,7 +49,6 @@ public class HistoryLogger extends Thread {
 							ControllersServiceImpl.controller
 									.getAllRegs(c.addr);
 					} catch (Exception e) {
-						e.printStackTrace();
 					}
 				}
 

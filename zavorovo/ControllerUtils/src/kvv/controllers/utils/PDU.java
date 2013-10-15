@@ -1,9 +1,9 @@
 package kvv.controllers.utils;
 
-public class RTU {
+public class PDU {
 	public byte[] data;
 
-	public RTU(byte[] data) {
+	public PDU(byte[] data) {
 		this.data = data;
 	}
 

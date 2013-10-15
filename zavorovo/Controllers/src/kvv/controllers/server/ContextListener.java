@@ -4,9 +4,9 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import kvv.controllers.controller.Controller;
+import kvv.controllers.controller.MyLogger;
 import kvv.controllers.server.history.HistoryLogger;
 import kvv.controllers.server.schedule.Scheduler;
-import kvv.controllers.server.utils.MyLogger;
 import kvv.controllers.utils.Constants;
 import kvv.controllers.utils.Utils;
 
@@ -38,8 +38,6 @@ public class ContextListener implements ServletContextListener {
 			Scheduler.instance = null;
 		}
 		HistoryLogger.stopLogger();
-
-		MyLogger.stopLogger();
 
 		System.out.println("The Simple Web App. Has Been Removed");
 		// this.context = null;

@@ -113,10 +113,10 @@ public abstract class ScheduleCanvas extends Composite {
 			@Override
 			public void onMouseDown(MouseDownEvent event) {
 				int m = x2sec(event.getX()) / 60;
-				
-				if((m < 0 || m >= 24 * 60))
+
+				if ((m < 0 || m >= 24 * 60))
 					return;
-				
+
 				int minute = (m + 5) / 10 * 10;
 				double y0 = getY(minVal) + getRegY();
 				double y1 = getY(maxVal) + getRegY();
@@ -243,7 +243,8 @@ public abstract class ScheduleCanvas extends Composite {
 	private ArrayList<HistoryItem> logItems;
 
 	public void refresh(RegisterSchedule registerSchedule,
-			ArrayList<HistoryItem> logItems, int curSeconds, int historyEndSeconds) {
+			ArrayList<HistoryItem> logItems, int curSeconds,
+			int historyEndSeconds) {
 		this.registerSchedule = registerSchedule;
 		this.logItems = logItems;
 		this.curSeconds = curSeconds;
@@ -324,17 +325,30 @@ public abstract class ScheduleCanvas extends Composite {
 
 	private void drawLogItem(int seconds, HistoryItem logItem,
 			HistoryItem lastValue) {
+		Integer last = lastValue == null ? null : lastValue.value;
+		Integer current = logItem.value;
+
 		int x = sec2x(seconds);
 
-		if (lastValue != null && lastValue.value != null)
-			context.lineTo(x, getY(lastValue.value));
-
-		if (logItem.value != null) {
-			if (lastValue == null || lastValue.value == null)
-				context.moveTo(x, getY(logItem.value));
-			else
-				context.lineTo(x, getY(logItem.value));
+		if(last == null && current != null) {
+			context.moveTo(x, getY(current));
+		} else if(last != null && current != null) {
+			context.lineTo(x, getY(last));
+			context.lineTo(x, getY(current));
+		} else if(last != null && current == null) {
+			context.lineTo(x, getY(last));
 		}
+/*		
+		if (last != null)
+			context.lineTo(x, getY(last));
+
+		if (current != null) {
+			if (last == null)
+				context.moveTo(x, getY(current));
+			else
+				context.lineTo(x, getY(current));
+		}
+*/		
 	}
 
 	private void createBG() {
