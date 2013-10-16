@@ -5,24 +5,33 @@ import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import kvv.controllers.utils.Constants;
 
 public class BusLogger {
-	private static Set<Integer> failedAddrs = new HashSet<Integer>();
+	private static Map<Integer, Set<String>> failedAddrs = new HashMap<Integer, Set<String>>();
 
 	public static synchronized void logSuccess(int addr) {
-		if (failedAddrs.contains(addr))
+		if (failedAddrs.containsKey(addr))
 			log("addr=" + addr + " OK");
 		failedAddrs.remove(addr);
 	}
 
 	public static synchronized void logErr(int addr, String msg) {
-		if (!failedAddrs.contains(addr))
+		Set<String> msgs = failedAddrs.get(addr);
+
+		if (msgs == null || !msgs.contains(msg))
 			log("addr=" + addr + " " + msg);
-		failedAddrs.add(addr);
+
+		if (msgs == null) {
+			msgs = new HashSet<String>();
+			failedAddrs.put(addr, msgs);
+		}
+		msgs.add(msg);
 	}
 
 	private static final DateFormat df = new SimpleDateFormat(

@@ -30,22 +30,22 @@ public class Scheduler extends Thread {
 		int regIndex = 0;
 		while (!stopped) {
 			synchronized (this) {
-				Schedule schedule;
 				try {
-					schedule = Utils.jsonRead(Constants.scheduleFile,
-							Schedule.class);
-				} catch (Exception e1) {
+					String sched = null;
+					Schedule schedule = null;
+					ArrayList<String> regs = null;
 					try {
-						sleep(1000);
-					} catch (InterruptedException e) {
+						sched = Utils.readFile(Constants.scheduleFile);
+						schedule = Utils.fromJson(sched, Schedule.class);
+						regs = new ArrayList<String>(schedule.map.keySet());
+						Collections.sort(regs);
+					} catch (Exception e) {
+						System.err.println("CANNOT READ SCHEDULE FILE: "
+								+ sched);
+						e.printStackTrace();
+						throw e;
 					}
-					break;
-				}
-				ArrayList<String> regs = new ArrayList<String>(
-						schedule.map.keySet());
-				Collections.sort(regs);
 
-				try {
 					if (regIndex >= regs.size()) {
 						regIndex = 0;
 						sleep(1000);
@@ -65,6 +65,10 @@ public class Scheduler extends Thread {
 						}
 					}
 				} catch (Exception e) {
+					try {
+						sleep(1000);
+					} catch (InterruptedException e1) {
+					}
 				}
 
 				regIndex++;

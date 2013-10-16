@@ -1,6 +1,8 @@
 package kvv.controllers.rs485;
 
 import gnu.io.CommPortIdentifier;
+import gnu.io.NoSuchPortException;
+import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
@@ -12,7 +14,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
 
 import kvv.controllers.controller.BusLogger;
 
@@ -21,7 +22,7 @@ public class PacketTransceiver {
 
 	private static final long PACKET_TIMEOUT = 400;
 
-	private static final long BYTE_TIMEOUT = 50;
+	private static final long BYTE_TIMEOUT = 100;
 
 	private CommPortIdentifier pID;
 	private SerialPort serPort;
@@ -60,6 +61,7 @@ public class PacketTransceiver {
 	}
 
 	private void init() throws Exception {
+		
 		if (serPort != null)
 			serPort.close();
 
@@ -75,28 +77,49 @@ public class PacketTransceiver {
 		serPort.setRTS(true);
 	}
 
-	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse)
-			throws IOException {
-		return _sendPacket(data, waitResponse);
+	public static void main(String[] args) throws NoSuchPortException, PortInUseException {
+		CommPortIdentifier pID = CommPortIdentifier.getPortIdentifier("COM2");
+		SerialPort serPort = (SerialPort) pID.open("PortReader", 2000);
+		System.out.println(serPort.getInputBufferSize());
+		
+	}
+	
+	class PacketTimeoutException extends IOException {
+		private static final long serialVersionUID = 1L;
+
+		public PacketTimeoutException() {
+			super("PACKET_TIMEOUT");
+		}
 	}
 
-	private synchronized byte[] _sendPacket(byte[] data, boolean waitResponse)
+	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse)
 			throws IOException {
 		try {
 			return __sendPacket(data, waitResponse);
-		} catch (Exception e) {
+		} catch (PacketTimeoutException e) {
+			throw e;
+		} catch (IOException e) {
 			try {
+				Thread.sleep(500);
 				init();
 			} catch (Exception e1) {
 				throw new IOException(e1);
 			}
-			throw new IOException(e);
+			throw e;
 		}
 	}
 
 	private synchronized byte[] __sendPacket(byte[] data, boolean waitResponse)
-			throws Exception {
+			throws IOException {
+
 		synchronized (inputBuffer) {
+			if (!inputBuffer.isEmpty()) {
+				String msg = "inputBuffer: ";
+				for (byte b : inputBuffer)
+					msg += Integer.toHexString((int) b & 0xFF) + " ";
+				BusLogger.log(msg);
+			}
+
 			inputBuffer.clear();
 		}
 
@@ -108,19 +131,34 @@ public class PacketTransceiver {
 			return null;
 
 		while (true) {
-			long time = System.currentTimeMillis();
-			if (time > sendTime + PACKET_TIMEOUT)
-				throw new IOException("PACKET_TIMEOUT");
+			synchronized (inputBuffer) {
+				if (!inputBuffer.isEmpty())
+					break;
+			}
+			if (System.currentTimeMillis() > sendTime + PACKET_TIMEOUT)
+				throw new PacketTimeoutException();
+			try {
+				Thread.sleep(2);
+			} catch (InterruptedException e) {
+			}
+		}
+
+		while (true) {
 			synchronized (inputBuffer) {
 				if (!inputBuffer.isEmpty()
-						&& time > lastReceiveTime + BYTE_TIMEOUT) {
+						&& System.currentTimeMillis() > lastReceiveTime
+								+ BYTE_TIMEOUT) {
 					byte[] response = new byte[inputBuffer.size()];
 					for (int i = 0; i < inputBuffer.size(); i++)
 						response[i] = inputBuffer.get(i);
+					inputBuffer.clear();
 					return response;
 				}
 			}
-			Thread.sleep(2);
+			try {
+				Thread.sleep(2);
+			} catch (InterruptedException e) {
+			}
 		}
 	}
 
