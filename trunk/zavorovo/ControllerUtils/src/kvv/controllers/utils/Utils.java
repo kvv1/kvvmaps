@@ -14,7 +14,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class Utils {
-	public static <T> T jsonRead(String file, Class<T> clazz) throws IOException {
+	public static <T> T fromJson(String str, Class<T> clazz) {
+		return new Gson().fromJson(str, clazz);
+	}
+
+	public static <T> T jsonRead(String file, Class<T> clazz)
+			throws IOException {
 		Reader reader = null;
 		try {
 			reader = new InputStreamReader(new FileInputStream(file),
@@ -101,4 +106,5 @@ public class Utils {
 			return false;
 		}
 	}
+
 }

@@ -59,33 +59,44 @@ public class PDUServlet extends HttpServlet {
 					wr.close();
 					break;
 				} catch (Exception e) {
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException ee) {
+					}
+
+					handleError(addr, i, body, res, e);
+
 					if (i < attempts - 1)
 						continue;
-					failedAddrs.add(addr);
-					String msg = "cmd: ";
-					for (byte b : body)
-						msg += Integer.toHexString((int) b & 0xFF) + " ";
-					msg += ", response: ";
-					if (res == null)
-						msg += "null";
-					else
-						for (byte b : res)
-							msg += Integer.toHexString((int) b & 0xFF) + " ";
-					BusLogger.logErr(addr, msg + " " + e.getMessage());
 
-					try {
-						PrintStream ps = new PrintStream(new FileOutputStream(
-								"c:/zavorovo/log/l.txt", true), true,
-								"Windows-1251");
-						e.printStackTrace(ps);
-						ps.close();
-					} catch (Exception e1) {
-					}
+					failedAddrs.add(addr);
 
 					return;
 				}
 			}
 			BusLogger.logSuccess(addr);
+		}
+	}
+
+	private void handleError(int addr, int attempt, byte[] body, byte[] res,
+			Exception e) {
+		String msg = attempt + " cmd: ";
+		for (byte b : body)
+			msg += Integer.toHexString((int) b & 0xFF) + " ";
+		msg += ", response: ";
+		if (res == null)
+			msg += "null";
+		else
+			for (byte b : res)
+				msg += Integer.toHexString((int) b & 0xFF) + " ";
+		BusLogger.logErr(addr, msg + " " + e.getMessage());
+
+		try {
+			PrintStream ps = new PrintStream(new FileOutputStream(
+					"c:/zavorovo/log/l.txt", true), true, "Windows-1251");
+			e.printStackTrace(ps);
+			ps.close();
+		} catch (Exception e1) {
 		}
 	}
 

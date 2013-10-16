@@ -2,6 +2,7 @@ package kvv.controllers.client;
 
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.ControllerDescr;
+import kvv.controllers.shared.PageDescr;
 import kvv.controllers.shared.Register;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -36,4 +37,8 @@ public interface ControllersService extends RemoteService {
 	void saveRegisters(String text) throws Exception;
 
 	void saveObjects(String text) throws Exception;
+	
+//	PageDescr[] getPages();
+//	void savePage(PageDescr pageDescr);
+	
 }
