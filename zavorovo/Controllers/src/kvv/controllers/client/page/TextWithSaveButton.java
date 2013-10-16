@@ -26,8 +26,8 @@ public abstract class TextWithSaveButton extends Composite {
 
 	protected abstract void save(String text, AsyncCallback<Void> callback);
 
-	public TextWithSaveButton(String caption, int width, int height) {
-		text.setSize(width + "px", height + "px");
+	public TextWithSaveButton(String caption, String width, String height) {
+		text.setSize(width, height);
 
 		if (caption != null)
 			vertPanel.add(new Label(caption));

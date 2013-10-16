@@ -53,7 +53,7 @@ public class Controllers {
 										(reg.addr << 16) + reg.register, reg);
 							}
 						}
-						c.registers = null;
+						//c.registers = null;
 					}
 					controllers.add(c);
 					nameMap.put(c.name, c);

@@ -10,8 +10,6 @@ import kvv.controllers.shared.ScheduleItem;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.dom.client.ImageElement;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -20,9 +18,7 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 
 public abstract class ScheduleCanvas extends Composite {
@@ -35,8 +31,6 @@ public abstract class ScheduleCanvas extends Composite {
 	private static final int width = tenMinutesWidth * 6 * 24 + 30;
 
 	private Image bgImage;
-
-	private final Button saveButton = new Button("Сохранить");
 
 	public static class Range {
 		int from;
@@ -72,24 +66,7 @@ public abstract class ScheduleCanvas extends Composite {
 
 		createBG();
 
-		HorizontalPanel panel = new HorizontalPanel();
-		panel.add(canvas);
-		panel.add(saveButton);
-		initWidget(panel);
-
-		saveButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				registerSchedule.compact();
-				if (registerSchedule.items.size() == 0)
-					registerSchedule = null;
-				save(reg.name, registerSchedule);
-				setDirty(false);
-				refresh();
-			}
-		});
-
-		setDirty(false);
+		initWidget(canvas);
 
 		canvas.setWidth(width + "px");
 		canvas.setHeight(height + "px");
@@ -193,10 +170,6 @@ public abstract class ScheduleCanvas extends Composite {
 				// }
 			}
 		});
-	}
-
-	private void setDirty(boolean b) {
-		saveButton.setVisible(b);
 	}
 
 	private int x2sec(int x) {
@@ -330,25 +303,20 @@ public abstract class ScheduleCanvas extends Composite {
 
 		int x = sec2x(seconds);
 
-		if(last == null && current != null) {
+		if (last == null && current != null) {
 			context.moveTo(x, getY(current));
-		} else if(last != null && current != null) {
+		} else if (last != null && current != null) {
 			context.lineTo(x, getY(last));
 			context.lineTo(x, getY(current));
-		} else if(last != null && current == null) {
+		} else if (last != null && current == null) {
 			context.lineTo(x, getY(last));
 		}
-/*		
-		if (last != null)
-			context.lineTo(x, getY(last));
-
-		if (current != null) {
-			if (last == null)
-				context.moveTo(x, getY(current));
-			else
-				context.lineTo(x, getY(current));
-		}
-*/		
+		/*
+		 * if (last != null) context.lineTo(x, getY(last));
+		 * 
+		 * if (current != null) { if (last == null) context.moveTo(x,
+		 * getY(current)); else context.lineTo(x, getY(current)); }
+		 */
 	}
 
 	private void createBG() {

@@ -14,28 +14,37 @@ public class ConfigurationPage extends Composite {
 	private HorizontalPanel hpanel = new HorizontalPanel();
 	private VerticalPanel vpanel = new VerticalPanel();
 	private TextWithSaveButton controllers = new TextWithSaveButton(
-			"Контроллеры", 400, 600) {
+			"Контроллеры", "400px", "600px") {
 		@Override
 		protected void save(String text, final AsyncCallback<Void> callback) {
-			controllersService.save(text, callback);
+			controllersService.saveControllersText(text, callback);
 			// Window.Location.reload();
 		}
 	};
 
-	private TextWithSaveButton objects = new TextWithSaveButton("Формы", 400,
-			200) {
-		@Override
-		protected void save(String text, final AsyncCallback<Void> callback) {
-			controllersService.saveObjects(text, callback);
-			// Window.Location.reload();
-		}
-	};
+//	private TextWithSaveButton objects = new TextWithSaveButton("Формы", 400,
+//			150) {
+//		@Override
+//		protected void save(String text, final AsyncCallback<Void> callback) {
+//			controllersService.saveObjects(text, callback);
+//			// Window.Location.reload();
+//		}
+//	};
+//
+//	private TextWithSaveButton registers = new TextWithSaveButton("Регистры",
+//			400, 150) {
+//		@Override
+//		protected void save(String text, final AsyncCallback<Void> callback) {
+//			controllersService.saveRegisters(text, callback);
+//			// Window.Location.reload();
+//		}
+//	};
 
-	private TextWithSaveButton registers = new TextWithSaveButton("Регистры",
-			400, 200) {
+	private TextWithSaveButton pages = new TextWithSaveButton("Страницы", "400px",
+			"600px") {
 		@Override
 		protected void save(String text, final AsyncCallback<Void> callback) {
-			controllersService.saveRegisters(text, callback);
+			controllersService.savePagesText(text, callback);
 			// Window.Location.reload();
 		}
 	};
@@ -45,30 +54,39 @@ public class ConfigurationPage extends Composite {
 
 	public ConfigurationPage() {
 
-		controllersService.load(new CallbackAdapter<String>() {
+		controllersService.loadControllersText(new CallbackAdapter<String>() {
 			@Override
 			public void onSuccess(String result) {
 				controllers.setText(result);
 			}
 		});
 
-		controllersService.loadObjects(new CallbackAdapter<String>() {
-			@Override
-			public void onSuccess(String result) {
-				objects.setText(result);
-			}
-		});
+//		controllersService.loadObjects(new CallbackAdapter<String>() {
+//			@Override
+//			public void onSuccess(String result) {
+//				objects.setText(result);
+//			}
+//		});
+//
+//		controllersService.loadRegisters(new CallbackAdapter<String>() {
+//			@Override
+//			public void onSuccess(String result) {
+//				registers.setText(result);
+//			}
+//		});
 
-		controllersService.loadRegisters(new CallbackAdapter<String>() {
+		controllersService.loadPagesText(new CallbackAdapter<String>() {
 			@Override
 			public void onSuccess(String result) {
-				registers.setText(result);
+				if (result != null)
+					pages.setText(result);
 			}
 		});
 
 		hpanel.add(controllers);
-		vpanel.add(objects);
-		vpanel.add(registers);
+//		vpanel.add(objects);
+//		vpanel.add(registers);
+		vpanel.add(pages);
 		hpanel.add(vpanel);
 
 		initWidget(hpanel);

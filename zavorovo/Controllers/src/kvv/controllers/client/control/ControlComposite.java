@@ -27,11 +27,6 @@ public class ControlComposite extends Composite implements ControlChild {
 		children.clear();
 	}
 
-	// private void refresh(AllRegs result) {
-	// for (ControlChild controlComposite : children)
-	// controlComposite.refresh(result);
-	// }
-
 	public void refresh() {
 		Set<Integer> addrs = new HashSet<Integer>();
 		for (ControlChild controlComposite : children) {
@@ -59,7 +54,7 @@ public class ControlComposite extends Composite implements ControlChild {
 	}
 
 	@Override
-	public final Set<Integer> getAddrs() {
+	public Set<Integer> getAddrs() {
 		Set<Integer> res = new HashSet<Integer>();
 		for (ControlChild child : children)
 			res.addAll(child.getAddrs());

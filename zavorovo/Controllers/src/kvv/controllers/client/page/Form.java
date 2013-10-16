@@ -1,5 +1,7 @@
 package kvv.controllers.client.page;
 
+import java.util.Set;
+
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ChildComposite;
@@ -8,6 +10,7 @@ import kvv.controllers.client.control.simple.GetRegControl;
 import kvv.controllers.client.control.simple.GetSetRegControl;
 import kvv.controllers.client.control.simple.SimpleRelayControl;
 import kvv.controllers.register.AllRegs;
+import kvv.controllers.register.Register;
 import kvv.controllers.register.RegisterUI;
 
 import com.google.gwt.core.client.GWT;
@@ -26,13 +29,14 @@ class Form extends ControlComposite {
 	private final ControllersServiceAsync controllersService = GWT
 			.create(ControllersService.class);
 
-	private final String name;
-
 	private final int addr;
+	private final boolean addRefreshButton;
+	private Label nameLabel;
 
-	public Form(int addr, String name) {
+	public Form(int addr, String name, boolean addRefreshButton) {
 		this.addr = addr;
-		this.name = name;
+		this.addRefreshButton = addRefreshButton;
+		nameLabel = new Label(name + "(" + addr + ")");
 		initWidget(panel);
 		refreshUI();
 	}
@@ -40,7 +44,8 @@ class Form extends ControlComposite {
 	public void refreshUI(AllRegs result) {
 		removeChildren();
 		panel.clear();
-		panel.add(new Label(name + "(" + addr + ")"));
+
+		panel.add(nameLabel);
 
 		if (result == null)
 			return;
@@ -48,15 +53,17 @@ class Form extends ControlComposite {
 		Grid grid = new Grid(result.ui.size(), 2);
 		panel.add(grid);
 
-		Button refresh = new Button("Обновить");
-		panel.add(refresh);
+		if (addRefreshButton) {
+			Button refresh = new Button("Обновить");
+			panel.add(refresh);
 
-		refresh.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				refresh();
-			}
-		});
+			refresh.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					refresh();
+				}
+			});
+		}
 
 		int row = 0;
 		for (RegisterUI reg : result.ui) {
@@ -93,6 +100,18 @@ class Form extends ControlComposite {
 		refresh(result);
 	}
 
+	@Override
+	public void refresh(AllRegs result) {
+
+		super.refresh(result);
+		nameLabel.removeStyleName("stoppedVM");
+		nameLabel.removeStyleName("disabled");
+		if (result == null || result.values.get(Register.REG_VMONOFF) == null)
+			nameLabel.addStyleName("disabled");
+		else if (result.values.get(Register.REG_VMONOFF) == 0)
+			nameLabel.addStyleName("stoppedVM");
+	}
+
 	public void refreshUI() {
 		refreshUI(null);
 
@@ -107,6 +126,13 @@ class Form extends ControlComposite {
 			public void onFailure(Throwable caught) {
 			}
 		});
+	}
+
+	@Override
+	public Set<Integer> getAddrs() {
+		Set<Integer> addrs = super.getAddrs();
+		addrs.add(addr);
+		return addrs;
 	}
 
 }
