@@ -18,7 +18,7 @@ import kvv.controllers.utils.CRC16;
 
 import com.google.gson.Gson;
 
-public class Controller implements IController { // 9164642959 7378866
+public class Controller implements IController {
 
 	private final String url;
 
@@ -28,7 +28,7 @@ public class Controller implements IController { // 9164642959 7378866
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
-		byte[] req = new byte[] { (byte) Command.CMD_MODBUS_SETREGS,
+		byte[] req = new byte[] { Command.CMD_MODBUS_SETREGS,
 				(byte) (reg >> 8), (byte) reg, 0, 1, 2, (byte) (val >> 8),
 				(byte) val };
 		send(addr, req);
@@ -36,7 +36,7 @@ public class Controller implements IController { // 9164642959 7378866
 
 	@Override
 	public int getReg(int addr, int reg) throws IOException {
-		byte[] req = new byte[] { (byte) Command.CMD_MODBUS_GETREGS,
+		byte[] req = new byte[] { Command.CMD_MODBUS_GETREGS,
 				(byte) (reg >> 8), (byte) reg, 0, 1 };
 		byte[] resp = send(addr, req);
 		return resp[1] * 256 + (resp[2] & 0xFF);
@@ -44,7 +44,7 @@ public class Controller implements IController { // 9164642959 7378866
 
 	@Override
 	public int[] getRegs(int addr, int reg, int n) throws IOException {
-		byte[] req = new byte[] { (byte) Command.CMD_MODBUS_GETREGS,
+		byte[] req = new byte[] { Command.CMD_MODBUS_GETREGS,
 				(byte) (reg >> 8), (byte) reg, 0, (byte) n };
 		byte[] resp = send(addr, req);
 
@@ -57,7 +57,7 @@ public class Controller implements IController { // 9164642959 7378866
 
 	@Override
 	public AllRegs getAllRegs(int addr) throws IOException {
-		byte[] resp = send(addr, new byte[] { (byte) Command.CMD_GETALLREGS });
+		byte[] resp = send(addr, new byte[] { Command.CMD_GETALLREGS });
 
 		ArrayList<RegisterUI> ui = new ArrayList<RegisterUI>();
 
@@ -94,7 +94,7 @@ public class Controller implements IController { // 9164642959 7378866
 		}
 
 		ByteArrayOutputStream req = new ByteArrayOutputStream();
-		req.write((byte) Command.CMD_UPLOAD_END);
+		req.write(Command.CMD_UPLOAD_END);
 
 		req.write((byte) (data.length >> 8));
 		req.write((byte) data.length);
@@ -108,7 +108,7 @@ public class Controller implements IController { // 9164642959 7378866
 
 	private void upload(int addr, int start, byte[] data) throws IOException {
 		ByteArrayOutputStream req = new ByteArrayOutputStream();
-		req.write((byte) Command.CMD_UPLOAD);
+		req.write(Command.CMD_UPLOAD);
 		req.write((byte) (start >> 8));
 		req.write((byte) start);
 		req.write(data);
@@ -118,7 +118,7 @@ public class Controller implements IController { // 9164642959 7378866
 	@Override
 	public void vmInit(int addr) throws IOException {
 		ByteArrayOutputStream req = new ByteArrayOutputStream();
-		req.write((byte) Command.CMD_VMINIT);
+		req.write(Command.CMD_VMINIT);
 		send(addr, req.toByteArray());
 	}
 

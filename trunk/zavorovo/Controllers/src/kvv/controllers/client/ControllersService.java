@@ -3,7 +3,6 @@ package kvv.controllers.client;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.PageDescr;
-import kvv.controllers.shared.Register;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -18,27 +17,20 @@ public interface ControllersService extends RemoteService {
 
 	ControllerDescr[] getControllers() throws Exception;
 
-	String[] getObjects() throws Exception;
-
 	String upload(int addr, String name);
-
-	Register[] getRegisters() throws Exception;
 
 	void vmInit(int addr) throws Exception;
 
-	void save(String text) throws Exception;
+	void saveControllersText(String text) throws Exception;
 
-	String load() throws Exception;
+	String loadControllersText() throws Exception;
 
-	String loadObjects() throws Exception;
+	PageDescr[] getPages() throws Exception;
 
-	String loadRegisters() throws Exception;
+	void savePageScript(String pageName, String script) throws Exception;
 
-	void saveRegisters(String text) throws Exception;
+	String loadPagesText() throws Exception;
 
-	void saveObjects(String text) throws Exception;
-	
-//	PageDescr[] getPages();
-//	void savePage(PageDescr pageDescr);
-	
+	void savePagesText(String text) throws Exception;
+
 }

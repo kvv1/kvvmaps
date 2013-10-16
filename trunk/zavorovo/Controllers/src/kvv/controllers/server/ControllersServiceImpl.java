@@ -1,11 +1,12 @@
 package kvv.controllers.server;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Properties;
 
 import kvv.controllers.client.ControllersService;
@@ -14,7 +15,7 @@ import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.RegisterUI;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerDescr.Type;
-import kvv.controllers.shared.Register;
+import kvv.controllers.shared.PageDescr;
 import kvv.controllers.utils.Constants;
 import kvv.controllers.utils.Utils;
 import kvv.evlang.EG1;
@@ -48,29 +49,6 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public ControllerDescr[] getControllers() throws Exception {
 		return Controllers.getInstance().getControllers();
-	}
-
-	@Override
-	public Register[] getRegisters() throws Exception {
-		try {
-			String[] regNames = Utils.jsonRead(Constants.registersFile,
-					String[].class);
-			List<Register> res = new ArrayList<Register>();
-			for (String name : regNames)
-				res.add(Controllers.getInstance().getRegister(name));
-			return res.toArray(new Register[0]);
-		} catch (IOException e) {
-			throw new Exception(e.getMessage());
-		}
-	}
-
-	@Override
-	public String[] getObjects() throws Exception {
-		try {
-			return Utils.jsonRead(Constants.objectsFile, String[].class);
-		} catch (Exception e) {
-			throw new Exception(e.getMessage());
-		}
 	}
 
 	@Override
@@ -157,7 +135,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public void save(String text) throws Exception {
+	public void saveControllersText(String text) throws Exception {
 		try {
 			Controllers.save(text);
 		} catch (IOException e) {
@@ -166,7 +144,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public String load() throws Exception {
+	public String loadControllersText() throws Exception {
 		try {
 			return Controllers.load();
 		} catch (IOException e) {
@@ -175,36 +153,50 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public String loadObjects() throws Exception {
+	public PageDescr[] getPages() throws Exception {
 		try {
-			return Utils.readFile(Constants.objectsFile);
+			PageDescr[] pages = Utils.jsonRead(Constants.pagesFile,
+					PageDescr[].class);
+			for (PageDescr page : pages) {
+				try {
+					page.script = Utils.readFile(Constants.ROOT + "/scripts/"
+							+ page.name);
+				} catch (Exception e) {
+				}
+			}
+			return pages;
+		} catch (FileNotFoundException e) {
+			return null;
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}
 	}
 
 	@Override
-	public String loadRegisters() throws Exception {
+	public String loadPagesText() throws Exception {
 		try {
-			return Utils.readFile(Constants.registersFile);
+			return Utils.readFile(Constants.pagesFile);
+		} catch (FileNotFoundException e) {
+			return null;
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}
 	}
 
 	@Override
-	public void saveRegisters(String text) throws Exception {
+	public void savePagesText(String text) throws Exception {
 		try {
-			Utils.writeFile(Constants.registersFile, text);
+			Utils.writeFile(Constants.pagesFile, text);
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}
 	}
 
 	@Override
-	public void saveObjects(String text) throws Exception {
+	public void savePageScript(String pageName, String script) throws Exception {
+		new File(Constants.ROOT + "/scripts").mkdir();
 		try {
-			Utils.writeFile(Constants.objectsFile, text);
+			Utils.writeFile(Constants.ROOT + "/scripts/" + pageName, script);
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}

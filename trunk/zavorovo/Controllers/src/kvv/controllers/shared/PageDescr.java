@@ -1,7 +1,11 @@
 package kvv.controllers.shared;
 
-public class PageDescr {
+import java.io.Serializable;
+
+@SuppressWarnings("serial")
+public class PageDescr implements Serializable {
 	public String name;
-	public PageLine[] lines;
+	public String[] controllers;
+	public String[] registers;
 	public String script;
 }

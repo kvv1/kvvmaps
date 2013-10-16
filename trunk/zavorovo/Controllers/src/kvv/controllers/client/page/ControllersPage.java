@@ -10,7 +10,7 @@ import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.control.form.MU110_8Form;
 import kvv.controllers.client.control.form.Type2Form;
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.Register;
+import kvv.controllers.shared.PageDescr;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -29,8 +29,7 @@ public class ControllersPage extends Composite {
 			.create(ControllersService.class);
 
 	public static ControllerDescr[] controllers;
-	public static String[] forms;
-	public static Register[] registers;
+	public static PageDescr[] pages;
 
 	public static void loadData(final AsyncCallback<Void> callback) {
 		controllersService
@@ -39,25 +38,11 @@ public class ControllersPage extends Composite {
 					public void onSuccess(ControllerDescr[] result) {
 						controllers = result;
 						controllersService
-								.getObjects(new CallbackAdapter<String[]>() {
+								.getPages(new AsyncCallback<PageDescr[]>() {
 									@Override
-									public void onSuccess(String[] result) {
-										forms = result;
-										controllersService
-												.getRegisters(new CallbackAdapter<Register[]>() {
-													@Override
-													public void onSuccess(
-															Register[] result) {
-														registers = result;
-														callback.onSuccess(null);
-													}
-
-													@Override
-													public void onFailure(
-															Throwable caught) {
-														callback.onFailure(caught);
-													}
-												});
+									public void onSuccess(PageDescr[] result) {
+										pages = result;
+										callback.onSuccess(null);
 									}
 
 									@Override
