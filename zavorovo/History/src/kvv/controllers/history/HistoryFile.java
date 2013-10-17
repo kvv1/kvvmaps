@@ -82,7 +82,7 @@ public class HistoryFile {
 	private static PrintStream getLogStream(Date date) {
 		try {
 			PrintStream ps = new PrintStream(new FileOutputStream(
-					HistoryFile.getLogFile(date), true), true, "Windows-1251");
+					getLogFile(date), true), true, "Windows-1251");
 			return ps;
 		} catch (Exception e) {
 			return null;

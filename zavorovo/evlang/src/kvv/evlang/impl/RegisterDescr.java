@@ -2,7 +2,6 @@ package kvv.evlang.impl;
 
 public class RegisterDescr {
 	public int reg;
-	public String name;
 	public boolean readonly;
 	public boolean editable;
 	public Short initValue;

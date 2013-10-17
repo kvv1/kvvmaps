@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 
 import kvv.controllers.server.Controllers;
-import kvv.controllers.server.ControllersServiceImpl;
+import kvv.controllers.server.controller.Controller;
 import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
@@ -60,7 +60,8 @@ public class Scheduler extends Thread {
 							int minutes = date.getHours() * 60
 									+ date.getMinutes();
 							int value = registerSchedule.getValue(minutes);
-							exec(reg, value);
+							Controller.getController().setReg(reg.addr,
+									reg.register, value);
 							sleep(1000);
 						}
 					}
@@ -75,15 +76,4 @@ public class Scheduler extends Thread {
 			}
 		}
 	}
-
-	private static void exec(Register register, int value) throws Exception {
-		// ControllerDescr controllerDescr = Controllers.getInstance().get(
-		// register.addr);
-		// if (controllerDescr.type == Type.MU110_8)
-		// value = value == 0 ? 0 : 1000;
-
-		ControllersServiceImpl.controller.setReg(register.addr,
-				register.register, value);
-	}
-
 }

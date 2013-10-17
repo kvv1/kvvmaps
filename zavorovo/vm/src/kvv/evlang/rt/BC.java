@@ -1,4 +1,4 @@
-package kvv.evlang.impl;
+package kvv.evlang.rt;
 
 public enum BC {
 	RET(0, 0), RET_N(0, 1), RETI(-1, 0), RETI_N(-1, 1), LIT(1, 2), //
@@ -13,7 +13,8 @@ public enum BC {
 	CALL(0, 1), RESERVED(0, 0), //
 	MULDIV(-2, 0), //
 	GETLOCAL(1, 1), SETLOCAL(-1, 1), ENTER(0,1), //
-	PRINT(-1, 0);
+	PRINT(-1, 0), 
+	SETEXTREG(-1, 2), GETEXTREG(1, 2);
 
 	public int stackBalance;
 	public int args;

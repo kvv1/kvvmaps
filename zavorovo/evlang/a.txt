@@ -6,6 +6,9 @@ reg y;
 
 eereg ee = 44;
 
+extreg er;
+
+
 onset(x > 20) {
     print x;
 }

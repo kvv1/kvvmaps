@@ -3,20 +3,22 @@ package kvv.evlang.impl;
 import kvv.evlang.ParseException;
 
 public class Timer {
-	public int n;
+	public final int n;
 	public CodeRef handler;
-	public String name;
+	public final String name;
+	private final Context context;
 
-	public Timer(String name, int n) {
+	public Timer(Context context, String name, int n) {
 		this.name = name;
 		this.n = n;
+		this.context = context;
 	}
 
 	public int getMaxStack() throws ParseException {
 		String msg = "timer '" + name + "'";
-		EG.dumpStream.print(msg + " ");
+		context.dumpStream.print(msg + " ");
 		int maxStack = handler.check(0, msg);
-		EG.dumpStream.println("maxStack: " + maxStack);
+		context.dumpStream.println("maxStack: " + maxStack);
 		return maxStack;
 	}
 }
