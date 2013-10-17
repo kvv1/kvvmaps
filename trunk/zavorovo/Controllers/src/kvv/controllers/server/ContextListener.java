@@ -3,27 +3,14 @@ package kvv.controllers.server;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import kvv.controllers.controller.Controller;
-import kvv.controllers.controller.MyLogger;
-import kvv.controllers.server.history.HistoryLogger;
+import kvv.controllers.server.controller.Controller;
 import kvv.controllers.server.schedule.Scheduler;
-import kvv.controllers.utils.Constants;
-import kvv.controllers.utils.Utils;
 
 public class ContextListener implements ServletContextListener {
 
 	public void contextInitialized(ServletContextEvent event) {
-		try {
-			String busURL = Utils.getProp(Constants.propsFile, "busURL");
-			if (busURL == null)
-				busURL = "http://localhost/rs485";
-			ControllersServiceImpl.controller = new ControllerWrapper(
-					new Controller(busURL));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		HistoryLogger.instance = new HistoryLogger();
+		Controller.create();
+		// HistoryLogger.create();
 
 		Scheduler.instance = new Scheduler();
 
@@ -37,7 +24,8 @@ public class ContextListener implements ServletContextListener {
 			Scheduler.instance.stop();
 			Scheduler.instance = null;
 		}
-		HistoryLogger.stopLogger();
+		Controller.close();
+		// HistoryLogger.close();
 
 		System.out.println("The Simple Web App. Has Been Removed");
 		// this.context = null;

@@ -5,16 +5,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Properties;
 
 import kvv.controllers.client.ControllersService;
-import kvv.controllers.controller.IController;
 import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.RegisterUI;
+import kvv.controllers.server.controller.Controller;
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.ControllerDescr.Type;
 import kvv.controllers.shared.PageDescr;
 import kvv.controllers.utils.Constants;
 import kvv.controllers.utils.Utils;
@@ -22,7 +18,7 @@ import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
 import kvv.evlang.Token;
 import kvv.evlang.impl.Context;
-import kvv.evlang.impl.MyReader;
+import kvv.evlang.impl.ExtRegisterDescr;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -30,17 +26,15 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class ControllersServiceImpl extends RemoteServiceServlet implements
 		ControllersService {
 
-	public static IController controller;
-
 	@Override
 	public int getReg(int addr, int reg) throws Exception {
-		return controller.getReg(addr, reg);
+		return Controller.getController().getReg(addr, reg);
 	}
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws Exception {
 		try {
-			controller.setReg(addr, reg, val);
+			Controller.getController().setReg(addr, reg, val);
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}
@@ -54,18 +48,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public AllRegs getRegs(int addr) throws Exception {
 		try {
-			ControllerDescr controllerDescr = Controllers.getInstance().get(
-					addr);
-			if (controllerDescr.type == Type.MU110_8) {
-				HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
-				int[] vals = controller.getRegs(addr, 0, 8);
-				for (int i = 0; i < 8; i++)
-					map.put(i, vals[i]);
-				return new AllRegs(addr, new ArrayList<RegisterUI>(), map);
-			} else {
-				AllRegs allRegs = controller.getAllRegs(addr);
-				return allRegs;
-			}
+			return Controller.getController().getAllRegs(addr);
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}
@@ -76,17 +59,20 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		EG1 parser = null;
 		try {
 			if (fileName == null) {
-				controller.upload(addr, Context.dumpNull());
+				Controller.getController().upload(addr, Context.dumpNull());
 				storeSourceDescr(addr, null);
 			} else {
-				// parser = new EG1(new ELReader(new FileReader(Constants.ROOT
-				// + "/src/" + fileName)));
-				parser = new EG1(new MyReader(Constants.ROOT + "/src/"
-						+ fileName));
+				parser = new EG1(Constants.ROOT + "/src/" + fileName) {
+					@Override
+					protected ExtRegisterDescr getExtRegisterDescr(
+							String extRegName) throws ParseException {
+						throw new ParseException("extregs not allowed");
+					}
+				};
 
 				parser.parse();
 				byte[] bytes = parser.dump();
-				controller.upload(addr, bytes);
+				Controller.getController().upload(addr, bytes);
 
 				storeSourceDescr(addr, fileName);
 			}
@@ -102,7 +88,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public void vmInit(int addr) throws Exception {
 		try {
-			controller.vmInit(addr);
+			Controller.getController().vmInit(addr);
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}

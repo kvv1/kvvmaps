@@ -3,6 +3,8 @@ package kvv.evlang.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,15 +19,29 @@ import kvv.controllers.register.Register;
 import kvv.controllers.register.RegisterUI;
 import kvv.evlang.ParseException;
 import kvv.evlang.impl.Event.EventType;
+import kvv.evlang.rt.BC;
 import kvv.evlang.rt.RTContext;
 import kvv.evlang.rt.VM;
 
-public class Context {
+public abstract class Context {
 	protected Map<String, Short> constants = new HashMap<String, Short>();
 
 	protected Map<String, RegisterDescr> registers = new LinkedHashMap<String, RegisterDescr>();
+	protected Map<String, ExtRegisterDescr> extRegisters = new LinkedHashMap<String, ExtRegisterDescr>();
+
 	protected int nextReg = Register.REG_RAM0;
 	protected int nextEEReg = Register.REG_EEPROM0;
+
+	protected abstract ExtRegisterDescr getExtRegisterDescr(String extRegName)
+			throws ParseException;
+
+	public static PrintStream nullStream = new PrintStream(new OutputStream() {
+		@Override
+		public void write(int b) throws IOException {
+		}
+	});
+
+	public PrintStream dumpStream = nullStream;
 
 	{
 		registers.put("REG_RELAY0", new RegisterDescr(Register.REG_RELAY0));
@@ -124,7 +140,7 @@ public class Context {
 		Func func = funcDefList.get(name);
 		if (func == null) {
 			checkName(name);
-			func = new Func(name, locals, retSize);
+			func = new Func(this, name, locals, retSize);
 			funcDefList.put(func);
 		} else if (func.retSize != retSize) {
 			throw new ParseException(name + " - ?");
@@ -133,25 +149,39 @@ public class Context {
 		return func;
 	}
 
-	protected void newRegister(String regName, String regNum, boolean forceEE,
-			Short initValue) throws ParseException {
+	protected void newExtRegister(String extRegName) throws ParseException {
+		checkName(extRegName);
+		ExtRegisterDescr descr = getExtRegisterDescr(extRegName);
+		if (descr == null)
+			throw new ParseException(extRegName + " - ?");
+		extRegisters.put(extRegName, descr);
+	}
+
+	protected void newRegister(String regName, String regNum)
+			throws ParseException {
 		checkName(regName);
-		RegisterDescr registerDescr;
-		if (regNum == null) {
-			if (forceEE)
-				registerDescr = new RegisterDescr(nextEEReg++, true, true,
-						initValue);
-			else
-				registerDescr = new RegisterDescr(nextReg++, false, false,
-						initValue);
-			if (nextEEReg > Register.REG_EEPROM0 + Register.REG_EEPROM_CNT
-					|| nextReg > Register.REG_RAM0 + Register.REG_RAM_CNT)
-				throw new ParseException("too many registers used");
-		} else {
-			registerDescr = registers.get(regNum);
-			if (registerDescr == null)
-				throw new ParseException(regNum + " - ?");
-		}
+		RegisterDescr registerDescr = registers.get(regNum);
+		if (registerDescr == null)
+			throw new ParseException(regNum + " - ?");
+		registers.put(regName, registerDescr);
+	}
+
+	protected void newRegister(String regName) throws ParseException {
+		checkName(regName);
+		RegisterDescr registerDescr = new RegisterDescr(nextReg++, false,
+				false, null);
+		if (nextReg > Register.REG_RAM0 + Register.REG_RAM_CNT)
+			throw new ParseException("too many registers used");
+		registers.put(regName, registerDescr);
+	}
+
+	protected void newEERegister(String regName, Short initValue)
+			throws ParseException {
+		checkName(regName);
+		RegisterDescr registerDescr = new RegisterDescr(nextEEReg++, true,
+				true, initValue);
+		if (nextEEReg > Register.REG_EEPROM0 + Register.REG_EEPROM_CNT)
+			throw new ParseException("too many registers used");
 		registers.put(regName, registerDescr);
 	}
 
@@ -176,7 +206,7 @@ public class Context {
 		Timer timer = timers.get(name);
 		if (timer == null) {
 			checkName(name);
-			timer = new Timer(name, nextTimer++);
+			timer = new Timer(this, name, nextTimer++);
 			timers.put(name, timer);
 		}
 		return timer;
@@ -216,7 +246,7 @@ public class Context {
 
 		code.add(BC.RET);
 
-		Func func = new Func("<init>", new LocalListDef(), 0);
+		Func func = new Func(this, "<init>", new LocalListDef(), 0);
 		func.code = new CodeRef(this, code);
 		funcDefList.setInit(func);
 	}
@@ -287,18 +317,28 @@ public class Context {
 	public void run() {
 		Collection<RTContext.Event> rtEvents = new ArrayList<RTContext.Event>();
 		for (Event e : events)
-			rtEvents.add(new RTContext.Event(e.cond, e.handler, e.type));
+			rtEvents.add(new RTContext.Event(e.cond.off, e.handler.off, e.type
+					.ordinal()));
 
 		RTContext.Timer rtTimers[] = new RTContext.Timer[timers.size()];
 		for (Timer t : timers.values())
-			rtTimers[t.n] = new RTContext.Timer(t.handler);
+			rtTimers[t.n] = new RTContext.Timer(t.handler.off);
 
 		RTContext.Func rtFuncs[] = new RTContext.Func[funcDefList.size()];
 		for (Func f : funcDefList.values())
-			rtFuncs[f.n] = new RTContext.Func(f.code);
+			rtFuncs[f.n] = new RTContext.Func(f.code.off);
 
 		RTContext context = new RTContext(codeArr, rtTimers,
-				rtEvents.toArray(new RTContext.Event[0]), rtFuncs);
+				rtEvents.toArray(new RTContext.Event[0]), rtFuncs) {
+			@Override
+			public void setExtReg(int addr, int reg, int pop) {
+			}
+
+			@Override
+			public int getExtReg(int addr, int reg) {
+				return 0;
+			}
+		};
 
 		new VM(context);
 

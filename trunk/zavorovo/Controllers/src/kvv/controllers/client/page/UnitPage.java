@@ -23,11 +23,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class UnitPage extends ControlCompositeWithDiagrams {
 	private final ControllersServiceAsync controllersService = GWT
 			.create(ControllersService.class);
-	private final RadioButton historyOff = new RadioButton("history", "Выкл");
-	private final RadioButton historyToday = new RadioButton("history",
-			"Сегодня");
-	private final RadioButton historyYesterday = new RadioButton("history",
-			"Вчера");
+	private final RadioButton historyOff = new RadioButton("history"
+			+ hashCode(), "Выкл");
+	private final RadioButton historyToday = new RadioButton("history"
+			+ hashCode(), "Сегодня");
+	private final RadioButton historyYesterday = new RadioButton("history"
+			+ hashCode(), "Вчера");
 
 	public UnitPage(final PageDescr page) {
 		Button refreshButton = new Button("Обновить");

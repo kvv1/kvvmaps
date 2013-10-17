@@ -3,6 +3,7 @@ package kvv.evlang.impl;
 import java.util.List;
 
 import kvv.evlang.ParseException;
+import kvv.evlang.rt.BC;
 
 public class Expr {
 	private Code code;
@@ -50,10 +51,18 @@ public class Expr {
 				code.compileGetreg(descr.reg);
 			} else {
 				Short val1 = context.constants.get(name);
-				if (val1 == null)
-					throw new ParseException(name + " - ?");
-				code = new Code();
-				code.compileLit(val1);
+				if (val1 != null) {
+					code = new Code();
+					code.compileLit(val1);
+				} else {
+					ExtRegisterDescr extRegisterDescr = context.extRegisters
+							.get(name);
+					if (extRegisterDescr != null) {
+						code.compileGetregExt(extRegisterDescr.addr, extRegisterDescr.reg);
+					} else {
+						throw new ParseException(name + " - ?");
+					}
+				}
 			}
 		}
 	}

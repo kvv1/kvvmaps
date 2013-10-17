@@ -7,6 +7,7 @@ import java.util.Map;
 
 import kvv.evlang.ParseException;
 import kvv.evlang.impl.Event.EventType;
+import kvv.evlang.rt.BC;
 
 public class Code {
 	public List<Byte> code = new ArrayList<Byte>();
@@ -75,6 +76,18 @@ public class Code {
 			add(BC.SETREG);
 			add(reg);
 		}
+	}
+
+	protected void compileSetregExt(int addr, int reg) {
+		add(BC.SETEXTREG);
+		add(addr);
+		add(reg);
+	}
+
+	protected void compileGetregExt(int addr, int reg) {
+		add(BC.GETEXTREG);
+		add(addr);
+		add(reg);
 	}
 
 	void compileGetLocal(int loc) {
@@ -191,10 +204,19 @@ public class Code {
 					- 1);
 		} else {
 			RegisterDescr descr = context.registers.get(name);
-			if (descr == null)
-				throw new ParseException(name + " - ?");
-			context.checkROReg(descr);
-			res.compileSetreg(descr.reg);
+			if (descr != null) {
+				context.checkROReg(descr);
+				res.compileSetreg(descr.reg);
+			} else {
+				ExtRegisterDescr extRegisterDescr = context.extRegisters
+						.get(name);
+				if (extRegisterDescr != null) {
+					res.compileSetregExt(extRegisterDescr.addr,
+							extRegisterDescr.reg);
+				} else {
+					throw new ParseException(name + " - ?");
+				}
+			}
 		}
 		return res;
 	}
@@ -258,8 +280,8 @@ public class Code {
 
 		cond.add(BC.RETI);
 		bytes.add(BC.RET);
-		context.events.add(new Event(new CodeRef(context, cond), new CodeRef(
-				context, bytes), EventType.SET));
+		context.events.add(new Event(context, new CodeRef(context, cond),
+				new CodeRef(context, bytes), EventType.SET));
 		System.out.println("onset " + cond.size() + " " + bytes.size());
 	}
 
@@ -269,8 +291,8 @@ public class Code {
 
 		cond.add(BC.RETI);
 		bytes.add(BC.RET);
-		context.events.add(new Event(new CodeRef(context, cond), new CodeRef(
-				context, bytes), EventType.CHANGE));
+		context.events.add(new Event(context, new CodeRef(context, cond),
+				new CodeRef(context, bytes), EventType.CHANGE));
 		System.out.println("onchange " + cond.size() + " " + bytes.size());
 	}
 }

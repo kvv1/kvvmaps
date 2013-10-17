@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 
-public class MyReader extends Reader {
+public class JavaCCReader extends Reader {
 
 	private InputStream is;
 
-	public MyReader(String filename) throws FileNotFoundException {
+	public JavaCCReader(String filename) throws FileNotFoundException {
 		is = new FileInputStream(filename);
 	}
 

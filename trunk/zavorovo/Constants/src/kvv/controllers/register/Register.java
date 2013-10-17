@@ -72,4 +72,5 @@ public class Register {
 	public static final int REG_INPULLUP5 = 253;
 	public static final int REG_INPULLUP6 = 254;
 	public static final int REG_INPULLUP7 = 255;
+
 }

@@ -3,6 +3,7 @@ package kvv.evlang.impl;
 import java.io.PrintStream;
 
 import kvv.evlang.ParseException;
+import kvv.evlang.rt.BC;
 
 public class CodeRef {
 	public int off;
@@ -26,31 +27,31 @@ public class CodeRef {
 		for (int i = off; i < off + len; i++) {
 			int bc1 = context.codeArr.get(i) & 0xC0;
 			if (bc1 == BC.GETREGSHORT) {
-				EG.dumpStream.print("GETREGSHORT ");
+				context.dumpStream.print("GETREGSHORT ");
 				stack++;
 			} else if (bc1 == BC.SETREGSHORT) {
-				EG.dumpStream.print("SETREGSHORT ");
+				context.dumpStream.print("SETREGSHORT ");
 				stack--;
 			} else if (bc1 == BC.LITSHORT) {
-				EG.dumpStream.print("LITSHORT ");
+				context.dumpStream.print("LITSHORT ");
 				stack += 1;
 			} else {
 				bc1 = context.codeArr.get(i);
 
 				BC bc = BC.values()[bc1];
 
-				EG.dumpStream.print(bc.name() + " ");
+				context.dumpStream.print(bc.name() + " ");
 
 				if (bc == BC.CALL) {
-					PrintStream ps = EG.dumpStream;
-					EG.dumpStream = EG.nullStream;
+					PrintStream ps = context.dumpStream;
+					context.dumpStream = EG.nullStream;
 					Func f = context.funcDefList
 							.get(context.codeArr.get(i + 1));
 					maxStack = Math.max(maxStack, stack + 2 + f.getMaxStack());
 					stack -= f.locals.getArgCnt();
 					stack += f.retSize;
 					i += bc.args;
-					EG.dumpStream = ps;
+					context.dumpStream = ps;
 				} else if (bc == BC.ENTER) {
 					i++;
 					locals = context.codeArr.get(i);

@@ -2,8 +2,6 @@ package kvv.evlang.rt;
 
 import java.util.List;
 
-import kvv.evlang.impl.BC;
-
 public class Interpreter {
 
 	static class Stack {
@@ -85,7 +83,7 @@ public class Interpreter {
 			BC bc = BC.values()[c];
 			switch (bc) {
 			case CALL:
-				int addr = context.funcs[code.get(ip++)].code.off;
+				int addr = context.funcs[code.get(ip++)].code;
 				stack.push(ip);
 				ip = addr;
 				stack.push(fp);
@@ -215,6 +213,16 @@ public class Interpreter {
 			case SETREG:
 				int reg1 = code.get(ip++) & 0xFF;
 				context.regs[reg1] = stack.pop();
+				break;
+			case GETEXTREG:
+				addr = code.get(ip++) & 0xFF;
+				reg = code.get(ip++) & 0xFF;
+				stack.push(context.getExtReg(addr, reg));
+				break;
+			case SETEXTREG:
+				addr = code.get(ip++) & 0xFF;
+				reg = code.get(ip++) & 0xFF;
+				context.setExtReg(addr, reg, stack.pop());
 				break;
 			case BRANCH:
 				off = code.get(ip++);
