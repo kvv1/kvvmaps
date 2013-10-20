@@ -57,16 +57,14 @@ public class Pages {
 
 		EG1 parser = new EG1(Constants.ROOT + "/scripts/" + pageName) {
 			@Override
-			protected ExtRegisterDescr getExtRegisterDescr(String extRegName)
-					throws ParseException {
-
+			protected ExtRegisterDescr getExtRegisterDescr(String extRegName) {
 				try {
 					Register reg = Controllers.getInstance().getRegister(
 							extRegName);
 
 					return new ExtRegisterDescr(reg.addr, reg.register);
 				} catch (Exception e) {
-					throw new ParseException("unknown external register");
+					return null;
 				}
 			}
 		};
