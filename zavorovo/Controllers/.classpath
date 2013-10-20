@@ -9,5 +9,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/Controller"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ControllerUtils"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/History"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/vm"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

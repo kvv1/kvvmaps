@@ -1,5 +1,7 @@
 package kvv.controllers.client;
 
+import java.util.Map;
+
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.PageDescr;
@@ -32,5 +34,9 @@ public interface ControllersService extends RemoteService {
 	String loadPagesText() throws Exception;
 
 	void savePagesText(String text) throws Exception;
+
+	void enableScript(String pageName, boolean b) throws Exception;
+
+	Map<String, String> getVMErrors();
 
 }

@@ -1,24 +1,29 @@
 package kvv.evlang.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import kvv.evlang.ParseException;
 import kvv.evlang.rt.BC;
 
 public class Expr {
-	private Code code;
+	private final Code code = new Code();
 
-	// private Short val;
+	public Code getCode() {
+		return code;
+	}
+
+	public Expr(Code code) {
+		this.code.addAll(code);
+	}
 
 	public Expr(BC bc, Expr... args) {
-		code = new Code();
 		for (Expr arg : args)
 			code.addAll(arg.getCode());
 		code.add(bc);
 	}
 
 	public Expr(Short val) {
-		code = new Code();
 		code.compileLit(val);
 	}
 
@@ -27,38 +32,31 @@ public class Expr {
 		Func func = context.getFunc(funcName, argList.size());
 		if (func.retSize != 1)
 			throw new ParseException(funcName + " - ?");
-		code = new Code();
 		for (Expr c : argList)
 			code.addAll(c.getCode());
 		code.add(BC.CALL);
 		code.add(func.n);
 	}
 
-	public Code getCode() {
-		return code;
-	}
-
 	public Expr(Context context, String name) throws ParseException {
 		Integer val = context.currentFunc.locals.get(name);
 		if (val != null) {
-			code = new Code();
 			code.compileGetLocal(context.currentFunc.locals.getArgCnt() - val
 					- 1);
 		} else {
 			RegisterDescr descr = context.registers.get(name);
 			if (descr != null) {
-				code = new Code();
 				code.compileGetreg(descr.reg);
 			} else {
 				Short val1 = context.constants.get(name);
 				if (val1 != null) {
-					code = new Code();
 					code.compileLit(val1);
 				} else {
-					ExtRegisterDescr extRegisterDescr = context.extRegisters
-							.get(name);
+					ExtRegisterDescr extRegisterDescr = context
+							.getExtRegisterDescr(name);
 					if (extRegisterDescr != null) {
-						code.compileGetregExt(extRegisterDescr.addr, extRegisterDescr.reg);
+						code.compileGetregExt(extRegisterDescr.addr,
+								extRegisterDescr.reg);
 					} else {
 						throw new ParseException(name + " - ?");
 					}
@@ -119,11 +117,57 @@ public class Expr {
 		return new Expr(BC.GE, arg1, arg2);
 	}
 
-	public static Expr and(Expr arg1, Expr arg2) {
-		return new Expr(BC.AND, arg1, arg2);
+	public static Expr and(List<Expr> list) {
+		if (list.size() == 1)
+			return list.get(0);
+
+		Code code = new Code();
+
+		List<Integer> addrs = new ArrayList<Integer>();
+
+		for (Expr e : list) {
+			code.addAll(e.getCode());
+			code.add(BC.QBRANCH);
+			code.add(0);
+			addrs.add(code.code.size());
+		}
+
+		code.compileLit((short) 1);
+		code.add(BC.BRANCH);
+		code.add(0);
+		int a = code.code.size();
+		code.resolveBranchs(addrs);
+		code.compileLit((short) 0);
+		code.resolveBranch(a);
+
+		return new Expr(code);
 	}
 
-	public static Expr or(Expr arg1, Expr arg2) {
-		return new Expr(BC.OR, arg1, arg2);
+	public static Expr or(List<Expr> list) {
+		if (list.size() == 1)
+			return list.get(0);
+
+		Code code = new Code();
+
+		List<Integer> addrs = new ArrayList<Integer>();
+
+		for (Expr e : list) {
+			code.addAll(e.getCode());
+			code.add(BC.NOT);
+			code.add(BC.QBRANCH);
+			code.add(0);
+			addrs.add(code.code.size());
+		}
+
+		code.compileLit((short) 0);
+		code.add(BC.BRANCH);
+		code.add(0);
+		int a = code.code.size();
+		code.resolveBranchs(addrs);
+		code.compileLit((short) 1);
+		code.resolveBranch(a);
+
+		return new Expr(code);
 	}
+
 }

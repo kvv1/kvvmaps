@@ -12,11 +12,9 @@ import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerDescr.Type;
 
-class ControllerWrapperUni implements IController {
-	private final IController controller;
-
+class ControllerWrapperUni extends Controller {
 	public ControllerWrapperUni(IController controller) {
-		this.controller = controller;
+		super(controller);
 	}
 
 	@Override
@@ -26,12 +24,12 @@ class ControllerWrapperUni implements IController {
 				val = val == 0 ? 0 : 1000;
 		} catch (Exception e) {
 		}
-		controller.setReg(addr, reg, val);
+		wrapped.setReg(addr, reg, val);
 	}
 
 	@Override
 	public int getReg(int addr, int reg) throws IOException {
-		Integer i = adjustValue(addr, reg, controller.getReg(addr, reg));
+		Integer i = adjustValue(addr, reg, wrapped.getReg(addr, reg));
 		if (i == null)
 			throw new IOException();
 		return i;
@@ -39,7 +37,7 @@ class ControllerWrapperUni implements IController {
 
 	@Override
 	public int[] getRegs(int addr, int reg, int n) throws IOException {
-		int[] res = controller.getRegs(addr, reg, n);
+		int[] res = wrapped.getRegs(addr, reg, n);
 		for (int i = 0; i < n; i++) {
 			Integer ii = adjustValue(addr, reg + i, res[i]);
 			if (ii == null)
@@ -62,13 +60,13 @@ class ControllerWrapperUni implements IController {
 		switch (controllerDescr.type) {
 		case MU110_8:
 			HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
-			int[] vals = controller.getRegs(addr, 0, 8);
+			int[] vals = wrapped.getRegs(addr, 0, 8);
 			for (int i = 0; i < 8; i++)
 				map.put(i, vals[i]);
 			allRegs = new AllRegs(addr, new ArrayList<RegisterUI>(), map);
 			break;
 		case TYPE2:
-			allRegs = controller.getAllRegs(addr);
+			allRegs = wrapped.getAllRegs(addr);
 			int relays = allRegs.values.get(Register.REG_RELAYS);
 			for (int i = 0; i < Register.REG_RELAY_CNT; i++)
 				allRegs.values.put(Register.REG_RELAY0 + i, (relays >> i) & 1);
@@ -83,21 +81,6 @@ class ControllerWrapperUni implements IController {
 					adjustValue(addr, reg, allRegs.values.get(reg)));
 
 		return allRegs;
-	}
-
-	@Override
-	public void upload(int addr, byte[] data) throws IOException {
-		controller.upload(addr, data);
-	}
-
-	@Override
-	public void close() {
-		controller.close();
-	}
-
-	@Override
-	public void vmInit(int addr) throws IOException {
-		controller.vmInit(addr);
 	}
 
 	private static Integer adjustValue(int addr, int reg, Integer value)
@@ -119,6 +102,11 @@ class ControllerWrapperUni implements IController {
 			break;
 		}
 		return value;
+	}
+
+	@Override
+	public void step() {
+		wrapped.step();
 	}
 
 }

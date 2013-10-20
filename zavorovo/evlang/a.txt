@@ -1,12 +1,12 @@
 
 // #################################
-
+/*
 reg x;
 reg y;
 
 eereg ee = 44;
 
-extreg er;
+//extreg er;
 
 
 onset(x > 20) {
@@ -64,9 +64,14 @@ void p(int c) {
 	c = c + 300; 
     print f(13+c,6);
 }
-/*
-when(REG_TIME in (23:15 ... 23:30)) {
-	REG_RELAY7 = 1;
-}
-*/
 // #################################
+*/
+
+reg r;
+text r "регистр";
+
+void main() {
+	r = 10 && 5 && 0;
+	print r;
+	print 1 || 1;
+}

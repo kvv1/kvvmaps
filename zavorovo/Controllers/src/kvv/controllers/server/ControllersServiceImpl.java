@@ -1,10 +1,10 @@
 package kvv.controllers.server;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 
 import kvv.controllers.client.ControllersService;
@@ -124,6 +124,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	public void saveControllersText(String text) throws Exception {
 		try {
 			Controllers.save(text);
+			Controller.loadScripts();
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}
@@ -141,16 +142,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public PageDescr[] getPages() throws Exception {
 		try {
-			PageDescr[] pages = Utils.jsonRead(Constants.pagesFile,
-					PageDescr[].class);
-			for (PageDescr page : pages) {
-				try {
-					page.script = Utils.readFile(Constants.ROOT + "/scripts/"
-							+ page.name);
-				} catch (Exception e) {
-				}
-			}
-			return pages;
+			return Pages.getPages();
 		} catch (FileNotFoundException e) {
 			return null;
 		} catch (IOException e) {
@@ -180,12 +172,25 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void savePageScript(String pageName, String script) throws Exception {
-		new File(Constants.ROOT + "/scripts").mkdir();
 		try {
-			Utils.writeFile(Constants.ROOT + "/scripts/" + pageName, script);
-		} catch (IOException e) {
+			Pages.saveScript(pageName, script);
+		} catch (Throwable e) {
 			throw new Exception(e.getMessage());
 		}
+	}
+
+	@Override
+	public void enableScript(String pageName, boolean b) throws Exception {
+		try {
+			Pages.enableScript(pageName, b);
+		} catch (Throwable e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	@Override
+	public Map<String, String> getVMErrors() {
+		return Controller.getVMErrors();
 	}
 
 }

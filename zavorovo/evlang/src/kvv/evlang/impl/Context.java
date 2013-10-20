@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,7 +28,6 @@ public abstract class Context {
 	protected Map<String, Short> constants = new HashMap<String, Short>();
 
 	protected Map<String, RegisterDescr> registers = new LinkedHashMap<String, RegisterDescr>();
-	protected Map<String, ExtRegisterDescr> extRegisters = new LinkedHashMap<String, ExtRegisterDescr>();
 
 	protected int nextReg = Register.REG_RAM0;
 	protected int nextEEReg = Register.REG_EEPROM0;
@@ -147,14 +147,6 @@ public abstract class Context {
 		} else if (func.locals.getArgCnt() != locals.getArgCnt())
 			throw new ParseException(name + " argument number error");
 		return func;
-	}
-
-	protected void newExtRegister(String extRegName) throws ParseException {
-		checkName(extRegName);
-		ExtRegisterDescr descr = getExtRegisterDescr(extRegName);
-		if (descr == null)
-			throw new ParseException(extRegName + " - ?");
-		extRegisters.put(extRegName, descr);
 	}
 
 	protected void newRegister(String regName, String regNum)
@@ -315,6 +307,20 @@ public abstract class Context {
 	}
 
 	public void run() {
+		RTContext context = getRTContext();
+		new VM(context) {
+			@Override
+			public void setExtReg(int addr, int reg, int value) {
+			}
+
+			@Override
+			public int getExtReg(int addr, int reg) {
+				return 0;
+			}
+		}.loop();
+	}
+
+	public RTContext getRTContext() {
 		Collection<RTContext.Event> rtEvents = new ArrayList<RTContext.Event>();
 		for (Event e : events)
 			rtEvents.add(new RTContext.Event(e.cond.off, e.handler.off, e.type
@@ -329,23 +335,25 @@ public abstract class Context {
 			rtFuncs[f.n] = new RTContext.Func(f.code.off);
 
 		RTContext context = new RTContext(codeArr, rtTimers,
-				rtEvents.toArray(new RTContext.Event[0]), rtFuncs) {
-			@Override
-			public void setExtReg(int addr, int reg, int pop) {
-			}
+				rtEvents.toArray(new RTContext.Event[0]), rtFuncs);
 
-			@Override
-			public int getExtReg(int addr, int reg) {
-				return 0;
-			}
-		};
-
-		new VM(context);
-
+		return context;
 	}
 
 	public RegisterUI[] getRegisterDescriptions() {
 		return registerUIs.toArray(new RegisterUI[0]);
+	}
+
+	public static String win2utf(String str) {
+//		return str;
+		byte[] bytes = new byte[str.length()];
+		for (int i = 0; i < str.length(); i++)
+			bytes[i] = (byte) str.charAt(i);
+		try {
+			return new String(bytes, "Windows-1251");
+		} catch (UnsupportedEncodingException e) {
+			return "###";
+		}
 	}
 
 }

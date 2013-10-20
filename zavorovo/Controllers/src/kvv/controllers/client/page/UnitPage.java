@@ -1,7 +1,9 @@
 package kvv.controllers.client.page;
 
 import java.util.Date;
+import java.util.Map;
 
+import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ControlCompositeWithDiagrams;
@@ -15,6 +17,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
@@ -30,7 +33,37 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 	private final RadioButton historyYesterday = new RadioButton("history"
 			+ hashCode(), "Вчера");
 
+	private final Label errMsg = new Label();
+	private final CheckBox vmCB = new CheckBox();
+	private final PageDescr page;
+
+	private final TextWithSaveButton script = new TextWithSaveButton("",
+			"100%", "400px") {
+		@Override
+		protected void save(final String text,
+				final AsyncCallback<Void> callback) {
+			controllersService.savePageScript(page.name, text,
+					new AsyncCallback<Void>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+							callback.onFailure(caught);
+							refreshScript();
+						}
+
+						@Override
+						public void onSuccess(Void result) {
+							page.script = text;
+							callback.onSuccess(result);
+							refreshScript();
+						}
+					});
+		}
+	};
+
 	public UnitPage(final PageDescr page) {
+		this.page = page;
+
 		Button refreshButton = new Button("Обновить");
 		refreshButton.addClickHandler(new ClickHandler() {
 			@Override
@@ -101,28 +134,21 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 			}
 		}
 
-		TextWithSaveButton script = new TextWithSaveButton("", "100%", "400px") {
+		vmCB.addClickHandler(new ClickHandler() {
 			@Override
-			protected void save(final String text,
-					final AsyncCallback<Void> callback) {
-				controllersService.savePageScript(page.name, text,
-						new AsyncCallback<Void>() {
-
-							@Override
-							public void onFailure(Throwable caught) {
-								callback.onFailure(caught);
-							}
-
+			public void onClick(ClickEvent event) {
+				controllersService.enableScript(page.name, vmCB.getValue(),
+						new CallbackAdapter<Void>() {
 							@Override
 							public void onSuccess(Void result) {
-								page.script = text;
-								callback.onSuccess(result);
+								refreshScript();
 							}
 						});
 			}
-		};
+		});
 
-		script.setText(page.script);
+		panel.add(vmCB);
+		panel.add(errMsg);
 
 		script.setWidth("100%");
 		panel.add(script);
@@ -135,6 +161,27 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 	public void refresh() {
 		super.refresh();
 		refreshDiagrams();
+		refreshScript();
+	}
+
+	private void refreshScript() {
+		controllersService
+				.getVMErrors(new CallbackAdapter<Map<String, String>>() {
+					@Override
+					public void onSuccess(Map<String, String> result) {
+						errMsg.setText(result.get(page.name));
+					}
+				});
+		controllersService.getPages(new CallbackAdapter<PageDescr[]>() {
+			@Override
+			public void onSuccess(PageDescr[] result) {
+				for (PageDescr page : result)
+					if (page.name.equals(UnitPage.this.page.name)) {
+						script.setText(page.script);
+						vmCB.setValue(page.scriptEnabled);
+					}
+			}
+		});
 	}
 
 	@SuppressWarnings("deprecation")

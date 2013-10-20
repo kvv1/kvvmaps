@@ -208,8 +208,7 @@ public class Code {
 				context.checkROReg(descr);
 				res.compileSetreg(descr.reg);
 			} else {
-				ExtRegisterDescr extRegisterDescr = context.extRegisters
-						.get(name);
+				ExtRegisterDescr extRegisterDescr = context.getExtRegisterDescr(name);
 				if (extRegisterDescr != null) {
 					res.compileSetregExt(extRegisterDescr.addr,
 							extRegisterDescr.reg);
@@ -294,5 +293,14 @@ public class Code {
 		context.events.add(new Event(context, new CodeRef(context, cond),
 				new CodeRef(context, bytes), EventType.CHANGE));
 		System.out.println("onchange " + cond.size() + " " + bytes.size());
+	}
+
+	public void resolveBranchs(List<Integer> addrs) {
+		for (int a : addrs)
+			resolveBranch(a);
+	}
+
+	public void resolveBranch(int a) {
+		code.set(a - 1, (byte) (code.size() - a));
 	}
 }
