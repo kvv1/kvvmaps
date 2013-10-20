@@ -2,7 +2,10 @@ package kvv.evlang.rt;
 
 import java.util.List;
 
-public class Interpreter {
+public abstract class Interpreter {
+	public abstract void setExtReg(int addr, int reg, int value);
+
+	public abstract int getExtReg(int addr, int reg);
 
 	static class Stack {
 		private int[] data = new int[100];
@@ -217,12 +220,12 @@ public class Interpreter {
 			case GETEXTREG:
 				addr = code.get(ip++) & 0xFF;
 				reg = code.get(ip++) & 0xFF;
-				stack.push(context.getExtReg(addr, reg));
+				stack.push(getExtReg(addr, reg));
 				break;
 			case SETEXTREG:
 				addr = code.get(ip++) & 0xFF;
 				reg = code.get(ip++) & 0xFF;
-				context.setExtReg(addr, reg, stack.pop());
+				setExtReg(addr, reg, stack.pop());
 				break;
 			case BRANCH:
 				off = code.get(ip++);

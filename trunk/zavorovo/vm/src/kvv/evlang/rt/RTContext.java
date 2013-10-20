@@ -2,11 +2,7 @@ package kvv.evlang.rt;
 
 import java.util.List;
 
-public abstract class RTContext {
-	public abstract void setExtReg(int addr, int reg, int pop);
-
-	public abstract int getExtReg(int addr, int reg);
-
+public class RTContext {
 	public static class Event {
 		public static final int TYPE_SET = 0;
 		public static final int TYPE_CHANGE = 1;
