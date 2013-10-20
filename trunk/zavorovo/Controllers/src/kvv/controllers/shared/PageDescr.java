@@ -8,4 +8,5 @@ public class PageDescr implements Serializable {
 	public String[] controllers;
 	public String[] registers;
 	public String script;
+	public boolean scriptEnabled;
 }

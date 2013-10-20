@@ -1,33 +1,23 @@
 package kvv.controllers.server.controller;
 
 import java.io.IOException;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import kvv.controllers.controller.IController;
-import kvv.controllers.history.HistoryFile;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.ControllerDescr;
 
-class ControllerWrapperCached implements IController {
-
-	private final IController controller;
+class ControllerWrapperCached extends Controller {
 
 	private Map<Integer, AllRegs> map = new HashMap<Integer, AllRegs>();
 
-	// private AllRegs allRegs(int addr) throws IOException {
-	// AllRegs allRegs = map.get(addr);
-	// if (allRegs == null) {
-	// allRegs = controller.getAllRegs(addr);
-	// map.put(addr, allRegs);
-	// }
-	// return allRegs;
-	// }
-
 	public ControllerWrapperCached(IController controller) {
-		this.controller = controller;
+		super(controller);
 	}
 
 	@Override
@@ -35,7 +25,7 @@ class ControllerWrapperCached implements IController {
 			throws IOException {
 		AllRegs allRegs = map.get(addr);
 		try {
-			controller.setReg(addr, reg, val);
+			wrapped.setReg(addr, reg, val);
 			if (allRegs != null)
 				allRegs.values.put(reg, val);
 		} catch (IOException e) {
@@ -77,68 +67,25 @@ class ControllerWrapperCached implements IController {
 		return allRegs;
 	}
 
-	@Override
-	public void upload(int addr, byte[] data) throws IOException {
-		controller.upload(addr, data);
-	}
-
-	@Override
-	public void close() {
-		stopped = true;
-		controller.close();
-	}
-
-	@Override
-	public void vmInit(int addr) throws IOException {
-		controller.vmInit(addr);
-	}
-
 	private synchronized void refreshCache(int addr) {
 		try {
-			map.put(addr, controller.getAllRegs(addr));
+			map.put(addr, wrapped.getAllRegs(addr));
 		} catch (IOException e) {
 			map.remove(addr);
 		}
 	}
 
-	private volatile boolean stopped;
+	private List<ControllerDescr> controllers;
 
-	private Thread thread = new Thread() {
+	@Override
+	public void step() {
+		wrapped.step();
 
-		{
-			setDaemon(true);
-			setPriority(Thread.MIN_PRIORITY);
-			start();
-		}
+		if (controllers == null || controllers.isEmpty())
+			controllers = new LinkedList<ControllerDescr>(
+					Arrays.asList(Controllers.getInstance().getControllers()));
 
-		@Override
-		public void run() {
-			HistoryFile.logValue(new Date(), null, null);
-
-			while (!stopped) {
-				try {
-					Thread.sleep(100);
-					ControllerDescr[] controllers = Controllers.getInstance()
-							.getControllers();
-					for (ControllerDescr c : controllers) {
-						if (stopped)
-							break;
-						try {
-							Thread.sleep(100);
-							synchronized (ControllerWrapperCached.this) {
-								if (!stopped)
-									refreshCache(c.addr);
-							}
-						} catch (Exception e) {
-						}
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-
-			HistoryFile.logValue(new Date(), null, null);
-		}
-	};
-
+		if (!controllers.isEmpty())
+			refreshCache(controllers.remove(0).addr);
+	}
 }

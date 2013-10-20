@@ -1,10 +1,12 @@
 package kvv.evlang.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintStream;
 
 import kvv.controllers.controller.Controller;
 import kvv.controllers.register.Register;
@@ -16,6 +18,9 @@ import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
 import kvv.evlang.Token;
 import kvv.evlang.rt.VMStatus;
+
+//  < ID : [ "a"-"z", "A"-"Z", "_", "\u00A0"-"\u00FF" ] ([ "a"-"z", "A"-"Z", "_", "0"-"9", "\u00A0"-"\u00FF" ])* >
+
 
 public abstract class EG extends Context {
 

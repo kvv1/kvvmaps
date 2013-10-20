@@ -1,5 +1,7 @@
 package kvv.controllers.client;
 
+import java.util.Map;
+
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.PageDescr;
@@ -32,5 +34,9 @@ public interface ControllersServiceAsync {
 
 	void savePageScript(String pageName, String script,
 			AsyncCallback<Void> callback);
+
+	void enableScript(String pageName, boolean b, AsyncCallback<Void> callback);
+
+	void getVMErrors(AsyncCallback<Map<String, String>> callback);
 
 }

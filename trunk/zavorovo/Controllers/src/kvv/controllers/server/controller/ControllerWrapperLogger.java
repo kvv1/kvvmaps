@@ -12,24 +12,24 @@ import kvv.controllers.register.AllRegs;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.Register;
 
-class ControllerWrapperLogger implements IController {
-
-	private final IController controller;
+class ControllerWrapperLogger extends Controller {
 
 	public ControllerWrapperLogger(IController controller) {
-		this.controller = controller;
+		super(controller);
+		HistoryFile.logValue(new Date(), null, null);
 	}
 
 	@Override
 	public void close() {
-		controller.close();
+		super.close();
+		HistoryFile.logValue(new Date(), null, null);
 	}
-
+	
 	@Override
 	public synchronized void setReg(int addr, int reg, int val)
 			throws IOException {
 		try {
-			controller.setReg(addr, reg, val);
+			wrapped.setReg(addr, reg, val);
 			log(addr, reg, val);
 		} catch (IOException e) {
 			log(addr, reg, null);
@@ -40,7 +40,7 @@ class ControllerWrapperLogger implements IController {
 	@Override
 	public synchronized int getReg(int addr, int reg) throws IOException {
 		try {
-			int val = controller.getReg(addr, reg);
+			int val = wrapped.getReg(addr, reg);
 			log(addr, reg, val);
 			return val;
 		} catch (IOException e) {
@@ -52,7 +52,7 @@ class ControllerWrapperLogger implements IController {
 	@Override
 	public synchronized AllRegs getAllRegs(int addr) throws IOException {
 		try {
-			AllRegs allRegs = controller.getAllRegs(addr);
+			AllRegs allRegs = wrapped.getAllRegs(addr);
 			log(addr, allRegs.values);
 			return allRegs;
 		} catch (IOException e) {
@@ -65,7 +65,7 @@ class ControllerWrapperLogger implements IController {
 	public synchronized int[] getRegs(int addr, int reg, int n)
 			throws IOException {
 		try {
-			int[] res = controller.getRegs(addr, reg, n);
+			int[] res = wrapped.getRegs(addr, reg, n);
 			for (int i = 0; i < res.length; i++)
 				log(addr, reg + i, res[i]);
 			return res;
@@ -73,16 +73,6 @@ class ControllerWrapperLogger implements IController {
 			log(addr, null);
 			throw e;
 		}
-	}
-
-	@Override
-	public void upload(int addr, byte[] data) throws IOException {
-		controller.upload(addr, data);
-	}
-
-	@Override
-	public void vmInit(int addr) throws IOException {
-		controller.vmInit(addr);
 	}
 
 	private void log(int addr, int reg, Integer val) {
@@ -136,4 +126,10 @@ class ControllerWrapperLogger implements IController {
 		HistoryFile.logValue(date, register, value);
 		lastValues.put(register, value);
 	}
+
+	@Override
+	public void step() {
+		wrapped.step();
+	}
+
 }
