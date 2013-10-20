@@ -21,7 +21,6 @@ import kvv.evlang.rt.VMStatus;
 
 //  < ID : [ "a"-"z", "A"-"Z", "_", "\u00A0"-"\u00FF" ] ([ "a"-"z", "A"-"Z", "_", "0"-"9", "\u00A0"-"\u00FF" ])* >
 
-
 public abstract class EG extends Context {
 
 	public static CmdLine cmdLine = new CmdLine();
@@ -37,9 +36,8 @@ public abstract class EG extends Context {
 
 		EG1 parser = new EG1(cmdLine.args[0]) {
 			@Override
-			protected ExtRegisterDescr getExtRegisterDescr(String extRegName)
-					throws ParseException {
-				throw new ParseException("extregs not allowed");
+			protected ExtRegisterDescr getExtRegisterDescr(String extRegName) {
+				return null;
 			}
 		};
 

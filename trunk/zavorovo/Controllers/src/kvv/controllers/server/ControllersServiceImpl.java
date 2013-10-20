@@ -65,8 +65,8 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 				parser = new EG1(Constants.ROOT + "/src/" + fileName) {
 					@Override
 					protected ExtRegisterDescr getExtRegisterDescr(
-							String extRegName) throws ParseException {
-						throw new ParseException("extregs not allowed");
+							String extRegName) {
+						return null;
 					}
 				};
 

@@ -32,8 +32,7 @@ public abstract class Context {
 	protected int nextReg = Register.REG_RAM0;
 	protected int nextEEReg = Register.REG_EEPROM0;
 
-	protected abstract ExtRegisterDescr getExtRegisterDescr(String extRegName)
-			throws ParseException;
+	protected abstract ExtRegisterDescr getExtRegisterDescr(String extRegName);
 
 	public static PrintStream nullStream = new PrintStream(new OutputStream() {
 		@Override
