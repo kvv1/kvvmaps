@@ -70,7 +70,7 @@ void p(int c) {
 reg r;
 text r "регистр";
 
-void main() {
+void ma in() {
 	r = 10 && 5 && 0;
 	print r;
 	print 1 || 1;

@@ -17,6 +17,7 @@ class ControllerWrapperScheduled extends Controller {
 
 	public ControllerWrapperScheduled(IController wrapped) {
 		super(wrapped);
+		thread.start();
 	}
 
 	@Override
@@ -42,10 +43,7 @@ class ControllerWrapperScheduled extends Controller {
 	public HashMap<String, RegisterSchedule> map = new HashMap<String, RegisterSchedule>();
 
 	@SuppressWarnings("deprecation")
-	@Override
 	public void step() {
-		wrapped.step();
-
 		try {
 
 			if (map.isEmpty()) {
@@ -69,5 +67,25 @@ class ControllerWrapperScheduled extends Controller {
 		} catch (Exception e) {
 		}
 	}
+
+	private Thread thread = new Thread(
+			ControllerWrapperScheduled.class.getSimpleName() + "Thread") {
+		{
+			setDaemon(true);
+			setPriority(Thread.MIN_PRIORITY);
+		}
+
+		@Override
+		public void run() {
+			while (!stopped) {
+				try {
+					Thread.sleep(100);
+					step();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	};
 
 }

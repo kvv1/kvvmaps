@@ -127,9 +127,4 @@ class ControllerWrapperLogger extends Controller {
 		lastValues.put(register, value);
 	}
 
-	@Override
-	public void step() {
-		wrapped.step();
-	}
-
 }

@@ -12,6 +12,4 @@ public interface IController {
 	public void upload(int addr, byte[] data) throws IOException;
 	public void close();
 	void vmInit(int addr) throws IOException;
-	public void step();
-
 }

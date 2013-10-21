@@ -34,6 +34,8 @@ public abstract class Context {
 
 	protected abstract ExtRegisterDescr getExtRegisterDescr(String extRegName);
 
+	public abstract void throwExc(String msg) throws ParseException;
+
 	public static PrintStream nullStream = new PrintStream(new OutputStream() {
 		@Override
 		public void write(int b) throws IOException {
@@ -43,6 +45,8 @@ public abstract class Context {
 	public PrintStream dumpStream = nullStream;
 
 	{
+		constants.put("INVALID", (short) 0x8000);
+
 		registers.put("REG_RELAY0", new RegisterDescr(Register.REG_RELAY0));
 		registers.put("REG_RELAY1", new RegisterDescr(Register.REG_RELAY1));
 		registers.put("REG_RELAY2", new RegisterDescr(Register.REG_RELAY2));
@@ -114,7 +118,7 @@ public abstract class Context {
 
 	protected void checkROReg(RegisterDescr descr) throws ParseException {
 		if (descr.readonly)
-			throw new ParseException("register is read only");
+			throwExc("register is read only");
 	}
 
 	public Func currentFunc;
@@ -128,9 +132,9 @@ public abstract class Context {
 	public Func getFunc(String name, int argCnt) throws ParseException {
 		Func func = funcDefList.get(name);
 		if (func == null)
-			throw new ParseException(name + " - ?");
+			throwExc(name + " - ?");
 		else if (func.locals.getArgCnt() != argCnt)
-			throw new ParseException(name + " argument number error");
+			throwExc(name + " argument number error");
 		return func;
 	}
 
@@ -142,9 +146,9 @@ public abstract class Context {
 			func = new Func(this, name, locals, retSize);
 			funcDefList.put(func);
 		} else if (func.retSize != retSize) {
-			throw new ParseException(name + " - ?");
+			throwExc(name + " - ?");
 		} else if (func.locals.getArgCnt() != locals.getArgCnt())
-			throw new ParseException(name + " argument number error");
+			throwExc(name + " argument number error");
 		return func;
 	}
 
@@ -153,7 +157,7 @@ public abstract class Context {
 		checkName(regName);
 		RegisterDescr registerDescr = registers.get(regNum);
 		if (registerDescr == null)
-			throw new ParseException(regNum + " - ?");
+			throwExc(regNum + " - ?");
 		registers.put(regName, registerDescr);
 	}
 
@@ -162,7 +166,7 @@ public abstract class Context {
 		RegisterDescr registerDescr = new RegisterDescr(nextReg++, false,
 				false, null);
 		if (nextReg > Register.REG_RAM0 + Register.REG_RAM_CNT)
-			throw new ParseException("too many registers used");
+			throwExc("too many registers used");
 		registers.put(regName, registerDescr);
 	}
 
@@ -172,7 +176,7 @@ public abstract class Context {
 		RegisterDescr registerDescr = new RegisterDescr(nextEEReg++, true,
 				true, initValue);
 		if (nextEEReg > Register.REG_EEPROM0 + Register.REG_EEPROM_CNT)
-			throw new ParseException("too many registers used");
+			throwExc("too many registers used");
 		registers.put(regName, registerDescr);
 	}
 
@@ -180,7 +184,7 @@ public abstract class Context {
 			throws ParseException {
 		RegisterDescr registerDescr = registers.get(regName);
 		if (registerDescr == null)
-			throw new ParseException(regName + " - ?");
+			throwExc(regName + " - ?");
 
 		if (uiType == RegType.textRW && !registerDescr.editable)
 			uiType = RegType.textRO;
@@ -207,7 +211,7 @@ public abstract class Context {
 
 	protected void checkName(String name) throws ParseException {
 		if (names.contains(name))
-			throw new ParseException("name '" + name + "' already defined");
+			throwExc("name '" + name + "' already defined");
 		names.add(name);
 	}
 
@@ -344,7 +348,7 @@ public abstract class Context {
 	}
 
 	public static String win2utf(String str) {
-//		return str;
+		// return str;
 		byte[] bytes = new byte[str.length()];
 		for (int i = 0; i < str.length(); i++)
 			bytes[i] = (byte) str.charAt(i);
