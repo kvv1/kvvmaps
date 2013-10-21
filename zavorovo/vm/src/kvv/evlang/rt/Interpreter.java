@@ -65,6 +65,7 @@ public abstract class Interpreter {
 
 		while (true) {
 			int right;
+			int left;
 			int off;
 			int timer;
 
@@ -162,7 +163,11 @@ public abstract class Interpreter {
 				break;
 			case DIV:
 				right = stack.pop();
-				stack.push(stack.pop() / right);
+				left = stack.pop();
+				if (right == 0)
+					stack.push(-1);
+				else
+					stack.push(left / right);
 				break;
 			case AND: {
 				int n1 = stack.pop();
@@ -266,7 +271,10 @@ public abstract class Interpreter {
 				int n3 = stack.pop();
 				int n2 = stack.pop();
 				int n1 = stack.pop();
-				stack.push(n1 * n2 / n3);
+				if (n3 == 0)
+					stack.push(-1);
+				else
+					stack.push(n1 * n2 / n3);
 				break;
 			}
 			default:
