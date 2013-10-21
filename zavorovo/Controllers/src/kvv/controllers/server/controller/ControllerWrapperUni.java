@@ -97,16 +97,12 @@ class ControllerWrapperUni extends Controller {
 			break;
 		case TYPE2:
 			if ((reg == Register.REG_TEMP || reg == Register.REG_TEMP2)
-					&& value != null && value == -9999)
+					&& value != null
+					&& (value > 120 || value == 85 || value < -50))
 				value = null;
 			break;
 		}
 		return value;
-	}
-
-	@Override
-	public void step() {
-		wrapped.step();
 	}
 
 }

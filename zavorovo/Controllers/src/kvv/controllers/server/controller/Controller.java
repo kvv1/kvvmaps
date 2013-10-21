@@ -9,6 +9,7 @@ import kvv.controllers.server.Pages;
 import kvv.controllers.shared.PageDescr;
 import kvv.controllers.utils.Constants;
 import kvv.controllers.utils.Utils;
+import kvv.evlang.rt.Const;
 import kvv.evlang.rt.RTContext;
 import kvv.evlang.rt.VM;
 
@@ -48,6 +49,8 @@ public abstract class Controller implements IController {
 		}
 	}
 
+	protected volatile boolean stopped;
+
 	protected final IController wrapped;
 
 	public Controller(IController wrapped) {
@@ -61,6 +64,7 @@ public abstract class Controller implements IController {
 
 	@Override
 	public void close() {
+		stopped = true;
 		wrapped.close();
 	}
 
@@ -69,7 +73,8 @@ public abstract class Controller implements IController {
 		wrapped.vmInit(addr);
 	}
 
-	private static Thread thread = new Thread("ControllerThread") {
+	private static Thread thread = new Thread(Controller.class.getSimpleName()
+			+ "Thread") {
 
 		{
 			setDaemon(true);
@@ -81,12 +86,8 @@ public abstract class Controller implements IController {
 			while (controller != null) {
 				try {
 					Thread.sleep(100);
-					synchronized (Controller.class) {
-						if (controller != null)
-							controller.step();
-						for (VM vm : vms.values())
-							vm.step();
-					}
+					for (VM vm : vms.values())
+						vm.step();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -116,7 +117,7 @@ public abstract class Controller implements IController {
 					return controller.getReg(addr, reg);
 			} catch (IOException e) {
 			}
-			return 0x7FFF;
+			return Const.INVALID_VALUE;
 		}
 	}
 

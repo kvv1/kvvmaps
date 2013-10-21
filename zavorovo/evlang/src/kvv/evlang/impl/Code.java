@@ -22,7 +22,7 @@ public class Code {
 
 	public void insertEnter(int n) throws ParseException {
 		if (n < 0)
-			throw new ParseException("ERROR");
+			throw new ParseException();
 		if (n != 0) {
 			List<Byte> code1 = new ArrayList<Byte>();
 			code1.add((byte) BC.ENTER.ordinal());
@@ -103,7 +103,7 @@ public class Code {
 	public static Code dec(Context context, String name) throws ParseException {
 		RegisterDescr descr = context.registers.get(name);
 		if (descr == null)
-			throw new ParseException(name + " - ?");
+			context.throwExc(name + " - ?");
 		context.checkROReg(descr);
 		Code res = new Code();
 		res.add(BC.DEC);
@@ -114,7 +114,7 @@ public class Code {
 	public static Code inc(Context context, String name) throws ParseException {
 		RegisterDescr descr = context.registers.get(name);
 		if (descr == null)
-			throw new ParseException(name + " - ?");
+			context.throwExc(name + " - ?");
 		context.checkROReg(descr);
 		Code res = new Code();
 		res.add(BC.INC);
@@ -170,7 +170,7 @@ public class Code {
 	public static Code ret(Context context, Expr n) throws ParseException {
 		if (n != null) {
 			if (context.currentFunc.retSize == 0)
-				throw new ParseException("'return;' expected");
+				context.throwExc("'return;' expected");
 			Code bytes = n.getCode();
 			int argCnt = context.currentFunc.locals.getArgCnt();
 			if (argCnt == 0)
@@ -182,7 +182,7 @@ public class Code {
 			return bytes;
 		} else {
 			if (context.currentFunc.retSize != 0)
-				throw new ParseException("'return <expr>;' expected");
+				context.throwExc("'return <expr>;' expected");
 			Code bytes = new Code();
 			int argCnt = context.currentFunc.locals.getArgCnt();
 			if (argCnt == 0)
@@ -208,12 +208,13 @@ public class Code {
 				context.checkROReg(descr);
 				res.compileSetreg(descr.reg);
 			} else {
-				ExtRegisterDescr extRegisterDescr = context.getExtRegisterDescr(name);
+				ExtRegisterDescr extRegisterDescr = context
+						.getExtRegisterDescr(name);
 				if (extRegisterDescr != null) {
 					res.compileSetregExt(extRegisterDescr.addr,
 							extRegisterDescr.reg);
 				} else {
-					throw new ParseException(name + " - ?");
+					context.throwExc(name + " - ?");
 				}
 			}
 		}

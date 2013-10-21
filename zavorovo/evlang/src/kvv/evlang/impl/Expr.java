@@ -31,7 +31,7 @@ public class Expr {
 			throws ParseException {
 		Func func = context.getFunc(funcName, argList.size());
 		if (func.retSize != 1)
-			throw new ParseException(funcName + " - ?");
+			context.throwExc(funcName + " - ?");
 		for (Expr c : argList)
 			code.addAll(c.getCode());
 		code.add(BC.CALL);
@@ -58,7 +58,7 @@ public class Expr {
 						code.compileGetregExt(extRegisterDescr.addr,
 								extRegisterDescr.reg);
 					} else {
-						throw new ParseException(name + " - ?");
+						context.throwExc(name + " - ?");
 					}
 				}
 			}

@@ -11,6 +11,7 @@ import kvv.controllers.controller.IController;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.ControllerDescr;
+import kvv.evlang.rt.Const;
 
 class ControllerWrapperCached extends Controller {
 
@@ -18,6 +19,7 @@ class ControllerWrapperCached extends Controller {
 
 	public ControllerWrapperCached(IController controller) {
 		super(controller);
+		thread.start();
 	}
 
 	@Override
@@ -39,7 +41,10 @@ class ControllerWrapperCached extends Controller {
 		AllRegs allRegs = map.get(addr);
 		if (allRegs == null)
 			throw new IOException();
-		return allRegs.values.get(reg);
+		Integer val = allRegs.values.get(reg);
+		if (val == null)
+			throw new IOException();
+		return val;
 	}
 
 	@Override
@@ -53,7 +58,7 @@ class ControllerWrapperCached extends Controller {
 		for (int i = 0; i < n; i++) {
 			Integer val = allRegs.values.get(reg + i);
 			if (val == null)
-				val = 0;
+				val = Const.INVALID_VALUE;
 			res[i] = val;
 		}
 		return res;
@@ -67,25 +72,47 @@ class ControllerWrapperCached extends Controller {
 		return allRegs;
 	}
 
-	private synchronized void refreshCache(int addr) {
-		try {
-			map.put(addr, wrapped.getAllRegs(addr));
-		} catch (IOException e) {
-			map.remove(addr);
-		}
-	}
-
 	private List<ControllerDescr> controllers;
 
-	@Override
-	public void step() {
-		wrapped.step();
+	private void step() {
 
 		if (controllers == null || controllers.isEmpty())
 			controllers = new LinkedList<ControllerDescr>(
 					Arrays.asList(Controllers.getInstance().getControllers()));
 
-		if (!controllers.isEmpty())
-			refreshCache(controllers.remove(0).addr);
+		if (!controllers.isEmpty()) {
+			int addr = controllers.remove(0).addr;
+			try {
+				AllRegs allRegs = wrapped.getAllRegs(addr);
+				synchronized (this) {
+					map.put(addr, allRegs);
+				}
+			} catch (IOException e) {
+				synchronized (this) {
+					map.remove(addr);
+				}
+			}
+		}
 	}
+
+	private Thread thread = new Thread(
+			ControllerWrapperCached.class.getSimpleName() + "Thread") {
+		{
+			setDaemon(true);
+			setPriority(Thread.MIN_PRIORITY);
+		}
+
+		@Override
+		public void run() {
+			while (!stopped) {
+				try {
+					Thread.sleep(100);
+					step();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	};
+
 }

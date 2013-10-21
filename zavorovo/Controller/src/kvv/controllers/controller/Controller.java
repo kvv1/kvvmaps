@@ -176,10 +176,6 @@ public class Controller implements IController {
 		}
 	}
 
-	@Override
-	public void step() {
-	}
-
 	public static void main(String[] args) {
 		String s = new Gson().fromJson("", String.class);
 		System.out.println(s);
