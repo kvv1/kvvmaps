@@ -33,9 +33,9 @@ public class Controllers {
 	private final Map<String, Register> registers = new HashMap<String, Register>();
 	private final Map<Integer, Register> ar2register = new HashMap<Integer, Register>();
 
-	private final Map<String, Register> globalRegisters = new HashMap<String, Register>();
-
 	{
+		int nextGlobalReg = 0;
+
 		try {
 			ControllerDescr[] controllers1 = Utils.jsonRead(
 					Constants.controllersFile, ControllerDescr[].class);
@@ -47,25 +47,25 @@ public class Controllers {
 						for (Register reg : regs) {
 							if (reg != null) {
 								if (c.name == null) {
-									globalRegisters.put(reg.name, reg);
+									reg.register = nextGlobalReg++;
 								} else {
 									reg.controller = c.name;
 									reg.addr = c.addr;
-									if (reg.scaleLevels == null)
-										reg.scaleLevels = new int[] { 0, 1 };
-									registers.put(reg.name, reg);
-									ar2register.put((reg.addr << 16)
-											+ reg.register, reg);
 								}
+								if (reg.scaleLevels == null)
+									reg.scaleLevels = new int[] { 0, 1 };
+								registers.put(reg.name, reg);
+								ar2register.put(
+										(reg.addr << 16) + reg.register, reg);
 							}
 						}
 						// c.registers = null;
 					}
-					if (c.name != null) {
-						controllers.add(c);
-						nameMap.put(c.name, c);
-						addrMap.put(c.addr, c);
-					}
+					if (c.name == null)
+						c.name = "";
+					controllers.add(c);
+					nameMap.put(c.name, c);
+					addrMap.put(c.addr, c);
 				}
 			}
 		} catch (Exception e) {

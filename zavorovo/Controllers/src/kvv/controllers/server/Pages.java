@@ -61,7 +61,6 @@ public class Pages {
 				try {
 					Register reg = Controllers.getInstance().getRegister(
 							extRegName);
-
 					return new ExtRegisterDescr(reg.addr, reg.register);
 				} catch (Exception e) {
 					return null;

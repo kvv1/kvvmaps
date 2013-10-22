@@ -74,7 +74,7 @@ public class ControllersPage extends Composite {
 		});
 
 		for (ControllerDescr descr : controllers) {
-			if (descr != null) {
+			if (descr != null && descr.addr != 0) {
 				switch (descr.type) {
 				case TYPE2: {
 					ControlComposite control = new Type2Form(descr.addr,
