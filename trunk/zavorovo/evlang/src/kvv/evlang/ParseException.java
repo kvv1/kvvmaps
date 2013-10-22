@@ -2,6 +2,8 @@
 /* JavaCCOptions:KEEP_LINE_COL=null */
 package kvv.evlang;
 
+import kvv.evlang.impl.Context;
+
 /**
  * This exception is thrown when parse errors are encountered. You can
  * explicitly create objects of this exception type by calling the method
@@ -27,7 +29,9 @@ public class ParseException extends Exception {
 	 */
 	public ParseException(Token currentTokenVal,
 			int[][] expectedTokenSequencesVal, String[] tokenImageVal) {
-		this(currentTokenVal.next, "Syntax error");
+		this(currentTokenVal.next, "'"
+				+ Context.win2utf(currentTokenVal.next.image)
+				+ "' Syntax error");
 	}
 
 	/**
