@@ -1,4 +1,4 @@
-package kvv.controllers.client.page;
+package kvv.controllers.client.control.simple;
 
 import java.util.Set;
 
@@ -6,9 +6,6 @@ import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.control.ControlComposite;
-import kvv.controllers.client.control.simple.GetRegControl;
-import kvv.controllers.client.control.simple.GetSetRegControl;
-import kvv.controllers.client.control.simple.SimpleRelayControl;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.Register;
 import kvv.controllers.register.RegisterUI;
@@ -22,7 +19,7 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-class Form extends ControlComposite {
+public class Form extends ControlComposite {
 
 	private final VerticalPanel panel = new VerticalPanel();
 

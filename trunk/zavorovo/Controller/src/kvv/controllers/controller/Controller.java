@@ -2,14 +2,18 @@ package kvv.controllers.controller;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
+import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.RegType;
@@ -134,20 +138,32 @@ public class Controller implements IController {
 		}
 	}
 
-	public byte[] send(int addr, byte[] bytes) throws IOException {
+	protected byte[] send1(int addr, byte[] bytes) throws IOException {
 		String url1 = url + "/PDU?addr=" + addr + "&body="
 				+ new Gson().toJson(bytes);
 		HttpURLConnection conn = null;
-
 		Reader r = null;
+
 		try {
 			conn = (HttpURLConnection) new URL(url1).openConnection();
 			conn.setRequestMethod("GET");
 			conn.connect();
-			byte[] res = null;
+			if (addr == 0)
+				return null;
 			r = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			return new Gson().fromJson(r, byte[].class);
+		} finally {
+			if (conn != null)
+				conn.disconnect();
+			if (r != null)
+				r.close();
+		}
+	}
+
+	public byte[] send(int addr, byte[] bytes) throws IOException {
+		try {
+			byte[] res = send1(addr, bytes);
 			if (addr != 0) {
-				res = new Gson().fromJson(r, byte[].class);
 				if (res == null)
 					throw new NoResponseException("no response");
 				if (res.length == 0)
@@ -168,17 +184,57 @@ public class Controller implements IController {
 		} catch (Exception e) {
 			MyLogger.log(e.getMessage());
 			throw new IOException(e);
-		} finally {
-			if (conn != null)
-				conn.disconnect();
-			if (r != null)
-				r.close();
 		}
 	}
 
-	public static void main(String[] args) {
-		String s = new Gson().fromJson("", String.class);
-		System.out.println(s);
+	@Override
+	public Map<Integer, Statistics> getStatistics() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
+	@Override
+	public void clearStatistics() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public static void main(String[] args) throws IOException {
+		Controller c = new Controller("") {
+			@Override
+			protected byte[] send1(int addr, byte[] bytes) throws IOException {
+				Socket s = null;
+				try {
+					s = new Socket("localhost", 502);
+					DataOutputStream os = new DataOutputStream(
+							s.getOutputStream());
+					DataInputStream is = new DataInputStream(s.getInputStream());
+					os.writeShort(0);
+					os.writeShort(0);
+					os.writeShort(bytes.length + 1); // len
+					os.writeByte(addr); // addr
+					os.write(bytes);
+					os.flush();
+
+					is.readShort();
+					is.readShort();
+					short len = is.readShort();
+					int a = is.readByte();
+					if (a != addr)
+						throw new IOException("TCP response format error");
+					byte[] res = new byte[len - 1];
+					for (int i = 0; i < res.length; i++) {
+						res[i] = is.readByte();
+						System.out.print(res[i] + " ");
+					}
+					res[0] |= 0x80;
+					return res;
+				} finally {
+					if (s != null)
+						s.close();
+				}
+			}
+		};
+		c.send1(1, new byte[] { 6, 0, 4, 0x66, 0x34 });
+	}
 }

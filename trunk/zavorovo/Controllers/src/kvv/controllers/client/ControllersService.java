@@ -5,6 +5,7 @@ import java.util.Map;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.PageDescr;
+import kvv.controllers.shared.SystemDescr;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -17,7 +18,10 @@ public interface ControllersService extends RemoteService {
 
 	AllRegs getRegs(int addr) throws Exception;
 
-	ControllerDescr[] getControllers() throws Exception;
+//	ControllerDescr[] getControllers() throws Exception;
+//	PageDescr[] getPages() throws Exception;
+
+	SystemDescr getSystemDescr()  throws Exception;
 
 	String upload(int addr, String name);
 
@@ -26,8 +30,6 @@ public interface ControllersService extends RemoteService {
 	void saveControllersText(String text) throws Exception;
 
 	String loadControllersText() throws Exception;
-
-	PageDescr[] getPages() throws Exception;
 
 	void savePageScript(String pageName, String script) throws Exception;
 
@@ -38,5 +40,4 @@ public interface ControllersService extends RemoteService {
 	void enableScript(String pageName, boolean b) throws Exception;
 
 	Map<String, String> getVMErrors();
-
 }

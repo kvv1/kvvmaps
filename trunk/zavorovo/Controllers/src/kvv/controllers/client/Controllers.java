@@ -7,8 +7,11 @@ import kvv.controllers.client.page.ModePage;
 import kvv.controllers.client.page.SourcesPage;
 import kvv.controllers.client.page.UnitPage;
 import kvv.controllers.shared.PageDescr;
+import kvv.controllers.shared.SystemDescr;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 
@@ -16,6 +19,11 @@ import com.google.gwt.user.client.ui.TabPanel;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Controllers implements EntryPoint {
+	private static final ControllersServiceAsync controllersService = GWT
+			.create(ControllersService.class);
+
+	public static SystemDescr systemDescr;
+
 	public void onModuleLoad() {
 
 		RootPanel root = RootPanel.get();
@@ -25,14 +33,14 @@ public class Controllers implements EntryPoint {
 
 		root.add(tabs);
 
-		// Window.alert("xx");
-		ControllersPage.loadData(new CallbackAdapter<Void>() {
+		controllersService.getSystemDescr(new AsyncCallback<SystemDescr>() {
 			@Override
-			public void onSuccess(Void result) {
+			public void onSuccess(SystemDescr result) {
+				systemDescr = result;
 				// Window.alert("x1");
 				try {
-					if (ControllersPage.pages != null)
-						for (PageDescr page : ControllersPage.pages)
+					if (systemDescr.pageDescrs != null)
+						for (PageDescr page : systemDescr.pageDescrs)
 							tabs.add(new UnitPage(page), page.name);
 
 					tabs.add(new ControllersPage(), "Контроллеры");
@@ -44,6 +52,7 @@ public class Controllers implements EntryPoint {
 						tabs.add(new ConfigurationPage(), "Конфигурация");
 					// throw new Exception();
 				} catch (Exception e) {
+					e.printStackTrace();
 					if (ModePage.controlMode)
 						tabs.add(new ConfigurationPage(), "Конфигурация");
 					tabs.selectTab(0);
@@ -62,7 +71,6 @@ public class Controllers implements EntryPoint {
 				if (ModePage.controlMode)
 					tabs.add(new ConfigurationPage(), "Конфигурация");
 				tabs.selectTab(0);
-				super.onFailure(caught);
 			}
 		});
 

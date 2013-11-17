@@ -73,6 +73,16 @@ public abstract class Controller implements IController {
 		wrapped.vmInit(addr);
 	}
 
+	@Override
+	public Map<Integer, Statistics> getStatistics() {
+		return wrapped.getStatistics();
+	}
+	
+	@Override
+	public void clearStatistics() {
+		wrapped.clearStatistics();
+	}
+	
 	private static Thread thread = new Thread(Controller.class.getSimpleName()
 			+ "Thread") {
 

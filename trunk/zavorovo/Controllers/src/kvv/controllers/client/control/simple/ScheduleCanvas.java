@@ -1,7 +1,8 @@
-package kvv.controllers.client.page;
+package kvv.controllers.client.control.simple;
 
 import java.util.ArrayList;
 
+import kvv.controllers.client.page.ModePage;
 import kvv.controllers.history.shared.HistoryItem;
 import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;
@@ -33,8 +34,8 @@ public abstract class ScheduleCanvas extends Composite {
 	private Image bgImage;
 
 	public static class Range {
-		int from;
-		int to;
+		public int from;
+		public int to;
 	};
 
 	//

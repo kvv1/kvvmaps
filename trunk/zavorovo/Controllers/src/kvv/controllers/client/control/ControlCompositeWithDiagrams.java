@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import kvv.controllers.client.CallbackAdapter;
+import kvv.controllers.client.Controllers;
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
-import kvv.controllers.client.page.AutoRelayControl;
-import kvv.controllers.history.shared.History;
+import kvv.controllers.client.control.simple.AutoRelayControl;
 import kvv.controllers.history.shared.HistoryItem;
 import kvv.controllers.shared.RegisterSchedule;
-import kvv.controllers.shared.Schedule;
+import kvv.controllers.shared.ScheduleAndHistory;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -37,37 +37,47 @@ public abstract class ControlCompositeWithDiagrams extends ControlComposite {
 		}
 	};
 
+	@SuppressWarnings("deprecation")
 	protected void refreshDiagrams() {
-		scheduleService.getSchedule(new CallbackAdapter<Schedule>() {
-			@Override
-			public void onSuccess(final Schedule schedule) {
-				final Date dateForHistory = getDateForHistory(schedule.date);
-				scheduleService.getHistory(dateForHistory,
-						new CallbackAdapter<History>() {
-							@Override
-							public void onSuccess(History log) {
-								for (AutoRelayControl c : diagrams) {
-									RegisterSchedule registerSchedule = schedule.map
-											.get(c.reg.name);
-									ArrayList<HistoryItem> logItems = log == null ? null
-											: log.items.get(c.reg.name);
-									@SuppressWarnings("deprecation")
-									int markerSeconds = schedule.date
-											.getHours()
-											* 3600
-											+ schedule.date.getMinutes()
-											* 60
-											+ schedule.date.getSeconds();
-									int historyEndSeconds = schedule.date
-											.equals(dateForHistory) ? markerSeconds
-											: 24 * 3600;
-									c.refreshSchedule(registerSchedule,
-											logItems, markerSeconds,
-											historyEndSeconds);
-								}
-							}
-						});
-			}
-		});
+		final Date now = Server2Local(new Date());
+		final Date dateForHistory = getDateForHistory(now);
+		scheduleService.getScheduleAndHistory(Local2Server(dateForHistory),
+				new CallbackAdapter<ScheduleAndHistory>() {
+					@Override
+					public void onSuccess(ScheduleAndHistory result) {
+						for (AutoRelayControl c : diagrams) {
+							RegisterSchedule registerSchedule = result.schedule.map
+									.get(c.reg.name);
+							ArrayList<HistoryItem> logItems = result.history == null ? null
+									: result.history.items.get(c.reg.name);
+							int markerSeconds = now.getHours() * 3600
+									+ now.getMinutes() * 60 + now.getSeconds();
+							int historyEndSeconds = now.equals(dateForHistory) ? markerSeconds
+									: 24 * 3600;
+							c.refreshSchedule(registerSchedule, logItems,
+									markerSeconds, historyEndSeconds);
+						}
+					}
+				});
+	}
+
+	@SuppressWarnings("deprecation")
+	private static Date Local2Server(Date d) {
+		if (d == null)
+			return d;
+		return new Date(
+				d.getTime()
+						- (d.getTimezoneOffset() - Controllers.systemDescr.timeZoneOffset)
+						* 60000);
+	}
+
+	@SuppressWarnings("deprecation")
+	private static Date Server2Local(Date d) {
+		if (d == null)
+			return d;
+		return new Date(
+				d.getTime()
+						+ (d.getTimezoneOffset() - Controllers.systemDescr.timeZoneOffset)
+						* 60000);
 	}
 }

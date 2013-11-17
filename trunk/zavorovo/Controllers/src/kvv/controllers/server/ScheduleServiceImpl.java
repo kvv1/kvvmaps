@@ -8,6 +8,7 @@ import kvv.controllers.history.HistoryFile;
 import kvv.controllers.history.shared.History;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
+import kvv.controllers.shared.ScheduleAndHistory;
 import kvv.controllers.utils.Constants;
 import kvv.controllers.utils.Utils;
 
@@ -18,21 +19,8 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 		ScheduleService {
 
 	@Override
-	public synchronized Schedule getSchedule() throws Exception {
-		try {
-			Schedule schedule = Utils.jsonRead(Constants.scheduleFile,
-					Schedule.class);
-			schedule.date = new Date();
-			return schedule;
-		} catch (Exception e) {
-			return new Schedule();
-		}
-	}
-
-	@Override
 	public synchronized void setSchedule(Schedule sched) throws Exception {
 		try {
-			sched.date = null;
 			Utils.jsonWrite(Constants.scheduleFile, sched);
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
@@ -62,14 +50,6 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public History getHistory(Date date) {
-		if (date == null)
-			return null;
-		History log = HistoryFile.load(date);
-		return log;
-	}
-
-	@Override
 	public String loadHistoryFile() {
 		try {
 			return Utils.readFile(HistoryFile.getLogFile(new Date())
@@ -77,6 +57,31 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 		} catch (IOException e) {
 			return null;
 		}
+	}
+
+	@Override
+	public ScheduleAndHistory getScheduleAndHistory(Date date){
+		ScheduleAndHistory scheduleAndHistory = new ScheduleAndHistory();
+		scheduleAndHistory.schedule = getSchedule();
+		scheduleAndHistory.history = getHistory(date);
+		return scheduleAndHistory;
+	}
+
+	private synchronized Schedule getSchedule(){
+		try {
+			Schedule schedule = Utils.jsonRead(Constants.scheduleFile,
+					Schedule.class);
+			return schedule;
+		} catch (Exception e) {
+			return new Schedule();
+		}
+	}
+
+	private History getHistory(Date date) {
+		if (date == null)
+			return null;
+		History log = HistoryFile.load(date);
+		return log;
 	}
 
 }
