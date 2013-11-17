@@ -5,6 +5,7 @@ import java.util.Map;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.PageDescr;
+import kvv.controllers.shared.SystemDescr;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -14,7 +15,7 @@ public interface ControllersServiceAsync {
 
 	void setReg(int addr, int reg, int val, AsyncCallback<Void> callback);
 
-	void getControllers(AsyncCallback<ControllerDescr[]> callback);
+//	void getControllers(AsyncCallback<ControllerDescr[]> callback);
 
 	void getRegs(int addr, AsyncCallback<AllRegs> callback);
 
@@ -26,7 +27,7 @@ public interface ControllersServiceAsync {
 
 	void loadControllersText(AsyncCallback<String> callbackAdapter);
 
-	void getPages(AsyncCallback<PageDescr[]> callback);
+//	void getPages(AsyncCallback<PageDescr[]> callback);
 
 	void loadPagesText(AsyncCallback<String> callbackAdapter);
 
@@ -38,5 +39,7 @@ public interface ControllersServiceAsync {
 	void enableScript(String pageName, boolean b, AsyncCallback<Void> callback);
 
 	void getVMErrors(AsyncCallback<Map<String, String>> callback);
+
+	void getSystemDescr(AsyncCallback<SystemDescr> callback);
 
 }

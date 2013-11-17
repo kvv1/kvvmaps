@@ -1,4 +1,4 @@
-package kvv.controllers.client.page;
+package kvv.controllers.client.control.simple;
 
 import java.util.ArrayList;
 
@@ -7,8 +7,7 @@ import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.control.ControlComposite;
-import kvv.controllers.client.control.simple.GetRegControl;
-import kvv.controllers.client.control.simple.SimpleRelayControl;
+import kvv.controllers.client.page.ModePage;
 import kvv.controllers.history.shared.HistoryItem;
 import kvv.controllers.shared.Register;
 import kvv.controllers.shared.RegisterSchedule;

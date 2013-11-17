@@ -1,4 +1,4 @@
-package kvv.controllers.client.page;
+package kvv.controllers.client.control.simple;
 
 import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.page.source.ExtendedTextArea;

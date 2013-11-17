@@ -4,9 +4,13 @@ import java.util.Date;
 import java.util.Map;
 
 import kvv.controllers.client.CallbackAdapter;
+import kvv.controllers.client.Controllers;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ControlCompositeWithDiagrams;
+import kvv.controllers.client.control.simple.AutoRelayControl;
+import kvv.controllers.client.control.simple.Form;
+import kvv.controllers.client.control.simple.TextWithSaveButton;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.PageDescr;
 import kvv.controllers.shared.Register;
@@ -81,7 +85,7 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 			controllersPanel1.setBorderWidth(1);
 			for (String controllerName : page.controllers) {
 				int addr = -1;
-				for (ControllerDescr descr : ControllersPage.controllers)
+				for (ControllerDescr descr : Controllers.systemDescr.controllerDescrs)
 					if (descr.name.equals(controllerName))
 						addr = descr.addr;
 				if (addr >= 0) {
@@ -119,7 +123,7 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 			historyOff.setValue(true);
 
 			for (String regName : page.registers) {
-				l1: for (ControllerDescr descr : ControllersPage.controllers)
+				l1: for (ControllerDescr descr : Controllers.systemDescr.controllerDescrs)
 					if (descr != null && descr.registers != null)
 						for (Register register : descr.registers)
 							if (register != null
@@ -172,16 +176,11 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 						errMsg.setText(result.get(page.name));
 					}
 				});
-		controllersService.getPages(new CallbackAdapter<PageDescr[]>() {
-			@Override
-			public void onSuccess(PageDescr[] result) {
-				for (PageDescr page : result)
-					if (page.name.equals(UnitPage.this.page.name)) {
-						script.setText(page.script);
-						vmCB.setValue(page.scriptEnabled);
-					}
+		for (PageDescr page : Controllers.systemDescr.pageDescrs)
+			if (page.name.equals(UnitPage.this.page.name)) {
+				script.setText(page.script);
+				vmCB.setValue(page.scriptEnabled);
 			}
-		});
 	}
 
 	@SuppressWarnings("deprecation")

@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 
@@ -11,7 +12,7 @@ import kvv.controllers.client.ControllersService;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.server.controller.Controller;
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.PageDescr;
+import kvv.controllers.shared.SystemDescr;
 import kvv.controllers.utils.Constants;
 import kvv.controllers.utils.Utils;
 import kvv.evlang.EG1;
@@ -38,11 +39,6 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}
-	}
-
-	@Override
-	public ControllerDescr[] getControllers() throws Exception {
-		return Controllers.getInstance().getControllers();
 	}
 
 	@Override
@@ -140,17 +136,6 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public PageDescr[] getPages() throws Exception {
-		try {
-			return Pages.getPages();
-		} catch (FileNotFoundException e) {
-			return null;
-		} catch (IOException e) {
-			throw new Exception(e.getMessage());
-		}
-	}
-
-	@Override
 	public String loadPagesText() throws Exception {
 		try {
 			return Utils.readFile(Constants.pagesFile);
@@ -193,4 +178,36 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		return Controller.getVMErrors();
 	}
 
+	@SuppressWarnings("deprecation")
+	@Override
+	public SystemDescr getSystemDescr() throws Exception {
+		try {
+			SystemDescr systemDescr = new SystemDescr();
+			systemDescr.controllerDescrs = Controllers.getInstance()
+					.getControllers();
+			systemDescr.pageDescrs = Pages.getPages();
+			systemDescr.timeZoneOffset = new Date().getTimezoneOffset();
+			return systemDescr;
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+//	@Override
+//	public PageDescr[] getPages() throws Exception {
+//		try {
+//			return Pages.getPages();
+//		} catch (FileNotFoundException e) {
+//			return null;
+//		} catch (IOException e) {
+//			throw new Exception(e.getMessage());
+//		}
+//	}
+//
+//	@Override
+//	public ControllerDescr[] getControllers() throws Exception {
+//		return Controllers.getInstance().getControllers();
+//	}
+
+	// return new Date().getTimezoneOffset();
 }

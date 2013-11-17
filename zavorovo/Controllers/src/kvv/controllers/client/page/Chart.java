@@ -2,7 +2,7 @@ package kvv.controllers.client.page;
 
 import java.util.ArrayList;
 
-import kvv.controllers.client.page.ScheduleCanvas.Range;
+import kvv.controllers.client.control.simple.ScheduleCanvas.Range;
 import kvv.controllers.history.shared.HistoryItem;
 
 import com.google.gwt.canvas.client.Canvas;
