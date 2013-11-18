@@ -12,7 +12,7 @@ import kvv.controllers.client.control.simple.AutoRelayControl;
 import kvv.controllers.client.control.simple.Form;
 import kvv.controllers.client.control.simple.TextWithSaveButton;
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.PageDescr;
+import kvv.controllers.shared.UnitDescr;
 import kvv.controllers.shared.Register;
 
 import com.google.gwt.core.client.GWT;
@@ -39,7 +39,7 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 
 	private final Label errMsg = new Label();
 	private final CheckBox vmCB = new CheckBox();
-	private final PageDescr page;
+	private final UnitDescr page;
 
 	private final TextWithSaveButton script = new TextWithSaveButton("",
 			"100%", "400px") {
@@ -65,7 +65,7 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 		}
 	};
 
-	public UnitPage(final PageDescr page) {
+	public UnitPage(final UnitDescr page) {
 		this.page = page;
 
 		Button refreshButton = new Button("Обновить");
@@ -176,7 +176,7 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 						errMsg.setText(result.get(page.name));
 					}
 				});
-		for (PageDescr page : Controllers.systemDescr.pageDescrs)
+		for (UnitDescr page : Controllers.systemDescr.unitDescrs)
 			if (page.name.equals(UnitPage.this.page.name)) {
 				script.setText(page.script);
 				vmCB.setValue(page.scriptEnabled);

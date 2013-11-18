@@ -15,12 +15,13 @@ import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.evlang.rt.Const;
 
-class ControllerWrapperCached extends Controller {
+public class ControllerWrapperCached extends ControllerAdapter {
 
 	private Map<Integer, AllRegs> map = new HashMap<Integer, AllRegs>();
 
-	public ControllerWrapperCached(IController controller) {
-		super(controller);
+	public ControllerWrapperCached(Controllers controllers,
+			IController controller) {
+		super(controllers, controller);
 		thread.start();
 	}
 
@@ -83,16 +84,16 @@ class ControllerWrapperCached extends Controller {
 		return allRegs;
 	}
 
-	private List<ControllerDescr> controllers;
+	private List<ControllerDescr> controllersList;
 
 	private void step() {
 
-		if (controllers == null || controllers.isEmpty())
-			controllers = new LinkedList<ControllerDescr>(
-					Arrays.asList(Controllers.getInstance().getControllers()));
+		if (controllersList == null || controllersList.isEmpty())
+			controllersList = new LinkedList<ControllerDescr>(
+					Arrays.asList(controllers.getControllers()));
 
-		if (!controllers.isEmpty()) {
-			int addr = controllers.remove(0).addr;
+		if (!controllersList.isEmpty()) {
+			int addr = controllersList.remove(0).addr;
 			try {
 				if (addr != 0) {
 					AllRegs allRegs = wrapped.getAllRegs(addr);

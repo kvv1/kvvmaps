@@ -12,10 +12,11 @@ import kvv.controllers.register.AllRegs;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.Register;
 
-class ControllerWrapperLogger extends Controller {
+public class ControllerWrapperLogger extends ControllerAdapter {
 
-	public ControllerWrapperLogger(IController controller) {
-		super(controller);
+	public ControllerWrapperLogger(Controllers controllers,
+			IController controller) {
+		super(controllers, controller);
 		HistoryFile.logValue(new Date(), null, null);
 	}
 
@@ -24,7 +25,7 @@ class ControllerWrapperLogger extends Controller {
 		super.close();
 		HistoryFile.logValue(new Date(), null, null);
 	}
-	
+
 	@Override
 	public synchronized void setReg(int addr, int reg, int val)
 			throws IOException {
@@ -76,7 +77,7 @@ class ControllerWrapperLogger extends Controller {
 	}
 
 	private void log(int addr, int reg, Integer val) {
-		Register register = Controllers.getInstance().getRegister(addr, reg);
+		Register register = controllers.getRegister(addr, reg);
 		if (register == null)
 			return;
 		logValue(register.name, val);
@@ -84,8 +85,7 @@ class ControllerWrapperLogger extends Controller {
 
 	private void log(int addr, Map<Integer, Integer> values) {
 		if (values == null) {
-			Collection<Register> regs = Controllers.getInstance().getRegisters(
-					addr);
+			Collection<Register> regs = controllers.getRegisters(addr);
 			for (Register reg : regs)
 				logValue(reg.name, null);
 			return;

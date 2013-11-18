@@ -6,7 +6,7 @@ import kvv.controllers.client.page.LogPage;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.client.page.SourcesPage;
 import kvv.controllers.client.page.UnitPage;
-import kvv.controllers.shared.PageDescr;
+import kvv.controllers.shared.UnitDescr;
 import kvv.controllers.shared.SystemDescr;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -39,8 +39,8 @@ public class Controllers implements EntryPoint {
 				systemDescr = result;
 				// Window.alert("x1");
 				try {
-					if (systemDescr.pageDescrs != null)
-						for (PageDescr page : systemDescr.pageDescrs)
+					if (systemDescr.unitDescrs != null)
+						for (UnitDescr page : systemDescr.unitDescrs)
 							tabs.add(new UnitPage(page), page.name);
 
 					tabs.add(new ControllersPage(), "Контроллеры");

@@ -4,7 +4,7 @@ import java.util.Map;
 
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.PageDescr;
+import kvv.controllers.shared.UnitDescr;
 import kvv.controllers.shared.SystemDescr;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;

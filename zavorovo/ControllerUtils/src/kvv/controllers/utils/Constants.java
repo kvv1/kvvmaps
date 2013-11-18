@@ -9,6 +9,6 @@ public class Constants {
 	public static final String logFile = ROOT + "log/log.txt";
 	public static final String rs485LogFile = ROOT + "log/rs485.txt";
 	public static final String srcFile = ROOT + "sources.properties";
-	public static final String pagesFile = ROOT + "pages.txt";
+	public static final String unitsFile = ROOT + "pages.txt";
 	public static final String scriptsFile = ROOT + "scripts/scripts.properties";
 }
