@@ -12,15 +12,15 @@ import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerDescr.Type;
 
-class ControllerWrapperUni extends Controller {
-	public ControllerWrapperUni(IController controller) {
-		super(controller);
+public class ControllerWrapperUni extends ControllerAdapter {
+	public ControllerWrapperUni(Controllers controllers, IController controller) {
+		super(controllers, controller);
 	}
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
 		try {
-			if (Controllers.getInstance().get(addr).type == Type.MU110_8)
+			if (controllers.get(addr).type == Type.MU110_8)
 				val = val == 0 ? 0 : 1000;
 		} catch (Exception e) {
 		}
@@ -51,7 +51,7 @@ class ControllerWrapperUni extends Controller {
 	public AllRegs getAllRegs(int addr) throws IOException {
 		ControllerDescr controllerDescr;
 		try {
-			controllerDescr = Controllers.getInstance().get(addr);
+			controllerDescr = controllers.get(addr);
 		} catch (Exception e) {
 			throw new IOException(e.getMessage());
 		}
@@ -83,11 +83,11 @@ class ControllerWrapperUni extends Controller {
 		return allRegs;
 	}
 
-	private static Integer adjustValue(int addr, int reg, Integer value)
+	private Integer adjustValue(int addr, int reg, Integer value)
 			throws IOException {
 		ControllerDescr controllerDescr;
 		try {
-			controllerDescr = Controllers.getInstance().get(addr);
+			controllerDescr = controllers.get(addr);
 		} catch (Exception e) {
 			throw new IOException(e.getMessage());
 		}

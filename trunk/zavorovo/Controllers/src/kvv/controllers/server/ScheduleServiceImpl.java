@@ -60,14 +60,11 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public ScheduleAndHistory getScheduleAndHistory(Date date){
-		ScheduleAndHistory scheduleAndHistory = new ScheduleAndHistory();
-		scheduleAndHistory.schedule = getSchedule();
-		scheduleAndHistory.history = getHistory(date);
-		return scheduleAndHistory;
+	public synchronized ScheduleAndHistory getScheduleAndHistory(Date date) {
+		return new ScheduleAndHistory(getSchedule(), getHistory(date));
 	}
 
-	private synchronized Schedule getSchedule(){
+	private synchronized Schedule getSchedule() {
 		try {
 			Schedule schedule = Utils.jsonRead(Constants.scheduleFile,
 					Schedule.class);
@@ -77,7 +74,7 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 		}
 	}
 
-	private History getHistory(Date date) {
+	private synchronized History getHistory(Date date) {
 		if (date == null)
 			return null;
 		History log = HistoryFile.load(date);

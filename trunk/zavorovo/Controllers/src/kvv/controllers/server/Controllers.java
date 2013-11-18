@@ -7,25 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import kvv.controllers.server.context.Context;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.Register;
 import kvv.controllers.utils.Constants;
 import kvv.controllers.utils.Utils;
 
 public class Controllers {
-
-	private static Controllers instance;
-
-	public static synchronized Controllers getInstance() {
-		if (instance == null)
-			instance = new Controllers();
-		return instance;
-	}
-
-	public static synchronized void reload() {
-		instance = null;
-	}
-
 	private final Map<String, ControllerDescr> nameMap = new HashMap<String, ControllerDescr>();
 	private final Map<Integer, ControllerDescr> addrMap = new HashMap<Integer, ControllerDescr>();
 
@@ -117,7 +105,7 @@ public class Controllers {
 
 	public static void save(String text) throws IOException {
 		Utils.writeFile(Constants.controllersFile, text);
-		reload();
+		Context.reload();
 	}
 
 	public static String load() throws IOException {

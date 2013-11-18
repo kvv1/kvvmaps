@@ -268,9 +268,9 @@ public abstract class Context {
 		System.out.println("maxstack = " + maxStack);
 	}
 
-	public static byte[] dumpNull() throws IOException {
-		return new byte[0];
-	}
+//	public static byte[] dumpNull() throws IOException {
+//		return new byte[0];
+//	}
 
 	public byte[] dump() throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
