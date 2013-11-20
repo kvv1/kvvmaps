@@ -18,6 +18,26 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>configurationServlet</servlet-name>
+		<servlet-class>kvv.controllers.server.ConfigurationServiceImpl</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>configurationServlet</servlet-name>
+		<url-pattern>/controllers/configuration</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>unitServlet</servlet-name>
+		<servlet-class>kvv.controllers.server.UnitServiceImpl</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>unitServlet</servlet-name>
+		<url-pattern>/controllers/unit</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>scheduleServlet</servlet-name>
 		<servlet-class>kvv.controllers.server.ScheduleServiceImpl</servlet-class>
 	</servlet>

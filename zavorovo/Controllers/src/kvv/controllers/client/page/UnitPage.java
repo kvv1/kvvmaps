@@ -1,19 +1,19 @@
 package kvv.controllers.client.page;
 
 import java.util.Date;
-import java.util.Map;
 
 import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.Controllers;
-import kvv.controllers.client.ControllersService;
-import kvv.controllers.client.ControllersServiceAsync;
+import kvv.controllers.client.UnitService;
+import kvv.controllers.client.UnitServiceAsync;
 import kvv.controllers.client.control.ControlCompositeWithDiagrams;
 import kvv.controllers.client.control.simple.AutoRelayControl;
 import kvv.controllers.client.control.simple.Form;
 import kvv.controllers.client.control.simple.TextWithSaveButton;
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.UnitDescr;
 import kvv.controllers.shared.Register;
+import kvv.controllers.shared.ScriptData;
+import kvv.controllers.shared.UnitDescr;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -28,8 +28,7 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class UnitPage extends ControlCompositeWithDiagrams {
-	private final ControllersServiceAsync controllersService = GWT
-			.create(ControllersService.class);
+	private final UnitServiceAsync unitService = GWT.create(UnitService.class);
 	private final RadioButton historyOff = new RadioButton("history"
 			+ hashCode(), "Выкл");
 	private final RadioButton historyToday = new RadioButton("history"
@@ -46,7 +45,7 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 		@Override
 		protected void save(final String text,
 				final AsyncCallback<Void> callback) {
-			controllersService.savePageScript(page.name, text,
+			unitService.savePageScript(page.name, text,
 					new AsyncCallback<Void>() {
 
 						@Override
@@ -57,7 +56,6 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 
 						@Override
 						public void onSuccess(Void result) {
-							page.script = text;
 							callback.onSuccess(result);
 							refreshScript();
 						}
@@ -141,7 +139,7 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 		vmCB.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				controllersService.enableScript(page.name, vmCB.getValue(),
+				unitService.enableScript(page.name, vmCB.getValue(),
 						new CallbackAdapter<Void>() {
 							@Override
 							public void onSuccess(Void result) {
@@ -169,18 +167,14 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 	}
 
 	private void refreshScript() {
-		controllersService
-				.getVMErrors(new CallbackAdapter<Map<String, String>>() {
-					@Override
-					public void onSuccess(Map<String, String> result) {
-						errMsg.setText(result.get(page.name));
-					}
-				});
-		for (UnitDescr page : Controllers.systemDescr.unitDescrs)
-			if (page.name.equals(UnitPage.this.page.name)) {
-				script.setText(page.script);
-				vmCB.setValue(page.scriptEnabled);
+		unitService.getScriptData(page.name, new CallbackAdapter<ScriptData>() {
+			@Override
+			public void onSuccess(ScriptData result) {
+				script.setText(result.text);
+				errMsg.setText(result.err);
+				vmCB.setValue(result.enabled);
 			}
+		});
 	}
 
 	@SuppressWarnings("deprecation")

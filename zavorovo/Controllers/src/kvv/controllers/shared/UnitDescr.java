@@ -7,6 +7,6 @@ public class UnitDescr implements Serializable {
 	public String name;
 	public String[] controllers;
 	public String[] registers;
-	public String script;
-	public boolean scriptEnabled;
+//	public String script;
+//	public boolean scriptEnabled;
 }

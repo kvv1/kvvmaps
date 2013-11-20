@@ -32,23 +32,31 @@ public class Units {
 	public static UnitDescr[] getUnits() throws IOException {
 		UnitDescr[] units = Utils.jsonRead(Constants.unitsFile,
 				UnitDescr[].class);
-		for (UnitDescr unit : units) {
-			try {
-				unit.script = Utils.readFile(Constants.ROOT + "/scripts/"
-						+ unit.name);
-				unit.scriptEnabled = scriptEnabled(unit.name);
-			} catch (Exception e) {
-			}
-		}
+		// for (UnitDescr unit : units) {
+		// try {
+		// unit.script = Utils.readFile(Constants.ROOT + "/scripts/"
+		// + unit.name);
+		// unit.scriptEnabled = scriptEnabled(unit.name);
+		// } catch (Exception e) {
+		// }
+		// }
 		return units;
 	}
 
-	public void saveScript(String unitName, String script) throws Exception {
+	public void setScript(String unitName, String script) throws Exception {
 		try {
 			new File(Constants.ROOT + "/scripts").mkdir();
 			String fileName = Constants.ROOT + "/scripts/" + unitName;
 			Utils.writeFile(fileName, script);
 			loadScript(unitName);
+		} catch (Throwable e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	public String getScript(String unitName) throws Exception {
+		try {
+			return Utils.readFile(Constants.ROOT + "/scripts/" + unitName);
 		} catch (Throwable e) {
 			throw new Exception(e.getMessage());
 		}
@@ -62,6 +70,10 @@ public class Units {
 		} catch (Throwable e) {
 			throw new Exception(e.getMessage());
 		}
+	}
+
+	public boolean scriptEnabled(String unitName) {
+		return Boolean.valueOf(Utils.getProp(Constants.scriptsFile, unitName));
 	}
 
 	public RTContext parse(String unitName) throws FileNotFoundException,
@@ -81,10 +93,6 @@ public class Units {
 
 		parser.parse();
 		return parser.getRTContext();
-	}
-
-	public static boolean scriptEnabled(String unitName) {
-		return Boolean.valueOf(Utils.getProp(Constants.scriptsFile, unitName));
 	}
 
 	private Thread thread = new Thread(Units.class.getSimpleName() + "Thread") {
@@ -125,8 +133,8 @@ public class Units {
 		thread.start();
 	}
 
-	public synchronized Map<String, String> getVMErrors() {
-		return vmErrors;
+	public String getError(String pageName) {
+		return vmErrors.get(pageName);
 	}
 
 	public synchronized void loadScripts() throws IOException {
@@ -134,20 +142,17 @@ public class Units {
 		vmErrors.clear();
 
 		UnitDescr[] units = Units.getUnits();
-		for (UnitDescr unit : units) {
-			if (unit.scriptEnabled) {
+		for (UnitDescr unit : units)
+			if (scriptEnabled(unit.name))
 				_loadScript(unit.name);
-			}
-		}
 	}
 
 	public synchronized void loadScript(String unitName) throws IOException {
 		vms.remove(unitName);
 		vmErrors.remove(unitName);
 
-		if (Units.scriptEnabled(unitName)) {
+		if (scriptEnabled(unitName))
 			_loadScript(unitName);
-		}
 	}
 
 	private void _loadScript(String unitName) {
