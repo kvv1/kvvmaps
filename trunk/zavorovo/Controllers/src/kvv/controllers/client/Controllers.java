@@ -6,8 +6,8 @@ import kvv.controllers.client.page.LogPage;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.client.page.SourcesPage;
 import kvv.controllers.client.page.UnitPage;
-import kvv.controllers.shared.UnitDescr;
 import kvv.controllers.shared.SystemDescr;
+import kvv.controllers.shared.UnitDescr;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -19,8 +19,8 @@ import com.google.gwt.user.client.ui.TabPanel;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Controllers implements EntryPoint {
-	private static final ControllersServiceAsync controllersService = GWT
-			.create(ControllersService.class);
+	private static final ConfigurationServiceAsync configurationService = GWT
+			.create(ConfigurationService.class);
 
 	public static SystemDescr systemDescr;
 
@@ -33,7 +33,7 @@ public class Controllers implements EntryPoint {
 
 		root.add(tabs);
 
-		controllersService.getSystemDescr(new AsyncCallback<SystemDescr>() {
+		configurationService.getSystemDescr(new AsyncCallback<SystemDescr>() {
 			@Override
 			public void onSuccess(SystemDescr result) {
 				systemDescr = result;

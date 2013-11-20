@@ -1,6 +1,5 @@
 package kvv.controllers.server;
 
-import java.io.IOException;
 import java.util.Date;
 
 import kvv.controllers.client.ScheduleService;
@@ -19,43 +18,31 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 		ScheduleService {
 
 	@Override
-	public synchronized void setSchedule(Schedule sched) throws Exception {
+	public synchronized void update(String regName,
+			RegisterSchedule registerSchedule) throws Exception {
 		try {
-			Utils.jsonWrite(Constants.scheduleFile, sched);
+			Schedule schedule = getSchedule();
+			if (registerSchedule != null)
+				schedule.map.put(regName, registerSchedule);
+			else
+				schedule.map.remove(regName);
+			setSchedule(schedule);
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		}
 	}
 
 	@Override
-	public synchronized void update(String regName,
-			RegisterSchedule registerSchedule) throws Exception {
-
-		Schedule schedule = getSchedule();
-		if (registerSchedule != null)
-			schedule.map.put(regName, registerSchedule);
-		else
-			schedule.map.remove(regName);
-		setSchedule(schedule);
-	}
-
-	@Override
 	public synchronized void enable(String regName, boolean b) throws Exception {
-		Schedule schedule = getSchedule();
-		RegisterSchedule registerSchedule = schedule.map.get(regName);
-		if (registerSchedule != null) {
-			registerSchedule.enabled = b;
-			setSchedule(schedule);
-		}
-	}
-
-	@Override
-	public String loadHistoryFile() {
 		try {
-			return Utils.readFile(HistoryFile.getLogFile(new Date())
-					.getAbsolutePath());
-		} catch (IOException e) {
-			return null;
+			Schedule schedule = getSchedule();
+			RegisterSchedule registerSchedule = schedule.map.get(regName);
+			if (registerSchedule != null) {
+				registerSchedule.enabled = b;
+				setSchedule(schedule);
+			}
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
 		}
 	}
 
@@ -64,7 +51,7 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 		return new ScheduleAndHistory(getSchedule(), getHistory(date));
 	}
 
-	private synchronized Schedule getSchedule() {
+	private Schedule getSchedule() {
 		try {
 			Schedule schedule = Utils.jsonRead(Constants.scheduleFile,
 					Schedule.class);
@@ -72,6 +59,10 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 		} catch (Exception e) {
 			return new Schedule();
 		}
+	}
+
+	private void setSchedule(Schedule sched) throws Exception {
+		Utils.jsonWrite(Constants.scheduleFile, sched);
 	}
 
 	private synchronized History getHistory(Date date) {
