@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.history.shared.HistoryItem;
-import kvv.controllers.shared.Register;
+import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.ScheduleItem;
 
@@ -51,7 +51,7 @@ public abstract class ScheduleCanvas extends Composite {
 	protected abstract void save(String regName,
 			RegisterSchedule registerSchedule);
 
-	public ScheduleCanvas(final Register reg,
+	public ScheduleCanvas(final RegisterDescr reg,
 			final MouseMoveHandler mouseMoveHandler) {
 		scaleLevels = reg.scaleLevels;
 

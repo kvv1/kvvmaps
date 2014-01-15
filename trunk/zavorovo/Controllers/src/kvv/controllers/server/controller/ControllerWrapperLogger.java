@@ -10,7 +10,7 @@ import kvv.controllers.controller.IController;
 import kvv.controllers.history.HistoryFile;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.server.Controllers;
-import kvv.controllers.shared.Register;
+import kvv.controllers.shared.RegisterDescr;
 
 public class ControllerWrapperLogger extends ControllerAdapter {
 
@@ -77,7 +77,7 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 	}
 
 	private void log(int addr, int reg, Integer val) {
-		Register register = controllers.getRegister(addr, reg);
+		RegisterDescr register = controllers.getRegister(addr, reg);
 		if (register == null)
 			return;
 		logValue(register.name, val);
@@ -85,8 +85,8 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 
 	private void log(int addr, Map<Integer, Integer> values) {
 		if (values == null) {
-			Collection<Register> regs = controllers.getRegisters(addr);
-			for (Register reg : regs)
+			Collection<RegisterDescr> regs = controllers.getRegisters(addr);
+			for (RegisterDescr reg : regs)
 				logValue(reg.name, null);
 			return;
 		}

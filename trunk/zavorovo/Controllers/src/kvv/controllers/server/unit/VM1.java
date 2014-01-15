@@ -5,13 +5,14 @@ import java.io.IOException;
 import kvv.controllers.controller.IController;
 import kvv.evlang.rt.Const;
 import kvv.evlang.rt.RTContext;
+import kvv.evlang.rt.UncaughtExceptionException;
 import kvv.evlang.rt.VM;
 
 class VM1 extends VM {
 
 	private final IController controller;
 
-	public VM1(RTContext cont, IController controller) {
+	public VM1(RTContext cont, IController controller) throws UncaughtExceptionException {
 		super(cont);
 		this.controller = controller;
 	}

@@ -13,6 +13,7 @@ import kvv.controllers.utils.cmdline.IntParam;
 import kvv.controllers.utils.cmdline.StringParam;
 import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
+import kvv.evlang.rt.UncaughtExceptionException;
 import kvv.evlang.rt.VMStatus;
 
 //  < ID : [ "a"-"z", "A"-"Z", "_", "\u00A0"-"\u00FF" ] ([ "a"-"z", "A"-"Z", "_", "0"-"9", "\u00A0"-"\u00FF" ])* >
@@ -27,7 +28,8 @@ public abstract class EG extends Context {
 	public static BooleanParam dump = new BooleanParam(cmdLine, "-dump");
 	public static BooleanParam run = new BooleanParam(cmdLine, "-run");
 
-	public static void main(String args[]) throws IOException {
+	public static void main(String args[]) throws IOException,
+			UncaughtExceptionException {
 		cmdLine.parse(args);
 
 		EG1 parser = new EG1(cmdLine.args[0]) {

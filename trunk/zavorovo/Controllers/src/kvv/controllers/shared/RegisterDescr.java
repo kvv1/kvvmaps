@@ -3,13 +3,15 @@ package kvv.controllers.shared;
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
-public class Register implements Serializable {
+public class RegisterDescr implements Serializable {
 	public String name;
 	public String controller;
 	public int addr;
 	public int register;
 	public int[] scaleLevels;
 	public Integer height;
+	
+	public int hysteresis;
 
 	@Override
 	public int hashCode() {
@@ -18,7 +20,7 @@ public class Register implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		return name.equals(((Register) obj).name);
+		return name.equals(((RegisterDescr) obj).name);
 	}
 
 }

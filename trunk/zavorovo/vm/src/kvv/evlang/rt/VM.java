@@ -7,26 +7,29 @@ public abstract class VM {
 
 	public abstract int getExtReg(int addr, int reg);
 
-	private final Interpreter interpreter = new Interpreter() {
-		@Override
-		public void setExtReg(int addr, int reg, int value) {
-			VM.this.setExtReg(addr, reg, value);
-		}
-
-		@Override
-		public int getExtReg(int addr, int reg) {
-			return VM.this.getExtReg(addr, reg);
-		}
-	};
+	private final Interpreter interpreter;
 
 	private final RTContext cont;
 
 	private final static int STEP = 10;
 
-	public VM(final RTContext cont) {
+	public VM(final RTContext cont) throws UncaughtExceptionException {
 		this.cont = cont;
-		interpreter.interpret(cont, cont.funcs[0].code);
-		interpreter.interpret(cont, cont.funcs[1].code);
+
+		interpreter = new Interpreter(cont) {
+			@Override
+			public void setExtReg(int addr, int reg, int value) {
+				VM.this.setExtReg(addr, reg, value);
+			}
+
+			@Override
+			public int getExtReg(int addr, int reg) {
+				return VM.this.getExtReg(addr, reg);
+			}
+		};
+
+		interpreter.interpret(cont.funcs[0].code);
+		interpreter.interpret(cont.funcs[1].code);
 
 	}
 
@@ -51,21 +54,30 @@ public abstract class VM {
 				timer.cnt -= (time - t);
 				if (timer.cnt <= 0) {
 					timer.cnt = 0;
-					interpreter.interpret(cont, timer.handler);
+					try {
+						interpreter.interpret(timer.handler);
+					} catch (UncaughtExceptionException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
 
 		for (Event event : cont.events) {
-			int val = interpreter.eval(cont, event.cond);
-			if (event.type == RTContext.Event.TYPE_SET) {
-				if (event.state == 0 && val != 0)
-					interpreter.interpret(cont, event.handler);
-			} else if (event.type == RTContext.Event.TYPE_CHANGE) {
-				if (event.state != val)
-					interpreter.interpret(cont, event.handler);
+			int val;
+			try {
+				val = interpreter.eval(event.cond);
+				if (event.type == RTContext.Event.TYPE_SET) {
+					if (event.state == 0 && val != 0)
+						interpreter.interpret(event.handler);
+				} else if (event.type == RTContext.Event.TYPE_CHANGE) {
+					if (event.state != val)
+						interpreter.interpret(event.handler);
+				}
+				event.state = val;
+			} catch (UncaughtExceptionException e) {
+				e.printStackTrace();
 			}
-			event.state = val;
 		}
 	}
 }

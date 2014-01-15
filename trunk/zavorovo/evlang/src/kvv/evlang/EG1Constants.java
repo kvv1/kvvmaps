@@ -79,13 +79,19 @@ public interface EG1Constants {
   /** RegularExpression Id. */
   int RETURN = 40;
   /** RegularExpression Id. */
-  int ID = 41;
+  int TRY = 41;
   /** RegularExpression Id. */
-  int STRING = 42;
+  int CATCH = 42;
   /** RegularExpression Id. */
-  int NUMBER = 43;
+  int THROW = 43;
   /** RegularExpression Id. */
-  int DIGIT = 44;
+  int ID = 44;
+  /** RegularExpression Id. */
+  int STRING = 45;
+  /** RegularExpression Id. */
+  int NUMBER = 46;
+  /** RegularExpression Id. */
+  int DIGIT = 47;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -133,6 +139,9 @@ public interface EG1Constants {
     "\"int\"",
     "\"void\"",
     "\"return\"",
+    "\"try\"",
+    "\"catch\"",
+    "\"throw\"",
     "<ID>",
     "<STRING>",
     "<NUMBER>",

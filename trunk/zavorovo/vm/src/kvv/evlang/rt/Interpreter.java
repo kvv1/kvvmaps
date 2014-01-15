@@ -3,11 +3,18 @@ package kvv.evlang.rt;
 import java.util.List;
 
 public abstract class Interpreter {
+
+	private final RTContext context;
+
+	public Interpreter(RTContext cont) {
+		this.context = cont;
+	}
+
 	public abstract void setExtReg(int addr, int reg, int value);
 
 	public abstract int getExtReg(int addr, int reg);
 
-	static class Stack {
+	static private class Stack {
 		private int[] data = new int[100];
 		private int sp = data.length;
 
@@ -37,31 +44,69 @@ public abstract class Interpreter {
 	}
 
 	private Stack stack = new Stack();
+	private int ip;
+	private int fp;
 
-	public void interpret(RTContext context, int off) {
+	public void interpret(int off) throws UncaughtExceptionException {
 		if (!stack.isEmpty())
 			throw new IllegalStateException();
-		_interpret(context, off);
+		if (ip != 0)
+			throw new IllegalStateException();
+		if (fp != 0)
+			throw new IllegalStateException();
+		_interpret(off);
 		if (!stack.isEmpty())
 			throw new IllegalStateException();
 	}
 
-	public int eval(RTContext context, int off) {
+	public int eval(int off) throws UncaughtExceptionException {
 		if (!stack.isEmpty())
 			throw new IllegalStateException();
-		_interpret(context, off);
+		if (ip != 0)
+			throw new IllegalStateException();
+		if (fp != 0)
+			throw new IllegalStateException();
+		_interpret(off);
 		int res = stack.pop();
 		if (!stack.isEmpty())
 			throw new IllegalStateException();
 		return res;
 	}
 
-	private void _interpret(RTContext context, int ip) {
-		// System.out.println(code.size());
+	private void call(int addr) {
+		stack.push(ip);
+		stack.push(fp);
+		fp = stack.getSP();
+		ip = addr;
+	}
 
+	private void ret() {
+		stack.sp = fp;
+		fp = stack.pop();
+		ip = stack.pop();
+	}
+
+	private void throwException(int e) throws UncaughtExceptionException {
+		for (;;) {
+			stack.sp = fp;
+			TryCatchBlock tcb = context.findTryCatchBlock(ip);
+			if (tcb != null) {
+				stack.push(e);
+				ip = tcb.handler;
+				break;
+			} else {
+				ret();
+				if (ip == 0)
+					throw new UncaughtExceptionException();
+			}
+		}
+	}
+
+	private void _interpret(int _ip)
+			throws UncaughtExceptionException {
 		List<Byte> code = context.codeArr;
 
-		int fp = stack.getSP();
+		call(_ip);
 
 		while (true) {
 			int right;
@@ -88,69 +133,61 @@ public abstract class Interpreter {
 			switch (bc) {
 			case CALL:
 				int addr = context.funcs[code.get(ip++)].code;
-				stack.push(ip);
-				ip = addr;
-				stack.push(fp);
-				fp = stack.getSP();
+				call(addr);
 				break;
 			case RET:
-				stack.sp = fp;
-				if (stack.isEmpty())
+				ret();
+				if (ip == 0)
 					return;
-				fp = stack.pop();
-				ip = stack.pop();
 				break;
 			case RET_N:
-				stack.sp = fp;
-				if (stack.isEmpty())
-					return;
-				fp = stack.pop();
-				int ip1 = stack.pop();
 				int n = code.get(ip++);
+				ret();
 				while (n-- > 0)
 					stack.pop();
-				ip = ip1;
+				if (ip == 0)
+					return;
 				break;
 			case RETI:
 				int res = stack.pop();
-				stack.sp = fp;
-				if (stack.isEmpty()) {
-					stack.push(res);
-					return;
-				}
-				fp = stack.pop();
-				ip = stack.pop();
+				ret();
 				stack.push(res);
+				if (ip == 0)
+					return;
 				break;
 			case RETI_N:
-				res = stack.pop();
-				stack.sp = fp;
-				fp = stack.pop();
-				ip1 = stack.pop();
 				n = code.get(ip++);
+				res = stack.pop();
+				ret();
 				while (n-- > 0)
 					stack.pop();
-				ip = ip1;
 				stack.push(res);
+				if (ip == 0)
+					return;
 				break;
+
+			case THROW:
+				res = stack.pop();
+				throwException(res);
+				break;
+
 			case GETLOCAL:
 				n = code.get(ip++);
-				if (n >= 0)
-					stack.push(stack.getAt(fp + 2 + n));
-				else
-					stack.push(stack.getAt(fp + n));
+				stack.push(stack.getAt(fp + 2 + n));
 				break;
 			case SETLOCAL:
 				n = code.get(ip++);
-				if (n >= 0)
-					stack.setAt(fp + 2 + n, stack.pop());
-				else
-					stack.setAt(fp + n, stack.pop());
+				stack.setAt(fp + 2 + n, stack.pop());
 				break;
 			case ENTER:
+				int link = stack.pop();
+				int ret = stack.pop();
 				n = code.get(ip++);
 				while (n-- > 0)
 					stack.push(0);
+				stack.push(ret);
+				stack.push(link);
+				fp = stack.sp;
 				break;
 			case ADD:
 				stack.push(stack.pop() + stack.pop());
@@ -165,7 +202,7 @@ public abstract class Interpreter {
 				right = stack.pop();
 				left = stack.pop();
 				if (right == 0)
-					stack.push(-1);
+					throwException(Exc.ARITHMETIC_EXCEPTION.ordinal());
 				else
 					stack.push(left / right);
 				break;
@@ -272,7 +309,7 @@ public abstract class Interpreter {
 				int n2 = stack.pop();
 				int n1 = stack.pop();
 				if (n3 == 0)
-					stack.push(-1);
+					throwException(Exc.ARITHMETIC_EXCEPTION.ordinal());
 				else
 					stack.push(n1 * n2 / n3);
 				break;

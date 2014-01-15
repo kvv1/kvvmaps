@@ -9,7 +9,7 @@ import java.util.Map;
 import kvv.controllers.controller.IController;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.server.context.Context;
-import kvv.controllers.shared.Register;
+import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.UnitDescr;
 import kvv.controllers.utils.Constants;
 import kvv.controllers.utils.Utils;
@@ -83,7 +83,7 @@ public class Units {
 			@Override
 			protected ExtRegisterDescr getExtRegisterDescr(String extRegName) {
 				try {
-					Register reg = controllers.getRegister(extRegName);
+					RegisterDescr reg = controllers.getRegister(extRegName);
 					return new ExtRegisterDescr(reg.addr, reg.register);
 				} catch (Exception e) {
 					return null;

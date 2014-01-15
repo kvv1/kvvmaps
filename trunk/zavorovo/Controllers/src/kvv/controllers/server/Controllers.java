@@ -9,7 +9,7 @@ import java.util.Map;
 
 import kvv.controllers.server.context.Context;
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.Register;
+import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.utils.Constants;
 import kvv.controllers.utils.Utils;
 
@@ -18,8 +18,8 @@ public class Controllers {
 	private final Map<Integer, ControllerDescr> addrMap = new HashMap<Integer, ControllerDescr>();
 
 	private final List<ControllerDescr> controllers = new ArrayList<ControllerDescr>();
-	private final Map<String, Register> registers = new HashMap<String, Register>();
-	private final Map<Integer, Register> ar2register = new HashMap<Integer, Register>();
+	private final Map<String, RegisterDescr> registers = new HashMap<String, RegisterDescr>();
+	private final Map<Integer, RegisterDescr> ar2register = new HashMap<Integer, RegisterDescr>();
 
 	{
 		int nextGlobalReg = 0;
@@ -30,9 +30,9 @@ public class Controllers {
 
 			for (ControllerDescr c : controllers1) {
 				if (c != null) {
-					Register[] regs = c.registers;
+					RegisterDescr[] regs = c.registers;
 					if (regs != null) {
-						for (Register reg : regs) {
+						for (RegisterDescr reg : regs) {
 							if (reg != null) {
 								if (c.name == null) {
 									reg.register = nextGlobalReg++;
@@ -76,24 +76,24 @@ public class Controllers {
 		return d;
 	}
 
-	public Map<String, Register> getRegisters() {
+	public Map<String, RegisterDescr> getRegisters() {
 		return registers;
 	}
 
-	public Register getRegister(String name) throws Exception {
-		Register reg = registers.get(name);
+	public RegisterDescr getRegister(String name) throws Exception {
+		RegisterDescr reg = registers.get(name);
 		if (reg == null)
 			throw new Exception("Регистр " + name + " не определен");
 		return reg;
 	}
 
-	public Register getRegister(int addr, int reg) {
+	public RegisterDescr getRegister(int addr, int reg) {
 		return ar2register.get((addr << 16) + reg);
 	}
 
-	public Collection<Register> getRegisters(int addr) {
-		Collection<Register> regs = new ArrayList<Register>();
-		for (Register reg : registers.values())
+	public Collection<RegisterDescr> getRegisters(int addr) {
+		Collection<RegisterDescr> regs = new ArrayList<RegisterDescr>();
+		for (RegisterDescr reg : registers.values())
 			if (reg.addr == addr)
 				regs.add(reg);
 		return regs;

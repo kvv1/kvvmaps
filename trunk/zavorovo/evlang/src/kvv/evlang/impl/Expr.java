@@ -41,8 +41,7 @@ public class Expr {
 	public Expr(Context context, String name) throws ParseException {
 		Integer val = context.currentFunc.locals.get(name);
 		if (val != null) {
-			code.compileGetLocal(context.currentFunc.locals.getArgCnt() - val
-					- 1);
+			code.compileGetLocal(val);
 		} else {
 			RegisterDescr descr = context.registers.get(name);
 			if (descr != null) {
@@ -127,15 +126,11 @@ public class Expr {
 
 		for (Expr e : list) {
 			code.addAll(e.getCode());
-			code.add(BC.QBRANCH);
-			code.add(0);
-			addrs.add(code.code.size());
+			addrs.add(code.compileQBranch(0));
 		}
 
 		code.compileLit((short) 1);
-		code.add(BC.BRANCH);
-		code.add(0);
-		int a = code.code.size();
+		int a = code.compileBranch(0);
 		code.resolveBranchs(addrs);
 		code.compileLit((short) 0);
 		code.resolveBranch(a);
@@ -154,15 +149,11 @@ public class Expr {
 		for (Expr e : list) {
 			code.addAll(e.getCode());
 			code.add(BC.NOT);
-			code.add(BC.QBRANCH);
-			code.add(0);
-			addrs.add(code.code.size());
+			addrs.add(code.compileQBranch(0));
 		}
 
 		code.compileLit((short) 0);
-		code.add(BC.BRANCH);
-		code.add(0);
-		int a = code.code.size();
+		int a = code.compileBranch(0);
 		code.resolveBranchs(addrs);
 		code.compileLit((short) 1);
 		code.resolveBranch(a);

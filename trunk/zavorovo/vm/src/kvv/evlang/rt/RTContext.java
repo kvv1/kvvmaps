@@ -41,13 +41,24 @@ public class RTContext {
 	public Timer[] timers;
 	public Event[] events;
 	public Func[] funcs;
+	public TryCatchBlock[] tryCatchBlocks;
+
+	public TryCatchBlock findTryCatchBlock(int ip) {
+		TryCatchBlock best = null;
+		for (TryCatchBlock tcb : tryCatchBlocks)
+			if (ip >= tcb.from && ip < tcb.to
+					&& (best == null || best.from < tcb.from))
+				best = tcb;
+		return best;
+	}
 
 	public RTContext(List<Byte> codeArr, Timer[] timers, Event[] events,
-			Func[] funcs) {
+			Func[] funcs, TryCatchBlock[] tryCatchBlocks) {
 		this.codeArr = codeArr;
 		this.timers = timers;
 		this.events = events;
 		this.funcs = funcs;
+		this.tryCatchBlocks = tryCatchBlocks;
 	}
 
 }
