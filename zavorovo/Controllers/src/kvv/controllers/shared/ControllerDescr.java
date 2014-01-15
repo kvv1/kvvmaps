@@ -17,5 +17,5 @@ public class ControllerDescr implements Serializable {
 	public String name;
 	public int addr;
 	public Type type;
-	public Register[] registers;
+	public RegisterDescr[] registers;
 }

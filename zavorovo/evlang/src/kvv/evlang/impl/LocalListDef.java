@@ -24,6 +24,13 @@ public class LocalListDef {
 		argCnt = locals.size();
 	}
 
+//	public Integer getIdx(String name) {
+//		Integer idx = get(name);
+//		if(idx == null)
+//			return null;
+//		return argCnt - idx - 1;
+//	}
+	
 	public int getArgCnt() {
 		return argCnt;
 	}

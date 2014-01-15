@@ -22,6 +22,8 @@ import kvv.evlang.ParseException;
 import kvv.evlang.impl.Event.EventType;
 import kvv.evlang.rt.BC;
 import kvv.evlang.rt.RTContext;
+import kvv.evlang.rt.TryCatchBlock;
+import kvv.evlang.rt.UncaughtExceptionException;
 import kvv.evlang.rt.VM;
 
 public abstract class Context {
@@ -125,7 +127,7 @@ public abstract class Context {
 	// public LocalListDef locals = new LocalListDef();
 	// public boolean isFunc;
 
-	public List<Byte> codeArr = new ArrayList<Byte>();
+	public Code codeArr = new Code();
 
 	public FuncDefList funcDefList = new FuncDefList();
 
@@ -268,9 +270,9 @@ public abstract class Context {
 		System.out.println("maxstack = " + maxStack);
 	}
 
-//	public static byte[] dumpNull() throws IOException {
-//		return new byte[0];
-//	}
+	// public static byte[] dumpNull() throws IOException {
+	// return new byte[0];
+	// }
 
 	public byte[] dump() throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -302,14 +304,21 @@ public abstract class Context {
 			dos.writeShort(f.code.off);
 		}
 
-		for (byte b : codeArr)
+		dos.writeByte(codeArr.tryCatchBlocks.size());
+		for (TryCatchBlock tcb : codeArr.tryCatchBlocks) {
+			dos.writeShort(tcb.from);
+			dos.writeShort(tcb.to);
+			dos.writeShort(tcb.handler);
+		}
+
+		for (byte b : codeArr.code)
 			dos.write(b);
 
 		dos.close();
 		return baos.toByteArray();
 	}
 
-	public void run() {
+	public void run() throws UncaughtExceptionException {
 		RTContext context = getRTContext();
 		new VM(context) {
 			@Override
@@ -337,8 +346,9 @@ public abstract class Context {
 		for (Func f : funcDefList.values())
 			rtFuncs[f.n] = new RTContext.Func(f.code.off);
 
-		RTContext context = new RTContext(codeArr, rtTimers,
-				rtEvents.toArray(new RTContext.Event[0]), rtFuncs);
+		RTContext context = new RTContext(codeArr.code, rtTimers,
+				rtEvents.toArray(new RTContext.Event[0]), rtFuncs,
+				codeArr.tryCatchBlocks.toArray(new TryCatchBlock[0]));
 
 		return context;
 	}

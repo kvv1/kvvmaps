@@ -1,12 +1,27 @@
-reg in(REG_IN0);
-reg inpullup(REG_INPULLUP0);
-
-main {
-	inpullup = 1;
+int div(int n1, int n2) {
+		return n1 / n2;
 }
 
-onchange (in) {
-	REG_RELAY2 = in;
+int div2(int n1, int n2) {
+		return div(n1, n2);
 }
 
-reg r1("")
+int div1(int n1, int n2) {
+	int n;
+	try {
+		n = div2(n1, n2);
+	} catch (int e) {
+		print(e);
+		n = 666;
+	}
+	
+	return n;
+}
+
+
+void main() {
+	print div1(20, 4);
+	print div1(20, 4);
+	print div1(10, 0);
+	print div1(10, 5);
+}

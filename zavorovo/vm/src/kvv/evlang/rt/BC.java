@@ -12,9 +12,10 @@ public enum BC {
 	INC(0, 1), DEC(0, 1), //
 	CALL(0, 1), RESERVED(0, 0), //
 	MULDIV(-2, 0), //
-	GETLOCAL(1, 1), SETLOCAL(-1, 1), ENTER(0,1), //
+	GETLOCAL(1, 1), SETLOCAL(-1, 1), ENTER(0, 1), //
 	PRINT(-1, 0), 
-	SETEXTREG(-1, 2), GETEXTREG(1, 2);
+	SETEXTREG(-1, 2), GETEXTREG(1, 2),
+	/*TRY(1, 1), CATCH(-1, 1),*/ THROW(-1, 0);
 
 	public int stackBalance;
 	public int args;

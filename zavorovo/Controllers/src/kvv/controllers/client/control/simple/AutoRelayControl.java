@@ -9,7 +9,7 @@ import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.history.shared.HistoryItem;
-import kvv.controllers.shared.Register;
+import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterSchedule;
 
 import com.google.gwt.core.client.GWT;
@@ -35,9 +35,9 @@ public class AutoRelayControl extends ControlComposite {
 	private final CheckBox autoButton;
 	private final ChildComposite relayControl;
 
-	public final Register reg;
+	public final RegisterDescr reg;
 
-	public AutoRelayControl(final Register reg,
+	public AutoRelayControl(final RegisterDescr reg,
 			MouseMoveHandler mouseMoveHandler) {
 		this.reg = reg;
 

@@ -11,7 +11,7 @@ import kvv.controllers.client.control.simple.AutoRelayControl;
 import kvv.controllers.client.control.simple.Form;
 import kvv.controllers.client.control.simple.TextWithSaveButton;
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.Register;
+import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.ScriptData;
 import kvv.controllers.shared.UnitDescr;
 
@@ -123,7 +123,7 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 			for (String regName : page.registers) {
 				l1: for (ControllerDescr descr : Controllers.systemDescr.controllerDescrs)
 					if (descr != null && descr.registers != null)
-						for (Register register : descr.registers)
+						for (RegisterDescr register : descr.registers)
 							if (register != null
 									&& register.name.equals(regName)) {
 								AutoRelayControl autoRelayControl = new AutoRelayControl(

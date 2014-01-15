@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import kvv.controllers.controller.IController;
 import kvv.controllers.server.Controllers;
-import kvv.controllers.shared.Register;
+import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
 import kvv.controllers.utils.Constants;
@@ -49,7 +49,7 @@ public class Scheduler {
 					if (!map.isEmpty()) {
 						String regName = map.keySet().iterator().next();
 						RegisterSchedule registerSchedule = map.remove(regName);
-						Register reg = controllers.getRegister(regName);
+						RegisterDescr reg = controllers.getRegister(regName);
 
 						if (registerSchedule.enabled) {
 							Date date = new Date();

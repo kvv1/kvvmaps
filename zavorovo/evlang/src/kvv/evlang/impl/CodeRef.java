@@ -16,8 +16,8 @@ public class CodeRef {
 	public CodeRef(Context context, Code code) {
 		this.context = context;
 		this.off = context.codeArr.size();
-		context.codeArr.addAll(code.code);
-		this.len = context.codeArr.size() - off;
+		context.codeArr.addAll(code);
+		this.len = code.size();
 	}
 
 	public int check(int expected, String msg) throws ParseException {
@@ -25,7 +25,7 @@ public class CodeRef {
 		int stack = 0;
 		int locals = 0;
 		for (int i = off; i < off + len; i++) {
-			int bc1 = context.codeArr.get(i) & 0xC0;
+			int bc1 = context.codeArr.code.get(i) & 0xC0;
 			if (bc1 == BC.GETREGSHORT) {
 				context.dumpStream.print("GETREGSHORT ");
 				stack++;
@@ -36,7 +36,7 @@ public class CodeRef {
 				context.dumpStream.print("LITSHORT ");
 				stack += 1;
 			} else {
-				bc1 = context.codeArr.get(i);
+				bc1 = context.codeArr.code.get(i);
 
 				BC bc = BC.values()[bc1];
 
@@ -45,8 +45,8 @@ public class CodeRef {
 				if (bc == BC.CALL) {
 					PrintStream ps = context.dumpStream;
 					context.dumpStream = EG.nullStream;
-					Func f = context.funcDefList
-							.get(context.codeArr.get(i + 1));
+					Func f = context.funcDefList.get(context.codeArr.code
+							.get(i + 1));
 					maxStack = Math.max(maxStack, stack + 2 + f.getMaxStack());
 					stack -= f.locals.getArgCnt();
 					stack += f.retSize;
@@ -54,7 +54,7 @@ public class CodeRef {
 					context.dumpStream = ps;
 				} else if (bc == BC.ENTER) {
 					i++;
-					locals = context.codeArr.get(i);
+					locals = context.codeArr.code.get(i);
 					stack += locals;
 				} else if (bc == BC.RET || bc == BC.RETI || bc == BC.RET_N
 						|| bc == BC.RETI_N) {
