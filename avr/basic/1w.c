@@ -116,85 +116,117 @@ static int oneWireStartConversion(char n) {
 	return 1;
 }
 
+uint8_t doCRC8(uint8_t inData, uint8_t seed) {
+	uint8_t bitsLeft;
+	uint8_t temp;
+
+	for (bitsLeft = 8; bitsLeft > 0; bitsLeft--) {
+		temp = ((seed ^ inData) & 0x01);
+		if (temp == 0) {
+			seed >>= 1;
+		} else {
+			seed ^= 0x18;
+			seed >>= 1;
+			seed |= 0x80;
+		}
+		inData >>= 1;
+	}
+	return seed;
+}
+
+int checkCRC8(uint8_t* buf, int len) {
+	uint8_t crc = 0;
+	while (len-- > 1)
+		crc = doCRC8(*(buf++), crc);
+	return *buf == crc;
+}
+
 static int oneWireGetConversionResult(char n) {
-	unsigned char ds18b20[2];
 	if (!oneWireInit(n))
-		return -9999;
+		return TEMPERATURE_INVALID;
 	oneWireWriteByte(n, SKIP_ROM);
 	oneWireWriteByte(n, READ_SCRATCHPAD);
-	ds18b20[0] = oneWireReadByte(n);
-	ds18b20[1] = oneWireReadByte(n);
-	if (ds18b20[0] == 255 && ds18b20[1] == 255)
-		return -9999;
-	return ((ds18b20[1] << 8) + ds18b20[0]) >> 4;
+
+	unsigned char ds18b20[9];
+	for (int i = 0; i < 9; i++)
+		ds18b20[i] = oneWireReadByte(n);
+
+	if(checkCRC8(ds18b20, 9))
+		return ((ds18b20[1] << 8) + ds18b20[0]) >> 4;
+	else
+		return TEMPERATURE_INVALID;
 }
 
 int oneWireGetTemperature(char n) {
 	if (!oneWireStartConversion(n))
-		return -9999;
+		return TEMPERATURE_INVALID;
 	_delay_ms(200);
 	return oneWireGetConversionResult(n);
 }
 
 int temperature[2] = { TEMPERATURE_INVALID, TEMPERATURE_INVALID };
 
-void ds18b20_step(int n, int ms) {
-	static int state[2];
-	static int time[2];
-	static unsigned char ds18b20Hi[2];
-	static unsigned char ds18b20Lo[2];
+typedef struct {
+	char state;
+	int time;
+	uint8_t buffer[9];
+	int idx;
+} DS1820STATE;
 
-	switch (state[n]) {
+void ds18b20_step(int n, int ms) {
+	static DS1820STATE states[2];
+	DS1820STATE* state = &states[n];
+
+	switch (state[n].state) {
 	case 0:
 		if (!oneWireInit(n)) {
 			temperature[n] = TEMPERATURE_INVALID;
-			state[n] = 0;
+			state->state = 0;
 			break;
 		}
-		state[n]++;
+		state->state++;
 		break;
 	case 1:
 		oneWireWriteByte(n, SKIP_ROM);
-		state[n]++;
+		state->state++;
 		break;
 	case 2:
 		oneWireWriteByte(n, CONVERT_TEMP);
-		time[n] = 0;
-		state[n]++;
+		state->time = 0;
+		state->state++;
 		break;
 	case 3:
-		time[n] += ms;
-		if (time[n] < 200)
+		state->time += ms;
+		if (state->time < 200)
 			break;
-		state[n]++;
+		state->state++;
 		break;
 	case 4:
 		if (!oneWireInit(n)) {
 			temperature[n] = TEMPERATURE_INVALID;
-			state[n] = 0;
+			state->state = 0;
 			break;
 		}
-		state[n]++;
+		state->state++;
 		break;
 	case 5:
 		oneWireWriteByte(n, SKIP_ROM);
-		state[n]++;
+		state->state++;
 		break;
 	case 6:
 		oneWireWriteByte(n, READ_SCRATCHPAD);
-		state[n]++;
+		state->state++;
+		state->idx = 0;
 		break;
 	case 7:
-		ds18b20Lo[n] = oneWireReadByte(n);
-		state[n]++;
-		break;
-	case 8:
-		ds18b20Hi[n] = oneWireReadByte(n);
-		if (ds18b20Lo[n] == 255 && ds18b20Hi[n] == 255)
-			temperature[n] = TEMPERATURE_INVALID;
-		else
-			temperature[n] = ((ds18b20Hi[n] << 8) + ds18b20Lo[n]) >> 4;
-		state[n] = 0;
+		state->buffer[state->idx++] = oneWireReadByte(n);
+		if(state->idx == 9) {
+			if(checkCRC8(state->buffer, 9))
+				temperature[n] = ((state->buffer[1] << 8) + state->buffer[0]) >> 4;
+			else
+				temperature[n] = TEMPERATURE_INVALID;
+			state->state = 0;
+		}
 		break;
 	}
 }
