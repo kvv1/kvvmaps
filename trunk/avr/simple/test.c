@@ -12,6 +12,8 @@
 
 #include "dht11.h"
 
+int n;
+
 int main(void) {
 	PORTB = 0x00;
 	DDRB = 0xFF;
@@ -77,13 +79,18 @@ int main(void) {
 //vmMain();
 	_delay_ms(2000);
 
+	print0("0 ");
+	print1("%d ", 3 / n);
+	print0("1 ");
+
 	while (1) {
-		_delay_ms(50);
+		//_delay_ms(50);
 
 		//print0("012345678901234567890123456789abcdefgh\n");
 
-//		ds18b20_step(500);
-//		print1("%d ", temperature);
+		_delay_ms(10);
+		ds18b20_step(0, 10);
+		print1("%d ", temperature[0]);
 
 //		int t;
 //		int h;
@@ -96,7 +103,7 @@ int main(void) {
 //		t = oneWireGetTemperature(1);
 //		print1("%d\n", t);
 
-		PORTB = PORTB ^ (1 << 6);
+		//PORTB = PORTB ^ (1 << 6);
 
 	};
 

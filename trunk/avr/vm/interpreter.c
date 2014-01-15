@@ -41,6 +41,9 @@ enum {
 	SETLOCAL,
 	ENTER,
 	PRINT,
+	SETEXTREG,
+	GETEXTREG,
+	THROW,
 };
 
 #define GETREGSHORT 0x80
@@ -51,9 +54,11 @@ static uint16_t codeOffset;
 static uint16_t events;
 static uint16_t timers;
 static uint16_t funcs;
+static uint16_t TCBs;
 static int ntimers;
 static int nevents;
 static int nfuncs;
+static int nTCB;
 
 #define MAX_TIMERS 16
 #define MAX_EVENTS 16
@@ -61,7 +66,10 @@ static int nfuncs;
 static int32_t vmTimerCnts[MAX_TIMERS];
 static int16_t vmEventStates[MAX_EVENTS];
 
-static void vmExec(uint16_t ip);
+static uint16_t fp;
+static uint16_t ip;
+
+static int16_t vmExec(uint16_t ip);
 
 static uint16_t getUint16(uint16_t addr) {
 	return (vmReadByte(addr) << 8) | vmReadByte(addr + 1);
@@ -116,6 +124,11 @@ static void initVars() {
 	funcs = ptr;
 	ptr += nfuncs * 2;
 
+	nTCB = vmReadByte(ptr);
+	ptr++;
+	TCBs = ptr;
+	ptr += nTCB * 6;
+
 	codeOffset = ptr;
 
 	stackPtr = stack + STACK_SIZE;
@@ -140,8 +153,9 @@ static void vmMain() {
 }
 
 static int16_t eval(uint16_t ip) {
-	vmExec(ip);
-	return vmPop();
+	if (vmExec(ip) == 0)
+		return vmPop();
+	return 0;
 }
 
 void vmStep(int ms) {
@@ -178,13 +192,66 @@ void vmStep(int ms) {
 	}
 }
 
-static void vmExec(uint16_t ip) {
+static uint16_t findCatchBlock(uint16_t ip) {
+	uint16_t bestHandler = 0;
+	uint16_t bestFrom = 0;
+	int i;
 
-	uint16_t fp = stackPtr - stack;
+	for (i = 0; i < nTCB; i++) {
+		uint16_t tcb = TCBs + i * 6;
+		uint16_t from = getUint16(tcb);
+		uint16_t to = getUint16(tcb + 2);
+		if (ip >= from && ip < to && from > bestFrom) {
+			bestFrom = from;
+			bestHandler = getUint16(tcb + 4);
+		}
+	}
+
+	return bestHandler;
+}
+
+static void call(uint16_t addr) {
+	vmPush(ip);
+	vmPush(fp);
+	fp = stackPtr - stack;
+	ip = addr;
+}
+
+static void ret() {
+	vmSetStack(stack + fp);
+	fp = vmPop();
+	ip = vmPop();
+}
+
+static void throwException(int16_t e) {
+	for (;;) {
+		vmSetStack(stack + fp);
+		uint16_t catchBlock = findCatchBlock(ip - codeOffset);
+		if (catchBlock != 0) {
+			vmPush(e);
+			ip = catchBlock + codeOffset;
+			break;
+		} else {
+			ret();
+			if (ip == 0)
+				return;
+		}
+	}
+}
+
+#define LOCAL(n) (stack[fp + 2 + (n)])
+
+static int16_t vmExec(uint16_t _ip) {
+
+	stackPtr = stack + STACK_SIZE;
+	ip = 0;
+	fp = 0;
+
+	call(_ip);
 
 	for (;;) {
 		if (vmGetStatus() != VMSTATUS_RUNNING)
-			return;
+			return -1;
 
 		uint8_t c = vmReadByte(ip++);
 
@@ -203,74 +270,65 @@ static void vmExec(uint16_t ip) {
 		switch (c) {
 		case CALL: {
 			uint16_t addr = vmGetFuncCode(vmReadByte(ip++)) + codeOffset;
-			vmPush(ip);
-			ip = addr;
-			vmPush(fp);
-			fp = stackPtr - stack;
+			call(addr);
 			break;
 		}
 		case RET:
-			vmSetStack(stack + fp);
-			if (stackPtr == stack + STACK_SIZE)
-				return;
-			fp = vmPop();
-			ip = vmPop();
+			ret();
+			if (ip == 0)
+				return 0;
 			break;
 		case RET_N: {
-			uint16_t ip1;
-			vmSetStack(stack + fp);
-			if (stackPtr == stack + STACK_SIZE)
-				return;
-			fp = vmPop();
-			ip1 = vmPop();
-			vmChangeStack(-vmReadByte(ip++));
-			ip = ip1;
+			uint8_t n = vmReadByte(ip);
+			ret();
+			vmChangeStack(-n);
+			if (ip == 0)
+				return 0;
 			break;
 		}
 		case RETI: {
 			int16_t res = vmPop();
-			vmSetStack(stack + fp);
-			if (stackPtr == stack + STACK_SIZE) {
-				vmPush(res);
-				return;
-			}
-			fp = vmPop();
-			ip = vmPop();
+			ret();
 			vmPush(res);
+			if (ip == 0)
+				return 0;
 			break;
 		}
 		case RETI_N: {
-			uint16_t ip1;
+			uint8_t n = vmReadByte(ip);
 			int16_t res = vmPop();
-			vmSetStack(stack + fp);
-			if (stackPtr == stack + STACK_SIZE) {
-				vmPush(res);
-				return;
-			}
-			fp = vmPop();
-			ip1 = vmPop();
-			vmChangeStack(-vmReadByte(ip++));
-			ip = ip1;
+			ret();
+			vmChangeStack(-n);
 			vmPush(res);
+			if (ip == 0)
+				return 0;
+			break;
+		}
+		case THROW: {
+			int16_t res = vmPop();
+			throwException(res);
+			if (ip == 0)
+				return res;
 			break;
 		}
 		case GETLOCAL: {
 			int n = (int8_t) vmReadByte(ip++);
-			if (n >= 0)
-				n += 2;
-			vmPush(stack[fp + n]);
+			vmPush(LOCAL(n));
 			break;
 		}
 		case SETLOCAL: {
 			int n = (int8_t) vmReadByte(ip++);
-			if (n >= 0)
-				n += 2;
-			stack[fp + n] = vmPop();
+			LOCAL(n) = vmPop();
 			break;
 		}
 		case ENTER: {
+			uint16_t link = vmPop();
+			uint16_t ret = vmPop();
 			int n = vmReadByte(ip++);
 			vmChangeStack(n);
+			vmPush(ret);
+			vmPush(link);
+			fp = stackPtr - stack;
 			break;
 		}
 		case LIT:
@@ -315,7 +373,13 @@ static void vmExec(uint16_t ip) {
 			break;
 		case DIV: {
 			int16_t r = vmPop();
-			vmPush(vmPop() / r);
+			if (r == 0) {
+				throwException(ARITHMETIC_EXCEPTION);
+				if (ip == 0)
+					return ARITHMETIC_EXCEPTION;
+			} else {
+				vmPush(vmPop() / r);
+			}
 			break;
 		}
 		case OR: {
@@ -364,7 +428,7 @@ static void vmExec(uint16_t ip) {
 			vmPush(vmPop() != vmPop());
 			break;
 		case DROP:
-			vmPrintInt(vmPop());
+			vmPop();
 			break;
 		case PRINT:
 			vmPrintInt(vmPop());
@@ -383,7 +447,13 @@ static void vmExec(uint16_t ip) {
 			int32_t n3 = vmPop();
 			int32_t n2 = vmPop();
 			int32_t n1 = vmPop();
-			vmPush(n1 * n2 / n3);
+			if (n3 == 0) {
+				throwException(ARITHMETIC_EXCEPTION);
+				if (ip == 0)
+					return ARITHMETIC_EXCEPTION;
+			} else {
+				vmPush(n1 * n2 / n3);
+			}
 			break;
 		}
 		default:
@@ -391,6 +461,8 @@ static void vmExec(uint16_t ip) {
 			break;
 		}
 	}
+
+	return -1;
 }
 
 void vmStart(int8_t b) {
