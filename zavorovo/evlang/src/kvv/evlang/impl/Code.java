@@ -136,7 +136,7 @@ public class Code {
 
 	public static Code callp(Context context, String name, List<Expr> argList)
 			throws ParseException {
-		Func func = context.getFunc(name, argList.size());
+		Func func = context.getFunc(name, argList);
 		Code res = new Code();
 		for (Expr c : argList)
 			res.addAll(c.getCode());

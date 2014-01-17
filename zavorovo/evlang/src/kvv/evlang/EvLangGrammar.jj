@@ -207,8 +207,9 @@ void argListDef(LocalListDef locals) :
     locals.add(new NameAndType(name, type));
   }
   (
-    "," type() name = id()
+    "," type = type() name = id()
     {
+      checkNotVoid(type);
       locals.add(new NameAndType(name, type));
     }
   )*
