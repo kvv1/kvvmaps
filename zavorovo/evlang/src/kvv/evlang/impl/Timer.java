@@ -13,7 +13,7 @@ public class Timer {
 		this.n = n;
 		this.context = context;
 	}
-
+/*
 	public int getMaxStack() throws ParseException {
 		String msg = "timer '" + name + "'";
 		context.dumpStream.print(msg + " ");
@@ -21,4 +21,5 @@ public class Timer {
 		context.dumpStream.println("maxStack: " + maxStack);
 		return maxStack;
 	}
+*/	
 }

@@ -1,41 +1,412 @@
 /**
  * JavaCC template file created by SF JavaCC plugin 1.5.17+ wizard for JavaCC 1.5.0+
- */options{  JDK_VERSION = "1.5";  static = false;}PARSER_BEGIN(EG1)package kvv.evlang;import java.io.*;import java.util.*;import kvv.evlang.impl.*;import kvv.controllers.register.*;public abstract class EG1 extends EG{  public EG1(String fileName) throws FileNotFoundException  {
+ */
+options
+{
+  JDK_VERSION = "1.5";
+//  LOOKAHEAD=2;
+
+  static = false;
+}
+
+PARSER_BEGIN(EG1)
+package kvv.evlang;
+import java.io.*;
+import java.util.*;
+import kvv.evlang.impl.*;
+import kvv.controllers.register.*;
+
+public abstract class EG1 extends EG
+{
+  public EG1(String fileName) throws FileNotFoundException
+  {
 	//this(new InputStreamReader(new FileInputStream(fileName), "Windows-1251"));
 //    this (new FileReader(fileName));
-    this (new JavaCCReader(fileName));  }
-  public void throwExc(String msg) throws ParseException  {	throw new ParseException(token, msg);
+    this (new JavaCCReader(fileName));
   }
-  public void parse() throws ParseException  {    file();    buildInit();    check();    //checkStack();  }}PARSER_END(EG1)SKIP :{  " "| "\r"| "\t"| "\n"| < "//" (~[ "\n", "\r" ])*    (      "\n"    | "\r"    | "\r\n"    ) >| < "/*" (~[ "*" ])* "*"    (      "*"    | ~[ "*", "/" ] (~[ "*" ])* "*"    )*    "/" >}TOKEN : /* OPERATORS */{  < AND : "&&" >| < OR : "||" >| < EQ : "==" >| < NEQ : "!=" >| < LT : "<" >| < LE : "<=" >| < GT : ">" >| < GE : ">=" >| < NOT : "!" >| < PLUS : "+" >| < MINUS : "-" >| < MULTIPLY : "*" >| < DIVIDE : "/" >| < EEPROM : "eeprom" >| < REG : "reg" >| < EEREG : "eereg" >| < TIMER : "timer" >| < ONSET : "onset" >| < ONCHANGE : "onchange" >| < CONST : "const" >| < IF : "if" >| < ELSE : "else" >| < START_S : "start_s" >| < START_MS : "start_ms" >| < STOP : "stop" >| < PRINT : "print" >| < DEC : "--" >| < INC : "++" >| < MULDIV : "muldiv" >| < CHECKBOX : "checkbox" >| < TEXT : "text" >| < INT : "int" >| < VOID : "void" >| < RETURN : "return" >| < TRY  : "try" > 
+
+  public void throwExc(String msg) throws ParseException
+  {
+	throw new ParseException(token, msg);
+  }
+
+  public void parse() throws ParseException
+  {
+    file();
+    buildInit();
+    check();
+    //checkStack();
+  }
+}
+
+PARSER_END(EG1)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+| < "//" (~[ "\n", "\r" ])*
+    (
+      "\n"
+    | "\r"
+    | "\r\n"
+    ) >
+| < "/*" (~[ "*" ])* "*"
+    (
+      "*"
+    | ~[ "*", "/" ] (~[ "*" ])* "*"
+    )*
+    "/" >
+}
+
+TOKEN : /* OPERATORS */
+{
+  < AND : "&&" >
+| < OR : "||" >
+| < EQ : "==" >
+| < NEQ : "!=" >
+| < LT : "<" >
+| < LE : "<=" >
+| < GT : ">" >
+| < GE : ">=" >
+| < NOT : "!" >
+| < PLUS : "+" >
+| < MINUS : "-" >
+| < MULTIPLY : "*" >
+| < DIVIDE : "/" >
+| < EEPROM : "eeprom" >
+| < REG : "reg" >
+| < EEREG : "eereg" >
+| < TIMER : "timer" >
+| < ONSET : "onset" >
+| < ONCHANGE : "onchange" >
+| < CONST : "const" >
+| < IF : "if" >
+| < ELSE : "else" >
+| < START_S : "start_s" >
+| < START_MS : "start_ms" >
+| < STOP : "stop" >
+| < PRINT : "print" >
+| < DEC : "--" >
+| < INC : "++" >
+| < MULDIV : "muldiv" >
+| < CHECKBOX : "checkbox" >
+| < TEXT : "text" >
+| < INT : "int" >
+| < VOID : "void" >
+| < RETURN : "return" >
+| < TRY  : "try" > 
 | < CATCH  : "catch" >
 | < THROW  : "throw" >
-}TOKEN :{  < ID : [ "a"-"z", "A"-"Z", "_", "\u00A0"-"\u00FF" ] ([ "a"-"z", "A"-"Z", "_", "0"-"9", "\u00A0"-"\u00FF" ])* >| < STRING : "\"" (~[ "\"", "\n", "\r" ])* "\"" >| < NUMBER : (< DIGIT >)+ >| < #DIGIT : [ "0"-"9" ] >}void file() :{}{  < EOF >| line() file()}void line() :{}{  constant()| register()| uiDecl()| timer()| onset()| onchange()| proc()}void proc() :{  String name;  Code bytes = null;  int retSize = 0;  LocalListDef locals = new LocalListDef();}{  (    < VOID >  | < INT >    {      retSize = 1;      ;    }  )  name = id() "(" [ argListDef(locals) ] ")"  {    Code.procDecl(this, retSize, name, locals);  }  (    bytes = stmtBlock()    {      Code.procCode(this, bytes);    }  | ";"  )}void argListDef(LocalListDef locals) :{  String arg;}{  < INT > arg = id()  {    locals.add(arg);  }  (    "," < INT > arg = id()    {      locals.add(arg);    }  )*  {    locals.endOfArgs();  }}void localListDef() :
+| < STRUCT  : "struct" >
+| < NULL  : "null" >
+}
+
+TOKEN :
 {
-  String arg;
+  < ID : [ "a"-"z", "A"-"Z", "_", "\u00A0"-"\u00FF" ] ([ "a"-"z", "A"-"Z", "_", "0"-"9", "\u00A0"-"\u00FF" ])* >
+| < STRING : "\"" (~[ "\"", "\n", "\r" ])* "\"" >
+| < NUMBER : (< DIGIT >)+ >
+| < #DIGIT : [ "0"-"9" ] >
+}
+
+void file() :
+{}
+{
+  < EOF >
+| line() file()
+}
+
+void line() :
+{}
+{
+  constant()
+| register()
+| varOrProc()
+| uiDecl()
+| timer()
+| onset()
+| onchange()
+| struct()
+}
+
+void varOrProc() :
+{
+  Type type;
+  String name;
+}
+{
+  type = type() name = id()
+  (
+    proc(type, name)
+  |
+  	var(type, name)
+  ) 
+}
+  
+
+
+void struct() :
+{
+  String name;
+  String fieldName;
+  Type fieldType;
+}
+{
+  < STRUCT > name = id()  {
+    createStruct(name);  }
+  "{"
+  (
+    fieldType = type() fieldName = id() ";"
+    {
+      checkNotVoid(fieldType);
+      addField(name, fieldType, fieldName);
+    }
+  )*
+  "}" ";"
+}
+
+Type type() :{  String name = null;}{  < VOID >  {    return Type.VOID;  }|   < INT >
+  {
+    return Type.INT;
+  }
+| 
+  name = id()  {    return new Type(name);  }}
+
+
+void proc(Type type, String name) :
+{
+  Code bytes = null;
+  LocalListDef locals = new LocalListDef();
+}
+{
+  "(" [ argListDef(locals) ] ")"
+  {
+    Code.procDecl(this, type, name, locals);
+  }
+  (
+    bytes = stmtBlock()
+    {
+      Code.procCode(this, bytes);
+    }
+  | ";"
+  )
+}
+
+void argListDef(LocalListDef locals) :
+{
+  String name;
+  Type type;
+}
+{
+  type = type() name = id()
+  {
+    checkNotVoid(type);
+    locals.add(new NameAndType(name, type));
+  }
+  (
+    "," type() name = id()
+    {
+      locals.add(new NameAndType(name, type));
+    }
+  )*
+  {
+    locals.endOfArgs();
+  }
+}
+
+void localListDef() :
+{
+  String name;
+  Type type;
 }
 {
   (
-    localDef() ";"
+    LOOKAHEAD(2)
+    type = type() name = id() ";"
+    {
+      checkNotVoid(type);
+      currentFunc.locals.add(new NameAndType(name, type));
+    }
   )*
 }
 
 String localDef() :
 {
   String name;
+  Type type;
 }
 {
-    < INT > name = id()
+    type = type() name = id()
     {
-      currentFunc.locals.add(name);
+      checkNotVoid(type);
+      currentFunc.locals.add(new NameAndType(name, type));
       return name;
     }
 }
 
-void constant() :{  String name;  short value;}{  < CONST > name = id() "=" value = number() ";"  {    checkName(name);    constants.put(name, value);  }}void uiDecl() :{  String name;  Token text;  RegType type;}{  type = uitype() name = id() text = < STRING > ";"  {    setUI(name, text.image.replace("\"", ""), type);  }}RegType uitype() :{  Token t;}{  t = < CHECKBOX >  {    return RegType.checkbox;  }| t = < TEXT >  {    return RegType.textRW;  }}void register() :{  String regName;  String regNum = null;  short initVal;}{< REG > regName = id() [ "(" regNum = id() ")" ] ";"  {    if (regNum == null) newRegister(regName);    else newRegister(regName, regNum);  }| < EEREG > regName = id() "=" initVal = number() ";"  {    newEERegister(regName, initVal);  }}void timer() :{  String name;  Code bytes;}{  {    currentFunc = new Func(this, "", new LocalListDef(), 0);  }  < TIMER > name = id() bytes = stmtBlock()  {    Code.timer(this, name, bytes);  }}void onset() :{  Expr cond;  Code bytes;}{  {    currentFunc = new Func(this, "", new LocalListDef(), 0);  }  < ONSET > "(" cond = expr() ")" bytes = stmtBlock()  {    Code.onset(this, cond.getCode(), bytes);  }}void onchange() :{  Expr cond;  Code bytes;}{  {    currentFunc = new Func(this, "", new LocalListDef(), 0);  }  < ONCHANGE > "(" cond = expr() ")" bytes = stmtBlock()  {    Code.onchange(this, cond.getCode(), bytes);  }}Code stmtBlock() :{  Code bytes = new Code();  Code temp;  int localpos = currentFunc.locals.getSize();}{  "{" localListDef()  (    temp = stmt()    {      bytes.addAll(temp);    }  )*  "}"  {    currentFunc.locals.setSize(localpos);    return bytes;  }}Code stmt() :{  Code res;  Token name;}{  res = assign()  {    return res;  }| res = ifStmt()  {    return res;  }| res = tryCatchStmt()
+
+void constant() :
+{
+  String name;
+  short value;
+}
+{
+  < CONST > name = id() "=" value = number() ";"
+  {
+    checkName(name);
+    constants.put(name, value);
+  }
+}
+
+void uiDecl() :
+{
+  String name;
+  Token text;
+  RegType type;
+}
+{
+  type = uitype() name = id() text = < STRING > ";"
+  {
+    setUI(name, text.image.replace("\"", ""), type);
+  }
+}
+
+RegType uitype() :
+{
+  Token t;
+}
+{
+  t = < CHECKBOX >
+  {
+    return RegType.checkbox;
+  }
+| t = < TEXT >
+  {
+    return RegType.textRW;
+  }
+}
+
+void var(Type type, String name) :
+{
+}
+{
+  ";"
+  {
+	 checkNotVoid(type);
+	 newRegister(type, name);
+  }
+}
+
+void register() :
+{
+  String regName;
+  String regNum = null;
+  short initVal;
+}
+{
+  < REG > regName = id() "(" regNum = id() ")" ";"
+  {
+    newRegisterAlias(regName, regNum);
+  }
+|  < EEREG > regName = id() "=" initVal = number() ";"
+  {
+    newEERegister(regName, initVal);
+  }
+}
+
+void timer() :
+{
+  String name;
+  Code bytes;
+}
+{
+  {
+    currentFunc = new Func(this, "", new LocalListDef(), Type.VOID);
+  }
+  < TIMER > name = id() bytes = stmtBlock()
+  {
+    Code.timer(this, name, bytes);
+  }
+}
+
+void onset() :
+{
+  Expr cond;
+  Code bytes;
+}
+{
+  {
+    currentFunc = new Func(this, "", new LocalListDef(), Type.VOID);
+  }
+  < ONSET > "(" cond = expr() ")" bytes = stmtBlock()
+  {
+    Code.onset(this, cond.getCode(), bytes);
+  }
+}
+
+void onchange() :
+{
+  Expr cond;
+  Code bytes;
+}
+{
+  {
+    currentFunc = new Func(this, "", new LocalListDef(), Type.VOID);
+  }
+  < ONCHANGE > "(" cond = expr() ")" bytes = stmtBlock()
+  {
+    Code.onchange(this, cond.getCode(), bytes);
+  }
+}
+
+Code stmtBlock() :
+{
+  Code bytes = new Code();
+  Code temp;
+  int localpos = currentFunc.locals.getSize();
+}
+{
+  "{" localListDef()
+  (
+    temp = stmt()
+    {
+      bytes.addAll(temp);
+    }
+  )*
+  "}"
+  {
+    currentFunc.locals.setSize(localpos);
+    return bytes;
+  }
+}
+
+Code stmt() :
+{
+  Code res;
+  Token name;
+}
+{
+  res = assign()
   {
     return res;
   }
-| res = stmtBlock()  {    return res;  }}
+| res = ifStmt()
+  {
+    return res;
+  }
+| res = tryCatchStmt()
+  {
+    return res;
+  }
+| res = stmtBlock()
+  {
+    return res;
+  }
+}
+
 Code tryCatchStmt() :
 {
   Code tryStmt;
@@ -49,25 +420,314 @@ Code tryCatchStmt() :
   }
 }
 
-Code ifStmt() :{  Expr res;  Code stmt;  Code stmt2 = null;}{  < IF > "(" res = expr() ")" stmt = stmt()  [    LOOKAHEAD(2)    < ELSE > stmt2 = stmt()  ]  {    return Code.ifstmt(res, stmt, stmt2);  }}Code assign() :{  Expr res = null;  String name;  List < Expr > argList = new ArrayList < Expr > ();}{  < PRINT > res = expr() ";"  {    return Code.print(res);  }| < RETURN > [ res = expr() ] ";"  {    return Code.ret(this, res);  }| < THROW > [ res = expr() ] ";"
+Code ifStmt() :
+{
+  Expr res;
+  Code stmt;
+  Code stmt2 = null;
+}
+{
+  < IF > "(" res = expr() ")" stmt = stmt()
+  [
+    LOOKAHEAD(2)
+    < ELSE > stmt2 = stmt()
+  ]
+  {
+    return Code.ifstmt(res, stmt, stmt2);
+  }
+}
+
+Code assign() :
+{
+  Expr res = null;
+  String name;
+  List < Expr > argList = new ArrayList < Expr > ();
+}
+{
+  < PRINT > res = expr() ";"
+  {
+    return Code.print(res);
+  }
+| < RETURN > [ res = expr() ] ";"
+  {
+    return Code.ret(this, res);
+  }
+| < THROW > [ res = expr() ] ";"
   {
     return Code.throw_(this, res);
   }
-| name = id()  (    "=" res = expr() ";"    {      return Code.assign(this, name, res);    }  | "."    (      < START_S > res = expr() ";"      {        return Code.start_s(this, name, res);      }    | < START_MS > res = expr() ";"      {        return Code.start_ms(this, name, res);      }    | < STOP > ";"      {        return Code.stop(this, name);      }    )  | < DEC > ";"    {      return Code.dec(this, name);    }  | < INC > ";"    {      return Code.inc(this, name);    }  | "(" [ argList = argList() ] ")" ";"    {      return Code.callp(this, name, argList);    }  )}Expr expr() :{  List < Expr > res = new ArrayList < Expr > ();
-  Expr temp;}{  temp = logAndExpr()  {
+| name = id()
+  (
+    "=" res = expr() ";"
+    {
+      return Code.assign(this, name, res);
+    }
+  | "."
+    (
+      < START_S > res = expr() ";"
+      {
+        return Code.start_s(this, name, res);
+      }
+    | < START_MS > res = expr() ";"
+      {
+        return Code.start_ms(this, name, res);
+      }
+    | < STOP > ";"
+      {
+        return Code.stop(this, name);
+      }
+    )
+  | < DEC > ";"
+    {
+      return Code.dec(this, name);
+    }
+  | < INC > ";"
+    {
+      return Code.inc(this, name);
+    }
+  | "(" [ argList = argList() ] ")" ";"
+    {
+      return Code.callp(this, name, argList);
+    }
+  )
+}
+
+Expr expr() :
+{
+  List < Expr > res = new ArrayList < Expr > ();
+  Expr temp;
+}
+{
+  temp = logAndExpr()
+  {
     res.add(temp);
   }
-  (    < OR > temp = logAndExpr()    {      res.add(temp);
-    }  )*  {    return Expr.or(res);
-  }}Expr logAndExpr() :{  List < Expr > res = new ArrayList < Expr > ();  Expr temp;}{  temp = boolExpr()  {    res.add(temp);  }  (    < AND > temp = boolExpr()    {      res.add(temp);    }  )*  {    return Expr.and(res);  }}Expr boolExpr() :{  Expr res;  Expr temp;}{  res = intExpr()  (    (      < EQ > temp = intExpr()      {        res = Expr.eq(res, temp);      }    | < NEQ > temp = intExpr()      {        res = Expr.neq(res, temp);      }    | < LT > temp = intExpr()      {        res = Expr.lt(res, temp);      }    | < LE > temp = intExpr()      {        res = Expr.le(res, temp);      }    | < GT > temp = intExpr()      {        res = Expr.gt(res, temp);      }    | < GE > temp = intExpr()      {        res = Expr.ge(res, temp);      }    )  )*  {    return res;  }}Expr intExpr() :{  Expr res;  Expr temp;}{  res = term()  (    (      < PLUS > temp = term()      {        res = Expr.add(res, temp);      }    | < MINUS > temp = term()      {        res = Expr.sub(res, temp);      }    )  )*  {    return res;  }}Expr term() :{  Expr res;  Expr temp;}{  res = unary()  (    (      < MULTIPLY > temp = unary()      {        res = Expr.mul(res, temp);      }    | < DIVIDE > temp = unary()      {        res = Expr.div(res, temp);      }    )  )*  {    return res;  }}Expr unary() :{  Expr res;}{  < NOT > res = element()  {    return Expr.not(res);  }| < MINUS > res = element()  {    return Expr.negate(res);  }| res = element()  {    return res;  }}List < Expr > argList() :{  List < Expr > res = new ArrayList < Expr > ();  Expr arg;}{  arg = expr()  {    res.add(arg);  }  (    "," arg = expr()    {      res.add(arg);    }  )*  {    return res;  }}Expr element() :{
-  short n;  String t;  List < Expr > argList = null;}{  n = number()  {    return new Expr(n);  }| t = id()  (    "("    {      argList = new ArrayList < Expr > ();    }    [ argList = argList() ] ")"  )?  {    if (argList != null)    {      return new Expr(this, t, argList);    }    else    {      return new Expr(this, t);    }  }|  {    Expr res;    Expr temp;    Expr temp1;  }  < MULDIV > "(" res = expr() "," temp = expr() "," temp1 = expr() ")"  {    return Expr.muldiv(res, temp, temp1);  }| "(" res = expr() ")"  {    return res;  }}
+  (
+    < OR > temp = logAndExpr()
+    {
+      res.add(temp);
+    }
+  )*
+  {
+    return Expr.or(res);
+  }
+}
 
-String id() :{  Token t;}{  t = < ID >  {    return win2utf(t.image);  }}
+Expr logAndExpr() :
+{
+  List < Expr > res = new ArrayList < Expr > ();
+  Expr temp;
+}
+{
+  temp = boolExpr()
+  {
+    res.add(temp);
+  }
+  (
+    < AND > temp = boolExpr()
+    {
+      res.add(temp);
+    }
+  )*
+  {
+    return Expr.and(res);
+  }
+}
+
+Expr boolExpr() :
+{
+  Expr res;
+  Expr temp;
+}
+{
+  res = intExpr()
+  (
+    (
+      < EQ > temp = intExpr()
+      {
+        res = Expr.eq(this, res, temp);
+      }
+    | < NEQ > temp = intExpr()
+      {
+        res = Expr.neq(this,res, temp);
+      }
+    | < LT > temp = intExpr()
+      {
+        res = Expr.lt(this,res, temp);
+      }
+    | < LE > temp = intExpr()
+      {
+        res = Expr.le(this,res, temp);
+      }
+    | < GT > temp = intExpr()
+      {
+        res = Expr.gt(this,res, temp);
+      }
+    | < GE > temp = intExpr()
+      {
+        res = Expr.ge(this,res, temp);
+      }
+    )
+  )*
+  {
+    return res;
+  }
+}
+
+Expr intExpr() :
+{
+  Expr res;
+  Expr temp;
+}
+{
+  res = term()
+  (
+    (
+      < PLUS > temp = term()
+      {
+        res = Expr.add(this,res, temp);
+      }
+    | < MINUS > temp = term()
+      {
+        res = Expr.sub(this,res, temp);
+      }
+    )
+  )*
+  {
+    return res;
+  }
+}
+
+Expr term() :
+{
+  Expr res;
+  Expr temp;
+}
+{
+  res = unary()
+  (
+    (
+      < MULTIPLY > temp = unary()
+      {
+        res = Expr.mul(this, res, temp);
+      }
+    | < DIVIDE > temp = unary()
+      {
+        res = Expr.div(this, res, temp);
+      }
+    )
+  )*
+  {
+    return res;
+  }
+}
+
+Expr unary() :
+{
+  Expr res;
+}
+{
+  < NOT > res = element()
+  {
+    return Expr.not(this, res);
+  }
+| < MINUS > res = element()
+  {
+    return Expr.negate(this, res);
+  }
+| res = element()
+  {
+    return res;
+  }
+}
+
+List < Expr > argList() :
+{
+  List < Expr > res = new ArrayList < Expr > ();
+  Expr arg;
+}
+{
+  arg = expr()
+  {
+    res.add(arg);
+  }
+  (
+    "," arg = expr()
+    {
+      res.add(arg);
+    }
+  )*
+  {
+    return res;
+  }
+}
+
+Expr element() :
+{
+  short n;
+  String t;
+  List < Expr > argList = null;
+    Expr res;
+    Expr temp;
+    Expr temp1;
+}
+{
+  < NULL >
+  {
+    return Expr.nullExpr();
+  }
+|  n = number()
+  {
+    return new Expr(n);
+  }
+| t = id()
+  (
+    "("
+    {
+      argList = new ArrayList < Expr > ();
+    }
+    [ argList = argList() ] ")"
+  )?
+  {
+    if (argList != null)
+    {
+      return new Expr(this, t, argList);
+    }
+    else
+    {
+      return new Expr(this, t);
+    }
+  }
+|
+  {
+  }
+  < MULDIV > "(" res = expr() "," temp = expr() "," temp1 = expr() ")"
+  {
+    return Expr.muldiv(this, res, temp, temp1);
+  }
+| "(" res = expr() ")"
+  {
+    return res;
+  }
+}
+
+String id() :
+{
+  Token t;
+}
+{
+  t = < ID >
+  {
+    return win2utf(t.image);
+  }
+}
 
 short number() :
-{  Token t;
+{
+  Token t;
 }
-{  t = < NUMBER >
+{
+  t = < NUMBER >
   {
     return Short.parseShort(t.image);
   }

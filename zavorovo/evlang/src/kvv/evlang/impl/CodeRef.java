@@ -19,8 +19,8 @@ public class CodeRef {
 		context.codeArr.addAll(code);
 		this.len = code.size();
 	}
-
-	public int check(int expected, String msg) throws ParseException {
+/*
+	public int check(String retType, String msg) throws ParseException {
 		int maxStack = 0;
 		int stack = 0;
 		int locals = 0;
@@ -80,4 +80,5 @@ public class CodeRef {
 
 		return maxStack;
 	}
+*/	
 }

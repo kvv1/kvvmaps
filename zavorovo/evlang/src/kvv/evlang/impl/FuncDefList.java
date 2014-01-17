@@ -20,7 +20,7 @@ public class FuncDefList {
 	}
 
 	public void put(Func func) {
-		if (func.retSize == 0 && func.name.equals("main")
+		if (func.retType.equals(Type.VOID) && func.name.equals("main")
 				&& func.locals.getArgCnt() == 0)
 			setMain(func);
 		else

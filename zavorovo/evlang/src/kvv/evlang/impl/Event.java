@@ -19,7 +19,7 @@ public class Event {
 		this.type = type;
 		this.context = context;
 	}
-
+/*
 	public int getCondMaxStack() throws ParseException {
 		String msg = "event cond";
 		context.dumpStream.print(msg + " ");
@@ -35,4 +35,5 @@ public class Event {
 		context.dumpStream.println("maxStack: " + maxStack);
 		return maxStack;
 	}
+*/	
 }

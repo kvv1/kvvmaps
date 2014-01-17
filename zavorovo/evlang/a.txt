@@ -1,6 +1,6 @@
 
 // #################################
-/*
+
 struct A {
 	int n;
 	A a; 
@@ -10,9 +10,13 @@ struct B {
 	int n;
 	A a; 
 };
-*/
-reg x;
-reg y;
+
+A fff(B b, int i, A a) {
+	return null;
+}
+
+int x;
+int y;
 
 eereg ee = 44;
 

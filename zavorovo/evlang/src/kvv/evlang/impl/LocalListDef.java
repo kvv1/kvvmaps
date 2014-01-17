@@ -5,7 +5,17 @@ import java.util.List;
 
 public class LocalListDef {
 
-	private List<String> locals = new ArrayList<String>();
+	public static class Local {
+		public int n;
+		public NameAndType nat;
+
+		public Local(int n, NameAndType nat) {
+			this.n = n;
+			this.nat = nat;
+		}
+	}
+
+	private List<Local> locals = new ArrayList<Local>();
 	private int argCnt;
 
 	private int max;
@@ -14,9 +24,9 @@ public class LocalListDef {
 		return max;
 	}
 
-	public void add(String name) {
-		System.out.println("LOCAL " + name + " : " + locals.size());
-		locals.add(name);
+	public void add(NameAndType nat) {
+		System.out.println("LOCAL " + nat.name + " : " + locals.size());
+		locals.add(new Local(locals.size(), nat));
 		max = Math.max(max, locals.size());
 	}
 
@@ -24,21 +34,21 @@ public class LocalListDef {
 		argCnt = locals.size();
 	}
 
-//	public Integer getIdx(String name) {
-//		Integer idx = get(name);
-//		if(idx == null)
-//			return null;
-//		return argCnt - idx - 1;
-//	}
-	
+	// public Integer getIdx(String name) {
+	// Integer idx = get(name);
+	// if(idx == null)
+	// return null;
+	// return argCnt - idx - 1;
+	// }
+
 	public int getArgCnt() {
 		return argCnt;
 	}
 
-	public Integer get(String name) {
+	public Local get(String name) {
 		for (int i = 0; i < locals.size(); i++)
-			if (locals.get(i).equals(name))
-				return i;
+			if (locals.get(i).nat.name.equals(name))
+				return locals.get(i);
 		return null;
 	}
 
@@ -47,6 +57,6 @@ public class LocalListDef {
 	}
 
 	public void setSize(int size) {
-		locals = new ArrayList<String>(locals.subList(0, size));
+		locals = new ArrayList<Local>(locals.subList(0, size));
 	}
 }
