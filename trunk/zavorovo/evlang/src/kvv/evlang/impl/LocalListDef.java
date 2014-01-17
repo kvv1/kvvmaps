@@ -59,4 +59,8 @@ public class LocalListDef {
 	public void setSize(int size) {
 		locals = new ArrayList<Local>(locals.subList(0, size));
 	}
+
+	public Local get(int i) {
+		return locals.get(i);
+	}
 }

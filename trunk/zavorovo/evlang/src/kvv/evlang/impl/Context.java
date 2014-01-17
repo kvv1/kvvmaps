@@ -142,12 +142,17 @@ public abstract class Context {
 
 	public FuncDefList funcDefList = new FuncDefList();
 
-	public Func getFunc(String name, int argCnt) throws ParseException {
+	public Func getFunc(String name, List<Expr> argList) throws ParseException {
 		Func func = funcDefList.get(name);
 		if (func == null)
 			throwExc(name + " - ?");
-		else if (func.locals.getArgCnt() != argCnt)
+		
+		if (func.locals.getArgCnt() != argList.size())
 			throwExc(name + " argument number error");
+		
+		for(int i = 0; i < func.locals.getArgCnt(); i++)
+			argList.get(i).type.checkAssignableTo(this, func.locals.get(i).nat.type);
+			
 		return func;
 	}
 
@@ -162,6 +167,10 @@ public abstract class Context {
 			throwExc(name + " - ?");
 		} else if (func.locals.getArgCnt() != locals.getArgCnt())
 			throwExc(name + " argument number error");
+		
+		for(int i = 0; i < func.locals.getArgCnt(); i++)
+			locals.get(i).nat.type.checkAssignableTo(this, func.locals.get(i).nat.type);
+		
 		return func;
 	}
 

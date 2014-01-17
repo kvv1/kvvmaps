@@ -36,7 +36,7 @@ public class Expr {
 
 	public Expr(Context context, String funcName, List<Expr> argList)
 			throws ParseException {
-		Func func = context.getFunc(funcName, argList.size());
+		Func func = context.getFunc(funcName, argList);
 		type = func.retType;
 		type.getSize();
 		if (func.retType.getSize() == 0)
