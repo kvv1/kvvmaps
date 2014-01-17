@@ -9,6 +9,7 @@ import java.util.Set;
 
 import kvv.evlang.ParseException;
 import kvv.evlang.impl.Event.EventType;
+import kvv.evlang.impl.LocalListDef.Local;
 import kvv.evlang.rt.BC;
 import kvv.evlang.rt.TryCatchBlock;
 
@@ -141,7 +142,7 @@ public class Code {
 			res.addAll(c.getCode());
 		res.add(BC.CALL);
 		res.add(func.n);
-		if (func.retSize != 0)
+		if (func.retType.getSize() != 0)
 			res.add(BC.DROP);
 		return res;
 	}
@@ -180,8 +181,9 @@ public class Code {
 
 	public static Code ret(Context context, Expr n) throws ParseException {
 		if (n != null) {
-			if (context.currentFunc.retSize == 0)
+			if (context.currentFunc.retType.getSize() == 0)
 				context.throwExc("'return;' expected");
+			n.type.checkAssignableTo(context, context.currentFunc.retType);
 			Code bytes = n.getCode();
 			int locals = context.currentFunc.locals.getMax();
 			if (locals == 0)
@@ -192,7 +194,7 @@ public class Code {
 			}
 			return bytes;
 		} else {
-			if (context.currentFunc.retSize != 0)
+			if (context.currentFunc.retType.getSize() != 0)
 				context.throwExc("'return <expr>;' expected");
 			Code bytes = new Code();
 			int locals = context.currentFunc.locals.getMax();
@@ -215,18 +217,21 @@ public class Code {
 	public static Code assign(Context context, String name, Expr t)
 			throws ParseException {
 		Code res = t.getCode();
-		Integer val = context.currentFunc.locals.get(name);
+		Local val = context.currentFunc.locals.get(name);
 		if (val != null) {
-			res.compileSetLocal(val);
+			t.type.checkAssignableTo(context, val.nat.type);
+			res.compileSetLocal(val.n);
 		} else {
 			RegisterDescr descr = context.registers.get(name);
 			if (descr != null) {
 				context.checkROReg(descr);
+				t.type.checkAssignableTo(context, descr.type);
 				res.compileSetreg(descr.reg);
 			} else {
 				ExtRegisterDescr extRegisterDescr = context
 						.getExtRegisterDescr(name);
 				if (extRegisterDescr != null) {
+					t.type.checkAssignableTo(context, Type.INT);
 					res.compileSetregExt(extRegisterDescr.addr,
 							extRegisterDescr.reg);
 				} else {
@@ -278,8 +283,8 @@ public class Code {
 		int to = res.size();
 		int b = res.compileBranch(0);
 		int handler = res.size();
-		int idx = context.currentFunc.locals.get(name);
-		res.compileSetLocal(idx);
+		Local local = context.currentFunc.locals.get(name);
+		res.compileSetLocal(local.n);
 		res.addAll(catchStmt);
 		res.resolveBranch(b);
 
@@ -288,9 +293,9 @@ public class Code {
 		return res;
 	}
 
-	public static void procDecl(Context context, int retSize, String name,
+	public static void procDecl(Context context, Type type, String name,
 			LocalListDef locals) throws ParseException {
-		Func func = context.getCreateFunc(name, locals, retSize);
+		Func func = context.getCreateFunc(name, locals, type);
 		context.currentFunc = func;
 	}
 
@@ -314,8 +319,10 @@ public class Code {
 		Code res = new Code();
 		res.compileEnter(context);
 		res.addAll(bytes);
-		if (context.currentFunc.retSize == 0)
+		if (context.currentFunc.retType.getSize() == 0)
 			res.addAll(ret(context, null));
+		else if (context.currentFunc.retType.isRef())
+			res.addAll(ret(context, Expr.nullExpr()));
 		else
 			res.addAll(ret(context, new Expr((short) 0)));
 		res.adjustLocals(context);

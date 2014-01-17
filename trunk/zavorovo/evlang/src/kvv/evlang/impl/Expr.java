@@ -4,33 +4,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kvv.evlang.ParseException;
+import kvv.evlang.impl.LocalListDef.Local;
 import kvv.evlang.rt.BC;
 
 public class Expr {
 	private final Code code = new Code();
 
+	public final Type type;
+
 	public Code getCode() {
 		return code;
 	}
 
-	public Expr(Code code) {
-		this.code.addAll(code);
+	public Expr(Type type) {
+		this.type = type;
+		type.getSize();
 	}
 
-	public Expr(BC bc, Expr... args) {
+	public Expr(Type type, BC bc, Expr... args) {
+		this.type = type;
+		type.getSize();
 		for (Expr arg : args)
 			code.addAll(arg.getCode());
 		code.add(bc);
 	}
 
-	public Expr(Short val) {
+	public Expr(short val) {
+		this.type = Type.INT;
 		code.compileLit(val);
 	}
 
 	public Expr(Context context, String funcName, List<Expr> argList)
 			throws ParseException {
 		Func func = context.getFunc(funcName, argList.size());
-		if (func.retSize != 1)
+		type = func.retType;
+		type.getSize();
+		if (func.retType.getSize() == 0)
 			context.throwExc(funcName + " - ?");
 		for (Expr c : argList)
 			code.addAll(c.getCode());
@@ -39,24 +48,31 @@ public class Expr {
 	}
 
 	public Expr(Context context, String name) throws ParseException {
-		Integer val = context.currentFunc.locals.get(name);
+		Local val = context.currentFunc.locals.get(name);
 		if (val != null) {
-			code.compileGetLocal(val);
+			type = val.nat.type;
+			type.getSize();
+			code.compileGetLocal(val.n);
 		} else {
 			RegisterDescr descr = context.registers.get(name);
 			if (descr != null) {
+				type = descr.type;
+				type.getSize();
 				code.compileGetreg(descr.reg);
 			} else {
 				Short val1 = context.constants.get(name);
 				if (val1 != null) {
+					type = Type.INT;
 					code.compileLit(val1);
 				} else {
 					ExtRegisterDescr extRegisterDescr = context
 							.getExtRegisterDescr(name);
 					if (extRegisterDescr != null) {
+						type = Type.INT;
 						code.compileGetregExt(extRegisterDescr.addr,
 								extRegisterDescr.reg);
 					} else {
+						type = Type.INT;
 						context.throwExc(name + " - ?");
 					}
 				}
@@ -64,101 +80,140 @@ public class Expr {
 		}
 	}
 
-	public static Expr muldiv(Expr e1, Expr e2, Expr e3) {
-		return new Expr(BC.MULDIV, e1, e2, e3);
+	public static Expr muldiv(Context context, Expr e1, Expr e2, Expr e3)
+			throws ParseException {
+		e1.type.checkInt(context);
+		e2.type.checkInt(context);
+		e3.type.checkInt(context);
+		return new Expr(Type.INT, BC.MULDIV, e1, e2, e3);
 	}
 
-	public static Expr not(Expr arg) {
-		return new Expr(BC.NOT, arg);
+	public static Expr not(Context context, Expr arg) throws ParseException {
+		arg.type.checkInt(context);
+		return new Expr(Type.INT, BC.NOT, arg);
 	}
 
-	public static Expr negate(Expr arg) {
-		return new Expr(BC.NEGATE, arg);
+	public static Expr negate(Context context, Expr arg) throws ParseException {
+		arg.type.checkInt(context);
+		return new Expr(Type.INT, BC.NEGATE, arg);
 	}
 
-	public static Expr mul(Expr arg1, Expr arg2) {
-		return new Expr(BC.MUL, arg1, arg2);
+	public static Expr mul(Context context, Expr arg1, Expr arg2)
+			throws ParseException {
+		arg1.type.checkInt(context);
+		arg2.type.checkInt(context);
+		return new Expr(Type.INT, BC.MUL, arg1, arg2);
 	}
 
-	public static Expr div(Expr arg1, Expr arg2) {
-		return new Expr(BC.DIV, arg1, arg2);
+	public static Expr div(Context context, Expr arg1, Expr arg2)
+			throws ParseException {
+		arg1.type.checkInt(context);
+		arg2.type.checkInt(context);
+		return new Expr(Type.INT, BC.DIV, arg1, arg2);
 	}
 
-	public static Expr add(Expr arg1, Expr arg2) {
-		return new Expr(BC.ADD, arg1, arg2);
+	public static Expr add(Context context, Expr arg1, Expr arg2)
+			throws ParseException {
+		arg1.type.checkInt(context);
+		arg2.type.checkInt(context);
+		return new Expr(Type.INT, BC.ADD, arg1, arg2);
 	}
 
-	public static Expr sub(Expr arg1, Expr arg2) {
-		return new Expr(BC.SUB, arg1, arg2);
+	public static Expr sub(Context context, Expr arg1, Expr arg2)
+			throws ParseException {
+		arg1.type.checkInt(context);
+		arg2.type.checkInt(context);
+		return new Expr(Type.INT, BC.SUB, arg1, arg2);
 	}
 
-	public static Expr eq(Expr arg1, Expr arg2) {
-		return new Expr(BC.EQ, arg1, arg2);
+	public static Expr eq(Context context, Expr arg1, Expr arg2)
+			throws ParseException {
+		Type.checkComparable(context, arg1.type, arg2.type);
+		return new Expr(Type.INT, BC.EQ, arg1, arg2);
 	}
 
-	public static Expr neq(Expr arg1, Expr arg2) {
-		return new Expr(BC.NEQ, arg1, arg2);
+	public static Expr neq(Context context, Expr arg1, Expr arg2)
+			throws ParseException {
+		Type.checkComparable(context, arg1.type, arg2.type);
+		return new Expr(Type.INT, BC.NEQ, arg1, arg2);
 	}
 
-	public static Expr lt(Expr arg1, Expr arg2) {
-		return new Expr(BC.LT, arg1, arg2);
+	public static Expr lt(Context context, Expr arg1, Expr arg2)
+			throws ParseException {
+		arg1.type.checkInt(context);
+		arg2.type.checkInt(context);
+		return new Expr(Type.INT, BC.LT, arg1, arg2);
 	}
 
-	public static Expr le(Expr arg1, Expr arg2) {
-		return new Expr(BC.LE, arg1, arg2);
+	public static Expr le(Context context, Expr arg1, Expr arg2)
+			throws ParseException {
+		arg1.type.checkInt(context);
+		arg2.type.checkInt(context);
+		return new Expr(Type.INT, BC.LE, arg1, arg2);
 	}
 
-	public static Expr gt(Expr arg1, Expr arg2) {
-		return new Expr(BC.GT, arg1, arg2);
+	public static Expr gt(Context context, Expr arg1, Expr arg2)
+			throws ParseException {
+		arg1.type.checkInt(context);
+		arg2.type.checkInt(context);
+		return new Expr(Type.INT, BC.GT, arg1, arg2);
 	}
 
-	public static Expr ge(Expr arg1, Expr arg2) {
-		return new Expr(BC.GE, arg1, arg2);
+	public static Expr ge(Context context, Expr arg1, Expr arg2)
+			throws ParseException {
+		arg1.type.checkInt(context);
+		arg2.type.checkInt(context);
+		return new Expr(Type.INT, BC.GE, arg1, arg2);
 	}
 
 	public static Expr and(List<Expr> list) {
 		if (list.size() == 1)
 			return list.get(0);
 
-		Code code = new Code();
-
+		Expr res = new Expr(Type.INT);
+		
 		List<Integer> addrs = new ArrayList<Integer>();
 
 		for (Expr e : list) {
-			code.addAll(e.getCode());
-			addrs.add(code.compileQBranch(0));
+			res.code.addAll(e.getCode());
+			addrs.add(res.code.compileQBranch(0));
 		}
 
-		code.compileLit((short) 1);
-		int a = code.compileBranch(0);
-		code.resolveBranchs(addrs);
-		code.compileLit((short) 0);
-		code.resolveBranch(a);
+		res.code.compileLit((short) 1);
+		int a = res.code.compileBranch(0);
+		res.code.resolveBranchs(addrs);
+		res.code.compileLit((short) 0);
+		res.code.resolveBranch(a);
 
-		return new Expr(code);
+		return res;
 	}
 
 	public static Expr or(List<Expr> list) {
 		if (list.size() == 1)
 			return list.get(0);
 
-		Code code = new Code();
-
+		Expr res = new Expr(Type.INT);
+		
 		List<Integer> addrs = new ArrayList<Integer>();
 
 		for (Expr e : list) {
-			code.addAll(e.getCode());
-			code.add(BC.NOT);
-			addrs.add(code.compileQBranch(0));
+			res.code.addAll(e.getCode());
+			res.code.add(BC.NOT);
+			addrs.add(res.code.compileQBranch(0));
 		}
 
-		code.compileLit((short) 0);
-		int a = code.compileBranch(0);
-		code.resolveBranchs(addrs);
-		code.compileLit((short) 1);
-		code.resolveBranch(a);
+		res.code.compileLit((short) 0);
+		int a = res.code.compileBranch(0);
+		res.code.resolveBranchs(addrs);
+		res.code.compileLit((short) 1);
+		res.code.resolveBranch(a);
 
-		return new Expr(code);
+		return res;
 	}
 
+	public static Expr nullExpr() {
+		Expr res = new Expr(Type.NULL);
+		res.code.compileLit((short) 0);
+		return res;
+	}
 }

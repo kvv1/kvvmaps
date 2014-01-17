@@ -27,6 +27,9 @@ import kvv.evlang.rt.UncaughtExceptionException;
 import kvv.evlang.rt.VM;
 
 public abstract class Context {
+
+	protected Map<String, Struct> structs = new HashMap<String, Struct>();
+
 	protected Map<String, Short> constants = new HashMap<String, Short>();
 
 	protected Map<String, RegisterDescr> registers = new LinkedHashMap<String, RegisterDescr>();
@@ -49,18 +52,26 @@ public abstract class Context {
 	{
 		constants.put("INVALID", (short) 0x8000);
 
-		registers.put("REG_RELAY0", new RegisterDescr(Register.REG_RELAY0));
-		registers.put("REG_RELAY1", new RegisterDescr(Register.REG_RELAY1));
-		registers.put("REG_RELAY2", new RegisterDescr(Register.REG_RELAY2));
-		registers.put("REG_RELAY3", new RegisterDescr(Register.REG_RELAY3));
-		registers.put("REG_RELAY4", new RegisterDescr(Register.REG_RELAY4));
-		registers.put("REG_RELAY5", new RegisterDescr(Register.REG_RELAY5));
-		registers.put("REG_RELAY6", new RegisterDescr(Register.REG_RELAY6));
-		registers.put("REG_RELAY7", new RegisterDescr(Register.REG_RELAY7));
-		registers.put("REG_TEMPERATURE", new RegisterDescr(Register.REG_TEMP,
-				true, false));
-		registers.put("REG_TEMPERATURE2", new RegisterDescr(Register.REG_TEMP2,
-				true, false));
+		registers.put("REG_RELAY0", new RegisterDescr(Type.INT,
+				Register.REG_RELAY0));
+		registers.put("REG_RELAY1", new RegisterDescr(Type.INT,
+				Register.REG_RELAY1));
+		registers.put("REG_RELAY2", new RegisterDescr(Type.INT,
+				Register.REG_RELAY2));
+		registers.put("REG_RELAY3", new RegisterDescr(Type.INT,
+				Register.REG_RELAY3));
+		registers.put("REG_RELAY4", new RegisterDescr(Type.INT,
+				Register.REG_RELAY4));
+		registers.put("REG_RELAY5", new RegisterDescr(Type.INT,
+				Register.REG_RELAY5));
+		registers.put("REG_RELAY6", new RegisterDescr(Type.INT,
+				Register.REG_RELAY6));
+		registers.put("REG_RELAY7", new RegisterDescr(Type.INT,
+				Register.REG_RELAY7));
+		registers.put("REG_TEMPERATURE", new RegisterDescr(Type.INT,
+				Register.REG_TEMP, true, false));
+		registers.put("REG_TEMPERATURE2", new RegisterDescr(Type.INT,
+				Register.REG_TEMP2, true, false));
 
 		// registers.put("REG_EEPROM0", Register.REG_EEPROM0);
 		// registers.put("REG_EEPROM1", Register.REG_EEPROM1);
@@ -71,48 +82,48 @@ public abstract class Context {
 		// registers.put("REG_EEPROM6", Register.REG_EEPROM6);
 		// registers.put("REG_EEPROM7", Register.REG_EEPROM7);
 
-		registers.put("REG_ADC0", new RegisterDescr(Register.REG_ADC0, true,
-				false));
-		registers.put("REG_ADC1", new RegisterDescr(Register.REG_ADC1, true,
-				false));
-		registers.put("REG_ADC2", new RegisterDescr(Register.REG_ADC2, true,
-				false));
-		registers.put("REG_ADC3", new RegisterDescr(Register.REG_ADC3, true,
-				false));
+		registers.put("REG_ADC0", new RegisterDescr(Type.INT,
+				Register.REG_ADC0, true, false));
+		registers.put("REG_ADC1", new RegisterDescr(Type.INT,
+				Register.REG_ADC1, true, false));
+		registers.put("REG_ADC2", new RegisterDescr(Type.INT,
+				Register.REG_ADC2, true, false));
+		registers.put("REG_ADC3", new RegisterDescr(Type.INT,
+				Register.REG_ADC3, true, false));
 
-		registers.put("REG_IN0", new RegisterDescr(Register.REG_IN0, true,
-				false));
-		registers.put("REG_IN1", new RegisterDescr(Register.REG_IN1, true,
-				false));
-		registers.put("REG_IN2", new RegisterDescr(Register.REG_IN2, true,
-				false));
-		registers.put("REG_IN3", new RegisterDescr(Register.REG_IN3, true,
-				false));
-		registers.put("REG_IN4", new RegisterDescr(Register.REG_IN4, true,
-				false));
-		registers.put("REG_IN5", new RegisterDescr(Register.REG_IN5, true,
-				false));
-		registers.put("REG_IN6", new RegisterDescr(Register.REG_IN6, true,
-				false));
-		registers.put("REG_IN7", new RegisterDescr(Register.REG_IN7, true,
-				false));
+		registers.put("REG_IN0", new RegisterDescr(Type.INT, Register.REG_IN0,
+				true, false));
+		registers.put("REG_IN1", new RegisterDescr(Type.INT, Register.REG_IN1,
+				true, false));
+		registers.put("REG_IN2", new RegisterDescr(Type.INT, Register.REG_IN2,
+				true, false));
+		registers.put("REG_IN3", new RegisterDescr(Type.INT, Register.REG_IN3,
+				true, false));
+		registers.put("REG_IN4", new RegisterDescr(Type.INT, Register.REG_IN4,
+				true, false));
+		registers.put("REG_IN5", new RegisterDescr(Type.INT, Register.REG_IN5,
+				true, false));
+		registers.put("REG_IN6", new RegisterDescr(Type.INT, Register.REG_IN6,
+				true, false));
+		registers.put("REG_IN7", new RegisterDescr(Type.INT, Register.REG_IN7,
+				true, false));
 
-		registers.put("REG_INPULLUP0",
-				new RegisterDescr(Register.REG_INPULLUP0));
-		registers.put("REG_INPULLUP1",
-				new RegisterDescr(Register.REG_INPULLUP1));
-		registers.put("REG_INPULLUP2",
-				new RegisterDescr(Register.REG_INPULLUP2));
-		registers.put("REG_INPULLUP3",
-				new RegisterDescr(Register.REG_INPULLUP3));
-		registers.put("REG_INPULLUP4",
-				new RegisterDescr(Register.REG_INPULLUP4));
-		registers.put("REG_INPULLUP5",
-				new RegisterDescr(Register.REG_INPULLUP5));
-		registers.put("REG_INPULLUP6",
-				new RegisterDescr(Register.REG_INPULLUP6));
-		registers.put("REG_INPULLUP7",
-				new RegisterDescr(Register.REG_INPULLUP7));
+		registers.put("REG_INPULLUP0", new RegisterDescr(Type.INT,
+				Register.REG_INPULLUP0));
+		registers.put("REG_INPULLUP1", new RegisterDescr(Type.INT,
+				Register.REG_INPULLUP1));
+		registers.put("REG_INPULLUP2", new RegisterDescr(Type.INT,
+				Register.REG_INPULLUP2));
+		registers.put("REG_INPULLUP3", new RegisterDescr(Type.INT,
+				Register.REG_INPULLUP3));
+		registers.put("REG_INPULLUP4", new RegisterDescr(Type.INT,
+				Register.REG_INPULLUP4));
+		registers.put("REG_INPULLUP5", new RegisterDescr(Type.INT,
+				Register.REG_INPULLUP5));
+		registers.put("REG_INPULLUP6", new RegisterDescr(Type.INT,
+				Register.REG_INPULLUP6));
+		registers.put("REG_INPULLUP7", new RegisterDescr(Type.INT,
+				Register.REG_INPULLUP7));
 
 	}
 
@@ -140,21 +151,38 @@ public abstract class Context {
 		return func;
 	}
 
-	public Func getCreateFunc(String name, LocalListDef locals, int retSize)
+	public Func getCreateFunc(String name, LocalListDef locals, Type retType)
 			throws ParseException {
 		Func func = funcDefList.get(name);
 		if (func == null) {
 			checkName(name);
-			func = new Func(this, name, locals, retSize);
+			func = new Func(this, name, locals, retType);
 			funcDefList.put(func);
-		} else if (func.retSize != retSize) {
+		} else if (!func.retType.equals(retType)) {
 			throwExc(name + " - ?");
 		} else if (func.locals.getArgCnt() != locals.getArgCnt())
 			throwExc(name + " argument number error");
 		return func;
 	}
 
-	protected void newRegister(String regName, String regNum)
+	protected void createStruct(String name) throws ParseException {
+		checkName(name);
+		structs.put(name, new Struct(name));
+	}
+
+	protected void addField(String structName, Type fieldType,
+			String fieldName) throws ParseException {
+		Struct struct = structs.get(structName);
+		if (struct == null)
+			throwExc(structName + " -?");
+
+		if (struct.fields.containsKey(fieldName))
+			throwExc(fieldName + " already defined");
+
+		struct.fields.put(fieldName, fieldType);
+	}
+
+	protected void newRegisterAlias(String regName, String regNum)
 			throws ParseException {
 		checkName(regName);
 		RegisterDescr registerDescr = registers.get(regNum);
@@ -163,9 +191,9 @@ public abstract class Context {
 		registers.put(regName, registerDescr);
 	}
 
-	protected void newRegister(String regName) throws ParseException {
+	protected void newRegister(Type type, String regName) throws ParseException {
 		checkName(regName);
-		RegisterDescr registerDescr = new RegisterDescr(nextReg++, false,
+		RegisterDescr registerDescr = new RegisterDescr(type, nextReg++, false,
 				false, null);
 		if (nextReg > Register.REG_RAM0 + Register.REG_RAM_CNT)
 			throwExc("too many registers used");
@@ -175,8 +203,8 @@ public abstract class Context {
 	protected void newEERegister(String regName, Short initValue)
 			throws ParseException {
 		checkName(regName);
-		RegisterDescr registerDescr = new RegisterDescr(nextEEReg++, true,
-				true, initValue);
+		RegisterDescr registerDescr = new RegisterDescr(Type.INT, nextEEReg++,
+				true, true, initValue);
 		if (nextEEReg > Register.REG_EEPROM0 + Register.REG_EEPROM_CNT)
 			throwExc("too many registers used");
 		registers.put(regName, registerDescr);
@@ -225,8 +253,8 @@ public abstract class Context {
 
 		for (Func f : funcDefList.values()) {
 			if (f.code == null)
-				throw new ParseException((f.retSize != 0 ? "function"
-						: "procedure") + " '" + f.name + "' not defined");
+				throw new ParseException("function '" + f.name
+						+ "' not defined");
 		}
 
 	}
@@ -243,33 +271,25 @@ public abstract class Context {
 
 		code.add(BC.RET);
 
-		Func func = new Func(this, "<init>", new LocalListDef(), 0);
+		Func func = new Func(this, "<init>", new LocalListDef(), Type.VOID);
 		func.code = new CodeRef(this, code);
 		funcDefList.setInit(func);
 	}
 
-	public void checkStack() throws ParseException {
-		int maxStack = 0;
-
-		for (Timer t : timers.values()) {
-			int stack = t.getMaxStack();
-			maxStack = Math.max(maxStack, stack);
-		}
-
-		for (Func f : funcDefList.values()) {
-			int stack = f.getMaxStack();
-			maxStack = Math.max(maxStack, stack);
-		}
-
-		for (Event e : events) {
-			int stack = e.getCondMaxStack();
-			maxStack = Math.max(maxStack, stack);
-			stack = e.getHandlerMaxStack();
-			maxStack = Math.max(maxStack, stack);
-		}
-		System.out.println("maxstack = " + maxStack);
-	}
-
+	/*
+	 * public void checkStack() throws ParseException { int maxStack = 0;
+	 * 
+	 * for (Timer t : timers.values()) { int stack = t.getMaxStack(); maxStack =
+	 * Math.max(maxStack, stack); }
+	 * 
+	 * for (Func f : funcDefList.values()) { int stack = f.getMaxStack();
+	 * maxStack = Math.max(maxStack, stack); }
+	 * 
+	 * for (Event e : events) { int stack = e.getCondMaxStack(); maxStack =
+	 * Math.max(maxStack, stack); stack = e.getHandlerMaxStack(); maxStack =
+	 * Math.max(maxStack, stack); } System.out.println("maxstack = " +
+	 * maxStack); }
+	 */
 	// public static byte[] dumpNull() throws IOException {
 	// return new byte[0];
 	// }
@@ -367,6 +387,11 @@ public abstract class Context {
 		} catch (UnsupportedEncodingException e) {
 			return "###";
 		}
+	}
+
+	public void checkNotVoid(Type type) throws ParseException {
+		if (type.equals(Type.VOID))
+			throwExc("'void' type not allowed");
 	}
 
 }

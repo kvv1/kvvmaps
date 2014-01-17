@@ -85,13 +85,17 @@ public interface EG1Constants {
   /** RegularExpression Id. */
   int THROW = 43;
   /** RegularExpression Id. */
-  int ID = 44;
+  int STRUCT = 44;
   /** RegularExpression Id. */
-  int STRING = 45;
+  int NULL = 45;
   /** RegularExpression Id. */
-  int NUMBER = 46;
+  int ID = 46;
   /** RegularExpression Id. */
-  int DIGIT = 47;
+  int STRING = 47;
+  /** RegularExpression Id. */
+  int NUMBER = 48;
+  /** RegularExpression Id. */
+  int DIGIT = 49;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -142,17 +146,19 @@ public interface EG1Constants {
     "\"try\"",
     "\"catch\"",
     "\"throw\"",
+    "\"struct\"",
+    "\"null\"",
     "<ID>",
     "<STRING>",
     "<NUMBER>",
     "<DIGIT>",
+    "\"{\"",
+    "\";\"",
+    "\"}\"",
     "\"(\"",
     "\")\"",
-    "\";\"",
     "\",\"",
     "\"=\"",
-    "\"{\"",
-    "\"}\"",
     "\".\"",
   };
 
