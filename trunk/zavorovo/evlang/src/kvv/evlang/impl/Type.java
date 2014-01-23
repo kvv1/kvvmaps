@@ -40,13 +40,13 @@ public class Type {
 
 	public static void checkComparable(Context context, Type type1, Type type2) throws ParseException {
 		if(type1.equals(VOID) || type2.equals(VOID))
-			context.throwExc("incompatible types");
+			context.throwExc("incompatible types: " + type1.name + "," + type2.name);
 		if(type1.equals(type2))
 			return;
 		if(type1.equals(INT) ^ type2.equals(INT))
-			context.throwExc("incompatible types");
+			context.throwExc("incompatible types: " + type1.name + "," + type2.name);
 		if(!type1.equals(NULL) && !type2.equals(NULL))
-			context.throwExc("incompatible types");
+			context.throwExc("incompatible types: " + type1.name + "," + type2.name);
 	}
 
 	public void checkAssignableTo(Context context, Type type2) throws ParseException {

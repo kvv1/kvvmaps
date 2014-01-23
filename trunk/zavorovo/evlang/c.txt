@@ -1,27 +1,27 @@
-int div(int n1, int n2) {
-		return n1 / n2;
-}
 
-int div2(int n1, int n2) {
-		return div(n1, n2);
-}
-
-int div1(int n1, int n2) {
-	int n;
-	try {
-		n = div2(n1, n2);
-	} catch (int e) {
-		print(e);
-		n = 666;
-	}
+struct S {
+	int a;
+	int b;
 	
-	return n;
+	int sum() {
+		return this.a + this.b;
+	}
 }
 
+xtimer T {
+	S s;
+	{
+		this.s.sum();
+		print this.s.a;
+		this.s.a = this.s.a + this.s.b;
+//		this.start_s(1);
+	}
+}
 
 void main() {
-	print div1(20, 4);
-	print div1(20, 4);
-	print div1(10, 0);
-	print div1(10, 5);
+	S s = new S(3,4);
+	print s.sum();
+
+	T t = new T(new S(10, 2));
+	t.start_s(1);
 }

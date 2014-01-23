@@ -24,10 +24,12 @@ public class LocalListDef {
 		return max;
 	}
 
-	public void add(NameAndType nat) {
+	public Local add(NameAndType nat) {
 		System.out.println("LOCAL " + nat.name + " : " + locals.size());
-		locals.add(new Local(locals.size(), nat));
+		Local res = new Local(locals.size(), nat);
+		locals.add(res);
 		max = Math.max(max, locals.size());
+		return res;
 	}
 
 	public void endOfArgs() {

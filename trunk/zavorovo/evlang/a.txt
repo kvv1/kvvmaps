@@ -1,20 +1,6 @@
 
 // #################################
 
-struct A {
-	int n;
-	A a; 
-};
-
-struct B {
-	int n;
-	A a; 
-};
-
-A fff(B b, int i, A a) {
-	return null;
-}
-
 int x;
 int y;
 
@@ -33,37 +19,38 @@ onset(x <= 20) {
 
 timer t {
 	x = -x;
-	t.start_ms (500);
+	start_ms (t, 500);
 }
 
 void p(int c);
 int f(int a, int b);
 
-void main() {
+void _main() {
 //	print muldiv(20000, 30000, 10000);
 
-	int z0;
-	int z1;
+	int z0 = 0;
+	int z1 = 0;
 
 	print ee;
 
 	{
-		int z2;
-		int z3;
+		int z2 = 0;
+		int z3 = 0;
 		z0 = 22;
 		z3 = 33;
+		//z0++;
 	}
 
 	{
-		int z2;
-		int z3;
+		int z2 = 0;
+		int z3 = 0;
 		print z3;
 	}
 
 	p(100);	
 		print z0;
 	x = 25;
-	t.start_ms 100;
+	start_ms(t, 100);
 	
 	f(0,0);
 }
@@ -74,19 +61,82 @@ int f(int a, int b) {
 }
 
 void p(int c) {
-	int d;
 	c = c + 300; 
+	int d = 0;
     print f(13+c, 6);
 }
 // #################################
 // 44 33 666 407 22 666 25 -25 25 -25 25 -25 25 -25 25 -25
-/*
-reg r;
+
+void test2();
+void test3();
+
+int r;
 text r "�������";
 
 void main() {
 	r = 10 && 5 && 0;
 	print r;
 	print 1 || 1;
+	
+	test3();
+	
+	_main();
+}
+
+
+struct A {
+	int n;
+	A a; 
+}
+
+struct B {
+	int n;
+	A a; 
+}
+
+
+A a1 = new A(6, null);
+A a2 = new A(5, a1);
+B b = new B(10, a2);
+
+A fff(A a, B b) {
+	a.n = b.n;
+	return a;
+}
+
+int zz = 10 + 3;
+
+void test3() {
+	//test2();
+	try {
+		test2();
+	} catch (int e) {
+		print e;
+	}
+}
+
+/*
+Timer T {
+ 	int n;
+ 	{
+ 		start_s(5);
+ 	}
+}
+
+void f() {
+	new T(33).start_s(1);
 }
 */
+
+void test2() {
+	print b.n;
+	print b.a.n;
+	print b.a.a.n;
+	
+	a2 = null;
+	b.a = null;
+
+	print b.a.a.a.n;
+}
+

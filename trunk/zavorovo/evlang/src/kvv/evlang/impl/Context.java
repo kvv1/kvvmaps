@@ -20,7 +20,6 @@ import kvv.controllers.register.Register;
 import kvv.controllers.register.RegisterUI;
 import kvv.evlang.ParseException;
 import kvv.evlang.impl.Event.EventType;
-import kvv.evlang.rt.BC;
 import kvv.evlang.rt.RTContext;
 import kvv.evlang.rt.TryCatchBlock;
 import kvv.evlang.rt.UncaughtExceptionException;
@@ -28,14 +27,25 @@ import kvv.evlang.rt.VM;
 
 public abstract class Context {
 
-	protected Map<String, Struct> structs = new HashMap<String, Struct>();
+	private static final int MAX_CONSTPOOL = 16;
+	private static final int MAX_REGPOOL = 16;
+
+	private static final String TIMER_FUNC_NAME = "__timer_func__";
+	private static final String TIMER_COUNTER_NAME = "__timer_counter__";
+	private static final String TIMER_NEXT_NAME = "__timer_next__";
+
+	
+	
+	protected Map<String, Struct> structs = new LinkedHashMap<String, Struct>();
 
 	protected Map<String, Short> constants = new HashMap<String, Short>();
 
 	protected Map<String, RegisterDescr> registers = new LinkedHashMap<String, RegisterDescr>();
 
-	protected int nextReg = Register.REG_RAM0;
-	protected int nextEEReg = Register.REG_EEPROM0;
+	protected short nextReg = Register.REG_RAM0;
+	protected short nextEEReg = Register.REG_EEPROM0;
+
+	private List<Byte> refs = new ArrayList<Byte>();
 
 	protected abstract ExtRegisterDescr getExtRegisterDescr(String extRegName);
 
@@ -46,6 +56,8 @@ public abstract class Context {
 		public void write(int b) throws IOException {
 		}
 	});
+
+	public Code initCode = new Code(this);
 
 	public PrintStream dumpStream = nullStream;
 
@@ -138,7 +150,7 @@ public abstract class Context {
 	// public LocalListDef locals = new LocalListDef();
 	// public boolean isFunc;
 
-	public Code codeArr = new Code();
+	public Code codeArr = new Code(this);
 
 	public FuncDefList funcDefList = new FuncDefList();
 
@@ -146,13 +158,14 @@ public abstract class Context {
 		Func func = funcDefList.get(name);
 		if (func == null)
 			throwExc(name + " - ?");
-		
+
 		if (func.locals.getArgCnt() != argList.size())
 			throwExc(name + " argument number error");
-		
-		for(int i = 0; i < func.locals.getArgCnt(); i++)
-			argList.get(i).type.checkAssignableTo(this, func.locals.get(i).nat.type);
-			
+
+		for (int i = 0; i < func.locals.getArgCnt(); i++)
+			argList.get(i).type.checkAssignableTo(this,
+					func.locals.get(i).nat.type);
+
 		return func;
 	}
 
@@ -167,30 +180,52 @@ public abstract class Context {
 			throwExc(name + " - ?");
 		} else if (func.locals.getArgCnt() != locals.getArgCnt())
 			throwExc(name + " argument number error");
-		
-		for(int i = 0; i < func.locals.getArgCnt(); i++)
-			locals.get(i).nat.type.checkAssignableTo(this, func.locals.get(i).nat.type);
-		
+
+		for (int i = 0; i < func.locals.getArgCnt(); i++)
+			locals.get(i).nat.type.checkAssignableTo(this,
+					func.locals.get(i).nat.type);
+
 		return func;
 	}
 
-	protected void createStruct(String name) throws ParseException {
+	protected Struct createStruct(String name, boolean isTimer) throws ParseException {
 		checkName(name);
-		structs.put(name, new Struct(name));
+		Struct str = new Struct(structs.size(), new Type(name), isTimer);
+		structs.put(name, str);
+		return str;
 	}
 
-	protected void addField(String structName, Type fieldType,
-			String fieldName) throws ParseException {
-		Struct struct = structs.get(structName);
-		if (struct == null)
-			throwExc(structName + " -?");
-
-		if (struct.fields.containsKey(fieldName))
+	protected void addField(Struct struct, Type fieldType, String fieldName)
+			throws ParseException {
+		if (struct.getField(fieldName) != null)
 			throwExc(fieldName + " already defined");
 
-		struct.fields.put(fieldName, fieldType);
+		struct.addField(fieldName, fieldType);
 	}
 
+	public int getFieldIndex(Type type, String fieldName) throws ParseException {
+		if (!type.isRef())
+			throwExc("should be struct type");
+		Struct struct = structs.get(type.name);
+		Integer idx = struct.getField(fieldName);
+		if (idx == null)
+			throwExc(fieldName + " - ?");
+		return idx;
+	}
+
+	public void addXTimerCode(Struct struct, Code code) {
+		
+	}
+	
+	public Struct createXTimer(String name) throws ParseException {
+		Struct struct = createStruct(name, true);
+		addField(struct, Type.INT, TIMER_FUNC_NAME);
+		addField(struct, Type.INT, TIMER_COUNTER_NAME);
+		addField(struct, new Type("__TIMER__"), TIMER_NEXT_NAME);
+		return struct;
+		
+	}
+	
 	protected void newRegisterAlias(String regName, String regNum)
 			throws ParseException {
 		checkName(regName);
@@ -200,13 +235,24 @@ public abstract class Context {
 		registers.put(regName, registerDescr);
 	}
 
-	protected void newRegister(Type type, String regName) throws ParseException {
+	protected void newVar(Type type, String regName, Expr initValue)
+			throws ParseException {
 		checkName(regName);
-		RegisterDescr registerDescr = new RegisterDescr(type, nextReg++, false,
-				false, null);
-		if (nextReg > Register.REG_RAM0 + Register.REG_RAM_CNT)
+		if (nextReg >= Register.REG_RAM0 + Register.REG_RAM_CNT)
 			throwExc("too many registers used");
+
+		short n = nextReg++;
+		RegisterDescr registerDescr = new RegisterDescr(type, n, false, false,
+				null);
 		registers.put(regName, registerDescr);
+		
+		if(type.isRef())
+			refs.add((byte) n);
+
+		if (initValue != null) {
+			initCode.addAll(initValue.getCode());
+			initCode.compileSetreg(registerDescr.reg);
+		}
 	}
 
 	protected void newEERegister(String regName, Short initValue)
@@ -214,9 +260,13 @@ public abstract class Context {
 		checkName(regName);
 		RegisterDescr registerDescr = new RegisterDescr(Type.INT, nextEEReg++,
 				true, true, initValue);
+
 		if (nextEEReg > Register.REG_EEPROM0 + Register.REG_EEPROM_CNT)
 			throwExc("too many registers used");
 		registers.put(regName, registerDescr);
+
+		initCode.compileLit(initValue);
+		initCode.compileSetreg(registerDescr.reg);
 	}
 
 	protected void setUI(String regName, String uiName, RegType uiType)
@@ -248,6 +298,9 @@ public abstract class Context {
 
 	protected Set<String> names = new HashSet<String>();
 
+	public List<Short> constPool = new ArrayList<Short>();
+	public List<Short> regPool = new ArrayList<Short>();
+
 	protected void checkName(String name) throws ParseException {
 		if (names.contains(name))
 			throwExc("name '" + name + "' already defined");
@@ -268,20 +321,10 @@ public abstract class Context {
 
 	}
 
-	public void buildInit() {
-		Code code = new Code();
-
-		for (RegisterDescr reg : registers.values()) {
-			if (reg.initValue != null) {
-				code.compileLit(reg.initValue);
-				code.compileSetreg(reg.reg);
-			}
-		}
-
-		code.add(BC.RET);
-
+	public void buildInit() throws ParseException {
+		initCode.compileRet(0);
 		Func func = new Func(this, "<init>", new LocalListDef(), Type.VOID);
-		func.code = new CodeRef(this, code);
+		func.code = new CodeRef(this, initCode);
 		funcDefList.setInit(func);
 	}
 
@@ -340,6 +383,16 @@ public abstract class Context {
 			dos.writeShort(tcb.handler);
 		}
 
+		dos.writeByte(constPool.size());
+		for (Short s : constPool) {
+			dos.writeShort(s);
+		}
+
+		dos.writeByte(regPool.size());
+		for (Short s : regPool) {
+			dos.writeByte(s);
+		}
+
 		for (byte b : codeArr.code)
 			dos.write(b);
 
@@ -375,9 +428,15 @@ public abstract class Context {
 		for (Func f : funcDefList.values())
 			rtFuncs[f.n] = new RTContext.Func(f.code.off);
 
+		RTContext.Type[] rtTypes = new RTContext.Type[structs.size()];
+		for(Struct str : structs.values())
+			rtTypes[str.idx] = new RTContext.Type(str.fields.size(), str.getMask());
+		
 		RTContext context = new RTContext(codeArr.code, rtTimers,
 				rtEvents.toArray(new RTContext.Event[0]), rtFuncs,
-				codeArr.tryCatchBlocks.toArray(new TryCatchBlock[0]));
+				codeArr.tryCatchBlocks.toArray(new TryCatchBlock[0]),
+				constPool.toArray(new Short[0]), regPool.toArray(new Short[0]),
+				refs.toArray(new Byte[0]), rtTypes);
 
 		return context;
 	}
@@ -401,6 +460,28 @@ public abstract class Context {
 	public void checkNotVoid(Type type) throws ParseException {
 		if (type.equals(Type.VOID))
 			throwExc("'void' type not allowed");
+	}
+
+	public Integer addConst(short s) {
+		for (int i = 0; i < constPool.size(); i++)
+			if (constPool.get(i) == s)
+				return i;
+		if (constPool.size() < MAX_CONSTPOOL) {
+			constPool.add(s);
+			return constPool.size() - 1;
+		}
+		return null;
+	}
+
+	public Integer addReg(short s) {
+		for (int i = 0; i < regPool.size(); i++)
+			if (regPool.get(i) == s)
+				return i;
+		if (regPool.size() < MAX_REGPOOL) {
+			regPool.add(s);
+			return regPool.size() - 1;
+		}
+		return null;
 	}
 
 }

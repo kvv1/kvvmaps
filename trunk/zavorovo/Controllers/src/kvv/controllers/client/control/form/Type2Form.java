@@ -34,7 +34,7 @@ public class Type2Form extends ControlComposite {
 		panel.add(addrLabel);
 
 		RelayCheckBoxes relays = new RelayCheckBoxes(addr, Register.REG_RELAY0,
-				Register.REG_PWM0, Register.REG_RELAY_CNT);
+				(int)Register.REG_PWM0, Register.REG_RELAY_CNT);
 		add(relays);
 		panel.add(relays);
 

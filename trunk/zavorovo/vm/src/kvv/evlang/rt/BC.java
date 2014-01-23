@@ -12,17 +12,28 @@ public enum BC {
 	INC(0, 1), DEC(0, 1), //
 	CALL(0, 1), RESERVED(0, 0), //
 	MULDIV(-2, 0), //
-	GETLOCAL(1, 1), SETLOCAL(-1, 1), ENTER(0, 1), //
+	ENTER(0, 1), //
 	PRINT(-1, 0), 
 	SETEXTREG(-1, 2), GETEXTREG(1, 2),
-	/*TRY(1, 1), CATCH(-1, 1),*/ THROW(-1, 0);
+	THROW(-1, 0), NEW(1, 1);
 
 	public int stackBalance;
 	public int args;
 
-	public static final int GETREGSHORT = 0x80;
-	public static final int SETREGSHORT = 0xC0;
-	public static final int LITSHORT = 0x40;
+	public static final int GETREG_SHORT = 0x40;
+	public static final int SETREG_SHORT = 0x50;
+	public static final int GETLOCAL_SHORT = 0x60;
+	public static final int SETLOCAL_SHORT = 0x70;
+	public static final int GETFIELD_SHORT = 0x80;
+	public static final int SETFIELD_SHORT = 0x90;
+	public static final int CALL_SHORT = 0xA0;
+	public static final int RET_SHORT = 0xB0;
+	public static final int RETI_SHORT = 0xC0;
+	public static final int LIT_SHORT = 0xD0;
+	public static final int ENTER_SHORT = 0xE0;
+	
+//	public static final int OR_BRANCH_SHORT = 0xE0;
+//	public static final int AND_BRANCH_SHORT = 0xF0;
 
 	BC(int stackBalance, int args) {
 		this.stackBalance = stackBalance;

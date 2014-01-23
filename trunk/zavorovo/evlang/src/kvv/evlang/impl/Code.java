@@ -1,10 +1,7 @@
 package kvv.evlang.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import kvv.evlang.ParseException;
@@ -13,32 +10,16 @@ import kvv.evlang.impl.LocalListDef.Local;
 import kvv.evlang.rt.BC;
 import kvv.evlang.rt.TryCatchBlock;
 
-public class Code {
+public class Code extends CodeBase {
 
-	public final List<Byte> code = new ArrayList<Byte>();
+	public Code(Context context) {
+		super(context);
+	}
+
 	public Set<TryCatchBlock> tryCatchBlocks = new HashSet<TryCatchBlock>();
-	public Set<Integer> locals = new HashSet<Integer>();
-
-	static Map<BC, Integer> histo = new HashMap<BC, Integer>();
-
-	static void printHisto() {
-		for (BC c : histo.keySet()) {
-			System.out.println(c.name() + " " + histo.get(c));
-		}
-	}
-
-	void add(BC c) {
-		code.add((byte) c.ordinal());
-		Integer n = histo.get(c);
-		histo.put(c, n == null ? 1 : n + 1);
-	}
-
-	void add(int c) {
-		code.add((byte) c);
-	}
 
 	public void addAll(Code c) {
-		int sz = size();
+		short sz = size();
 		code.addAll(c.code);
 		for (TryCatchBlock tcb : c.tryCatchBlocks)
 			tryCatchBlocks.add(new TryCatchBlock(tcb.from + sz, tcb.to + sz,
@@ -47,77 +28,12 @@ public class Code {
 			locals.add(local + sz);
 	}
 
-	int size() {
-		return code.size();
-	}
-
-	public void compileEnter(int n) throws ParseException {
-		if (n < 0)
-			throw new ParseException();
-		if (n != 0) {
-			add(BC.ENTER);
-			add(n);
-		}
-	}
-
-	void compileLit(short s) {
-		if (s >= -32 && s < 32) {
-			add(BC.LITSHORT + (s & 0x3F));
-		} else {
-			add(BC.LIT);
-			add(s >>> 8);
-			add(s & 0xFF);
-		}
-	}
-
-	void compileGetreg(int reg) {
-		if (reg < 64) {
-			add(BC.GETREGSHORT + reg);
-		} else {
-			add(BC.GETREG);
-			add(reg);
-		}
-	}
-
-	void compileSetreg(int reg) {
-		if (reg < 64) {
-			add(BC.SETREGSHORT + reg);
-		} else {
-			add(BC.SETREG);
-			add(reg);
-		}
-	}
-
-	protected void compileSetregExt(int addr, int reg) {
-		add(BC.SETEXTREG);
-		add(addr);
-		add(reg);
-	}
-
-	protected void compileGetregExt(int addr, int reg) {
-		add(BC.GETEXTREG);
-		add(addr);
-		add(reg);
-	}
-
-	void compileGetLocal(int loc) {
-		add(BC.GETLOCAL);
-		add(loc);
-		locals.add(size());
-	}
-
-	private void compileSetLocal(int loc) {
-		add(BC.SETLOCAL);
-		add(loc);
-		locals.add(size());
-	}
-
 	public static Code dec(Context context, String name) throws ParseException {
 		RegisterDescr descr = context.registers.get(name);
 		if (descr == null)
 			context.throwExc(name + " - ?");
 		context.checkROReg(descr);
-		Code res = new Code();
+		Code res = new Code(context);
 		res.add(BC.DEC);
 		res.add(descr.reg);
 		return res;
@@ -128,28 +44,29 @@ public class Code {
 		if (descr == null)
 			context.throwExc(name + " - ?");
 		context.checkROReg(descr);
-		Code res = new Code();
+		Code res = new Code(context);
 		res.add(BC.INC);
 		res.add(descr.reg);
 		return res;
 	}
 
-	public static Code callp(Context context, String name, List<Expr> argList)
-			throws ParseException {
-		Func func = context.getFunc(name, argList);
-		Code res = new Code();
-		for (Expr c : argList)
-			res.addAll(c.getCode());
-		res.add(BC.CALL);
-		res.add(func.n);
-		if (func.retType.getSize() != 0)
-			res.add(BC.DROP);
-		return res;
-	}
+//	public static Code callp(Context context, LValue lvalue, List<Expr> argList)
+//			throws ParseException {
+//		if (lvalue.expr != null)
+//			context.throwExc("method calls not implemented");
+//		Func func = context.getFunc(lvalue.field, argList);
+//		Code res = new Code(context);
+//		for (Expr c : argList)
+//			res.addAll(c.getCode());
+//		res.compileCall(func.n);
+//		if (func.retType.getSize() != 0)
+//			res.add(BC.DROP);
+//		return res;
+//	}
 
 	public static Code stop(Context context, String name) throws ParseException {
 		Timer timer = context.getCreateTimer(name);
-		Code res = new Code();
+		Code res = new Code(context);
 		res.add(BC.STOPTIMER);
 		res.add(timer.n);
 		return res;
@@ -186,24 +103,14 @@ public class Code {
 			n.type.checkAssignableTo(context, context.currentFunc.retType);
 			Code bytes = n.getCode();
 			int locals = context.currentFunc.locals.getMax();
-			if (locals == 0)
-				bytes.add(BC.RETI);
-			else {
-				bytes.add(BC.RETI_N);
-				bytes.add(locals);
-			}
+			bytes.compileRetI(locals);
 			return bytes;
 		} else {
 			if (context.currentFunc.retType.getSize() != 0)
 				context.throwExc("'return <expr>;' expected");
-			Code bytes = new Code();
+			Code bytes = new Code(context);
 			int locals = context.currentFunc.locals.getMax();
-			if (locals == 0)
-				bytes.add(BC.RET);
-			else {
-				bytes.add(BC.RET_N);
-				bytes.add(locals);
-			}
+			bytes.compileRet(locals);
 			return bytes;
 		}
 	}
@@ -214,7 +121,33 @@ public class Code {
 		return res;
 	}
 
-	public static Code assign(Context context, String name, Expr t)
+	public static Code assign(Context context, LValue lvalue, Expr t)
+			throws ParseException {
+		if (lvalue.expr == null)
+			return assign(context, lvalue.field, t);
+		else {
+			if(t == null) {
+				Expr e = lvalue.getExpr();
+				Code code = lvalue.getExpr().getCode();
+				if(e.type != Type.VOID)
+					code.add(BC.DROP);
+				return code;
+			}
+			
+			int idx = context.getFieldIndex(lvalue.expr.type, lvalue.field);
+			Type type = context.structs.get(lvalue.expr.type.name).fields
+					.get(idx).type;
+			t.type.checkAssignableTo(context, type);
+
+			Code res = new Code(context);
+			res.addAll(lvalue.expr.getCode());
+			res.addAll(t.getCode());
+			res.compileSetfield(idx);
+			return res;
+		}
+	}
+
+	private static Code assign(Context context, String name, Expr t)
 			throws ParseException {
 		Code res = t.getCode();
 		Local val = context.currentFunc.locals.get(name);
@@ -275,15 +208,14 @@ public class Code {
 	}
 
 	public static Code trycatchstmt(Context context, Code tryStmt,
-			Code catchStmt, String name) {
-		Code res = new Code();
+			Code catchStmt, Local local) throws ParseException {
+		Code res = new Code(context);
 
 		int from = res.size();
 		res.addAll(tryStmt);
 		int to = res.size();
 		int b = res.compileBranch(0);
 		int handler = res.size();
-		Local local = context.currentFunc.locals.get(name);
 		res.compileSetLocal(local.n);
 		res.addAll(catchStmt);
 		res.resolveBranch(b);
@@ -293,39 +225,40 @@ public class Code {
 		return res;
 	}
 
-	public static void procDecl(Context context, Type type, String name,
+	public static Code initLocal(Context context, Local local, Expr initVal) throws ParseException {
+		initVal.type.checkAssignableTo(context, local.nat.type);
+		
+		Code res = new Code(context);
+		res.addAll(initVal.code);
+		res.compileSetLocal(local.n);
+		return res;
+	}
+	
+	public static Func procDecl(Context context, Type type, String name,
 			LocalListDef locals) throws ParseException {
 		Func func = context.getCreateFunc(name, locals, type);
 		context.currentFunc = func;
+		return func;
 	}
 
-	private void compileEnter(Context context) throws ParseException {
+	private void compileEnter() throws ParseException {
 		compileEnter(context.currentFunc.locals.getMax()
 				- context.currentFunc.locals.getArgCnt());
-	}
-
-	private void adjustLocals(Context context) {
-		for (int local : locals) {
-			int l = code.get(local - 1);
-			l = context.currentFunc.locals.getMax() - 1 - l;
-			code.set(local - 1, (byte) l);
-		}
-		locals.clear();
 	}
 
 	public static void procCode(Context context, Code bytes)
 			throws ParseException {
 
-		Code res = new Code();
-		res.compileEnter(context);
+		Code res = new Code(context);
+		res.compileEnter();
 		res.addAll(bytes);
 		if (context.currentFunc.retType.getSize() == 0)
 			res.addAll(ret(context, null));
 		else if (context.currentFunc.retType.isRef())
-			res.addAll(ret(context, Expr.nullExpr()));
+			res.addAll(ret(context, Expr.nullExpr(context)));
 		else
-			res.addAll(ret(context, new Expr((short) 0)));
-		res.adjustLocals(context);
+			res.addAll(ret(context, new Expr(context, (short) 0)));
+		res.adjustLocals();
 
 		context.currentFunc.code = new CodeRef(context, res);
 		System.out.println("proc " + context.currentFunc.name + " "
@@ -334,11 +267,11 @@ public class Code {
 
 	public static void timer(Context context, String name, Code bytes)
 			throws ParseException {
-		Code res = new Code();
-		res.compileEnter(context);
+		Code res = new Code(context);
+		res.compileEnter();
 		res.addAll(bytes);
-		res.add(BC.RET);
-		res.adjustLocals(context);
+		res.compileRet(0);
+		res.adjustLocals();
 
 		Timer timer = context.getCreateTimer(name);
 		timer.handler = new CodeRef(context, res);
@@ -347,13 +280,13 @@ public class Code {
 
 	public static void onset(Context context, Code cond, Code bytes)
 			throws ParseException {
-		Code res = new Code();
-		res.compileEnter(context);
+		Code res = new Code(context);
+		res.compileEnter();
 		res.addAll(bytes);
-		res.add(BC.RET);
-		res.adjustLocals(context);
+		res.compileRet(0);
+		res.adjustLocals();
 
-		cond.add(BC.RETI);
+		cond.compileRetI(0);
 		context.events.add(new Event(context, new CodeRef(context, cond),
 				new CodeRef(context, res), EventType.SET));
 		System.out.println("onset " + cond.size() + " " + res.size());
@@ -361,13 +294,13 @@ public class Code {
 
 	public static void onchange(Context context, Code cond, Code bytes)
 			throws ParseException {
-		Code res = new Code();
-		res.compileEnter(context);
+		Code res = new Code(context);
+		res.compileEnter();
 		res.addAll(bytes);
-		res.add(BC.RET);
-		res.adjustLocals(context);
+		res.compileRet(0);
+		res.adjustLocals();
 
-		cond.add(BC.RETI);
+		cond.compileRetI(0);
 		context.events.add(new Event(context, new CodeRef(context, cond),
 				new CodeRef(context, res), EventType.CHANGE));
 		System.out.println("onchange " + cond.size() + " " + res.size());

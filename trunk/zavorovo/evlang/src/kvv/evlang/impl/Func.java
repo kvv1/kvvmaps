@@ -1,6 +1,5 @@
 package kvv.evlang.impl;
 
-import kvv.evlang.ParseException;
 
 public class Func {
 	private final Context context;
@@ -17,7 +16,6 @@ public class Func {
 		this.locals = locals;
 		this.retType = retType;
 		this.context = context;
-		String n = retType.name;
 	}
 /*
 	int getMaxStack() throws ParseException {

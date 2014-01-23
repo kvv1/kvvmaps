@@ -8,7 +8,8 @@ import kvv.evlang.impl.LocalListDef.Local;
 import kvv.evlang.rt.BC;
 
 public class Expr {
-	private final Code code = new Code();
+	// public final Context context;
+	final Code code;
 
 	public final Type type;
 
@@ -16,48 +17,47 @@ public class Expr {
 		return code;
 	}
 
-	public Expr(Type type) {
+	public Expr(Context context, Type type) {
 		this.type = type;
-		type.getSize();
+		code = new Code(context);
 	}
 
-	public Expr(Type type, BC bc, Expr... args) {
-		this.type = type;
-		type.getSize();
+	public Expr(Context context, Type type, int val) {
+		this(context, type);
+		code.compileLit((short) val);
+	}
+
+	public Expr(Context context, Type type, BC bc, Expr... args) {
+		this(context, type);
 		for (Expr arg : args)
 			code.addAll(arg.getCode());
 		code.add(bc);
 	}
 
-	public Expr(short val) {
-		this.type = Type.INT;
-		code.compileLit(val);
+	public Expr(Context context, int val) {
+		this(context, Type.INT, val);
 	}
 
 	public Expr(Context context, String funcName, List<Expr> argList)
 			throws ParseException {
+		code = new Code(context);
 		Func func = context.getFunc(funcName, argList);
 		type = func.retType;
-		type.getSize();
-		if (func.retType.getSize() == 0)
-			context.throwExc(funcName + " - ?");
 		for (Expr c : argList)
 			code.addAll(c.getCode());
-		code.add(BC.CALL);
-		code.add(func.n);
+		code.compileCall(func.n);
 	}
 
 	public Expr(Context context, String name) throws ParseException {
+		code = new Code(context);
 		Local val = context.currentFunc.locals.get(name);
 		if (val != null) {
 			type = val.nat.type;
-			type.getSize();
 			code.compileGetLocal(val.n);
 		} else {
 			RegisterDescr descr = context.registers.get(name);
 			if (descr != null) {
 				type = descr.type;
-				type.getSize();
 				code.compileGetreg(descr.reg);
 			} else {
 				Short val1 = context.constants.get(name);
@@ -80,98 +80,106 @@ public class Expr {
 		}
 	}
 
+	public Expr(Context context, Expr expr, String field) throws ParseException {
+		code = new Code(context);
+		int idx = context.getFieldIndex(expr.type, field);
+		type = context.structs.get(expr.type.name).fields.get(idx).type;
+		code.addAll(expr.getCode());
+		code.compileGetfield(idx);
+	}
+
 	public static Expr muldiv(Context context, Expr e1, Expr e2, Expr e3)
 			throws ParseException {
 		e1.type.checkInt(context);
 		e2.type.checkInt(context);
 		e3.type.checkInt(context);
-		return new Expr(Type.INT, BC.MULDIV, e1, e2, e3);
+		return new Expr(context, Type.INT, BC.MULDIV, e1, e2, e3);
 	}
 
 	public static Expr not(Context context, Expr arg) throws ParseException {
 		arg.type.checkInt(context);
-		return new Expr(Type.INT, BC.NOT, arg);
+		return new Expr(context, Type.INT, BC.NOT, arg);
 	}
 
 	public static Expr negate(Context context, Expr arg) throws ParseException {
 		arg.type.checkInt(context);
-		return new Expr(Type.INT, BC.NEGATE, arg);
+		return new Expr(context, Type.INT, BC.NEGATE, arg);
 	}
 
 	public static Expr mul(Context context, Expr arg1, Expr arg2)
 			throws ParseException {
 		arg1.type.checkInt(context);
 		arg2.type.checkInt(context);
-		return new Expr(Type.INT, BC.MUL, arg1, arg2);
+		return new Expr(context, Type.INT, BC.MUL, arg1, arg2);
 	}
 
 	public static Expr div(Context context, Expr arg1, Expr arg2)
 			throws ParseException {
 		arg1.type.checkInt(context);
 		arg2.type.checkInt(context);
-		return new Expr(Type.INT, BC.DIV, arg1, arg2);
+		return new Expr(context, Type.INT, BC.DIV, arg1, arg2);
 	}
 
 	public static Expr add(Context context, Expr arg1, Expr arg2)
 			throws ParseException {
 		arg1.type.checkInt(context);
 		arg2.type.checkInt(context);
-		return new Expr(Type.INT, BC.ADD, arg1, arg2);
+		return new Expr(context, Type.INT, BC.ADD, arg1, arg2);
 	}
 
 	public static Expr sub(Context context, Expr arg1, Expr arg2)
 			throws ParseException {
 		arg1.type.checkInt(context);
 		arg2.type.checkInt(context);
-		return new Expr(Type.INT, BC.SUB, arg1, arg2);
+		return new Expr(context, Type.INT, BC.SUB, arg1, arg2);
 	}
 
 	public static Expr eq(Context context, Expr arg1, Expr arg2)
 			throws ParseException {
 		Type.checkComparable(context, arg1.type, arg2.type);
-		return new Expr(Type.INT, BC.EQ, arg1, arg2);
+		return new Expr(context, Type.INT, BC.EQ, arg1, arg2);
 	}
 
 	public static Expr neq(Context context, Expr arg1, Expr arg2)
 			throws ParseException {
 		Type.checkComparable(context, arg1.type, arg2.type);
-		return new Expr(Type.INT, BC.NEQ, arg1, arg2);
+		return new Expr(context, Type.INT, BC.NEQ, arg1, arg2);
 	}
 
 	public static Expr lt(Context context, Expr arg1, Expr arg2)
 			throws ParseException {
 		arg1.type.checkInt(context);
 		arg2.type.checkInt(context);
-		return new Expr(Type.INT, BC.LT, arg1, arg2);
+		return new Expr(context, Type.INT, BC.LT, arg1, arg2);
 	}
 
 	public static Expr le(Context context, Expr arg1, Expr arg2)
 			throws ParseException {
 		arg1.type.checkInt(context);
 		arg2.type.checkInt(context);
-		return new Expr(Type.INT, BC.LE, arg1, arg2);
+		return new Expr(context, Type.INT, BC.LE, arg1, arg2);
 	}
 
 	public static Expr gt(Context context, Expr arg1, Expr arg2)
 			throws ParseException {
 		arg1.type.checkInt(context);
 		arg2.type.checkInt(context);
-		return new Expr(Type.INT, BC.GT, arg1, arg2);
+		return new Expr(context, Type.INT, BC.GT, arg1, arg2);
 	}
 
 	public static Expr ge(Context context, Expr arg1, Expr arg2)
 			throws ParseException {
 		arg1.type.checkInt(context);
 		arg2.type.checkInt(context);
-		return new Expr(Type.INT, BC.GE, arg1, arg2);
+		return new Expr(context, Type.INT, BC.GE, arg1, arg2);
 	}
 
-	public static Expr and(List<Expr> list) {
+	public static Expr and(Context context, List<Expr> list) {
 		if (list.size() == 1)
 			return list.get(0);
 
-		Expr res = new Expr(Type.INT);
-		
+		Expr res = new Expr(context, Type.INT);
+
 		List<Integer> addrs = new ArrayList<Integer>();
 
 		for (Expr e : list) {
@@ -188,12 +196,12 @@ public class Expr {
 		return res;
 	}
 
-	public static Expr or(List<Expr> list) {
+	public static Expr or(Context context, List<Expr> list) {
 		if (list.size() == 1)
 			return list.get(0);
 
-		Expr res = new Expr(Type.INT);
-		
+		Expr res = new Expr(context, Type.INT);
+
 		List<Integer> addrs = new ArrayList<Integer>();
 
 		for (Expr e : list) {
@@ -211,9 +219,46 @@ public class Expr {
 		return res;
 	}
 
-	public static Expr nullExpr() {
-		Expr res = new Expr(Type.NULL);
-		res.code.compileLit((short) 0);
+	public static Expr nullExpr(Context context) {
+		return new Expr(context, Type.NULL, 0);
+	}
+
+	public static Expr field(Context context, Expr parent, String field)
+			throws ParseException {
+		return new Expr(context, parent, field);
+	}
+
+	public static Expr newObj(Context context, String typeName,
+			List<Expr> argList) throws ParseException {
+		Struct str = context.structs.get(typeName);
+		if (str == null)
+			context.throwExc(typeName + " -?");
+
+		if(str.isTimer) {
+			List<Expr> argList1 = new ArrayList<Expr>();
+
+			argList1.add(new Expr(context, str.timerFunc));
+			argList1.add(new Expr(context, 0));
+			argList1.add(new Expr(context, Type.NULL, 0));
+			
+			argList1.addAll(argList);
+			argList = argList1;
+		}
+		
+		
+		if (str.fields.size() != argList.size())
+			context.throwExc(typeName + " argument number error");
+
+		for (int i = 0; i < argList.size(); i++)
+			argList.get(i).type.checkAssignableTo(context,
+					str.fields.get(i).type);
+
+		Expr res = new Expr(context, str.type);
+		for (Expr c : argList)
+			res.code.addAll(c.getCode());
+		res.code.add(BC.NEW);
+		res.code.add(str.idx);
 		return res;
 	}
+
 }
