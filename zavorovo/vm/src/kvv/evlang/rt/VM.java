@@ -30,7 +30,6 @@ public abstract class VM {
 
 		interpreter.interpret(cont.funcs[0].code);
 		interpreter.interpret(cont.funcs[1].code);
-
 	}
 
 	public void loop() {
@@ -68,16 +67,20 @@ public abstract class VM {
 			try {
 				val = interpreter.eval(event.cond);
 				if (event.type == RTContext.Event.TYPE_SET) {
-					if (event.state == 0 && val != 0)
+					if (event.state == 0 && val != 0) {
 						interpreter.interpret(event.handler);
+					}
 				} else if (event.type == RTContext.Event.TYPE_CHANGE) {
-					if (event.state != val)
+					if (event.state != val) {
 						interpreter.interpret(event.handler);
+					}
 				}
 				event.state = val;
 			} catch (UncaughtExceptionException e) {
 				e.printStackTrace();
 			}
 		}
+
 	}
+
 }

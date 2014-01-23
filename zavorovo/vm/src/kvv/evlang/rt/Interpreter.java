@@ -15,65 +15,59 @@ public abstract class Interpreter {
 	public abstract int getExtReg(int addr, int reg);
 
 	static private class Stack {
-		private int[] data = new int[100];
-		private int sp = data.length;
+		private short[] data = new short[100];
+		private short sp = (short) data.length;
 
 		public boolean isEmpty() {
 			return sp == data.length;
 		}
 
-		public int pop() {
+		public short pop() {
 			return data[sp++];
 		}
 
 		public void push(int n) {
-			data[--sp] = n;
+			data[--sp] = (short) n;
 		}
 
-		public int getSP() {
+		public short getSP() {
 			return sp;
 		}
 
-		public int getAt(int off) {
+		public short getAt(int off) {
 			return data[off];
 		}
 
-		public void setAt(int off, int n) {
+		public void setAt(int off, short n) {
 			data[off] = n;
 		}
 	}
 
 	private Stack stack = new Stack();
-	private int ip;
-	private int fp;
+	private short ip;
+	private short fp;
 
-	public void interpret(int off) throws UncaughtExceptionException {
-		if (!stack.isEmpty())
-			throw new IllegalStateException();
-		if (ip != 0)
-			throw new IllegalStateException();
-		if (fp != 0)
+	public void interpret(short off) throws UncaughtExceptionException {
+		if (!stack.isEmpty() || ip != 0 || fp != 0)
 			throw new IllegalStateException();
 		_interpret(off);
-		if (!stack.isEmpty())
+		if (!stack.isEmpty() || ip != 0 || fp != 0)
 			throw new IllegalStateException();
+		context.gc();
 	}
 
-	public int eval(int off) throws UncaughtExceptionException {
-		if (!stack.isEmpty())
-			throw new IllegalStateException();
-		if (ip != 0)
-			throw new IllegalStateException();
-		if (fp != 0)
+	public int eval(short off) throws UncaughtExceptionException {
+		if (!stack.isEmpty() || ip != 0 || fp != 0)
 			throw new IllegalStateException();
 		_interpret(off);
 		int res = stack.pop();
-		if (!stack.isEmpty())
+		if (!stack.isEmpty() || ip != 0 || fp != 0)
 			throw new IllegalStateException();
+		context.gc();
 		return res;
 	}
 
-	private void call(int addr) {
+	private void call(short addr) {
 		stack.push(ip);
 		stack.push(fp);
 		fp = stack.getSP();
@@ -81,6 +75,8 @@ public abstract class Interpreter {
 	}
 
 	private void ret() {
+		if (stack.sp > fp)
+			throw new IllegalStateException();
 		stack.sp = fp;
 		fp = stack.pop();
 		ip = stack.pop();
@@ -102,8 +98,7 @@ public abstract class Interpreter {
 		}
 	}
 
-	private void _interpret(int _ip)
-			throws UncaughtExceptionException {
+	private void _interpret(short _ip) throws UncaughtExceptionException {
 		List<Byte> code = context.codeArr;
 
 		call(_ip);
@@ -115,79 +110,109 @@ public abstract class Interpreter {
 			int timer;
 
 			byte c = code.get(ip++);
-			if ((c & 0xC0) == BC.GETREGSHORT) {
-				int reg = c & 0x3F;
-				stack.push(context.regs[reg]);
-				continue;
-			} else if ((c & 0xC0) == BC.SETREGSHORT) {
-				int reg = c & 0x3F;
-				context.regs[reg] = stack.pop();
-				continue;
-			} else if ((c & 0xC0) == BC.LITSHORT) {
-				int val = (c & 0x3F) << 26 >> 26;
-				stack.push(val);
+
+			if ((c & 0xC0) != 0) {
+				short param = (short) (c & 0x0F);
+				switch (c & 0xF0) {
+				case BC.LIT_SHORT:
+					stack.push(context.constPool[param]);
+					break;
+				case BC.GETREG_SHORT:
+					getreg(context.regPool[param]);
+					break;
+				case BC.SETREG_SHORT:
+					setreg(context.regPool[param]);
+					break;
+				case BC.GETLOCAL_SHORT:
+					stack.push(stack.getAt(fp + 2 + param));
+					break;
+				case BC.SETLOCAL_SHORT:
+					stack.setAt(fp + 2 + param, stack.pop());
+					break;
+				case BC.GETFIELD_SHORT:
+					short a = stack.pop();
+					if (a == 0)
+						throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
+					else
+						stack.push(context.heap.get(a, param));
+					break;
+				case BC.SETFIELD_SHORT:
+					short n = stack.pop();
+					a = stack.pop();
+					if (a == 0)
+						throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
+					else
+						context.heap.set(a, param, n);
+					break;
+				case BC.CALL_SHORT:
+					short addr = context.funcs[param].code;
+					call(addr);
+					break;
+				case BC.RETI_SHORT:
+					short res = stack.pop();
+					ret();
+					while (param-- > 0)
+						stack.pop();
+					stack.push(res);
+					if (ip == 0)
+						return;
+					break;
+				case BC.RET_SHORT:
+					ret();
+					while (param-- > 0)
+						stack.pop();
+					if (ip == 0)
+						return;
+					break;
+				case BC.ENTER_SHORT:
+					short link = stack.pop();
+					short ret = stack.pop();
+					while (param-- > 0)
+						stack.push(0);
+					stack.push(ret);
+					stack.push(link);
+					fp = stack.sp;
+					break;
+				default:
+					throw new RuntimeException("unknown short bytecode "
+							+ (c & 0xF0));
+				}
 				continue;
 			}
 
 			BC bc = BC.values()[c];
 			switch (bc) {
 			case CALL:
-				int addr = context.funcs[code.get(ip++)].code;
+				short addr = context.funcs[code.get(ip++)].code;
 				call(addr);
-				break;
-			case RET:
-				ret();
-				if (ip == 0)
-					return;
-				break;
-			case RET_N:
-				int n = code.get(ip++);
-				ret();
-				while (n-- > 0)
-					stack.pop();
-				if (ip == 0)
-					return;
-				break;
-			case RETI:
-				int res = stack.pop();
-				ret();
-				stack.push(res);
-				if (ip == 0)
-					return;
-				break;
-			case RETI_N:
-				n = code.get(ip++);
-				res = stack.pop();
-				ret();
-				while (n-- > 0)
-					stack.pop();
-				stack.push(res);
-				if (ip == 0)
-					return;
 				break;
 
 			case THROW:
-				res = stack.pop();
+				short res = stack.pop();
 				throwException(res);
 				break;
 
-			case GETLOCAL:
-				n = code.get(ip++);
-				stack.push(stack.getAt(fp + 2 + n));
-				break;
-			case SETLOCAL:
-				n = code.get(ip++);
-				stack.setAt(fp + 2 + n, stack.pop());
-				break;
 			case ENTER:
 				int link = stack.pop();
 				int ret = stack.pop();
-				n = code.get(ip++);
+				short n = code.get(ip++);
 				while (n-- > 0)
 					stack.push(0);
 				stack.push(ret);
 				stack.push(link);
 				fp = stack.sp;
+				break;
+			case NEW:
+				n = code.get(ip++);
+				int sz = context.types[n].sz;
+				short a = context.heap.alloc(n);
+				if (a == 0)
+					throwException(Exc.OUTOFMEMORY_EXCEPTION.ordinal());
+				else {
+					while (sz-- > 0)
+						context.heap.set(a, sz, stack.pop());
+					stack.push(a);
+				}
 				break;
 			case ADD:
 				stack.push(stack.pop() + stack.pop());
@@ -253,19 +278,19 @@ public abstract class Interpreter {
 				break;
 			case GETREG:
 				int reg = code.get(ip++) & 0xFF;
-				stack.push(context.regs[reg]);
+				getreg(reg);
 				break;
 			case SETREG:
 				int reg1 = code.get(ip++) & 0xFF;
-				context.regs[reg1] = stack.pop();
+				setreg(reg1);
 				break;
 			case GETEXTREG:
-				addr = code.get(ip++) & 0xFF;
+				addr = (short) (code.get(ip++) & 0xFF);
 				reg = code.get(ip++) & 0xFF;
 				stack.push(getExtReg(addr, reg));
 				break;
 			case SETEXTREG:
-				addr = code.get(ip++) & 0xFF;
+				addr = (short) (code.get(ip++) & 0xFF);
 				reg = code.get(ip++) & 0xFF;
 				setExtReg(addr, reg, stack.pop());
 				break;
@@ -319,5 +344,13 @@ public abstract class Interpreter {
 			}
 		}
 
+	}
+
+	private void setreg(int reg) {
+		context.regs[reg] = stack.pop();
+	}
+
+	private void getreg(int reg) {
+		stack.push(context.regs[reg]);
 	}
 }

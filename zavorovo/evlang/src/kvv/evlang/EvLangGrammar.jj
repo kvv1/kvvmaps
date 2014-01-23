@@ -14,6 +14,7 @@ package kvv.evlang;
 import java.io.*;
 import java.util.*;
 import kvv.evlang.impl.*;
+import kvv.evlang.impl.LocalListDef.Local;
 import kvv.controllers.register.*;
 
 public abstract class EG1 extends EG
@@ -102,6 +103,8 @@ TOKEN : /* OPERATORS */
 | < THROW  : "throw" >
 | < STRUCT  : "struct" >
 | < NULL  : "null" >
+| < NEW  : "new" >
+| < XTIMER  : "xtimer" >
 }
 
 TOKEN :
@@ -127,6 +130,7 @@ void line() :
 | varOrProc()
 | uiDecl()
 | timer()
+| xtimer()
 | onset()
 | onchange()
 | struct()
@@ -140,7 +144,7 @@ void varOrProc() :
 {
   type = type() name = id()
   (
-    proc(type, name)
+    proc(type, name, null)
   |
   	var(type, name)
   ) 
@@ -148,25 +152,7 @@ void varOrProc() :
   
 
 
-void struct() :
-{
-  String name;
-  String fieldName;
-  Type fieldType;
-}
-{
-  < STRUCT > name = id()  {
-    createStruct(name);  }
-  "{"
-  (
-    fieldType = type() fieldName = id() ";"
-    {
-      checkNotVoid(fieldType);
-      addField(name, fieldType, fieldName);
-    }
-  )*
-  "}" ";"
-}
+void struct() :{  String name;  String fieldName;  Type fieldType;  Struct struct;}{  < STRUCT > name = id()  {    struct = createStruct(name, false);  }  "{"  (    fieldType = type() fieldName = id()    (      proc(fieldType, fieldName, struct)    | ";"      {        checkNotVoid(fieldType);        addField(struct, fieldType, fieldName);      }    )  )*  "}"}
 
 Type type() :{  String name = null;}{  < VOID >  {    return Type.VOID;  }|   < INT >
   {
@@ -176,65 +162,23 @@ Type type() :{  String name = null;}{  < VOID >  {    return Type.VOID; 
   name = id()  {    return new Type(name);  }}
 
 
-void proc(Type type, String name) :
-{
-  Code bytes = null;
-  LocalListDef locals = new LocalListDef();
-}
-{
-  "(" [ argListDef(locals) ] ")"
-  {
-    Code.procDecl(this, type, name, locals);
-  }
-  (
-    bytes = stmtBlock()
-    {
-      Code.procCode(this, bytes);
-    }
-  | ";"
-  )
-}
+void proc(Type type, String name, Struct thisType) :{  Code bytes = null;  LocalListDef locals = new LocalListDef();  if (thisType != null)  {    locals.add(new NameAndType("this", thisType.type));    name = thisType.type.name + ":" + name;  }}{  "(" [ argListDef(locals) ] ")"  {    locals.endOfArgs();
+    Code.procDecl(this, type, name, locals);  }  (    bytes = stmtBlock()    {      Code.procCode(this, bytes);    }  | ";"  )}
 
 void argListDef(LocalListDef locals) :
 {
-  String name;
-  Type type;
 }
 {
-  type = type() name = id()
-  {
-    checkNotVoid(type);
-    locals.add(new NameAndType(name, type));
-  }
+  localDef(locals)
   (
-    "," type = type() name = id()
-    {
-      checkNotVoid(type);
-      locals.add(new NameAndType(name, type));
-    }
+    "," localDef(locals)
   )*
   {
     locals.endOfArgs();
   }
 }
 
-void localListDef() :
-{
-  String name;
-  Type type;
-}
-{
-  (
-    LOOKAHEAD(2)
-    type = type() name = id() ";"
-    {
-      checkNotVoid(type);
-      currentFunc.locals.add(new NameAndType(name, type));
-    }
-  )*
-}
-
-String localDef() :
+Local localDef(LocalListDef locals) :
 {
   String name;
   Type type;
@@ -243,8 +187,7 @@ String localDef() :
     type = type() name = id()
     {
       checkNotVoid(type);
-      currentFunc.locals.add(new NameAndType(name, type));
-      return name;
+      return locals.add(new NameAndType(name, type));
     }
 }
 
@@ -292,12 +235,14 @@ RegType uitype() :
 
 void var(Type type, String name) :
 {
+  Expr e = null;
 }
 {
+  [ "=" e = expr() ]
   ";"
   {
 	 checkNotVoid(type);
-	 newRegister(type, name);
+	 newVar(type, name, e);
   }
 }
 
@@ -317,6 +262,9 @@ void register() :
     newEERegister(regName, initVal);
   }
 }
+
+void xtimer() :{  String name;  String fieldName;  Type fieldType;  Code code;  Struct struct;}{  < XTIMER > name = id()  {    LocalListDef locals = new LocalListDef();    locals.add(new NameAndType("this", new Type(name)));    Func func = Code.procDecl(this, Type.VOID, "__timer__" + name,     locals);    struct = createXTimer(name);
+    struct.timerFunc = func.n;  }  "{"  (    fieldType = type() fieldName = id() ";"    {      checkNotVoid(fieldType);      addField(struct, fieldType, fieldName);    }  )*  code = stmtBlock()  {    Code.procCode(this, code);  }  "}"}
 
 void timer() :
 {
@@ -365,12 +313,12 @@ void onchange() :
 
 Code stmtBlock() :
 {
-  Code bytes = new Code();
+  Code bytes = new Code(this);
   Code temp;
   int localpos = currentFunc.locals.getSize();
 }
 {
-  "{" localListDef()
+  "{"
   (
     temp = stmt()
     {
@@ -384,40 +332,18 @@ Code stmtBlock() :
   }
 }
 
-Code stmt() :
-{
-  Code res;
-  Token name;
-}
-{
-  res = assign()
-  {
-    return res;
-  }
-| res = ifStmt()
-  {
-    return res;
-  }
-| res = tryCatchStmt()
-  {
-    return res;
-  }
-| res = stmtBlock()
-  {
-    return res;
-  }
-}
+Code stmt() :{  Code res;}{  (    LOOKAHEAD(2)    res = assign()  | res = ifStmt()  | res = tryCatchStmt()  | res = stmtBlock()  )  {    return res;  }}
 
 Code tryCatchStmt() :
 {
   Code tryStmt;
   Code catchStmt;
-  String name;
+  Local local;
 }
 {
-  < TRY > tryStmt = stmtBlock() < CATCH > "(" name = localDef() ")" catchStmt = stmtBlock()
+  < TRY > tryStmt = stmtBlock() < CATCH > "(" local = localDef(currentFunc.locals) ")" catchStmt = stmtBlock()
   {
-    return Code.trycatchstmt(this, tryStmt, catchStmt, name);
+    return Code.trycatchstmt(this, tryStmt, catchStmt, local);
   }
 }
 
@@ -441,8 +367,10 @@ Code ifStmt() :
 Code assign() :
 {
   Expr res = null;
+  LValue lvalue;
   String name;
   List < Expr > argList = new ArrayList < Expr > ();
+  Local local;
 }
 {
   < PRINT > res = expr() ";"
@@ -457,40 +385,31 @@ Code assign() :
   {
     return Code.throw_(this, res);
   }
-| name = id()
-  (
-    "=" res = expr() ";"
-    {
-      return Code.assign(this, name, res);
-    }
-  | "."
-    (
-      < START_S > res = expr() ";"
-      {
-        return Code.start_s(this, name, res);
-      }
-    | < START_MS > res = expr() ";"
-      {
-        return Code.start_ms(this, name, res);
-      }
-    | < STOP > ";"
-      {
-        return Code.stop(this, name);
-      }
-    )
-  | < DEC > ";"
-    {
-      return Code.dec(this, name);
-    }
-  | < INC > ";"
-    {
-      return Code.inc(this, name);
-    }
-  | "(" [ argList = argList() ] ")" ";"
-    {
-      return Code.callp(this, name, argList);
-    }
-  )
+| < START_S > "(" name = id() "," res = expr() ")" ";"
+  {
+    return Code.start_s(this, name, res);
+  }
+| < START_MS > "(" name = id() "," res = expr() ")" ";"
+  {
+    return Code.start_ms(this, name, res);
+  }
+| < STOP > "(" name = id() ")" ";"
+  {
+    return Code.stop(this, name);
+  }
+|
+    LOOKAHEAD(2)
+	local = localDef(currentFunc.locals) "=" res = expr() ";"
+  {
+    return Code.initLocal(this, local, res);
+  }
+| lvalue = lvalue1()
+  [
+    "=" res = expr() 
+  ]   ";"
+  {
+    return Code.assign(this, lvalue, res);
+  }
 }
 
 Expr expr() :
@@ -510,7 +429,7 @@ Expr expr() :
     }
   )*
   {
-    return Expr.or(res);
+    return Expr.or(this, res);
   }
 }
 
@@ -531,7 +450,7 @@ Expr logAndExpr() :
     }
   )*
   {
-    return Expr.and(res);
+    return Expr.and(this, res);
   }
 }
 
@@ -642,75 +561,80 @@ Expr unary() :
   }
 }
 
-List < Expr > argList() :
-{
-  List < Expr > res = new ArrayList < Expr > ();
-  Expr arg;
-}
-{
-  arg = expr()
-  {
-    res.add(arg);
-  }
-  (
-    "," arg = expr()
-    {
-      res.add(arg);
-    }
-  )*
-  {
-    return res;
-  }
-}
+Expr element() :{  Expr res;  LValue lvalue;}{  res = simpleElement()  {    return res;  }| lvalue = lvalue1()  {    return lvalue.getExpr();  }}
 
-Expr element() :
+LValue lvalue1() :{  LValue res;  Expr expr;}{  (    res = field(null)  | expr = newExpr()    {      res = new LValue(this, expr);    }  )  (    "." res = field(res)  )*  {    return res;  }}
+
+LValue field(LValue left) :
 {
-  short n;
-  String t;
+  String name;
   List < Expr > argList = null;
-    Expr res;
-    Expr temp;
-    Expr temp1;
 }
 {
-  < NULL >
-  {
-    return Expr.nullExpr();
-  }
-|  n = number()
-  {
-    return new Expr(n);
-  }
-| t = id()
-  (
+  name = id()
+  [
     "("
     {
       argList = new ArrayList < Expr > ();
     }
     [ argList = argList() ] ")"
-  )?
+  ]
   {
-    if (argList != null)
-    {
-      return new Expr(this, t, argList);
-    }
-    else
-    {
-      return new Expr(this, t);
-    }
+    return new LValue(this, left, name, argList);
   }
-|
+}
+
+
+Expr simpleElement() :
+{
+  short n;
+  String name;
+  List < Expr > argList = null;
+  Expr res;
+}
+{
+  < NULL >
   {
+    return Expr.nullExpr(this);
   }
-  < MULDIV > "(" res = expr() "," temp = expr() "," temp1 = expr() ")"
+| n = number()
   {
-    return Expr.muldiv(this, res, temp, temp1);
+    return new Expr(this, n);
+  }
+| res = muldiv()
+  {
+    return res;
   }
 | "(" res = expr() ")"
   {
     return res;
   }
 }
+
+
+
+Expr muldiv():{  Expr res;
+  Expr temp;
+  Expr temp1;
+}{  < MULDIV > "(" res = expr() "," temp = expr() "," temp1 = expr() ")"
+  {
+    return Expr.muldiv(this, res, temp, temp1);
+  }
+}
+
+Expr newExpr():{  String name;
+  List < Expr > argList = null;
+}{
+  < NEW > name = id() 
+  "("
+  {
+    argList = new ArrayList < Expr > ();
+  }
+  [ argList = argList() ] ")"
+  {
+    return Expr.newObj(this, name, argList);
+  }}
+  
 
 String id() :
 {
@@ -733,4 +657,26 @@ short number() :
     return Short.parseShort(t.image);
   }
 }
+
+List < Expr > argList() :
+{
+  List < Expr > res = new ArrayList < Expr > ();
+  Expr arg;
+}
+{
+  arg = expr()
+  {
+    res.add(arg);
+  }
+  (
+    "," arg = expr()
+    {
+      res.add(arg);
+    }
+  )*
+  {
+    return res;
+  }
+}
+
 

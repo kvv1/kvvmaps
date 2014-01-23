@@ -6,8 +6,8 @@ import kvv.evlang.ParseException;
 import kvv.evlang.rt.BC;
 
 public class CodeRef {
-	public int off;
-	public int len;
+	public short off;
+	public short len;
 	private final Context context;
 
 	// public CodeRef() {
