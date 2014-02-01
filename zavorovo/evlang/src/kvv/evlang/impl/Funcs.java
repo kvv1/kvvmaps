@@ -7,13 +7,13 @@ import java.util.Map;
 
 import kvv.evlang.ParseException;
 
-public class FuncDefList {
+public class Funcs {
 	public Map<String, Func> funcs = new LinkedHashMap<String, Func>();
 	private Map<Integer, Func> funcs1 = new LinkedHashMap<Integer, Func>();
 
 	private final Context context;
 
-	public FuncDefList(Context context) {
+	public Funcs(Context context) {
 		this.context = context;
 
 		funcs.put("<init>", null);
@@ -75,7 +75,7 @@ public class FuncDefList {
 		return func;
 	}
 
-	public Func getCreateFunc(String name, LocalListDef locals, Type retType)
+	public Func getCreateFunc(String name, Locals locals, Type retType)
 			throws ParseException {
 		locals.endOfArgs();
 		Func func = get(name);

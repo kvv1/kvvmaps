@@ -3,7 +3,7 @@ package kvv.evlang.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LocalListDef {
+public class Locals {
 
 	public static class Local {
 		public int n;
@@ -35,13 +35,6 @@ public class LocalListDef {
 	public void endOfArgs() {
 		argCnt = locals.size();
 	}
-
-	// public Integer getIdx(String name) {
-	// Integer idx = get(name);
-	// if(idx == null)
-	// return null;
-	// return argCnt - idx - 1;
-	// }
 
 	public int getArgCnt() {
 		return argCnt;

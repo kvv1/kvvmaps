@@ -54,7 +54,7 @@ public class CodeBase {
 	// //////////////////////////////////////////////////////////////////////////////////
 
 	void compileLit(short s) {
-		Integer poolIdx = context.addConst(s);
+		Integer poolIdx = context.constPool.add(s);
 		if (poolIdx != null) {
 			add(BC.LIT_SHORT | poolIdx);
 		} else {
@@ -65,7 +65,7 @@ public class CodeBase {
 	}
 
 	void compileGetreg(short reg) {
-		Integer poolIdx = context.addReg(reg);
+		Integer poolIdx = context.regPool.add(reg);
 		if (poolIdx != null) {
 			add(BC.GETREG_SHORT | poolIdx);
 		} else {
@@ -75,7 +75,7 @@ public class CodeBase {
 	}
 
 	void compileSetreg(short reg) {
-		Integer poolIdx = context.addReg(reg);
+		Integer poolIdx = context.regPool.add(reg);
 		if (poolIdx != null) {
 			add(BC.SETREG_SHORT | poolIdx);
 		} else {
@@ -88,14 +88,14 @@ public class CodeBase {
 		if (n >= 16)
 			context.throwExc("too mamy locals");
 		add(BC.GETLOCAL_SHORT | n);
-		locals.add((int)size());
+		locals.add((int) size());
 	}
 
 	void compileSetLocal(int n) throws ParseException {
 		if (n >= 16)
 			context.throwExc("too mamy locals");
 		add(BC.SETLOCAL_SHORT | n);
-		locals.add((int)size());
+		locals.add((int) size());
 	}
 
 	protected void compileSetregExt(int addr, int reg) {

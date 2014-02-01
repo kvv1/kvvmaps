@@ -45,55 +45,51 @@ public interface EG1Constants {
   /** RegularExpression Id. */
   int TIMER = 23;
   /** RegularExpression Id. */
-  int ONSET = 24;
+  int CONST = 24;
   /** RegularExpression Id. */
-  int ONCHANGE = 25;
+  int IF = 25;
   /** RegularExpression Id. */
-  int CONST = 26;
+  int ELSE = 26;
   /** RegularExpression Id. */
-  int IF = 27;
+  int PRINT = 27;
   /** RegularExpression Id. */
-  int ELSE = 28;
+  int DEC = 28;
   /** RegularExpression Id. */
-  int PRINT = 29;
+  int INC = 29;
   /** RegularExpression Id. */
-  int DEC = 30;
+  int MULDIV = 30;
   /** RegularExpression Id. */
-  int INC = 31;
+  int CHECKBOX = 31;
   /** RegularExpression Id. */
-  int MULDIV = 32;
+  int TEXT = 32;
   /** RegularExpression Id. */
-  int CHECKBOX = 33;
+  int INT = 33;
   /** RegularExpression Id. */
-  int TEXT = 34;
+  int VOID = 34;
   /** RegularExpression Id. */
-  int INT = 35;
+  int RETURN = 35;
   /** RegularExpression Id. */
-  int VOID = 36;
+  int TRY = 36;
   /** RegularExpression Id. */
-  int RETURN = 37;
+  int CATCH = 37;
   /** RegularExpression Id. */
-  int TRY = 38;
+  int THROW = 38;
   /** RegularExpression Id. */
-  int CATCH = 39;
+  int STRUCT = 39;
   /** RegularExpression Id. */
-  int THROW = 40;
+  int NULL = 40;
   /** RegularExpression Id. */
-  int STRUCT = 41;
+  int NEW = 41;
   /** RegularExpression Id. */
-  int NULL = 42;
+  int XTIMER = 42;
   /** RegularExpression Id. */
-  int NEW = 43;
+  int ID = 43;
   /** RegularExpression Id. */
-  int XTIMER = 44;
+  int STRING = 44;
   /** RegularExpression Id. */
-  int ID = 45;
+  int NUMBER = 45;
   /** RegularExpression Id. */
-  int STRING = 46;
-  /** RegularExpression Id. */
-  int NUMBER = 47;
-  /** RegularExpression Id. */
-  int DIGIT = 48;
+  int DIGIT = 46;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -124,8 +120,6 @@ public interface EG1Constants {
     "\"reg\"",
     "\"eereg\"",
     "\"timer\"",
-    "\"onset\"",
-    "\"onchange\"",
     "\"const\"",
     "\"if\"",
     "\"else\"",

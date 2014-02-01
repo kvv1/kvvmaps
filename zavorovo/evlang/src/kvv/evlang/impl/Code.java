@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import kvv.evlang.ParseException;
-import kvv.evlang.impl.Event.EventType;
-import kvv.evlang.impl.LocalListDef.Local;
+import kvv.evlang.impl.Locals.Local;
 import kvv.evlang.rt.BC;
 import kvv.evlang.rt.TryCatchBlock;
 
@@ -88,7 +87,7 @@ public class Code extends CodeBase {
 		else {
 			if (t == null) {
 				Expr e = lvalue.getExpr();
-				Code code = lvalue.getExpr().getCode();
+				Code code = e.getCode();
 				if (e.type != Type.VOID)
 					code.add(BC.DROP);
 				return code;
@@ -218,34 +217,6 @@ public class Code extends CodeBase {
 		context.currentFunc.code = new CodeRef(res);
 		System.out.println("proc " + context.currentFunc.name + " "
 				+ res.size());
-	}
-
-	public static void onset(Context context, Code cond, Code bytes)
-			throws ParseException {
-		Code res = new Code(context);
-		res.compileEnter();
-		res.addAll(bytes);
-		res.compileRet(0);
-		res.adjustLocals();
-
-		cond.compileRetI(0);
-		context.events.add(new Event(context, new CodeRef(cond), new CodeRef(
-				res), EventType.SET));
-		System.out.println("onset " + cond.size() + " " + res.size());
-	}
-
-	public static void onchange(Context context, Code cond, Code bytes)
-			throws ParseException {
-		Code res = new Code(context);
-		res.compileEnter();
-		res.addAll(bytes);
-		res.compileRet(0);
-		res.adjustLocals();
-
-		cond.compileRetI(0);
-		context.events.add(new Event(context, new CodeRef(cond), new CodeRef(
-				res), EventType.CHANGE));
-		System.out.println("onchange " + cond.size() + " " + res.size());
 	}
 
 	public void resolveBranchs(List<Integer> addrs) {
