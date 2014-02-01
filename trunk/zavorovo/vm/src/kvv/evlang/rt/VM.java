@@ -1,6 +1,5 @@
 package kvv.evlang.rt;
 
-import kvv.evlang.rt.RTContext.Event;
 
 public abstract class VM {
 	public abstract void setExtReg(int addr, int reg, int value);
@@ -83,26 +82,6 @@ public abstract class VM {
 		time = System.currentTimeMillis();
 
 		timersStep((int) (time - t));
-
-		for (Event event : cont.events) {
-			int val;
-			try {
-				val = interpreter.eval(event.cond);
-				if (event.type == RTContext.Event.TYPE_SET) {
-					if (event.state == 0 && val != 0) {
-						interpreter.interpret(event.handler, null);
-					}
-				} else if (event.type == RTContext.Event.TYPE_CHANGE) {
-					if (event.state != val) {
-						interpreter.interpret(event.handler, null);
-					}
-				}
-				event.state = val;
-			} catch (UncaughtExceptionException e) {
-				e.printStackTrace();
-			}
-		}
-
 	}
 
 }
