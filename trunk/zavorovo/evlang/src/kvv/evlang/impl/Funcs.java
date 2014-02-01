@@ -15,44 +15,47 @@ public class Funcs {
 	private final Context context;
 	public Func initFunc;
 
-	public Funcs(Context context) {
+	public Funcs(Context context, boolean root) {
 		this.context = context;
 
-		try {
-			initFunc = new Func(context, "<init>", new Locals(), Type.VOID);
-			initFunc.code = new Code(context);
-			put(initFunc);
+		if (root) {
+			try {
+				initFunc = new Func(context, "<init>", new Locals(), Type.VOID);
+				initFunc.code = new Code(context);
+				put(initFunc);
 
-			Func mainFunc = new Func(context, "main", new Locals(), Type.VOID);
-			put(mainFunc);
+				Func mainFunc = new Func(context, "main", new Locals(),
+						Type.VOID);
+				put(mainFunc);
 
-			
-			Locals locals = new Locals();
-			locals.add(new NameAndType("this", Type.NULL));
-			locals.add(new NameAndType("ms", Type.INT));
-			Func startFunc = new Func(context, "timer:start", locals, Type.VOID) {
-				@Override
-				public void compileCall(Code code) {
-					code.add(BC.SETTIMER_MS);
-				}
-			};
-			startFunc.code = new Code(context);
-			put(startFunc);
+				Locals locals = new Locals();
+				locals.add(new NameAndType("this", Type.NULL));
+				locals.add(new NameAndType("ms", Type.INT));
+				Func startFunc = new Func(context, "timer:start", locals,
+						Type.VOID) {
+					@Override
+					public void compileCall(Code code) {
+						code.add(BC.SETTIMER_MS);
+					}
+				};
+				startFunc.code = new Code(context);
+				put(startFunc);
 
-			locals = new Locals();
-			locals.add(new NameAndType("this", Type.NULL));
-			Func stopFunc = new Func(context, "timer:stop", locals, Type.VOID) {
-				@Override
-				public void compileCall(Code code) {
-					code.add(BC.STOPTIMER);
-				}
-			};
-			stopFunc.code = new Code(context);
-			put(stopFunc);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+				locals = new Locals();
+				locals.add(new NameAndType("this", Type.NULL));
+				Func stopFunc = new Func(context, "timer:stop", locals,
+						Type.VOID) {
+					@Override
+					public void compileCall(Code code) {
+						code.add(BC.STOPTIMER);
+					}
+				};
+				stopFunc.code = new Code(context);
+				put(stopFunc);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
-
 	}
 
 	public Func get(String name) {
@@ -119,8 +122,8 @@ public class Funcs {
 	}
 
 	public void dump(Code code) {
-		for(Func func : funcs.values())
+		for (Func func : funcs.values())
 			func.dump(code);
 	}
-	
+
 }

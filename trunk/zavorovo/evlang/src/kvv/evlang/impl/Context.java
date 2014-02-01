@@ -31,7 +31,7 @@ public abstract class Context {
 			throwExc("register is read only");
 	}
 
-	public Funcs funcs = new Funcs(this);
+	public Funcs funcs = new Funcs(this, true);
 
 	public Func currentFunc;
 
