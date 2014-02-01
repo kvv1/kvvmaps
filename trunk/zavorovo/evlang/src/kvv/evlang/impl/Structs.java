@@ -19,7 +19,8 @@ public class Structs {
 
 	public Struct createStruct(String name, boolean isTimer)
 			throws ParseException {
-		context.checkName(name);
+		if(structs.containsKey(name))
+			context.throwExc(name + " already defined");
 		Struct str = new Struct(context, structs.size(), new Type(name),
 				isTimer);
 		structs.put(name, str);

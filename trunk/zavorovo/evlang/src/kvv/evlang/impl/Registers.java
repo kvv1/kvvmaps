@@ -123,8 +123,8 @@ public class Registers {
 			refs.add((byte) n);
 
 		if (initValue != null) {
-			context.initCode.addAll(initValue.getCode());
-			context.initCode.compileSetreg(registerDescr.reg);
+			context.funcs.initFunc.code.addAll(initValue.getCode());
+			context.funcs.initFunc.code.compileSetreg(registerDescr.reg);
 		}
 
 		return registerDescr;
@@ -140,8 +140,8 @@ public class Registers {
 			context.throwExc("too many registers used");
 		registers.put(regName, registerDescr);
 
-		context.initCode.compileLit(initValue);
-		context.initCode.compileSetreg(registerDescr.reg);
+		context.funcs.initFunc.code.compileLit(initValue);
+		context.funcs.initFunc.code.compileSetreg(registerDescr.reg);
 
 		return registerDescr;
 	}

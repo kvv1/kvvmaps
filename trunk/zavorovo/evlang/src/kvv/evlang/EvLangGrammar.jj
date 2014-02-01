@@ -14,7 +14,7 @@ package kvv.evlang;
 import java.io.*;
 import java.util.*;
 import kvv.evlang.impl.*;
-import kvv.evlang.impl.LocalListDef.Local;
+import kvv.evlang.impl.Locals.Local;
 import kvv.controllers.register.*;
 
 public abstract class EG1 extends EG
@@ -154,9 +154,9 @@ Type type() :{  String name = null;}{  < VOID >  {    return Type.VOID; 
   name = id()  {    return new Type(name);  }}
 
 
-void proc(Type type, String name, Struct thisType) :{  Code bytes = null;  LocalListDef locals = new LocalListDef();  if (thisType != null)  {    locals.add(new NameAndType("this", thisType.type));    name = thisType.type.name + ":" + name;  }}{  "(" [ argListDef(locals) ] ")"  {    procDecl(type, name, locals);  }  (    bytes = stmtBlock()    {      Code.procCode(this, bytes);    }  | ";"  )}
+void proc(Type type, String name, Struct thisType) :{  Code bytes = null;  Locals locals = new Locals();  if (thisType != null)  {    locals.add(new NameAndType("this", thisType.type));    name = thisType.type.name + ":" + name;  }}{  "(" [ argListDef(locals) ] ")"  {    funcs.getCreateFunc(type, name, locals);  }  (    bytes = stmtBlock()    {      Code.procCode(this, bytes);    }  | ";"  )}
 
-void argListDef(LocalListDef locals) :
+void argListDef(Locals locals) :
 {
 }
 {
@@ -166,7 +166,7 @@ void argListDef(LocalListDef locals) :
   )*
 }
 
-Local localDef(LocalListDef locals) :
+Local localDef(Locals locals) :
 {
   String name;
   Type type;
@@ -251,7 +251,7 @@ void register() :
   }
 }
 
-void xtimer() :{  String name;  String fieldName;  Type fieldType;  Code code;  Struct struct;}{  < XTIMER > name = id()  {    LocalListDef locals = new LocalListDef();    locals.add(new NameAndType("this", new Type(name)));    Func func = procDecl(Type.VOID, "__timer__" + name,     locals);    struct = structs.createXTimer(name);
+void xtimer() :{  String name;  String fieldName;  Type fieldType;  Code code;  Struct struct;}{  < XTIMER > name = id()  {    Locals locals = new Locals();    locals.add(new NameAndType("this", new Type(name)));    Func func = funcs.getCreateFunc(Type.VOID, "__timer__" + name,     locals);    struct = structs.createXTimer(name);
     struct.timerFunc = func.n;  }  "{"  (    fieldType = type() fieldName = id() ";"    {      fieldType.checkNotVoid(this);
       struct.addField(fieldType, fieldName);    }  )*  code = stmtBlock()  {    Code.procCode(this, code);  }  "}"}
 

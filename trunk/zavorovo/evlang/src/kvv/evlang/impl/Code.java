@@ -214,7 +214,10 @@ public class Code extends CodeBase {
 			res.addAll(ret(context, new Expr(context, (short) 0)));
 		res.adjustLocals();
 
-		context.currentFunc.code = new CodeRef(res);
+		if(context.currentFunc.code != null)
+			context.throwExc("function " + context.currentFunc.name + " already defined");
+		
+		context.currentFunc.code = res;
 		System.out.println("proc " + context.currentFunc.name + " "
 				+ res.size());
 	}
