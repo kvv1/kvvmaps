@@ -86,9 +86,6 @@ TOKEN : /* OPERATORS */
 | < CONST : "const" >
 | < IF : "if" >
 | < ELSE : "else" >
-| < START_S : "start_s" >
-| < START_MS : "start_ms" >
-| < STOP : "stop" >
 | < PRINT : "print" >
 | < DEC : "--" >
 | < INC : "++" >
@@ -129,7 +126,6 @@ void line() :
 | register()
 | varOrProc()
 | uiDecl()
-| timer()
 | xtimer()
 | onset()
 | onchange()
@@ -152,7 +148,7 @@ void varOrProc() :
   
 
 
-void struct() :{  String name;  String fieldName;  Type fieldType;  Struct struct;}{  < STRUCT > name = id()  {    struct = createStruct(name, false);  }  "{"  (    fieldType = type() fieldName = id()    (      proc(fieldType, fieldName, struct)    | ";"      {        checkNotVoid(fieldType);        addField(struct, fieldType, fieldName);      }    )  )*  "}"}
+void struct() :{  String name;  String fieldName;  Type fieldType;  Struct struct;}{  < STRUCT > name = id()  {    struct = structs.createStruct(name, false);  }  "{"  (    fieldType = type() fieldName = id()    (      proc(fieldType, fieldName, struct)    | ";"      {        checkNotVoid(fieldType);        struct.addField(fieldType, fieldName);      }    )  )*  "}"}
 
 Type type() :{  String name = null;}{  < VOID >  {    return Type.VOID;  }|   < INT >
   {
@@ -162,8 +158,7 @@ Type type() :{  String name = null;}{  < VOID >  {    return Type.VOID; 
   name = id()  {    return new Type(name);  }}
 
 
-void proc(Type type, String name, Struct thisType) :{  Code bytes = null;  LocalListDef locals = new LocalListDef();  if (thisType != null)  {    locals.add(new NameAndType("this", thisType.type));    name = thisType.type.name + ":" + name;  }}{  "(" [ argListDef(locals) ] ")"  {    locals.endOfArgs();
-    Code.procDecl(this, type, name, locals);  }  (    bytes = stmtBlock()    {      Code.procCode(this, bytes);    }  | ";"  )}
+void proc(Type type, String name, Struct thisType) :{  Code bytes = null;  LocalListDef locals = new LocalListDef();  if (thisType != null)  {    locals.add(new NameAndType("this", thisType.type));    name = thisType.type.name + ":" + name;  }}{  "(" [ argListDef(locals) ] ")"  {    procDecl(type, name, locals);  }  (    bytes = stmtBlock()    {      Code.procCode(this, bytes);    }  | ";"  )}
 
 void argListDef(LocalListDef locals) :
 {
@@ -173,9 +168,6 @@ void argListDef(LocalListDef locals) :
   (
     "," localDef(locals)
   )*
-  {
-    locals.endOfArgs();
-  }
 }
 
 Local localDef(LocalListDef locals) :
@@ -214,7 +206,7 @@ void uiDecl() :
 {
   type = uitype() name = id() text = < STRING > ";"
   {
-    setUI(name, text.image.replace("\"", ""), type);
+    registers.setUI(name, text.image.replace("\"", ""), type);
   }
 }
 
@@ -242,7 +234,7 @@ void var(Type type, String name) :
   ";"
   {
 	 checkNotVoid(type);
-	 newVar(type, name, e);
+	 registers.newVar(type, name, e);
   }
 }
 
@@ -255,31 +247,16 @@ void register() :
 {
   < REG > regName = id() "(" regNum = id() ")" ";"
   {
-    newRegisterAlias(regName, regNum);
+    registers.newRegisterAlias(regName, regNum);
   }
 |  < EEREG > regName = id() "=" initVal = number() ";"
   {
-    newEERegister(regName, initVal);
+    registers.newEERegister(regName, initVal);
   }
 }
 
-void xtimer() :{  String name;  String fieldName;  Type fieldType;  Code code;  Struct struct;}{  < XTIMER > name = id()  {    LocalListDef locals = new LocalListDef();    locals.add(new NameAndType("this", new Type(name)));    Func func = Code.procDecl(this, Type.VOID, "__timer__" + name,     locals);    struct = createXTimer(name);
-    struct.timerFunc = func.n;  }  "{"  (    fieldType = type() fieldName = id() ";"    {      checkNotVoid(fieldType);      addField(struct, fieldType, fieldName);    }  )*  code = stmtBlock()  {    Code.procCode(this, code);  }  "}"}
-
-void timer() :
-{
-  String name;
-  Code bytes;
-}
-{
-  {
-    currentFunc = new Func(this, "", new LocalListDef(), Type.VOID);
-  }
-  < TIMER > name = id() bytes = stmtBlock()
-  {
-    Code.timer(this, name, bytes);
-  }
-}
+void xtimer() :{  String name;  String fieldName;  Type fieldType;  Code code;  Struct struct;}{  < XTIMER > name = id()  {    LocalListDef locals = new LocalListDef();    locals.add(new NameAndType("this", new Type(name)));    Func func = procDecl(Type.VOID, "__timer__" + name,     locals);    struct = structs.createXTimer(name);
+    struct.timerFunc = func.n;  }  "{"  (    fieldType = type() fieldName = id() ";"    {      checkNotVoid(fieldType);      struct.addField(fieldType, fieldName);    }  )*  code = stmtBlock()  {    Code.procCode(this, code);  }  "}"}
 
 void onset() :
 {
@@ -384,18 +361,6 @@ Code assign() :
 | < THROW > [ res = expr() ] ";"
   {
     return Code.throw_(this, res);
-  }
-| < START_S > "(" name = id() "," res = expr() ")" ";"
-  {
-    return Code.start_s(this, name, res);
-  }
-| < START_MS > "(" name = id() "," res = expr() ")" ";"
-  {
-    return Code.start_ms(this, name, res);
-  }
-| < STOP > "(" name = id() ")" ";"
-  {
-    return Code.stop(this, name);
   }
 |
     LOOKAHEAD(2)

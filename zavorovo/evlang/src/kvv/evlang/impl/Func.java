@@ -1,8 +1,9 @@
 package kvv.evlang.impl;
 
+import kvv.evlang.ParseException;
+
 
 public class Func {
-	private final Context context;
 	public int n;
 	public CodeRef code;
 	public final Type retType;
@@ -11,21 +12,16 @@ public class Func {
 
 	public int maxStack = -1;
 
-	public Func(Context context, String name, LocalListDef locals, Type retType) {
+	public Func(Context context, String name, LocalListDef locals, Type retType) throws ParseException {
 		this.name = name;
 		this.locals = locals;
 		this.retType = retType;
-		this.context = context;
+		locals.endOfArgs();
+		
+		context.checkName(name);
 	}
-/*
-	int getMaxStack() throws ParseException {
-		String msg = "function" + " '" + name + "'";
-		if (maxStack < 0) {
-			context.dumpStream.print(msg + " ");
-			maxStack = code.check(retType, msg);
-			context.dumpStream.println("maxStack: " + maxStack);
-		}
-		return maxStack;
-	}
-*/	
+
+	public void compileCall(Code code) {
+		code.compileCall(n);
+	}	
 }

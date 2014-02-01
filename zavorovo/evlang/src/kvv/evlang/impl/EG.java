@@ -68,6 +68,20 @@ public abstract class EG extends Context {
 			}
 			System.out.println();
 			Code.printHisto();
+
+			System.out.println("Functions:");
+			for (Func func : parser.funcDefList.funcs.values()) {
+				System.out.println(func.n + " " + func.name + " "
+						+ func.code.len + " " + func.code.off);
+			}
+
+			System.out.println("Types:");
+			for (Struct str : parser.structs.values()) {
+				System.out.println(str.idx + " " + str.type.name + " "
+						+ str.fields.size() + " "
+						+ (str.isTimer ? "timer" : ""));
+			}
+
 		}
 
 		if (url.value != null && addr.value != null)

@@ -50,46 +50,6 @@ public class Code extends CodeBase {
 		return res;
 	}
 
-//	public static Code callp(Context context, LValue lvalue, List<Expr> argList)
-//			throws ParseException {
-//		if (lvalue.expr != null)
-//			context.throwExc("method calls not implemented");
-//		Func func = context.getFunc(lvalue.field, argList);
-//		Code res = new Code(context);
-//		for (Expr c : argList)
-//			res.addAll(c.getCode());
-//		res.compileCall(func.n);
-//		if (func.retType.getSize() != 0)
-//			res.add(BC.DROP);
-//		return res;
-//	}
-
-	public static Code stop(Context context, String name) throws ParseException {
-		Timer timer = context.getCreateTimer(name);
-		Code res = new Code(context);
-		res.add(BC.STOPTIMER);
-		res.add(timer.n);
-		return res;
-	}
-
-	public static Code start_ms(Context context, String name, Expr t)
-			throws ParseException {
-		Timer timer = context.getCreateTimer(name);
-		Code res = t.getCode();
-		res.add(BC.SETTIMER_MS);
-		res.add(timer.n);
-		return res;
-	}
-
-	public static Code start_s(Context context, String name, Expr t)
-			throws ParseException {
-		Timer timer = context.getCreateTimer(name);
-		Code res = t.getCode();
-		res.add(BC.SETTIMER_S);
-		res.add(timer.n);
-		return res;
-	}
-
 	public static Code print(Expr n) throws ParseException {
 		Code res = n.getCode();
 		res.add(BC.PRINT);
@@ -126,15 +86,16 @@ public class Code extends CodeBase {
 		if (lvalue.expr == null)
 			return assign(context, lvalue.field, t);
 		else {
-			if(t == null) {
+			if (t == null) {
 				Expr e = lvalue.getExpr();
 				Code code = lvalue.getExpr().getCode();
-				if(e.type != Type.VOID)
+				if (e.type != Type.VOID)
 					code.add(BC.DROP);
 				return code;
 			}
-			
-			int idx = context.getFieldIndex(lvalue.expr.type, lvalue.field);
+
+			int idx = context.structs.getFieldIndex(lvalue.expr.type,
+					lvalue.field);
 			Type type = context.structs.get(lvalue.expr.type.name).fields
 					.get(idx).type;
 			t.type.checkAssignableTo(context, type);
@@ -225,20 +186,14 @@ public class Code extends CodeBase {
 		return res;
 	}
 
-	public static Code initLocal(Context context, Local local, Expr initVal) throws ParseException {
+	public static Code initLocal(Context context, Local local, Expr initVal)
+			throws ParseException {
 		initVal.type.checkAssignableTo(context, local.nat.type);
-		
+
 		Code res = new Code(context);
 		res.addAll(initVal.code);
 		res.compileSetLocal(local.n);
 		return res;
-	}
-	
-	public static Func procDecl(Context context, Type type, String name,
-			LocalListDef locals) throws ParseException {
-		Func func = context.getCreateFunc(name, locals, type);
-		context.currentFunc = func;
-		return func;
 	}
 
 	private void compileEnter() throws ParseException {
@@ -260,22 +215,9 @@ public class Code extends CodeBase {
 			res.addAll(ret(context, new Expr(context, (short) 0)));
 		res.adjustLocals();
 
-		context.currentFunc.code = new CodeRef(context, res);
+		context.currentFunc.code = new CodeRef(res);
 		System.out.println("proc " + context.currentFunc.name + " "
 				+ res.size());
-	}
-
-	public static void timer(Context context, String name, Code bytes)
-			throws ParseException {
-		Code res = new Code(context);
-		res.compileEnter();
-		res.addAll(bytes);
-		res.compileRet(0);
-		res.adjustLocals();
-
-		Timer timer = context.getCreateTimer(name);
-		timer.handler = new CodeRef(context, res);
-		System.out.println("timer " + name + " " + res.size());
 	}
 
 	public static void onset(Context context, Code cond, Code bytes)
@@ -287,8 +229,8 @@ public class Code extends CodeBase {
 		res.adjustLocals();
 
 		cond.compileRetI(0);
-		context.events.add(new Event(context, new CodeRef(context, cond),
-				new CodeRef(context, res), EventType.SET));
+		context.events.add(new Event(context, new CodeRef(cond), new CodeRef(
+				res), EventType.SET));
 		System.out.println("onset " + cond.size() + " " + res.size());
 	}
 
@@ -301,8 +243,8 @@ public class Code extends CodeBase {
 		res.adjustLocals();
 
 		cond.compileRetI(0);
-		context.events.add(new Event(context, new CodeRef(context, cond),
-				new CodeRef(context, res), EventType.CHANGE));
+		context.events.add(new Event(context, new CodeRef(cond), new CodeRef(
+				res), EventType.CHANGE));
 		System.out.println("onchange " + cond.size() + " " + res.size());
 	}
 

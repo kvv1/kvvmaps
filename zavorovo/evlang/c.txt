@@ -2,6 +2,8 @@
 struct S {
 	int a;
 	int b;
+
+	int sum();
 	
 	int sum() {
 		return this.a + this.b;
@@ -11,10 +13,10 @@ struct S {
 xtimer T {
 	S s;
 	{
-		this.s.sum();
+//		this.s.sum();
 		print this.s.a;
 		this.s.a = this.s.a + this.s.b;
-//		this.start_s(1);
+		this.start(1000);
 	}
 }
 
@@ -23,5 +25,6 @@ void main() {
 	print s.sum();
 
 	T t = new T(new S(10, 2));
-	t.start_s(1);
+	t.start(1000);
+	//t.stop();
 }

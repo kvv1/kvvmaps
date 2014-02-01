@@ -3,14 +3,18 @@ package kvv.evlang.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import kvv.evlang.ParseException;
+
 public class Struct {
 	public final int idx;
 	public final Type type;
 	public final boolean isTimer;
 	public int timerFunc;
 	public final List<NameAndType> fields = new ArrayList<NameAndType>();
+	private final Context context;
 
-	public Struct(int idx, Type type, boolean isTimer) {
+	public Struct(Context context, int idx, Type type, boolean isTimer) {
+		this.context = context;
 		this.idx = idx;
 		this.type = type;
 		this.isTimer = isTimer;
@@ -23,7 +27,10 @@ public class Struct {
 		return null;
 	}
 
-	public void addField(String fieldName, Type fieldType) {
+	public void addField(Type fieldType, String fieldName)
+			throws ParseException {
+		if (getField(fieldName) != null)
+			context.throwExc(fieldName + " already defined");
 		fields.add(new NameAndType(fieldName, fieldType));
 	}
 

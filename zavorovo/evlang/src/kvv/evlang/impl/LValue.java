@@ -30,7 +30,7 @@ public class LValue {
 
 		if (parent == null) {
 			if (argList != null) {
-				expr = new Expr(context, field, argList);
+				expr = new Expr(context, null, field, argList);
 				this.field = null;
 			} else {
 				expr = null;
@@ -40,11 +40,11 @@ public class LValue {
 			Expr parentExpr = parent.getExpr();
 			if (argList != null) {
 				argList.add(0, parentExpr);
-				expr = new Expr(context, parentExpr.type.name + ":" + field, argList);
+				expr = new Expr(context, parentExpr.type, field, argList);
 				this.field = null;
 			} else {
-			expr = parentExpr;
-			this.field = field;
+				expr = parentExpr;
+				this.field = field;
 			}
 		}
 

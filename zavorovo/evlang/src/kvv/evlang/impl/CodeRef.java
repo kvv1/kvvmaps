@@ -13,8 +13,8 @@ public class CodeRef {
 	// public CodeRef() {
 	// }
 
-	public CodeRef(Context context, Code code) {
-		this.context = context;
+	public CodeRef(Code code) {
+		this.context = code.context;
 		this.off = context.codeArr.size();
 		context.codeArr.addAll(code);
 		this.len = code.size();
