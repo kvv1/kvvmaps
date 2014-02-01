@@ -1,24 +1,40 @@
 package kvv.evlang.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 
 import kvv.controllers.controller.Controller;
 import kvv.controllers.register.Register;
+import kvv.controllers.register.RegisterUI;
 import kvv.controllers.utils.cmdline.BooleanParam;
 import kvv.controllers.utils.cmdline.CmdLine;
 import kvv.controllers.utils.cmdline.IntParam;
 import kvv.controllers.utils.cmdline.StringParam;
 import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
+import kvv.evlang.rt.RTContext;
+import kvv.evlang.rt.TryCatchBlock;
 import kvv.evlang.rt.UncaughtExceptionException;
+import kvv.evlang.rt.VM;
 import kvv.evlang.rt.VMStatus;
 
 //  < ID : [ "a"-"z", "A"-"Z", "_", "\u00A0"-"\u00FF" ] ([ "a"-"z", "A"-"Z", "_", "0"-"9", "\u00A0"-"\u00FF" ])* >
 
 public abstract class EG extends Context {
+
+	public static PrintStream nullStream = new PrintStream(new OutputStream() {
+		@Override
+		public void write(int b) throws IOException {
+		}
+	});
+
+	public PrintStream dumpStream = nullStream;
+
 
 	public static CmdLine cmdLine = new CmdLine();
 	public static StringParam url = new StringParam(cmdLine, "-url", null);
@@ -121,6 +137,81 @@ public abstract class EG extends Context {
 			if (controller != null)
 				controller.close();
 		}
+	}
+
+	public byte[] dump() throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(baos);
+
+		RegisterUI[] regs = registers.getRegisterDescriptions();
+		dos.writeByte(regs.length);
+		for (RegisterUI reg : regs) {
+			dos.writeByte(reg.reg);
+			dos.writeByte(reg.type.ordinal());
+			dos.writeByte(reg.text.length());
+			dos.writeBytes(reg.text);
+		}
+
+		dos.writeByte(funcDefList.size());
+		for (Func f : funcDefList.values()) {
+			dos.writeShort(f.code.off);
+		}
+
+		dos.writeByte(codeArr.tryCatchBlocks.size());
+		for (TryCatchBlock tcb : codeArr.tryCatchBlocks) {
+			dos.writeShort(tcb.from);
+			dos.writeShort(tcb.to);
+			dos.writeShort(tcb.handler);
+		}
+
+		dos.writeByte(constPool.size());
+		for (Short s : constPool.data) {
+			dos.writeShort(s);
+		}
+
+		dos.writeByte(regPool.size());
+		for (Short s : regPool.data) {
+			dos.writeByte(s);
+		}
+
+		for (byte b : codeArr.code)
+			dos.write(b);
+
+		dos.close();
+		return baos.toByteArray();
+	}
+
+	public void run() throws UncaughtExceptionException {
+		RTContext context = getRTContext();
+		new VM(context) {
+			@Override
+			public void setExtReg(int addr, int reg, int value) {
+			}
+
+			@Override
+			public int getExtReg(int addr, int reg) {
+				return 0;
+			}
+		}.loop();
+	}
+
+	public RTContext getRTContext() {
+		RTContext.Func rtFuncs[] = new RTContext.Func[funcDefList.size()];
+		for (Func f : funcDefList.values())
+			rtFuncs[f.n] = new RTContext.Func(f.code.off);
+
+		RTContext.Type[] rtTypes = new RTContext.Type[structs.size()];
+		for (Struct str : structs.values())
+			rtTypes[str.idx] = new RTContext.Type(str.fields.size(),
+					str.getMask());
+
+		RTContext context = new RTContext(codeArr.code, rtFuncs,
+				codeArr.tryCatchBlocks.toArray(new TryCatchBlock[0]),
+				constPool.data.toArray(new Short[0]),
+				regPool.data.toArray(new Short[0]),
+				registers.refs.toArray(new Byte[0]), rtTypes);
+
+		return context;
 	}
 
 }

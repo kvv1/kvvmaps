@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kvv.evlang.ParseException;
-import kvv.evlang.impl.LocalListDef.Local;
+import kvv.evlang.impl.Locals.Local;
 import kvv.evlang.rt.BC;
 
 public class Expr {

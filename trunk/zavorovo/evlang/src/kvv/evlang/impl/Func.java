@@ -8,11 +8,11 @@ public class Func {
 	public CodeRef code;
 	public final Type retType;
 	public final String name;
-	public final LocalListDef locals;
+	public final Locals locals;
 
 	public int maxStack = -1;
 
-	public Func(Context context, String name, LocalListDef locals, Type retType) throws ParseException {
+	public Func(Context context, String name, Locals locals, Type retType) throws ParseException {
 		this.name = name;
 		this.locals = locals;
 		this.retType = retType;

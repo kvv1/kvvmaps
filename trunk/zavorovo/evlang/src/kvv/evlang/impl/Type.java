@@ -38,6 +38,11 @@ public class Type {
 			context.throwExc("should be int type");
 	}
 
+	public void checkNotVoid(Context context) throws ParseException {
+		if (equals(Type.VOID))
+			context.throwExc("'void' type not allowed");
+	}
+
 	public static void checkComparable(Context context, Type type1, Type type2) throws ParseException {
 		if(type1.equals(VOID) || type2.equals(VOID))
 			context.throwExc("incompatible types: " + type1.name + "," + type2.name);

@@ -81,8 +81,6 @@ TOKEN : /* OPERATORS */
 | < REG : "reg" >
 | < EEREG : "eereg" >
 | < TIMER : "timer" >
-| < ONSET : "onset" >
-| < ONCHANGE : "onchange" >
 | < CONST : "const" >
 | < IF : "if" >
 | < ELSE : "else" >
@@ -127,8 +125,6 @@ void line() :
 | varOrProc()
 | uiDecl()
 | xtimer()
-| onset()
-| onchange()
 | struct()
 }
 
@@ -148,7 +144,7 @@ void varOrProc() :
   
 
 
-void struct() :{  String name;  String fieldName;  Type fieldType;  Struct struct;}{  < STRUCT > name = id()  {    struct = structs.createStruct(name, false);  }  "{"  (    fieldType = type() fieldName = id()    (      proc(fieldType, fieldName, struct)    | ";"      {        checkNotVoid(fieldType);        struct.addField(fieldType, fieldName);      }    )  )*  "}"}
+void struct() :{  String name;  String fieldName;  Type fieldType;  Struct struct;}{  < STRUCT > name = id()  {    struct = structs.createStruct(name, false);  }  "{"  (    fieldType = type() fieldName = id()    (      proc(fieldType, fieldName, struct)    | ";"      {        fieldType.checkNotVoid(this);        struct.addField(fieldType, fieldName);      }    )  )*  "}"}
 
 Type type() :{  String name = null;}{  < VOID >  {    return Type.VOID;  }|   < INT >
   {
@@ -178,7 +174,7 @@ Local localDef(LocalListDef locals) :
 {
     type = type() name = id()
     {
-      checkNotVoid(type);
+      type.checkNotVoid(this);
       return locals.add(new NameAndType(name, type));
     }
 }
@@ -233,7 +229,7 @@ void var(Type type, String name) :
   [ "=" e = expr() ]
   ";"
   {
-	 checkNotVoid(type);
+	 type.checkNotVoid(this);
 	 registers.newVar(type, name, e);
   }
 }
@@ -256,37 +252,8 @@ void register() :
 }
 
 void xtimer() :{  String name;  String fieldName;  Type fieldType;  Code code;  Struct struct;}{  < XTIMER > name = id()  {    LocalListDef locals = new LocalListDef();    locals.add(new NameAndType("this", new Type(name)));    Func func = procDecl(Type.VOID, "__timer__" + name,     locals);    struct = structs.createXTimer(name);
-    struct.timerFunc = func.n;  }  "{"  (    fieldType = type() fieldName = id() ";"    {      checkNotVoid(fieldType);      struct.addField(fieldType, fieldName);    }  )*  code = stmtBlock()  {    Code.procCode(this, code);  }  "}"}
-
-void onset() :
-{
-  Expr cond;
-  Code bytes;
-}
-{
-  {
-    currentFunc = new Func(this, "", new LocalListDef(), Type.VOID);
-  }
-  < ONSET > "(" cond = expr() ")" bytes = stmtBlock()
-  {
-    Code.onset(this, cond.getCode(), bytes);
-  }
-}
-
-void onchange() :
-{
-  Expr cond;
-  Code bytes;
-}
-{
-  {
-    currentFunc = new Func(this, "", new LocalListDef(), Type.VOID);
-  }
-  < ONCHANGE > "(" cond = expr() ")" bytes = stmtBlock()
-  {
-    Code.onchange(this, cond.getCode(), bytes);
-  }
-}
+    struct.timerFunc = func.n;  }  "{"  (    fieldType = type() fieldName = id() ";"    {      fieldType.checkNotVoid(this);
+      struct.addField(fieldType, fieldName);    }  )*  code = stmtBlock()  {    Code.procCode(this, code);  }  "}"}
 
 Code stmtBlock() :
 {
