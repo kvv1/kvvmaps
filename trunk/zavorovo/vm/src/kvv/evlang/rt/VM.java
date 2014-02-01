@@ -28,8 +28,8 @@ public abstract class VM {
 			}
 		};
 
-		interpreter.interpret(cont.funcs[0].code);
-		interpreter.interpret(cont.funcs[1].code);
+		interpreter.interpret(cont.funcs[0].code, null);
+		interpreter.interpret(cont.funcs[1].code, null);
 	}
 
 	public void loop() {
@@ -42,25 +42,47 @@ public abstract class VM {
 		}
 	}
 
+	private boolean step(short obj, int step) {
+		int cnt = cont.heap.get(obj, RTContext.TIMER_CNT_IDX);
+		cnt -= step;
+		if (cnt <= 0)
+			cnt = 0;
+		cont.heap.set(obj, RTContext.TIMER_CNT_IDX, cnt);
+		if (cnt == 0) {
+			short func = cont.heap.get(obj, RTContext.TIMER_FUNC_IDX);
+			try {
+				interpreter.interpret(cont.funcs[func].code, obj);
+			} catch (UncaughtExceptionException e) {
+				e.printStackTrace();
+			}
+		}
+		return cnt == 0;
+	}
+
+	public void timersStep(int step) {
+		int sz = cont.timers.size();
+		boolean gc = false;
+		for (int i = 0; i < sz; i++) {
+			short obj = cont.timers.getAt(i);
+			if (obj != 0) {
+				if (step(obj, step)) {
+					cont.timers.setAt(i, 0);
+					gc = true;
+				}
+			}
+		}
+		cont.timers.compact();
+		if (gc)
+			cont.gc();
+	}
+
 	private long time = System.currentTimeMillis();
 
 	public void step() {
 		long t = time;
 		time = System.currentTimeMillis();
 
-		for (kvv.evlang.rt.RTContext.Timer timer : cont.timers) {
-			if (timer.cnt > 0) {
-				timer.cnt -= (time - t);
-				if (timer.cnt <= 0) {
-					timer.cnt = 0;
-					try {
-						interpreter.interpret(timer.handler);
-					} catch (UncaughtExceptionException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
+		timersStep((int) (time - t));
 
 		for (Event event : cont.events) {
 			int val;
@@ -68,11 +90,11 @@ public abstract class VM {
 				val = interpreter.eval(event.cond);
 				if (event.type == RTContext.Event.TYPE_SET) {
 					if (event.state == 0 && val != 0) {
-						interpreter.interpret(event.handler);
+						interpreter.interpret(event.handler, null);
 					}
 				} else if (event.type == RTContext.Event.TYPE_CHANGE) {
 					if (event.state != val) {
-						interpreter.interpret(event.handler);
+						interpreter.interpret(event.handler, null);
 					}
 				}
 				event.state = val;

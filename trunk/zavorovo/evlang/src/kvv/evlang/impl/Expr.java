@@ -38,14 +38,23 @@ public class Expr {
 		this(context, Type.INT, val);
 	}
 
-	public Expr(Context context, String funcName, List<Expr> argList)
-			throws ParseException {
+	public Expr(Context context, Type parentType, String funcName,
+			List<Expr> argList) throws ParseException {
+		if (parentType != null) {
+			if (parentType.isRef()
+					&& context.structs.get(parentType.name).isTimer
+					&& (funcName.equals("start") || funcName.equals("stop")))
+				funcName = "timer" + ":" + funcName;
+			else
+				funcName = parentType.name + ":" + funcName;
+		}
 		code = new Code(context);
-		Func func = context.getFunc(funcName, argList);
+		Func func = context.funcDefList.getFunc(funcName, argList);
 		type = func.retType;
+		
 		for (Expr c : argList)
 			code.addAll(c.getCode());
-		code.compileCall(func.n);
+		func.compileCall(code);
 	}
 
 	public Expr(Context context, String name) throws ParseException {
@@ -82,7 +91,7 @@ public class Expr {
 
 	public Expr(Context context, Expr expr, String field) throws ParseException {
 		code = new Code(context);
-		int idx = context.getFieldIndex(expr.type, field);
+		int idx = context.structs.getFieldIndex(expr.type, field);
 		type = context.structs.get(expr.type.name).fields.get(idx).type;
 		code.addAll(expr.getCode());
 		code.compileGetfield(idx);
@@ -234,18 +243,16 @@ public class Expr {
 		if (str == null)
 			context.throwExc(typeName + " -?");
 
-		if(str.isTimer) {
+		if (str.isTimer) {
 			List<Expr> argList1 = new ArrayList<Expr>();
 
 			argList1.add(new Expr(context, str.timerFunc));
 			argList1.add(new Expr(context, 0));
-			argList1.add(new Expr(context, Type.NULL, 0));
-			
+
 			argList1.addAll(argList);
 			argList = argList1;
 		}
-		
-		
+
 		if (str.fields.size() != argList.size())
 			context.throwExc(typeName + " argument number error");
 

@@ -47,13 +47,15 @@ public abstract class Interpreter {
 	private short ip;
 	private short fp;
 
-	public void interpret(short off) throws UncaughtExceptionException {
+	public void interpret(short off, Short param)
+			throws UncaughtExceptionException {
 		if (!stack.isEmpty() || ip != 0 || fp != 0)
 			throw new IllegalStateException();
+		if (param != null)
+			stack.push(param);
 		_interpret(off);
 		if (!stack.isEmpty() || ip != 0 || fp != 0)
 			throw new IllegalStateException();
-		context.gc();
 	}
 
 	public int eval(short off) throws UncaughtExceptionException {
@@ -63,7 +65,6 @@ public abstract class Interpreter {
 		int res = stack.pop();
 		if (!stack.isEmpty() || ip != 0 || fp != 0)
 			throw new IllegalStateException();
-		context.gc();
 		return res;
 	}
 
@@ -107,7 +108,6 @@ public abstract class Interpreter {
 			int right;
 			int left;
 			int off;
-			int timer;
 
 			byte c = code.get(ip++);
 
@@ -205,7 +205,7 @@ public abstract class Interpreter {
 			case NEW:
 				n = code.get(ip++);
 				int sz = context.types[n].sz;
-				short a = context.heap.alloc(n);
+				short a = context.heap.alloc(n, false, false);
 				if (a == 0)
 					throwException(Exc.OUTOFMEMORY_EXCEPTION.ordinal());
 				else {
@@ -310,16 +310,23 @@ public abstract class Interpreter {
 				System.out.print(stack.pop() + " ");
 				break;
 			case SETTIMER_MS:
-				timer = code.get(ip++);
-				context.timers[timer].cnt = stack.pop();
+				short ms = stack.pop();
+				short obj = stack.pop();
+				if (obj == 0)
+					throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
+				else
+					context.setTimer(obj, ms);
 				break;
-			case SETTIMER_S:
-				timer = code.get(ip++);
-				context.timers[timer].cnt = stack.pop() * 1000;
-				break;
+			// case SETTIMER_S:
+			// timer = code.get(ip++);
+			// context.timers[timer].cnt = stack.pop() * 1000;
+			// break;
 			case STOPTIMER:
-				timer = code.get(ip++);
-				context.timers[timer].cnt = 0;
+				obj = stack.pop();
+				if (obj == 0)
+					throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
+				else
+					context.stopTimer(obj);
 				break;
 			case INC:
 				reg = code.get(ip++) & 0xFF;
