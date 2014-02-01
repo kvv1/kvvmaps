@@ -5,22 +5,6 @@ import java.util.List;
 import kvv.evlang.rt.HeapImpl.Array;
 
 public class RTContext {
-	public static class Event {
-		public static final int TYPE_SET = 0;
-		public static final int TYPE_CHANGE = 1;
-
-		short cond;
-		short handler;
-		int state;
-		int type;
-
-		public Event(short cond, short handler, int type) {
-			this.cond = cond;
-			this.handler = handler;
-			this.type = type;
-		}
-	}
-
 	public static class Func {
 		short code;
 
@@ -41,7 +25,6 @@ public class RTContext {
 
 	public final List<Byte> codeArr;
 	public final short[] regs = new short[256];
-	public final Event[] events;
 	public final Func[] funcs;
 	public final TryCatchBlock[] tryCatchBlocks;
 	public final Short[] constPool;
@@ -60,11 +43,10 @@ public class RTContext {
 		return null;
 	}
 
-	public RTContext(List<Byte> codeArr, Event[] events, Func[] funcs,
+	public RTContext(List<Byte> codeArr, Func[] funcs,
 			TryCatchBlock[] tryCatchBlocks, Short[] constPool, Short[] regPool,
 			Byte[] refs, Type[] types) {
 		this.codeArr = codeArr;
-		this.events = events;
 		this.funcs = funcs;
 		this.tryCatchBlocks = tryCatchBlocks;
 		this.constPool = constPool;
