@@ -86,9 +86,9 @@ public abstract class EG extends Context {
 			Code.printHisto();
 
 			System.out.println("Functions:");
-			for (Func func : parser.funcDefList.funcs.values()) {
+			for (Func func : parser.funcs.funcs.values()) {
 				System.out.println(func.n + " " + func.name + " "
-						+ func.code.len + " " + func.code.off);
+						+ func.code.size() + " " + func.code.size());
 			}
 
 			System.out.println("Types:");
@@ -152,13 +152,16 @@ public abstract class EG extends Context {
 			dos.writeBytes(reg.text);
 		}
 
-		dos.writeByte(funcDefList.size());
-		for (Func f : funcDefList.values()) {
-			dos.writeShort(f.code.off);
+		Code code = new Code(this);
+		funcs.dump(code);
+		
+		dos.writeByte(funcs.size());
+		for (Func f : funcs.values()) {
+			dos.writeShort(f.off);
 		}
 
-		dos.writeByte(codeArr.tryCatchBlocks.size());
-		for (TryCatchBlock tcb : codeArr.tryCatchBlocks) {
+		dos.writeByte(code.tryCatchBlocks.size());
+		for (TryCatchBlock tcb : code.tryCatchBlocks) {
 			dos.writeShort(tcb.from);
 			dos.writeShort(tcb.to);
 			dos.writeShort(tcb.handler);
@@ -174,7 +177,7 @@ public abstract class EG extends Context {
 			dos.writeByte(s);
 		}
 
-		for (byte b : codeArr.code)
+		for (byte b : code.code)
 			dos.write(b);
 
 		dos.close();
@@ -196,17 +199,20 @@ public abstract class EG extends Context {
 	}
 
 	public RTContext getRTContext() {
-		RTContext.Func rtFuncs[] = new RTContext.Func[funcDefList.size()];
-		for (Func f : funcDefList.values())
-			rtFuncs[f.n] = new RTContext.Func(f.code.off);
+		Code code = new Code(this);
+		funcs.dump(code);
+		
+		RTContext.Func rtFuncs[] = new RTContext.Func[funcs.size()];
+		for (Func f : funcs.values())
+			rtFuncs[f.n] = new RTContext.Func(f.off);
 
 		RTContext.Type[] rtTypes = new RTContext.Type[structs.size()];
 		for (Struct str : structs.values())
 			rtTypes[str.idx] = new RTContext.Type(str.fields.size(),
 					str.getMask());
 
-		RTContext context = new RTContext(codeArr.code, rtFuncs,
-				codeArr.tryCatchBlocks.toArray(new TryCatchBlock[0]),
+		RTContext context = new RTContext(code.code, rtFuncs,
+				code.tryCatchBlocks.toArray(new TryCatchBlock[0]),
 				constPool.data.toArray(new Short[0]),
 				regPool.data.toArray(new Short[0]),
 				registers.refs.toArray(new Byte[0]), rtTypes);

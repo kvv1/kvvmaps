@@ -49,7 +49,7 @@ public class Expr {
 				funcName = parentType.name + ":" + funcName;
 		}
 		code = new Code(context);
-		Func func = context.funcDefList.getFunc(funcName, argList);
+		Func func = context.funcs.getFunc(funcName, argList);
 		type = func.retType;
 		
 		for (Expr c : argList)

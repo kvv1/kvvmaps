@@ -6,20 +6,53 @@ import java.util.List;
 import java.util.Map;
 
 import kvv.evlang.ParseException;
+import kvv.evlang.rt.BC;
 
 public class Funcs {
 	public Map<String, Func> funcs = new LinkedHashMap<String, Func>();
 	private Map<Integer, Func> funcs1 = new LinkedHashMap<Integer, Func>();
 
 	private final Context context;
+	public Func initFunc;
 
 	public Funcs(Context context) {
 		this.context = context;
 
-		funcs.put("<init>", null);
-		funcs.put("<main>", null);
-		funcs1.put(0, null);
-		funcs1.put(1, null);
+		try {
+			initFunc = new Func(context, "<init>", new Locals(), Type.VOID);
+			initFunc.code = new Code(context);
+			put(initFunc);
+
+			Func mainFunc = new Func(context, "main", new Locals(), Type.VOID);
+			put(mainFunc);
+
+			
+			Locals locals = new Locals();
+			locals.add(new NameAndType("this", Type.NULL));
+			locals.add(new NameAndType("ms", Type.INT));
+			Func startFunc = new Func(context, "timer:start", locals, Type.VOID) {
+				@Override
+				public void compileCall(Code code) {
+					code.add(BC.SETTIMER_MS);
+				}
+			};
+			startFunc.code = new Code(context);
+			put(startFunc);
+
+			locals = new Locals();
+			locals.add(new NameAndType("this", Type.NULL));
+			Func stopFunc = new Func(context, "timer:stop", locals, Type.VOID) {
+				@Override
+				public void compileCall(Code code) {
+					code.add(BC.STOPTIMER);
+				}
+			};
+			stopFunc.code = new Code(context);
+			put(stopFunc);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
 	}
 
 	public Func get(String name) {
@@ -27,11 +60,7 @@ public class Funcs {
 	}
 
 	public void put(Func func) {
-		if (func.retType.equals(Type.VOID) && func.name.equals("main")
-				&& func.locals.getArgCnt() == 0)
-			setMain(func);
-		else
-			add(func, func.name, funcs.size());
+		add(func, func.name, funcs.size());
 	}
 
 	public int size() {
@@ -52,14 +81,6 @@ public class Funcs {
 		funcs.put(name, func);
 	}
 
-	private void setMain(Func func) {
-		add(func, "<main>", 1);
-	}
-
-	public void setInit(Func func) {
-		add(func, "<init>", 0);
-	}
-
 	public Func getFunc(String name, List<Expr> argList) throws ParseException {
 		Func func = get(name);
 		if (func == null)
@@ -75,13 +96,14 @@ public class Funcs {
 		return func;
 	}
 
-	public Func getCreateFunc(String name, Locals locals, Type retType)
+	public Func getCreateFunc(Type retType, String name, Locals locals)
 			throws ParseException {
 		locals.endOfArgs();
 		Func func = get(name);
 		if (func == null) {
 			func = new Func(context, name, locals, retType);
 			put(func);
+			context.currentFunc = func;
 			return func;
 		} else if (!func.retType.equals(retType)) {
 			context.throwExc(name + " - ?");
@@ -92,7 +114,13 @@ public class Funcs {
 			locals.get(i).nat.type.checkAssignableTo(context,
 					func.locals.get(i).nat.type);
 
+		context.currentFunc = func;
 		return func;
 	}
 
+	public void dump(Code code) {
+		for(Func func : funcs.values())
+			func.dump(code);
+	}
+	
 }
