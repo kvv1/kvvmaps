@@ -1,18 +1,64 @@
+struct S0;
+struct S2;
 
-struct S {
+struct S1 {
+	S2 s2;
+	void f1();
+	int f2(int n) {
+		return n + 1; 
+	}
+	void f3();
+}
+
+struct Trig1 : Trigger {
+	int value() {
+	}
+	void handle(int oldValue, int newValue) {
+	}
+}
+
+struct S2 : S1 {
+	int x;
+	void f1() {
+		this.x = this.x - 1;
+	}
+}
+
+void S1:f3() {
+	this.s2.x = 666;
+}
+
+void fff() {
+	S2 s2 = new S2(null, 333);
+	s2.f1();
+}
+
+/*
+struct Timer {
+	int cnt;
+	void run();
+	void start(int ms);
+	void stop();
+}
+*/
+struct A {
 	int a;
+}
+
+struct S : A {
 	int b;
 
 	int sum();
 	
-	int sum() {
-		return this.a + this.b;
-	}
 }
 
-xtimer T {
+int S:sum() {
+	return this.a + this.b;
+}
+	
+struct T : Timer {
 	S s;
-	{
+	void run() {
 //		this.s.sum();
 		print this.s.a;
 		this.s.a = this.s.a + this.s.b;
@@ -20,11 +66,30 @@ xtimer T {
 	}
 }
 
+struct Tr : Trigger {
+	T t;
+	
+	int value() {
+	trap;
+		return this.t.s.a >= 20;
+	}
+	
+	void handle(int oldValue, int newValue) {
+	trap;
+		print 999;
+	}
+}
+
 void main() {
 	S s = new S(3,4);
 	print s.sum();
 
-	T t = new T(new S(10, 2));
+	T t = new T(0, new S(10, 2));
 	t.start(1000);
+	
+	Tr tr = new Tr(0, t);
+	trap;
+	tr.start(0);
+	
 	//t.stop();
 }

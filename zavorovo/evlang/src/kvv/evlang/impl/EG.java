@@ -35,7 +35,6 @@ public abstract class EG extends Context {
 
 	public PrintStream dumpStream = nullStream;
 
-
 	public static CmdLine cmdLine = new CmdLine();
 	public static StringParam url = new StringParam(cmdLine, "-url", null);
 	public static IntParam addr = new IntParam(cmdLine, "-addr", null);
@@ -45,7 +44,7 @@ public abstract class EG extends Context {
 	public static BooleanParam run = new BooleanParam(cmdLine, "-run");
 
 	public static void main(String args[]) throws IOException,
-			UncaughtExceptionException {
+			UncaughtExceptionException, ParseException {
 		cmdLine.parse(args);
 
 		EG1 parser = new EG1(cmdLine.args[0]) {
@@ -75,6 +74,8 @@ public abstract class EG extends Context {
 			os.close();
 		}
 
+		Code code = parser.gen();
+
 		if (dump.value) {
 			int i = 0;
 			for (byte b : bytes) {
@@ -86,25 +87,20 @@ public abstract class EG extends Context {
 			Code.printHisto();
 
 			System.out.println("Functions:");
-			for (Func func : parser.funcs.funcs.values()) {
-				System.out.println(func.n + " " + func.name + " "
-						+ func.code.size() + " " + func.code.size());
-			}
+			for (Func func : parser.funcs.funcs.values())
+				func.print();
 
 			System.out.println("Types:");
 			for (Struct str : parser.structs.values()) {
-				System.out.println(str.idx + " " + str.type.name + " "
-						+ str.fields.size() + " "
-						+ (str.isTimer ? "timer" : ""));
+				str.print();
 			}
-
 		}
 
 		if (url.value != null && addr.value != null)
 			upload(url.value, addr.value, bytes, run.value);
 
 		if (sim.value)
-			parser.run();
+			parser.run(code);
 	}
 
 	private static void upload(String url, int addr, byte[] bytes, boolean run) {
@@ -154,10 +150,10 @@ public abstract class EG extends Context {
 
 		Code code = new Code(this);
 		funcs.dump(code);
-		
+
 		dos.writeByte(funcs.size());
 		for (Func f : funcs.values()) {
-			dos.writeShort(f.off);
+			dos.writeShort(f.getOff());
 		}
 
 		dos.writeByte(code.tryCatchBlocks.size());
@@ -184,8 +180,9 @@ public abstract class EG extends Context {
 		return baos.toByteArray();
 	}
 
-	public void run() throws UncaughtExceptionException {
-		RTContext context = getRTContext();
+	public void run(Code code) throws UncaughtExceptionException,
+			ParseException {
+		RTContext context = getRTContext(code);
 		new VM(context) {
 			@Override
 			public void setExtReg(int addr, int reg, int value) {
@@ -198,18 +195,18 @@ public abstract class EG extends Context {
 		}.loop();
 	}
 
-	public RTContext getRTContext() {
-		Code code = new Code(this);
-		funcs.dump(code);
-		
-		RTContext.Func rtFuncs[] = new RTContext.Func[funcs.size()];
-		for (Func f : funcs.values())
-			rtFuncs[f.n] = new RTContext.Func(f.off);
+	public RTContext getRTContext(Code code) throws ParseException {
+
+		short rtFuncs[] = funcs.getVTable();
 
 		RTContext.Type[] rtTypes = new RTContext.Type[structs.size()];
-		for (Struct str : structs.values())
-			rtTypes[str.idx] = new RTContext.Type(str.fields.size(),
-					str.getMask());
+		for (Struct str : structs.values()) {
+			if (str.isAbstract)
+				rtTypes[str.idx] = null;
+			else
+				rtTypes[str.idx] = new RTContext.Type(str.fields.size(),
+						str.getMask(), str.funcs.getVTable());
+		}
 
 		RTContext context = new RTContext(code.code, rtFuncs,
 				code.tryCatchBlocks.toArray(new TryCatchBlock[0]),

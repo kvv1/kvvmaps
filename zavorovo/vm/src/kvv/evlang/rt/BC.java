@@ -15,7 +15,7 @@ public enum BC {
 	ENTER(0, 1), //
 	PRINT(-1, 0), 
 	SETEXTREG(-1, 2), GETEXTREG(1, 2),
-	THROW(-1, 0), NEW(1, 1);
+	THROW(-1, 0), NEW(1, 1), VCALL(0, 1), TRAP(0,0), STOPTRIGGER(0,0), SETTRIGGER(0,0);
 
 	public int stackBalance;
 	public int args;

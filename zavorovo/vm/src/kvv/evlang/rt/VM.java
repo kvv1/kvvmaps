@@ -1,6 +1,5 @@
 package kvv.evlang.rt;
 
-
 public abstract class VM {
 	public abstract void setExtReg(int addr, int reg, int value);
 
@@ -27,8 +26,8 @@ public abstract class VM {
 			}
 		};
 
-		interpreter.interpret(cont.funcs[0].code, null);
-		interpreter.interpret(cont.funcs[1].code, null);
+		interpreter.interpret(cont.funcs[0]);
+		interpreter.interpret(cont.funcs[1]);
 	}
 
 	public void loop() {
@@ -42,20 +41,35 @@ public abstract class VM {
 	}
 
 	private boolean step(short obj, int step) {
-		int cnt = cont.heap.get(obj, RTContext.TIMER_CNT_IDX);
+		short cnt = cont.heap.get(obj, RTContext.TIMER_CNT_IDX);
 		cnt -= step;
 		if (cnt <= 0)
 			cnt = 0;
 		cont.heap.set(obj, RTContext.TIMER_CNT_IDX, cnt);
 		if (cnt == 0) {
-			short func = cont.heap.get(obj, RTContext.TIMER_FUNC_IDX);
+			short func = (short) cont.types[cont.heap.getTypeIdx(obj)].vtable[RTContext.TIMER_RUN_FUNC_IDX];
 			try {
-				interpreter.interpret(cont.funcs[func].code, obj);
+				interpreter.interpret(func, obj);
 			} catch (UncaughtExceptionException e) {
 				e.printStackTrace();
 			}
 		}
 		return cnt == 0;
+	}
+
+	private void triggerStep(short obj) {
+		short oldVal = cont.heap.get(obj, RTContext.TRIGGER_VAL_IDX);
+		short func = (short) cont.types[cont.heap.getTypeIdx(obj)].vtable[RTContext.TRIGGER_VAL_FUNC_IDX];
+		try {
+			short newVal = interpreter.eval(func, obj);
+			if (newVal != oldVal) {
+				cont.heap.set(obj, RTContext.TRIGGER_VAL_IDX, newVal);
+				func = (short) cont.types[cont.heap.getTypeIdx(obj)].vtable[RTContext.TRIGGER_HANDLE_FUNC_IDX];
+				interpreter.interpret(func, obj, oldVal, newVal);
+			}
+		} catch (UncaughtExceptionException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void timersStep(int step) {
@@ -70,6 +84,16 @@ public abstract class VM {
 				}
 			}
 		}
+
+		sz = cont.triggers.size();
+		for (int i = 0; i < sz; i++) {
+			short obj = cont.triggers.getAt(i);
+			if (obj != 0) {
+				triggerStep(obj);
+				gc = true;
+			}
+		}
+
 		cont.timers.compact();
 		if (gc)
 			cont.gc();

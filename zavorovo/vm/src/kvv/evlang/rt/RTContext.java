@@ -2,36 +2,34 @@ package kvv.evlang.rt;
 
 import java.util.List;
 
-import kvv.evlang.rt.HeapImpl.Array;
+import kvv.evlang.rt.heap.Array;
+import kvv.evlang.rt.heap.Heap;
+import kvv.evlang.rt.heap.HeapImpl;
+
 
 public class RTContext {
-	public static class Func {
-		short code;
-
-		public Func(short code) {
-			this.code = code;
-		}
-	}
-
 	public static class Type {
-		int sz;
-		int mask;
+		public final int sz;
+		public final int mask;
+		public final short[] vtable;
 
-		public Type(int sz, int mask) {
+		public Type(int sz, int mask, short[] vtable) {
 			this.sz = sz;
 			this.mask = mask;
+			this.vtable = vtable;
 		}
 	}
 
 	public final List<Byte> codeArr;
 	public final short[] regs = new short[256];
-	public final Func[] funcs;
+	public final short[] funcs;
 	public final TryCatchBlock[] tryCatchBlocks;
 	public final Short[] constPool;
 	public final Short[] regPool;
 	public final Byte[] refs;
 	public final Type[] types;
 	public final Array timers;
+	public final Array triggers;
 
 	public final Heap heap;
 
@@ -43,7 +41,7 @@ public class RTContext {
 		return null;
 	}
 
-	public RTContext(List<Byte> codeArr, Func[] funcs,
+	public RTContext(List<Byte> codeArr, short[] funcs,
 			TryCatchBlock[] tryCatchBlocks, Short[] constPool, Short[] regPool,
 			Byte[] refs, Type[] types) {
 		this.codeArr = codeArr;
@@ -54,18 +52,24 @@ public class RTContext {
 		this.refs = refs;
 		this.types = types;
 		heap = new HeapImpl(64, types);
-		timers = new Array(heap);
+		timers = new Array(heap, true);
+		triggers = new Array(heap, true);
 	}
 
 	public void gc() {
 		for (byte b : refs)
 			heap.mark(regs[b & 0xFF]);
 		heap.mark(timers.a);
+		heap.mark(triggers.a);
 		heap.sweep();
 	}
 
-	final static int TIMER_FUNC_IDX = 0;
-	final static int TIMER_CNT_IDX = 1;
+	public static final int TIMER_CNT_IDX = 0;
+	public static final int TIMER_RUN_FUNC_IDX = 0;
+
+	public static final int TRIGGER_VAL_IDX = 0;
+	public static final int TRIGGER_VAL_FUNC_IDX = 0;
+	public static final int TRIGGER_HANDLE_FUNC_IDX = 1;
 
 	public void setTimer(short obj, short ms) {
 		timers.clear(obj);
@@ -76,5 +80,16 @@ public class RTContext {
 	public void stopTimer(short a) {
 		timers.clear(a);
 		heap.set(a, TIMER_CNT_IDX, 0);
+	}
+
+	public void setTrigger(short obj, short initVal) {
+		triggers.clear(obj);
+		triggers.add(obj);
+		heap.set(obj, TRIGGER_VAL_IDX, initVal);
+	}
+
+	public void stopTrigger(short obj) {
+		triggers.clear(obj);
+		heap.set(obj, TRIGGER_VAL_IDX, 0);
 	}
 }

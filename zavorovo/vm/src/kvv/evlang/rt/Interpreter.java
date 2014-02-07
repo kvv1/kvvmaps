@@ -47,22 +47,26 @@ public abstract class Interpreter {
 	private short ip;
 	private short fp;
 
-	public void interpret(short off, Short param)
+	public void interpret(short off, Short... params)
 			throws UncaughtExceptionException {
 		if (!stack.isEmpty() || ip != 0 || fp != 0)
 			throw new IllegalStateException();
-		if (param != null)
-			stack.push(param);
+		if (params != null)
+			for (Short param : params)
+				stack.push(param);
 		_interpret(off);
 		if (!stack.isEmpty() || ip != 0 || fp != 0)
 			throw new IllegalStateException();
 	}
 
-	public int eval(short off) throws UncaughtExceptionException {
+	public short eval(short off, Short... params) throws UncaughtExceptionException {
 		if (!stack.isEmpty() || ip != 0 || fp != 0)
 			throw new IllegalStateException();
+		if (params != null)
+			for (Short param : params)
+				stack.push(param);
 		_interpret(off);
-		int res = stack.pop();
+		short res = stack.pop();
 		if (!stack.isEmpty() || ip != 0 || fp != 0)
 			throw new IllegalStateException();
 		return res;
@@ -145,7 +149,7 @@ public abstract class Interpreter {
 						context.heap.set(a, param, n);
 					break;
 				case BC.CALL_SHORT:
-					short addr = context.funcs[param].code;
+					short addr = context.funcs[param];
 					call(addr);
 					break;
 				case BC.RETI_SHORT:
@@ -182,10 +186,26 @@ public abstract class Interpreter {
 
 			BC bc = BC.values()[c];
 			switch (bc) {
-			case CALL:
-				short addr = context.funcs[code.get(ip++)].code;
+			case CALL: {
+				short addr = context.funcs[code.get(ip++)];
 				call(addr);
 				break;
+			}
+
+			case VCALL: {
+				byte arg = code.get(ip++);
+				int argCnt = (arg & 0xFF) >>> 4;
+				int n = arg & 0x0f;
+				int obj = stack.getAt(stack.sp + argCnt - 1);
+				if (obj == 0) {
+					throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
+				} else {
+					int type = context.heap.getTypeIdx(obj);
+					short addr = context.types[type].vtable[n];
+					call(addr);
+				}
+				break;
+			}
 
 			case THROW:
 				short res = stack.pop();
@@ -284,16 +304,18 @@ public abstract class Interpreter {
 				int reg1 = code.get(ip++) & 0xFF;
 				setreg(reg1);
 				break;
-			case GETEXTREG:
-				addr = (short) (code.get(ip++) & 0xFF);
+			case GETEXTREG: {
+				short addr = (short) (code.get(ip++) & 0xFF);
 				reg = code.get(ip++) & 0xFF;
 				stack.push(getExtReg(addr, reg));
 				break;
-			case SETEXTREG:
-				addr = (short) (code.get(ip++) & 0xFF);
+			}
+			case SETEXTREG: {
+				short addr = (short) (code.get(ip++) & 0xFF);
 				reg = code.get(ip++) & 0xFF;
 				setExtReg(addr, reg, stack.pop());
 				break;
+			}
 			case BRANCH:
 				off = code.get(ip++);
 				ip += off;
@@ -328,6 +350,21 @@ public abstract class Interpreter {
 				else
 					context.stopTimer(obj);
 				break;
+			case SETTRIGGER:
+				short initVal = stack.pop();
+				obj = stack.pop();
+				if (obj == 0)
+					throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
+				else
+					context.setTrigger(obj, initVal);
+				break;
+			case STOPTRIGGER:
+				obj = stack.pop();
+				if (obj == 0)
+					throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
+				else
+					context.stopTrigger(obj);
+				break;
 			case INC:
 				reg = code.get(ip++) & 0xFF;
 				context.regs[reg]++;
@@ -346,6 +383,8 @@ public abstract class Interpreter {
 					stack.push(n1 * n2 / n3);
 				break;
 			}
+			case TRAP:
+				break;
 			default:
 				throw new RuntimeException("unknown bytecode " + c);
 			}

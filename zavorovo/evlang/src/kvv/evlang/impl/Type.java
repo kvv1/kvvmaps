@@ -34,7 +34,7 @@ public class Type {
 	}
 
 	public void checkInt(Context context) throws ParseException {
-		if(!equals(INT))
+		if (!equals(INT))
 			context.throwExc("should be int type");
 	}
 
@@ -43,18 +43,57 @@ public class Type {
 			context.throwExc("'void' type not allowed");
 	}
 
-	public static void checkComparable(Context context, Type type1, Type type2) throws ParseException {
-		if(type1.equals(VOID) || type2.equals(VOID))
-			context.throwExc("incompatible types: " + type1.name + "," + type2.name);
-		if(type1.equals(type2))
+	public static void checkComparable(Context context, Type type1, Type type2)
+			throws ParseException {
+		if (type1.equals(VOID) || type2.equals(VOID))
+			context.throwExc("incompatible types: " + type1.name + ","
+					+ type2.name);
+
+		if (type1.equals(INT) && type2.equals(INT))
 			return;
-		if(type1.equals(INT) ^ type2.equals(INT))
-			context.throwExc("incompatible types: " + type1.name + "," + type2.name);
-		if(!type1.equals(NULL) && !type2.equals(NULL))
-			context.throwExc("incompatible types: " + type1.name + "," + type2.name);
+
+		if (type1.equals(INT) || type2.equals(INT))
+			context.throwExc("incompatible types: " + type1.name + ","
+					+ type2.name);
+
+		if (type1.equals(NULL) || type2.equals(NULL))
+			return;
+
+		if (type1.isSubclassOf(context, type2)
+				|| type2.isSubclassOf(context, type1))
+			return;
+
+		context.throwExc("incompatible types: " + type1.name + "," + type2.name);
 	}
 
-	public void checkAssignableTo(Context context, Type type2) throws ParseException {
-		checkComparable(context, this, type2);
+	public void checkAssignableTo(Context context, Type type2)
+			throws ParseException {
+
+		if (equals(VOID))
+			context.throwExc("cannot assign " + name + " to " + type2.name);
+
+		if (equals(INT) && type2.equals(INT))
+			return;
+
+		if (equals(INT) || type2.equals(INT))
+			context.throwExc("cannot assign " + name + " to " + type2.name);
+
+		if (equals(NULL))
+			return;
+
+		if (isSubclassOf(context, type2))
+			return;
+
+		context.throwExc("cannot assign " + name + " to " + type2.name);
+	}
+
+	private boolean isSubclassOf(Context context, Type type)
+			throws ParseException {
+		if (equals(type))
+			return true;
+		Struct s = context.structs.get(name);
+		if (s.superClass == null)
+			return false;
+		return s.superClass.type.isSubclassOf(context, type);
 	}
 }
