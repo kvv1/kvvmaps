@@ -40,21 +40,32 @@ public class Expr {
 
 	public Expr(Context context, Type parentType, String funcName,
 			List<Expr> argList) throws ParseException {
+		Funcs funcs = context.funcs;
 		if (parentType != null) {
-			if (parentType.isRef()
-					&& context.structs.get(parentType.name).isTimer
-					&& (funcName.equals("start") || funcName.equals("stop")))
-				funcName = "timer" + ":" + funcName;
-			else
-				funcName = parentType.name + ":" + funcName;
+			funcs = context.structs.get(parentType.name).funcs;
+			// if (parentType.isRef()
+			// && context.structs.get(parentType.name).isTimer
+			// && (funcName.equals("start") || funcName.equals("stop")))
+			// funcName = "timer" + ":" + funcName;
+			// else
+			// funcName = parentType.name + ":" + funcName;
 		}
 		code = new Code(context);
-		Func func = context.funcs.getFunc(funcName, argList);
+
+		List<Type> argTypes = new ArrayList<Type>();
+		for (Expr a : argList)
+			argTypes.add(a.type);
+
+		Func func = funcs.getFunc(funcName, argTypes);
 		type = func.retType;
-		
+
 		for (Expr c : argList)
 			code.addAll(c.getCode());
-		func.compileCall(code);
+
+		if (parentType != null)
+			code.addAll(func.getVCallCode());
+		else
+			code.addAll(func.getCallCode());
 	}
 
 	public Expr(Context context, String name) throws ParseException {
@@ -82,7 +93,7 @@ public class Expr {
 								extRegisterDescr.reg);
 					} else {
 						type = Type.INT;
-						context.throwExc(name + " - ?");
+						context.throwWatIsIt(name);
 					}
 				}
 			}
@@ -240,18 +251,6 @@ public class Expr {
 	public static Expr newObj(Context context, String typeName,
 			List<Expr> argList) throws ParseException {
 		Struct str = context.structs.get(typeName);
-		if (str == null)
-			context.throwExc(typeName + " -?");
-
-		if (str.isTimer) {
-			List<Expr> argList1 = new ArrayList<Expr>();
-
-			argList1.add(new Expr(context, str.timerFunc));
-			argList1.add(new Expr(context, 0));
-
-			argList1.addAll(argList);
-			argList = argList1;
-		}
 
 		if (str.fields.size() != argList.size())
 			context.throwExc(typeName + " argument number error");
@@ -265,6 +264,9 @@ public class Expr {
 			res.code.addAll(c.getCode());
 		res.code.add(BC.NEW);
 		res.code.add(str.idx);
+
+		str.isAbstract = false;
+
 		return res;
 	}
 

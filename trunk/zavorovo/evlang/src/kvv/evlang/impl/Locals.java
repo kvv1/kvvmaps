@@ -20,6 +20,19 @@ public class Locals {
 
 	private int max;
 
+	public Locals() {
+	}
+
+	public Locals(Locals locals2, Type thisType) {
+		locals.addAll(locals2.locals);
+		Local local0 = locals.get(0);
+		if (!local0.nat.name.equals("this"))
+			throw new IllegalStateException();
+		locals.set(0, new Local(0, new NameAndType("this", thisType)));
+		argCnt = locals2.argCnt;
+		max = locals2.max;
+	}
+
 	public int getMax() {
 		return max;
 	}
@@ -30,6 +43,17 @@ public class Locals {
 		locals.add(res);
 		max = Math.max(max, locals.size());
 		return res;
+	}
+
+	public Locals add(String name, Type type) {
+		add(new NameAndType(name, type));
+		return this;
+	}
+
+	public void addThis(Type type) {
+		Local res = new Local(locals.size(), new NameAndType("this", type));
+		locals.add(0, res);
+		max = Math.max(max, locals.size());
 	}
 
 	public void endOfArgs() {

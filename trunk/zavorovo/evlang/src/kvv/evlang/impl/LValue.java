@@ -9,10 +9,17 @@ public class LValue {
 	public final Expr expr;
 	public final String field;
 
+	@Override
+	public String toString() {
+		return "LValue expr=" + (expr == null ? "null" : expr.type.name) + " field=" + field;
+	}
+	
 	public LValue(Context context, Expr expr) {
 		this.context = context;
 		this.expr = expr;
 		this.field = null;
+		
+		//System.out.println(this);
 	}
 
 	public Expr getExpr() throws ParseException {
@@ -26,6 +33,9 @@ public class LValue {
 
 	public LValue(Context context, LValue parent, String field,
 			List<Expr> argList) throws ParseException {
+		
+		//System.out.println("LValue " + parent + " " + field);
+		
 		this.context = context;
 
 		if (parent == null) {
@@ -48,6 +58,7 @@ public class LValue {
 			}
 		}
 
+		//System.out.println(this);
 	}
 
 }

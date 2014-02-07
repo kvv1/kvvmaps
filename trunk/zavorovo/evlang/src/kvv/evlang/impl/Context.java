@@ -39,19 +39,39 @@ public abstract class Context {
 	public Pool<Short> regPool = new Pool<Short>(16);
 
 	public Context() {
+		try {
+			declareStruct("Timer");
+			createStruct("Timer", null);
+			closeStruct("Timer");
+
+			declareStruct("Trigger");
+			createStruct("Trigger", null);
+			closeStruct("Trigger");
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 	}
 
 	protected void checkName(String name) throws ParseException {
 		if (names.contains(name))
-			throwExc("name '" + name + "' already defined");
+			throwAlreadyDefined(name);
 		names.add(name);
 	}
 
 	public void check() throws ParseException {
 		for (Func f : funcs.values()) {
-			if (f.code == null)
+			if (!f.isDefined())
 				throw new ParseException("function '" + f.name
 						+ "' not defined");
+		}
+		for (Struct str : structs.values()) {
+			if (!str.isAbstract) {
+				for (Func f : str.funcs.values()) {
+					if (!f.isDefined())
+						throw new ParseException("function '" + str.type.name
+								+ ":" + f.name + "' not defined");
+				}
+			}
 		}
 	}
 
@@ -71,4 +91,66 @@ public abstract class Context {
 		}
 	}
 
+	public void throwWatIsIt(String txt) throws ParseException {
+		throwExc(txt + " - ?");
+	}
+
+	protected Code gen() {
+		Code code = new Code(this);
+		funcs.dump(code);
+
+		for (Struct str : structs.values())
+			if (str.isCreated())
+				str.funcs.dump(code);
+
+		return code;
+	}
+
+	public void throwAlreadyDefined(String string) throws ParseException {
+		throwExc(string + " already defined");
+	}
+
+	public void throwArgNumErr(String string) throws ParseException {
+		throwExc(string + " argument number error");
+	}
+
+	public void throwShouldBeDefined(String string) throws ParseException {
+		throwExc(string + " should be defined");
+	}
+
+	// /////////////////////////////////
+
+	public void declareStruct(String name) throws ParseException {
+		structs.createStruct(name);
+	}
+
+	public void createStruct(String name, String superName)
+			throws ParseException {
+		structs.create(name, superName);
+	}
+
+	public void closeStruct(String name) throws ParseException {
+		structs.close(name);
+
+	}
+
+	public void declareFunc(Type type, Type classType, String name,
+			Locals argList) throws ParseException {
+		if (classType == null)
+			funcs.getCreateFunc(type, name, argList, false);
+		else {
+			Struct str = structs.get(classType.name);
+			if (!str.isCreated())
+				throwShouldBeDefined(classType.name);
+			str.funcs.getCreateFunc(type, name, argList, str.closed);
+		}
+	}
+
+	public void createField(String structName, Type type, String fieldName)
+			throws ParseException {
+		Struct str = structs.get(structName);
+		if (!str.isCreated())
+			throwShouldBeDefined(structName);
+		str.addField(type, fieldName);
+	}
 }

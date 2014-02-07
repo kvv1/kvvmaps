@@ -30,7 +30,7 @@ public class Code extends CodeBase {
 	public static Code dec(Context context, String name) throws ParseException {
 		RegisterDescr descr = context.registers.get(name);
 		if (descr == null)
-			context.throwExc(name + " - ?");
+			context.throwWatIsIt(name);
 		context.checkROReg(descr);
 		Code res = new Code(context);
 		res.add(BC.DEC);
@@ -41,7 +41,7 @@ public class Code extends CodeBase {
 	public static Code inc(Context context, String name) throws ParseException {
 		RegisterDescr descr = context.registers.get(name);
 		if (descr == null)
-			context.throwExc(name + " - ?");
+			context.throwWatIsIt(name);
 		context.checkROReg(descr);
 		Code res = new Code(context);
 		res.add(BC.INC);
@@ -128,7 +128,7 @@ public class Code extends CodeBase {
 					res.compileSetregExt(extRegisterDescr.addr,
 							extRegisterDescr.reg);
 				} else {
-					context.throwExc(name + " - ?");
+					context.throwWatIsIt(name);
 				}
 			}
 		}
@@ -214,9 +214,9 @@ public class Code extends CodeBase {
 			res.addAll(ret(context, new Expr(context, (short) 0)));
 		res.adjustLocals();
 
-		if(context.currentFunc.code != null)
-			context.throwExc("function " + context.currentFunc.name + " already defined");
-		
+		if (context.currentFunc.code != null)
+			context.throwAlreadyDefined(context.currentFunc.name);
+
 		context.currentFunc.code = res;
 		System.out.println("proc " + context.currentFunc.name + " "
 				+ res.size());
@@ -229,6 +229,12 @@ public class Code extends CodeBase {
 
 	public void resolveBranch(int a) {
 		code.set(a - 1, (byte) (code.size() - a));
+	}
+
+	public static Code trap(Context context) {
+		Code res = new Code(context);
+		res.add(BC.TRAP);
+		return res;
 	}
 
 }

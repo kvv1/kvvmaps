@@ -119,6 +119,11 @@ public class CodeBase {
 		}
 	}
 
+	public void compileVCall(int argCnt, int n) {
+		add(BC.VCALL);
+		add((argCnt << 4) + n);
+	}
+
 	protected void compileRetI(int n) throws ParseException {
 		if (n >= 16)
 			context.throwExc("too mamy locals");
@@ -131,8 +136,9 @@ public class CodeBase {
 		add(BC.RET_SHORT | n);
 	}
 
-	public void compileEnter(int n) throws ParseException {
-		add(BC.ENTER_SHORT | n);
+	public void compileEnter(int extraLocals) throws ParseException {
+		if (extraLocals > 0)
+			add(BC.ENTER_SHORT | extraLocals);
 	}
 
 	void compileGetfield(int n) throws ParseException {

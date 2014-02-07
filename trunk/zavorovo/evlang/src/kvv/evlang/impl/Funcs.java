@@ -10,16 +10,14 @@ import kvv.evlang.rt.BC;
 
 public class Funcs {
 	public Map<String, Func> funcs = new LinkedHashMap<String, Func>();
-	private Map<Integer, Func> funcs1 = new LinkedHashMap<Integer, Func>();
-
 	private final Context context;
 	public Func initFunc;
 
-	public Funcs(Context context, boolean root) {
+	public Funcs(final Context context, boolean root) {
 		this.context = context;
 
-		if (root) {
-			try {
+		try {
+			if (root) {
 				initFunc = new Func(context, "<init>", new Locals(), Type.VOID);
 				initFunc.code = new Code(context);
 				put(initFunc);
@@ -27,34 +25,9 @@ public class Funcs {
 				Func mainFunc = new Func(context, "main", new Locals(),
 						Type.VOID);
 				put(mainFunc);
-
-				Locals locals = new Locals();
-				locals.add(new NameAndType("this", Type.NULL));
-				locals.add(new NameAndType("ms", Type.INT));
-				Func startFunc = new Func(context, "timer:start", locals,
-						Type.VOID) {
-					@Override
-					public void compileCall(Code code) {
-						code.add(BC.SETTIMER_MS);
-					}
-				};
-				startFunc.code = new Code(context);
-				put(startFunc);
-
-				locals = new Locals();
-				locals.add(new NameAndType("this", Type.NULL));
-				Func stopFunc = new Func(context, "timer:stop", locals,
-						Type.VOID) {
-					@Override
-					public void compileCall(Code code) {
-						code.add(BC.STOPTIMER);
-					}
-				};
-				stopFunc.code = new Code(context);
-				put(stopFunc);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
 			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -62,8 +35,9 @@ public class Funcs {
 		return funcs.get(name);
 	}
 
-	public void put(Func func) {
-		add(func, func.name, funcs.size());
+	private void put(Func func) {
+		func.n = funcs.size();
+		funcs.put(func.name, func);
 	}
 
 	public int size() {
@@ -74,44 +48,39 @@ public class Funcs {
 		return funcs.values();
 	}
 
-	public Func get(int idx) {
-		return funcs1.get(idx);
-	}
-
-	private void add(Func func, String name, int n) {
-		func.n = n;
-		funcs1.put(n, func);
-		funcs.put(name, func);
-	}
-
-	public Func getFunc(String name, List<Expr> argList) throws ParseException {
+	public Func getFunc(String name, List<Type> argTypes) throws ParseException {
 		Func func = get(name);
 		if (func == null)
-			context.throwExc(name + " - ?");
+			context.throwWatIsIt(name);
 
-		if (func.locals.getArgCnt() != argList.size())
-			context.throwExc(name + " argument number error");
+		if (func.locals.getArgCnt() != argTypes.size())
+			context.throwArgNumErr(name);
 
 		for (int i = 0; i < func.locals.getArgCnt(); i++)
-			argList.get(i).type.checkAssignableTo(context,
+			argTypes.get(i).checkAssignableTo(context,
 					func.locals.get(i).nat.type);
 
 		return func;
 	}
 
-	public Func getCreateFunc(Type retType, String name, Locals locals)
-			throws ParseException {
+	public Func getCreateFunc(Type retType, String name, Locals locals,
+			boolean shouldExist) throws ParseException {
 		locals.endOfArgs();
 		Func func = get(name);
 		if (func == null) {
+			if (shouldExist)
+				context.throwWatIsIt(name);
+
 			func = new Func(context, name, locals, retType);
 			put(func);
 			context.currentFunc = func;
 			return func;
-		} else if (!func.retType.equals(retType)) {
-			context.throwExc(name + " - ?");
-		} else if (func.locals.getArgCnt() != locals.getArgCnt())
-			context.throwExc(name + " argument number error");
+		}
+
+		if (!func.retType.equals(retType))
+			context.throwWatIsIt(name);
+		else if (func.locals.getArgCnt() != locals.getArgCnt())
+			context.throwArgNumErr(name);
 
 		for (int i = 0; i < func.locals.getArgCnt(); i++)
 			locals.get(i).nat.type.checkAssignableTo(context,
@@ -126,4 +95,119 @@ public class Funcs {
 			func.dump(code);
 	}
 
+	public void addAll(Funcs funcs2, Type thisType) {
+		for (Func f : funcs2.values()) {
+			Func f1 = new Func(f, thisType);
+			funcs.put(f1.name, f1);
+		}
+	}
+
+	public short[] getVTable() {
+		short[] methods = new short[funcs.size()];
+		for (Func f : funcs.values())
+			methods[f.n] = f.getOff();
+		return methods;
+	}
+
+	public void createTimerFuncs() throws ParseException {
+		Locals locals;
+		Func func;
+
+		locals = new Locals();
+		locals.add(new NameAndType("this", Type.NULL));
+		func = new Func(context, "run", locals, Type.VOID);
+		put(func);
+
+		locals = new Locals();
+		locals.add(new NameAndType("this", Type.NULL));
+		locals.add(new NameAndType("ms", Type.INT));
+		func = new Func(context, "start", locals, Type.VOID) {
+			@Override
+			public Code getVCallCode() {
+				Code code = new Code(context);
+				code.add(BC.SETTIMER_MS);
+				return code;
+			}
+
+			@Override
+			public boolean isDefined() {
+				return true;
+			}
+		};
+		func.code = new Code(context);
+		put(func);
+
+		locals = new Locals();
+		locals.add(new NameAndType("this", Type.NULL));
+		func = new Func(context, "stop", locals, Type.VOID) {
+			@Override
+			public Code getVCallCode() {
+				Code code = new Code(context);
+				code.add(BC.STOPTIMER);
+				return code;
+			}
+
+			@Override
+			public boolean isDefined() {
+				return true;
+			}
+		};
+		func.code = new Code(context);
+		put(func);
+	}
+
+	public void createTriggerFuncs() throws ParseException {
+		Locals locals;
+		Func func;
+
+		locals = new Locals();
+		locals.add(new NameAndType("this", Type.NULL));
+		func = new Func(context, "value", locals, Type.INT);
+		put(func);
+		
+		locals = new Locals();
+		locals.add(new NameAndType("this", Type.NULL));
+		locals.add(new NameAndType("oldValue", Type.INT));
+		locals.add(new NameAndType("newValue", Type.INT));
+		func = new Func(context, "handle", locals, Type.VOID);
+		put(func);
+
+		locals = new Locals();
+		locals.add(new NameAndType("this", Type.NULL));
+		locals.add(new NameAndType("initValue", Type.INT));
+		func = new Func(context, "start", locals, Type.VOID) {
+			@Override
+			public Code getVCallCode() {
+				Code code = new Code(context);
+				code.add(BC.SETTRIGGER);
+				return code;
+			}
+
+			@Override
+			public boolean isDefined() {
+				return true;
+			}
+		};
+		func.code = new Code(context);
+		put(func);
+
+		locals = new Locals();
+		locals.add(new NameAndType("this", Type.NULL));
+		func = new Func(context, "stop", locals, Type.VOID) {
+			@Override
+			public Code getVCallCode() {
+				Code code = new Code(context);
+				code.add(BC.STOPTRIGGER);
+				return code;
+			}
+
+			@Override
+			public boolean isDefined() {
+				return true;
+			}
+		};
+		func.code = new Code(context);
+		put(func);
+
+	}
 }

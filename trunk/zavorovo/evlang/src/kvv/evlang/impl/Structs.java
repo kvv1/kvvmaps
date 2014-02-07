@@ -7,9 +7,6 @@ import java.util.Map;
 import kvv.evlang.ParseException;
 
 public class Structs {
-	private static final String TIMER_FUNC_NAME = "__timer_func__";
-	private static final String TIMER_COUNTER_NAME = "__timer_counter__";
-
 	public Structs(Context context) {
 		this.context = context;
 	}
@@ -17,35 +14,50 @@ public class Structs {
 	private final Context context;
 	private Map<String, Struct> structs = new LinkedHashMap<String, Struct>();
 
-	public Struct createStruct(String name, boolean isTimer)
+	public Struct createStruct(String name)
 			throws ParseException {
-		if(structs.containsKey(name))
-			context.throwExc(name + " already defined");
-		Struct str = new Struct(context, structs.size(), new Type(name),
-				isTimer);
-		structs.put(name, str);
+		Struct str = structs.get(name);
+		if(str == null) {
+			str = new Struct(context, structs.size(), new Type(
+					name));
+			structs.put(name, str);
+		} else if(str.fields != null) {
+			context.throwAlreadyDefined(name);
+		}
+		
 		return str;
 	}
 
-	public Struct createXTimer(String name) throws ParseException {
-		Struct struct = createStruct(name, true);
-		struct.addField(Type.INT, TIMER_FUNC_NAME);
-		struct.addField(Type.INT, TIMER_COUNTER_NAME);
-		return struct;
+	public void create(String name, String superName) throws ParseException {
+		Struct str = structs.get(name);
+		Struct superStruct = null;
+		if (superName != null) {
+			superStruct = get(superName);
+			if (superStruct == null)
+				context.throwWatIsIt(superName);
+		}
+		str.create(superStruct);
 	}
-
+	
 	public int getFieldIndex(Type type, String fieldName) throws ParseException {
 		if (!type.isRef())
 			context.throwExc("should be struct type");
 		Struct struct = structs.get(type.name);
 		Integer idx = struct.getField(fieldName);
 		if (idx == null)
-			context.throwExc(fieldName + " - ?");
+			context.throwWatIsIt(fieldName);
 		return idx;
 	}
 
-	public Struct get(String name) {
-		return structs.get(name);
+//	public Struct _get(String name) {
+//		return structs.get(name);
+//	}
+
+	public Struct get(String name) throws ParseException {
+		Struct res = structs.get(name);
+		if (res == null)
+			context.throwWatIsIt(name);
+		return res;
 	}
 
 	public Collection<Struct> values() {
@@ -54,6 +66,10 @@ public class Structs {
 
 	public int size() {
 		return structs.size();
+	}
+
+	public void close(String name) throws ParseException {
+		get(name).closed = true;
 	}
 
 }

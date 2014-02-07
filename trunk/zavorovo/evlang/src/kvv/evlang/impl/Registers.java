@@ -104,7 +104,7 @@ public class Registers {
 		context.checkName(regName);
 		RegisterDescr registerDescr = registers.get(regNum);
 		if (registerDescr == null)
-			context.throwExc(regNum + " - ?");
+			context.throwWatIsIt(regNum);
 		registers.put(regName, registerDescr);
 	}
 
@@ -155,7 +155,7 @@ public class Registers {
 
 		RegisterDescr registerDescr = registers.get(regName);
 		if (registerDescr == null)
-			context.throwExc(regName + " - ?");
+			context.throwWatIsIt(regName);
 
 		if (uiType == RegType.textRW && !registerDescr.editable)
 			uiType = RegType.textRO;

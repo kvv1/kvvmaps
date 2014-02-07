@@ -6,18 +6,49 @@ import java.util.List;
 import kvv.evlang.ParseException;
 
 public class Struct {
+
 	public final int idx;
 	public final Type type;
-	public final boolean isTimer;
-	public int timerFunc;
-	public final List<NameAndType> fields = new ArrayList<NameAndType>();
+	public List<NameAndType> fields;
 	private final Context context;
 
-	public Struct(Context context, int idx, Type type, boolean isTimer) {
+	public Funcs funcs;
+
+	public Struct superClass;
+	public boolean isAbstract = true;
+	public boolean closed;
+
+	public Struct(Context context, int idx, Type type) {
 		this.context = context;
 		this.idx = idx;
 		this.type = type;
-		this.isTimer = isTimer;
+	}
+
+	public void create(Struct superClass) throws ParseException {
+		this.superClass = superClass;
+		fields = new ArrayList<NameAndType>();
+		funcs = new Funcs(context, false);
+
+		if (type.name.equals("Timer")) {
+			addField(Type.INT, "__cnt__");
+			funcs.createTimerFuncs();
+		}
+
+		if (type.name.equals("Trigger")) {
+			addField(Type.INT, "__val__");
+			funcs.createTriggerFuncs();
+		}
+
+		if (superClass != null) {
+			if (!superClass.closed)
+				context.throwShouldBeDefined(superClass.type.name);
+			fields.addAll(superClass.fields);
+			funcs.addAll(superClass.funcs, type);
+		}
+	}
+
+	public boolean isCreated() {
+		return fields != null;
 	}
 
 	public Integer getField(String name) {
@@ -30,7 +61,7 @@ public class Struct {
 	public void addField(Type fieldType, String fieldName)
 			throws ParseException {
 		if (getField(fieldName) != null)
-			context.throwExc(fieldName + " already defined");
+			context.throwAlreadyDefined(fieldName);
 		fields.add(new NameAndType(fieldName, fieldType));
 	}
 
@@ -44,4 +75,15 @@ public class Struct {
 		}
 		return mask;
 	}
+
+	public void print() {
+		System.out.println(idx + " " + type.name + " "
+				+ (isCreated() ? fields.size() : "NOT_CREATED"));
+		if (isCreated()) {
+			System.out.println("\tFunctions:");
+			for (Func func : funcs.funcs.values())
+				func.print();
+		}
+	}
+
 }
