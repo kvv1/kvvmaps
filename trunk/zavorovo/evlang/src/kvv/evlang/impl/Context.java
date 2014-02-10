@@ -65,7 +65,7 @@ public abstract class Context {
 						+ "' not defined");
 		}
 		for (Struct str : structs.values()) {
-			if (!str.isAbstract) {
+			if (!str.isAbstract()) {
 				for (Func f : str.funcs.values()) {
 					if (!f.isDefined())
 						throw new ParseException("function '" + str.type.name

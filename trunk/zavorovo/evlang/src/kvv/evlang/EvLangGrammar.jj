@@ -148,13 +148,25 @@ void varOrProc() :
 void struct() :{  String name;  String name1 = null;  String fieldName;  Type fieldType;}{  < STRUCT > name = id() [ ":" name1 = id() ]  {
     declareStruct(name);  }  (    "{"    {      createStruct(name, name1);    }    (      fieldType = type() fieldName = id()      (        proc(fieldType, fieldName, new Type(name))      | ";"        {          fieldType.checkNotVoid(this);          createField(name, fieldType, fieldName);        }      )    )*    "}"    {      closeStruct(name);    }  | ";"  )}
 
-Type type() :{  String name = null;}{  < VOID >  {    return Type.VOID;  }|   < INT >
+Type type() :{  Type type;  int cnt = 0;}{  type = typeBase()  (    "[" "]"    {      type.checkNotVoid(this);      cnt++;    }  )*  {    if (cnt == 0) return type;    else return new Type(type, cnt);  }}
+
+Type typeBase() :
+{  String name = null;
+}
+{
+  < VOID >
+  {
+    return Type.VOID;
+  }
+| < INT >
   {
     return Type.INT;
   }
-| 
-  name = id()  {    return new Type(name);  }}
-
+| name = id() 
+  {
+    return new Type(name);
+  }
+}
 
 void proc(Type type, String name, Type thisType) :{  Code bytes = null;  Locals locals = new Locals();}{  "(" [ argListDef(locals) ] ")"  {
     if(thisType != null)      	locals.addThis(thisType);
@@ -334,17 +346,17 @@ Code assign() :
     return Code.throw_(this, res);
   }
 |
-    LOOKAHEAD(2)
-	local = localDef(currentFunc.locals) "=" res = expr() ";"
+  LOOKAHEAD(3) local = localDef(currentFunc.locals) "=" res = expr() ";"
   {
     return Code.initLocal(this, local, res);
   }
 | lvalue = lvalue1()
   [
     "=" res = expr() 
-  ]   ";"
+  ]
+   ";"
   {
-    return Code.assign(this, lvalue, res);
+    return lvalue.assign(res);
   }
 }
 
@@ -499,7 +511,15 @@ Expr unary() :
 
 Expr element() :{  Expr res;  LValue lvalue;}{  res = simpleElement()  {    return res;  }| lvalue = lvalue1()  {    return lvalue.getExpr();  }}
 
-LValue lvalue1() :{  LValue res;  Expr expr;}{  (    res = field(null)  | expr = newExpr()    {      res = new LValue(this, expr);    }  )  (    "." res = field(res)  )*  {    return res;  }}
+LValue lvalue1() :{  LValue res;  Expr expr;}{  (    res = field(null)  | expr = newExpr()    {      res = new LValue(this, expr);    }  )  (    "." res = field(res)
+  | "[" res = index(res) "]"  )*  {    return res;  }}
+
+LValue index(LValue left) :
+{
+  Expr expr;}{
+  expr = expr()  {
+    return new LValue(this, left, expr);
+  }}
 
 LValue field(LValue left) :
 {
@@ -558,18 +578,9 @@ Expr muldiv():{  Expr res;
   }
 }
 
-Expr newExpr():{  String name;
-  List < Expr > argList = null;
-}{
-  < NEW > name = id() 
-  "("
-  {
-    argList = new ArrayList < Expr > ();
-  }
-  [ argList = argList() ] ")"
-  {
-    return Expr.newObj(this, name, argList);
-  }}
+Expr newExpr() :{  Type type;  int arrDepth = 0;  Expr arrSize = null;}{  < NEW > type = typeBase()  (    "[" arrSize = expr() "]"    {      arrDepth = 1;    }    (      LOOKAHEAD(2)      "[" "]"      {        arrDepth++;      }    )*    {
+      return Expr.newArr(this, type, arrSize, arrDepth);
+    }  | "("    {      List < Expr > argList = new ArrayList < Expr > ();    }    [ argList = argList() ] ")"    {      return Expr.newObj(this, type, argList);    }  )}
   
 
 String id() :

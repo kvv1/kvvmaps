@@ -10,13 +10,6 @@ struct S1 {
 	void f3();
 }
 
-struct Trig1 : Trigger {
-	int value() {
-	}
-	void handle(int oldValue, int newValue) {
-	}
-}
-
 struct S2 : S1 {
 	int x;
 	void f1() {
@@ -70,12 +63,12 @@ struct Tr : Trigger {
 	T t;
 	
 	int value() {
-	trap;
+		trap;
 		return this.t.s.a >= 20;
 	}
 	
 	void handle(int oldValue, int newValue) {
-	trap;
+		trap;
 		print 999;
 	}
 }

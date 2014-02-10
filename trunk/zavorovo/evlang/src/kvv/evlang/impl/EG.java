@@ -199,12 +199,10 @@ public abstract class EG extends Context {
 
 		short rtFuncs[] = funcs.getVTable();
 
-		RTContext.Type[] rtTypes = new RTContext.Type[structs.size()];
+		RTContext.Type[] rtTypes = new RTContext.Type[structs.nextIndex];
 		for (Struct str : structs.values()) {
-			if (str.isAbstract)
-				rtTypes[str.idx] = null;
-			else
-				rtTypes[str.idx] = new RTContext.Type(str.fields.size(),
+			if (!str.isAbstract())
+				rtTypes[str.index] = new RTContext.Type(str.fields.size(),
 						str.getMask(), str.funcs.getVTable());
 		}
 

@@ -12,10 +12,11 @@ public enum BC {
 	INC(0, 1), DEC(0, 1), //
 	CALL(0, 1), RESERVED(0, 0), //
 	MULDIV(-2, 0), //
-	ENTER(0, 1), //
 	PRINT(-1, 0), 
 	SETEXTREG(-1, 2), GETEXTREG(1, 2),
-	THROW(-1, 0), NEW(1, 1), VCALL(0, 1), TRAP(0,0), STOPTRIGGER(0,0), SETTRIGGER(0,0);
+	THROW(-1, 0), NEW(1, 1), VCALL(0, 1), TRAP(0,0), 
+	STOPTRIGGER(0,0), SETTRIGGER(0,0), 
+	NEWOBJARR(0,0), NEWINTARR(0,0), SETARRAY(0,0), GETARRAY(0,0), ARRAYLENGTH(0,0);
 
 	public int stackBalance;
 	public int args;
@@ -31,7 +32,8 @@ public enum BC {
 	public static final int RETI_SHORT = 0xC0;
 	public static final int LIT_SHORT = 0xD0;
 	public static final int ENTER_SHORT = 0xE0;
-	
+	public static final int NEW_SHORT = 0xF0;
+
 //	public static final int OR_BRANCH_SHORT = 0xE0;
 //	public static final int AND_BRANCH_SHORT = 0xF0;
 

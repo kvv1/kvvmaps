@@ -102,10 +102,26 @@ public class Expr {
 
 	public Expr(Context context, Expr expr, String field) throws ParseException {
 		code = new Code(context);
-		int idx = context.structs.getFieldIndex(expr.type, field);
-		type = context.structs.get(expr.type.name).fields.get(idx).type;
+		
+		if(expr.type.arrayLevel > 0 && field.equals("length")) {
+			type = Type.INT;
+			code.addAll(expr.getCode());
+			code.compileArrayLength();
+		} else {
+			int idx = context.structs.getFieldIndex(expr.type, field);
+			type = context.structs.get(expr.type.name).fields.get(idx).type;
+			code.addAll(expr.getCode());
+			code.compileGetfield(idx);
+		}
+	}
+
+	public Expr(Context context, Expr expr, Expr index) {
+		this.type = new Type(expr.type, expr.type.arrayLevel - 1);
+		this.code = new Code(context);
+
 		code.addAll(expr.getCode());
-		code.compileGetfield(idx);
+		code.addAll(index.getCode());
+		code.compileGetArray();
 	}
 
 	public static Expr muldiv(Context context, Expr e1, Expr e2, Expr e3)
@@ -248,12 +264,14 @@ public class Expr {
 		return new Expr(context, parent, field);
 	}
 
-	public static Expr newObj(Context context, String typeName,
-			List<Expr> argList) throws ParseException {
-		Struct str = context.structs.get(typeName);
+	public static Expr newObj(Context context, Type type, List<Expr> argList)
+			throws ParseException {
+		type.checkSimpleRef(context);
+
+		Struct str = context.structs.get(type.name);
 
 		if (str.fields.size() != argList.size())
-			context.throwExc(typeName + " argument number error");
+			context.throwExc(type.name + " argument number error");
 
 		for (int i = 0; i < argList.size(); i++)
 			argList.get(i).type.checkAssignableTo(context,
@@ -262,12 +280,25 @@ public class Expr {
 		Expr res = new Expr(context, str.type);
 		for (Expr c : argList)
 			res.code.addAll(c.getCode());
-		res.code.add(BC.NEW);
-		res.code.add(str.idx);
-
-		str.isAbstract = false;
-
+		res.code.compileNew(context.structs.getStructIndex(str));
 		return res;
 	}
 
+	public static Expr newArr(Context context, Type type, Expr arrSize,
+			int arrDepth) throws ParseException {
+		type.checkNotVoid(context);
+
+		Expr res = new Expr(context, new Type(type, arrDepth));
+		res.code.addAll(arrSize.getCode());
+
+		if (type.isRef()) {
+			context.structs.get(type.name);
+			res.code.compileNewObjArr();
+			return res;
+		} else {
+			res.code.compileNewIntArr();
+			return res;
+		}
+
+	}
 }

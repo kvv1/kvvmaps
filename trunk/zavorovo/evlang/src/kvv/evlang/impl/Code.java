@@ -80,34 +80,32 @@ public class Code extends CodeBase {
 		return res;
 	}
 
-	public static Code assign(Context context, LValue lvalue, Expr t)
-			throws ParseException {
-		if (lvalue.expr == null)
-			return assign(context, lvalue.field, t);
-		else {
-			if (t == null) {
-				Expr e = lvalue.getExpr();
-				Code code = e.getCode();
-				if (e.type != Type.VOID)
-					code.add(BC.DROP);
-				return code;
-			}
+	public static Code assignField(Context context, Expr expr, String field,
+			Expr t) throws ParseException {
+		int idx = context.structs.getFieldIndex(expr.type, field);
+		Type type = context.structs.get(expr.type.name).fields.get(idx).type;
+		t.type.checkAssignableTo(context, type);
 
-			int idx = context.structs.getFieldIndex(lvalue.expr.type,
-					lvalue.field);
-			Type type = context.structs.get(lvalue.expr.type.name).fields
-					.get(idx).type;
-			t.type.checkAssignableTo(context, type);
-
-			Code res = new Code(context);
-			res.addAll(lvalue.expr.getCode());
-			res.addAll(t.getCode());
-			res.compileSetfield(idx);
-			return res;
-		}
+		Code res = new Code(context);
+		res.addAll(expr.getCode());
+		res.addAll(t.getCode());
+		res.compileSetfield(idx);
+		return res;
 	}
 
-	private static Code assign(Context context, String name, Expr t)
+	public static Code assignIndex(Context context, Expr expr, Expr index, Expr t) throws ParseException {
+		index.type.checkInt(context);
+		t.type.checkAssignableTo(context, new Type(expr.type, expr.type.arrayLevel - 1));
+		
+		Code res = new Code(context);
+		res.addAll(expr.getCode());
+		res.addAll(index.getCode());
+		res.addAll(t.getCode());
+		res.compileSetArray();
+		return res;
+	}
+
+	public static Code assignVar(Context context, String name, Expr t)
 			throws ParseException {
 		Code res = t.getCode();
 		Local val = context.currentFunc.locals.get(name);
@@ -211,7 +209,7 @@ public class Code extends CodeBase {
 		else if (context.currentFunc.retType.isRef())
 			res.addAll(ret(context, Expr.nullExpr(context)));
 		else
-			res.addAll(ret(context, new Expr(context, (short) 0)));
+			res.addAll(ret(context, new Expr(context, 0)));
 		res.adjustLocals();
 
 		if (context.currentFunc.code != null)
