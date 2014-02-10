@@ -7,7 +7,7 @@ import kvv.evlang.ParseException;
 
 public class Struct {
 
-	public final int idx;
+	public Integer index;
 	public final Type type;
 	public List<NameAndType> fields;
 	private final Context context;
@@ -15,12 +15,10 @@ public class Struct {
 	public Funcs funcs;
 
 	public Struct superClass;
-	public boolean isAbstract = true;
 	public boolean closed;
 
-	public Struct(Context context, int idx, Type type) {
+	public Struct(Context context, Type type) {
 		this.context = context;
-		this.idx = idx;
 		this.type = type;
 	}
 
@@ -75,15 +73,21 @@ public class Struct {
 		}
 		return mask;
 	}
+	
+//	int[][] n = new int[4][]; 
 
 	public void print() {
-		System.out.println(idx + " " + type.name + " "
+		System.out.println(index + " " + type.name + " "
 				+ (isCreated() ? fields.size() : "NOT_CREATED"));
 		if (isCreated()) {
 			System.out.println("\tFunctions:");
 			for (Func func : funcs.funcs.values())
 				func.print();
 		}
+	}
+
+	public boolean isAbstract() {
+		return index == null;
 	}
 
 }

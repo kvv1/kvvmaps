@@ -13,18 +13,18 @@ public class Structs {
 
 	private final Context context;
 	private Map<String, Struct> structs = new LinkedHashMap<String, Struct>();
+	
+	int nextIndex;
 
-	public Struct createStruct(String name)
-			throws ParseException {
+	public Struct createStruct(String name) throws ParseException {
 		Struct str = structs.get(name);
-		if(str == null) {
-			str = new Struct(context, structs.size(), new Type(
-					name));
+		if (str == null) {
+			str = new Struct(context, new Type(name));
 			structs.put(name, str);
-		} else if(str.fields != null) {
+		} else if (str.fields != null) {
 			context.throwAlreadyDefined(name);
 		}
-		
+
 		return str;
 	}
 
@@ -38,20 +38,15 @@ public class Structs {
 		}
 		str.create(superStruct);
 	}
-	
+
 	public int getFieldIndex(Type type, String fieldName) throws ParseException {
-		if (!type.isRef())
-			context.throwExc("should be struct type");
+		type.checkSimpleRef(context);
 		Struct struct = structs.get(type.name);
 		Integer idx = struct.getField(fieldName);
 		if (idx == null)
 			context.throwWatIsIt(fieldName);
 		return idx;
 	}
-
-//	public Struct _get(String name) {
-//		return structs.get(name);
-//	}
 
 	public Struct get(String name) throws ParseException {
 		Struct res = structs.get(name);
@@ -70,6 +65,12 @@ public class Structs {
 
 	public void close(String name) throws ParseException {
 		get(name).closed = true;
+	}
+
+	public int getStructIndex(Struct str) {
+		if(str.isAbstract())
+			str.index = nextIndex++;
+		return str.index;
 	}
 
 }

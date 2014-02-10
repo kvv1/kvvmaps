@@ -4,8 +4,8 @@ import java.util.List;
 
 import kvv.evlang.rt.heap.Array;
 import kvv.evlang.rt.heap.Heap;
+import kvv.evlang.rt.heap.Heap2;
 import kvv.evlang.rt.heap.HeapImpl;
-
 
 public class RTContext {
 	public static class Type {
@@ -43,7 +43,7 @@ public class RTContext {
 
 	public RTContext(List<Byte> codeArr, short[] funcs,
 			TryCatchBlock[] tryCatchBlocks, Short[] constPool, Short[] regPool,
-			Byte[] refs, Type[] types) {
+			Byte[] refs, final Type[] types) {
 		this.codeArr = codeArr;
 		this.funcs = funcs;
 		this.tryCatchBlocks = tryCatchBlocks;
@@ -51,7 +51,18 @@ public class RTContext {
 		this.regPool = regPool;
 		this.refs = refs;
 		this.types = types;
-		heap = new HeapImpl(64, types);
+		// heap = new HeapImpl(64, types);
+		heap = new Heap2(512, 20) {
+			@Override
+			protected int getTypeSize(int typeIdx) {
+				return types[typeIdx].sz;
+			}
+
+			@Override
+			protected int getTypeMask(int typeIdx) {
+				return types[typeIdx].mask;
+			}
+		};
 		timers = new Array(heap, true);
 		triggers = new Array(heap, true);
 	}
@@ -61,6 +72,7 @@ public class RTContext {
 			heap.mark(regs[b & 0xFF]);
 		heap.mark(timers.a);
 		heap.mark(triggers.a);
+		heap.markClosure();
 		heap.sweep();
 	}
 

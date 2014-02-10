@@ -22,7 +22,7 @@ public class HeapImpl implements Heap {
 	}
 
 	@Override
-	public short alloc(int typeIdx_arrSize, boolean array, boolean objArray) {
+	public int alloc(int typeIdx_arrSize, boolean array, boolean objArray) {
 		for (short i = 1; i < entries.length; i++)
 			if (entries[i] == null) {
 				entries[i] = new Entry();
@@ -56,12 +56,12 @@ public class HeapImpl implements Heap {
 	}
 
 	@Override
-	public void mark(int a) {
+	public boolean mark(int a) {
 		if (a == 0)
-			return;
+			return false;
 		Entry entry = entries[a];
 		if (entry.marked)
-			return;
+			return false;
 		entry.marked = true;
 
 		if (!entry.array) {
@@ -76,6 +76,8 @@ public class HeapImpl implements Heap {
 				for (int i = 0; i < entry.typeIdx_arrSize; i++)
 					mark(entry.data[i]);
 		}
+
+		return true;
 	}
 
 	@Override
@@ -100,6 +102,12 @@ public class HeapImpl implements Heap {
 	@Override
 	public int getTypeIdx(int a) {
 		return entries[a].typeIdx_arrSize;
+	}
+
+	@Override
+	public void markClosure() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

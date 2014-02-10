@@ -153,4 +153,32 @@ public class CodeBase {
 		add(BC.SETFIELD_SHORT | n);
 	}
 
+	public void compileNew(int n) {
+		if (n >= 16) {
+			add(BC.NEW);
+			add(n);
+		} else {
+			add(BC.NEW_SHORT | n);
+		}
+	}
+	
+	public void compileNewObjArr() {
+		add(BC.NEWOBJARR);
+	}
+
+	public void compileNewIntArr() {
+		add(BC.NEWINTARR);
+	}
+
+	public void compileSetArray() {
+		add(BC.SETARRAY);
+	}
+
+	public void compileGetArray() {
+		add(BC.GETARRAY);
+	}
+
+	public void compileArrayLength() {
+		add(BC.ARRAYLENGTH);
+	}
 }

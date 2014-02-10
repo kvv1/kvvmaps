@@ -1,120 +1,85 @@
-reg out0(REG_RELAY0);
-reg out1(REG_RELAY1);
-reg in(REG_IN0);
-reg inpullup(REG_INPULLUP0);
 
-proc stop1() {
-	out0 = 0;
-	out1 = 0;
-	timerUp.stop;
-	timerDown.stop;
-	timerWork.stop;
+struct S1 {
+	int x;
 }
 
-proc up() {
-	out0 = 0;
-	out1 = 1;
+vod test1() {
+	S1 s = new S1(1);
+	print(s.x);
 }
 
-proc down() {
-	out0 = 1;
-	out1 = 0;
+struct S21;
+struct S22 {
+	S21 s21;
 }
 
-func getDir() = out1 - out0;
-
-const stateInitDown = 1;
-const stateInitUp = 2;
-const stateWork = 3;
-
-const timeout = 500;
-
-reg targ;
-reg pos;
-reg range;
-reg state;
-reg target;
-
-func calcTarg() = muldiv(target, range, 256);
-//func calcTarg = target * range / 256;
-
-main {
-	inpullup = 1;
-	stop1();
-	down();
-	timerDown.start_ms(timeout);
-	state = stateInitDown;
-	targ = -1;
-	target = 128;
+struct S21 {
+	int f();
 }
 
-onchange(target) {
-	if(state == stateWork) {
-		targ = calcTarg();
+struct S23 : S21 {
+	int f() {
+		return 2;
 	}
 }
 
-onchange(targ) {
-	if(state == stateWork) {
-		if (targ > pos) {
-			up();
-			timerWork.start_ms(timeout);
-		} else  { if (targ < pos) {
-			down();
-			timerWork.start_ms(timeout);
-		} }
+vod test2() {
+	S22 s = new S22(new S23());
+	print(s.s21.f());
+}
+
+
+struct T1 : Timer {
+	int n;
+	void run() {
+		print this.n;
+		this.n = this.n + 2;
+		if(this.n != 20)
+			this.start(1000);
 	}
 }
 
-onchange (in) {
-	if(state == stateInitDown) {
-		timerDown.start_ms(timeout);
-	} else if(state == stateInitUp) {
-		timerUp.start_ms(timeout);
-		pos++;
-	} else if(state == stateWork) {
-		pos = pos + getDir();
-		timerWork.start_ms(timeout);
-		if ((getDir() > 0 && pos >= targ) || (getDir() < 0 && pos <= targ))
-			stop1();
-	}
+void testTimer(){
+	T1 t = new T1(0,10);
+	t.start(1000);
 }
 
-onchange (0) {
-	if(state == stateInitDown) {
-		timerDown.start_ms(timeout);
-	} else if(state == stateInitUp) {
-		timerUp.start_ms(timeout);
-		pos++;
-	} else if(state == stateWork) {
-		pos = pos + getDir();
-		timerWork.start_ms(timeout);
-		if ((getDir() > 0 && pos >= targ) || (getDir() < 0 && pos <= targ))
-			stop1();
-	}
+struct SA {
+	int n;
+	int f(){}
 }
 
-timer timerDown {
-	stop1();
-	pos = 0;
-	up();
-	timerUp.start_ms(timeout);
-	state = stateInitUp;
+
+void testArray(){
+	int[] ia = new int[10];
+	ia[0] = 0;
+	ia[1] = 1;
+
+	print ia[0];
+	print ia[1];
+	
+	SA[] sa = new SA[10];
+	sa[0] = new SA(10);
+	sa[1] = new SA(11);
+
+	print sa[0].n;
+	print sa[1].n;
+
+	SA[][] sa2 = new SA[10][];
+	sa2[0] = new SA[1];
+	sa2[1] = new SA[1];
+	sa2[0][0] = new SA(20);
+	sa2[1][0] = new SA(21);
+	
+	print sa2[0][0].n;
+	print sa2[1][0].n;
+	
+	print sa.length;
 }
 
-timer timerUp {
-	stop1();
-	range = pos;
-	state = stateWork;
-	targ = calcTarg();
+void main() {
+	test1();
+	test2();
+	testArray();
+	testTimer();
 }
-
-timer timerWork {
-	if (getDir() > 0) {
-		pos = range;
-	} else { if (getDir() < 0) {
-		pos = 0;
-	} }
-	stop1();
-}
-

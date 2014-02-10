@@ -59,7 +59,8 @@ public abstract class Interpreter {
 			throw new IllegalStateException();
 	}
 
-	public short eval(short off, Short... params) throws UncaughtExceptionException {
+	public short eval(short off, Short... params)
+			throws UncaughtExceptionException {
 		if (!stack.isEmpty() || ip != 0 || fp != 0)
 			throw new IllegalStateException();
 		if (params != null)
@@ -97,8 +98,10 @@ public abstract class Interpreter {
 				break;
 			} else {
 				ret();
-				if (ip == 0)
+				if (ip == 0) {
+					System.out.println("UncaughtException " + Exc.values()[e]);
 					throw new UncaughtExceptionException();
+				}
 			}
 		}
 	}
@@ -135,18 +138,20 @@ public abstract class Interpreter {
 					break;
 				case BC.GETFIELD_SHORT:
 					short a = stack.pop();
-					if (a == 0)
+					if (a == 0) {
 						throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
-					else
-						stack.push(context.heap.get(a, param));
+						break;
+					}
+					stack.push(context.heap.get(a, param));
 					break;
 				case BC.SETFIELD_SHORT:
 					short n = stack.pop();
 					a = stack.pop();
-					if (a == 0)
+					if (a == 0) {
 						throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
-					else
-						context.heap.set(a, param, n);
+						break;
+					}
+					context.heap.set(a, param, n);
 					break;
 				case BC.CALL_SHORT:
 					short addr = context.funcs[param];
@@ -177,6 +182,9 @@ public abstract class Interpreter {
 					stack.push(link);
 					fp = stack.sp;
 					break;
+				case BC.NEW_SHORT:
+					_new(param);
+					break;
 				default:
 					throw new RuntimeException("unknown short bytecode "
 							+ (c & 0xF0));
@@ -199,11 +207,11 @@ public abstract class Interpreter {
 				int obj = stack.getAt(stack.sp + argCnt - 1);
 				if (obj == 0) {
 					throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
-				} else {
-					int type = context.heap.getTypeIdx(obj);
-					short addr = context.types[type].vtable[n];
-					call(addr);
+					break;
 				}
+				int type = context.heap.getTypeIdx(obj);
+				short addr = context.types[type].vtable[n];
+				call(addr);
 				break;
 			}
 
@@ -212,27 +220,52 @@ public abstract class Interpreter {
 				throwException(res);
 				break;
 
-			case ENTER:
-				int link = stack.pop();
-				int ret = stack.pop();
-				short n = code.get(ip++);
-				while (n-- > 0)
-					stack.push(0);
-				stack.push(ret);
-				stack.push(link);
-				fp = stack.sp;
-				break;
 			case NEW:
-				n = code.get(ip++);
-				int sz = context.types[n].sz;
-				short a = context.heap.alloc(n, false, false);
-				if (a == 0)
-					throwException(Exc.OUTOFMEMORY_EXCEPTION.ordinal());
-				else {
-					while (sz-- > 0)
-						context.heap.set(a, sz, stack.pop());
-					stack.push(a);
+				short n = code.get(ip++);
+				_new(n);
+				break;
+			case NEWINTARR:
+				short sz = stack.pop();
+				_newIntArr(sz);
+				break;
+			case NEWOBJARR:
+				sz = stack.pop();
+				_newObjArr(sz);
+				break;
+			case SETARRAY:
+				int val = stack.pop();
+				int idx = stack.pop();
+				int a = stack.pop();
+				if (a == 0) {
+					throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
+					break;
 				}
+				if (idx < 0 || idx >= context.heap.getArraySize(a)) {
+					throwException(Exc.ARRAYINDEX_EXCEPTION.ordinal());
+					break;
+				}
+				context.heap.set(a, idx, val);
+				break;
+			case GETARRAY:
+				idx = stack.pop();
+				a = stack.pop();
+				if (a == 0) {
+					throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
+					break;
+				}
+				if (idx < 0 || idx >= context.heap.getArraySize(a)) {
+					throwException(Exc.ARRAYINDEX_EXCEPTION.ordinal());
+					break;
+				}
+				stack.push(context.heap.get(a, idx));
+				break;
+			case ARRAYLENGTH:
+				a = stack.pop();
+				if (a == 0) {
+					throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
+					break;
+				}
+				stack.push(context.heap.getArraySize(a));
 				break;
 			case ADD:
 				stack.push(stack.pop() + stack.pop());
@@ -246,10 +279,11 @@ public abstract class Interpreter {
 			case DIV:
 				right = stack.pop();
 				left = stack.pop();
-				if (right == 0)
+				if (right == 0) {
 					throwException(Exc.ARITHMETIC_EXCEPTION.ordinal());
-				else
-					stack.push(left / right);
+					break;
+				}
+				stack.push(left / right);
 				break;
 			case AND: {
 				int n1 = stack.pop();
@@ -334,10 +368,11 @@ public abstract class Interpreter {
 			case SETTIMER_MS:
 				short ms = stack.pop();
 				short obj = stack.pop();
-				if (obj == 0)
+				if (obj == 0) {
 					throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
-				else
-					context.setTimer(obj, ms);
+					break;
+				}
+				context.setTimer(obj, ms);
 				break;
 			// case SETTIMER_S:
 			// timer = code.get(ip++);
@@ -345,25 +380,28 @@ public abstract class Interpreter {
 			// break;
 			case STOPTIMER:
 				obj = stack.pop();
-				if (obj == 0)
+				if (obj == 0) {
 					throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
-				else
-					context.stopTimer(obj);
+					break;
+				}
+				context.stopTimer(obj);
 				break;
 			case SETTRIGGER:
 				short initVal = stack.pop();
 				obj = stack.pop();
-				if (obj == 0)
+				if (obj == 0) {
 					throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
-				else
-					context.setTrigger(obj, initVal);
+					break;
+				}
+				context.setTrigger(obj, initVal);
 				break;
 			case STOPTRIGGER:
 				obj = stack.pop();
-				if (obj == 0)
+				if (obj == 0) {
 					throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
-				else
-					context.stopTrigger(obj);
+					break;
+				}
+				context.stopTrigger(obj);
 				break;
 			case INC:
 				reg = code.get(ip++) & 0xFF;
@@ -377,19 +415,58 @@ public abstract class Interpreter {
 				int n3 = stack.pop();
 				int n2 = stack.pop();
 				int n1 = stack.pop();
-				if (n3 == 0)
+				if (n3 == 0) {
 					throwException(Exc.ARITHMETIC_EXCEPTION.ordinal());
-				else
-					stack.push(n1 * n2 / n3);
+					break;
+				}
+				stack.push(n1 * n2 / n3);
 				break;
 			}
 			case TRAP:
 				break;
 			default:
-				throw new RuntimeException("unknown bytecode " + c);
+				if (c < BC.values().length)
+					throw new RuntimeException("unknown bytecode "
+							+ BC.values()[c] + " (" + c + ")");
+				else
+					throw new RuntimeException("unknown bytecode " + c);
 			}
 		}
 
+	}
+
+	private void _newObjArr(short sz) throws UncaughtExceptionException {
+		_newArr(sz, true);
+	}
+
+	private void _newIntArr(short sz) throws UncaughtExceptionException {
+		_newArr(sz, false);
+	}
+
+	private void _newArr(short sz, boolean objArr)
+			throws UncaughtExceptionException {
+		if (sz < 0) {
+			throwException(Exc.ARRAYINDEX_EXCEPTION.ordinal());
+			return;
+		}
+		int a = context.heap.alloc(sz, true, objArr);
+		if (a == 0) {
+			throwException(Exc.OUTOFMEMORY_EXCEPTION.ordinal());
+			return;
+		}
+		stack.push(a);
+	}
+
+	private void _new(short n) throws UncaughtExceptionException {
+		int sz = context.types[n].sz;
+		int a = context.heap.alloc(n, false, false);
+		if (a == 0) {
+			throwException(Exc.OUTOFMEMORY_EXCEPTION.ordinal());
+			return;
+		}
+		while (sz-- > 0)
+			context.heap.set(a, sz, stack.pop());
+		stack.push(a);
 	}
 
 	private void setreg(int reg) {
