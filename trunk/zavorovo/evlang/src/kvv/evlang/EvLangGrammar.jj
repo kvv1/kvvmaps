@@ -101,6 +101,7 @@ TOKEN : /* OPERATORS */
 | < NEW  : "new" >
 | < XTIMER  : "xtimer" >
 | < TRAP  : "trap" >
+| < WHILE  : "while" >
 }
 
 TOKEN :
@@ -289,7 +290,8 @@ Code stmtBlock() :
   }
 }
 
-Code stmt() :{  Code res;}{  (    LOOKAHEAD(2)    res = assign()  | res = ifStmt()  | res = tryCatchStmt()
+Code stmt() :{  Code res;}{  (    LOOKAHEAD(2)    res = assign()  | res = ifStmt()  | res = whileStmt()
+  | res = tryCatchStmt()
   | < TRAP > ";"  {
     res = Code.trap(this);
   }  | res = stmtBlock()  )  {    return res;  }}
@@ -321,6 +323,18 @@ Code ifStmt() :
   ]
   {
     return Code.ifstmt(res, stmt, stmt2);
+  }
+}
+
+Code whileStmt() :
+{
+  Expr res;
+  Code stmt;
+}
+{
+  < WHILE > "(" res = expr() ")" stmt = stmt()
+  {
+    return Code.whilestmt(res, stmt);
   }
 }
 

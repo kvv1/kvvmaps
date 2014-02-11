@@ -1,7 +1,5 @@
 package kvv.evlang.rt;
 
-import kvv.evlang.rt.wnd.HeapFrame;
-
 public abstract class VM {
 	public abstract void setExtReg(int addr, int reg, int value);
 

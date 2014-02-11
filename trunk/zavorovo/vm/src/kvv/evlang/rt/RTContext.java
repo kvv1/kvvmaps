@@ -5,7 +5,6 @@ import java.util.List;
 import kvv.evlang.rt.heap.Array;
 import kvv.evlang.rt.heap.Heap;
 import kvv.evlang.rt.heap.Heap2;
-import kvv.evlang.rt.heap.HeapImpl;
 
 public class RTContext {
 	public static class Type {
@@ -33,6 +32,8 @@ public class RTContext {
 
 	public final Heap heap;
 
+	public final Stack stack = new StackImpl();
+
 	public TryCatchBlock findTryCatchBlock(int ip) {
 		for (TryCatchBlock tcb : tryCatchBlocks) {
 			if (ip > tcb.from && ip <= tcb.to)
@@ -52,7 +53,7 @@ public class RTContext {
 		this.refs = refs;
 		this.types = types;
 		// heap = new HeapImpl(64, types);
-		heap = new Heap2(512, 20) {
+		heap = new Heap2(128) {
 			@Override
 			protected int getTypeSize(int typeIdx) {
 				return types[typeIdx].sz;
@@ -62,18 +63,14 @@ public class RTContext {
 			protected int getTypeMask(int typeIdx) {
 				return types[typeIdx].mask;
 			}
+
+			@Override
+			protected void gc() {
+				RTContext.this.gc();
+			}
 		};
 		timers = new Array(heap, true);
 		triggers = new Array(heap, true);
-	}
-
-	public void gc() {
-		for (byte b : refs)
-			heap.mark(regs[b & 0xFF]);
-		heap.mark(timers.a);
-		heap.mark(triggers.a);
-		heap.markClosure();
-		heap.sweep();
 	}
 
 	public static final int TIMER_CNT_IDX = 0;
@@ -104,4 +101,22 @@ public class RTContext {
 		triggers.clear(obj);
 		heap.set(obj, TRIGGER_VAL_IDX, 0);
 	}
+
+	public void gc() {
+		heap.startMark();
+		for (byte b : refs)
+			heap.mark(regs[b & 0xFF]);
+		heap.mark(timers.a);
+		heap.mark(triggers.a);
+
+		for (int spOff = 0; spOff < stack.depth(); spOff++)
+			heap.mark(stack.pick(spOff));
+
+		// for (int sp = stack.getSP(); sp < stack.size(); sp++)
+		// heap.mark(stack.getAt(sp));
+
+		heap.markClosure();
+		heap.sweep();
+	}
+
 }

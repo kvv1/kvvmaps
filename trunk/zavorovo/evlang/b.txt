@@ -51,33 +51,49 @@ struct SA {
 
 
 void testArray(){
-	int[] ia = new int[10];
-	ia[0] = 0;
-	ia[1] = 1;
-
-	print ia[0];
-	print ia[1];
+	{
+		int[] ia = new int[10];
+		ia[0] = 0;
+		ia[1] = 1;
 	
-	SA[] sa = new SA[10];
-	sa[0] = new SA(10);
-	sa[1] = new SA(11);
-
-	print sa[0].n;
-	print sa[1].n;
-
-	SA[][] sa2 = new SA[10][];
-	sa2[0] = new SA[1];
-	sa2[1] = new SA[1];
-	sa2[0][0] = new SA(20);
-	sa2[1][0] = new SA(21);
+		print ia[0];
+		print ia[1];
+		
+		//ia = null;
+	}
+	{	
+		SA[] sa = new SA[10];
+		sa[0] = new SA(10);
+		sa[1] = new SA(11);
 	
-	print sa2[0][0].n;
-	print sa2[1][0].n;
-	
-	print sa.length;
+		print sa[0].n;
+		print sa[1].n;
+		
+		//sa = null;
+	}
+	{
+		SA[][] sa2 = new SA[10][];
+		sa2[0] = new SA[1];
+		sa2[1] = new SA[1];
+		sa2[0][0] = new SA(20);
+		sa2[1][0] = new SA(21);
+		
+		print sa2[0][0].n;
+		print sa2[1][0].n;
+		
+		print sa2.length;
+	}
 }
 
 void main() {
+	int n = 12;
+	while(n) {
+		new SA(22);
+	
+		print n;
+		n = n - 1;
+	}
+
 	test1();
 	test2();
 	testArray();

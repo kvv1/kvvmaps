@@ -1,19 +1,29 @@
 package kvv.evlang.rt.heap;
 
 public interface Heap {
-	public int alloc(int typeIdx_arrSize, boolean array, boolean objArray);
+	int alloc(int typeIdx_arrSize, boolean array, boolean objArray);
+	int alloc2(int typeIdx_arrSize, boolean array, boolean objArray);
 
-	public short get(int a, int idx);
+	short get(int a, int idx);
 
-	public void set(int a, int idx, int val);
+	void set(int a, int idx, int val);
 
-	public boolean mark(int a);
-	public void markClosure();
+	int getRawDataOffset(int a);
 
-	public void sweep();
+	short getRaw(int offset, int idx);
 
-	public int getArraySize(int a);
+	void setRaw(int offset, int idx, int val);
 
-	public int getTypeIdx(int a);
+	boolean mark(int a);
+
+	void markClosure();
+
+	void sweep();
+
+	int getArraySize(int a);
+
+	int getTypeIdx(int a);
+
+	void startMark();
 
 }
