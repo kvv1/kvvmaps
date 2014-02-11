@@ -85,13 +85,15 @@ public interface EG1Constants {
   /** RegularExpression Id. */
   int TRAP = 43;
   /** RegularExpression Id. */
-  int ID = 44;
+  int WHILE = 44;
   /** RegularExpression Id. */
-  int STRING = 45;
+  int ID = 45;
   /** RegularExpression Id. */
-  int NUMBER = 46;
+  int STRING = 46;
   /** RegularExpression Id. */
-  int DIGIT = 47;
+  int NUMBER = 47;
+  /** RegularExpression Id. */
+  int DIGIT = 48;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -142,6 +144,7 @@ public interface EG1Constants {
     "\"new\"",
     "\"xtimer\"",
     "\"trap\"",
+    "\"while\"",
     "<ID>",
     "<STRING>",
     "<NUMBER>",

@@ -143,7 +143,7 @@ public class Code extends CodeBase {
 	public int compileBranch(int off) {
 		return compileBranch(BC.BRANCH, off);
 	}
-
+	
 	public int compileQBranch(int off) {
 		return compileBranch(BC.QBRANCH, off);
 	}
@@ -162,6 +162,16 @@ public class Code extends CodeBase {
 			res.addAll(stmt);
 			res.resolveBranch(a);
 		}
+		return res;
+	}
+
+	public static Code whilestmt(Expr cond, Code stmt) {
+		Code res = cond.getCode();
+		int a = res.compileQBranch(0);
+		res.addAll(stmt);
+		int b = res.compileBranch(0);
+		res.resolveBranch(b, 0);
+		res.resolveBranch(a);
 		return res;
 	}
 
@@ -225,8 +235,12 @@ public class Code extends CodeBase {
 			resolveBranch(a);
 	}
 
-	public void resolveBranch(int a) {
-		code.set(a - 1, (byte) (code.size() - a));
+	public void resolveBranch(int cmdAddr, int dest) {
+		code.set(cmdAddr - 1, (byte) (dest - cmdAddr));
+	}
+
+	public void resolveBranch(int cmdAddr) {
+		code.set(cmdAddr - 1, (byte) (code.size() - cmdAddr));
 	}
 
 	public static Code trap(Context context) {

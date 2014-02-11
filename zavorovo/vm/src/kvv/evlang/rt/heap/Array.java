@@ -1,5 +1,6 @@
 package kvv.evlang.rt.heap;
 
+
 public class Array {
 	public int a;
 	private final Heap heap;
@@ -9,7 +10,7 @@ public class Array {
 	public Array(Heap heap, boolean refs) {
 		this.refs = refs;
 		this.heap = heap;
-		a = heap.alloc(8, true, true);
+		a = heap.alloc2(2, true, refs);
 	}
 
 	public int size() {
@@ -26,7 +27,7 @@ public class Array {
 
 	public int add(int val) {
 		if (sz == heap.getArraySize(a)) {
-			int aa = heap.alloc(sz + 8, true, refs);
+			int aa = heap.alloc2(sz + 2, true, refs);
 			for (int i = 0; i < sz; i++)
 				heap.set(aa, i, heap.get(a, i));
 			a = aa;
