@@ -17,11 +17,6 @@ uint8_t vmReadByte(uint16_t addr);
 
 void vmPrintInt(int16_t n);
 
-void vmInit();
-void vmStart(int8_t b);
-void vmStep(int ms);
-//int vmCheckCode(); // returns codefile length
-
 int8_t vmGetStatus();
 
 void vmSetStatus(int8_t s);
@@ -36,7 +31,21 @@ void vmChangeStack(int16_t n);
 extern int16_t stack[STACK_SIZE];
 extern int16_t* stackPtr;
 
+int vmGetRefsCnt();
+int vmGetRefReg(int n);
+
 int getUIStart();
 int getUIEnd();
+
+int16_t vmExec(uint16_t addr);
+int16_t vmExec1(uint16_t addr, int16_t param);
+int16_t vmExec2(uint16_t addr, int16_t param1, int16_t param2);
+int16_t vmExec3(uint16_t addr, int16_t param1, int16_t param2, int16_t param3);
+int16_t eval(uint16_t ip);
+int16_t eval1(uint16_t ip, int16_t param);
+void initVars();
+
+uint16_t vmGetFuncCode(uint8_t func);
+uint16_t getVMethod(int typeIdx, int methodIdx);
 
 #endif /* INTERPRETER_H_ */
