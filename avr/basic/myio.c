@@ -8,6 +8,7 @@
 #include <avr/io.h>
 #include <stdlib.h>
 #include <util/atomic.h>
+#include <avr/interrupt.h>
 
 #include "myio.h"
 
@@ -50,36 +51,27 @@
 #define USART_RXC_vect USART_RX_vect
 #define USART_TXC_vect USART_TX_vect
 #endif
-/*
- static ObjectHeader* usartListener;
 
- void setUsartListener(ObjectHeader* l) {
- usartListener = l;
- }
- */
 void handleRxCmd(char* cmd, unsigned char len);
 
 #define RXBUFSIZE 40
 #define TX_BUFFER_SIZE 32
 
 static char rxBuf[RXBUFSIZE];
-static unsigned char rxIdx;
-static char rxBufReady;
+static volatile unsigned char rxIdx;
+static volatile char rxBufReady;
 
 #ifdef BINARY_DATA
-
 static char receiveTimer;
+#endif
 
 void ioMillisCli() {
+#ifdef BINARY_DATA
 	if (receiveTimer != 0)
 		if (--receiveTimer == 0)
 			rxBufReady = 1;
-}
-
-#else
-void ioMillisCli() {
-}
 #endif
+}
 
 void handleIO() {
 	if (rxBufReady) {
@@ -94,7 +86,6 @@ ISR (USART_RXC_vect) {
 	char data = UDR;
 
 #ifdef BINARY_DATA
-//	PORTD |= (1 << 2);
 	if (!rxBufReady
 			&& (status & (FRAMING_ERROR | PARITY_ERROR | DATA_OVERRUN)) == 0) {
 		rxBuf[rxIdx] = data;
@@ -102,7 +93,6 @@ ISR (USART_RXC_vect) {
 			rxIdx++;
 		receiveTimer = 3;
 	}
-//	PORTD &= ~(1 << 2);
 #else
 	if (!rxBufReady && (status & (FRAMING_ERROR | PARITY_ERROR | DATA_OVERRUN)) == 0) {
 		if (data < ' ') {
@@ -116,14 +106,12 @@ ISR (USART_RXC_vect) {
 #endif
 }
 
-// USART Transmitter buffer
-
 static char volatile tx_buffer[TX_BUFFER_SIZE];
 
 #if TX_BUFFER_SIZE<256
-unsigned char volatile tx_wr_index, tx_rd_index, tx_counter;
+static unsigned char volatile tx_wr_index, tx_rd_index, tx_counter;
 #else
-unsigned int volatile tx_wr_index,tx_rd_index,tx_counter;
+static unsigned int volatile tx_wr_index,tx_rd_index,tx_counter;
 #endif
 
 ISR (USART_TXC_vect) {
@@ -206,7 +194,7 @@ void uart_init() {
 void print2(char* format, int n1, int n2) {
 	char* pc = format;
 	int args[2];
-	int idx = 0;
+	uint8_t idx = 0;
 	args[0] = n1;
 	args[1] = n2;
 	while (*pc) {

@@ -1,47 +1,6 @@
 #include <avr/io.h>
-#include <util/atomic.h>
-#include <util/delay.h>
-#include "common.h"
-#include "myio.h"
-#include "ee.h"
-#include "1w.h"
 
-#include <avr/sleep.h>
-uint16_t crc16_step(uint8_t c, uint16_t crc_val) {
-	crc_val ^= (uint16_t) c;
-
-	char j = 8;
-	while (j--) {
-		uint8_t carry = crc_val & 0x0001;
-		crc_val >>= 1;
-		if (carry)
-			crc_val ^= 0xa001;
-	}
-
-	return crc_val;
-}
-
-uint16_t crc16(uint8_t * buf, int nbytes) {
-	uint16_t crc_val = CRC16_INIT;
-	while (nbytes--)
-		crc_val = crc16_step(*buf++, crc_val);
-	return crc_val;
-}
-
-void foo() {
-}
-
-void init_adc(char inputs, unsigned char vref_type);
-void timer0_init();
-
-int commonMain(void) {
-	ee_magic = MAGIC16;
-
-	//	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-//	sleep_enable();
-//	sleep_cpu();
-//	sleep_disable();
-
+void chipInit() {
 #if defined(__AVR_ATmega48__) || defined(__AVR_ATmega168__)
 
 	// Crystal Oscillator division factor: 1
@@ -93,11 +52,24 @@ int commonMain(void) {
 #error
 #endif
 #endif
+}
+
+/*
+static int commonMain(void) {
+	ee_magic = MAGIC16;
+
+	chipInit();
+
+	//	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+//	sleep_enable();
+//	sleep_cpu();
+//	sleep_disable();
 
 	timer0_init();
 	//init_adc(ADC_CHANS, INT_VREF_TYPE);
 	init_adc(ADC_CHANS, AVCC_VREF_TYPE);
 	uart_init();
+	w1_init();
 
 	sei();
 
@@ -115,8 +87,7 @@ int commonMain(void) {
 			handlePWM(TIME_UNIT);
 		}
 		handleIO();
-		handlePins();
-		handleMessages();
+		handlePins(); handleMessages();
 //		if (getMessage(&msg)) {
 //			if (msg.target)
 //				msg.target->handler(&msg);
@@ -129,4 +100,4 @@ int commonMain(void) {
 	}
 	return 0;
 }
-
+*/

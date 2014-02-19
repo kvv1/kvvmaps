@@ -1,6 +1,9 @@
 #ifndef __PIN__
 #define __PIN__
 
+#include <stdint.h>
+
+
 typedef struct {
 }*PINDIR;
 

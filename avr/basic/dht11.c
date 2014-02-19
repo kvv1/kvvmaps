@@ -18,6 +18,7 @@ int8_t wait(int8_t val, uint8_t timeoutUS) {
 }
 
 int8_t dht_read(DHT_TYPE type, int* t, int* h) {
+
 	for (int i = 0; i < 5; i++)
 		data[i] = 0;
 

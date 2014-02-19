@@ -19,20 +19,20 @@ static int tempArr;
 static int idxArr;
 static int entries;
 
-static int firstFree;
+static uint8_t firstFree;
 
-static int cnt;
+static uint8_t cnt;
 
 typedef struct {
 	uint8_t flags;
-	uint8_t size;
+	uint8_t type_size;
 	uint8_t entry;
-	short data[0];
+	int16_t data[0];
 } Entry;
 
 static void extendIdx();
-static int _getEntry(int e);
-static void _setEntry(int e, int16_t n);
+static int _getEntry(uint8_t e);
+static void _setEntry(uint8_t e, int16_t n);
 
 void heap_init() {
 	entries = 0;
@@ -42,12 +42,12 @@ void heap_init() {
 	firstFree = 0;
 }
 
-static void _addToFree(int e) {
+static void _addToFree(uint8_t e) {
 	_setEntry(e, firstFree);
 	firstFree = e;
 }
 
-static int _getFree() {
+static uint8_t _getFree() {
 	if (firstFree == 0)
 		extendIdx();
 	if (firstFree == 0)
@@ -74,34 +74,37 @@ static void extendIdx() {
 //	*(int16_t*) (&data[off]) = n;
 //}
 
-static int _getEntry(int e) {
+static int _getEntry(uint8_t e) {
 	return ((int16_t*) (data + HEAP_SIZE))[-e - 1];
-	//return _get(HEAP_SIZE - (e + 1) * 2);
 }
 
-static void _setEntry(int e, int16_t n) {
+//#define _getEntry1(e) (_getEntry((e) - REF_VALUE_START) & 0x7FFF)
+
+static int _getEntry1(int16_t e) {
+	return _getEntry(e - REF_VALUE_START) & 0x7FFF;
+}
+
+//static int _getEntry(int e) {
+//	return ((int16_t*) (data + HEAP_SIZE))[-e - 1];
+//}
+
+static void _setEntry(uint8_t e, int16_t n) {
 	((int16_t*) (data + HEAP_SIZE))[-e - 1] = n;
 	//_set(HEAP_SIZE - (e + 1) * 2, n);
 }
 
-static Entry* offToEntry(int off) {
-	return ((Entry*) &data[off]);
-}
+#define offToEntry(off) ((Entry*) &data[off])
 
-static int isValidRef(int a) {
-	if (a == 0)
-		return 0;
+//static Entry* offToEntry(int off) {
+//	return (Entry*) &data[off];
+//}
 
-	a -= REF_VALUE_START;
-	return a > 0 && a < entries && (_getEntry(a) & 0x8000) != 0;
-}
-
-int heapAlloc(int typeIdx_arrSize, int array, int objArray) {
-	int e = _getFree();
+static int heapAlloc(uint8_t typeIdx_arrSize, uint8_t array, uint8_t objArray) {
+	uint8_t e = _getFree();
 	if (e == 0)
 		return 0;
 
-	int sz = array ? typeIdx_arrSize : getTypeSize(typeIdx_arrSize);
+	uint8_t sz = array ? typeIdx_arrSize : getTypeSize(typeIdx_arrSize);
 
 	int newHere = here + sizeof(Entry) + sz * 2;
 
@@ -113,8 +116,6 @@ int heapAlloc(int typeIdx_arrSize, int array, int objArray) {
 	int off = here;
 	here = newHere;
 
-	memset(&data[off], 0, here - off);
-
 	int flags = 0;
 	if (array)
 		flags |= FLAG_ARRAY;
@@ -124,7 +125,8 @@ int heapAlloc(int typeIdx_arrSize, int array, int objArray) {
 	Entry* entry = offToEntry(off);
 	entry->flags = flags;
 	entry->entry = e;
-	entry->size = typeIdx_arrSize;
+	entry->type_size = typeIdx_arrSize;
+	memset(entry->data, 0, sz * 2);
 
 	_setEntry(e, off | 0x8000);
 
@@ -134,36 +136,47 @@ int heapAlloc(int typeIdx_arrSize, int array, int objArray) {
 	return e + REF_VALUE_START;
 }
 
-int heapAlloc2(int typeIdx_arrSize, int array, int objArray) {
+int heapAlloc2(uint8_t typeIdx_arrSize, uint8_t array, uint8_t objArray) {
 	int res = heapAlloc(typeIdx_arrSize, array, objArray);
+#if GC
 	if (res == 0) {
 		gc();
 		return heapAlloc(typeIdx_arrSize, array, objArray);
 	}
+#endif
 	return res;
 }
 
-int16_t heapGet(int a, int idx) {
-	return offToEntry(_getEntry(a - REF_VALUE_START) & 0x7FFF)->data[idx];
+int16_t heapGet(int a, uint8_t idx) {
+	return offToEntry(_getEntry1(a))->data[idx];
 }
 
-void heapSet(int a, int idx, int16_t val) {
-	offToEntry(_getEntry(a - REF_VALUE_START) & 0x7FFF)->data[idx] = val;
+void heapSet(int a, uint8_t idx, int16_t val) {
+	offToEntry(_getEntry1(a))->data[idx] = val;
 }
 
-static int markIdx = 0;
-static int markSz = 0;
+#if GC
+static uint8_t markIdx = 0;
+static uint8_t markSz = 0;
 
 void heapStartMark() {
 	markIdx = 0;
 	markSz = 0;
 }
 
+static int isValidRef(int a) {
+	if (a == 0)
+		return 0;
+
+	a -= REF_VALUE_START;
+	return a > 0 && a < entries && (_getEntry(a) & 0x8000) != 0;
+}
+
 void heapMark(int a) {
 	if (!isValidRef(a))
 		return;
 
-	int off = _getEntry(a - REF_VALUE_START) & 0x7FFF;
+	int off = _getEntry1(a);
 	Entry* entry = offToEntry(off);
 	if ((entry->flags & FLAG_MARKED) != 0)
 		return;
@@ -174,24 +187,24 @@ void heapMark(int a) {
 
 void heapMarkClosure() {
 	while (markIdx < markSz) {
-		int a = data[tempArr + markIdx];
+		uint8_t a = data[tempArr + markIdx];
 
 		int off = _getEntry(a) & 0x7FFF;
 		Entry* entry = offToEntry(off);
 
 		if ((entry->flags & FLAG_ARRAY) == 0) {
-			int typeIdx = entry->size;
+			uint8_t typeIdx = entry->type_size;
 			uint16_t mask = getTypeMask(typeIdx);
-			int sz = getTypeSize(typeIdx);
-			int i;
+			uint8_t sz = getTypeSize(typeIdx);
+			uint8_t i;
 			for (i = 0; i < sz; i++) {
 				if ((mask & 1) != 0)
 					heapMark(entry->data[i]);
 				mask >>= 1;
 			}
 		} else if ((entry->flags & FLAG_OBJARRAY) != 0) {
-			int sz = entry->size;
-			int i;
+			uint8_t sz = entry->type_size;
+			uint8_t i;
 			for (i = 0; i < sz; i++)
 				heapMark(entry->data[i]);
 		}
@@ -204,8 +217,8 @@ void heapSweep() {
 	int dst = 0;
 	int src = 0;
 
-	int newCnt = 0;
-	int i;
+	uint8_t newCnt = 0;
+	uint8_t i;
 	for (i = 0; i < cnt; i++) {
 		Entry* _src = offToEntry(src);
 		Entry* _dst = offToEntry(dst);
@@ -213,11 +226,11 @@ void heapSweep() {
 		int sz;
 
 		if ((_src->flags & FLAG_ARRAY) != 0)
-			sz = sizeof(Entry) + _src->size * 2;
+			sz = sizeof(Entry) + _src->type_size * 2;
 		else
-			sz = sizeof(Entry) + getTypeSize(_src->size) * 2;
+			sz = sizeof(Entry) + getTypeSize(_src->type_size) * 2;
 
-		int e = _src->entry;
+		uint8_t e = _src->entry;
 
 		if ((_src->flags & FLAG_MARKED) == 0) {
 			_addToFree(e);
@@ -236,14 +249,15 @@ void heapSweep() {
 	cnt = newCnt;
 	here = dst;
 }
+#endif
 
-int heapGetArraySize(int a) {
-	Entry* entry = offToEntry(_getEntry(a - REF_VALUE_START) & 0x7FFF);
-	return entry->size;
+uint8_t heapGetArraySize(int a) {
+	Entry* entry = offToEntry(_getEntry1(a));
+	return entry->type_size;
 }
 
-int heapGetTypeIdx(int a) {
-	Entry* entry = offToEntry(_getEntry(a - REF_VALUE_START) & 0x7FFF);
-	return entry->size;
+uint8_t heapGetTypeIdx(int a) {
+	Entry* entry = offToEntry(_getEntry1(a));
+	return entry->type_size;
 }
 

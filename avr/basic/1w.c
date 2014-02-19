@@ -108,7 +108,7 @@ unsigned char oneWireReadByte(char n) {
 }
 
 //***************************************************************************
-static int oneWireStartConversion(char n) {
+static char oneWireStartConversion(char n) {
 	if (!oneWireInit(n))
 		return 0;
 	oneWireWriteByte(n, SKIP_ROM);
@@ -164,23 +164,35 @@ int oneWireGetTemperature(char n) {
 	return oneWireGetConversionResult(n);
 }
 
-int temperature[2] = { TEMPERATURE_INVALID, TEMPERATURE_INVALID };
+//int temperature[2] = { TEMPERATURE_INVALID, TEMPERATURE_INVALID };
 
 typedef struct {
 	char state;
 	int time;
 	uint8_t buffer[9];
-	int idx;
+	uint8_t idx;
+	int temperature;
 } DS1820STATE;
 
-void ds18b20_step(int n, int ms) {
-	static DS1820STATE states[2];
+static DS1820STATE states[2];
+
+int w1_temp(uint8_t n) {
+	return states[n].temperature;
+}
+
+void w1_init() {
+	uint8_t i;
+	for(i = 0; i < sizeof(states) / sizeof(states[0]); i++)
+		states[i].temperature = TEMPERATURE_INVALID;
+}
+
+void ds18b20_step(uint8_t n, int ms) {
 	DS1820STATE* state = &states[n];
 
-	switch (state[n].state) {
+	switch (state->state) {
 	case 0:
 		if (!oneWireInit(n)) {
-			temperature[n] = TEMPERATURE_INVALID;
+			state->temperature = TEMPERATURE_INVALID;
 			state->state = 0;
 			break;
 		}
@@ -203,7 +215,7 @@ void ds18b20_step(int n, int ms) {
 		break;
 	case 4:
 		if (!oneWireInit(n)) {
-			temperature[n] = TEMPERATURE_INVALID;
+			state->temperature = TEMPERATURE_INVALID;
 			state->state = 0;
 			break;
 		}
@@ -222,9 +234,9 @@ void ds18b20_step(int n, int ms) {
 		state->buffer[state->idx++] = oneWireReadByte(n);
 		if(state->idx == 9) {
 			if(checkCRC8(state->buffer, 9))
-				temperature[n] = ((state->buffer[1] << 8) + state->buffer[0]) >> 4;
+				state->temperature = ((state->buffer[1] << 8) + state->buffer[0]) >> 4;
 			else
-				temperature[n] = TEMPERATURE_INVALID;
+				state->temperature = TEMPERATURE_INVALID;
 			state->state = 0;
 		}
 		break;

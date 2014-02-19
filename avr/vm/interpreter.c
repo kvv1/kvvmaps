@@ -2,6 +2,7 @@
 #include "vmstatus.h"
 #include "heap.h"
 #include "context.h"
+#include "config.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -63,8 +64,8 @@ enum {
 #define ENTER_SHORT  0xE0
 #define NEW_SHORT  0xF0
 
-static int nRefs;
-static int nTCB;
+static uint8_t nRefs;
+static uint8_t nTCB;
 
 static uint16_t codeOffset;
 static uint16_t funcs;
@@ -87,7 +88,7 @@ static int16_t types[MAX_TYPES];
 
 static uint16_t fp;
 static uint16_t ip;
-static uint16_t exception;
+static int16_t exception;
 
 static uint16_t getUint16(uint16_t addr) {
 	return (vmReadByte(addr) << 8) | vmReadByte(addr + 1);
@@ -114,10 +115,10 @@ int getUIEnd() {
 }
 
 void initVars() {
-	int nfuncs;
-	int nConstPool;
-	int nRegPool;
-	int i;
+	uint8_t nfuncs;
+	uint8_t nConstPool;
+	uint8_t nRegPool;
+	uint8_t i;
 
 	uint16_t ptr = getUIEnd();
 	nfuncs = vmReadByte(ptr);
@@ -145,12 +146,12 @@ void initVars() {
 	refs = ptr;
 	ptr += nRefs;
 
-	int nTypes = vmReadByte(ptr);
+	uint8_t nTypes = vmReadByte(ptr);
 	ptr++;
 	for (i = 0; i < nTypes; i++) {
 		types[i] = ptr;
 		ptr += 3;
-		int vtableCnt = vmReadByte(ptr++);
+		uint8_t vtableCnt = vmReadByte(ptr++);
 		ptr += vtableCnt * 2;
 	}
 
@@ -165,23 +166,29 @@ void initVars() {
 #define TYPE_MASK_OFF 1
 #define TYPE_VTABLE_OFF 4
 
-int getTypeSize(int typeIdx) {
+uint8_t getTypeSize(uint8_t typeIdx) {
 	return vmReadByte(types[typeIdx] + TYPE_SZ_OFF);
 }
 
-uint16_t getTypeMask(int typeIdx) {
+uint16_t getTypeMask(uint8_t typeIdx) {
 	return getUint16(types[typeIdx] + TYPE_MASK_OFF);
 }
 
-uint16_t getVMethod(int typeIdx, int methodIdx) {
+uint16_t getVMethod(uint8_t typeIdx, uint8_t methodIdx) {
 	return getUint16(types[typeIdx] + TYPE_VTABLE_OFF + methodIdx * 2);
 }
 
-static uint16_t findCatchBlock(uint16_t ip) {
-	int i;
+//uint16_t getVMethod1(int16_t obj, uint8_t methodIdx) {
+//	return getUint16(types[heapGetTypeIdx(obj)] + TYPE_VTABLE_OFF + methodIdx * 2);
+//}
 
+static uint16_t findCatchBlock(uint16_t ip) {
+	uint8_t i;
+
+	uint16_t tcb = TCBs;
 	for (i = 0; i < nTCB; i++) {
-		uint16_t tcb = TCBs + i * 6;
+		tcb += 6;
+		//uint16_t tcb = TCBs + i * 6;
 		uint16_t from = getUint16(tcb);
 		uint16_t to = getUint16(tcb + 2);
 		if (ip > from && ip <= to)
@@ -222,7 +229,10 @@ static void throwException(int16_t e) {
 	}
 }
 
-static void _newArr(int sz, int objArr) {
+#define CHECK_NPE(ref) if(ref == 0) { throwException(NULLPOINTER_EXCEPTION); break; }
+
+#if ARRAYS
+static void _newArr(int8_t sz, uint8_t objArr) {
 	if (sz < 0) {
 		throwException(ARRAYINDEX_EXCEPTION);
 		return;
@@ -230,21 +240,22 @@ static void _newArr(int sz, int objArr) {
 	int a = heapAlloc2(sz, 1, objArr);
 	if (a == 0) {
 		throwException(OUTOFMEMORY_EXCEPTION);
-		return;
+	} else {
+		vmPush(a);
 	}
-	vmPush(a);
 }
+#endif
 
-static void _new(short n) {
-	int sz = getTypeSize(n);
+static void _new(uint8_t n) {
+	uint8_t sz = getTypeSize(n);
 	int a = heapAlloc2(n, 0, 0);
 	if (a == 0) {
 		throwException(OUTOFMEMORY_EXCEPTION);
-		return;
+	} else {
+		while (sz-- > 0)
+			heapSet(a, sz, vmPop());
+		vmPush(a);
 	}
-	while (sz-- > 0)
-		heapSet(a, sz, vmPop());
-	vmPush(a);
 }
 
 #define LOCAL(n) (stack[fp + 2 + (n)])
@@ -306,51 +317,45 @@ static int16_t interpret(uint16_t addr) {
 
 		if ((c & 0xC0) != 0) {
 			uint8_t param = (c & 0x0F);
-			switch (c & 0xF0) {
-			case GETREG_SHORT:
+			switch ((c & 0xF0) >> 4) {
+			case GETREG_SHORT >> 4:
 				vmPush(_getReg(getUint16(param + regPool)));
 				break;
-			case SETREG_SHORT:
+			case SETREG_SHORT >> 4:
 				_setReg(getUint16(param + regPool), vmPop());
 				break;
-			case GETLOCAL_SHORT:
+			case GETLOCAL_SHORT >> 4:
 				vmPush(LOCAL(param));
 				break;
-			case SETLOCAL_SHORT:
+			case SETLOCAL_SHORT >> 4:
 				LOCAL(param) = vmPop();
 				break;
-			case GETFIELD_SHORT: {
+			case GETFIELD_SHORT >> 4: {
 				uint16_t a = vmPop();
-				if (a == 0) {
-					throwException(NULLPOINTER_EXCEPTION);
-					break;
-				}
+				CHECK_NPE(a);
 				vmPush(heapGet(a, param));
 				break;
 			}
-			case SETFIELD_SHORT: {
+			case SETFIELD_SHORT >> 4: {
 				uint16_t n = vmPop();
 				uint16_t a = vmPop();
-				if (a == 0) {
-					throwException(NULLPOINTER_EXCEPTION);
-					break;
-				}
+				CHECK_NPE(a);
 				heapSet(a, param, n);
 				break;
 			}
-			case CALL_SHORT: {
+			case CALL_SHORT >> 4: {
 				uint16_t addr = vmGetFuncCode(param) + codeOffset;
 				call(addr);
 				break;
 			}
-			case RET_SHORT: {
+			case RET_SHORT >> 4: {
 				ret();
 				vmChangeStack(-param);
 				if (ip == 0)
 					return 0;
 				break;
 			}
-			case RETI_SHORT: {
+			case RETI_SHORT >> 4: {
 				uint16_t val = vmPop();
 				ret();
 				vmChangeStack(-param);
@@ -359,10 +364,10 @@ static int16_t interpret(uint16_t addr) {
 					return 0;
 				break;
 			}
-			case LIT_SHORT:
+			case LIT_SHORT >> 4:
 				vmPush(getUint16(constPool + param * 2));
 				break;
-			case ENTER_SHORT: {
+			case ENTER_SHORT >> 4: {
 				uint16_t link = vmPop();
 				uint16_t ret = vmPop();
 				vmChangeStack(param);
@@ -371,7 +376,7 @@ static int16_t interpret(uint16_t addr) {
 				fp = stackPtr - stack;
 				break;
 			}
-			case NEW_SHORT:
+			case NEW_SHORT >> 4:
 				_new(param);
 				break;
 			default:
@@ -391,11 +396,8 @@ static int16_t interpret(uint16_t addr) {
 			int argCnt = (arg >> 4) & 0xFF;
 			int n = arg & 0x0F;
 			int obj = stackPtr[argCnt - 1];
-			if (obj == 0) {
-				throwException(NULLPOINTER_EXCEPTION);
-				break;
-			}
-			uint16_t func = getVMethod(heapGetTypeIdx(obj), n);
+			CHECK_NPE(obj);
+			uint16_t func = getVMethod1(obj, n);
 			call(func + codeOffset);
 			break;
 		}
@@ -413,24 +415,22 @@ static int16_t interpret(uint16_t addr) {
 			vmPush(getUint16(constPool + vmReadByte(ip++) * 2));
 			break;
 
+#if ARRAYS
 		case NEWINTARR: {
-			uint16_t sz = vmPop();
+			int8_t sz = vmPop();
 			_newArr(sz, 0);
 			break;
 		}
 		case NEWOBJARR: {
-			uint16_t sz = vmPop();
+			int8_t sz = vmPop();
 			_newArr(sz, 1);
 			break;
 		}
 		case SETARRAY: {
 			int16_t val = vmPop();
-			uint16_t idx = vmPop();
+			int16_t idx = vmPop();
 			uint16_t a = vmPop();
-			if (a == 0) {
-				throwException(NULLPOINTER_EXCEPTION);
-				break;
-			}
+			CHECK_NPE(a);
 			if (idx < 0 || idx >= heapGetArraySize(a)) {
 				throwException(ARRAYINDEX_EXCEPTION);
 				break;
@@ -439,12 +439,9 @@ static int16_t interpret(uint16_t addr) {
 			break;
 		}
 		case GETARRAY: {
-			uint16_t idx = vmPop();
+			int16_t idx = vmPop();
 			uint16_t a = vmPop();
-			if (a == 0) {
-				throwException(NULLPOINTER_EXCEPTION);
-				break;
-			}
+			CHECK_NPE(a);
 			if (idx < 0 || idx >= heapGetArraySize(a)) {
 				throwException(ARRAYINDEX_EXCEPTION);
 				break;
@@ -454,13 +451,11 @@ static int16_t interpret(uint16_t addr) {
 		}
 		case ARRAYLENGTH: {
 			uint16_t a = vmPop();
-			if (a == 0) {
-				throwException(NULLPOINTER_EXCEPTION);
-				break;
-			}
+			CHECK_NPE(a);
 			vmPush(heapGetArraySize(a));
 			break;
 		}
+#endif
 		case SETREG:
 			_setReg(vmReadByte(ip++), vmPop());
 			break;
@@ -473,38 +468,26 @@ static int16_t interpret(uint16_t addr) {
 		case SETTIMER_MS: {
 			uint16_t ms = vmPop();
 			uint16_t obj = vmPop();
-			if (obj == 0) {
-				throwException(NULLPOINTER_EXCEPTION);
-				break;
-			}
+			CHECK_NPE(obj);
 			setTimer(obj, ms);
 			break;
 		}
 		case STOPTIMER: {
 			uint16_t obj = vmPop();
-			if (obj == 0) {
-				throwException(NULLPOINTER_EXCEPTION);
-				break;
-			}
+			CHECK_NPE(obj);
 			stopTimer(obj);
 			break;
 		}
 		case SETTRIGGER: {
 			uint16_t initVal = vmPop();
 			uint16_t obj = vmPop();
-			if (obj == 0) {
-				throwException(NULLPOINTER_EXCEPTION);
-				break;
-			}
+			CHECK_NPE(obj);
 			setTrigger(obj, initVal);
 			break;
 		}
 		case STOPTRIGGER: {
 			uint16_t obj = vmPop();
-			if (obj == 0) {
-				throwException(NULLPOINTER_EXCEPTION);
-				break;
-			}
+			CHECK_NPE(obj);
 			stopTrigger(obj);
 			break;
 		}
