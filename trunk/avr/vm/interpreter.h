@@ -46,6 +46,7 @@ int16_t eval1(uint16_t ip, int16_t param);
 void initVars();
 
 uint16_t vmGetFuncCode(uint8_t func);
-uint16_t getVMethod(int typeIdx, int methodIdx);
+uint16_t getVMethod(uint8_t typeIdx, uint8_t methodIdx);
+#define getVMethod1(obj, methodIdx)	getVMethod(heapGetTypeIdx(obj), (methodIdx))
 
 #endif /* INTERPRETER_H_ */

@@ -1,19 +1,5 @@
-#include "common.h"
+#include "timer0.h"
 #include <util/atomic.h>
-
-//static long time;
-
-//long getTimeMillisCli() {
-//	return time;
-//}
-//
-//long getTimeMillis() {
-//	long res;
-//	ATOMIC_BLOCK(ATOMIC_FORCEON) {
-//		res = time;
-//	}
-//	return res;
-//}
 
 static volatile char timerTicks;
 
@@ -61,27 +47,20 @@ char getClearTimerTicks() {
 
 ISR(TIMER0_OVF_vect) {
 	static char n = TIME_UNIT / TIMER_PERIOD;
-//	PORTD |= (1 << 3);
-
 	TCNT0 = 255 - MODULO;
-
-//	time += TIMER_PERIOD;
 	ioMillisCli();
-
 	if (!(--n)) {
 		n = TIME_UNIT / TIMER_PERIOD;
 		timerTicks++;
 	}
-//	PORTD &= ~(1 << 3);
 }
 
-void timer0_init(void) {
+void timer0_init() {
 
 #if defined(__AVR_ATmega48__) || defined(__AVR_ATmega168__)
 
 	TCCR0A=0x00;
-	TCCR0B=0x04;
-	TCNT0=255-31;
+	TCCR0B=PRESCALER;
 	OCR0A=0x00;
 	OCR0B=0x00;
 	TIMSK0=0x01;

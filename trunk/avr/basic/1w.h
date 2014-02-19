@@ -8,7 +8,8 @@ unsigned char oneWireReadByte(char n);
 int oneWireGetTemperature(char n);
 #define TEMPERATURE_INVALID (-9999)
 
-extern int temperature[2];
-void ds18b20_step(int n, int ms);
+void w1_init();
+int w1_temp(uint8_t n);
+void ds18b20_step(uint8_t n, int ms);
 
 #endif /* OW_H_ */
