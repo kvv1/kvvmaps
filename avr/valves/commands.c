@@ -1,10 +1,11 @@
-#include "common.h"
+#include "settings.h"
 #include "packet.h"
 #include "commands.h"
 #include "valves.h"
 
 #include "vm.h"
 #include "vmstatus.h"
+#include "crc16.h"
 
 #include <avr/pgmspace.h>
 
@@ -28,15 +29,15 @@ static EEMEM uint16_t pwm[REG_RELAY_CNT];
 static uint8_t outState;
 static uint16_t outCnt[REG_RELAY_CNT];
 
-static void setPWM(int port, uint16_t value) {
+static void setPWM(uint8_t port, uint16_t value) {
 	eeprom_update_word(pwm + port, value);
 }
 
-static uint16_t getPWM(int port) {
+static uint16_t getPWM(uint8_t port) {
 	return eeprom_read_word(pwm + port);
 }
 
-static void setOutput(int port, uint8_t state) {
+static void setOutput(uint8_t port, uint8_t state) {
 	uint8_t mask = 1 << port;
 	if (state) {
 		outState |= mask;
@@ -48,7 +49,7 @@ static void setOutput(int port, uint8_t state) {
 	}
 }
 
-static uint16_t getOutput(int port) {
+static uint16_t getOutput(uint8_t port) {
 	return (outState >> port) & 1;
 }
 
@@ -59,7 +60,7 @@ void handlePWM(int ms) {
 	if (pwmCnt >= 1000) {
 		pwmCnt -= 1000;
 
-		for (int i = 0; i < REG_RELAY_CNT; i++) {
+		for (uint8_t i = 0; i < REG_RELAY_CNT; i++) {
 			int8_t s;
 			outCnt[i]++;
 			if (outCnt[i] >= (getPWM(i) >> 8))
@@ -93,8 +94,8 @@ static int getRelays() {
 	return outState;
 }
 
-static void setRelays(int val) {
-	for (int n = 0; n < REG_RELAY_CNT; n++) {
+static void setRelays(uint8_t val) {
+	for (uint8_t n = 0; n < REG_RELAY_CNT; n++) {
 		setOutput(n, val & 1);
 		val >>= 1;
 	}
@@ -105,7 +106,7 @@ void onVMStatusChanged() {
 }
 
 void initCommands() {
-	int n = REG_RELAY_CNT;
+	uint8_t n = REG_RELAY_CNT;
 	while (n--)
 		confPin(PORT(n), PIN_OUT, 0);
 	setRelays(0);
@@ -118,15 +119,57 @@ void initCommands() {
 
 static int getInputs() {
 	char resp = 0;
-	int n = REG_IN_CNT;
+	uint8_t n = REG_IN_CNT;
 	while (n--) {
 		resp <<= 1;
 		resp |= getPin(PIN(n));
 	}
 	return resp;
 }
-
+/*
 char getReg(int reg, int* val) {
+	switch(reg) {
+	case REG_RELAYS:
+		*val = getRelays();
+		break;
+	case REG_INPUTS:
+		*val = getInputs();
+		break;
+	case REG_TEMP:
+		*val = temperature[0];
+		break;
+	case REG_TEMP2:
+		*val = temperature[1];
+		break;
+	case REG_VMONOFF:
+		*val = getvmonoff();
+		break;
+	case REG_VMSTATE:
+		*val = vmGetStatus();
+		break;
+	default:
+		if (reg >= REG_RELAY0 && reg < REG_RELAY0 + REG_RELAY_CNT) {
+			*val = getOutput(reg - REG_RELAY0) ? 1 : 0;
+		} else if (reg >= REG_PWM0 && reg < REG_PWM0 + REG_RELAY_CNT) {
+			*val = getPWM(reg - REG_PWM0);
+		} else if (reg >= REG_ADC0 && reg < REG_ADC0 + REG_ADC_CNT) {
+			*val = read_adc(pgm_read_byte(&(adcs[reg - REG_ADC0])), AVCC_VREF_TYPE);
+		} else if (reg >= REG_IN0 && reg < REG_IN0 + REG_IN_CNT) {
+			*val = getPin(PIN(reg - REG_IN0)) ? 1 : 0;
+		} else if (reg >= REG_EEPROM0 && reg < REG_EEPROM0 + REG_EEPROM_CNT) {
+			*val = eeprom_read_word(
+					(uint16_t*) eepromRegisters + (reg - REG_EEPROM0));
+		} else if (reg >= REG_RAM0 && reg < REG_RAM0 + REG_RAM_CNT) {
+			*val = ramRegisters[reg];
+		} else {
+			return 0;
+		}
+		break;
+	}
+	return 1;
+}
+*/
+char getReg(uint8_t reg, int* val) {
 	if (reg >= REG_RELAY0 && reg < REG_RELAY0 + REG_RELAY_CNT) {
 		*val = getOutput(reg - REG_RELAY0) ? 1 : 0;
 	} else if (reg >= REG_PWM0 && reg < REG_PWM0 + REG_RELAY_CNT) {
@@ -136,9 +179,9 @@ char getReg(int reg, int* val) {
 	} else if (reg == REG_INPUTS) {
 		*val = getInputs();
 	} else if (reg == REG_TEMP) {
-		*val = temperature[0];
+		*val = w1_temp(0);
 	} else if (reg == REG_TEMP2) {
-		*val = temperature[1];
+		*val = w1_temp(1);
 	} else if (reg == REG_VMONOFF) {
 		*val = getvmonoff();
 	} else if (reg == REG_VMSTATE) {
@@ -158,7 +201,7 @@ char getReg(int reg, int* val) {
 	return 1;
 }
 
-char setReg(int reg, int val) {
+char setReg(uint8_t reg, int val) {
 	if (reg >= REG_RELAY0 && reg < REG_RELAY0 + REG_RELAY_CNT) {
 		setOutput(reg - REG_RELAY0, val);
 	} else if (reg >= REG_PWM0 && reg < REG_PWM0 + REG_RELAY_CNT) {
@@ -192,8 +235,8 @@ void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 	uint8_t command = cmd[0];
 	switch (command) {
 	case CMD_MODBUS_SETREGS: {
-		int reg = fetch(cmd + 1); //(cmd[1] << 8) + cmd[2];
-		int n = cmd[4];
+		uint8_t reg = cmd[2]; // fetch(cmd + 1); //(cmd[1] << 8) + cmd[2];
+		uint8_t n = cmd[4];
 		uint8_t* data = cmd + 6;
 		char res = 1;
 		while (n--) {
@@ -204,15 +247,15 @@ void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 		if (res) {
 			S = sendPacketBodyPart(cmd, 5, S);
 		} else {
-			S = sendByte(CMD_MODBUS_SETREGS | 0x80, S);
+			S = sendByte(command | 0x80, S);
 			S = sendByte(2, S);
 		}
 		sendPacketEnd(S);
 		break;
 	}
 	case CMD_MODBUS_GETREGS: {
-		int reg = fetch(cmd + 1);
-		int n = cmd[4];
+		uint8_t reg = cmd[2]; // fetch(cmd + 1);
+		uint8_t n = cmd[4];
 		uint16_t S = sendPacketStart();
 		S = sendByte(command, S);
 		S = sendByte(n * 2, S);
@@ -241,7 +284,7 @@ void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 				S = sendByte(vmReadByte(i), S);
 		}
 
-		for (int i = 0; i < sizeof(regs) / sizeof(regs[0]); i++) {
+		for (uint8_t i = 0; i < sizeof(regs) / sizeof(regs[0]); i++) {
 			uint8_t reg = pgm_read_byte(regs + i);
 			int16_t val;
 			getReg(reg, &val);
@@ -254,21 +297,23 @@ void handleCmd(uint8_t* cmd, uint8_t cmdlen) {
 	}
 	case CMD_UPLOAD: {
 		uint16_t addr;
-		int len = cmdlen - 3;
-		if (len < 0) {
+		if (cmdlen < 3) {
 			sendError(command, ERR_WRONG_CMD_FORMAT);
 			return;
 		}
+
+		cmdlen -= 3;
+
 		addr = fetch(cmd + 1);
 
-		if (addr + len > VMCODE_SIZE) {
+		if (addr + cmdlen > VMCODE_SIZE) {
 			sendError(command, ERR_WRONG_CMD_FORMAT);
 			return;
 		}
 
 		setvmonoff(0);
 		startVM(0);
-		EEPROM_writeBlock((int) code + addr, len, cmd + 3);
+		EEPROM_writeBlock((int) code + addr, cmdlen, cmd + 3);
 		sendOk(command);
 		break;
 	}

@@ -88,8 +88,8 @@
 
 //void initCommands();
 
-char getReg(int reg, int* val);
-char setReg(int reg, int val);
+char getReg(uint8_t reg, int* val);
+char setReg(uint8_t reg, int val);
 
 int checkCode();
 
@@ -97,3 +97,5 @@ void initCommands();
 
 ee_16_decl(CodeLen);
 ee_16_decl(CodeCRC);
+
+void handlePWM(int ms);

@@ -1,5 +1,7 @@
-#include "common.h"
 #include "packet.h"
+#include "crc16.h"
+#include "settings.h"
+#include "myio.h"
 
 static char targetAddr;
 
@@ -11,7 +13,6 @@ void handleRxCmd(char* data, unsigned char len) {
 		if ((data[len - 2] == (char) sum)
 				&& (data[len - 1] == (char) (sum >> 8))) {
 			targetAddr = data[0];
-			ee_magic = MAGIC16;
 			packetReceived(data + 1, len - 3);
 		}
 	}
