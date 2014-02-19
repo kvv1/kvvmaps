@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="de.innot.avreclipse.configuration.app.release.1346805947">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="de.innot.avreclipse.configuration.app.release.1346805947" moduleId="org.eclipse.cdt.core.settings" name="Release">
@@ -39,7 +37,7 @@
 								<option id="de.innot.avreclipse.compiler.option.incpath.1471182680" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/basic}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/vm}&quot;"/>
-									<listOptionValue builtIn="false" value="../."/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/valves}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.compiler.option.optimize.other.1239525498" name="Other Optimization Flags" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-fdata-sections -ffunction-sections --param inline-call-cost=2 -mcall-prologues" valueType="string"/>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1297193693" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
