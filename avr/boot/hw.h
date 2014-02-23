@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define WAIT_UNIT_US 100
+#define WAIT_UNIT_US 200
 
 void initHW();
 int rdByte(); // -1 on timeout
