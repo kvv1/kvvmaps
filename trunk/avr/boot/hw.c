@@ -1,7 +1,6 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "hw.h"
-#include "adc.h"
 
 #if(F_CPU == 1000000)
 #define PRESCALER 3
@@ -79,7 +78,7 @@ void initHW() {
 #endif
 #endif
 
-	initADC();
+//	initADC();
 	startCnt = 0;
 }
 
@@ -92,6 +91,10 @@ void stopTX() {
 	PORTB &= ~0x80;
 }
 
+//void incCnt() {
+//	startCnt++;
+//}
+
 int rdByte() {
 	int8_t cnt = TIMEOUT_US / WAIT_UNIT_US;
 	while (!(UCSRA & (1 << RXC))) { //ждём байта данных с COM-порта
@@ -99,9 +102,11 @@ int rdByte() {
 			return -1;
 		_delay_us(WAIT_UNIT_US);
 		cnt--;
-		startCnt++;
+		if (startCnt < 0xFFFFU)
+			startCnt++;
+//		incCnt();
 	}
-	return UDR;
+	return (uint8_t) UDR;
 }
 
 void wrByte(uint8_t b) {

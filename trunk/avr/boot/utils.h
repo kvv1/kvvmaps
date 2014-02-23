@@ -13,35 +13,23 @@
 #define MODBUS_BOOTLOADER 100
 #define MODBUS_CLEAR_APP 101
 #define MODBUS_UPLOAD_APP 102
-#define MODBUS_APP_OK 103
+#define MODBUS_ENABLE_APP 103
 
 #define MODBUS_HELLO 120
 
-#define START_TIMEOUT_US 5000000L
+#define START_TIMEOUT_US 5000000UL
 
-#define BOOT_INPUT_BUFFER_SIZE 64
-
-typedef struct {
-	uint8_t addr;
-	uint8_t func;
-	uint8_t data[];
-} ADU;
+#define BOOT_INPUT_BUFFER_SIZE (512 + 10)
 
 typedef struct {
 	volatile uint16_t magic16;
 	uint16_t lastPage;
 	void (*jump_to_app)(void);
-	uint8_t inputIdx;
+	uint16_t inputIdx;
 	uint8_t inputBuffer[BOOT_INPUT_BUFFER_SIZE];
 } Globals;
 
 extern Globals globals;
-
-inline void initGlobals() {
-	memset(&globals, 0, sizeof(globals));
-	globals.jump_to_app = 0;
-	globals.lastPage = 0xFFFF;
-}
 
 
 void packetReceived(uint8_t* buffer, int len); // returns consumed flag

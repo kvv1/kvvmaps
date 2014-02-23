@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "hw.h"
 #include "packet.h"
+#include "address.h"
 
 //#define MAGIC8 0x5A
 //#define MAGIC16 0xE6C9
@@ -13,31 +14,37 @@
 void __jumpMain(void) __attribute__ ((naked)) __attribute__ ((section (".init9")));
 void __jumpMain(void) {
 	asm volatile ( "rjmp main");
-	asm volatile ( "rjmp bootloader");
-	asm volatile ( "rjmp getModbusData");
-	asm volatile ( "rjmp crc16");
-	asm volatile ( "rjmp sendByte");
-//	asm volatile ( "rjmp sendPacketStart");
-//	asm volatile ( "rjmp sendPacketEnd");
-//	asm volatile ( "rjmp sendOk");
-//	asm volatile ( "rjmp sendError");
-	asm volatile ( "rjmp readADC");
+	asm volatile ( "rjmp checkPacket");
+	asm volatile ( "rjmp getAddr");
 }
 
+uint8_t getAddr() {
+	return MYADDR;
+}
 
 Globals globals;
 
 register uint8_t reg_r1 asm("r1");
 #define init() do { SP = RAMEND; reg_r1 = 0; SREG = reg_r1; } while(0)
 
-void mainLoop() {
-	while (startCnt < START_TIMEOUT_US / WAIT_UNIT_US || !isAppOK()) {
+void initGlobals() {
+	memset(&globals, 0, sizeof(globals));
+	globals.jump_to_app = 0;
+	globals.lastPage = 0xFFFF;
+	initHW();
+}
+
+int main() {
+	cli();
+	init();
+	initGlobals();
+	while (startCnt < (unsigned int) (START_TIMEOUT_US / WAIT_UNIT_US)
+			|| !isAppOK()) {
+
 		int b = rdByte();
 		if (b == -1) {
-			if (globals.inputIdx > 0) {
-				globals.magic16 = MAGIC16;
+			if (globals.inputIdx) {
 				packetReceived(globals.inputBuffer, globals.inputIdx);
-				globals.magic16 = 0;
 			}
 			globals.inputIdx = 0;
 
@@ -47,24 +54,6 @@ void mainLoop() {
 		}
 	}
 	globals.jump_to_app();
-}
-
-int main(void) {
-	init();
-	initGlobals();
-	initHW();
-	mainLoop();
-}
-
-void bootloader() {
-	cli();
-	init();
-	initGlobals();
-	initHW();
-	startTX();
-	sendOk(MODBUS_BOOTLOADER, wrByte);
-	stopTX();
-	mainLoop();
 }
 
 /*
