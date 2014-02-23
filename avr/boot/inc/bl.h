@@ -8,7 +8,7 @@
 #ifndef BL_H_
 #define BL_H_
 
-#define BOOTSIZE 1024 // in words
+#define BOOTSIZE 512 // in words
 #define BOOTLOADER_START (FLASHEND + 1 - (BOOTSIZE * 2))
 
 typedef struct {
