@@ -30,7 +30,6 @@ typedef struct {
 		}
 
 F_VOID(0, main, (), ())
-F(1, uint8_t, checkPacket, (buffer, len), (uint8_t* buffer, int len))
-F(2, uint8_t, getAddr, (), ())
+F(1, uint8_t, getAddr, (), ())
 
 #endif /* BL_H_ */
