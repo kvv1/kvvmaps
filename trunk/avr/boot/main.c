@@ -4,7 +4,6 @@
 #include "utils.h"
 #include "hw.h"
 #include "packet.h"
-#include "address.h"
 
 //#define MAGIC8 0x5A
 //#define MAGIC16 0xE6C9
@@ -14,7 +13,6 @@
 void __jumpMain(void) __attribute__ ((naked)) __attribute__ ((section (".init9")));
 void __jumpMain(void) {
 	asm volatile ( "rjmp main");
-	asm volatile ( "rjmp checkPacket");
 	asm volatile ( "rjmp getAddr");
 }
 
@@ -44,7 +42,9 @@ int main() {
 		int b = rdByte();
 		if (b == -1) {
 			if (globals.inputIdx) {
+				globals.magic16 = MAGIC16;
 				packetReceived(globals.inputBuffer, globals.inputIdx);
+				globals.magic16 = 0;
 			}
 			globals.inputIdx = 0;
 

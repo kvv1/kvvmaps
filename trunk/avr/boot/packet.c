@@ -1,5 +1,4 @@
 #include "packet.h"
-#include "address.h"
 #include "hw.h"
 
 #define CRC16_INIT 0xffff

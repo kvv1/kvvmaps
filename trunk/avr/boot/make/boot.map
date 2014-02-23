@@ -1,0 +1,360 @@
+
+Allocating common symbols
+Common symbol       size              file
+
+startCnt            0x2               ./hw.o
+globals             0x212             ./main.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+text             0x00000000         0x00002000         xr
+data             0x00800060         0x0000ffa0         rw !x
+eeprom           0x00810000         0x00010000         rw !x
+fuse             0x00820000         0x00000400         rw !x
+lock             0x00830000         0x00000400         rw !x
+signature        0x00840000         0x00000400         rw !x
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+Address of section .text set to 0x1800
+LOAD ./hw.o
+LOAD ./main.o
+LOAD ./packet.o
+LOAD ./utils.o
+
+.hash
+ *(.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.text
+ *(.rel.text)
+ *(.rel.text.*)
+ *(.rel.gnu.linkonce.t*)
+
+.rela.text
+ *(.rela.text)
+ *(.rela.text.*)
+ *(.rela.gnu.linkonce.t*)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.rodata
+ *(.rel.rodata)
+ *(.rel.rodata.*)
+ *(.rel.gnu.linkonce.r*)
+
+.rela.rodata
+ *(.rela.rodata)
+ *(.rela.rodata.*)
+ *(.rela.gnu.linkonce.r*)
+
+.rel.data
+ *(.rel.data)
+ *(.rel.data.*)
+ *(.rel.gnu.linkonce.d*)
+
+.rela.data
+ *(.rela.data)
+ *(.rela.data.*)
+ *(.rela.gnu.linkonce.d*)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.bss
+ *(.rel.bss)
+
+.rela.bss
+ *(.rela.bss)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.text           0x00001800      0x3fa
+ *(.vectors)
+ *(.vectors)
+ *(.progmem.gcc*)
+ *(.progmem*)
+                0x00001800                . = ALIGN (0x2)
+                0x00001800                __trampolines_start = .
+ *(.trampolines)
+ .trampolines   0x00001800        0x0 linker stubs
+ *(.trampolines*)
+                0x00001800                __trampolines_end = .
+ *(.jumptables)
+ *(.jumptables*)
+ *(.lowtext)
+ *(.lowtext*)
+                0x00001800                __ctors_start = .
+ *(.ctors)
+                0x00001800                __ctors_end = .
+                0x00001800                __dtors_start = .
+ *(.dtors)
+                0x00001800                __dtors_end = .
+ SORT(*)(.ctors)
+ SORT(*)(.dtors)
+ *(.init0)
+ *(.init0)
+ *(.init1)
+ *(.init1)
+ *(.init2)
+ *(.init2)
+ *(.init3)
+ *(.init3)
+ *(.init4)
+ *(.init4)
+ *(.init5)
+ *(.init5)
+ *(.init6)
+ *(.init6)
+ *(.init7)
+ *(.init7)
+ *(.init8)
+ *(.init8)
+ *(.init9)
+ .init9         0x00001800        0x4 ./main.o
+                0x00001800                __jumpMain
+ *(.init9)
+ *(.text)
+ .text          0x00001804        0x0 ./hw.o
+ .text          0x00001804        0x0 ./main.o
+ .text          0x00001804        0x0 ./packet.o
+ .text          0x00001804        0x0 ./utils.o
+                0x00001804                . = ALIGN (0x2)
+ *(.text.*)
+ .text.initHW   0x00001804       0x26 ./hw.o
+                0x00001804                initHW
+ .text.startTX  0x0000182a        0x4 ./hw.o
+                0x0000182a                startTX
+ .text.stopTX   0x0000182e        0xc ./hw.o
+                0x0000182e                stopTX
+ .text.rdByte   0x0000183a       0x4c ./hw.o
+                0x0000183a                rdByte
+ .text.wrByte   0x00001886        0x8 ./hw.o
+                0x00001886                wrByte
+ .text.getAddr  0x0000188e        0x4 ./main.o
+                0x0000188e                getAddr
+ .text.initGlobals
+                0x00001892       0x2c ./main.o
+                0x00001892                initGlobals
+ .text.main     0x000018be       0x9e ./main.o
+                0x000018be                main
+ .text.crc16_step
+                0x0000195c       0x26 ./packet.o
+                0x0000195c                crc16_step
+ .text.crc16    0x00001982       0x2e ./packet.o
+                0x00001982                crc16
+ .text.sendByte
+                0x000019b0       0x1a ./packet.o
+                0x000019b0                sendByte
+ .text.sendPacketEnd
+                0x000019ca       0x10 ./packet.o
+                0x000019ca                sendPacketEnd
+ .text.sendPacketStart
+                0x000019da        0xc ./packet.o
+                0x000019da                sendPacketStart
+ .text.sendError
+                0x000019e6       0x20 ./packet.o
+                0x000019e6                sendError
+ .text.sendOk   0x00001a06       0x12 ./packet.o
+                0x00001a06                sendOk
+ .text.spmWait  0x00001a18        0xc ./utils.o
+ .text.page_write
+                0x00001a24       0x30 ./utils.o
+ .text.isAppOK  0x00001a54       0x30 ./utils.o
+                0x00001a54                isAppOK
+ .text.setAppOK
+                0x00001a84       0x30 ./utils.o
+                0x00001a84                setAppOK
+ .text.erase    0x00001ab4       0x30 ./utils.o
+                0x00001ab4                erase
+ .text.processBlock
+                0x00001ae4       0x62 ./utils.o
+                0x00001ae4                processBlock
+ .text.packetReceived
+                0x00001b46       0xb4 ./utils.o
+                0x00001b46                packetReceived
+                0x00001bfa                . = ALIGN (0x2)
+ *(.fini9)
+ *(.fini9)
+ *(.fini8)
+ *(.fini8)
+ *(.fini7)
+ *(.fini7)
+ *(.fini6)
+ *(.fini6)
+ *(.fini5)
+ *(.fini5)
+ *(.fini4)
+ *(.fini4)
+ *(.fini3)
+ *(.fini3)
+ *(.fini2)
+ *(.fini2)
+ *(.fini1)
+ *(.fini1)
+ *(.fini0)
+ *(.fini0)
+                0x00001bfa                _etext = .
+
+.data           0x00800060        0x0 load address 0x00001bfa
+                0x00800060                PROVIDE (__data_start, .)
+ *(.data)
+ .data          0x00800060        0x0 ./hw.o
+ .data          0x00800060        0x0 ./main.o
+ .data          0x00800060        0x0 ./packet.o
+ .data          0x00800060        0x0 ./utils.o
+ *(.data*)
+ *(.rodata)
+ *(.rodata*)
+ *(.gnu.linkonce.d*)
+                0x00800060                . = ALIGN (0x2)
+                0x00800060                _edata = .
+                0x00800060                PROVIDE (__data_end, .)
+
+.bss            0x00800060      0x214
+                0x00800060                PROVIDE (__bss_start, .)
+ *(.bss)
+ .bss           0x00800060        0x0 ./hw.o
+ .bss           0x00800060        0x0 ./main.o
+ .bss           0x00800060        0x0 ./packet.o
+ .bss           0x00800060        0x0 ./utils.o
+ *(.bss*)
+ *(COMMON)
+ COMMON         0x00800060        0x2 ./hw.o
+                0x00800060                startCnt
+ COMMON         0x00800062      0x212 ./main.o
+                0x00800062                globals
+                0x00800274                PROVIDE (__bss_end, .)
+                0x00001bfa                __data_load_start = LOADADDR (.data)
+                0x00001bfa                __data_load_end = (__data_load_start + SIZEOF (.data))
+
+.noinit         0x00800274        0x0
+                0x00800274                PROVIDE (__noinit_start, .)
+ *(.noinit*)
+                0x00800274                PROVIDE (__noinit_end, .)
+                0x00800274                _end = .
+                0x00800274                PROVIDE (__heap_start, .)
+
+.eeprom         0x00810000        0x0
+ *(.eeprom*)
+                0x00810000                __eeprom_end = .
+
+.fuse
+ *(.fuse)
+ *(.lfuse)
+ *(.hfuse)
+ *(.efuse)
+
+.lock
+ *(.lock*)
+
+.signature
+ *(.signature*)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment
+ *(.comment)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges
+ *(.debug_aranges)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info
+ *(.debug_info)
+ *(.gnu.linkonce.wi.*)
+
+.debug_abbrev
+ *(.debug_abbrev)
+
+.debug_line
+ *(.debug_line)
+
+.debug_frame
+ *(.debug_frame)
+
+.debug_str
+ *(.debug_str)
+
+.debug_loc
+ *(.debug_loc)
+
+.debug_macinfo
+ *(.debug_macinfo)
+OUTPUT(boot.elf elf32-avr)
+LOAD linker stubs
