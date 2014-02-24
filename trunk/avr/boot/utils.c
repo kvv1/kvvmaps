@@ -4,17 +4,17 @@
 #include "packet.h"
 #include "hw.h"
 
-static void spmWait() {
+void spmWait() {
 	boot_spm_busy_wait();
 	eeprom_busy_wait();
 }
 
-static void rww_enable() {
+void rww_enable() {
 	spmWait();
 	boot_rww_enable();
 }
 
-static void page_write(uint16_t a) {
+void page_write(uint16_t a) {
 	spmWait();
 	if (globals.magic16 == MAGIC16)
 		boot_page_write(a);
@@ -25,8 +25,7 @@ static void page_write(uint16_t a) {
 
 uint8_t isAppOK() {
 	spmWait();
-	return pgm_read_word(LAST_PAGE_ADDR) == MAGIC_APP_0
-			&& pgm_read_word(LAST_PAGE_ADDR + 2) == MAGIC_APP_2;
+	return pgm_read_dword(LAST_PAGE_ADDR) != MAGIC_APP_DWORD;
 }
 
 void setAppOK() {
@@ -67,11 +66,10 @@ void packetReceived(uint8_t* buffer, int len) { // returns consumed flag
 		return;
 
 	uint8_t addr = adu->addr;
-	if (addr != MYADDR && addr != 0)
+	if (addr != MYADDR)
 		return;
 
 	uint16_t sum = crc16(buffer, len - 2);
-
 	if ((buffer[len - 2] != (char) sum)
 			|| (buffer[len - 1] != (char) (sum >> 8)))
 		return;
@@ -98,8 +96,7 @@ void packetReceived(uint8_t* buffer, int len) { // returns consumed flag
 		spmWait();
 		break;
 	default:
-		err:
-		sendError(adu->func, 1);
+		err: sendError(adu->func, 1);
 		return;
 	}
 	sendOk(adu->func);

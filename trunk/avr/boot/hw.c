@@ -38,6 +38,26 @@
 #define UART_SPEED 9600UL
 #define TIMEOUT_US 4000
 
+#if defined(__AVR_ATmega48__) || defined(__AVR_ATmega168__)
+#define UCSRA UCSR0A
+#define UDR UDR0
+#define UCSRB UCSR0B
+
+#define RXCIE RXCIE0
+#define TXCIE TXCIE0
+#define RXEN RXEN0
+#define TXEN TXEN0
+#define RXC RXC0
+#define UDRE UDRE0
+
+#define UCSRC UCSR0C
+#define UBRRH UBRR0H
+#define UBRRL UBRR0L
+
+#define USART_RXC_vect USART_RX_vect
+#define USART_TXC_vect USART_TX_vect
+#endif
+
 uint16_t startCnt;
 
 void initHW() {
