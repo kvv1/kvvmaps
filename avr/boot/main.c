@@ -22,20 +22,29 @@ uint8_t getAddr() {
 
 Globals globals;
 
+void on() {
+	DDRD |= 1 << 2;
+	PORTD |= 1 << 2;
+}
+
+void off() {
+	DDRD |= 1 << 2;
+	PORTD &= ~(1 << 2);
+}
+
 register uint8_t reg_r1 asm("r1");
 #define init() do { SP = RAMEND; reg_r1 = 0; SREG = reg_r1; } while(0)
-
-void initGlobals() {
-	memset(&globals, 0, sizeof(globals));
-	globals.jump_to_app = 0;
-	globals.lastPage = 0xFFFF;
-	initHW();
-}
 
 int main() {
 	cli();
 	init();
-	initGlobals();
+
+	on();
+
+	memset(&globals, 0, sizeof(globals));
+	globals.lastPage = 0xFFFF;
+	initHW();
+
 	while (startCnt < (unsigned int) (START_TIMEOUT_US / WAIT_UNIT_US)
 			|| !isAppOK()) {
 
@@ -53,7 +62,22 @@ int main() {
 				globals.inputBuffer[globals.inputIdx++] = b;
 		}
 	}
-	globals.jump_to_app();
+
+	off();
+
+#if defined(__AVR_ATmega168__)
+	asm volatile ( "jmp 0");
+
+#define BOOTSIZE 512 // in words
+#else
+#ifdef __AVR_ATmega8__
+
+	asm volatile ( "rjmp 0");
+
+#else
+#error
+#endif
+#endif
 }
 
 /*

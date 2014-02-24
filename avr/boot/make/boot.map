@@ -3,12 +3,12 @@ Allocating common symbols
 Common symbol       size              file
 
 startCnt            0x2               ./hw.o
-globals             0x212             ./main.o
+globals             0x210             ./main.o
 
 Memory Configuration
 
 Name             Origin             Length             Attributes
-text             0x00000000         0x00002000         xr
+text             0x00000000         0x00020000         xr
 data             0x00800060         0x0000ffa0         rw !x
 eeprom           0x00810000         0x00010000         rw !x
 fuse             0x00820000         0x00000400         rw !x
@@ -18,7 +18,8 @@ signature        0x00840000         0x00000400         rw !x
 
 Linker script and memory map
 
-Address of section .text set to 0x1c00
+Address of section .data set to 0x800100
+Address of section .text set to 0x3c00
 LOAD ./hw.o
 LOAD ./main.o
 LOAD ./packet.o
@@ -114,27 +115,27 @@ LOAD ./utils.o
 .rela.plt
  *(.rela.plt)
 
-.text           0x00001c00      0x3fa
+.text           0x00003c00      0x3f2
  *(.vectors)
  *(.vectors)
  *(.progmem.gcc*)
  *(.progmem*)
-                0x00001c00                . = ALIGN (0x2)
-                0x00001c00                __trampolines_start = .
+                0x00003c00                . = ALIGN (0x2)
+                0x00003c00                __trampolines_start = .
  *(.trampolines)
- .trampolines   0x00001c00        0x0 linker stubs
+ .trampolines   0x00003c00        0x0 linker stubs
  *(.trampolines*)
-                0x00001c00                __trampolines_end = .
+                0x00003c00                __trampolines_end = .
  *(.jumptables)
  *(.jumptables*)
  *(.lowtext)
  *(.lowtext*)
-                0x00001c00                __ctors_start = .
+                0x00003c00                __ctors_start = .
  *(.ctors)
-                0x00001c00                __ctors_end = .
-                0x00001c00                __dtors_start = .
+                0x00003c00                __ctors_end = .
+                0x00003c00                __dtors_start = .
  *(.dtors)
-                0x00001c00                __dtors_end = .
+                0x00003c00                __dtors_end = .
  SORT(*)(.ctors)
  SORT(*)(.dtors)
  *(.init0)
@@ -156,69 +157,72 @@ LOAD ./utils.o
  *(.init8)
  *(.init8)
  *(.init9)
- .init9         0x00001c00        0x4 ./main.o
-                0x00001c00                __jumpMain
+ .init9         0x00003c00        0x4 ./main.o
+                0x00003c00                __jumpMain
  *(.init9)
  *(.text)
- .text          0x00001c04        0x0 ./hw.o
- .text          0x00001c04        0x0 ./main.o
- .text          0x00001c04        0x0 ./packet.o
- .text          0x00001c04        0x0 ./utils.o
-                0x00001c04                . = ALIGN (0x2)
+ .text          0x00003c04        0x0 ./hw.o
+ .text          0x00003c04        0x0 ./main.o
+ .text          0x00003c04        0x0 ./packet.o
+ .text          0x00003c04        0x0 ./utils.o
+                0x00003c04                . = ALIGN (0x2)
  *(.text.*)
- .text.initHW   0x00001c04       0x26 ./hw.o
-                0x00001c04                initHW
- .text.startTX  0x00001c2a        0x4 ./hw.o
-                0x00001c2a                startTX
- .text.stopTX   0x00001c2e        0xc ./hw.o
-                0x00001c2e                stopTX
- .text.rdByte   0x00001c3a       0x4c ./hw.o
-                0x00001c3a                rdByte
- .text.wrByte   0x00001c86        0x8 ./hw.o
-                0x00001c86                wrByte
- .text.getAddr  0x00001c8e        0x4 ./main.o
-                0x00001c8e                getAddr
- .text.initGlobals
-                0x00001c92       0x2c ./main.o
-                0x00001c92                initGlobals
- .text.main     0x00001cbe       0x9e ./main.o
-                0x00001cbe                main
+ .text.initHW   0x00003c04       0x30 ./hw.o
+                0x00003c04                initHW
+ .text.startTX  0x00003c34        0x4 ./hw.o
+                0x00003c34                startTX
+ .text.stopTX   0x00003c38        0xc ./hw.o
+                0x00003c38                stopTX
+ .text.rdByte   0x00003c44       0x52 ./hw.o
+                0x00003c44                rdByte
+ .text.wrByte   0x00003c96       0x10 ./hw.o
+                0x00003c96                wrByte
+ .text.getAddr  0x00003ca6        0x4 ./main.o
+                0x00003ca6                getAddr
+ .text.on       0x00003caa        0x6 ./main.o
+                0x00003caa                on
+ .text.off      0x00003cb0        0x6 ./main.o
+                0x00003cb0                off
+ .text.main     0x00003cb6       0xbc ./main.o
+                0x00003cb6                main
  .text.crc16_step
-                0x00001d5c       0x26 ./packet.o
-                0x00001d5c                crc16_step
- .text.crc16    0x00001d82       0x2e ./packet.o
-                0x00001d82                crc16
+                0x00003d72       0x26 ./packet.o
+                0x00003d72                crc16_step
+ .text.crc16    0x00003d98       0x2e ./packet.o
+                0x00003d98                crc16
  .text.sendByte
-                0x00001db0       0x1a ./packet.o
-                0x00001db0                sendByte
+                0x00003dc6       0x1a ./packet.o
+                0x00003dc6                sendByte
  .text.sendPacketEnd
-                0x00001dca       0x10 ./packet.o
-                0x00001dca                sendPacketEnd
+                0x00003de0       0x10 ./packet.o
+                0x00003de0                sendPacketEnd
  .text.sendPacketStart
-                0x00001dda        0xc ./packet.o
-                0x00001dda                sendPacketStart
+                0x00003df0        0xa ./packet.o
+                0x00003df0                sendPacketStart
  .text.sendError
-                0x00001de6       0x20 ./packet.o
-                0x00001de6                sendError
- .text.sendOk   0x00001e06       0x12 ./packet.o
-                0x00001e06                sendOk
- .text.spmWait  0x00001e18        0xc ./utils.o
+                0x00003dfa       0x20 ./packet.o
+                0x00003dfa                sendError
+ .text.sendOk   0x00003e1a       0x12 ./packet.o
+                0x00003e1a                sendOk
+ .text.spmWait  0x00003e2c        0xc ./utils.o
+ .text.rww_enable
+                0x00003e38        0xc ./utils.o
  .text.page_write
-                0x00001e24       0x30 ./utils.o
- .text.isAppOK  0x00001e54       0x30 ./utils.o
-                0x00001e54                isAppOK
+                0x00003e44       0x28 ./utils.o
+ .text.isAppOK  0x00003e6c       0x20 ./utils.o
+                0x00003e6c                isAppOK
  .text.setAppOK
-                0x00001e84       0x30 ./utils.o
-                0x00001e84                setAppOK
- .text.erase    0x00001eb4       0x30 ./utils.o
-                0x00001eb4                erase
+                0x00003e8c       0x2e ./utils.o
+                0x00003e8c                setAppOK
+ .text.erase    0x00003eba       0x28 ./utils.o
+                0x00003eba                erase
  .text.processBlock
-                0x00001ee4       0x62 ./utils.o
-                0x00001ee4                processBlock
+                0x00003ee2       0x62 ./utils.o
+                0x00003ee2                processBlock
  .text.packetReceived
-                0x00001f46       0xb4 ./utils.o
-                0x00001f46                packetReceived
-                0x00001ffa                . = ALIGN (0x2)
+                0x00003f44       0xae ./utils.o
+                0x00003f44                packetReceived
+                0x00003ff2                . = ALIGN (0x2)
  *(.fini9)
  *(.fini9)
  *(.fini8)
@@ -239,46 +243,46 @@ LOAD ./utils.o
  *(.fini1)
  *(.fini0)
  *(.fini0)
-                0x00001ffa                _etext = .
+                0x00003ff2                _etext = .
 
-.data           0x00800060        0x0 load address 0x00001ffa
-                0x00800060                PROVIDE (__data_start, .)
+.data           0x00800100        0x0 load address 0x00003ff2
+                0x00800100                PROVIDE (__data_start, .)
  *(.data)
- .data          0x00800060        0x0 ./hw.o
- .data          0x00800060        0x0 ./main.o
- .data          0x00800060        0x0 ./packet.o
- .data          0x00800060        0x0 ./utils.o
+ .data          0x00800100        0x0 ./hw.o
+ .data          0x00800100        0x0 ./main.o
+ .data          0x00800100        0x0 ./packet.o
+ .data          0x00800100        0x0 ./utils.o
  *(.data*)
  *(.rodata)
  *(.rodata*)
  *(.gnu.linkonce.d*)
-                0x00800060                . = ALIGN (0x2)
-                0x00800060                _edata = .
-                0x00800060                PROVIDE (__data_end, .)
+                0x00800100                . = ALIGN (0x2)
+                0x00800100                _edata = .
+                0x00800100                PROVIDE (__data_end, .)
 
-.bss            0x00800060      0x214
-                0x00800060                PROVIDE (__bss_start, .)
+.bss            0x00800100      0x212
+                0x00800100                PROVIDE (__bss_start, .)
  *(.bss)
- .bss           0x00800060        0x0 ./hw.o
- .bss           0x00800060        0x0 ./main.o
- .bss           0x00800060        0x0 ./packet.o
- .bss           0x00800060        0x0 ./utils.o
+ .bss           0x00800100        0x0 ./hw.o
+ .bss           0x00800100        0x0 ./main.o
+ .bss           0x00800100        0x0 ./packet.o
+ .bss           0x00800100        0x0 ./utils.o
  *(.bss*)
  *(COMMON)
- COMMON         0x00800060        0x2 ./hw.o
-                0x00800060                startCnt
- COMMON         0x00800062      0x212 ./main.o
-                0x00800062                globals
-                0x00800274                PROVIDE (__bss_end, .)
-                0x00001ffa                __data_load_start = LOADADDR (.data)
-                0x00001ffa                __data_load_end = (__data_load_start + SIZEOF (.data))
+ COMMON         0x00800100        0x2 ./hw.o
+                0x00800100                startCnt
+ COMMON         0x00800102      0x210 ./main.o
+                0x00800102                globals
+                0x00800312                PROVIDE (__bss_end, .)
+                0x00003ff2                __data_load_start = LOADADDR (.data)
+                0x00003ff2                __data_load_end = (__data_load_start + SIZEOF (.data))
 
-.noinit         0x00800274        0x0
-                0x00800274                PROVIDE (__noinit_start, .)
+.noinit         0x00800312        0x0
+                0x00800312                PROVIDE (__noinit_start, .)
  *(.noinit*)
-                0x00800274                PROVIDE (__noinit_end, .)
-                0x00800274                _end = .
-                0x00800274                PROVIDE (__heap_start, .)
+                0x00800312                PROVIDE (__noinit_end, .)
+                0x00800312                _end = .
+                0x00800312                PROVIDE (__heap_start, .)
 
 .eeprom         0x00810000        0x0
  *(.eeprom*)

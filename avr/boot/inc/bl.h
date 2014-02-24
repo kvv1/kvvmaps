@@ -7,8 +7,23 @@
 
 #ifndef BL_H_
 #define BL_H_
+#if defined(__AVR_ATmega168__)
 
 #define BOOTSIZE 512 // in words
+
+#else
+#ifdef __AVR_ATmega8__
+
+#define BOOTSIZE 512 // in words
+
+#else
+#error
+#endif
+#endif
+
+
+
+
 #define BOOTLOADER_START (FLASHEND + 1 - (BOOTSIZE * 2))
 
 typedef struct {
