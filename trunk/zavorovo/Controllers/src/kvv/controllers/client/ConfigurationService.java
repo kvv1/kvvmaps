@@ -6,7 +6,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("configuration")
-public interface ConfigurationService  extends RemoteService {
+public interface ConfigurationService extends RemoteService {
 	SystemDescr getSystemDescr() throws Exception;
 
 	void saveControllersText(String text) throws Exception;
@@ -17,5 +17,6 @@ public interface ConfigurationService  extends RemoteService {
 
 	void savePagesText(String text) throws Exception;
 
+	void setSystemDescr(SystemDescr sd) throws Exception;
 
 }

@@ -1,6 +1,7 @@
 package kvv.controllers.client;
 
 import kvv.controllers.client.page.ConfigurationPage;
+import kvv.controllers.client.page.ConfigurationPageG;
 import kvv.controllers.client.page.ControllersPage;
 import kvv.controllers.client.page.LogPage;
 import kvv.controllers.client.page.ModePage;
@@ -39,8 +40,8 @@ public class Controllers implements EntryPoint {
 				systemDescr = result;
 				// Window.alert("x1");
 				try {
-					if (systemDescr.unitDescrs != null)
-						for (UnitDescr page : systemDescr.unitDescrs)
+					if (systemDescr.units != null)
+						for (UnitDescr page : systemDescr.units)
 							tabs.add(new UnitPage(page), page.name);
 
 					tabs.add(new ControllersPage(), "Контроллеры");
@@ -48,13 +49,17 @@ public class Controllers implements EntryPoint {
 					tabs.add(new SourcesPage(), "Sources");
 					tabs.add(new LogPage(), "Log");
 
-					if (ModePage.controlMode)
-						tabs.add(new ConfigurationPage(), "Конфигурация");
+					if (ModePage.controlMode) {
+						tabs.add(new ConfigurationPage(), "Конф.");
+						tabs.add(new ConfigurationPageG(), "Конфигурация");
+					}
 					// throw new Exception();
 				} catch (Exception e) {
 					e.printStackTrace();
-					if (ModePage.controlMode)
-						tabs.add(new ConfigurationPage(), "Конфигурация");
+					if (ModePage.controlMode) {
+						tabs.add(new ConfigurationPage(), "Конф.");
+						tabs.add(new ConfigurationPageG(), "Конфигурация");
+					}
 					tabs.selectTab(0);
 					// Window.alert("zzz");
 					String st = e.getClass().getName() + ": " + e.getMessage();
@@ -68,8 +73,10 @@ public class Controllers implements EntryPoint {
 			@Override
 			public void onFailure(Throwable caught) {
 				// Window.alert("x2");
-				if (ModePage.controlMode)
-					tabs.add(new ConfigurationPage(), "Конфигурация");
+				if (ModePage.controlMode) {
+					tabs.add(new ConfigurationPage(), "Конф.");
+					tabs.add(new ConfigurationPageG(), "Конфигурация");
+				}
 				tabs.selectTab(0);
 			}
 		});

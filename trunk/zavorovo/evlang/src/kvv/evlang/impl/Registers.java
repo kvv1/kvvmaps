@@ -163,7 +163,7 @@ public class Registers {
 		registerUIs.add(new RegisterUI(registerDescr.reg, uiType, uiName));
 	}
 
-	public RegisterUI[] getRegisterDescriptions() {
+	public RegisterUI[] getUIRegisters() {
 		return registerUIs.toArray(new RegisterUI[0]);
 	}
 

@@ -1,5 +1,8 @@
 package kvv.evlang.rt;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 import kvv.evlang.rt.heap.Array;
@@ -19,16 +22,30 @@ public class RTContext {
 		}
 	}
 
-	public final List<Byte> codeArr;
-	public final short[] regs = new short[256];
+	public static class UIReg {
+		public final int reg;
+		public final String text;
+		public final int type;
+
+		public UIReg(int reg, String text, int type) {
+			this.reg = reg;
+			this.text = text;
+			this.type = type;
+		}
+	}
+
+	public final UIReg[] uiRegs;
 	public final short[] funcs;
 	public final TryCatchBlock[] tryCatchBlocks;
 	public final Short[] constPool;
 	public final Short[] regPool;
 	public final Byte[] refs;
 	public final Type[] types;
+	public final List<Byte> code;
+
 	public final Array timers;
 	public final Array triggers;
+	public final short[] regs = new short[256];
 
 	public final Heap heap;
 
@@ -44,14 +61,15 @@ public class RTContext {
 
 	public RTContext(List<Byte> codeArr, short[] funcs,
 			TryCatchBlock[] tryCatchBlocks, Short[] constPool, Short[] regPool,
-			Byte[] refs, final Type[] types) {
-		this.codeArr = codeArr;
+			Byte[] refs, final Type[] types, UIReg[] uiRegs) {
+		this.code = codeArr;
 		this.funcs = funcs;
 		this.tryCatchBlocks = tryCatchBlocks;
 		this.constPool = constPool;
 		this.regPool = regPool;
 		this.refs = refs;
 		this.types = types;
+		this.uiRegs = uiRegs;
 		// heap = new HeapImpl(64, types);
 		heap = new Heap2(128) {
 			@Override
@@ -117,6 +135,59 @@ public class RTContext {
 
 		heap.markClosure();
 		heap.sweep();
+	}
+
+	public byte[] dump() throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(baos);
+
+		dos.writeByte(regs.length);
+		for (UIReg reg : uiRegs) {
+			dos.writeByte(reg.reg);
+			dos.writeByte(reg.type);
+			dos.writeByte(reg.text.length());
+			dos.writeBytes(reg.text);
+		}
+
+		dos.writeByte(funcs.length);
+		for (int f : funcs)
+			dos.writeShort(f);
+
+		dos.writeByte(tryCatchBlocks.length);
+		for (TryCatchBlock tcb : tryCatchBlocks) {
+			dos.writeShort(tcb.from);
+			dos.writeShort(tcb.to);
+			dos.writeShort(tcb.handler);
+		}
+
+		dos.writeByte(constPool.length);
+		for (short s : constPool)
+			dos.writeShort(s);
+
+		dos.writeByte(regPool.length);
+		for (short s : regPool)
+			dos.writeByte(s);
+
+		dos.writeByte(refs.length);
+		for (byte ref : refs)
+			dos.writeByte(ref);
+
+		dos.writeByte(types.length);
+		for (Type type : types) {
+			dos.writeByte(type.sz);
+			dos.writeShort(type.mask);
+			dos.writeByte(type.vtable.length);
+			for (short a : type.vtable)
+				dos.writeShort(a);
+		}
+
+		System.out.println("codeOffset = " + baos.toByteArray().length);
+		
+		for (byte b : code)
+			dos.write(b);
+
+		dos.close();
+		return baos.toByteArray();
 	}
 
 }

@@ -14,4 +14,6 @@ public interface ConfigurationServiceAsync {
 	void savePagesText(String text, AsyncCallback<Void> callback);
 
 	void getSystemDescr(AsyncCallback<SystemDescr> callback);
+
+	void setSystemDescr(SystemDescr sd, AsyncCallback<Void> callback);
 }

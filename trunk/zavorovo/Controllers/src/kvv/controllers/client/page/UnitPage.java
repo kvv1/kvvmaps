@@ -12,6 +12,7 @@ import kvv.controllers.client.control.simple.Form;
 import kvv.controllers.client.control.simple.TextWithSaveButton;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.RegisterDescr;
+import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.ScriptData;
 import kvv.controllers.shared.UnitDescr;
 
@@ -38,14 +39,14 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 
 	private final Label errMsg = new Label();
 	private final CheckBox vmCB = new CheckBox();
-	private final UnitDescr page;
+	private final UnitDescr unit;
 
 	private final TextWithSaveButton script = new TextWithSaveButton("",
 			"100%", "400px") {
 		@Override
 		protected void save(final String text,
 				final AsyncCallback<Void> callback) {
-			unitService.savePageScript(page.name, text,
+			unitService.savePageScript(unit.name, text,
 					new AsyncCallback<Void>() {
 
 						@Override
@@ -63,8 +64,8 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 		}
 	};
 
-	public UnitPage(final UnitDescr page) {
-		this.page = page;
+	public UnitPage(final UnitDescr unit) {
+		this.unit = unit;
 
 		Button refreshButton = new Button("Обновить");
 		refreshButton.addClickHandler(new ClickHandler() {
@@ -77,13 +78,13 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 		VerticalPanel panel = new VerticalPanel();
 		panel.add(refreshButton);
 
-		if (page.controllers != null) {
+		if (unit.controllers != null) {
 			HorizontalPanel controllersPanel1 = new HorizontalPanel();
 			controllersPanel1.setSpacing(4);
 			controllersPanel1.setBorderWidth(1);
-			for (String controllerName : page.controllers) {
+			for (String controllerName : unit.controllers) {
 				int addr = -1;
-				for (ControllerDescr descr : Controllers.systemDescr.controllerDescrs)
+				for (ControllerDescr descr : Controllers.systemDescr.controllers)
 					if (descr.name.equals(controllerName))
 						addr = descr.addr;
 				if (addr >= 0) {
@@ -98,7 +99,7 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 			panel.add(controllersPanel1);
 		}
 
-		if (page.registers != null && page.registers.length > 0) {
+		if (unit.registers != null && unit.registers.length > 0) {
 			ClickHandler historyClickHandler = new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
@@ -120,14 +121,14 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 
 			historyOff.setValue(true);
 
-			for (String regName : page.registers) {
-				l1: for (ControllerDescr descr : Controllers.systemDescr.controllerDescrs)
+			for (RegisterPresentation regPres : unit.registers) {
+				l1: for (ControllerDescr descr : Controllers.systemDescr.controllers)
 					if (descr != null && descr.registers != null)
 						for (RegisterDescr register : descr.registers)
 							if (register != null
-									&& register.name.equals(regName)) {
+									&& register.name.equals(regPres.name)) {
 								AutoRelayControl autoRelayControl = new AutoRelayControl(
-										register, mouseMoveHandler);
+										register, regPres, mouseMoveHandler);
 								panel.add(autoRelayControl);
 								add(autoRelayControl);
 								diagrams.add(autoRelayControl);
@@ -139,10 +140,14 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 		vmCB.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				unitService.enableScript(page.name, vmCB.getValue(),
+				unitService.enableScript(unit.name, vmCB.getValue(),
 						new CallbackAdapter<Void>() {
 							@Override
 							public void onSuccess(Void result) {
+								refreshScript();
+							}
+							@Override
+							public void onFailure(Throwable caught) {
 								refreshScript();
 							}
 						});
@@ -167,12 +172,16 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 	}
 
 	private void refreshScript() {
-		unitService.getScriptData(page.name, new CallbackAdapter<ScriptData>() {
+		unitService.getScriptData(unit.name, new CallbackAdapter<ScriptData>() {
 			@Override
 			public void onSuccess(ScriptData result) {
 				script.setText(result.text);
 				errMsg.setText(result.err);
 				vmCB.setValue(result.enabled);
+			}
+
+			@Override
+			public void onFailure(Throwable caught) {
 			}
 		});
 	}

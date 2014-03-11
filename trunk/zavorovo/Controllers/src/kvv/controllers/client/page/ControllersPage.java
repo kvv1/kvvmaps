@@ -34,7 +34,7 @@ public class ControllersPage extends Composite {
 			}
 		});
 
-		for (ControllerDescr descr : Controllers.systemDescr.controllerDescrs) {
+		for (ControllerDescr descr : Controllers.systemDescr.controllers) {
 			if (descr != null && descr.addr != 0) {
 				switch (descr.type) {
 				case TYPE2: {

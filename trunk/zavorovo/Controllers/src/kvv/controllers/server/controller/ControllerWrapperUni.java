@@ -67,9 +67,14 @@ public class ControllerWrapperUni extends ControllerAdapter {
 			break;
 		case TYPE2:
 			allRegs = wrapped.getAllRegs(addr);
-			int relays = allRegs.values.get(Register.REG_RELAYS);
-			for (int i = 0; i < Register.REG_RELAY_CNT; i++)
-				allRegs.values.put(Register.REG_RELAY0 + i, (relays >> i) & 1);
+			Integer relays = allRegs.values.get(Register.REG_RELAYS);
+//			for(int k : allRegs.values.keySet())
+//				System.out.print(k + " ");
+//			System.out.println();
+			if (relays != null)
+				for (int i = 0; i < Register.REG_RELAY_CNT; i++)
+					allRegs.values.put(Register.REG_RELAY0 + i,
+							(relays >> i) & 1);
 			break;
 
 		default:

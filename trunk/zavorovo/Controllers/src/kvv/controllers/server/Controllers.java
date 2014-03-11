@@ -1,6 +1,5 @@
 package kvv.controllers.server;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,12 +35,11 @@ public class Controllers {
 							if (reg != null) {
 								if (c.name == null) {
 									reg.register = nextGlobalReg++;
+									reg.addr = 0;
 								} else {
 									reg.controller = c.name;
 									reg.addr = c.addr;
 								}
-								if (reg.scaleLevels == null)
-									reg.scaleLevels = new int[] { 0, 1 };
 								registers.put(reg.name, reg);
 								ar2register.put(
 										(reg.addr << 16) + reg.register, reg);
@@ -103,13 +101,9 @@ public class Controllers {
 		return controllers.toArray(new ControllerDescr[0]);
 	}
 
-	public static void save(String text) throws IOException {
-		Utils.writeFile(Constants.controllersFile, text);
+	public static void save(ControllerDescr[] controllers) throws Exception {
+		Utils.jsonWrite(Constants.controllersFile, controllers);
 		Context.reload();
-	}
-
-	public static String load() throws IOException {
-		return Utils.readFile(Constants.controllersFile);
 	}
 
 }

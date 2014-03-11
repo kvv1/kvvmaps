@@ -18,6 +18,7 @@ import kvv.controllers.utils.cmdline.StringParam;
 import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
 import kvv.evlang.rt.RTContext;
+import kvv.evlang.rt.RTContext.UIReg;
 import kvv.evlang.rt.TryCatchBlock;
 import kvv.evlang.rt.UncaughtExceptionException;
 import kvv.evlang.rt.VM;
@@ -64,17 +65,11 @@ public abstract class EG extends Context {
 			return;
 		}
 
-		byte[] bytes = parser.dump();
+		RTContext context = parser.getRTContext();
+
+		byte[] bytes = context.dump();
 		System.out.println(bytes.length + " bytes");
-
-		if (out.value != null) {
-			new File(out.value).getParentFile().mkdirs();
-			OutputStream os = new FileOutputStream(out.value);
-			os.write(bytes);
-			os.close();
-		}
-
-		Code code = parser.gen();
+		
 
 		if (dump.value) {
 			int i = 0;
@@ -84,7 +79,6 @@ public abstract class EG extends Context {
 					System.out.println();
 			}
 			System.out.println();
-			Code.printHisto();
 
 			System.out.println("Functions:");
 			for (Func func : parser.funcs.funcs.values())
@@ -96,11 +90,18 @@ public abstract class EG extends Context {
 			}
 		}
 
+		if (out.value != null) {
+			new File(out.value).getParentFile().mkdirs();
+			OutputStream os = new FileOutputStream(out.value);
+			os.write(bytes);
+			os.close();
+		}
+
 		if (url.value != null && addr.value != null)
 			upload(url.value, addr.value, bytes, run.value);
 
 		if (sim.value)
-			parser.run(code);
+			parser.run(context);
 	}
 
 	private static void upload(String url, int addr, byte[] bytes, boolean run) {
@@ -135,54 +136,8 @@ public abstract class EG extends Context {
 		}
 	}
 
-	public byte[] dump() throws IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(baos);
-
-		RegisterUI[] regs = registers.getRegisterDescriptions();
-		dos.writeByte(regs.length);
-		for (RegisterUI reg : regs) {
-			dos.writeByte(reg.reg);
-			dos.writeByte(reg.type.ordinal());
-			dos.writeByte(reg.text.length());
-			dos.writeBytes(reg.text);
-		}
-
-		Code code = new Code(this);
-		funcs.dump(code);
-
-		dos.writeByte(funcs.size());
-		for (Func f : funcs.values()) {
-			dos.writeShort(f.getOff());
-		}
-
-		dos.writeByte(code.tryCatchBlocks.size());
-		for (TryCatchBlock tcb : code.tryCatchBlocks) {
-			dos.writeShort(tcb.from);
-			dos.writeShort(tcb.to);
-			dos.writeShort(tcb.handler);
-		}
-
-		dos.writeByte(constPool.size());
-		for (Short s : constPool.data) {
-			dos.writeShort(s);
-		}
-
-		dos.writeByte(regPool.size());
-		for (Short s : regPool.data) {
-			dos.writeByte(s);
-		}
-
-		for (byte b : code.code)
-			dos.write(b);
-
-		dos.close();
-		return baos.toByteArray();
-	}
-
-	public void run(Code code) throws UncaughtExceptionException,
+	public void run(RTContext context) throws UncaughtExceptionException,
 			ParseException {
-		RTContext context = getRTContext(code);
 		new VM(context) {
 			@Override
 			public void setExtReg(int addr, int reg, int value) {
@@ -195,7 +150,7 @@ public abstract class EG extends Context {
 		}.loop();
 	}
 
-	public RTContext getRTContext(Code code) throws ParseException {
+	public RTContext getRTContext() throws ParseException {
 
 		short rtFuncs[] = funcs.getVTable();
 
@@ -206,11 +161,18 @@ public abstract class EG extends Context {
 						str.getMask(), str.funcs.getVTable());
 		}
 
+		UIReg[] uiRegs = new UIReg[registers.getUIRegisters().length];
+		for(int i = 0; i < registers.getUIRegisters().length; i++) {
+			RegisterUI r = registers.getUIRegisters()[i];
+			uiRegs[i] = new UIReg(r.reg, r.text, r.type.ordinal());
+		}
+		
+		
 		RTContext context = new RTContext(code.code, rtFuncs,
 				code.tryCatchBlocks.toArray(new TryCatchBlock[0]),
 				constPool.data.toArray(new Short[0]),
 				regPool.data.toArray(new Short[0]),
-				registers.refs.toArray(new Byte[0]), rtTypes);
+				registers.refs.toArray(new Byte[0]), rtTypes, uiRegs);
 
 		return context;
 	}

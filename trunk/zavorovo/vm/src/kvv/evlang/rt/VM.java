@@ -40,7 +40,7 @@ public abstract class VM {
 		}
 	}
 
-	private boolean step(short obj, int step) {
+	private boolean timerStep(short obj, int step) {
 		short cnt = cont.heap.get(obj, RTContext.TIMER_CNT_IDX);
 		cnt -= step;
 		if (cnt <= 0)
@@ -78,7 +78,7 @@ public abstract class VM {
 		for (int i = 0; i < sz; i++) {
 			short obj = cont.timers.getAt(i);
 			if (obj != 0) {
-				if (step(obj, step)) {
+				if (timerStep(obj, step)) {
 					cont.timers.setAt(i, 0);
 					gc = true;
 				}
@@ -95,6 +95,7 @@ public abstract class VM {
 		}
 
 		cont.timers.compact();
+		cont.triggers.compact();
 		if (gc)
 			cont.gc();
 	}

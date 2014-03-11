@@ -1,6 +1,7 @@
 package kvv.controllers.server.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 import kvv.controllers.controller.IController;
@@ -42,6 +43,16 @@ public abstract class ControllerAdapter implements IController {
 	@Override
 	public void clearStatistics() {
 		wrapped.clearStatistics();
+	}
+
+	@Override
+	public void uploadAppHex(int addr, InputStream is) throws IOException {
+		wrapped.uploadAppHex(addr, is);
+	}
+
+	@Override
+	public Integer hello(int addr) throws IOException {
+		return wrapped.hello(addr);
 	}
 
 }

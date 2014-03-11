@@ -9,7 +9,7 @@ public class Func {
 	public final String name;
 	public final Locals locals;
 
-	private short off;
+	private short off = -1;
 
 	public final Func superFunc;
 
@@ -73,6 +73,6 @@ public class Func {
 
 	public void print() {
 		System.out.println(n + " " + name + " "
-				+ (code == null ? "null" : off + " " + code.size()));
+				+ (code == null ? "null" : "off=" + off + " sz=" + code.size()));
 	}
 }

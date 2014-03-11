@@ -5,21 +5,19 @@ import java.io.IOException;
 import kvv.controllers.controller.Controller;
 
 public class Test {
+	static int SPM_PAGESIZE = 4;
+
+	static int round(int n) {
+		return (n + SPM_PAGESIZE - 1) & ~(SPM_PAGESIZE - 1);
+	}
+	
 	public static void main(String[] args) throws IOException {
 		String url = "http://localhost/rs485";
 
-		// byte[] res = Controller.send(url, 20, new byte[] { (byte)
-		// Command.CMD_GETREGS.ordinal() });
-
-		// byte[] res = Controller.send(url, 16, new byte[] { 5, 0, 1, (byte)
-		// 0x00, 0, });
-
-		Controller controller = new Controller(url);
+		for(int i = 0; i < 10; i++)
+		System.out.println(i + " " + round(i));
 		
-		byte[] res = controller.send(16, new byte[] { 3, 0, (byte) 0x30, 0, 1});
-
-		for (byte b : res)
-			System.out.printf("%02X ", b);
-
+		
+		
 	}
 }

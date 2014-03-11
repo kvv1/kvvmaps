@@ -15,4 +15,6 @@ public interface ControllersServiceAsync {
 	void upload(int addr, String name, AsyncCallback<String> callback);
 
 	void vmInit(int addr, AsyncCallback<Void> callback);
+
+	void hello(int addr, AsyncCallback<Integer> callback);
 }

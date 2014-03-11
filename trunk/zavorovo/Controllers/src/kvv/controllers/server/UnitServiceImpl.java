@@ -1,7 +1,5 @@
 package kvv.controllers.server;
 
-import java.io.IOException;
-
 import kvv.controllers.client.UnitService;
 import kvv.controllers.server.context.Context;
 import kvv.controllers.server.unit.Units;
@@ -36,7 +34,7 @@ public class UnitServiceImpl extends RemoteServiceServlet implements
 			Units units = Context.getInstance().units;
 			return new ScriptData(units.getScript(pageName),
 					units.scriptEnabled(pageName), units.getError(pageName));
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			throw new Exception(e.getMessage());
 		}
 	}

@@ -7,21 +7,21 @@ public class RegisterDescr {
 	public boolean editable;
 	public Short initValue;
 
-	public RegisterDescr(Type type, short reg) {
+	public RegisterDescr(Type type, int reg) {
 		this.type = type;
-		this.reg = reg;
+		this.reg = (short) reg;
 	}
 
-	public RegisterDescr(Type type, short reg, boolean readonly, boolean editable,
+	public RegisterDescr(Type type, int reg, boolean readonly, boolean editable,
 			Short initValue) {
 		this.type = type;
-		this.reg = reg;
+		this.reg = (short) reg;
 		this.readonly = readonly;
 		this.editable = editable;
 		this.initValue = initValue;
 	}
 
-	public RegisterDescr(Type type, short reg, boolean readonly, boolean editable) {
+	public RegisterDescr(Type type, int reg, boolean readonly, boolean editable) {
 		this(type, reg, readonly, editable, null);
 	}
 }
