@@ -1,10 +1,8 @@
 package kvv.evlang.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import kvv.evlang.ParseException;
@@ -15,8 +13,6 @@ public class CodeBase {
 
 	public final List<Byte> code = new ArrayList<Byte>();
 	public final Set<Integer> locals = new HashSet<Integer>();
-
-	static Map<BC, Integer> histo = new HashMap<BC, Integer>();
 
 	public CodeBase(Context context) {
 		this.context = context;
@@ -31,20 +27,12 @@ public class CodeBase {
 		locals.clear();
 	}
 
-	static void printHisto() {
-		for (BC c : histo.keySet()) {
-			System.out.println(c.name() + " " + histo.get(c));
-		}
-	}
-
 	short size() {
 		return (short) code.size();
 	}
 
 	void add(BC c) {
 		code.add((byte) c.ordinal());
-		Integer n = histo.get(c);
-		histo.put(c, n == null ? 1 : n + 1);
 	}
 
 	void add(int c) {

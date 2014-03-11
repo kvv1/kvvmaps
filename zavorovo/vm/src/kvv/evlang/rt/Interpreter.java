@@ -77,7 +77,7 @@ public abstract class Interpreter {
 	}
 
 	private void _interpret(short _ip) throws UncaughtExceptionException {
-		List<Byte> code = context.codeArr;
+		List<Byte> code = context.code;
 
 		call(_ip);
 
@@ -91,9 +91,6 @@ public abstract class Interpreter {
 			if ((c & 0xC0) != 0) {
 				short param = (short) (c & 0x0F);
 				switch (c & 0xF0) {
-				case BC.LIT_SHORT:
-					context.stack.push(context.constPool[param]);
-					break;
 				case BC.GETREG_SHORT:
 					getreg(context.regPool[param]);
 					break;
@@ -142,6 +139,9 @@ public abstract class Interpreter {
 						context.stack.pop();
 					if (ip == 0)
 						return;
+					break;
+				case BC.LIT_SHORT:
+					context.stack.push(context.constPool[param]);
 					break;
 				case BC.ENTER_SHORT:
 					short link = context.stack.pop();
@@ -196,11 +196,11 @@ public abstract class Interpreter {
 				break;
 			case NEWINTARR:
 				short sz = context.stack.pop();
-				_newIntArr(sz);
+				_newArr(sz, false);
 				break;
 			case NEWOBJARR:
 				sz = context.stack.pop();
-				_newObjArr(sz);
+				_newArr(sz, true);
 				break;
 			case SETARRAY:
 				int val = context.stack.pop();
@@ -408,14 +408,6 @@ public abstract class Interpreter {
 			}
 		}
 
-	}
-
-	private void _newObjArr(short sz) throws UncaughtExceptionException {
-		_newArr(sz, true);
-	}
-
-	private void _newIntArr(short sz) throws UncaughtExceptionException {
-		_newArr(sz, false);
 	}
 
 	private void _newArr(short sz, boolean objArr)

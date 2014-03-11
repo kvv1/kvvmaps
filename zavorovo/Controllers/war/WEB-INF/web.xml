@@ -67,6 +67,16 @@
 		<url-pattern>/controllers/sources</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>uploadServlet</servlet-name>
+		<servlet-class>kvv.controllers.server.UploadServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>uploadServlet</servlet-name>
+		<url-pattern>/controllers/upload</url-pattern>
+	</servlet-mapping>
+
 	<listener>
 		<listener-class>
 			kvv.controllers.server.ContextListener

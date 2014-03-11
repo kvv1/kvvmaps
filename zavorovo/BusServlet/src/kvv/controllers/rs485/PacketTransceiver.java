@@ -61,9 +61,11 @@ public class PacketTransceiver {
 	}
 
 	private void init() throws Exception {
-		
-		if (serPort != null)
+
+		if (serPort != null) {
 			serPort.close();
+			serPort = null;
+		}
 
 		serPort = (SerialPort) pID.open("PortReader", 2000);
 		inStream = serPort.getInputStream();
@@ -77,18 +79,42 @@ public class PacketTransceiver {
 		serPort.setRTS(true);
 	}
 
-	public static void main(String[] args) throws NoSuchPortException, PortInUseException {
+	public static void main(String[] args) throws NoSuchPortException,
+			PortInUseException {
 		CommPortIdentifier pID = CommPortIdentifier.getPortIdentifier("COM2");
 		SerialPort serPort = (SerialPort) pID.open("PortReader", 2000);
 		System.out.println(serPort.getInputBufferSize());
-		
+
 	}
-	
+
 	class PacketTimeoutException extends IOException {
 		private static final long serialVersionUID = 1L;
 
 		public PacketTimeoutException() {
 			super("PACKET_TIMEOUT");
+		}
+	}
+
+	public synchronized byte[] _sendPacket(byte[] data, boolean waitResponse)
+			throws IOException {
+		try {
+			long t = System.currentTimeMillis();
+			while (System.currentTimeMillis() - t < 500) {
+				try {
+					init();
+					break;
+				} catch (Exception e) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e1) {
+					}
+				}
+			}
+			return __sendPacket(data, waitResponse);
+		} finally {
+			if (serPort != null)
+				serPort.close();
+			serPort = null;
 		}
 	}
 
@@ -118,6 +144,7 @@ public class PacketTransceiver {
 				for (byte b : inputBuffer)
 					msg += Integer.toHexString((int) b & 0xFF) + " ";
 				BusLogger.log(msg);
+				System.err.println(msg);
 			}
 
 			inputBuffer.clear();
@@ -149,8 +176,11 @@ public class PacketTransceiver {
 						&& System.currentTimeMillis() > lastReceiveTime
 								+ BYTE_TIMEOUT) {
 					byte[] response = new byte[inputBuffer.size()];
-					for (int i = 0; i < inputBuffer.size(); i++)
+					for (int i = 0; i < inputBuffer.size(); i++) {
 						response[i] = inputBuffer.get(i);
+						//System.err.print(response[i] + " ");
+					}
+					System.err.println();
 					inputBuffer.clear();
 					return response;
 				}

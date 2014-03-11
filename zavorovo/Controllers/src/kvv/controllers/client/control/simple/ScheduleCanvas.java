@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.history.shared.HistoryItem;
 import kvv.controllers.shared.RegisterDescr;
+import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.ScheduleItem;
 
@@ -43,25 +44,35 @@ public abstract class ScheduleCanvas extends Composite {
 
 	private final int minVal;
 	private final int maxVal;
-	private final int[] scaleLevels;
+	private final int step;
 
 	private final int registerHeight;
 	private final int height;
+	
+	private boolean isBool;
 
 	protected abstract void save(String regName,
 			RegisterSchedule registerSchedule);
 
 	public ScheduleCanvas(final RegisterDescr reg,
+			final RegisterPresentation _presentation,
 			final MouseMoveHandler mouseMoveHandler) {
-		scaleLevels = reg.scaleLevels;
 
-		minVal = scaleLevels[0];
-		maxVal = scaleLevels[scaleLevels.length - 1];
+		isBool = _presentation.isBool();
+		if (isBool) {
+			minVal = 0;
+			maxVal = 1;
+			step = 1;
+		} else {
+			minVal = _presentation.min;
+			maxVal = _presentation.max;
+			step = _presentation.step;
+		}
 
-		if (reg.height == null)
+		if (_presentation.height == null)
 			registerHeight = 18;
 		else
-			registerHeight = reg.height;
+			registerHeight = _presentation.height;
 
 		height = registerHeight + bottomMargin + topMargin;
 
@@ -345,13 +356,13 @@ public abstract class ScheduleCanvas extends Composite {
 			context.lineTo(x, getRegY() + registerHeight);
 		}
 
-		if (scaleLevels.length != 2 || scaleLevels[0] != 0
-				|| scaleLevels[1] != 1)
-			for (int level : scaleLevels) {
+		if (!isBool && maxVal > minVal && step > 0) {
+			for (int level = minVal; level <= maxVal; level += step) {
 				double y = getY(level) + getRegY();
 				context.moveTo(0, y);
 				context.lineTo(tenMinutesWidth * 6 * 24, y);
 			}
+		}
 
 		context.stroke();
 		context.restore();
@@ -360,13 +371,13 @@ public abstract class ScheduleCanvas extends Composite {
 		context.beginPath();
 		context.setLineWidth(1);
 
-		if (scaleLevels.length != 2 || scaleLevels[0] != 0
-				|| scaleLevels[1] != 1)
-			for (int level : scaleLevels) {
+		if (!isBool && maxVal > minVal && step > 0) {
+			for (int level = minVal; level <= maxVal; level += step) {
 				double y = getY(level) + getRegY();
 				context.strokeText("" + level, tenMinutesWidth * 6 * 24 + 4,
 						y + 4);
 			}
+		}
 
 		context.stroke();
 		context.restore();

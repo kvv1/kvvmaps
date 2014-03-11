@@ -20,19 +20,15 @@ import kvv.evlang.rt.RTContext;
 import kvv.evlang.rt.VM;
 
 public class Units {
-	public static String load() throws IOException {
-		return Utils.readFile(Constants.unitsFile);
-	}
-
-	public static void save(String text) throws IOException {
-		Utils.writeFile(Constants.unitsFile, text);
+	public static void save(UnitDescr[] units) throws Exception {
+		Utils.jsonWrite(Constants.unitsFile, units);
 		Context.reload();
 	}
 
 	public static UnitDescr[] getUnits() throws IOException {
 		UnitDescr[] units = Utils.jsonRead(Constants.unitsFile,
 				UnitDescr[].class);
-		// for (UnitDescr unit : units) {
+
 		// try {
 		// unit.script = Utils.readFile(Constants.ROOT + "/scripts/"
 		// + unit.name);
@@ -44,32 +40,21 @@ public class Units {
 	}
 
 	public void setScript(String unitName, String script) throws Exception {
-		try {
-			new File(Constants.ROOT + "/scripts").mkdir();
-			String fileName = Constants.ROOT + "/scripts/" + unitName;
-			Utils.writeFile(fileName, script);
-			loadScript(unitName);
-		} catch (Throwable e) {
-			throw new Exception(e.getMessage());
-		}
+		new File(Constants.ROOT + "/scripts").mkdir();
+		String fileName = Constants.ROOT + "/scripts/" + unitName;
+		Utils.writeFile(fileName, script);
+		loadScript(unitName);
 	}
 
 	public String getScript(String unitName) throws Exception {
-		try {
-			return Utils.readFile(Constants.ROOT + "/scripts/" + unitName);
-		} catch (Throwable e) {
-			throw new Exception(e.getMessage());
-		}
+		return Utils.readFile(Constants.ROOT + "/scripts/" + unitName);
 	}
 
 	public void enableScript(String unitName, boolean b) throws Exception {
-		try {
-			new File(Constants.ROOT + "/scripts").mkdir();
-			Utils.changeProp(Constants.scriptsFile, unitName, "" + b);
+		new File(Constants.ROOT + "/scripts").mkdir();
+		Utils.changeProp(Constants.scriptsFile, unitName, "" + b);
+		if (b)
 			loadScript(unitName);
-		} catch (Throwable e) {
-			throw new Exception(e.getMessage());
-		}
 	}
 
 	public boolean scriptEnabled(String unitName) {

@@ -10,6 +10,7 @@ import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.history.shared.HistoryItem;
 import kvv.controllers.shared.RegisterDescr;
+import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.RegisterSchedule;
 
 import com.google.gwt.core.client.GWT;
@@ -37,11 +38,11 @@ public class AutoRelayControl extends ControlComposite {
 
 	public final RegisterDescr reg;
 
-	public AutoRelayControl(final RegisterDescr reg,
+	public AutoRelayControl(final RegisterDescr reg, RegisterPresentation presentation,
 			MouseMoveHandler mouseMoveHandler) {
 		this.reg = reg;
 
-		scheduleCanvas = new ScheduleCanvas(reg, mouseMoveHandler) {
+		scheduleCanvas = new ScheduleCanvas(reg, presentation, mouseMoveHandler) {
 			public void save(String regName,
 					final RegisterSchedule registerSchedule) {
 				scheduleService.update(regName, registerSchedule,
@@ -62,7 +63,7 @@ public class AutoRelayControl extends ControlComposite {
 
 		autoButton = new CheckBox("Авто");
 
-		if (reg.scaleLevels.length <= 2) {
+		if (presentation.isBool()) {
 			relayControl = new SimpleRelayControl(reg.addr, reg.register, "");
 		} else {
 			relayControl = new GetRegControl(reg.addr, reg.register, 1, null);

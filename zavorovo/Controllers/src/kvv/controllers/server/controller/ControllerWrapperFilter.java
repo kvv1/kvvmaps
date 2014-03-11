@@ -35,15 +35,4 @@ public class ControllerWrapperFilter extends ControllerAdapter{
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	private Integer adjust(int addr, int reg, Integer val) {
-		int hysteresis = controllers.getRegister(addr, reg).hysteresis;
-		return null;
-	}
-	
-	
-	
-	public static void main(String[] args) {
-		
-	}
 }

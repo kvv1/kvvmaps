@@ -16,4 +16,6 @@ public interface ControllersService extends RemoteService {
 	String upload(int addr, String name);
 
 	void vmInit(int addr) throws Exception;
+
+	Integer hello(int addr) throws Exception;
 }

@@ -6,7 +6,7 @@ import java.io.Serializable;
 public class UnitDescr implements Serializable {
 	public String name;
 	public String[] controllers;
-	public String[] registers;
+	public RegisterPresentation[] registers;
 //	public String script;
 //	public boolean scriptEnabled;
 }

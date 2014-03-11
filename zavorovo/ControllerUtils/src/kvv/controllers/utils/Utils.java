@@ -26,6 +26,8 @@ public class Utils {
 					"Windows-1251");
 			Gson gson = new Gson();
 			return gson.fromJson(reader, clazz);
+		} catch (RuntimeException e) {
+			throw new IOException(e);
 		} finally {
 			if (reader != null)
 				reader.close();

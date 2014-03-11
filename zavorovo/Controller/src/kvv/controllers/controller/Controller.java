@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
@@ -13,6 +15,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import kvv.controllers.register.AllRegs;
@@ -169,10 +172,13 @@ public class Controller implements IController {
 				if (res.length == 0)
 					throw new IOException("response PDU len = 0");
 				if (res[0] != bytes[0]) {
-					if (res[0] != (bytes[0] | 0x80) || res.length < 2)
+					if ((res[0] & 0xFF) != (bytes[0] | 0x80) || res.length < 2)
 						throw new IOException("response PDU format error");
-					throw new IOException("response PDU error "
-							+ ErrorCode.values()[res[1]].name());
+					int code = res[1];
+					String errCode = "" + code;
+					if (code >= 0 && code < ErrorCode.values().length)
+						errCode += " (" + ErrorCode.values()[code].name() + ")";
+					throw new IOException("response PDU error " + errCode);
 				}
 			}
 			return res;
@@ -199,7 +205,7 @@ public class Controller implements IController {
 
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void _main(String[] args) throws IOException {
 		Controller c = new Controller("") {
 			@Override
 			protected byte[] send1(int addr, byte[] bytes) throws IOException {
@@ -237,4 +243,126 @@ public class Controller implements IController {
 		};
 		c.send1(1, new byte[] { 6, 0, 4, 0x66, 0x34 });
 	}
+
+	private void s(int addr, byte[] bytes) throws IOException {
+		byte[] resp = send(addr, bytes);
+		for (byte b : resp)
+			System.out.print(b + " ");
+	}
+
+	private byte[] getImageHex(InputStream is) throws IOException {
+		List<Byte> bytes = new ArrayList<Byte>();
+
+		int addr = 0;
+
+		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+		String line;
+		while ((line = rd.readLine()) != null) {
+			if (line.length() == 0 || line.charAt(0) != ':')
+				continue;
+			int idx = 1;
+			int byteCnt = Integer.parseInt(line.substring(idx, idx + 2), 16);
+			idx += 2;
+			int a = Integer.parseInt(line.substring(idx, idx + 4), 16);
+			idx += 4;
+			int cmd = Integer.parseInt(line.substring(idx, idx + 2), 16);
+			idx += 2;
+
+			if (cmd == 0) {
+				if (a != addr)
+					throw new IllegalArgumentException();
+
+				for (int i = 0; i < byteCnt; i++) {
+					int b = Integer.parseInt(line.substring(idx, idx + 2), 16);
+					idx += 2;
+					bytes.add((byte) b);
+				}
+
+				addr += byteCnt;
+			}
+		}
+		System.out.println();
+		rd.close();
+
+		byte[] res = new byte[bytes.size()];
+		int i = 0;
+		for (Byte b : bytes)
+			res[i++] = b;
+
+		return res;
+	}
+
+	private int BLOCK_SIZE = 256;
+
+	private void uploadApp(int addr, byte[] image) throws IOException {
+		System.out.println("uploading");
+
+		Integer ver = hello(addr);
+		if (ver != null && ver > 0)
+			s(addr, new byte[] { Command.MODBUS_BOOTLOADER });
+
+		s(addr, new byte[] { Command.MODBUS_ENABLE_APP, 0 });
+		int a = 0;
+		while (a < image.length) {
+			int l = image.length - a;
+			if (l > BLOCK_SIZE)
+				l = BLOCK_SIZE;
+
+			byte[] bytes = new byte[l + 3];
+			bytes[0] = Command.MODBUS_UPLOAD_APP;
+			bytes[1] = (byte) (a >> 8);
+			bytes[2] = (byte) a;
+			System.arraycopy(image, a, bytes, 3, l);
+
+			System.out.print("u" + a + " ");
+
+			s(addr, bytes);
+			a += BLOCK_SIZE;
+		}
+		System.out.println("e");
+		s(addr, new byte[] { Command.MODBUS_ENABLE_APP, 1 });
+	}
+
+	@Override
+	public void uploadAppHex(int addr, InputStream is) throws IOException {
+		uploadApp(addr, getImageHex(is));
+	}
+
+	@Override
+	public Integer hello(int addr) throws IOException {
+		byte[] resp = send(addr, new byte[] { Command.MODBUS_HELLO });
+		if (resp.length > 1)
+			return (int) resp[1];
+		return null;
+	}
+
+	public static void main(String[] args) throws IOException,
+			InterruptedException {
+		String path = "D:/googlecode/trunk/avr/v2/Release/v2.hex";
+		int addr = 77;
+
+		Controller c = new Controller("http://localhost/rs485");
+
+		// c.s(new byte[] { 1 });
+		// c.s(new byte[] { Command.MODBUS_BOOTLOADER });
+		// c.s(new byte[] { Command.MODBUS_HELLO });
+
+		c.s(addr, new byte[] { Command.MODBUS_BOOTLOADER });
+		c.s(addr, new byte[] { Command.MODBUS_HELLO });
+
+		c.uploadApp(addr, c.getImageHex(new FileInputStream(path)));
+
+		Thread.sleep(2000);
+
+		c.s(addr, new byte[] { Command.MODBUS_HELLO });
+
+		// byte[] bytes = "_:101C600067D08091A3009091A400A091A500B091AD"
+		// .getBytes();
+		// bytes[0] = 101;
+		//
+		// c.s(bytes);
+
+		// byte[] bytes = { 101, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	}
+
 }

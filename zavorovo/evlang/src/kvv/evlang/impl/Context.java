@@ -38,6 +38,8 @@ public abstract class Context {
 	public Pool<Short> constPool = new Pool<Short>(16);
 	public Pool<Short> regPool = new Pool<Short>(16);
 
+	public Code code;
+	
 	public Context() {
 		try {
 			declareStruct("Timer");
@@ -95,15 +97,12 @@ public abstract class Context {
 		throwExc(txt + " - ?");
 	}
 
-	protected Code gen() {
-		Code code = new Code(this);
+	protected void genCode() {
+		code = new Code(this);
 		funcs.dump(code);
-
 		for (Struct str : structs.values())
 			if (str.isCreated())
 				str.funcs.dump(code);
-
-		return code;
 	}
 
 	public void throwAlreadyDefined(String string) throws ParseException {

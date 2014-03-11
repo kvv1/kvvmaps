@@ -1,37 +1,41 @@
 package kvv.controllers.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 import kvv.controllers.register.AllRegs;
-
 
 public interface IController {
 	public class Statistics {
 	}
 
-//	public enum REG_TYPE {
-//		COIL,
-//		DISCRETE_INPUT,
-//		PHYSICAL_INPUT,
-//		STORAGE
-//	}
-	
-	public void setReg(int addr, int reg, int val) throws IOException;
+	// public enum REG_TYPE {
+	// COIL,
+	// DISCRETE_INPUT,
+	// PHYSICAL_INPUT,
+	// STORAGE
+	// }
 
-	public int getReg(int addr, int reg) throws IOException;
+	void setReg(int addr, int reg, int val) throws IOException;
 
-	public int[] getRegs(int addr, int reg, int n) throws IOException;
+	int getReg(int addr, int reg) throws IOException;
 
-	public AllRegs getAllRegs(int addr) throws IOException;
+	int[] getRegs(int addr, int reg, int n) throws IOException;
 
-	public void upload(int addr, byte[] data) throws IOException;
+	AllRegs getAllRegs(int addr) throws IOException;
 
-	public void close();
+	void upload(int addr, byte[] data) throws IOException;
 
 	void vmInit(int addr) throws IOException;
 
 	Map<Integer, Statistics> getStatistics();
 
 	void clearStatistics();
+
+	void uploadAppHex(int addr, InputStream is) throws IOException;
+
+	Integer hello(int addr) throws IOException;
+
+	void close();
 }

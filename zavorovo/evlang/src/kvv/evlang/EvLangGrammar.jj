@@ -36,6 +36,7 @@ public abstract class EG1 extends EG
     file();
     buildInit();
     check();
+    genCode();
     //checkStack();
   }
 }

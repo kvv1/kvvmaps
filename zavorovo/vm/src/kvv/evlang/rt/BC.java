@@ -1,7 +1,7 @@
 package kvv.evlang.rt;
 
 public enum BC {
-	RET(0, 0), RET_N(0, 1), RETI(-1, 0), RETI_N(-1, 1), LIT(1, 2), //
+	LIT(1, 2), //
 	SETREG(-1, 1), GETREG(1, 1), //
 	SETTIMER_S(-1, 1), SETTIMER_MS(-1, 1), STOPTIMER(0, 1), //
 	QBRANCH(-1, 1), BRANCH(0, 1), //
@@ -10,7 +10,7 @@ public enum BC {
 	LT(-1, 0), LE(-1, 0), GT(-1, 0), GE(-1, 0), EQ(-1, 0), NEQ(-1, 0), //
 	DROP(-1, 0), //
 	INC(0, 1), DEC(0, 1), //
-	CALL(0, 1), RESERVED(0, 0), //
+	CALL(0, 1), //
 	MULDIV(-2, 0), //
 	PRINT(-1, 0), 
 	SETEXTREG(-1, 2), GETEXTREG(1, 2),

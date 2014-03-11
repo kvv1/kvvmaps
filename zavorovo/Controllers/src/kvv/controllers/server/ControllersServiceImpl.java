@@ -61,7 +61,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 				};
 
 				parser.parse();
-				byte[] bytes = parser.dump();
+				byte[] bytes = parser.getRTContext().dump();
 				Context.getInstance().controller.upload(addr, bytes);
 
 				storeSourceDescr(addr, fileName);
@@ -108,6 +108,15 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 			e.printStackTrace();
 		}
 
+	}
+
+	@Override
+	public Integer hello(int addr) throws Exception {
+		try {
+			return Context.getInstance().controller.hello(addr);
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
 	}
 
 }

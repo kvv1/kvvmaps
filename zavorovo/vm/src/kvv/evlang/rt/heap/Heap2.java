@@ -32,7 +32,7 @@ public abstract class Heap2 implements Heap {
 
 	protected abstract void gc();
 
-	HeapFrame heapFrame = new HeapFrame();
+	//HeapFrame heapFrame = new HeapFrame();
 
 	// PrintStream out = System.out;
 	PrintStream out = new PrintStream(new OutputStream() {
@@ -45,7 +45,7 @@ public abstract class Heap2 implements Heap {
 		short[] entr = new short[entries];
 		for (int i = 0; i < entries; i++)
 			entr[i] = _getEntry(i);
-		heapFrame.setData(entr);
+		//heapFrame.setData(entr);
 	}
 
 	public Heap2(int sz) {
@@ -63,7 +63,7 @@ public abstract class Heap2 implements Heap {
 
 	private void _addToFree(int e) {
 		_setEntry(e, firstFree);
-		firstFree = (short) e;
+		firstFree = e;
 	}
 
 	private short _getFree() {
