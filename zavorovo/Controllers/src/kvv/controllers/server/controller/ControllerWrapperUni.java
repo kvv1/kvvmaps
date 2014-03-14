@@ -6,24 +6,40 @@ import java.util.HashMap;
 
 import kvv.controllers.controller.IController;
 import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.Register;
 import kvv.controllers.register.RegisterUI;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.ControllerDescr.Type;
+import kvv.controllers.shared.ControllerType;
 
 public class ControllerWrapperUni extends ControllerAdapter {
 	public ControllerWrapperUni(Controllers controllers, IController controller) {
 		super(controllers, controller);
 	}
 
+	private ControllerType getType(int addr) throws IOException {
+		try {
+			ControllerDescr controllerDescr = controllers.get(addr);
+			ControllerType controllerType = controllers.getControllerTypes()
+					.get(controllerDescr.type);
+			if (controllerType == null)
+				throw new Exception("Тип контроллера " + controllerDescr.type
+						+ " не определен");
+			return controllerType;
+		} catch (Exception e) {
+			throw new IOException(e.getMessage());
+		}
+	}
+
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
-		try {
-			if (controllers.get(addr).type == Type.MU110_8)
-				val = val == 0 ? 0 : 1000;
-		} catch (Exception e) {
+
+		ControllerType controllerType = getType(addr);
+		if (controllerType.def.relayRegsMul != null) {
+			for (int i = 1; i < controllerType.def.relayRegsMul.length; i++)
+				if (controllerType.def.relayRegsMul[i] == reg)
+					val = val * controllerType.def.relayRegsMul[0];
 		}
+
 		wrapped.setReg(addr, reg, val);
 	}
 
@@ -49,36 +65,27 @@ public class ControllerWrapperUni extends ControllerAdapter {
 
 	@Override
 	public AllRegs getAllRegs(int addr) throws IOException {
-		ControllerDescr controllerDescr;
-		try {
-			controllerDescr = controllers.get(addr);
-		} catch (Exception e) {
-			throw new IOException(e.getMessage());
-		}
+		ControllerType controllerType = getType(addr);
+
 		AllRegs allRegs;
 
-		switch (controllerDescr.type) {
-		case MU110_8:
+		if (controllerType.def.regs != null) {
 			HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
-			int[] vals = wrapped.getRegs(addr, 0, 8);
-			for (int i = 0; i < 8; i++)
-				map.put(i, vals[i]);
+			int[] vals = wrapped.getRegs(addr, controllerType.def.regs[0],
+					controllerType.def.regs[1]);
+			for (int i = 0; i < controllerType.def.regs[1]; i++)
+				map.put(controllerType.def.regs[0] + i, vals[i]);
 			allRegs = new AllRegs(addr, new ArrayList<RegisterUI>(), map);
-			break;
-		case TYPE2:
+		} else {
 			allRegs = wrapped.getAllRegs(addr);
-			Integer relays = allRegs.values.get(Register.REG_RELAYS);
-//			for(int k : allRegs.values.keySet())
-//				System.out.print(k + " ");
-//			System.out.println();
-			if (relays != null)
-				for (int i = 0; i < Register.REG_RELAY_CNT; i++)
-					allRegs.values.put(Register.REG_RELAY0 + i,
-							(relays >> i) & 1);
-			break;
+		}
 
-		default:
-			throw new IOException("unknown controller type");
+		if (controllerType.def.relaysBitMapping != null) {
+			Integer relays = allRegs.values
+					.get(controllerType.def.relaysBitMapping[0]);
+			for (int i = 1; i < controllerType.def.relaysBitMapping.length; i++)
+				allRegs.values.put(controllerType.def.relaysBitMapping[i],
+						(relays >> (i - 1)) & 1);
 		}
 
 		for (int reg : allRegs.values.keySet())
@@ -90,23 +97,14 @@ public class ControllerWrapperUni extends ControllerAdapter {
 
 	private Integer adjustValue(int addr, int reg, Integer value)
 			throws IOException {
-		ControllerDescr controllerDescr;
-		try {
-			controllerDescr = controllers.get(addr);
-		} catch (Exception e) {
-			throw new IOException(e.getMessage());
+		ControllerType controllerType = getType(addr);
+
+		if (controllerType.def.relayRegsMul != null) {
+			for (int i = 1; i < controllerType.def.relayRegsMul.length; i++)
+				if (controllerType.def.relayRegsMul[i] == reg)
+					value = value == 0 ? 0 : 1;
 		}
-		switch (controllerDescr.type) {
-		case MU110_8:
-			value = value == 0 ? 0 : 1;
-			break;
-		case TYPE2:
-			if ((reg == Register.REG_TEMP || reg == Register.REG_TEMP2)
-					&& value != null
-					&& (value > 120 || value == 85 || value < -50))
-				value = null;
-			break;
-		}
+
 		return value;
 	}
 

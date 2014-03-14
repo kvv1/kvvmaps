@@ -1,7 +1,5 @@
 package kvv.evlang.impl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,7 +7,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import kvv.controllers.controller.Controller;
-import kvv.controllers.register.Register;
 import kvv.controllers.register.RegisterUI;
 import kvv.controllers.utils.cmdline.BooleanParam;
 import kvv.controllers.utils.cmdline.CmdLine;
@@ -59,7 +56,7 @@ public abstract class EG extends Context {
 			parser.dumpStream = System.out;
 
 		try {
-			parser.parse();
+			parser.parse("TYPE2");
 		} catch (ParseException e) {
 			System.err.println(e.getMessage());
 			return;
@@ -69,7 +66,6 @@ public abstract class EG extends Context {
 
 		byte[] bytes = context.dump();
 		System.out.println(bytes.length + " bytes");
-		
 
 		if (dump.value) {
 			int i = 0;
@@ -98,13 +94,13 @@ public abstract class EG extends Context {
 		}
 
 		if (url.value != null && addr.value != null)
-			upload(url.value, addr.value, bytes, run.value);
+			parser.upload(url.value, addr.value, bytes, run.value);
 
 		if (sim.value)
 			parser.run(context);
 	}
 
-	private static void upload(String url, int addr, byte[] bytes, boolean run) {
+	protected void upload(String url, int addr, byte[] bytes, boolean run) {
 
 		Controller controller = null;
 
@@ -118,8 +114,9 @@ public abstract class EG extends Context {
 			controller.upload(addr, bytes);
 
 			if (run) {
-				controller.setReg(addr, Register.REG_VMONOFF, 1);
-				int status = controller.getReg(addr, Register.REG_VMSTATE);
+				controller.setReg(addr, registers.controllerDef.regVmOnOff, 1);
+				int status = controller.getReg(addr,
+						registers.controllerDef.regVmState);
 				if (status != VMStatus.VMSTATUS_RUNNING.ordinal()) {
 					System.out.println(url + ", addr=" + addr + " "
 							+ VMStatus.values()[status]);
@@ -162,12 +159,11 @@ public abstract class EG extends Context {
 		}
 
 		UIReg[] uiRegs = new UIReg[registers.getUIRegisters().length];
-		for(int i = 0; i < registers.getUIRegisters().length; i++) {
+		for (int i = 0; i < registers.getUIRegisters().length; i++) {
 			RegisterUI r = registers.getUIRegisters()[i];
 			uiRegs[i] = new UIReg(r.reg, r.text, r.type.ordinal());
 		}
-		
-		
+
 		RTContext context = new RTContext(code.code, rtFuncs,
 				code.tryCatchBlocks.toArray(new TryCatchBlock[0]),
 				constPool.data.toArray(new Short[0]),

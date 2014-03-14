@@ -5,8 +5,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 
-import kvv.evlang.rt.wnd.HeapFrame;
-
 public abstract class Heap2 implements Heap {
 	private static final int REF_VALUE_START = 0x7000;
 
@@ -32,14 +30,15 @@ public abstract class Heap2 implements Heap {
 
 	protected abstract void gc();
 
-	//HeapFrame heapFrame = new HeapFrame();
-
-	// PrintStream out = System.out;
-	PrintStream out = new PrintStream(new OutputStream() {
+	private PrintStream out = new PrintStream(new OutputStream() {
 		@Override
 		public void write(int b) throws IOException {
 		}
 	});
+	
+	{
+		out = System.out;
+	}
 
 	private void draw() {
 		short[] entr = new short[entries];

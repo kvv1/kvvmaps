@@ -5,14 +5,13 @@ import java.util.HashSet;
 import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ConfigurationService;
 import kvv.controllers.client.ConfigurationServiceAsync;
+import kvv.controllers.client.Controllers;
 import kvv.controllers.client.page.config.EditableTree;
 import kvv.controllers.client.page.config.ItemFactory;
 import kvv.controllers.client.page.config.TextWithLabel;
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.ControllerDescr.Type;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
-import kvv.controllers.shared.SystemDescr;
 import kvv.controllers.shared.UnitDescr;
 
 import com.google.gwt.core.client.GWT;
@@ -90,14 +89,19 @@ public class ConfigurationPageG extends Composite {
 		final ControllersTree controllers = new ControllersTree();
 		final UnitsTree units = new UnitsTree();
 
-		configurationService.getSystemDescr(new CallbackAdapter<SystemDescr>() {
+		controllers.set(Controllers.systemDescr.controllers);
+		units.set(Controllers.systemDescr.units);
 
-			@Override
-			public void onSuccess(SystemDescr result) {
-				controllers.set(result.controllers);
-				units.set(result.units);
-			}
-		});
+		// configurationService.getSystemDescr(new
+		// CallbackAdapter<SystemDescr>() {
+		//
+		// @Override
+		// public void onSuccess(SystemDescr result) {
+		// controllers.set(result.controllers);
+		// units.set(result.units);
+		// }
+		// });
+
 		hpanel.add(controllers);
 		hpanel.add(units);
 
@@ -115,13 +119,12 @@ public class ConfigurationPageG extends Composite {
 				message.clear();
 				try {
 					errLoc = new ErrorLocation();
-					SystemDescr sd = new SystemDescr();
-					sd.controllers = controllers.get();
-					sd.units = units.get();
+					ControllerDescr[] controllerDescrs = controllers.get();
+					UnitDescr[] unitDescrs = units.get();
 
 					HashSet<String> regNames = new HashSet<String>();
 					HashSet<String> cNames = new HashSet<String>();
-					for (ControllerDescr cd : sd.controllers) {
+					for (ControllerDescr cd : controllerDescrs) {
 						if (cNames.contains(cd.name))
 							message.add("Контроллер " + cd.name
 									+ " определен повторно");
@@ -135,7 +138,7 @@ public class ConfigurationPageG extends Composite {
 					}
 
 					HashSet<String> uNames = new HashSet<String>();
-					for (UnitDescr ud : sd.units) {
+					for (UnitDescr ud : unitDescrs) {
 						if (uNames.contains(ud.name))
 							message.add("Страница " + ud.name
 									+ " определена повторно");
@@ -150,8 +153,8 @@ public class ConfigurationPageG extends Composite {
 						}
 					}
 
-					configurationService.setSystemDescr(sd,
-							new CallbackAdapter<Void>());
+					configurationService.setSystemDescr(controllerDescrs,
+							unitDescrs, new CallbackAdapter<Void>());
 				} catch (Exception e) {
 					message.add("Ошибка: " + errLoc.getLoc()
 							+ "\nКонфигурация не созранена");
@@ -192,7 +195,8 @@ public class ConfigurationPageG extends Composite {
 				}
 			};
 
-			TreeItem item = addListItem(null, "Контроллеры", cFactory, controllerDescrs);
+			TreeItem item = addListItem(null, "Контроллеры", cFactory,
+					controllerDescrs);
 			item.setState(true);
 		}
 
@@ -207,7 +211,7 @@ public class ConfigurationPageG extends Composite {
 				errLoc.cd = cd;
 				cd.name = form.name.getText();
 				cd.addr = form.addr.getNum();
-				cd.type = Type.values()[form.type.getSelectedIndex()];
+				cd.type = form.type.getItemText(form.type.getSelectedIndex());
 
 				TreeItem regsItem = controllersItem.getChild(i).getChild(0);
 
@@ -309,20 +313,24 @@ public class ConfigurationPageG extends Composite {
 		TextWithLabel addr = new TextWithLabel("Адрес", 30, true);
 		ListBox type = new ListBox();
 		{
-			for (ControllerDescr.Type t : ControllerDescr.Type.values())
-				type.addItem(t.name());
+			type.addItem("");
+			for (String t : Controllers.systemDescr.controllerTypes.keySet())
+				type.addItem(t);
 		}
 
 		public ControllerForm(ControllerDescr cd) {
 			String name = cd == null ? "" : cd.name;
 			int addr = cd == null ? 0 : cd.addr;
-			ControllerDescr.Type type = cd == null ? Type.TYPE2 : cd.type;
+
+			if (cd != null)
+				for (int i = 0; i < this.type.getItemCount(); i++)
+					if (this.type.getItemText(i).equals(cd.type))
+						this.type.setSelectedIndex(i);
 
 			hp.setSpacing(2);
 			hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 			this.name.textBox.setText(name);
 			this.addr.textBox.setText("" + addr);
-			this.type.setSelectedIndex(type.ordinal());
 			hp.add(this.name);
 			hp.add(this.addr);
 			hp.add(this.type);

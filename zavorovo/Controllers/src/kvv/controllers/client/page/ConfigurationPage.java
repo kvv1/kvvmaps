@@ -9,14 +9,12 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ConfigurationPage extends Composite {
 	private final ConfigurationServiceAsync configurationService = GWT
 			.create(ConfigurationService.class);
 
 	private HorizontalPanel hpanel = new HorizontalPanel();
-	private VerticalPanel vpanel = new VerticalPanel();
 	private TextWithSaveButton controllers = new TextWithSaveButton(
 			"Контроллеры", "400px", "600px") {
 		@Override
@@ -51,8 +49,7 @@ public class ConfigurationPage extends Composite {
 		});
 
 		hpanel.add(controllers);
-		vpanel.add(pages);
-		hpanel.add(vpanel);
+		hpanel.add(pages);
 
 		initWidget(hpanel);
 

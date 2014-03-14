@@ -20,8 +20,8 @@ public class HistoryFile {
 	private static final DateFormat fileDF = new SimpleDateFormat("yyyy_MM_dd");
 
 	public static File getLogFile(Date date) {
-		new File(Constants.ROOT + "/history").mkdir();
-		return new File(Constants.ROOT + "/history/" + fileDF.format(date));
+		new File(Constants.historyDir).mkdir();
+		return new File(Constants.historyDir + fileDF.format(date));
 	}
 
 	@SuppressWarnings("deprecation")

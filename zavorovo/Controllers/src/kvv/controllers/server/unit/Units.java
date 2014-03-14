@@ -1,7 +1,6 @@
 package kvv.controllers.server.unit;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,31 +39,34 @@ public class Units {
 	}
 
 	public void setScript(String unitName, String script) throws Exception {
-		new File(Constants.ROOT + "/scripts").mkdir();
-		String fileName = Constants.ROOT + "/scripts/" + unitName;
+		new File(Constants.scriptsDir).mkdir();
+		String fileName = Constants.scriptsDir + unitName;
 		Utils.writeFile(fileName, script);
-		loadScript(unitName);
+		enableScript(unitName, false);
 	}
 
 	public String getScript(String unitName) throws Exception {
-		return Utils.readFile(Constants.ROOT + "/scripts/" + unitName);
+		return Utils.readFile(Constants.scriptsDir + unitName);
 	}
 
 	public void enableScript(String unitName, boolean b) throws Exception {
-		new File(Constants.ROOT + "/scripts").mkdir();
+		new File(Constants.scriptsDir).mkdir();
 		Utils.changeProp(Constants.scriptsFile, unitName, "" + b);
 		if (b)
 			loadScript(unitName);
+		else
+			vms.remove(unitName);
+
 	}
 
 	public boolean scriptEnabled(String unitName) {
 		return Boolean.valueOf(Utils.getProp(Constants.scriptsFile, unitName));
 	}
 
-	public RTContext parse(String unitName) throws FileNotFoundException,
+	public RTContext parse(String unitName) throws IOException,
 			ParseException {
 
-		EG1 parser = new EG1(Constants.ROOT + "/scripts/" + unitName) {
+		EG1 parser = new EG1(Constants.scriptsDir + unitName) {
 			@Override
 			protected ExtRegisterDescr getExtRegisterDescr(String extRegName) {
 				try {
@@ -76,7 +78,7 @@ public class Units {
 			}
 		};
 
-		parser.parse();
+		parser.parse("UNIT");
 		return parser.getRTContext();
 	}
 

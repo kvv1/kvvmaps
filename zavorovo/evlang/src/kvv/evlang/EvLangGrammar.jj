@@ -31,8 +31,9 @@ public abstract class EG1 extends EG
 	throw new ParseException(token, msg);
   }
 
-  public void parse() throws ParseException
+  public void parse(String controllerType) throws ParseException, IOException
   {
+    init(controllerType);
     file();
     buildInit();
     check();

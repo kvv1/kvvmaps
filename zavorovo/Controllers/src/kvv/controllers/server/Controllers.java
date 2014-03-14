@@ -1,13 +1,17 @@
 package kvv.controllers.server;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import kvv.controllers.register.ControllerDef;
 import kvv.controllers.server.context.Context;
 import kvv.controllers.shared.ControllerDescr;
+import kvv.controllers.shared.ControllerType;
+import kvv.controllers.shared.ControllerUI;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.utils.Constants;
 import kvv.controllers.utils.Utils;
@@ -20,10 +24,28 @@ public class Controllers {
 	private final Map<String, RegisterDescr> registers = new HashMap<String, RegisterDescr>();
 	private final Map<Integer, RegisterDescr> ar2register = new HashMap<Integer, RegisterDescr>();
 
-	{
+	private HashMap<String, ControllerType> controllerTypes = new HashMap<String, ControllerType>();
+
+	public Controllers() {
 		int nextGlobalReg = 0;
 
 		try {
+			new File(Constants.controllerTypesDir).mkdirs();
+			File[] dirs = new File(Constants.controllerTypesDir).listFiles();
+			for (File dir : dirs) {
+				String name = dir.getName();
+				try {
+					ControllerType controllerType = new ControllerType();
+					controllerType.def = Utils.jsonRead(new File(dir,
+							"def.json").getAbsolutePath(), ControllerDef.class);
+					controllerType.ui = Utils.jsonRead(new File(dir,
+							"form.json").getAbsolutePath(), ControllerUI.class);
+					controllerTypes.put(name, controllerType);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
 			ControllerDescr[] controllers1 = Utils.jsonRead(
 					Constants.controllersFile, ControllerDescr[].class);
 
@@ -54,6 +76,7 @@ public class Controllers {
 					addrMap.put(c.addr, c);
 				}
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -104,6 +127,10 @@ public class Controllers {
 	public static void save(ControllerDescr[] controllers) throws Exception {
 		Utils.jsonWrite(Constants.controllersFile, controllers);
 		Context.reload();
+	}
+
+	public HashMap<String, ControllerType> getControllerTypes() {
+		return controllerTypes;
 	}
 
 }

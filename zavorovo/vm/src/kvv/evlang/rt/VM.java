@@ -1,5 +1,7 @@
 package kvv.evlang.rt;
 
+import kvv.evlang.rt.RTContext.TTEntry;
+
 public abstract class VM {
 	public abstract void setExtReg(int addr, int reg, int value);
 
@@ -40,64 +42,69 @@ public abstract class VM {
 		}
 	}
 
-	private boolean timerStep(short obj, int step) {
-		short cnt = cont.heap.get(obj, RTContext.TIMER_CNT_IDX);
-		cnt -= step;
-		if (cnt <= 0)
-			cnt = 0;
-		cont.heap.set(obj, RTContext.TIMER_CNT_IDX, cnt);
-		if (cnt == 0) {
-			short func = (short) cont.types[cont.heap.getTypeIdx(obj)].vtable[RTContext.TIMER_RUN_FUNC_IDX];
-			try {
-				interpreter.interpret(func, obj);
-			} catch (UncaughtExceptionException e) {
-				e.printStackTrace();
-			}
-		}
-		return cnt == 0;
-	}
-
-	private void triggerStep(short obj) {
-		short oldVal = cont.heap.get(obj, RTContext.TRIGGER_VAL_IDX);
-		short func = (short) cont.types[cont.heap.getTypeIdx(obj)].vtable[RTContext.TRIGGER_VAL_FUNC_IDX];
-		try {
-			short newVal = interpreter.eval(func, obj);
-			if (newVal != oldVal) {
-				cont.heap.set(obj, RTContext.TRIGGER_VAL_IDX, newVal);
-				func = (short) cont.types[cont.heap.getTypeIdx(obj)].vtable[RTContext.TRIGGER_HANDLE_FUNC_IDX];
-				interpreter.interpret(func, obj, oldVal, newVal);
-			}
-		} catch (UncaughtExceptionException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void timersStep(int step) {
-		int sz = cont.timers.size();
+	public boolean stepTimers(int step) {
 		boolean gc = false;
-		for (int i = 0; i < sz; i++) {
-			short obj = cont.timers.getAt(i);
-			if (obj != 0) {
-				if (timerStep(obj, step)) {
-					cont.timers.setAt(i, 0);
+		for (int i = 0; i < cont.timers.length; i++) {
+			if (!cont.timers[i].flag) {
+				short obj = cont.timers[i].val;
+				if (obj != 0) {
+					short cnt = cont.heap.get(obj, RTContext.TIMER_CNT_IDX);
+					cnt -= step;
+					if (cnt <= 0)
+						cnt = 0;
+					cont.heap.set(obj, RTContext.TIMER_CNT_IDX, cnt);
+					if (cnt == 0) {
+						cont.currentTT = obj;
+						cont.timers[i].val = 0;
+						short func = cont.getVMethod(obj,
+								RTContext.TIMER_RUN_FUNC_IDX);
+						try {
+							interpreter.interpret(func, obj);
+						} catch (UncaughtExceptionException e) {
+							e.printStackTrace();
+						}
+						gc = true;
+					}
+				}
+			}
+		}
+
+		for (int i = 0; i < cont.triggers.length; i++) {
+			if (!cont.triggers[i].flag) {
+				short obj = cont.triggers[i].val;
+				if (obj != 0) {
+					short oldVal = cont.heap
+							.get(obj, RTContext.TRIGGER_VAL_IDX);
+					short func = cont.getVMethod(obj,
+							RTContext.TRIGGER_VAL_FUNC_IDX);
+					try {
+						short newVal = interpreter.eval(func, obj);
+						if (newVal != oldVal) {
+							cont.heap.set(obj, RTContext.TRIGGER_VAL_IDX,
+									newVal);
+							func = cont.getVMethod(obj,
+									RTContext.TRIGGER_HANDLE_FUNC_IDX);
+							interpreter.interpret(func, obj, oldVal, newVal);
+						}
+					} catch (UncaughtExceptionException e) {
+						e.printStackTrace();
+					}
 					gc = true;
 				}
 			}
 		}
 
-		sz = cont.triggers.size();
-		for (int i = 0; i < sz; i++) {
-			short obj = cont.triggers.getAt(i);
-			if (obj != 0) {
-				triggerStep(obj);
-				gc = true;
-			}
+		for (TTEntry t : cont.timers) {
+			t.flag = false;
 		}
 
-		cont.timers.compact();
-		cont.triggers.compact();
-		if (gc)
-			cont.gc();
+		for (TTEntry t : cont.triggers) {
+			t.flag = false;
+		}
+
+		cont.currentTT = 0;
+
+		return gc;
 	}
 
 	private long time = System.currentTimeMillis();
@@ -106,7 +113,8 @@ public abstract class VM {
 		long t = time;
 		time = System.currentTimeMillis();
 
-		timersStep((int) (time - t));
+		if (stepTimers((int) (time - t)))
+			cont.gc();
 	}
 
 }

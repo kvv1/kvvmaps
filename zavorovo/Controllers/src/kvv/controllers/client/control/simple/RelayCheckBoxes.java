@@ -9,10 +9,6 @@ public class RelayCheckBoxes extends ControlComposite {
 	public RelayCheckBoxes(final int addr, int reg0, Integer pwm0, int n) {
 		Grid panel = new Grid(pwm0 == null ? 1 : 2, n);
 
-		// HorizontalPanel panel = new HorizontalPanel();
-		// panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		// panel.setSpacing(10);
-
 		for (int i = 0; i < n; i++) {
 			SimpleRelayControl checkBox = new SimpleRelayControl(addr,
 					reg0 + i, null);

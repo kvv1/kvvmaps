@@ -52,7 +52,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 				Context.getInstance().controller.upload(addr, new byte[0]);
 				storeSourceDescr(addr, null);
 			} else {
-				parser = new EG1(Constants.ROOT + "/src/" + fileName) {
+				parser = new EG1(Constants.srcDir + fileName) {
 					@Override
 					protected ExtRegisterDescr getExtRegisterDescr(
 							String extRegName) {
@@ -60,7 +60,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 					}
 				};
 
-				parser.parse();
+				parser.parse(Context.getInstance().controllers.get(addr).type);
 				byte[] bytes = parser.getRTContext().dump();
 				Context.getInstance().controller.upload(addr, bytes);
 

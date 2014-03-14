@@ -11,7 +11,7 @@ import kvv.controllers.client.control.simple.GetSetRegControl;
 import kvv.controllers.client.control.simple.SimpleRelayControl;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.Register;
+import kvv.controllers.register.ControllerDef;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -34,7 +34,7 @@ public class VMControl extends ControlComposite {
 
 	private final String name;
 
-	public VMControl(final int addr, final String name) {
+	public VMControl(final int addr, final String name, ControllerDef def) {
 		this.name = name;
 
 		Grid panel = new Grid(2, 6);
@@ -42,7 +42,7 @@ public class VMControl extends ControlComposite {
 		HorizontalPanel vmStatePanel = new HorizontalPanel();
 
 		SimpleRelayControl vmCheckBox = new SimpleRelayControl(addr,
-				Register.REG_VMONOFF, null);
+				def.regVmOnOff, null);
 		add(vmCheckBox);
 		vmStatePanel.add(vmCheckBox);
 
@@ -58,38 +58,38 @@ public class VMControl extends ControlComposite {
 
 		panel.setWidget(0, 0, vmStatePanel);
 
-		GetRegControl vmState = new GetRegControl(addr, Register.REG_VMSTATE,
-				1, "VM=");
+		GetRegControl vmState = new GetRegControl(addr, def.regVmState, 1,
+				"VM=");
 		add(vmState);
 		panel.setWidget(1, 0, vmState);
 
-		GetSetRegControl eeprom0 = new GetSetRegControl(addr,
-				Register.REG_EEPROM0, false, "");
+		GetSetRegControl eeprom0 = new GetSetRegControl(addr, def.regEEPROM0,
+				false, "");
 		add(eeprom0);
 		panel.setWidget(0, 1, eeprom0);
 		GetSetRegControl eeprom1 = new GetSetRegControl(addr,
-				Register.REG_EEPROM1, false, "");
+				def.regEEPROM0 + 1, false, "");
 		add(eeprom1);
 		panel.setWidget(0, 2, eeprom1);
 		GetSetRegControl eeprom2 = new GetSetRegControl(addr,
-				Register.REG_EEPROM2, false, "");
+				def.regEEPROM0 + 2, false, "");
 		add(eeprom2);
 		panel.setWidget(0, 3, eeprom2);
 		GetSetRegControl eeprom3 = new GetSetRegControl(addr,
-				Register.REG_EEPROM3, false, "");
+				def.regEEPROM0 + 3, false, "");
 		add(eeprom3);
 		panel.setWidget(0, 4, eeprom3);
 
-		GetRegControl ram0 = new GetRegControl(addr, Register.REG_RAM0, 1, "");
+		GetRegControl ram0 = new GetRegControl(addr, def.regRAM0, 1, "");
 		add(ram0);
 		panel.setWidget(1, 1, ram0);
-		GetRegControl ram1 = new GetRegControl(addr, Register.REG_RAM1, 1, "");
+		GetRegControl ram1 = new GetRegControl(addr, def.regRAM0 + 1, 1, "");
 		add(ram1);
 		panel.setWidget(1, 2, ram1);
-		GetRegControl ram2 = new GetRegControl(addr, Register.REG_RAM2, 1, "");
+		GetRegControl ram2 = new GetRegControl(addr, def.regRAM0 + 2, 1, "");
 		add(ram2);
 		panel.setWidget(1, 3, ram2);
-		GetRegControl ram3 = new GetRegControl(addr, Register.REG_RAM3, 1, "");
+		GetRegControl ram3 = new GetRegControl(addr, def.regRAM0 + 3, 1, "");
 		add(ram3);
 		panel.setWidget(1, 4, ram3);
 
