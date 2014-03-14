@@ -1,5 +1,6 @@
 package kvv.evlang.impl;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +17,7 @@ public abstract class Context {
 
 	protected Structs structs = new Structs(this);
 
-	protected Registers registers = new Registers(this);
+	protected Registers registers;
 
 	protected abstract ExtRegisterDescr getExtRegisterDescr(String extRegName);
 
@@ -39,8 +40,9 @@ public abstract class Context {
 	public Pool<Short> regPool = new Pool<Short>(16);
 
 	public Code code;
-	
-	public Context() {
+
+	public void init(String controllerType) throws IOException {
+		registers = new Registers(this, controllerType);
 		try {
 			declareStruct("Timer");
 			createStruct("Timer", null);

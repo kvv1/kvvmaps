@@ -58,6 +58,16 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>fileServlet</servlet-name>
+		<servlet-class>kvv.controllers.server.FileServiceImpl</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>fileServlet</servlet-name>
+		<url-pattern>/controllers/file</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>sourcesServlet</servlet-name>
 		<servlet-class>kvv.controllers.server.SourcesServiceImpl</servlet-class>
 	</servlet>

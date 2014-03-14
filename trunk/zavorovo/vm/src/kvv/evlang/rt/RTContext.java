@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-import kvv.evlang.rt.heap.Array;
 import kvv.evlang.rt.heap.Heap;
 import kvv.evlang.rt.heap.Heap2;
 
@@ -34,6 +33,32 @@ public class RTContext {
 		}
 	}
 
+	static class TTEntry {
+		boolean flag;
+		short val;
+
+		static void arrayClear(TTEntry[] arr, int val) {
+			for (int i = 0; i < arr.length; i++) {
+				if (arr[i].val == val) {
+					arr[i].val = 0;
+					break;
+				}
+			}
+		}
+
+		static void arraySet(TTEntry[] arr, int val) {
+			arrayClear(arr, val);
+			for (int i = 0; i < arr.length; i++) {
+				if (arr[i].val == 0) {
+					arr[i].val = (short) val;
+					arr[i].flag = true;
+					break;
+				}
+			}
+		}
+
+	}
+
 	public final UIReg[] uiRegs;
 	public final short[] funcs;
 	public final TryCatchBlock[] tryCatchBlocks;
@@ -43,8 +68,9 @@ public class RTContext {
 	public final Type[] types;
 	public final List<Byte> code;
 
-	public final Array timers;
-	public final Array triggers;
+	public final TTEntry[] timers = new TTEntry[32];
+	public final TTEntry[] triggers = new TTEntry[32];
+	public int currentTT;
 	public final short[] regs = new short[256];
 
 	public final Heap heap;
@@ -87,8 +113,12 @@ public class RTContext {
 				RTContext.this.gc();
 			}
 		};
-		timers = new Array(heap, true);
-		triggers = new Array(heap, true);
+
+		for (int i = 0; i < timers.length; i++)
+			timers[i] = new TTEntry();
+
+		for (int i = 0; i < triggers.length; i++)
+			triggers[i] = new TTEntry();
 	}
 
 	public static final int TIMER_CNT_IDX = 0;
@@ -99,24 +129,22 @@ public class RTContext {
 	public static final int TRIGGER_HANDLE_FUNC_IDX = 1;
 
 	public void setTimer(short obj, short ms) {
-		timers.clear(obj);
-		timers.add(obj);
+		TTEntry.arraySet(timers, obj);
 		heap.set(obj, TIMER_CNT_IDX, ms);
 	}
 
-	public void stopTimer(short a) {
-		timers.clear(a);
-		heap.set(a, TIMER_CNT_IDX, 0);
+	public void stopTimer(short obj) {
+		TTEntry.arrayClear(timers, obj);
+		heap.set(obj, TIMER_CNT_IDX, 0);
 	}
 
 	public void setTrigger(short obj, short initVal) {
-		triggers.clear(obj);
-		triggers.add(obj);
+		TTEntry.arraySet(triggers, obj);
 		heap.set(obj, TRIGGER_VAL_IDX, initVal);
 	}
 
 	public void stopTrigger(short obj) {
-		triggers.clear(obj);
+		TTEntry.arrayClear(triggers, obj);
 		heap.set(obj, TRIGGER_VAL_IDX, 0);
 	}
 
@@ -124,14 +152,17 @@ public class RTContext {
 		heap.startMark();
 		for (byte b : refs)
 			heap.mark(regs[b & 0xFF]);
-		heap.mark(timers.a);
-		heap.mark(triggers.a);
+
+		for (TTEntry e : timers)
+			heap.mark(e.val);
+
+		for (TTEntry e : triggers)
+			heap.mark(e.val);
 
 		for (int spOff = 0; spOff < stack.depth(); spOff++)
 			heap.mark(stack.pick(spOff));
 
-		// for (int sp = stack.getSP(); sp < stack.size(); sp++)
-		// heap.mark(stack.getAt(sp));
+		heap.mark(currentTT);
 
 		heap.markClosure();
 		heap.sweep();
@@ -182,12 +213,16 @@ public class RTContext {
 		}
 
 		System.out.println("codeOffset = " + baos.toByteArray().length);
-		
+
 		for (byte b : code)
 			dos.write(b);
 
 		dos.close();
 		return baos.toByteArray();
+	}
+
+	public short getVMethod(short obj, int funcIdx) {
+		return types[heap.getTypeIdx(obj)].vtable[funcIdx];
 	}
 
 }

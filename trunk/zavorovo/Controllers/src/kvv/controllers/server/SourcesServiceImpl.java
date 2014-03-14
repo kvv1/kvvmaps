@@ -17,13 +17,13 @@ public class SourcesServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public String[] getSourceFiles() {
-		return new File(Constants.ROOT, "src").list();
+		return new File(Constants.srcDir).list();
 	}
 
 	@Override
 	public String createSource(String name) throws Exception {
 		try {
-			Utils.writeFile(Constants.ROOT + "/src/" + name,
+			Utils.writeFile(Constants.srcDir + name,
 					"void main() {\r\n}\r\n");
 			return "";
 		} catch (IOException e) {
@@ -34,7 +34,7 @@ public class SourcesServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public String getSource(String name) throws Exception {
 		try {
-			return Utils.readFile(Constants.ROOT + "/src/" + name);
+			return Utils.readFile(Constants.srcDir + name);
 		} catch (IOException e) {
 			throw new Exception("Error reading file");
 		}
@@ -43,7 +43,7 @@ public class SourcesServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public void setSource(String name, String text) throws Exception {
 		try {
-			Utils.writeFile(Constants.ROOT + "/src/" + name, text);
+			Utils.writeFile(Constants.srcDir + name, text);
 		} catch (IOException e) {
 			throw new Exception("Error writing file");
 		}
@@ -51,7 +51,7 @@ public class SourcesServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void delSourceFile(String name) {
-		new File(Constants.ROOT + "/src/" + name).delete();
+		new File(Constants.srcDir + name).delete();
 	}
 
 	@Override

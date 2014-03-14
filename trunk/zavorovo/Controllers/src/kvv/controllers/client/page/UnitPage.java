@@ -8,9 +8,10 @@ import kvv.controllers.client.UnitService;
 import kvv.controllers.client.UnitServiceAsync;
 import kvv.controllers.client.control.ControlCompositeWithDiagrams;
 import kvv.controllers.client.control.simple.AutoRelayControl;
-import kvv.controllers.client.control.simple.Form;
+import kvv.controllers.client.control.simple.ControllerUIForm;
 import kvv.controllers.client.control.simple.TextWithSaveButton;
 import kvv.controllers.shared.ControllerDescr;
+import kvv.controllers.shared.ControllerType;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.ScriptData;
@@ -83,12 +84,17 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 			controllersPanel1.setSpacing(4);
 			controllersPanel1.setBorderWidth(1);
 			for (String controllerName : unit.controllers) {
-				int addr = -1;
-				for (ControllerDescr descr : Controllers.systemDescr.controllers)
-					if (descr.name.equals(controllerName))
-						addr = descr.addr;
-				if (addr >= 0) {
-					Form form = new Form(addr, controllerName, false);
+				ControllerDescr descr = null;
+				for (ControllerDescr d : Controllers.systemDescr.controllers)
+					if (d.name.equals(controllerName))
+						descr = d;
+				ControllerType controllerType = null;
+				if (descr != null)
+					controllerType = Controllers.systemDescr.controllerTypes
+							.get(descr.type);
+				if (controllerType != null) {
+					ControllerUIForm form = new ControllerUIForm(descr.addr, controllerName,
+							controllerType.def, false);
 					controllersPanel1.add(form);
 					add(form);
 				} else {
@@ -146,6 +152,7 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 							public void onSuccess(Void result) {
 								refreshScript();
 							}
+
 							@Override
 							public void onFailure(Throwable caught) {
 								refreshScript();

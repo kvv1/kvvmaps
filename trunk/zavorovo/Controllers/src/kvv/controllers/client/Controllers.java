@@ -1,7 +1,6 @@
 package kvv.controllers.client;
 
-import kvv.controllers.client.page.ConfigurationPage;
-import kvv.controllers.client.page.ConfigurationPageG;
+import kvv.controllers.client.page.ConfigurationTabPage;
 import kvv.controllers.client.page.ControllersPage;
 import kvv.controllers.client.page.LogPage;
 import kvv.controllers.client.page.ModePage;
@@ -50,15 +49,18 @@ public class Controllers implements EntryPoint {
 					tabs.add(new LogPage(), "Log");
 
 					if (ModePage.controlMode) {
-						tabs.add(new ConfigurationPage(), "Конф.");
-						tabs.add(new ConfigurationPageG(), "Конфигурация");
+//						tabs.add(new ConfigurationPage(), "Конф.");
+//						tabs.add(new ConfigurationPageG(), "Конфигурация");
+						tabs.add(new ConfigurationTabPage(), "Конфигурация");
 					}
 					// throw new Exception();
 				} catch (Exception e) {
 					e.printStackTrace();
+					tabs.add(new ModePage(), "Режимы работы");
 					if (ModePage.controlMode) {
-						tabs.add(new ConfigurationPage(), "Конф.");
-						tabs.add(new ConfigurationPageG(), "Конфигурация");
+//						tabs.add(new ConfigurationPage(), "Конф.");
+//						tabs.add(new ConfigurationPageG(), "Конфигурация");
+						tabs.add(new ConfigurationTabPage(), "Конфигурация");
 					}
 					tabs.selectTab(0);
 					// Window.alert("zzz");
@@ -73,9 +75,11 @@ public class Controllers implements EntryPoint {
 			@Override
 			public void onFailure(Throwable caught) {
 				// Window.alert("x2");
+				tabs.add(new ModePage(), "Режимы работы");
 				if (ModePage.controlMode) {
-					tabs.add(new ConfigurationPage(), "Конф.");
-					tabs.add(new ConfigurationPageG(), "Конфигурация");
+//					tabs.add(new ConfigurationPage(), "Конф.");
+//					tabs.add(new ConfigurationPageG(), "Конфигурация");
+					tabs.add(new ConfigurationTabPage(), "Конфигурация");
 				}
 				tabs.selectTab(0);
 			}

@@ -1,6 +1,8 @@
 package kvv.controllers.client;
 
+import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.SystemDescr;
+import kvv.controllers.shared.UnitDescr;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -17,6 +19,15 @@ public interface ConfigurationService extends RemoteService {
 
 	void savePagesText(String text) throws Exception;
 
-	void setSystemDescr(SystemDescr sd) throws Exception;
+	void setSystemDescr(ControllerDescr[] controllerDescrs, UnitDescr[] unitDescrs) throws Exception;
 
+	String loadControllerDefText(String type) throws Exception;
+
+	void saveControllerDefText(String type, String text) throws Exception;
+	
+	String loadControllerUIText(String type) throws Exception;
+
+	void saveControllerUIText(String type, String text) throws Exception;
+	
+	void delControllerType(String type) throws Exception;
 }

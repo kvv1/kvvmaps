@@ -1,6 +1,6 @@
 package kvv.controllers.register;
 
 public enum RegType {
-	checkbox, textRW, textRO
+	checkbox, textRW, textRO, HP, VP
 }
 

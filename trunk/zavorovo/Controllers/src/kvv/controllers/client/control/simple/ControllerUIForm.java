@@ -7,7 +7,7 @@ import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.Register;
+import kvv.controllers.register.ControllerDef;
 import kvv.controllers.register.RegisterUI;
 
 import com.google.gwt.core.client.GWT;
@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class Form extends ControlComposite {
+public class ControllerUIForm extends ControlComposite {
 
 	private final VerticalPanel panel = new VerticalPanel();
 
@@ -29,9 +29,12 @@ public class Form extends ControlComposite {
 	private final int addr;
 	private final boolean addRefreshButton;
 	private Label nameLabel;
+	private final ControllerDef controllerDef;
 
-	public Form(int addr, String name, boolean addRefreshButton) {
+	public ControllerUIForm(int addr, String name, ControllerDef controllerDef,
+			boolean addRefreshButton) {
 		this.addr = addr;
+		this.controllerDef = controllerDef;
 		this.addRefreshButton = addRefreshButton;
 		nameLabel = new Label(name + "(" + addr + ")");
 		initWidget(panel);
@@ -103,9 +106,10 @@ public class Form extends ControlComposite {
 		super.refresh(result);
 		nameLabel.removeStyleName("stoppedVM");
 		nameLabel.removeStyleName("disabled");
-		if (result == null || result.values.get(Register.REG_VMONOFF) == null)
+		if (result == null
+				|| result.values.get(controllerDef.regVmOnOff) == null)
 			nameLabel.addStyleName("disabled");
-		else if (result.values.get(Register.REG_VMONOFF) == 0)
+		else if (result.values.get(controllerDef.regVmOnOff) == 0)
 			nameLabel.addStyleName("stoppedVM");
 	}
 
