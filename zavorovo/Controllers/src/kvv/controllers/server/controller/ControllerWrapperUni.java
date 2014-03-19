@@ -32,6 +32,7 @@ public class ControllerWrapperUni extends ControllerAdapter {
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
+		System.out.println("-" + addr + "(" + reg + ")=" + val);
 
 		ControllerType controllerType = getType(addr);
 		if (controllerType.def.relayRegsMul != null) {

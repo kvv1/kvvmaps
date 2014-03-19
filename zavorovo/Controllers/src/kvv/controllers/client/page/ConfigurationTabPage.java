@@ -24,8 +24,8 @@ public class ConfigurationTabPage extends Composite {
 		TabPanel tabs = new TabPanel();
 		tabs.setHeight("200px");
 
-		tabs.add(new ConfigurationPageG(), "Контроллеры и страницы");
-		tabs.add(new ConfigurationPage(), "Контроллеры и страницы(текст)");
+		tabs.add(new ConfigurationPage(), "Контроллеры и страницы");
+		tabs.add(new ConfigurationTextPage(), "Контроллеры и страницы(текст)");
 
 		tabs.add(createControllerTypesPanel(), "Типы контроллеров");
 

@@ -9,6 +9,7 @@ import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.history.shared.HistoryItem;
+import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.RegisterSchedule;
@@ -38,6 +39,19 @@ public class AutoRelayControl extends ControlComposite {
 
 	public final RegisterDescr reg;
 
+	@Override
+	public void refresh() {
+		super.refresh();
+	}
+	
+	@Override
+	public void refresh(AllRegs result) {
+		// TODO Auto-generated method stub
+		if(result != null)
+			result = result;
+		super.refresh(result);
+	}
+	
 	public AutoRelayControl(final RegisterDescr reg, RegisterPresentation presentation,
 			MouseMoveHandler mouseMoveHandler) {
 		this.reg = reg;

@@ -21,6 +21,8 @@ public class Registers {
 	public ControllerDef controllerDef;
 	private int nextReg;
 	private int nextEEReg;
+	private int lastReg;
+	private int lastEEReg;
 
 	public List<Byte> refs = new ArrayList<Byte>();
 
@@ -31,21 +33,29 @@ public class Registers {
 	public Registers(Context context, String controllerType) throws IOException {
 		this.context = context;
 
-		controllerDef = Utils.jsonRead(Constants.controllerTypesDir
-				+ controllerType + "/def.json", ControllerDef.class);
+		if (controllerType != null) {
 
-		nextReg = controllerDef.regRAM0;
-		nextEEReg = controllerDef.regEEPROM0;
+			controllerDef = Utils.jsonRead(Constants.controllerTypesDir
+					+ controllerType + "/def.json", ControllerDef.class);
 
-		Properties prop = new Properties();
-		prop.load(new FileInputStream(Constants.controllerTypesDir
-				+ controllerType + "/reg.properties"));
+			nextReg = controllerDef.regRAM0;
+			nextEEReg = controllerDef.regEEPROM0;
+			lastReg = controllerDef.lastReg;
+			lastEEReg = controllerDef.lastEEReg;
 
-		for (Object key : prop.keySet())
-			registers.put(
-					(String) key,
-					new RegisterDescr(Type.INT, Integer.parseInt(prop
-							.getProperty((String) key))));
+			Properties prop = new Properties();
+			prop.load(new FileInputStream(Constants.controllerTypesDir
+					+ controllerType + "/reg.properties"));
+
+			for (Object key : prop.keySet())
+				registers.put(
+						(String) key,
+						new RegisterDescr(Type.INT, Integer.parseInt(prop
+								.getProperty((String) key))));
+		} else {
+			nextReg = 0;
+			lastReg = 100;
+		}
 	}
 
 	public void newRegisterAlias(String regName, String regNum)
@@ -60,7 +70,7 @@ public class Registers {
 	public RegisterDescr newVar(Type type, String regName, Expr initValue)
 			throws ParseException {
 		context.checkName(regName);
-		if (nextReg >= controllerDef.lastReg)
+		if (nextReg >= lastReg)
 			context.throwExc("too many registers used");
 
 		int n = nextReg++;
@@ -82,7 +92,7 @@ public class Registers {
 	public RegisterDescr newEERegister(String regName, Short initValue)
 			throws ParseException {
 		context.checkName(regName);
-		if (nextEEReg >= controllerDef.lastEEReg)
+		if (nextEEReg >= lastEEReg)
 			context.throwExc("too many registers used");
 
 		RegisterDescr registerDescr = new RegisterDescr(Type.INT, nextEEReg++,

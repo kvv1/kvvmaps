@@ -1,7 +1,6 @@
 package kvv.controllers.server.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -10,7 +9,6 @@ import java.util.Map;
 
 import kvv.controllers.controller.IController;
 import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.RegisterUI;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.evlang.rt.Const;
@@ -28,20 +26,12 @@ public class ControllerWrapperCached extends ControllerAdapter {
 	@Override
 	public synchronized void setReg(int addr, int reg, int val)
 			throws IOException {
+		System.out.println("+" + addr + "(" + reg + ")=" + val);
 		AllRegs allRegs = map.get(addr);
 		try {
-			if (addr != 0) {
-				wrapped.setReg(addr, reg, val);
-				if (allRegs != null)
-					allRegs.values.put(reg, val);
-			} else {
-				if (allRegs == null) {
-					allRegs = new AllRegs(addr, new ArrayList<RegisterUI>(),
-							new HashMap<Integer, Integer>());
-					map.put(addr, allRegs);
-				}
+			wrapped.setReg(addr, reg, val);
+			if (allRegs != null)
 				allRegs.values.put(reg, val);
-			}
 		} catch (IOException e) {
 			if (allRegs != null)
 				allRegs.values.put(reg, null);
@@ -96,8 +86,8 @@ public class ControllerWrapperCached extends ControllerAdapter {
 			int addr = controllersList.remove(0).addr;
 			try {
 				if (addr != 0) {
-					AllRegs allRegs = wrapped.getAllRegs(addr);
 					synchronized (this) {
+						AllRegs allRegs = wrapped.getAllRegs(addr);
 						map.put(addr, allRegs);
 					}
 				}

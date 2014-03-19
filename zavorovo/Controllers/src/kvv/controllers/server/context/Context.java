@@ -3,6 +3,7 @@ package kvv.controllers.server.context;
 import kvv.controllers.controller.IController;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.server.controller.ControllerWrapperCached;
+import kvv.controllers.server.controller.ControllerWrapperGlobals;
 import kvv.controllers.server.controller.ControllerWrapperLogger;
 import kvv.controllers.server.controller.ControllerWrapperUni;
 import kvv.controllers.server.controller.Scheduler;
@@ -31,6 +32,7 @@ public class Context {
 		if (instance != null)
 			instance.close();
 		instance = null;
+		getInstance(); // to restart VMs
 	}
 
 	public final Controllers controllers;
@@ -50,11 +52,16 @@ public class Context {
 		String busURL = Utils.getProp(Constants.propsFile, "busURL");
 		if (busURL == null)
 			busURL = "http://localhost/rs485";
-		controller = new ControllerWrapperCached(controllers,
-				new ControllerWrapperLogger(controllers,
-						new ControllerWrapperUni(controllers,
-								new kvv.controllers.controller.Controller(
-										busURL))));
+		controller = new ControllerWrapperGlobals(
+				controllers,
+				new ControllerWrapperCached(
+						controllers,
+						new ControllerWrapperLogger(
+								controllers,
+								new ControllerWrapperUni(
+										controllers,
+										new kvv.controllers.controller.Controller(
+												busURL)))));
 
 		scheduler = new Scheduler(controllers, controller);
 		units = new Units(controllers, controller);

@@ -7,7 +7,7 @@ public abstract class VM {
 
 	public abstract int getExtReg(int addr, int reg);
 
-	private final Interpreter interpreter;
+	private Interpreter interpreter;
 
 	private final RTContext cont;
 
@@ -15,7 +15,9 @@ public abstract class VM {
 
 	public VM(final RTContext cont) throws UncaughtExceptionException {
 		this.cont = cont;
+	}
 
+	public void init() throws UncaughtExceptionException {
 		interpreter = new Interpreter(cont) {
 			@Override
 			public void setExtReg(int addr, int reg, int value) {
@@ -27,7 +29,6 @@ public abstract class VM {
 				return VM.this.getExtReg(addr, reg);
 			}
 		};
-
 		interpreter.interpret(cont.funcs[0]);
 		interpreter.interpret(cont.funcs[1]);
 	}
@@ -42,8 +43,7 @@ public abstract class VM {
 		}
 	}
 
-	public boolean stepTimers(int step) {
-		boolean gc = false;
+	public void stepTimers(int step) {
 		for (int i = 0; i < cont.timers.length; i++) {
 			if (!cont.timers[i].flag) {
 				short obj = cont.timers[i].val;
@@ -63,7 +63,6 @@ public abstract class VM {
 						} catch (UncaughtExceptionException e) {
 							e.printStackTrace();
 						}
-						gc = true;
 					}
 				}
 			}
@@ -89,7 +88,6 @@ public abstract class VM {
 					} catch (UncaughtExceptionException e) {
 						e.printStackTrace();
 					}
-					gc = true;
 				}
 			}
 		}
@@ -103,8 +101,6 @@ public abstract class VM {
 		}
 
 		cont.currentTT = 0;
-
-		return gc;
 	}
 
 	private long time = System.currentTimeMillis();
@@ -113,8 +109,6 @@ public abstract class VM {
 		long t = time;
 		time = System.currentTimeMillis();
 
-		if (stepTimers((int) (time - t)))
-			cont.gc();
+		stepTimers((int) (time - t));
 	}
-
 }
