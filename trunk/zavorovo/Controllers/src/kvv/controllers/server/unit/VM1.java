@@ -15,6 +15,7 @@ class VM1 extends VM {
 	public VM1(RTContext cont, IController controller) throws UncaughtExceptionException {
 		super(cont);
 		this.controller = controller;
+		init();
 	}
 
 	@Override

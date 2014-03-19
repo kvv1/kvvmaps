@@ -78,7 +78,7 @@ public class Units {
 			}
 		};
 
-		parser.parse("UNIT");
+		parser.parse(null);
 		return parser.getRTContext();
 	}
 

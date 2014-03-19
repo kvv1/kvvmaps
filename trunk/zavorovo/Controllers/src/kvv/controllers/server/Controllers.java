@@ -1,6 +1,7 @@
 package kvv.controllers.server;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,7 +32,13 @@ public class Controllers {
 
 		try {
 			new File(Constants.controllerTypesDir).mkdirs();
-			File[] dirs = new File(Constants.controllerTypesDir).listFiles();
+			FileFilter ff = new FileFilter() {
+				@Override
+				public boolean accept(File pathname) {
+					return pathname.isDirectory();
+				}
+			};
+			File[] dirs = new File(Constants.controllerTypesDir).listFiles(ff);
 			for (File dir : dirs) {
 				String name = dir.getName();
 				try {
@@ -55,7 +62,7 @@ public class Controllers {
 					if (regs != null) {
 						for (RegisterDescr reg : regs) {
 							if (reg != null) {
-								if (c.name == null) {
+								if (c.addr == 0) {
 									reg.register = nextGlobalReg++;
 									reg.addr = 0;
 								} else {

@@ -135,7 +135,7 @@ public abstract class EG extends Context {
 
 	public void run(RTContext context) throws UncaughtExceptionException,
 			ParseException {
-		new VM(context) {
+		VM vm = new VM(context) {
 			@Override
 			public void setExtReg(int addr, int reg, int value) {
 			}
@@ -144,7 +144,9 @@ public abstract class EG extends Context {
 			public int getExtReg(int addr, int reg) {
 				return 0;
 			}
-		}.loop();
+		};
+		vm.init();
+		vm.loop();
 	}
 
 	public RTContext getRTContext() throws ParseException {
