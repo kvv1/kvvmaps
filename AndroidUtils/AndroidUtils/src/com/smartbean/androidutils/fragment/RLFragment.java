@@ -28,13 +28,19 @@ public abstract class RLFragment<A extends Activity, IService> extends Fragment 
 
 	// protected A activity;
 
+	private final Class<?> serviceClass;
+
 	protected abstract void createUI(IService service);
-	protected abstract Class<?> getServiceClass();
+
 	protected abstract int getLayout();
 
 	private void createUiIfPossible() {
 		if (conn.service != null && rootView != null)
 			createUI(conn.service);
+	}
+
+	public RLFragment(Class<?> serviceClass) {
+		this.serviceClass = serviceClass;
 	}
 
 	@Override
@@ -49,9 +55,8 @@ public abstract class RLFragment<A extends Activity, IService> extends Fragment 
 	public void onCreate(Bundle savedInstanceState) {
 		Utils.log(this, getClass().getSimpleName() + ".onCreate");
 		super.onCreate(savedInstanceState);
-		getActivity().bindService(
-				new Intent(getActivity(), getServiceClass()), conn,
-				Context.BIND_AUTO_CREATE);
+		getActivity().bindService(new Intent(getActivity(), serviceClass),
+				conn, Context.BIND_AUTO_CREATE);
 		id = getArguments().getLong("id");
 	}
 
@@ -59,9 +64,9 @@ public abstract class RLFragment<A extends Activity, IService> extends Fragment 
 	public void onDestroy() {
 		Utils.log(this, getClass().getSimpleName() + ".onDestroy");
 		getActivity().unbindService(conn);
-		
+
 		Drawables.unbindDrawables(rootView);
-		
+
 		rootView = null;
 		super.onDestroy();
 	}
