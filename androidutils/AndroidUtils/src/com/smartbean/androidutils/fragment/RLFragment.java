@@ -30,6 +30,7 @@ public abstract class RLFragment<A extends Activity, IService> extends Fragment 
 
 	private final Class<?> serviceClass;
 
+	
 	protected abstract void createUI(IService service);
 
 	protected abstract int getLayout();
