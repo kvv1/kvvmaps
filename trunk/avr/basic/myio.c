@@ -125,7 +125,7 @@ ISR (USART_TXC_vect) {
 	}
 }
 
-void uart_putchar(char c) {
+void uartPutchar(char c) {
 	while (tx_counter == TX_BUFFER_SIZE)
 		;
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
@@ -142,8 +142,8 @@ void uart_putchar(char c) {
 
 static void uart_putchar_cr(char c) {
 	if (c == '\n')
-		uart_putchar('\r');
-	uart_putchar(c);
+		uartPutchar('\r');
+	uartPutchar(c);
 }
 
 void uart_init() {

@@ -9,20 +9,18 @@
 
 #define MAGIC_APP_0 0x1234
 #define MAGIC_APP_2 0xABCD
-#define MAGIC_APP_DWORD 0x1234ABCDUL
+#define MAGIC_APP_DWORD 0xABCD1234UL
 
-#define MODBUS_BOOTLOADER 100
-#define MODBUS_CLEAR_APP 101
-#define MODBUS_UPLOAD_APP 102
-#define MODBUS_ENABLE_APP 103
-
-#define MODBUS_HELLO 120
+#define MODBUS_HELLO 90
+#define MODBUS_UPLOAD_APP 91
+#define MODBUS_ENABLE_APP 92
 
 #define START_TIMEOUT_US 5000000UL
 
 #define BOOT_INPUT_BUFFER_SIZE (512 + 10)
 
 typedef struct {
+	uint16_t startCnt;
 	volatile uint16_t magic16;
 	uint16_t lastPage;
 	uint16_t inputIdx;

@@ -90,7 +90,7 @@ int main(void) {
 
 		_delay_ms(10);
 		ds18b20_step(0, 10);
-		print1("%d ", temperature[0]);
+		print1("%d ", w1_temp(0));
 
 //		int t;
 //		int h;

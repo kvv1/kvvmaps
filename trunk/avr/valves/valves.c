@@ -22,11 +22,11 @@ void packetReceived(uint8_t* data, uint8_t len) {
 int main() {
 	chipInit();
 
-	timer0_init();
+	timer0Init();
 	//init_adc(ADC_CHANS, INT_VREF_TYPE);
-	init_adc(0, AVCC_VREF_TYPE);
+	adcInit(0, AVCC_VREF_TYPE);
 	uart_init();
-	w1_init();
+	w1Init();
 
 	sei();
 

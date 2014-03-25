@@ -3,6 +3,6 @@
 
 #define TIME_UNIT 10
 char getClearTimerTicks();
-void timer0_init();
+void timer0Init();
 
 #endif

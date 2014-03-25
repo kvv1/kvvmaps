@@ -30,7 +30,7 @@ unsigned int read_adc(unsigned char adc_input, unsigned char vref_type) {
 #define PRESCALER 3
 #endif
 
-void init_adc(char inputs, char vref_type) {
+void adcInit(char inputs, char vref_type) {
 	// ADC initialization
 	// ADC Clock frequency: 1000,000 kHz
 	// ADC Voltage Reference: AVCC pin

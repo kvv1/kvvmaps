@@ -1,12 +1,23 @@
 #include "ee.h"
 #include <util/atomic.h>
+#include <avr/io.h>
 
 volatile uint16_t ee_magic;
 
 #define MAGIC8 0x67
 
+#include <avr/eeprom.h>
+
+#if defined(__AVR_ATmega48__) || defined(__AVR_ATmega168__)
+#define EEWE EEPE
+#define EEMWE EEMPE
+#define SPMCR SPMCSR
+#endif
+
+
 void _EEPROM_write(uint16_t uiAddress, uint8_t ucData, uint8_t magic) {
-	while (EECR & (1 << EEWE))
+
+	while ((EECR & (1 << EEWE)) || (SPMCR & (1 << RWWSB)))
 		; //ждем установки бита EEWE
 	EEAR = uiAddress; //устанавливаем адрес
 

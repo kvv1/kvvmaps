@@ -25,7 +25,7 @@ void page_write(uint16_t a) {
 
 uint8_t isAppOK() {
 	spmWait();
-	return pgm_read_dword(LAST_PAGE_ADDR) != MAGIC_APP_DWORD;
+	return pgm_read_dword(LAST_PAGE_ADDR) == MAGIC_APP_DWORD;
 }
 
 void setAppOK() {
@@ -41,8 +41,6 @@ void erase(uint16_t a) {
 		boot_page_erase(a);
 	rww_enable();
 }
-
-#define BSWAP_16(x) ( (uint8_t)((x) >> 8) | ((uint8_t)(x)) << 8 )
 
 void processBlock(uint16_t a, uint16_t* data, uint8_t nwords) {
 	do {
@@ -62,7 +60,7 @@ void processBlock(uint16_t a, uint16_t* data, uint8_t nwords) {
 void packetReceived(uint8_t* buffer, int len) { // returns consumed flag
 	ADU* adu = (ADU*) (buffer);
 
-	if (len < 3)
+	if (len < 4)
 		return;
 
 	uint8_t addr = adu->addr;
@@ -74,11 +72,10 @@ void packetReceived(uint8_t* buffer, int len) { // returns consumed flag
 			|| (buffer[len - 1] != (char) (sum >> 8)))
 		return;
 
+	// ((0x3FFF + 1 - (512 * 2)) - 128)
+
 	switch (adu->func) {
 	case MODBUS_HELLO:
-		break;
-	case MODBUS_CLEAR_APP:
-		erase(LAST_PAGE_ADDR);
 		break;
 	case MODBUS_UPLOAD_APP: {
 		uint16_t l = len - 6;
@@ -92,8 +89,13 @@ void packetReceived(uint8_t* buffer, int len) { // returns consumed flag
 		break;
 	}
 	case MODBUS_ENABLE_APP:
-		setAppOK();
-		spmWait();
+		if (adu->data[0]) {
+			//sendError(adu->func, 6);
+			//return;
+			setAppOK();
+		} else {
+			erase(LAST_PAGE_ADDR);
+		}
 		break;
 	default:
 		err: sendError(adu->func, 1);

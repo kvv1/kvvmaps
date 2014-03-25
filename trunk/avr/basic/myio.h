@@ -15,7 +15,7 @@ void uart_init();
 void handleIO();
 void ioMillisCli();
 
-void uart_putchar(char c);
+void uartPutchar(char c);
 
 void print2(char* format, int n1, int n2);
 void print1(char* format, int n1);
