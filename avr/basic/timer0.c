@@ -1,4 +1,5 @@
 #include "timer0.h"
+#include "myio.h"
 #include <util/atomic.h>
 
 static volatile char timerTicks;
@@ -55,7 +56,7 @@ ISR(TIMER0_OVF_vect) {
 	}
 }
 
-void timer0_init() {
+void timer0Init() {
 
 #if defined(__AVR_ATmega48__) || defined(__AVR_ATmega168__)
 

@@ -1,16 +1,16 @@
+#include <avr/io.h>
 #include "packet.h"
 #include "hw.h"
-
-#define CRC16_INIT 0xffff
+#include "inc/bl.h"
 
 uint16_t crc16_step(uint8_t c, uint16_t crc_val) {
 	crc_val ^= (uint16_t) c;
 
 	char j = 8;
 	while (j--) {
-		uint8_t carry = crc_val & 0x0001;
+		uint8_t oldval = crc_val;
 		crc_val >>= 1;
-		if (carry)
+		if (oldval & 1)
 			crc_val ^= 0xa001;
 	}
 
@@ -45,7 +45,14 @@ void sendOk(uint8_t cmd) {
 	S = sendByte(cmd, S);
 	sendPacketEnd(S);
 }
-
+/*
+void sendOk(uint8_t cmd, uint8_t param) {
+	uint16_t S = sendPacketStart();
+	S = sendByte(cmd, S);
+	S = sendByte(cmd, param);
+	sendPacketEnd(S);
+}
+*/
 void sendError(uint8_t cmd, uint8_t err) {
 	uint16_t S = sendPacketStart();
 	S = sendByte(cmd | 0x80, S);

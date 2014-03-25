@@ -7,29 +7,36 @@
 
 #ifndef BL_H_
 #define BL_H_
+
+#include <avr/io.h>
+#include <stdint.h>
+
 #if defined(__AVR_ATmega168__)
 
 #define BOOTSIZE 512 // in words
-
 #else
 #ifdef __AVR_ATmega8__
 
 #define BOOTSIZE 512 // in words
-
 #else
 #error
 #endif
 #endif
 
-
-
+#define CRC16_INIT 0xffff
 
 #define BOOTLOADER_START (FLASHEND + 1 - (BOOTSIZE * 2))
 
+#define BSWAP_16(x) ( (uint8_t)((x) >> 8) | ((uint8_t)(x)) << 8 )
+
 typedef struct {
-	uint8_t addr;
 	uint8_t func;
 	uint8_t data[];
+} PDU;
+
+typedef struct {
+	uint8_t addr;
+	PDU pdu;
 } ADU;
 
 #define F(num, rettype, name, argnames, argtypenames) \
@@ -46,5 +53,7 @@ typedef struct {
 
 F_VOID(0, main, (), ())
 F(1, uint8_t, getAddr, (), ())
+F(2, uint16_t, crc16_step, (c, crc_val), (uint8_t c, uint16_t crc_val))
+F(3, uint16_t, crc16, (buf, nbytes), (uint8_t * buf, uint16_t nbytes))
 
 #endif /* BL_H_ */

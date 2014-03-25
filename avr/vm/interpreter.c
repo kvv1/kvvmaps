@@ -95,7 +95,7 @@ static uint16_t getUint16(uint16_t addr) {
 }
 
 uint16_t vmGetFuncCode(uint8_t func) {
-	return getUint16(funcs + func * 2);
+	return getUint16(funcs + func * 2) + codeOffset;
 }
 
 int getUIStart() {
@@ -139,7 +139,7 @@ void initVars() {
 	nRegPool = vmReadByte(ptr);
 	ptr++;
 	regPool = ptr;
-	ptr += nRegPool * 2;
+	ptr += nRegPool;
 
 	nRefs = vmReadByte(ptr);
 	ptr++;
@@ -175,7 +175,8 @@ uint16_t getTypeMask(uint8_t typeIdx) {
 }
 
 uint16_t getVMethod(uint8_t typeIdx, uint8_t methodIdx) {
-	return getUint16(types[typeIdx] + TYPE_VTABLE_OFF + methodIdx * 2);
+	return getUint16(types[typeIdx] + TYPE_VTABLE_OFF + methodIdx * 2)
+			+ codeOffset;
 }
 
 //uint16_t getVMethod1(int16_t obj, uint8_t methodIdx) {
@@ -301,8 +302,6 @@ int16_t vmExec3(uint16_t addr, int16_t param1, int16_t param2, int16_t param3) {
 }
 
 static int16_t interpret(uint16_t addr) {
-	addr += codeOffset;
-
 	ip = 0;
 	fp = 0;
 	exception = 0;
@@ -319,10 +318,10 @@ static int16_t interpret(uint16_t addr) {
 			uint8_t param = (c & 0x0F);
 			switch ((c & 0xF0) >> 4) {
 			case GETREG_SHORT >> 4:
-				vmPush(_getReg(getUint16(param + regPool)));
+				vmPush(_getReg(vmReadByte(param + regPool)));
 				break;
 			case SETREG_SHORT >> 4:
-				_setReg(getUint16(param + regPool), vmPop());
+				_setReg(vmReadByte(param + regPool), vmPop());
 				break;
 			case GETLOCAL_SHORT >> 4:
 				vmPush(LOCAL(param));
@@ -344,7 +343,7 @@ static int16_t interpret(uint16_t addr) {
 				break;
 			}
 			case CALL_SHORT >> 4: {
-				uint16_t addr = vmGetFuncCode(param) + codeOffset;
+				uint16_t addr = vmGetFuncCode(param);
 				call(addr);
 				break;
 			}
@@ -387,7 +386,7 @@ static int16_t interpret(uint16_t addr) {
 		}
 		switch (c) {
 		case CALL: {
-			uint16_t addr = vmGetFuncCode(vmReadByte(ip++)) + codeOffset;
+			uint16_t addr = vmGetFuncCode(vmReadByte(ip++));
 			call(addr);
 			break;
 		}
@@ -398,7 +397,7 @@ static int16_t interpret(uint16_t addr) {
 			int obj = stackPtr[argCnt - 1];
 			CHECK_NPE(obj);
 			uint16_t func = getVMethod1(obj, n);
-			call(func + codeOffset);
+			call(func);
 			break;
 		}
 		case THROW: {

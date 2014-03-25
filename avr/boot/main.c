@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <string.h>
+#include <util/delay.h>
 #include "utils.h"
 #include "hw.h"
 #include "packet.h"
@@ -14,6 +15,8 @@ void __jumpMain(void) __attribute__ ((naked)) __attribute__ ((section (".init9")
 void __jumpMain(void) {
 	asm volatile ( "rjmp main");
 	asm volatile ( "rjmp getAddr");
+	asm volatile ( "rjmp crc16_step");
+	asm volatile ( "rjmp crc16");
 }
 
 uint8_t getAddr() {
@@ -43,9 +46,10 @@ int main() {
 
 	memset(&globals, 0, sizeof(globals));
 	globals.lastPage = 0xFFFF;
-	initHW();
 
-	while (startCnt < (unsigned int) (START_TIMEOUT_US / WAIT_UNIT_US)
+	hwInit();
+
+	while (globals.startCnt < (unsigned int) (START_TIMEOUT_US / WAIT_UNIT_US)
 			|| !isAppOK()) {
 
 		int b = rdByte();

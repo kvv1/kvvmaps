@@ -42,8 +42,6 @@ void vmStart(int8_t b) {
 }
 
 void vmStep(int ms) {
-	if (stepTimers(ms))
-		gc();
 	if (vmGetStatus() != VMSTATUS_RUNNING)
 		return;
 }
@@ -121,8 +119,7 @@ void stopTrigger(int obj) {
 	heapSet(obj, TRIGGER_VAL_IDX, 0);
 }
 
-static int stepTimers(int step) {
-	uint8_t gc = 0;
+static void stepTimers(int step) {
 	uint8_t i;
 	for (i = 0; i < MAXTIMERS; i++) {
 		if (!timers[i].flag) {
@@ -138,7 +135,6 @@ static int stepTimers(int step) {
 					timers[i].val = 0;
 					uint16_t func = getVMethod1(obj, TIMER_RUN_FUNC_IDX);
 					vmExec1(func, obj);
-					gc = 1;
 				}
 			}
 		}
@@ -156,7 +152,6 @@ static int stepTimers(int step) {
 					func = getVMethod1(obj, TRIGGER_HANDLE_FUNC_IDX);
 					vmExec3(func, obj, oldVal, newVal);
 				}
-				gc = 1;
 			}
 		}
 	}
@@ -170,6 +165,4 @@ static int stepTimers(int step) {
 	}
 
 	currentTT = 0;
-
-	return gc;
 }

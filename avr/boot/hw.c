@@ -1,6 +1,9 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "hw.h"
+//#include "inc/bl.h"
+#include "inc/board.h"
+#include "utils.h"
 
 #if(F_CPU == 1000000)
 #define PRESCALER 3
@@ -58,9 +61,7 @@
 #define USART_TXC_vect USART_TX_vect
 #endif
 
-uint16_t startCnt;
-
-void initHW() {
+void hwInit() {
 	UCSRA = 0x00;
 	UCSRB = (1 << RXEN) | (1 << TXEN);
 #if defined(__AVR_ATmega48__) || defined(__AVR_ATmega168__)
@@ -85,8 +86,6 @@ void initHW() {
 	speed = (speed / UART_SPEED) - 1UL;
 	UBRRH = (speed >> 8) & 0xff;
 	UBRRL = speed & 0xFF;
-	DDRB = 0x80;
-	PORTB = 0;
 
 #if defined(__AVR_ATmega48__) || defined(__AVR_ATmega168__)
 	TIMSK0=0x01;
@@ -99,7 +98,13 @@ void initHW() {
 #endif
 
 //	initADC();
-	startCnt = 0;
+
+	RS485_DDR |= (1 << RS485_BIT);
+	RS485_PORT &= ~(1 << RS485_BIT);
+
+	RX_DDR &= ~(1 << RX_BIT);
+	RX_PORT |= (1 << RX_BIT);
+
 }
 
 void startTX() {
@@ -122,8 +127,8 @@ int rdByte() {
 			return -1;
 		_delay_us(WAIT_UNIT_US);
 		cnt--;
-		if (startCnt < 0xFFFFU)
-			startCnt++;
+		if (globals.startCnt < 0xFFFFU)
+			globals.startCnt++;
 //		incCnt();
 	}
 	return (uint8_t) UDR;

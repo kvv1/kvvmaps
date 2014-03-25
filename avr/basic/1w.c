@@ -180,7 +180,7 @@ int w1_temp(uint8_t n) {
 	return states[n].temperature;
 }
 
-void w1_init() {
+void w1Init() {
 	uint8_t i;
 	for(i = 0; i < sizeof(states) / sizeof(states[0]); i++)
 		states[i].temperature = TEMPERATURE_INVALID;

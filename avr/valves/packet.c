@@ -20,7 +20,7 @@ void handleRxCmd(char* data, unsigned char len) {
 
 uint16_t sendByte(uint8_t b, uint16_t S) {
 	if (targetAddr != 0)
-		uart_putchar(b);
+		uartPutchar(b);
 	return crc16_step(b, S);
 }
 
