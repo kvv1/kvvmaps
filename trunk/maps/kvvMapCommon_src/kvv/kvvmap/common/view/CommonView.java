@@ -8,10 +8,8 @@ import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.adapter.RectInt;
 import kvv.kvvmap.adapter.RectX;
-import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.Img;
 import kvv.kvvmap.common.InfoLevel;
-import kvv.kvvmap.common.LongSet;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maps.Maps.MapsListener;
 import kvv.kvvmap.common.pacemark.IPlaceMarksListener;
@@ -26,6 +24,8 @@ import kvv.kvvmap.common.tiles.TileLoader;
 import kvv.kvvmap.common.tiles.TileLoader.Callback;
 import kvv.kvvmap.common.tiles.TileLoader.TileSource;
 import kvv.kvvmap.common.tiles.Tiles;
+import kvv.kvvmap.util.COLOR;
+import kvv.kvvmap.util.LongSet;
 
 public class CommonView implements ICommonView {
 

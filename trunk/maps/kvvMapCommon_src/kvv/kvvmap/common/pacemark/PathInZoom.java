@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.common.IntArray;
+import kvv.kvvmap.util.IntArray;
 
 class PathInZoom extends PathInZoomBase {
 	private List<LocationX> notCompacted = new ArrayList<LocationX>();

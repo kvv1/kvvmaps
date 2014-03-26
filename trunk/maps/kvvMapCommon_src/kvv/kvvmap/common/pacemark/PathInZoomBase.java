@@ -5,9 +5,9 @@ import java.util.List;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.common.IntArray;
-import kvv.kvvmap.common.LongHashMap;
 import kvv.kvvmap.common.tiles.TileId;
+import kvv.kvvmap.util.IntArray;
+import kvv.kvvmap.util.LongHashMap;
 
 public class PathInZoomBase {
 

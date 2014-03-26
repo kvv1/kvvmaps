@@ -5,8 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import kvv.kvvmap.common.IntToIntMap;
 import kvv.kvvmap.common.Utils;
+import kvv.kvvmap.util.IntToIntMap;
 
 public class MapDir {
 	private final IntToIntMap mapDir = new IntToIntMap();
