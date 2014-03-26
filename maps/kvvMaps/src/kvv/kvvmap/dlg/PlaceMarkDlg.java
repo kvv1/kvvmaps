@@ -4,7 +4,7 @@ import java.util.Locale;
 
 import kvv.kvvmap.R;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.common.pacemark.PlaceMarks;
+import kvv.kvvmap.placemark.PlaceMarks;
 import kvv.kvvmap.view.MapView;
 import android.app.AlertDialog;
 import android.app.Dialog;

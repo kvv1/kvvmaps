@@ -2,8 +2,8 @@ package kvv.kvvmap.dlg;
 
 import kvv.kvvmap.R;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.common.pacemark.Path;
-import kvv.kvvmap.common.pacemark.Paths;
+import kvv.kvvmap.placemark.Path;
+import kvv.kvvmap.placemark.Paths;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
