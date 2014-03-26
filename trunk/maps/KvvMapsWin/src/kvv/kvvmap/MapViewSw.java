@@ -20,17 +20,17 @@ import javax.swing.JComponent;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.common.Utils;
-import kvv.kvvmap.common.maps.Maps;
-import kvv.kvvmap.common.maps.MapsDir;
-import kvv.kvvmap.common.pacemark.ISelectable;
-import kvv.kvvmap.common.pacemark.PathSelection;
-import kvv.kvvmap.common.pacemark.Paths;
-import kvv.kvvmap.common.pacemark.PlaceMarks;
-import kvv.kvvmap.common.view.CommonView;
-import kvv.kvvmap.common.view.Environment;
-import kvv.kvvmap.common.view.ICommonView;
-import kvv.kvvmap.common.view.IPlatformView;
+import kvv.kvvmap.maps.Maps;
+import kvv.kvvmap.maps.MapsDir;
+import kvv.kvvmap.placemark.PathSelection;
+import kvv.kvvmap.placemark.Paths;
+import kvv.kvvmap.placemark.PlaceMarks;
+import kvv.kvvmap.util.ISelectable;
+import kvv.kvvmap.util.Utils;
+import kvv.kvvmap.view.CommonView;
+import kvv.kvvmap.view.Environment;
+import kvv.kvvmap.view.ICommonView;
+import kvv.kvvmap.view.IPlatformView;
 
 public class MapViewSw extends JComponent {
 	private static final long serialVersionUID = 1L;

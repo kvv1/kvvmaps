@@ -16,9 +16,29 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>kvvMapCommon_src</name>
+			<name>kvvMapsMaps_src</name>
 			<type>2</type>
-			<location>D:/googlecode/trunk/maps/kvvMapCommon_src</location>
+			<location>D:/googlecode/trunk/maps/kvvMapsMaps/src</location>
+		</link>
+		<link>
+			<name>kvvMapsPlacemark_src</name>
+			<type>2</type>
+			<location>D:/googlecode/trunk/maps/kvvMapsPlacemark/src</location>
+		</link>
+		<link>
+			<name>kvvMapsTiles_src</name>
+			<type>2</type>
+			<location>D:/googlecode/trunk/maps/kvvMapsTiles/src</location>
+		</link>
+		<link>
+			<name>kvvMapsUtil_src</name>
+			<type>2</type>
+			<location>D:/googlecode/trunk/maps/kvvMapsUtil/src</location>
+		</link>
+		<link>
+			<name>kvvMapsView_src</name>
+			<type>2</type>
+			<location>D:/googlecode/trunk/maps/kvvMapsView/src</location>
 		</link>
 	</linkedResources>
 </projectDescription>
