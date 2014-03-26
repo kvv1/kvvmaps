@@ -1,8 +1,8 @@
 package kvv.kvvmap.common.tiles;
 
 import kvv.kvvmap.adapter.Adapter;
-import kvv.kvvmap.common.Cache;
 import kvv.kvvmap.common.Recycleable;
+import kvv.kvvmap.util.Cache;
 
 public abstract class Tiles implements Recycleable {
 

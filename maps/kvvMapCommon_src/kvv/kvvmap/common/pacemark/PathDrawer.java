@@ -8,10 +8,10 @@ import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.adapter.PointInt;
 import kvv.kvvmap.adapter.RectX;
-import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.tiles.TileId;
+import kvv.kvvmap.util.COLOR;
 
 public class PathDrawer {
 

@@ -9,7 +9,7 @@ import java.io.InputStream;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.common.Img;
-import kvv.kvvmap.common.PackedDataFile;
+import kvv.kvvmap.util.PackedDataFile;
 
 public class MapDescr extends MapDescrBase {
 	// private final Cache<CacheKey, byte[]> cache;

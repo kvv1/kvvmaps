@@ -1,4 +1,4 @@
-package kvv.kvvmap.common;
+package kvv.kvvmap.util;
 
 import java.util.Arrays;
 

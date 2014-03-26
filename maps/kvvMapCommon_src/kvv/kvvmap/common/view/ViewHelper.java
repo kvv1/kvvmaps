@@ -3,8 +3,8 @@ package kvv.kvvmap.common.view;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.adapter.RectX;
-import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.Utils;
+import kvv.kvvmap.util.COLOR;
 
 public class ViewHelper {
 	public static void drawText(GC gc, String text, int x, int y,

@@ -3,10 +3,10 @@ package kvv.kvvmap.common.maps;
 import java.util.Collection;
 
 import kvv.kvvmap.adapter.Adapter;
-import kvv.kvvmap.common.Cache;
 import kvv.kvvmap.common.Img;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.tiles.TileContent;
+import kvv.kvvmap.util.Cache;
 
 public abstract class MapDescrBase {
 

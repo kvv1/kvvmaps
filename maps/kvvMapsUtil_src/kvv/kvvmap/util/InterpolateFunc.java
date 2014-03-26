@@ -1,4 +1,4 @@
-package kvv.kvvmap.common;
+package kvv.kvvmap.util;
 
 public abstract class InterpolateFunc {
 	private final double[] data;

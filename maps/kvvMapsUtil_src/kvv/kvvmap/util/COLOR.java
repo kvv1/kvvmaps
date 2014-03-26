@@ -1,4 +1,4 @@
-package kvv.kvvmap.common;
+package kvv.kvvmap.util;
 
 public class COLOR {
 	public static final int MAGENTA = 0xFFFF00FF;

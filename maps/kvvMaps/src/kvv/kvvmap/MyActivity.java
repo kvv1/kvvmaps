@@ -12,7 +12,6 @@ import java.util.Comparator;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.common.COLOR;
 import kvv.kvvmap.common.InfoLevel;
 import kvv.kvvmap.common.Utils;
 import kvv.kvvmap.common.maps.Maps;
@@ -26,6 +25,7 @@ import kvv.kvvmap.dlg.PlaceMarkDlg;
 import kvv.kvvmap.service.IKvvMapsService;
 import kvv.kvvmap.service.KvvMapsService;
 import kvv.kvvmap.service.KvvMapsService.KvvMapsServiceListener;
+import kvv.kvvmap.util.COLOR;
 import kvv.kvvmap.view.DiagramView;
 import kvv.kvvmap.view.KvvMapsButton;
 import kvv.kvvmap.view.MapView;
