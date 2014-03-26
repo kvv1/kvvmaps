@@ -29,6 +29,7 @@ import kvv.kvvmap.common.pacemark.Paths;
 import kvv.kvvmap.common.pacemark.PlaceMarks;
 import kvv.kvvmap.common.view.CommonView;
 import kvv.kvvmap.common.view.Environment;
+import kvv.kvvmap.common.view.ICommonView;
 import kvv.kvvmap.common.view.IPlatformView;
 
 public class MapViewSw extends JComponent {
@@ -68,7 +69,7 @@ public class MapViewSw extends JComponent {
 		updateTitle();
 	}
 
-	private final CommonView commonView;
+	private final ICommonView commonView;
 	private final SwingWnd swingWnd;
 
 	private final Environment envir;

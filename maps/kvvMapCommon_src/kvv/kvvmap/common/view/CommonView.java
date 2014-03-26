@@ -167,10 +167,12 @@ public class CommonView implements ICommonView {
 		this.tileDrawer = new TileDrawer(envir.adapter, this.tiles);
 	}
 
+	@Override
 	public RotationMode getRotationMode() {
 		return rotationMode;
 	}
 
+	@Override
 	public void setRotationMode(RotationMode rotationMode) {
 		this.rotationMode = rotationMode;
 		setAngle(0);
@@ -178,13 +180,14 @@ public class CommonView implements ICommonView {
 			scrollToRotationGPS();
 	}
 
+	@Override
 	public LocationX getMyLocation() {
 		return myLocation;
 	}
 
-	public boolean isMyLocationDimmed() {
-		return myLocationDimmed;
-	}
+//	public boolean isMyLocationDimmed() {
+//		return myLocationDimmed;
+//	}
 
 	private void scrollToRotationGPS() {
 		if (myLocation == null)
@@ -196,6 +199,7 @@ public class CommonView implements ICommonView {
 		animateTo(myLocation);
 	}
 
+	@Override
 	public void setMyLocation(LocationX loc, boolean scroll) {
 
 		LocationX oldLocation = myLocation;
@@ -221,21 +225,25 @@ public class CommonView implements ICommonView {
 
 	}
 
+	@Override
 	public void dimmMyLocation() {
 		myLocationDimmed = true;
 	}
 
+	@Override
 	public boolean isOnMyLocation() {
 		return myLocation != null
 				&& Math.abs(viewParams.loc2scrX(myLocation)) < 2
 				&& Math.abs(viewParams.loc2scrY(myLocation)) < 2;
 	}
 
+	@Override
 	public void startScrolling() {
 		scrolling = true;
 		cancelSel();
 	}
 
+	@Override
 	public void endScrolling() {
 		scrolling = false;
 		updateSel();
@@ -243,6 +251,7 @@ public class CommonView implements ICommonView {
 		System.gc();
 	}
 
+	@Override
 	public boolean isMultiple() {
 		Tile tile = getCenterTile();
 		if (tile == null)
@@ -250,6 +259,7 @@ public class CommonView implements ICommonView {
 		return tile.isMultiple();
 	}
 
+	@Override
 	public List<String> getCenterMaps() {
 		Tile tile = getCenterTile();
 		if (tile == null)
@@ -270,6 +280,7 @@ public class CommonView implements ICommonView {
 		return tile;
 	}
 
+	@Override
 	public void reorderMaps() {
 		Tile tile = getCenterTile();
 		if (tile != null && tile.isMultiple()) {
@@ -278,6 +289,7 @@ public class CommonView implements ICommonView {
 		}
 	}
 
+	@Override
 	public String getTopMap() {
 		envir.adapter.assertUIThread();
 		Tile tile = getCenterTile();
@@ -286,31 +298,37 @@ public class CommonView implements ICommonView {
 		return tile.content.maps.getFirst();
 	}
 
+	@Override
 	public void setTopMap(String map) {
 		envir.maps.setTopMap(map);
 		invalidateTiles();
 	}
 
+	@Override
 	public void zoomOut() {
 		if (getZoom() > Utils.MIN_ZOOM)
 			setZoom(getZoom() - 1);
 	}
 
+	@Override
 	public void zoomIn() {
 		if (getZoom() < Utils.MAX_ZOOM)
 			setZoom(getZoom() + 1);
 	}
 
+	@Override
 	public int getZoom() {
 		return viewParams.getZoom();
 	}
 
+	@Override
 	public void setAngle(float deg) {
 		envir.adapter.assertUIThread();
 		viewParams.setAngle(deg);
 		repaint();
 	}
 
+	@Override
 	public void setZoom(int zoom) {
 		envir.adapter.assertUIThread();
 		tiles.cancelLoading();
@@ -321,20 +339,19 @@ public class CommonView implements ICommonView {
 		updateSel();
 	}
 
-	public void animateTo(double lon, double lat) {
+	private void animateTo(double lon, double lat) {
 		envir.adapter.assertUIThread();
 		viewParams.animateTo(lon, lat);
 		repaint();
 		updateSel();
 	}
 
+	@Override
 	public void animateTo(LocationX loc) {
-		envir.adapter.assertUIThread();
-		viewParams.animateTo(loc.getLongitude(), loc.getLatitude());
-		repaint();
-		updateSel();
+		animateTo(loc.getLongitude(), loc.getLatitude());
 	}
 
+	@Override
 	public void scrollBy(double dx, double dy) {
 		envir.adapter.assertUIThread();
 		viewParams.scrollBy(dx, dy);
@@ -342,6 +359,7 @@ public class CommonView implements ICommonView {
 		cancelSel();
 	}
 
+	@Override
 	public void draw(GC gc) {
 		// Adapter.log("draw");
 
@@ -413,18 +431,20 @@ public class CommonView implements ICommonView {
 		}
 	}
 
-	@Override
-	public void repaint() {
+	private void repaint() {
 		platformView.repaint();
 	}
 
+	@Override
 	public ISelectable getSel() {
 		return sel;
 	}
 
+	@Override
 	public void dispose() {
 	}
 
+	@Override
 	public void incInfoLevel() {
 		envir.adapter.assertUIThread();
 		if (infoLevel.ordinal() < InfoLevel.values().length - 1) {
@@ -434,6 +454,7 @@ public class CommonView implements ICommonView {
 		}
 	}
 
+	@Override
 	public void decInfoLevel() {
 		envir.adapter.assertUIThread();
 		if (infoLevel.ordinal() > 0) {
@@ -443,16 +464,19 @@ public class CommonView implements ICommonView {
 		}
 	}
 
+	@Override
 	public void setInfoLevel(InfoLevel level) {
 		infoLevel = level;
 		invalidateTiles();
 		updateSel();
 	}
 
+	@Override
 	public InfoLevel getInfoLevel() {
 		return infoLevel;
 	}
 
+	@Override
 	public void invalidateTiles() {
 		envir.adapter.assertUIThread();
 		// viewParams.reset();
@@ -463,20 +487,22 @@ public class CommonView implements ICommonView {
 		}
 	}
 
+	@Override
 	public LocationX getTarget() {
 		return envir.placemarks.getTarget();
 	}
 
+	@Override
 	public LocationX getLocation() {
 		envir.adapter.assertUIThread();
 		return viewParams.getLocation();
 	}
 
-	public LocationX getLocation(int dx, int dy) {
-		envir.adapter.assertUIThread();
-		return new LocationX(viewParams.scr2lon(dx, dy), viewParams.scr2lat(dx,
-				dy));
-	}
+//	public LocationX getLocation(int dx, int dy) {
+//		envir.adapter.assertUIThread();
+//		return new LocationX(viewParams.scr2lon(dx, dy), viewParams.scr2lat(dx,
+//				dy));
+//	}
 
 	private void cancelSel() {
 		envir.adapter.assertUIThread();
@@ -568,18 +594,21 @@ public class CommonView implements ICommonView {
 		return rect;
 	}
 
+	@Override
 	public void animateToMyLocation() {
 		LocationX myLoc = getMyLocation();
 		if (myLoc != null)
 			animateTo(myLoc);
 	}
 
+	@Override
 	public void animateToTarget() {
 		LocationX target = getTarget();
 		if (target != null)
 			animateTo(target);
 	}
 
+	@Override
 	public void onSizeChanged(int w, int h) {
 		updateSel();
 		repaint();
@@ -591,22 +620,10 @@ public class CommonView implements ICommonView {
 		super.finalize();
 	}
 
+	@Override
 	public void fixMap(String map) {
 		envir.maps.fixMap(map);
 		invalidateTiles();
-	}
-
-	public String fixMap(boolean fix) {
-		if (!fix) {
-			envir.maps.fixMap(null);
-			invalidateTiles();
-			return null;
-		} else {
-			String topMap = getTopMap();
-			envir.maps.fixMap(topMap);
-			invalidateTiles();
-			return topMap;
-		}
 	}
 
 }

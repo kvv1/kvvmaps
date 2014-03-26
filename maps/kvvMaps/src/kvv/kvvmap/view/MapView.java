@@ -12,6 +12,7 @@ import kvv.kvvmap.common.pacemark.PathSelection;
 import kvv.kvvmap.common.view.CommonView;
 import kvv.kvvmap.common.view.CommonView.RotationMode;
 import kvv.kvvmap.common.view.Environment;
+import kvv.kvvmap.common.view.ICommonView;
 import kvv.kvvmap.common.view.IPlatformView;
 import kvv.kvvmap.common.view.ViewHelper;
 import android.content.Context;
@@ -30,7 +31,7 @@ import android.widget.Scroller;
 
 public class MapView extends View implements IPlatformView {
 
-	private CommonView commonView;
+	private ICommonView commonView;
 
 	private MyActivity activity;
 
@@ -62,7 +63,7 @@ public class MapView extends View implements IPlatformView {
 		this.activity = activity;
 		commonView = new CommonView(this, envir);
 
-		//Adapter.logMem();
+		// Adapter.logMem();
 
 		animateTo(new LocationX(30, 60));
 
@@ -115,11 +116,12 @@ public class MapView extends View implements IPlatformView {
 		// if (compass == null)
 		// compass = new Compass(getWidth() / 10);
 
-//		Float targBearing = null;
-//		LocationX myLoc = commonView.getMyLocation();
-//		LocationX targ = commonView.getTarget();
-//		if (myLoc != null && targ != null && !commonView.isMyLocationDimmed())
-//			targBearing = myLoc.bearingTo(targ);
+		// Float targBearing = null;
+		// LocationX myLoc = commonView.getMyLocation();
+		// LocationX targ = commonView.getTarget();
+		// if (myLoc != null && targ != null &&
+		// !commonView.isMyLocationDimmed())
+		// targBearing = myLoc.bearingTo(targ);
 
 		if (activity.mapsService.isLoadingMaps()) {
 			paint.setColor(Color.CYAN);
@@ -246,32 +248,10 @@ public class MapView extends View implements IPlatformView {
 		}
 	}
 
-	private class MyGestureDetector extends GestureDetector1 {
-		public MyGestureDetector() {
-			super(new MyOnGestureListener());
-		}
-
-		{
-			// setIsLongpressEnabled(false);
-		}
-
-	}
-
-	private class MyGestureDetector22 extends GestureDetector1 {
-		public MyGestureDetector22() {
-			super(getContext(), new MyOnGestureListener(), new Handler(), true);
-		}
-
-		{
-			// setIsLongpressEnabled(false);
-		}
-	}
-
-	private class MyScaleGestureDetector {
-		private final ScaleGestureDetector mScaleDetector;
+	private class MyScaleGestureDetector extends ScaleGestureDetector {
 
 		MyScaleGestureDetector(Context context) {
-			mScaleDetector = new ScaleGestureDetector(context,
+			super(context,
 					new ScaleGestureDetector.SimpleOnScaleGestureListener() {
 						int initZoom;
 						float mScaleFactor;
@@ -305,30 +285,21 @@ public class MapView extends View implements IPlatformView {
 					});
 		}
 
-		public void onTouchEvent(MotionEvent event) {
-			mScaleDetector.onTouchEvent(event);
-		}
-
 	}
 
-	private MyScaleGestureDetector mScaleDetector;
+	private ScaleGestureDetector mScaleDetector;
 	private GestureDetector1 mGestureDetector;
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		if (mGestureDetector == null) {
-			if (Integer.parseInt(Build.VERSION.SDK) >= 8)
-				mGestureDetector = new MyGestureDetector22();
-			else
-				mGestureDetector = new MyGestureDetector();
-		}
+		if (mGestureDetector == null)
+			mGestureDetector = new GestureDetector1(getContext(),
+					new MyOnGestureListener());
 
-		if (Integer.parseInt(Build.VERSION.SDK) >= 8) {
-			if (mScaleDetector == null)
-				mScaleDetector = new MyScaleGestureDetector(getContext());
-			mScaleDetector.onTouchEvent(event);
-		}
+		if (mScaleDetector == null)
+			mScaleDetector = new MyScaleGestureDetector(getContext());
 
+		mScaleDetector.onTouchEvent(event);
 		mGestureDetector.onTouchEvent(event);
 		return true;
 
@@ -351,14 +322,10 @@ public class MapView extends View implements IPlatformView {
 
 	public void save(Bundle outState) {
 		if (commonView != null) {
-			if (commonView != null) {
-				outState.putDouble("lon", commonView.getLocation()
-						.getLongitude());
-				outState.putDouble("lat", commonView.getLocation()
-						.getLatitude());
-				outState.putInt("zoom", commonView.getZoom());
-				outState.putString("map", commonView.getTopMap());
-			}
+			outState.putDouble("lon", commonView.getLocation().getLongitude());
+			outState.putDouble("lat", commonView.getLocation().getLatitude());
+			outState.putInt("zoom", commonView.getZoom());
+			outState.putString("map", commonView.getTopMap());
 		}
 	}
 
@@ -410,33 +377,6 @@ public class MapView extends View implements IPlatformView {
 		commonView.dimmMyLocation();
 	}
 
-	// private void updateButtons() {
-	// if (activity == null || commonView == null)
-	// return;
-	//
-	// View button = activity.findViewById(R.id.here);
-	// if (commonView.getMyLocation() != null && !commonView.isOnMyLocation())
-	// button.setVisibility(View.VISIBLE);
-	// else
-	// button.setVisibility(View.GONE);
-	//
-	// Button toTarget = (Button) activity.findViewById(R.id.toTarget);
-	// LocationX target = commonView.getTarget();
-	// if (target != null) {
-	// toTarget.setVisibility(View.VISIBLE);
-	// int dist = (int) commonView.getLocation().distanceTo(target);
-	// toTarget.setText(Utils.formatDistance(dist));
-	// } else {
-	// toTarget.setVisibility(View.GONE);
-	// }
-	//
-	// ((KvvMapsButton) activity.findViewById(R.id.rotate))
-	// .setEnabled(commonView != null && commonView.isMultiple());
-	// ((KvvMapsButton) activity.findViewById(R.id.edit))
-	// .setVisibility(getInfoLevel() != InfoLevel.LOW
-	// && getSel() != null ? VISIBLE : INVISIBLE);
-	// }
-
 	public void dispose() {
 		assertUIThread();
 		if (commonView != null) {
@@ -479,10 +419,9 @@ public class MapView extends View implements IPlatformView {
 			commonView.animateToTarget();
 	}
 
-	public String fixMap(boolean fix) {
+	public void fixMap(String mapName) {
 		if (commonView != null)
-			return commonView.fixMap(fix);
-		return null;
+			commonView.fixMap(mapName);
 	}
 
 	@Override
