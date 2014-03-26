@@ -23,8 +23,8 @@ import kvv.kvvmap.common.view.CommonView.RotationMode;
 import kvv.kvvmap.common.view.Environment;
 import kvv.kvvmap.dlg.PathDlg;
 import kvv.kvvmap.dlg.PlaceMarkDlg;
+import kvv.kvvmap.service.IKvvMapsService;
 import kvv.kvvmap.service.KvvMapsService;
-import kvv.kvvmap.service.KvvMapsService.IKvvMapsService;
 import kvv.kvvmap.service.KvvMapsService.KvvMapsServiceListener;
 import kvv.kvvmap.view.DiagramView;
 import kvv.kvvmap.view.KvvMapsButton;
@@ -78,8 +78,6 @@ public class MyActivity extends Activity {
 
 	private static final String BRIGHTNESS_KEY = "brightness";
 	private static final float DIMMED_BRIGHTNESS = 0.1f;
-	
-	
 
 	public static final String PREFS_NAME = "KvvMapPrefsFile";
 
@@ -304,6 +302,8 @@ public class MyActivity extends Activity {
 		int tileSz = 256;
 		if (metrics.xdpi > 160)
 			tileSz = (int) (tileSz * metrics.xdpi / 145);
+		
+		//tileSz = 384;
 		Adapter.TILE_SIZE_0 = tileSz;
 
 		adapter = new Adapter(this);
@@ -462,11 +462,12 @@ public class MyActivity extends Activity {
 							float br = mapsService.getBundle().getFloat(
 									BRIGHTNESS_KEY);
 							if (br != 0.0f) {
-								mapsService.getBundle().putFloat(BRIGHTNESS_KEY,
-										0.0f);
+								mapsService.getBundle().putFloat(
+										BRIGHTNESS_KEY, 0.0f);
 								layoutParams.screenBrightness = br;
 							} else {
-								mapsService.getBundle().putFloat(BRIGHTNESS_KEY,
+								mapsService.getBundle().putFloat(
+										BRIGHTNESS_KEY,
 										layoutParams.screenBrightness);
 								layoutParams.screenBrightness = DIMMED_BRIGHTNESS;
 							}
@@ -679,7 +680,7 @@ public class MyActivity extends Activity {
 			new Option(this, MENU_LARGE, "Крупный размер", LARGE_SETTING, false) {
 				public void set(boolean value) {
 					super.set(value);
-					setLarge(get());
+					setLarge(!get());
 				};
 			},
 			new Option(this, MENU_SPEED_PROFILE, "Скоростной профиль",
@@ -792,8 +793,16 @@ public class MyActivity extends Activity {
 		if (mapsService == null || view == null)
 			return;
 		String fixedMap = mapsService.getBundle().getString("fixedMap");
-		fixedMap = view.fixMap(fixedMap == null);
+		if (fixedMap == null)
+			fixedMap = view.getTopMap();
+		else
+			fixedMap = null;
+
+		view.fixMap(fixedMap);
 		mapsService.getBundle().putString("fixedMap", fixedMap);
+
+//		fixedMap = view.fixMap(fixedMap == null);
+//		mapsService.getBundle().putString("fixedMap", fixedMap);
 		updateButtons();
 	}
 

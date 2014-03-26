@@ -2,7 +2,6 @@ package kvv.kvvmap.view;
 
 import android.content.Context;
 import android.graphics.PointF;
-import android.os.Handler;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 
@@ -10,13 +9,7 @@ public class GestureDetector1 {
 
 	private final OnGestureListener listener;
 
-	public GestureDetector1(OnGestureListener listener) {
-		this.listener = listener;
-		this.detector = new OldDetector();
-	}
-
-	public GestureDetector1(Context context, OnGestureListener listener,
-			Handler handler, boolean b) {
+	public GestureDetector1(Context context, OnGestureListener listener) {
 		this.listener = listener;
 		this.detector = new NewDetector();
 	}

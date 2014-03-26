@@ -8,10 +8,6 @@ public final class PointInt extends Point{
 		super(x, y);
 	}
 
-	public PointInt(PointX px) {
-		super((int)px.x, (int)px.y);
-	}
-
 	public void setLocation(int x, int y) {
 		super.set(x, y);
 	}

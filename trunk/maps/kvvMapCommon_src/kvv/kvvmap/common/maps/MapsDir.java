@@ -36,11 +36,12 @@ public class MapsDir {
 		addMap(dirs, getName(file));
 	}
 
-	public String getName(File file) {
-		int ptidx = file.getName().lastIndexOf('.');
+	public static String getName(File file) {
+		String name = file.getName();
+		int ptidx = name.lastIndexOf('.');
 		if (ptidx < 0)
-			ptidx = file.getName().length();
-		return file.getName().substring(0, ptidx);
+			return name;
+		return name.substring(0, ptidx);
 	}
 
 	public void addMap(MapDir[] dirs, String name) {
@@ -56,7 +57,6 @@ public class MapsDir {
 
 	public static MapDir[] read(File file) throws IOException {
 		List<MapDir> res = new ArrayList<MapDir>();
-
 		if (file.getName().endsWith(".dir")) {
 			res.add(new MapDir(file, false));
 		} else if (file.getName().endsWith(".kvvmap")) {
