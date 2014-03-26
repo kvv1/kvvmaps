@@ -1,0 +1,23 @@
+package kvv.kvvmap.util;
+
+public class COLOR {
+	public static final int MAGENTA = 0xFFFF00FF;
+	public static final int BLACK = 0xFF000000;
+	public static final int WHITE = 0xFFFFFFFF;
+	public static final int RED = 0xFFFF0000;
+	public static final int BLUE = 0xFF0000FF;
+	public static final int CYAN = 0xFF00FFFF;
+	public static final int GREEN = 0xFF00FF00;
+	public static final int YELLOW = 0xFFFFFF00;
+	public static final int CHARTREUSE = 0xFF7FFF00;
+	public static final int ALYI = 0xFFFF2400;
+	
+//	public static final int TARG_COLOR = 0xFFFF8000;
+	public static final int TARG_COLOR = MAGENTA;
+	public static final int ARROW_COLOR = RED;
+	
+	public static int dimm (int color) {
+		return color & 0x7FFFFFFF;
+	}
+}
+

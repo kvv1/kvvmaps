@@ -1,8 +1,8 @@
 package kvv.kvvmap.service;
 
 import kvv.kvvmap.adapter.LocationX;
-import kvv.kvvmap.common.pacemark.Path;
-import kvv.kvvmap.common.pacemark.Paths;
+import kvv.kvvmap.placemark.Path;
+import kvv.kvvmap.placemark.Paths;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;

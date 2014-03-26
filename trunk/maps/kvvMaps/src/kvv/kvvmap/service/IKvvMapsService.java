@@ -1,8 +1,8 @@
 package kvv.kvvmap.service;
 
-import kvv.kvvmap.common.maps.MapsDir;
-import kvv.kvvmap.common.pacemark.Paths;
-import kvv.kvvmap.common.pacemark.PlaceMarks;
+import kvv.kvvmap.maps.MapsDir;
+import kvv.kvvmap.placemark.Paths;
+import kvv.kvvmap.placemark.PlaceMarks;
 import kvv.kvvmap.service.KvvMapsService.KvvMapsServiceListener;
 import android.os.Bundle;
 
