@@ -2,8 +2,7 @@
 Allocating common symbols
 Common symbol       size              file
 
-startCnt            0x2               ./hw.o
-globals             0x210             ./main.o
+globals             0x212             ./main.o
 
 Memory Configuration
 
@@ -115,7 +114,7 @@ LOAD ./utils.o
 .rela.plt
  *(.rela.plt)
 
-.text           0x00003c00      0x3f2
+.text           0x00003c00      0x3dc
  *(.vectors)
  *(.vectors)
  *(.progmem.gcc*)
@@ -157,72 +156,71 @@ LOAD ./utils.o
  *(.init8)
  *(.init8)
  *(.init9)
- .init9         0x00003c00        0x4 ./main.o
+ .init9         0x00003c00        0x8 ./main.o
                 0x00003c00                __jumpMain
  *(.init9)
  *(.text)
- .text          0x00003c04        0x0 ./hw.o
- .text          0x00003c04        0x0 ./main.o
- .text          0x00003c04        0x0 ./packet.o
- .text          0x00003c04        0x0 ./utils.o
-                0x00003c04                . = ALIGN (0x2)
+ .text          0x00003c08        0x0 ./hw.o
+ .text          0x00003c08        0x0 ./main.o
+ .text          0x00003c08        0x0 ./packet.o
+ .text          0x00003c08        0x0 ./utils.o
+                0x00003c08                . = ALIGN (0x2)
  *(.text.*)
- .text.initHW   0x00003c04       0x30 ./hw.o
-                0x00003c04                initHW
- .text.startTX  0x00003c34        0x4 ./hw.o
-                0x00003c34                startTX
- .text.stopTX   0x00003c38        0xc ./hw.o
-                0x00003c38                stopTX
- .text.rdByte   0x00003c44       0x52 ./hw.o
-                0x00003c44                rdByte
- .text.wrByte   0x00003c96       0x10 ./hw.o
-                0x00003c96                wrByte
- .text.getAddr  0x00003ca6        0x4 ./main.o
-                0x00003ca6                getAddr
- .text.on       0x00003caa        0x6 ./main.o
-                0x00003caa                on
- .text.off      0x00003cb0        0x6 ./main.o
-                0x00003cb0                off
- .text.main     0x00003cb6       0xbc ./main.o
-                0x00003cb6                main
+ .text.hwInit   0x00003c08       0x2a ./hw.o
+                0x00003c08                hwInit
+ .text.startTX  0x00003c32        0x4 ./hw.o
+                0x00003c32                startTX
+ .text.stopTX   0x00003c36        0xc ./hw.o
+                0x00003c36                stopTX
+ .text.rdByte   0x00003c42       0x52 ./hw.o
+                0x00003c42                rdByte
+ .text.wrByte   0x00003c94       0x10 ./hw.o
+                0x00003c94                wrByte
+ .text.getAddr  0x00003ca4        0x4 ./main.o
+                0x00003ca4                getAddr
+ .text.main     0x00003ca8       0xb8 ./main.o
+                0x00003ca8                main
  .text.crc16_step
-                0x00003d72       0x26 ./packet.o
-                0x00003d72                crc16_step
- .text.crc16    0x00003d98       0x2e ./packet.o
-                0x00003d98                crc16
+                0x00003d60       0x24 ./packet.o
+                0x00003d60                crc16_step
+ .text.crc16    0x00003d84       0x2e ./packet.o
+                0x00003d84                crc16
  .text.sendByte
-                0x00003dc6       0x1a ./packet.o
-                0x00003dc6                sendByte
+                0x00003db2       0x1a ./packet.o
+                0x00003db2                sendByte
  .text.sendPacketEnd
-                0x00003de0       0x10 ./packet.o
-                0x00003de0                sendPacketEnd
+                0x00003dcc       0x10 ./packet.o
+                0x00003dcc                sendPacketEnd
  .text.sendPacketStart
-                0x00003df0        0xa ./packet.o
-                0x00003df0                sendPacketStart
+                0x00003ddc        0xa ./packet.o
+                0x00003ddc                sendPacketStart
  .text.sendError
-                0x00003dfa       0x20 ./packet.o
-                0x00003dfa                sendError
- .text.sendOk   0x00003e1a       0x12 ./packet.o
-                0x00003e1a                sendOk
- .text.spmWait  0x00003e2c        0xc ./utils.o
+                0x00003de6       0x20 ./packet.o
+                0x00003de6                sendError
+ .text.sendOk   0x00003e06       0x12 ./packet.o
+                0x00003e06                sendOk
+ .text.spmWait  0x00003e18        0xc ./utils.o
+                0x00003e18                spmWait
  .text.rww_enable
-                0x00003e38        0xc ./utils.o
+                0x00003e24        0xc ./utils.o
+                0x00003e24                rww_enable
  .text.page_write
-                0x00003e44       0x28 ./utils.o
- .text.isAppOK  0x00003e6c       0x20 ./utils.o
-                0x00003e6c                isAppOK
+                0x00003e30       0x28 ./utils.o
+                0x00003e30                page_write
+ .text.isAppOK  0x00003e58       0x20 ./utils.o
+                0x00003e58                isAppOK
  .text.setAppOK
-                0x00003e8c       0x2e ./utils.o
-                0x00003e8c                setAppOK
- .text.erase    0x00003eba       0x28 ./utils.o
-                0x00003eba                erase
+                0x00003e78       0x2e ./utils.o
+                0x00003e78                setAppOK
+ .text.erase    0x00003ea6       0x28 ./utils.o
+                0x00003ea6                erase
  .text.processBlock
-                0x00003ee2       0x62 ./utils.o
-                0x00003ee2                processBlock
+                0x00003ece       0x62 ./utils.o
+                0x00003ece                processBlock
  .text.packetReceived
-                0x00003f44       0xae ./utils.o
-                0x00003f44                packetReceived
-                0x00003ff2                . = ALIGN (0x2)
+                0x00003f30       0xac ./utils.o
+                0x00003f30                packetReceived
+                0x00003fdc                . = ALIGN (0x2)
  *(.fini9)
  *(.fini9)
  *(.fini8)
@@ -243,9 +241,9 @@ LOAD ./utils.o
  *(.fini1)
  *(.fini0)
  *(.fini0)
-                0x00003ff2                _etext = .
+                0x00003fdc                _etext = .
 
-.data           0x00800100        0x0 load address 0x00003ff2
+.data           0x00800100        0x0 load address 0x00003fdc
                 0x00800100                PROVIDE (__data_start, .)
  *(.data)
  .data          0x00800100        0x0 ./hw.o
@@ -269,13 +267,11 @@ LOAD ./utils.o
  .bss           0x00800100        0x0 ./utils.o
  *(.bss*)
  *(COMMON)
- COMMON         0x00800100        0x2 ./hw.o
-                0x00800100                startCnt
- COMMON         0x00800102      0x210 ./main.o
-                0x00800102                globals
+ COMMON         0x00800100      0x212 ./main.o
+                0x00800100                globals
                 0x00800312                PROVIDE (__bss_end, .)
-                0x00003ff2                __data_load_start = LOADADDR (.data)
-                0x00003ff2                __data_load_end = (__data_load_start + SIZEOF (.data))
+                0x00003fdc                __data_load_start = LOADADDR (.data)
+                0x00003fdc                __data_load_end = (__data_load_start + SIZEOF (.data))
 
 .noinit         0x00800312        0x0
                 0x00800312                PROVIDE (__noinit_start, .)

@@ -25,15 +25,15 @@ uint8_t getAddr() {
 
 Globals globals;
 
-void on() {
-	DDRD |= 1 << 2;
-	PORTD |= 1 << 2;
-}
-
-void off() {
-	DDRD |= 1 << 2;
-	PORTD &= ~(1 << 2);
-}
+//void on() {
+//	DDRD |= 1 << 2;
+//	PORTD |= 1 << 2;
+//}
+//
+//void off() {
+//	DDRD |= 1 << 2;
+//	PORTD &= ~(1 << 2);
+//}
 
 register uint8_t reg_r1 asm("r1");
 #define init() do { SP = RAMEND; reg_r1 = 0; SREG = reg_r1; } while(0)
@@ -42,7 +42,7 @@ int main() {
 	cli();
 	init();
 
-	on();
+//	on();
 
 	memset(&globals, 0, sizeof(globals));
 	globals.lastPage = 0xFFFF;
@@ -67,7 +67,7 @@ int main() {
 		}
 	}
 
-	off();
+//	off();
 
 #if defined(__AVR_ATmega168__)
 	asm volatile ( "jmp 0");
@@ -83,18 +83,3 @@ int main() {
 #endif
 #endif
 }
-
-/*
- void pageWrite(int page, unsigned char magic8) {
- asm volatile("mov R30,%A0" "\n\t"
- "mov R31,%B0" :"=r" (page));
- if (magic16 != MAGIC16)
- return;
- SPMCR = ((1 << SPMEN) | (1 << PGWRT));
- if (magic8 == MAGIC8)
- asm volatile ( "spm");
- }
- void _pageWrite(int page, unsigned char magic8) {
- boot_page_write(page);
- }
- */

@@ -3,519 +3,506 @@ boot.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         000003f2  00003c00  00003c00  00000074  2**1
+  0 .text         000003dc  00003c00  00003c00  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .bss          00000212  00800100  00800100  00000466  2**0
+  1 .bss          00000212  00800100  00800100  00000450  2**0
                   ALLOC
 
 Disassembly of section .text:
 
 00003c00 <__jumpMain>:
-    3c00:	5a c0       	rjmp	.+180    	; 0x3cb6 <main>
-    3c02:	51 c0       	rjmp	.+162    	; 0x3ca6 <getAddr>
+    3c00:	53 c0       	rjmp	.+166    	; 0x3ca8 <main>
+    3c02:	50 c0       	rjmp	.+160    	; 0x3ca4 <getAddr>
+    3c04:	ad c0       	rjmp	.+346    	; 0x3d60 <crc16_step>
+    3c06:	be c0       	rjmp	.+380    	; 0x3d84 <crc16>
 
-00003c04 <initHW>:
-    3c04:	10 92 c0 00 	sts	0x00C0, r1
-    3c08:	88 e1       	ldi	r24, 0x18	; 24
-    3c0a:	80 93 c1 00 	sts	0x00C1, r24
-    3c0e:	86 e0       	ldi	r24, 0x06	; 6
-    3c10:	80 93 c2 00 	sts	0x00C2, r24
-    3c14:	10 92 c5 00 	sts	0x00C5, r1
-    3c18:	83 e3       	ldi	r24, 0x33	; 51
-    3c1a:	80 93 c4 00 	sts	0x00C4, r24
-    3c1e:	80 e8       	ldi	r24, 0x80	; 128
-    3c20:	84 b9       	out	0x04, r24	; 4
-    3c22:	15 b8       	out	0x05, r1	; 5
-    3c24:	81 e0       	ldi	r24, 0x01	; 1
-    3c26:	80 93 6e 00 	sts	0x006E, r24
-    3c2a:	10 92 01 01 	sts	0x0101, r1
-    3c2e:	10 92 00 01 	sts	0x0100, r1
-    3c32:	08 95       	ret
+00003c08 <hwInit>:
+    3c08:	10 92 c0 00 	sts	0x00C0, r1
+    3c0c:	88 e1       	ldi	r24, 0x18	; 24
+    3c0e:	80 93 c1 00 	sts	0x00C1, r24
+    3c12:	86 e0       	ldi	r24, 0x06	; 6
+    3c14:	80 93 c2 00 	sts	0x00C2, r24
+    3c18:	10 92 c5 00 	sts	0x00C5, r1
+    3c1c:	83 e3       	ldi	r24, 0x33	; 51
+    3c1e:	80 93 c4 00 	sts	0x00C4, r24
+    3c22:	81 e0       	ldi	r24, 0x01	; 1
+    3c24:	80 93 6e 00 	sts	0x006E, r24
+    3c28:	27 9a       	sbi	0x04, 7	; 4
+    3c2a:	2f 98       	cbi	0x05, 7	; 5
+    3c2c:	50 98       	cbi	0x0a, 0	; 10
+    3c2e:	58 9a       	sbi	0x0b, 0	; 11
+    3c30:	08 95       	ret
 
-00003c34 <startTX>:
-    3c34:	2f 9a       	sbi	0x05, 7	; 5
-    3c36:	08 95       	ret
+00003c32 <startTX>:
+    3c32:	2f 9a       	sbi	0x05, 7	; 5
+    3c34:	08 95       	ret
 
-00003c38 <stopTX>:
-    3c38:	80 ea       	ldi	r24, 0xA0	; 160
-    3c3a:	9f e0       	ldi	r25, 0x0F	; 15
-    3c3c:	01 97       	sbiw	r24, 0x01	; 1
-    3c3e:	f1 f7       	brne	.-4      	; 0x3c3c <stopTX+0x4>
-    3c40:	2f 98       	cbi	0x05, 7	; 5
-    3c42:	08 95       	ret
+00003c36 <stopTX>:
+    3c36:	80 ea       	ldi	r24, 0xA0	; 160
+    3c38:	9f e0       	ldi	r25, 0x0F	; 15
+    3c3a:	01 97       	sbiw	r24, 0x01	; 1
+    3c3c:	f1 f7       	brne	.-4      	; 0x3c3a <stopTX+0x4>
+    3c3e:	2f 98       	cbi	0x05, 7	; 5
+    3c40:	08 95       	ret
 
-00003c44 <rdByte>:
-    3c44:	20 91 00 01 	lds	r18, 0x0100
-    3c48:	30 91 01 01 	lds	r19, 0x0101
-    3c4c:	44 e1       	ldi	r20, 0x14	; 20
-    3c4e:	60 e9       	ldi	r22, 0x90	; 144
-    3c50:	71 e0       	ldi	r23, 0x01	; 1
-    3c52:	13 c0       	rjmp	.+38     	; 0x3c7a <rdByte+0x36>
-    3c54:	4f 3f       	cpi	r20, 0xFF	; 255
-    3c56:	39 f4       	brne	.+14     	; 0x3c66 <rdByte+0x22>
-    3c58:	30 93 01 01 	sts	0x0101, r19
-    3c5c:	20 93 00 01 	sts	0x0100, r18
-    3c60:	2f ef       	ldi	r18, 0xFF	; 255
-    3c62:	3f ef       	ldi	r19, 0xFF	; 255
-    3c64:	16 c0       	rjmp	.+44     	; 0x3c92 <rdByte+0x4e>
-    3c66:	cb 01       	movw	r24, r22
-    3c68:	01 97       	sbiw	r24, 0x01	; 1
-    3c6a:	f1 f7       	brne	.-4      	; 0x3c68 <rdByte+0x24>
-    3c6c:	8f ef       	ldi	r24, 0xFF	; 255
-    3c6e:	2f 3f       	cpi	r18, 0xFF	; 255
-    3c70:	38 07       	cpc	r19, r24
-    3c72:	11 f0       	breq	.+4      	; 0x3c78 <rdByte+0x34>
-    3c74:	2f 5f       	subi	r18, 0xFF	; 255
-    3c76:	3f 4f       	sbci	r19, 0xFF	; 255
-    3c78:	41 50       	subi	r20, 0x01	; 1
-    3c7a:	80 91 c0 00 	lds	r24, 0x00C0
-    3c7e:	87 ff       	sbrs	r24, 7
-    3c80:	e9 cf       	rjmp	.-46     	; 0x3c54 <rdByte+0x10>
-    3c82:	30 93 01 01 	sts	0x0101, r19
-    3c86:	20 93 00 01 	sts	0x0100, r18
-    3c8a:	80 91 c6 00 	lds	r24, 0x00C6
-    3c8e:	28 2f       	mov	r18, r24
-    3c90:	30 e0       	ldi	r19, 0x00	; 0
-    3c92:	c9 01       	movw	r24, r18
-    3c94:	08 95       	ret
+00003c42 <rdByte>:
+    3c42:	20 91 00 01 	lds	r18, 0x0100
+    3c46:	30 91 01 01 	lds	r19, 0x0101
+    3c4a:	44 e1       	ldi	r20, 0x14	; 20
+    3c4c:	60 e9       	ldi	r22, 0x90	; 144
+    3c4e:	71 e0       	ldi	r23, 0x01	; 1
+    3c50:	13 c0       	rjmp	.+38     	; 0x3c78 <rdByte+0x36>
+    3c52:	4f 3f       	cpi	r20, 0xFF	; 255
+    3c54:	39 f4       	brne	.+14     	; 0x3c64 <rdByte+0x22>
+    3c56:	30 93 01 01 	sts	0x0101, r19
+    3c5a:	20 93 00 01 	sts	0x0100, r18
+    3c5e:	2f ef       	ldi	r18, 0xFF	; 255
+    3c60:	3f ef       	ldi	r19, 0xFF	; 255
+    3c62:	16 c0       	rjmp	.+44     	; 0x3c90 <rdByte+0x4e>
+    3c64:	cb 01       	movw	r24, r22
+    3c66:	01 97       	sbiw	r24, 0x01	; 1
+    3c68:	f1 f7       	brne	.-4      	; 0x3c66 <rdByte+0x24>
+    3c6a:	8f ef       	ldi	r24, 0xFF	; 255
+    3c6c:	2f 3f       	cpi	r18, 0xFF	; 255
+    3c6e:	38 07       	cpc	r19, r24
+    3c70:	11 f0       	breq	.+4      	; 0x3c76 <rdByte+0x34>
+    3c72:	2f 5f       	subi	r18, 0xFF	; 255
+    3c74:	3f 4f       	sbci	r19, 0xFF	; 255
+    3c76:	41 50       	subi	r20, 0x01	; 1
+    3c78:	80 91 c0 00 	lds	r24, 0x00C0
+    3c7c:	87 ff       	sbrs	r24, 7
+    3c7e:	e9 cf       	rjmp	.-46     	; 0x3c52 <rdByte+0x10>
+    3c80:	30 93 01 01 	sts	0x0101, r19
+    3c84:	20 93 00 01 	sts	0x0100, r18
+    3c88:	80 91 c6 00 	lds	r24, 0x00C6
+    3c8c:	28 2f       	mov	r18, r24
+    3c8e:	30 e0       	ldi	r19, 0x00	; 0
+    3c90:	c9 01       	movw	r24, r18
+    3c92:	08 95       	ret
 
-00003c96 <wrByte>:
-    3c96:	98 2f       	mov	r25, r24
-    3c98:	80 91 c0 00 	lds	r24, 0x00C0
-    3c9c:	85 ff       	sbrs	r24, 5
-    3c9e:	fc cf       	rjmp	.-8      	; 0x3c98 <wrByte+0x2>
-    3ca0:	90 93 c6 00 	sts	0x00C6, r25
-    3ca4:	08 95       	ret
+00003c94 <wrByte>:
+    3c94:	98 2f       	mov	r25, r24
+    3c96:	80 91 c0 00 	lds	r24, 0x00C0
+    3c9a:	85 ff       	sbrs	r24, 5
+    3c9c:	fc cf       	rjmp	.-8      	; 0x3c96 <wrByte+0x2>
+    3c9e:	90 93 c6 00 	sts	0x00C6, r25
+    3ca2:	08 95       	ret
 
-00003ca6 <getAddr>:
-    3ca6:	8d e4       	ldi	r24, 0x4D	; 77
-    3ca8:	08 95       	ret
+00003ca4 <getAddr>:
+    3ca4:	8d e4       	ldi	r24, 0x4D	; 77
+    3ca6:	08 95       	ret
 
-00003caa <on>:
-    3caa:	52 9a       	sbi	0x0a, 2	; 10
-    3cac:	5a 9a       	sbi	0x0b, 2	; 11
-    3cae:	08 95       	ret
+00003ca8 <main>:
+    3ca8:	cf 93       	push	r28
+    3caa:	df 93       	push	r29
+    3cac:	f8 94       	cli
+    3cae:	8f ef       	ldi	r24, 0xFF	; 255
+    3cb0:	94 e0       	ldi	r25, 0x04	; 4
+    3cb2:	9e bf       	out	0x3e, r25	; 62
+    3cb4:	8d bf       	out	0x3d, r24	; 61
+    3cb6:	11 24       	eor	r1, r1
+    3cb8:	1f be       	out	0x3f, r1	; 63
+    3cba:	82 e1       	ldi	r24, 0x12	; 18
+    3cbc:	92 e0       	ldi	r25, 0x02	; 2
+    3cbe:	e0 e0       	ldi	r30, 0x00	; 0
+    3cc0:	f1 e0       	ldi	r31, 0x01	; 1
+    3cc2:	df 01       	movw	r26, r30
+    3cc4:	9c 01       	movw	r18, r24
+    3cc6:	1d 92       	st	X+, r1
+    3cc8:	21 50       	subi	r18, 0x01	; 1
+    3cca:	30 40       	sbci	r19, 0x00	; 0
+    3ccc:	e1 f7       	brne	.-8      	; 0x3cc6 <main+0x1e>
+    3cce:	8f ef       	ldi	r24, 0xFF	; 255
+    3cd0:	9f ef       	ldi	r25, 0xFF	; 255
+    3cd2:	90 93 05 01 	sts	0x0105, r25
+    3cd6:	80 93 04 01 	sts	0x0104, r24
+    3cda:	96 df       	rcall	.-212    	; 0x3c08 <hwInit>
+    3cdc:	c9 ec       	ldi	r28, 0xC9	; 201
+    3cde:	d6 ee       	ldi	r29, 0xE6	; 230
+    3ce0:	2e c0       	rjmp	.+92     	; 0x3d3e <main+0x96>
+    3ce2:	af df       	rcall	.-162    	; 0x3c42 <rdByte>
+    3ce4:	3f ef       	ldi	r19, 0xFF	; 255
+    3ce6:	8f 3f       	cpi	r24, 0xFF	; 255
+    3ce8:	93 07       	cpc	r25, r19
+    3cea:	b9 f4       	brne	.+46     	; 0x3d1a <main+0x72>
+    3cec:	60 91 06 01 	lds	r22, 0x0106
+    3cf0:	70 91 07 01 	lds	r23, 0x0107
+    3cf4:	61 15       	cp	r22, r1
+    3cf6:	71 05       	cpc	r23, r1
+    3cf8:	59 f0       	breq	.+22     	; 0x3d10 <main+0x68>
+    3cfa:	d0 93 03 01 	sts	0x0103, r29
+    3cfe:	c0 93 02 01 	sts	0x0102, r28
+    3d02:	88 e0       	ldi	r24, 0x08	; 8
+    3d04:	91 e0       	ldi	r25, 0x01	; 1
+    3d06:	14 d1       	rcall	.+552    	; 0x3f30 <packetReceived>
+    3d08:	10 92 03 01 	sts	0x0103, r1
+    3d0c:	10 92 02 01 	sts	0x0102, r1
+    3d10:	10 92 07 01 	sts	0x0107, r1
+    3d14:	10 92 06 01 	sts	0x0106, r1
+    3d18:	12 c0       	rjmp	.+36     	; 0x3d3e <main+0x96>
+    3d1a:	20 91 06 01 	lds	r18, 0x0106
+    3d1e:	30 91 07 01 	lds	r19, 0x0107
+    3d22:	42 e0       	ldi	r20, 0x02	; 2
+    3d24:	2a 30       	cpi	r18, 0x0A	; 10
+    3d26:	34 07       	cpc	r19, r20
+    3d28:	50 f4       	brcc	.+20     	; 0x3d3e <main+0x96>
+    3d2a:	f9 01       	movw	r30, r18
+    3d2c:	e0 50       	subi	r30, 0x00	; 0
+    3d2e:	ff 4f       	sbci	r31, 0xFF	; 255
+    3d30:	80 87       	std	Z+8, r24	; 0x08
+    3d32:	2f 5f       	subi	r18, 0xFF	; 255
+    3d34:	3f 4f       	sbci	r19, 0xFF	; 255
+    3d36:	30 93 07 01 	sts	0x0107, r19
+    3d3a:	20 93 06 01 	sts	0x0106, r18
+    3d3e:	80 91 00 01 	lds	r24, 0x0100
+    3d42:	90 91 01 01 	lds	r25, 0x0101
+    3d46:	88 5a       	subi	r24, 0xA8	; 168
+    3d48:	91 46       	sbci	r25, 0x61	; 97
+    3d4a:	58 f2       	brcs	.-106    	; 0x3ce2 <main+0x3a>
+    3d4c:	85 d0       	rcall	.+266    	; 0x3e58 <isAppOK>
+    3d4e:	88 23       	and	r24, r24
+    3d50:	41 f2       	breq	.-112    	; 0x3ce2 <main+0x3a>
+    3d52:	0c 94 00 00 	jmp	0	; 0x0 <__tmp_reg__>
+    3d56:	80 e0       	ldi	r24, 0x00	; 0
+    3d58:	90 e0       	ldi	r25, 0x00	; 0
+    3d5a:	df 91       	pop	r29
+    3d5c:	cf 91       	pop	r28
+    3d5e:	08 95       	ret
 
-00003cb0 <off>:
-    3cb0:	52 9a       	sbi	0x0a, 2	; 10
-    3cb2:	5a 98       	cbi	0x0b, 2	; 11
-    3cb4:	08 95       	ret
+00003d60 <crc16_step>:
+    3d60:	90 e0       	ldi	r25, 0x00	; 0
+    3d62:	68 27       	eor	r22, r24
+    3d64:	79 27       	eor	r23, r25
+    3d66:	98 e0       	ldi	r25, 0x08	; 8
+    3d68:	21 e0       	ldi	r18, 0x01	; 1
+    3d6a:	30 ea       	ldi	r19, 0xA0	; 160
+    3d6c:	07 c0       	rjmp	.+14     	; 0x3d7c <crc16_step+0x1c>
+    3d6e:	86 2f       	mov	r24, r22
+    3d70:	76 95       	lsr	r23
+    3d72:	67 95       	ror	r22
+    3d74:	80 ff       	sbrs	r24, 0
+    3d76:	02 c0       	rjmp	.+4      	; 0x3d7c <crc16_step+0x1c>
+    3d78:	62 27       	eor	r22, r18
+    3d7a:	73 27       	eor	r23, r19
+    3d7c:	91 50       	subi	r25, 0x01	; 1
+    3d7e:	b8 f7       	brcc	.-18     	; 0x3d6e <crc16_step+0xe>
+    3d80:	cb 01       	movw	r24, r22
+    3d82:	08 95       	ret
 
-00003cb6 <main>:
-    3cb6:	cf 93       	push	r28
-    3cb8:	df 93       	push	r29
-    3cba:	f8 94       	cli
-    3cbc:	8f ef       	ldi	r24, 0xFF	; 255
-    3cbe:	94 e0       	ldi	r25, 0x04	; 4
-    3cc0:	9e bf       	out	0x3e, r25	; 62
-    3cc2:	8d bf       	out	0x3d, r24	; 61
-    3cc4:	11 24       	eor	r1, r1
-    3cc6:	1f be       	out	0x3f, r1	; 63
-    3cc8:	f0 df       	rcall	.-32     	; 0x3caa <on>
-    3cca:	80 e1       	ldi	r24, 0x10	; 16
-    3ccc:	92 e0       	ldi	r25, 0x02	; 2
-    3cce:	e2 e0       	ldi	r30, 0x02	; 2
-    3cd0:	f1 e0       	ldi	r31, 0x01	; 1
-    3cd2:	df 01       	movw	r26, r30
-    3cd4:	9c 01       	movw	r18, r24
-    3cd6:	1d 92       	st	X+, r1
-    3cd8:	21 50       	subi	r18, 0x01	; 1
-    3cda:	30 40       	sbci	r19, 0x00	; 0
-    3cdc:	e1 f7       	brne	.-8      	; 0x3cd6 <main+0x20>
-    3cde:	8f ef       	ldi	r24, 0xFF	; 255
-    3ce0:	9f ef       	ldi	r25, 0xFF	; 255
-    3ce2:	90 93 05 01 	sts	0x0105, r25
-    3ce6:	80 93 04 01 	sts	0x0104, r24
-    3cea:	8c df       	rcall	.-232    	; 0x3c04 <initHW>
-    3cec:	c9 ec       	ldi	r28, 0xC9	; 201
-    3cee:	d6 ee       	ldi	r29, 0xE6	; 230
-    3cf0:	2e c0       	rjmp	.+92     	; 0x3d4e <main+0x98>
-    3cf2:	a8 df       	rcall	.-176    	; 0x3c44 <rdByte>
-    3cf4:	3f ef       	ldi	r19, 0xFF	; 255
-    3cf6:	8f 3f       	cpi	r24, 0xFF	; 255
-    3cf8:	93 07       	cpc	r25, r19
-    3cfa:	b9 f4       	brne	.+46     	; 0x3d2a <main+0x74>
-    3cfc:	60 91 06 01 	lds	r22, 0x0106
-    3d00:	70 91 07 01 	lds	r23, 0x0107
-    3d04:	61 15       	cp	r22, r1
-    3d06:	71 05       	cpc	r23, r1
-    3d08:	59 f0       	breq	.+22     	; 0x3d20 <main+0x6a>
-    3d0a:	d0 93 03 01 	sts	0x0103, r29
-    3d0e:	c0 93 02 01 	sts	0x0102, r28
-    3d12:	88 e0       	ldi	r24, 0x08	; 8
-    3d14:	91 e0       	ldi	r25, 0x01	; 1
-    3d16:	16 d1       	rcall	.+556    	; 0x3f44 <packetReceived>
-    3d18:	10 92 03 01 	sts	0x0103, r1
-    3d1c:	10 92 02 01 	sts	0x0102, r1
-    3d20:	10 92 07 01 	sts	0x0107, r1
-    3d24:	10 92 06 01 	sts	0x0106, r1
-    3d28:	12 c0       	rjmp	.+36     	; 0x3d4e <main+0x98>
-    3d2a:	20 91 06 01 	lds	r18, 0x0106
-    3d2e:	30 91 07 01 	lds	r19, 0x0107
-    3d32:	42 e0       	ldi	r20, 0x02	; 2
-    3d34:	2a 30       	cpi	r18, 0x0A	; 10
-    3d36:	34 07       	cpc	r19, r20
-    3d38:	50 f4       	brcc	.+20     	; 0x3d4e <main+0x98>
-    3d3a:	f9 01       	movw	r30, r18
-    3d3c:	ee 5f       	subi	r30, 0xFE	; 254
-    3d3e:	fe 4f       	sbci	r31, 0xFE	; 254
-    3d40:	86 83       	std	Z+6, r24	; 0x06
-    3d42:	2f 5f       	subi	r18, 0xFF	; 255
-    3d44:	3f 4f       	sbci	r19, 0xFF	; 255
-    3d46:	30 93 07 01 	sts	0x0107, r19
-    3d4a:	20 93 06 01 	sts	0x0106, r18
-    3d4e:	80 91 00 01 	lds	r24, 0x0100
-    3d52:	90 91 01 01 	lds	r25, 0x0101
-    3d56:	88 5a       	subi	r24, 0xA8	; 168
-    3d58:	91 46       	sbci	r25, 0x61	; 97
-    3d5a:	58 f2       	brcs	.-106    	; 0x3cf2 <main+0x3c>
-    3d5c:	87 d0       	rcall	.+270    	; 0x3e6c <isAppOK>
-    3d5e:	88 23       	and	r24, r24
-    3d60:	41 f2       	breq	.-112    	; 0x3cf2 <main+0x3c>
-    3d62:	a6 df       	rcall	.-180    	; 0x3cb0 <off>
-    3d64:	0c 94 00 00 	jmp	0	; 0x0 <__tmp_reg__>
-    3d68:	80 e0       	ldi	r24, 0x00	; 0
-    3d6a:	90 e0       	ldi	r25, 0x00	; 0
-    3d6c:	df 91       	pop	r29
-    3d6e:	cf 91       	pop	r28
-    3d70:	08 95       	ret
+00003d84 <crc16>:
+    3d84:	0f 93       	push	r16
+    3d86:	1f 93       	push	r17
+    3d88:	cf 93       	push	r28
+    3d8a:	df 93       	push	r29
+    3d8c:	8c 01       	movw	r16, r24
+    3d8e:	eb 01       	movw	r28, r22
+    3d90:	6f ef       	ldi	r22, 0xFF	; 255
+    3d92:	7f ef       	ldi	r23, 0xFF	; 255
+    3d94:	06 c0       	rjmp	.+12     	; 0x3da2 <crc16+0x1e>
+    3d96:	f8 01       	movw	r30, r16
+    3d98:	81 91       	ld	r24, Z+
+    3d9a:	8f 01       	movw	r16, r30
+    3d9c:	e1 df       	rcall	.-62     	; 0x3d60 <crc16_step>
+    3d9e:	bc 01       	movw	r22, r24
+    3da0:	21 97       	sbiw	r28, 0x01	; 1
+    3da2:	20 97       	sbiw	r28, 0x00	; 0
+    3da4:	c1 f7       	brne	.-16     	; 0x3d96 <crc16+0x12>
+    3da6:	cb 01       	movw	r24, r22
+    3da8:	df 91       	pop	r29
+    3daa:	cf 91       	pop	r28
+    3dac:	1f 91       	pop	r17
+    3dae:	0f 91       	pop	r16
+    3db0:	08 95       	ret
 
-00003d72 <crc16_step>:
-    3d72:	90 e0       	ldi	r25, 0x00	; 0
-    3d74:	68 27       	eor	r22, r24
-    3d76:	79 27       	eor	r23, r25
-    3d78:	98 e0       	ldi	r25, 0x08	; 8
-    3d7a:	21 e0       	ldi	r18, 0x01	; 1
-    3d7c:	30 ea       	ldi	r19, 0xA0	; 160
-    3d7e:	08 c0       	rjmp	.+16     	; 0x3d90 <crc16_step+0x1e>
-    3d80:	86 2f       	mov	r24, r22
-    3d82:	81 70       	andi	r24, 0x01	; 1
-    3d84:	76 95       	lsr	r23
-    3d86:	67 95       	ror	r22
-    3d88:	88 23       	and	r24, r24
-    3d8a:	11 f0       	breq	.+4      	; 0x3d90 <crc16_step+0x1e>
-    3d8c:	62 27       	eor	r22, r18
-    3d8e:	73 27       	eor	r23, r19
-    3d90:	91 50       	subi	r25, 0x01	; 1
-    3d92:	b0 f7       	brcc	.-20     	; 0x3d80 <crc16_step+0xe>
-    3d94:	cb 01       	movw	r24, r22
-    3d96:	08 95       	ret
+00003db2 <sendByte>:
+    3db2:	ff 92       	push	r15
+    3db4:	0f 93       	push	r16
+    3db6:	1f 93       	push	r17
+    3db8:	f8 2e       	mov	r15, r24
+    3dba:	8b 01       	movw	r16, r22
+    3dbc:	6b df       	rcall	.-298    	; 0x3c94 <wrByte>
+    3dbe:	8f 2d       	mov	r24, r15
+    3dc0:	b8 01       	movw	r22, r16
+    3dc2:	ce df       	rcall	.-100    	; 0x3d60 <crc16_step>
+    3dc4:	1f 91       	pop	r17
+    3dc6:	0f 91       	pop	r16
+    3dc8:	ff 90       	pop	r15
+    3dca:	08 95       	ret
 
-00003d98 <crc16>:
-    3d98:	0f 93       	push	r16
-    3d9a:	1f 93       	push	r17
-    3d9c:	cf 93       	push	r28
-    3d9e:	df 93       	push	r29
-    3da0:	8c 01       	movw	r16, r24
-    3da2:	eb 01       	movw	r28, r22
-    3da4:	6f ef       	ldi	r22, 0xFF	; 255
-    3da6:	7f ef       	ldi	r23, 0xFF	; 255
-    3da8:	06 c0       	rjmp	.+12     	; 0x3db6 <crc16+0x1e>
-    3daa:	f8 01       	movw	r30, r16
-    3dac:	81 91       	ld	r24, Z+
-    3dae:	8f 01       	movw	r16, r30
-    3db0:	e0 df       	rcall	.-64     	; 0x3d72 <crc16_step>
-    3db2:	bc 01       	movw	r22, r24
-    3db4:	21 97       	sbiw	r28, 0x01	; 1
-    3db6:	20 97       	sbiw	r28, 0x00	; 0
-    3db8:	c1 f7       	brne	.-16     	; 0x3daa <crc16+0x12>
-    3dba:	cb 01       	movw	r24, r22
-    3dbc:	df 91       	pop	r29
-    3dbe:	cf 91       	pop	r28
-    3dc0:	1f 91       	pop	r17
-    3dc2:	0f 91       	pop	r16
-    3dc4:	08 95       	ret
-
-00003dc6 <sendByte>:
-    3dc6:	ff 92       	push	r15
-    3dc8:	0f 93       	push	r16
-    3dca:	1f 93       	push	r17
-    3dcc:	f8 2e       	mov	r15, r24
-    3dce:	8b 01       	movw	r16, r22
-    3dd0:	62 df       	rcall	.-316    	; 0x3c96 <wrByte>
-    3dd2:	8f 2d       	mov	r24, r15
-    3dd4:	b8 01       	movw	r22, r16
-    3dd6:	cd df       	rcall	.-102    	; 0x3d72 <crc16_step>
+00003dcc <sendPacketEnd>:
+    3dcc:	1f 93       	push	r17
+    3dce:	19 2f       	mov	r17, r25
+    3dd0:	61 df       	rcall	.-318    	; 0x3c94 <wrByte>
+    3dd2:	81 2f       	mov	r24, r17
+    3dd4:	5f df       	rcall	.-322    	; 0x3c94 <wrByte>
+    3dd6:	2f df       	rcall	.-418    	; 0x3c36 <stopTX>
     3dd8:	1f 91       	pop	r17
-    3dda:	0f 91       	pop	r16
-    3ddc:	ff 90       	pop	r15
-    3dde:	08 95       	ret
+    3dda:	08 95       	ret
 
-00003de0 <sendPacketEnd>:
-    3de0:	1f 93       	push	r17
-    3de2:	19 2f       	mov	r17, r25
-    3de4:	58 df       	rcall	.-336    	; 0x3c96 <wrByte>
-    3de6:	81 2f       	mov	r24, r17
-    3de8:	56 df       	rcall	.-340    	; 0x3c96 <wrByte>
-    3dea:	26 df       	rcall	.-436    	; 0x3c38 <stopTX>
-    3dec:	1f 91       	pop	r17
-    3dee:	08 95       	ret
+00003ddc <sendPacketStart>:
+    3ddc:	2a df       	rcall	.-428    	; 0x3c32 <startTX>
+    3dde:	8d e4       	ldi	r24, 0x4D	; 77
+    3de0:	6f ef       	ldi	r22, 0xFF	; 255
+    3de2:	7f ef       	ldi	r23, 0xFF	; 255
+    3de4:	e6 cf       	rjmp	.-52     	; 0x3db2 <sendByte>
 
-00003df0 <sendPacketStart>:
-    3df0:	21 df       	rcall	.-446    	; 0x3c34 <startTX>
-    3df2:	8d e4       	ldi	r24, 0x4D	; 77
-    3df4:	6f ef       	ldi	r22, 0xFF	; 255
-    3df6:	7f ef       	ldi	r23, 0xFF	; 255
-    3df8:	e6 cf       	rjmp	.-52     	; 0x3dc6 <sendByte>
+00003de6 <sendError>:
+    3de6:	0f 93       	push	r16
+    3de8:	1f 93       	push	r17
+    3dea:	18 2f       	mov	r17, r24
+    3dec:	06 2f       	mov	r16, r22
+    3dee:	f6 df       	rcall	.-20     	; 0x3ddc <sendPacketStart>
+    3df0:	bc 01       	movw	r22, r24
+    3df2:	81 2f       	mov	r24, r17
+    3df4:	80 68       	ori	r24, 0x80	; 128
+    3df6:	dd df       	rcall	.-70     	; 0x3db2 <sendByte>
+    3df8:	bc 01       	movw	r22, r24
+    3dfa:	80 2f       	mov	r24, r16
+    3dfc:	da df       	rcall	.-76     	; 0x3db2 <sendByte>
+    3dfe:	e6 df       	rcall	.-52     	; 0x3dcc <sendPacketEnd>
+    3e00:	1f 91       	pop	r17
+    3e02:	0f 91       	pop	r16
+    3e04:	08 95       	ret
 
-00003dfa <sendError>:
-    3dfa:	0f 93       	push	r16
-    3dfc:	1f 93       	push	r17
-    3dfe:	18 2f       	mov	r17, r24
-    3e00:	06 2f       	mov	r16, r22
-    3e02:	f6 df       	rcall	.-20     	; 0x3df0 <sendPacketStart>
-    3e04:	bc 01       	movw	r22, r24
-    3e06:	81 2f       	mov	r24, r17
-    3e08:	80 68       	ori	r24, 0x80	; 128
-    3e0a:	dd df       	rcall	.-70     	; 0x3dc6 <sendByte>
+00003e06 <sendOk>:
+    3e06:	1f 93       	push	r17
+    3e08:	18 2f       	mov	r17, r24
+    3e0a:	e8 df       	rcall	.-48     	; 0x3ddc <sendPacketStart>
     3e0c:	bc 01       	movw	r22, r24
-    3e0e:	80 2f       	mov	r24, r16
-    3e10:	da df       	rcall	.-76     	; 0x3dc6 <sendByte>
-    3e12:	e6 df       	rcall	.-52     	; 0x3de0 <sendPacketEnd>
+    3e0e:	81 2f       	mov	r24, r17
+    3e10:	d0 df       	rcall	.-96     	; 0x3db2 <sendByte>
+    3e12:	dc df       	rcall	.-72     	; 0x3dcc <sendPacketEnd>
     3e14:	1f 91       	pop	r17
-    3e16:	0f 91       	pop	r16
-    3e18:	08 95       	ret
+    3e16:	08 95       	ret
 
-00003e1a <sendOk>:
-    3e1a:	1f 93       	push	r17
-    3e1c:	18 2f       	mov	r17, r24
-    3e1e:	e8 df       	rcall	.-48     	; 0x3df0 <sendPacketStart>
-    3e20:	bc 01       	movw	r22, r24
-    3e22:	81 2f       	mov	r24, r17
-    3e24:	d0 df       	rcall	.-96     	; 0x3dc6 <sendByte>
-    3e26:	dc df       	rcall	.-72     	; 0x3de0 <sendPacketEnd>
-    3e28:	1f 91       	pop	r17
-    3e2a:	08 95       	ret
+00003e18 <spmWait>:
+    3e18:	07 b6       	in	r0, 0x37	; 55
+    3e1a:	00 fc       	sbrc	r0, 0
+    3e1c:	fd cf       	rjmp	.-6      	; 0x3e18 <spmWait>
+    3e1e:	f9 99       	sbic	0x1f, 1	; 31
+    3e20:	fe cf       	rjmp	.-4      	; 0x3e1e <spmWait+0x6>
+    3e22:	08 95       	ret
 
-00003e2c <spmWait>:
-    3e2c:	07 b6       	in	r0, 0x37	; 55
-    3e2e:	00 fc       	sbrc	r0, 0
-    3e30:	fd cf       	rjmp	.-6      	; 0x3e2c <spmWait>
-    3e32:	f9 99       	sbic	0x1f, 1	; 31
-    3e34:	fe cf       	rjmp	.-4      	; 0x3e32 <spmWait+0x6>
-    3e36:	08 95       	ret
+00003e24 <rww_enable>:
+    3e24:	f9 df       	rcall	.-14     	; 0x3e18 <spmWait>
+    3e26:	81 e1       	ldi	r24, 0x11	; 17
+    3e28:	80 93 57 00 	sts	0x0057, r24
+    3e2c:	e8 95       	spm
+    3e2e:	08 95       	ret
 
-00003e38 <rww_enable>:
-    3e38:	f9 df       	rcall	.-14     	; 0x3e2c <spmWait>
-    3e3a:	81 e1       	ldi	r24, 0x11	; 17
-    3e3c:	80 93 57 00 	sts	0x0057, r24
-    3e40:	e8 95       	spm
-    3e42:	08 95       	ret
+00003e30 <page_write>:
+    3e30:	cf 93       	push	r28
+    3e32:	df 93       	push	r29
+    3e34:	ec 01       	movw	r28, r24
+    3e36:	f0 df       	rcall	.-32     	; 0x3e18 <spmWait>
+    3e38:	80 91 02 01 	lds	r24, 0x0102
+    3e3c:	90 91 03 01 	lds	r25, 0x0103
+    3e40:	89 5c       	subi	r24, 0xC9	; 201
+    3e42:	96 4e       	sbci	r25, 0xE6	; 230
+    3e44:	29 f4       	brne	.+10     	; 0x3e50 <page_write+0x20>
+    3e46:	85 e0       	ldi	r24, 0x05	; 5
+    3e48:	fe 01       	movw	r30, r28
+    3e4a:	80 93 57 00 	sts	0x0057, r24
+    3e4e:	e8 95       	spm
+    3e50:	e9 df       	rcall	.-46     	; 0x3e24 <rww_enable>
+    3e52:	df 91       	pop	r29
+    3e54:	cf 91       	pop	r28
+    3e56:	08 95       	ret
 
-00003e44 <page_write>:
-    3e44:	cf 93       	push	r28
-    3e46:	df 93       	push	r29
-    3e48:	ec 01       	movw	r28, r24
-    3e4a:	f0 df       	rcall	.-32     	; 0x3e2c <spmWait>
-    3e4c:	80 91 02 01 	lds	r24, 0x0102
-    3e50:	90 91 03 01 	lds	r25, 0x0103
-    3e54:	89 5c       	subi	r24, 0xC9	; 201
-    3e56:	96 4e       	sbci	r25, 0xE6	; 230
-    3e58:	29 f4       	brne	.+10     	; 0x3e64 <page_write+0x20>
-    3e5a:	85 e0       	ldi	r24, 0x05	; 5
-    3e5c:	fe 01       	movw	r30, r28
-    3e5e:	80 93 57 00 	sts	0x0057, r24
-    3e62:	e8 95       	spm
-    3e64:	e9 df       	rcall	.-46     	; 0x3e38 <rww_enable>
-    3e66:	df 91       	pop	r29
-    3e68:	cf 91       	pop	r28
-    3e6a:	08 95       	ret
+00003e58 <isAppOK>:
+    3e58:	df df       	rcall	.-66     	; 0x3e18 <spmWait>
+    3e5a:	e0 e8       	ldi	r30, 0x80	; 128
+    3e5c:	fb e3       	ldi	r31, 0x3B	; 59
+    3e5e:	85 91       	lpm	r24, Z+
+    3e60:	95 91       	lpm	r25, Z+
+    3e62:	a5 91       	lpm	r26, Z+
+    3e64:	b4 91       	lpm	r27, Z+
+    3e66:	20 e0       	ldi	r18, 0x00	; 0
+    3e68:	84 53       	subi	r24, 0x34	; 52
+    3e6a:	92 41       	sbci	r25, 0x12	; 18
+    3e6c:	ad 4c       	sbci	r26, 0xCD	; 205
+    3e6e:	bb 4a       	sbci	r27, 0xAB	; 171
+    3e70:	09 f4       	brne	.+2      	; 0x3e74 <isAppOK+0x1c>
+    3e72:	21 e0       	ldi	r18, 0x01	; 1
+    3e74:	82 2f       	mov	r24, r18
+    3e76:	08 95       	ret
 
-00003e6c <isAppOK>:
-    3e6c:	df df       	rcall	.-66     	; 0x3e2c <spmWait>
-    3e6e:	e0 e8       	ldi	r30, 0x80	; 128
-    3e70:	fb e3       	ldi	r31, 0x3B	; 59
-    3e72:	85 91       	lpm	r24, Z+
-    3e74:	95 91       	lpm	r25, Z+
-    3e76:	a5 91       	lpm	r26, Z+
-    3e78:	b4 91       	lpm	r27, Z+
-    3e7a:	20 e0       	ldi	r18, 0x00	; 0
-    3e7c:	8d 5c       	subi	r24, 0xCD	; 205
-    3e7e:	9b 4a       	sbci	r25, 0xAB	; 171
-    3e80:	a4 43       	sbci	r26, 0x34	; 52
-    3e82:	b2 41       	sbci	r27, 0x12	; 18
-    3e84:	09 f0       	breq	.+2      	; 0x3e88 <isAppOK+0x1c>
-    3e86:	21 e0       	ldi	r18, 0x01	; 1
-    3e88:	82 2f       	mov	r24, r18
-    3e8a:	08 95       	ret
-
-00003e8c <setAppOK>:
-    3e8c:	cf df       	rcall	.-98     	; 0x3e2c <spmWait>
-    3e8e:	24 e3       	ldi	r18, 0x34	; 52
-    3e90:	32 e1       	ldi	r19, 0x12	; 18
-    3e92:	e0 e8       	ldi	r30, 0x80	; 128
+00003e78 <setAppOK>:
+    3e78:	cf df       	rcall	.-98     	; 0x3e18 <spmWait>
+    3e7a:	24 e3       	ldi	r18, 0x34	; 52
+    3e7c:	32 e1       	ldi	r19, 0x12	; 18
+    3e7e:	e0 e8       	ldi	r30, 0x80	; 128
+    3e80:	fb e3       	ldi	r31, 0x3B	; 59
+    3e82:	81 e0       	ldi	r24, 0x01	; 1
+    3e84:	09 01       	movw	r0, r18
+    3e86:	80 93 57 00 	sts	0x0057, r24
+    3e8a:	e8 95       	spm
+    3e8c:	11 24       	eor	r1, r1
+    3e8e:	2d ec       	ldi	r18, 0xCD	; 205
+    3e90:	3b ea       	ldi	r19, 0xAB	; 171
+    3e92:	e2 e8       	ldi	r30, 0x82	; 130
     3e94:	fb e3       	ldi	r31, 0x3B	; 59
-    3e96:	81 e0       	ldi	r24, 0x01	; 1
-    3e98:	09 01       	movw	r0, r18
-    3e9a:	80 93 57 00 	sts	0x0057, r24
-    3e9e:	e8 95       	spm
-    3ea0:	11 24       	eor	r1, r1
-    3ea2:	2d ec       	ldi	r18, 0xCD	; 205
-    3ea4:	3b ea       	ldi	r19, 0xAB	; 171
-    3ea6:	e2 e8       	ldi	r30, 0x82	; 130
-    3ea8:	fb e3       	ldi	r31, 0x3B	; 59
-    3eaa:	09 01       	movw	r0, r18
-    3eac:	80 93 57 00 	sts	0x0057, r24
-    3eb0:	e8 95       	spm
-    3eb2:	11 24       	eor	r1, r1
-    3eb4:	80 e8       	ldi	r24, 0x80	; 128
-    3eb6:	9b e3       	ldi	r25, 0x3B	; 59
-    3eb8:	c5 cf       	rjmp	.-118    	; 0x3e44 <page_write>
+    3e96:	09 01       	movw	r0, r18
+    3e98:	80 93 57 00 	sts	0x0057, r24
+    3e9c:	e8 95       	spm
+    3e9e:	11 24       	eor	r1, r1
+    3ea0:	80 e8       	ldi	r24, 0x80	; 128
+    3ea2:	9b e3       	ldi	r25, 0x3B	; 59
+    3ea4:	c5 cf       	rjmp	.-118    	; 0x3e30 <page_write>
 
-00003eba <erase>:
-    3eba:	cf 93       	push	r28
-    3ebc:	df 93       	push	r29
-    3ebe:	ec 01       	movw	r28, r24
-    3ec0:	b5 df       	rcall	.-150    	; 0x3e2c <spmWait>
-    3ec2:	80 91 02 01 	lds	r24, 0x0102
-    3ec6:	90 91 03 01 	lds	r25, 0x0103
-    3eca:	89 5c       	subi	r24, 0xC9	; 201
-    3ecc:	96 4e       	sbci	r25, 0xE6	; 230
-    3ece:	29 f4       	brne	.+10     	; 0x3eda <erase+0x20>
-    3ed0:	83 e0       	ldi	r24, 0x03	; 3
-    3ed2:	fe 01       	movw	r30, r28
-    3ed4:	80 93 57 00 	sts	0x0057, r24
-    3ed8:	e8 95       	spm
-    3eda:	ae df       	rcall	.-164    	; 0x3e38 <rww_enable>
-    3edc:	df 91       	pop	r29
-    3ede:	cf 91       	pop	r28
-    3ee0:	08 95       	ret
+00003ea6 <erase>:
+    3ea6:	cf 93       	push	r28
+    3ea8:	df 93       	push	r29
+    3eaa:	ec 01       	movw	r28, r24
+    3eac:	b5 df       	rcall	.-150    	; 0x3e18 <spmWait>
+    3eae:	80 91 02 01 	lds	r24, 0x0102
+    3eb2:	90 91 03 01 	lds	r25, 0x0103
+    3eb6:	89 5c       	subi	r24, 0xC9	; 201
+    3eb8:	96 4e       	sbci	r25, 0xE6	; 230
+    3eba:	29 f4       	brne	.+10     	; 0x3ec6 <erase+0x20>
+    3ebc:	83 e0       	ldi	r24, 0x03	; 3
+    3ebe:	fe 01       	movw	r30, r28
+    3ec0:	80 93 57 00 	sts	0x0057, r24
+    3ec4:	e8 95       	spm
+    3ec6:	ae df       	rcall	.-164    	; 0x3e24 <rww_enable>
+    3ec8:	df 91       	pop	r29
+    3eca:	cf 91       	pop	r28
+    3ecc:	08 95       	ret
 
-00003ee2 <processBlock>:
-    3ee2:	cf 92       	push	r12
-    3ee4:	df 92       	push	r13
-    3ee6:	ef 92       	push	r14
-    3ee8:	ff 92       	push	r15
-    3eea:	0f 93       	push	r16
-    3eec:	1f 93       	push	r17
-    3eee:	cf 93       	push	r28
-    3ef0:	df 93       	push	r29
-    3ef2:	8c 01       	movw	r16, r24
-    3ef4:	6b 01       	movw	r12, r22
-    3ef6:	f4 2e       	mov	r15, r20
-    3ef8:	ee 24       	eor	r14, r14
-    3efa:	e3 94       	inc	r14
-    3efc:	c8 01       	movw	r24, r16
-    3efe:	dd df       	rcall	.-70     	; 0x3eba <erase>
-    3f00:	e8 01       	movw	r28, r16
-    3f02:	94 df       	rcall	.-216    	; 0x3e2c <spmWait>
-    3f04:	f6 01       	movw	r30, r12
-    3f06:	81 91       	ld	r24, Z+
-    3f08:	91 91       	ld	r25, Z+
-    3f0a:	6f 01       	movw	r12, r30
-    3f0c:	fe 01       	movw	r30, r28
-    3f0e:	0c 01       	movw	r0, r24
-    3f10:	e0 92 57 00 	sts	0x0057, r14
-    3f14:	e8 95       	spm
-    3f16:	11 24       	eor	r1, r1
-    3f18:	22 96       	adiw	r28, 0x02	; 2
-    3f1a:	fa 94       	dec	r15
-    3f1c:	ce 01       	movw	r24, r28
-    3f1e:	8f 77       	andi	r24, 0x7F	; 127
-    3f20:	90 70       	andi	r25, 0x00	; 0
-    3f22:	89 2b       	or	r24, r25
-    3f24:	71 f7       	brne	.-36     	; 0x3f02 <processBlock+0x20>
-    3f26:	c8 01       	movw	r24, r16
-    3f28:	8d df       	rcall	.-230    	; 0x3e44 <page_write>
-    3f2a:	ff 20       	and	r15, r15
-    3f2c:	11 f0       	breq	.+4      	; 0x3f32 <processBlock+0x50>
-    3f2e:	8e 01       	movw	r16, r28
-    3f30:	e5 cf       	rjmp	.-54     	; 0x3efc <processBlock+0x1a>
-    3f32:	df 91       	pop	r29
-    3f34:	cf 91       	pop	r28
-    3f36:	1f 91       	pop	r17
-    3f38:	0f 91       	pop	r16
-    3f3a:	ff 90       	pop	r15
-    3f3c:	ef 90       	pop	r14
-    3f3e:	df 90       	pop	r13
-    3f40:	cf 90       	pop	r12
-    3f42:	08 95       	ret
+00003ece <processBlock>:
+    3ece:	cf 92       	push	r12
+    3ed0:	df 92       	push	r13
+    3ed2:	ef 92       	push	r14
+    3ed4:	ff 92       	push	r15
+    3ed6:	0f 93       	push	r16
+    3ed8:	1f 93       	push	r17
+    3eda:	cf 93       	push	r28
+    3edc:	df 93       	push	r29
+    3ede:	8c 01       	movw	r16, r24
+    3ee0:	6b 01       	movw	r12, r22
+    3ee2:	f4 2e       	mov	r15, r20
+    3ee4:	ee 24       	eor	r14, r14
+    3ee6:	e3 94       	inc	r14
+    3ee8:	c8 01       	movw	r24, r16
+    3eea:	dd df       	rcall	.-70     	; 0x3ea6 <erase>
+    3eec:	e8 01       	movw	r28, r16
+    3eee:	94 df       	rcall	.-216    	; 0x3e18 <spmWait>
+    3ef0:	f6 01       	movw	r30, r12
+    3ef2:	81 91       	ld	r24, Z+
+    3ef4:	91 91       	ld	r25, Z+
+    3ef6:	6f 01       	movw	r12, r30
+    3ef8:	fe 01       	movw	r30, r28
+    3efa:	0c 01       	movw	r0, r24
+    3efc:	e0 92 57 00 	sts	0x0057, r14
+    3f00:	e8 95       	spm
+    3f02:	11 24       	eor	r1, r1
+    3f04:	22 96       	adiw	r28, 0x02	; 2
+    3f06:	fa 94       	dec	r15
+    3f08:	ce 01       	movw	r24, r28
+    3f0a:	8f 77       	andi	r24, 0x7F	; 127
+    3f0c:	90 70       	andi	r25, 0x00	; 0
+    3f0e:	89 2b       	or	r24, r25
+    3f10:	71 f7       	brne	.-36     	; 0x3eee <processBlock+0x20>
+    3f12:	c8 01       	movw	r24, r16
+    3f14:	8d df       	rcall	.-230    	; 0x3e30 <page_write>
+    3f16:	ff 20       	and	r15, r15
+    3f18:	11 f0       	breq	.+4      	; 0x3f1e <processBlock+0x50>
+    3f1a:	8e 01       	movw	r16, r28
+    3f1c:	e5 cf       	rjmp	.-54     	; 0x3ee8 <processBlock+0x1a>
+    3f1e:	df 91       	pop	r29
+    3f20:	cf 91       	pop	r28
+    3f22:	1f 91       	pop	r17
+    3f24:	0f 91       	pop	r16
+    3f26:	ff 90       	pop	r15
+    3f28:	ef 90       	pop	r14
+    3f2a:	df 90       	pop	r13
+    3f2c:	cf 90       	pop	r12
+    3f2e:	08 95       	ret
 
-00003f44 <packetReceived>:
-    3f44:	0f 93       	push	r16
-    3f46:	1f 93       	push	r17
-    3f48:	cf 93       	push	r28
-    3f4a:	df 93       	push	r29
-    3f4c:	ec 01       	movw	r28, r24
-    3f4e:	8b 01       	movw	r16, r22
-    3f50:	63 30       	cpi	r22, 0x03	; 3
-    3f52:	71 05       	cpc	r23, r1
-    3f54:	0c f4       	brge	.+2      	; 0x3f58 <packetReceived+0x14>
-    3f56:	48 c0       	rjmp	.+144    	; 0x3fe8 <packetReceived+0xa4>
-    3f58:	88 81       	ld	r24, Y
-    3f5a:	8d 34       	cpi	r24, 0x4D	; 77
-    3f5c:	09 f0       	breq	.+2      	; 0x3f60 <packetReceived+0x1c>
-    3f5e:	44 c0       	rjmp	.+136    	; 0x3fe8 <packetReceived+0xa4>
-    3f60:	62 50       	subi	r22, 0x02	; 2
-    3f62:	70 40       	sbci	r23, 0x00	; 0
-    3f64:	ce 01       	movw	r24, r28
-    3f66:	18 df       	rcall	.-464    	; 0x3d98 <crc16>
-    3f68:	29 2f       	mov	r18, r25
-    3f6a:	fe 01       	movw	r30, r28
-    3f6c:	e0 0f       	add	r30, r16
-    3f6e:	f1 1f       	adc	r31, r17
-    3f70:	32 97       	sbiw	r30, 0x02	; 2
-    3f72:	90 81       	ld	r25, Z
-    3f74:	32 96       	adiw	r30, 0x02	; 2
-    3f76:	98 17       	cp	r25, r24
-    3f78:	b9 f5       	brne	.+110    	; 0x3fe8 <packetReceived+0xa4>
-    3f7a:	31 97       	sbiw	r30, 0x01	; 1
-    3f7c:	80 81       	ld	r24, Z
-    3f7e:	82 17       	cp	r24, r18
-    3f80:	99 f5       	brne	.+102    	; 0x3fe8 <packetReceived+0xa4>
-    3f82:	69 81       	ldd	r22, Y+1	; 0x01
-    3f84:	66 36       	cpi	r22, 0x66	; 102
-    3f86:	71 f0       	breq	.+28     	; 0x3fa4 <packetReceived+0x60>
-    3f88:	67 36       	cpi	r22, 0x67	; 103
-    3f8a:	18 f4       	brcc	.+6      	; 0x3f92 <packetReceived+0x4e>
-    3f8c:	65 36       	cpi	r22, 0x65	; 101
-    3f8e:	31 f5       	brne	.+76     	; 0x3fdc <packetReceived+0x98>
-    3f90:	05 c0       	rjmp	.+10     	; 0x3f9c <packetReceived+0x58>
-    3f92:	67 36       	cpi	r22, 0x67	; 103
-    3f94:	01 f1       	breq	.+64     	; 0x3fd6 <packetReceived+0x92>
-    3f96:	68 37       	cpi	r22, 0x78	; 120
-    3f98:	09 f5       	brne	.+66     	; 0x3fdc <packetReceived+0x98>
-    3f9a:	24 c0       	rjmp	.+72     	; 0x3fe4 <packetReceived+0xa0>
-    3f9c:	80 e8       	ldi	r24, 0x80	; 128
-    3f9e:	9b e3       	ldi	r25, 0x3B	; 59
-    3fa0:	8c df       	rcall	.-232    	; 0x3eba <erase>
-    3fa2:	20 c0       	rjmp	.+64     	; 0x3fe4 <packetReceived+0xa0>
-    3fa4:	a8 01       	movw	r20, r16
-    3fa6:	47 58       	subi	r20, 0x87	; 135
-    3fa8:	5f 4f       	sbci	r21, 0xFF	; 255
-    3faa:	40 78       	andi	r20, 0x80	; 128
-    3fac:	2b 81       	ldd	r18, Y+3	; 0x03
-    3fae:	9a 81       	ldd	r25, Y+2	; 0x02
-    3fb0:	80 e0       	ldi	r24, 0x00	; 0
-    3fb2:	30 e0       	ldi	r19, 0x00	; 0
-    3fb4:	28 2b       	or	r18, r24
-    3fb6:	39 2b       	or	r19, r25
-    3fb8:	80 e8       	ldi	r24, 0x80	; 128
-    3fba:	9b e3       	ldi	r25, 0x3B	; 59
-    3fbc:	84 1b       	sub	r24, r20
-    3fbe:	95 0b       	sbc	r25, r21
-    3fc0:	82 17       	cp	r24, r18
-    3fc2:	93 07       	cpc	r25, r19
-    3fc4:	58 f0       	brcs	.+22     	; 0x3fdc <packetReceived+0x98>
-    3fc6:	be 01       	movw	r22, r28
-    3fc8:	6c 5f       	subi	r22, 0xFC	; 252
-    3fca:	7f 4f       	sbci	r23, 0xFF	; 255
-    3fcc:	56 95       	lsr	r21
-    3fce:	47 95       	ror	r20
-    3fd0:	c9 01       	movw	r24, r18
-    3fd2:	87 df       	rcall	.-242    	; 0x3ee2 <processBlock>
-    3fd4:	07 c0       	rjmp	.+14     	; 0x3fe4 <packetReceived+0xa0>
-    3fd6:	5a df       	rcall	.-332    	; 0x3e8c <setAppOK>
-    3fd8:	29 df       	rcall	.-430    	; 0x3e2c <spmWait>
-    3fda:	04 c0       	rjmp	.+8      	; 0x3fe4 <packetReceived+0xa0>
-    3fdc:	86 2f       	mov	r24, r22
-    3fde:	61 e0       	ldi	r22, 0x01	; 1
-    3fe0:	0c df       	rcall	.-488    	; 0x3dfa <sendError>
-    3fe2:	02 c0       	rjmp	.+4      	; 0x3fe8 <packetReceived+0xa4>
-    3fe4:	89 81       	ldd	r24, Y+1	; 0x01
-    3fe6:	19 df       	rcall	.-462    	; 0x3e1a <sendOk>
-    3fe8:	df 91       	pop	r29
-    3fea:	cf 91       	pop	r28
-    3fec:	1f 91       	pop	r17
-    3fee:	0f 91       	pop	r16
-    3ff0:	08 95       	ret
+00003f30 <packetReceived>:
+    3f30:	0f 93       	push	r16
+    3f32:	1f 93       	push	r17
+    3f34:	cf 93       	push	r28
+    3f36:	df 93       	push	r29
+    3f38:	ec 01       	movw	r28, r24
+    3f3a:	8b 01       	movw	r16, r22
+    3f3c:	64 30       	cpi	r22, 0x04	; 4
+    3f3e:	71 05       	cpc	r23, r1
+    3f40:	0c f4       	brge	.+2      	; 0x3f44 <packetReceived+0x14>
+    3f42:	47 c0       	rjmp	.+142    	; 0x3fd2 <packetReceived+0xa2>
+    3f44:	88 81       	ld	r24, Y
+    3f46:	8d 34       	cpi	r24, 0x4D	; 77
+    3f48:	09 f0       	breq	.+2      	; 0x3f4c <packetReceived+0x1c>
+    3f4a:	43 c0       	rjmp	.+134    	; 0x3fd2 <packetReceived+0xa2>
+    3f4c:	62 50       	subi	r22, 0x02	; 2
+    3f4e:	70 40       	sbci	r23, 0x00	; 0
+    3f50:	ce 01       	movw	r24, r28
+    3f52:	18 df       	rcall	.-464    	; 0x3d84 <crc16>
+    3f54:	29 2f       	mov	r18, r25
+    3f56:	fe 01       	movw	r30, r28
+    3f58:	e0 0f       	add	r30, r16
+    3f5a:	f1 1f       	adc	r31, r17
+    3f5c:	32 97       	sbiw	r30, 0x02	; 2
+    3f5e:	90 81       	ld	r25, Z
+    3f60:	32 96       	adiw	r30, 0x02	; 2
+    3f62:	98 17       	cp	r25, r24
+    3f64:	b1 f5       	brne	.+108    	; 0x3fd2 <packetReceived+0xa2>
+    3f66:	31 97       	sbiw	r30, 0x01	; 1
+    3f68:	80 81       	ld	r24, Z
+    3f6a:	82 17       	cp	r24, r18
+    3f6c:	91 f5       	brne	.+100    	; 0x3fd2 <packetReceived+0xa2>
+    3f6e:	69 81       	ldd	r22, Y+1	; 0x01
+    3f70:	6a 35       	cpi	r22, 0x5A	; 90
+    3f72:	69 f1       	breq	.+90     	; 0x3fce <packetReceived+0x9e>
+    3f74:	6a 35       	cpi	r22, 0x5A	; 90
+    3f76:	38 f1       	brcs	.+78     	; 0x3fc6 <packetReceived+0x96>
+    3f78:	6b 35       	cpi	r22, 0x5B	; 91
+    3f7a:	19 f0       	breq	.+6      	; 0x3f82 <packetReceived+0x52>
+    3f7c:	6c 35       	cpi	r22, 0x5C	; 92
+    3f7e:	19 f5       	brne	.+70     	; 0x3fc6 <packetReceived+0x96>
+    3f80:	19 c0       	rjmp	.+50     	; 0x3fb4 <packetReceived+0x84>
+    3f82:	a8 01       	movw	r20, r16
+    3f84:	47 58       	subi	r20, 0x87	; 135
+    3f86:	5f 4f       	sbci	r21, 0xFF	; 255
+    3f88:	40 78       	andi	r20, 0x80	; 128
+    3f8a:	2b 81       	ldd	r18, Y+3	; 0x03
+    3f8c:	9a 81       	ldd	r25, Y+2	; 0x02
+    3f8e:	80 e0       	ldi	r24, 0x00	; 0
+    3f90:	30 e0       	ldi	r19, 0x00	; 0
+    3f92:	28 2b       	or	r18, r24
+    3f94:	39 2b       	or	r19, r25
+    3f96:	80 e8       	ldi	r24, 0x80	; 128
+    3f98:	9b e3       	ldi	r25, 0x3B	; 59
+    3f9a:	84 1b       	sub	r24, r20
+    3f9c:	95 0b       	sbc	r25, r21
+    3f9e:	82 17       	cp	r24, r18
+    3fa0:	93 07       	cpc	r25, r19
+    3fa2:	88 f0       	brcs	.+34     	; 0x3fc6 <packetReceived+0x96>
+    3fa4:	be 01       	movw	r22, r28
+    3fa6:	6c 5f       	subi	r22, 0xFC	; 252
+    3fa8:	7f 4f       	sbci	r23, 0xFF	; 255
+    3faa:	56 95       	lsr	r21
+    3fac:	47 95       	ror	r20
+    3fae:	c9 01       	movw	r24, r18
+    3fb0:	8e df       	rcall	.-228    	; 0x3ece <processBlock>
+    3fb2:	0d c0       	rjmp	.+26     	; 0x3fce <packetReceived+0x9e>
+    3fb4:	8a 81       	ldd	r24, Y+2	; 0x02
+    3fb6:	88 23       	and	r24, r24
+    3fb8:	11 f0       	breq	.+4      	; 0x3fbe <packetReceived+0x8e>
+    3fba:	5e df       	rcall	.-324    	; 0x3e78 <setAppOK>
+    3fbc:	08 c0       	rjmp	.+16     	; 0x3fce <packetReceived+0x9e>
+    3fbe:	80 e8       	ldi	r24, 0x80	; 128
+    3fc0:	9b e3       	ldi	r25, 0x3B	; 59
+    3fc2:	71 df       	rcall	.-286    	; 0x3ea6 <erase>
+    3fc4:	04 c0       	rjmp	.+8      	; 0x3fce <packetReceived+0x9e>
+    3fc6:	86 2f       	mov	r24, r22
+    3fc8:	61 e0       	ldi	r22, 0x01	; 1
+    3fca:	0d df       	rcall	.-486    	; 0x3de6 <sendError>
+    3fcc:	02 c0       	rjmp	.+4      	; 0x3fd2 <packetReceived+0xa2>
+    3fce:	89 81       	ldd	r24, Y+1	; 0x01
+    3fd0:	1a df       	rcall	.-460    	; 0x3e06 <sendOk>
+    3fd2:	df 91       	pop	r29
+    3fd4:	cf 91       	pop	r28
+    3fd6:	1f 91       	pop	r17
+    3fd8:	0f 91       	pop	r16
+    3fda:	08 95       	ret

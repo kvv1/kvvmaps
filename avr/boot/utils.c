@@ -74,22 +74,22 @@ void packetReceived(uint8_t* buffer, int len) { // returns consumed flag
 
 	// ((0x3FFF + 1 - (512 * 2)) - 128)
 
-	switch (adu->func) {
+	switch (adu->pdu.func) {
 	case MODBUS_HELLO:
 		break;
 	case MODBUS_UPLOAD_APP: {
 		uint16_t l = len - 6;
 		l = (l + SPM_PAGESIZE - 1) & ~(SPM_PAGESIZE - 1);
-		uint16_t a = BSWAP_16(*((uint16_t*)adu->data));
+		uint16_t a = BSWAP_16(*((uint16_t*)adu->pdu.data));
 
 		if (a > LAST_PAGE_ADDR - l)
 			goto err;
 
-		processBlock(a, (uint16_t*) (adu->data + 2), l >> 1);
+		processBlock(a, (uint16_t*) (adu->pdu.data + 2), l >> 1);
 		break;
 	}
 	case MODBUS_ENABLE_APP:
-		if (adu->data[0]) {
+		if (adu->pdu.data[0]) {
 			//sendError(adu->func, 6);
 			//return;
 			setAppOK();
@@ -98,9 +98,9 @@ void packetReceived(uint8_t* buffer, int len) { // returns consumed flag
 		}
 		break;
 	default:
-		err: sendError(adu->func, 1);
+		err: sendError(adu->pdu.func, 1);
 		return;
 	}
-	sendOk(adu->func);
+	sendOk(adu->pdu.func);
 }
 
