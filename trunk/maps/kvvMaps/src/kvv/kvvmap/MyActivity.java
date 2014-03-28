@@ -10,6 +10,8 @@ import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import com.smartbean.androidutils.util.Drawables;
+
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.dlg.PathDlg;
@@ -152,51 +154,59 @@ public class MyActivity extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
+	private void onFG() {
+		if (sensorListener == null) {
+			sensorListener = new SensorListener() {
+				public void onSensorChanged(int sensor, float[] values) {
+					if (view != null)
+						view.setCompass(values);
+				}
+
+				public void onAccuracyChanged(int sensor, int accuracy) {
+				}
+			};
+
+		}
+
+		((SensorManager) getSystemService(Context.SENSOR_SERVICE))
+				.registerListener(sensorListener,
+						SensorManager.SENSOR_ORIENTATION,
+						SensorManager.SENSOR_DELAY_NORMAL);
+
+		if (wakeLock == null) {
+			wakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE))
+					.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
+							"kvvMaps wake lock");
+			wakeLock.acquire();
+		}
+
+		// handler.removeCallbacks(stopGPS);
+		if (following())
+			startGPS(false);
+		updateButtons();
+
+	}
+
+	private void onBG() {
+		if (wakeLock != null) {
+			wakeLock.release();
+			wakeLock = null;
+		}
+
+		((SensorManager) getSystemService(Context.SENSOR_SERVICE))
+				.unregisterListener(sensorListener);
+
+		stopGPS();
+	}
+
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		Adapter.log("onWindowFocusChanged " + hasFocus);
 
-		if (hasFocus) {
-			if (sensorListener == null) {
-				sensorListener = new SensorListener() {
-					public void onSensorChanged(int sensor, float[] values) {
-						if (view != null)
-							view.setCompass(values);
-					}
-
-					public void onAccuracyChanged(int sensor, int accuracy) {
-					}
-				};
-
-			}
-
-			((SensorManager) getSystemService(Context.SENSOR_SERVICE))
-					.registerListener(sensorListener,
-							SensorManager.SENSOR_ORIENTATION,
-							SensorManager.SENSOR_DELAY_NORMAL);
-
-			if (wakeLock == null)
-				wakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE))
-						.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
-								"kvvMaps wake lock");
-
-			wakeLock.acquire();
-
-			// handler.removeCallbacks(stopGPS);
-			if (following())
-				startGPS(false);
-			updateButtons();
-
-		} else {
-			if (wakeLock != null)
-				wakeLock.release();
-
-			((SensorManager) getSystemService(Context.SENSOR_SERVICE))
-					.unregisterListener(sensorListener);
-
-			stopGPS();
-			// handler.postDelayed(stopGPS, 120000);
-		}
+		if (hasFocus)
+			onFG();
+		else
+			onBG();
 
 		super.onWindowFocusChanged(hasFocus);
 	}
@@ -204,6 +214,7 @@ public class MyActivity extends Activity {
 	@Override
 	protected void onPause() {
 		Adapter.log("onPause");
+		onBG();
 
 		super.onPause();
 		System.gc();
@@ -291,32 +302,37 @@ public class MyActivity extends Activity {
 		Adapter.log("onCreate " + this);
 		super.onCreate(savedInstanceState);
 
+		setDefaultUncaughtExceptionHandler();
+
 		settings = getSharedPreferences(PREFS_NAME, 0);
 
 		if (!MapLoader.checkMaps(this))
 			return;
 
-		DisplayMetrics metrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-		int tileSz = 256;
-		if (metrics.xdpi > 160)
-			tileSz = (int) (tileSz * metrics.xdpi / 145);
-		
-		//tileSz = 384;
-		Adapter.TILE_SIZE_0 = tileSz;
+		initTileSize();
 
 		adapter = new Adapter(this);
-
 		setLarge(settings.getBoolean(LARGE_SETTING, false));
+		Adapter.debugDraw = settings.getBoolean("debugDraw", false);
 
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 		startService(new Intent(this, KvvMapsService.class));
-
 		bindService(new Intent(this, KvvMapsService.class), conn,
 				Context.BIND_AUTO_CREATE);
 
+		setContentView(R.layout.screen);
+		view = (MapView) findViewById(R.id.MapView);
+		diagramView = (DiagramView) findViewById(R.id.diagramView);
+		altSpeed = (TextView) findViewById(R.id.altSpeed);
+		altSpeed.setBackgroundColor(0x80000000);
+		altSpeed.setTextColor(COLOR.CYAN);
+		altSpeed.setText("");
+
+		setButtons();
+	}
+
+	private void setDefaultUncaughtExceptionHandler() {
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			private UncaughtExceptionHandler defaultUEH = Thread
 					.getDefaultUncaughtExceptionHandler();
@@ -338,15 +354,21 @@ public class MyActivity extends Activity {
 				defaultUEH.uncaughtException(thread, ex);
 			}
 		});
+	}
 
-		Adapter.debugDraw = settings.getBoolean("debugDraw", false);
+	private void initTileSize() {
+		DisplayMetrics metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
-		setContentView(R.layout.screen);
-		altSpeed = (TextView) findViewById(R.id.altSpeed);
-		altSpeed.setBackgroundColor(0x80000000);
-		altSpeed.setTextColor(COLOR.CYAN);
-		altSpeed.setText("");
+		int tileSz = 256;
+		if (metrics.xdpi > 160)
+			tileSz = (int) (tileSz * metrics.xdpi / 145);
 
+		// tileSz = 384;
+		Adapter.TILE_SIZE_0 = tileSz;
+	}
+
+	private void setButtons() {
 		((KvvMapsButton) findViewById(R.id.edit)).setup(R.drawable.edit,
 				R.drawable.edit_dis).setOnClickListener(new OnClickListener() {
 			@Override
@@ -500,16 +522,6 @@ public class MyActivity extends Activity {
 		toTarget.setFocusable(false);
 
 		updateButtons();
-
-		view = (MapView) findViewById(R.id.MapView);
-		diagramView = (DiagramView) findViewById(R.id.diagramView);
-
-	}
-
-	void setupImageButton(int buttonId, int img, int imgDisabled) {
-		ImageButton button = (ImageButton) findViewById(buttonId);
-		button.setBackgroundResource(img);
-		button.setImageResource(img);
 	}
 
 	private boolean buttonsVisible() {
@@ -801,8 +813,8 @@ public class MyActivity extends Activity {
 		view.fixMap(fixedMap);
 		mapsService.getBundle().putString("fixedMap", fixedMap);
 
-//		fixedMap = view.fixMap(fixedMap == null);
-//		mapsService.getBundle().putString("fixedMap", fixedMap);
+		// fixedMap = view.fixMap(fixedMap == null);
+		// mapsService.getBundle().putString("fixedMap", fixedMap);
 		updateButtons();
 	}
 
@@ -1060,30 +1072,10 @@ public class MyActivity extends Activity {
 		super.onDestroy();
 		System.runFinalizersOnExit(true);
 
-		unbindDrawables(findViewById(R.id.RootView));
+		Drawables.unbindDrawables(findViewById(R.id.RootView));
 
 		System.gc();
 
-	}
-
-	private void unbindDrawables(View view) {
-		if (view == null)
-			return;
-
-		if (view.getBackground() != null) {
-			view.getBackground().setCallback(null);
-		}
-		if (view instanceof ViewGroup) {
-			for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-				unbindDrawables(((ViewGroup) view).getChildAt(i));
-			}
-			try {
-				((ViewGroup) view).removeAllViews();
-			} catch (UnsupportedOperationException mayHappen) {
-				// AdapterViews, ListViews and potentially other ViewGroups
-				// don’t support the removeAllViews operation
-			}
-		}
 	}
 
 	public void updateView() {

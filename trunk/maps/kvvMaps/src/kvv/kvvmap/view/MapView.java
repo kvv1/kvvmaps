@@ -28,20 +28,12 @@ public class MapView extends View implements IPlatformView {
 
 	private MyActivity activity;
 
-	private Thread uiThread;
-
-	public void assertUIThread() {
-		if (Thread.currentThread() != uiThread) {
-			final Throwable t = new RuntimeException("illegal thread");
-			t.printStackTrace();
-		}
-	}
-
 	public MapView(Context ctxt, AttributeSet attrs) {
 		super(ctxt, attrs);
-		Adapter.log("MapView");
 
-		uiThread = Thread.currentThread();
+		if (!isInEditMode())
+			Adapter.log("MapView");
+
 		setFocusable(true);
 		setFocusableInTouchMode(true);
 	}
@@ -50,7 +42,6 @@ public class MapView extends View implements IPlatformView {
 
 	public void init(MyActivity activity, Environment envir,
 			Bundle savedInstanceState, RotationMode rotationMode) {
-		assertUIThread();
 		Adapter.log("MapView.init " + ++cnt);
 
 		this.activity = activity;
@@ -371,7 +362,6 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	public void dispose() {
-		assertUIThread();
 		if (commonView != null) {
 			Adapter.log("MapView.dispose " + --cnt);
 			commonView.dispose();
