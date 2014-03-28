@@ -89,13 +89,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Button" />
-
-            <kvv.kvvmap.view.OnScreenButton
-                android:id="@+id/here"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:focusable="false"
-                android:src="@drawable/here" />
         </LinearLayout>
 
         <LinearLayout
@@ -153,6 +146,24 @@
                 android:minHeight="40sp"
                 android:minWidth="40sp"
                 android:src="@drawable/zoomout" />
+
+            <View
+                android:id="@+id/View02"
+                android:layout_width="10sp"
+                android:layout_height="20sp"
+                android:layout_weight="1" />
+
+            <kvv.kvvmap.view.KvvMapsButton
+                android:id="@+id/here"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="0.5dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg"
+                android:focusable="false"
+                android:minHeight="40sp"
+                android:minWidth="40sp"
+                android:src="@drawable/here" />
         </LinearLayout>
     </FrameLayout>
 
