@@ -7,6 +7,7 @@ import java.util.HashMap;
 import kvv.controllers.controller.IController;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.RegisterUI;
+import kvv.controllers.register.ControllerDef.RegisterDef;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerType;
@@ -17,49 +18,55 @@ public class ControllerWrapperUni extends ControllerAdapter {
 	}
 
 	private ControllerType getType(int addr) throws IOException {
-		try {
-			ControllerDescr controllerDescr = controllers.get(addr);
-			ControllerType controllerType = controllers.getControllerTypes()
-					.get(controllerDescr.type);
-			if (controllerType == null)
-				throw new Exception("Тип контроллера " + controllerDescr.type
-						+ " не определен");
-			return controllerType;
-		} catch (Exception e) {
-			throw new IOException(e.getMessage());
-		}
+		ControllerDescr controllerDescr = controllers.get(addr);
+		ControllerType controllerType = controllers.getControllerTypes().get(
+				controllerDescr.type);
+		if (controllerType == null)
+			throw new ControllerTypeNotFoundException(controllerDescr.type);
+		return controllerType;
+	}
+
+	private RegisterDef getRegDef(int addr, int reg) throws IOException {
+		ControllerType controllerType = getType(addr);
+		RegisterDef registerDef = controllerType.def.getReg(reg);
+		if (registerDef == null)
+			throw new RegisterNotFoundException(addr, reg);
+		return registerDef;
 	}
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
-		System.out.println("-" + addr + "(" + reg + ")=" + val);
+		//System.out.println("-" + addr + "(" + reg + ")=" + val);
 
-		ControllerType controllerType = getType(addr);
-		if (controllerType.def.relayRegsMul != null) {
-			for (int i = 1; i < controllerType.def.relayRegsMul.length; i++)
-				if (controllerType.def.relayRegsMul[i] == reg)
-					val = val * controllerType.def.relayRegsMul[0];
-		}
+		RegisterDef registerDef = getRegDef(addr, reg);
+
+		if (registerDef.mul != null)
+			val = val * registerDef.mul;
 
 		wrapped.setReg(addr, reg, val);
 	}
 
 	@Override
 	public int getReg(int addr, int reg) throws IOException {
-		Integer i = adjustValue(addr, reg, wrapped.getReg(addr, reg));
-		if (i == null)
-			throw new IOException();
-		return i;
+		int val = wrapped.getReg(addr, reg);
+		Integer val1 = adjustValue(addr, reg, val);
+		if (val1 == null)
+			throw new InvalidRegisterValueException(addr, reg, val);
+		return val1;
 	}
 
 	@Override
 	public int[] getRegs(int addr, int reg, int n) throws IOException {
 		int[] res = wrapped.getRegs(addr, reg, n);
 		for (int i = 0; i < n; i++) {
-			Integer ii = adjustValue(addr, reg + i, res[i]);
-			if (ii == null)
-				ii = -9999;
-			res[i] = ii;
+			try {
+				Integer ii = adjustValue(addr, reg + i, res[i]);
+				if (ii == null)
+					ii = -9999;
+				res[i] = ii;
+			} catch (IOException e) {
+				res[i] = 0;
+			}
 		}
 		return res;
 	}
@@ -70,40 +77,65 @@ public class ControllerWrapperUni extends ControllerAdapter {
 
 		AllRegs allRegs;
 
-		if (controllerType.def.regs != null) {
+		if (controllerType.def.allRegs != null) {
 			HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
-			int[] vals = wrapped.getRegs(addr, controllerType.def.regs[0],
-					controllerType.def.regs[1]);
-			for (int i = 0; i < controllerType.def.regs[1]; i++)
-				map.put(controllerType.def.regs[0] + i, vals[i]);
+			int[] vals = wrapped.getRegs(addr, controllerType.def.allRegs[0],
+					controllerType.def.allRegs[1]);
+			for (int i = 0; i < controllerType.def.allRegs[1]; i++)
+				map.put(controllerType.def.allRegs[0] + i, vals[i]);
 			allRegs = new AllRegs(addr, new ArrayList<RegisterUI>(), map);
 		} else {
 			allRegs = wrapped.getAllRegs(addr);
 		}
 
-		if (controllerType.def.relaysBitMapping != null) {
-			Integer relays = allRegs.values
-					.get(controllerType.def.relaysBitMapping[0]);
-			for (int i = 1; i < controllerType.def.relaysBitMapping.length; i++)
-				allRegs.values.put(controllerType.def.relaysBitMapping[i],
-						(relays >> (i - 1)) & 1);
+		HashMap<Integer, Integer> values1 = new HashMap<Integer, Integer>();
+
+		for (int reg : allRegs.values.keySet()) {
+			try {
+				RegisterDef registerDef = getRegDef(addr, reg);
+				if (registerDef.bitMapping != null) {
+					int relays = allRegs.values.get(reg);
+					for (int i = 0; i < registerDef.bitMapping.length; i++)
+						values1.put(registerDef.bitMapping[i],
+								(relays >> i) & 1);
+				}
+			} catch (IOException e) {
+			}
 		}
 
-		for (int reg : allRegs.values.keySet())
-			allRegs.values.put(reg,
-					adjustValue(addr, reg, allRegs.values.get(reg)));
+		allRegs.values.putAll(values1);
+
+//		for (int key : allRegs.values.keySet())
+//			System.out.print(key + ":" + allRegs.values.get(key) + " ");
+//		System.out.println();
+
+		for (int reg : allRegs.values.keySet()) {
+			try {
+				allRegs.values.put(reg,
+						adjustValue(addr, reg, allRegs.values.get(reg)));
+			} catch (IOException e) {
+				allRegs.values.put(reg, null);
+			}
+		}
 
 		return allRegs;
 	}
 
 	private Integer adjustValue(int addr, int reg, Integer value)
 			throws IOException {
-		ControllerType controllerType = getType(addr);
+		RegisterDef registerDef = getRegDef(addr, reg);
 
-		if (controllerType.def.relayRegsMul != null) {
-			for (int i = 1; i < controllerType.def.relayRegsMul.length; i++)
-				if (controllerType.def.relayRegsMul[i] == reg)
-					value = value == 0 ? 0 : 1;
+		if (registerDef.mul != null)
+			value = value / registerDef.mul;
+
+		if (registerDef.validRanges != null) {
+			boolean ok = false;
+			for (int i = 0; i < registerDef.validRanges.length; i += 2)
+				if (value >= registerDef.validRanges[i]
+						&& value < registerDef.validRanges[i + 1])
+					ok = true;
+			if (!ok)
+				return null;
 		}
 
 		return value;

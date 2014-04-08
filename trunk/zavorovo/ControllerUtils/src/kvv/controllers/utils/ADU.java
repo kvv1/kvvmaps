@@ -26,6 +26,7 @@ public class ADU {
 		if (data.length < 3)
 			return null;
 		short sum = CRC16.crc16(data, 0, data.length - 2);
+		short sum1 = (short) ((data[data.length - 1] << 8) | (data[data.length - 2] & 0xFF)); 
 		if ((data[data.length - 2] & 0xFF) != (sum & 0xFF)
 				|| (data[data.length - 1] & 0xFF) != ((sum >> 8) & 0xFF))
 			return null;

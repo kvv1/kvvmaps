@@ -72,8 +72,8 @@ public class SimpleRelayControl extends ChildComposite {
 		if (result == null) {
 			cb.setEnabled(false);
 		} else {
-			cb.setEnabled(true);
 			cb.setValue(result.values.get(reg) != 0);
+			cb.setEnabled(true);
 		}
 	}
 }

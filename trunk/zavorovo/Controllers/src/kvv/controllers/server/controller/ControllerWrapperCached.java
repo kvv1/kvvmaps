@@ -26,7 +26,7 @@ public class ControllerWrapperCached extends ControllerAdapter {
 	@Override
 	public synchronized void setReg(int addr, int reg, int val)
 			throws IOException {
-		System.out.println("+" + addr + "(" + reg + ")=" + val);
+		//System.out.println("+" + addr + "(" + reg + ")=" + val);
 		AllRegs allRegs = map.get(addr);
 		try {
 			wrapped.setReg(addr, reg, val);
@@ -35,6 +35,7 @@ public class ControllerWrapperCached extends ControllerAdapter {
 		} catch (IOException e) {
 			if (allRegs != null)
 				allRegs.values.put(reg, null);
+			throw e;
 		}
 	}
 
