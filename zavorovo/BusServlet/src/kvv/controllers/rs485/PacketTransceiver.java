@@ -178,7 +178,7 @@ public class PacketTransceiver {
 					byte[] response = new byte[inputBuffer.size()];
 					for (int i = 0; i < inputBuffer.size(); i++) {
 						response[i] = inputBuffer.get(i);
-						//System.err.print(response[i] + " ");
+						System.err.print(response[i] + " ");
 					}
 					System.err.println();
 					inputBuffer.clear();

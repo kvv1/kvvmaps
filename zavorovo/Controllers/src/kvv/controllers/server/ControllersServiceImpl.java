@@ -3,6 +3,9 @@ package kvv.controllers.server;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 import kvv.controllers.client.ControllersService;
@@ -35,10 +38,21 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		}
 	}
 
+	public static  void print(AllRegs allRegs) {
+		List<Integer> keys = new ArrayList<Integer>(allRegs.values.keySet());
+		Collections.sort(keys);
+		for(Integer reg : keys) {
+			System.out.print(reg + ":" + allRegs.values.get(reg) + " ");
+		}
+		System.out.println();
+	}
+	
 	@Override
 	public AllRegs getRegs(int addr) throws Exception {
 		try {
-			return Context.getInstance().controller.getAllRegs(addr);
+			AllRegs allRegs = Context.getInstance().controller.getAllRegs(addr);
+			//print(allRegs);
+			return allRegs;
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}

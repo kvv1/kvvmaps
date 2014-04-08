@@ -133,14 +133,6 @@ public class Controller implements IController {
 	public void close() {
 	}
 
-	public static class NoResponseException extends IOException {
-		private static final long serialVersionUID = 1L;
-
-		public NoResponseException(String string) {
-			super(string);
-		}
-	}
-
 	protected byte[] send1(int addr, byte[] bytes) throws IOException {
 		String url1 = url + "/PDU?addr=" + addr + "&body="
 				+ new Gson().toJson(bytes);
@@ -170,15 +162,14 @@ public class Controller implements IController {
 				if (res == null)
 					throw new NoResponseException("no response");
 				if (res.length == 0)
-					throw new IOException("response PDU len = 0");
+					throw new WrongResponseException("response PDU len = 0");
 				if (res[0] != bytes[0]) {
 					if ((res[0] & 0xFF) != (bytes[0] | 0x80) || res.length < 2)
-						throw new IOException("response PDU format error");
-					int code = res[1];
-					String errCode = "" + code;
-					if (code >= 0 && code < ErrorCode.values().length)
-						errCode += " (" + ErrorCode.values()[code].name() + ")";
-					throw new IOException("response PDU error " + errCode);
+						throw new WrongResponseException("response PDU format error");
+					int code = res[1] & 0xFF;
+					if(code >= ErrorCode.values().length)
+						throw new WrongResponseException("wrong error code: " + code);
+					throw new ModbusCmdException(code);
 				}
 			}
 			return res;

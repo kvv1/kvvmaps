@@ -12,4 +12,6 @@ public class ControllerDescr implements Serializable {
 	public int addr;
 	public String type;
 	public RegisterDescr[] registers;
+	
+	public boolean enabled = true;
 }

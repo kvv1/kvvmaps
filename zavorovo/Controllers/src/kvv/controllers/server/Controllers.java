@@ -10,6 +10,7 @@ import java.util.Map;
 
 import kvv.controllers.register.ControllerDef;
 import kvv.controllers.server.context.Context;
+import kvv.controllers.server.controller.ControllerNotFoundException;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerType;
 import kvv.controllers.shared.ControllerUI;
@@ -89,18 +90,17 @@ public class Controllers {
 		}
 	}
 
-	public ControllerDescr get(String name) throws Exception {
+	public ControllerDescr get(String name) throws ControllerNotFoundException {
 		ControllerDescr d = nameMap.get(name);
 		if (d == null)
-			throw new Exception("Контроллер с именем " + name + " не определен");
+			throw new ControllerNotFoundException(name);
 		return d;
 	}
 
-	public ControllerDescr get(int addr) throws Exception {
+	public ControllerDescr get(int addr) throws ControllerNotFoundException {
 		ControllerDescr d = addrMap.get(addr);
 		if (d == null)
-			throw new Exception("Контроллер с адресом " + addr
-					+ " не определен");
+			throw new ControllerNotFoundException(addr);
 		return d;
 	}
 

@@ -63,18 +63,21 @@ public class VMControl extends ControlComposite {
 		add(vmState);
 		panel.setWidget(1, 0, vmState);
 
-		GetSetRegControl eeprom0 = new GetSetRegControl(addr, def.regEEPROM0,
-				false, "");
+		GetSetRegControl eeprom0 = new GetSetRegControl(addr,
+				def.regEEPROM0 + 0, false, "");
 		add(eeprom0);
 		panel.setWidget(0, 1, eeprom0);
+
 		GetSetRegControl eeprom1 = new GetSetRegControl(addr,
 				def.regEEPROM0 + 1, false, "");
 		add(eeprom1);
 		panel.setWidget(0, 2, eeprom1);
+
 		GetSetRegControl eeprom2 = new GetSetRegControl(addr,
 				def.regEEPROM0 + 2, false, "");
 		add(eeprom2);
 		panel.setWidget(0, 3, eeprom2);
+
 		GetSetRegControl eeprom3 = new GetSetRegControl(addr,
 				def.regEEPROM0 + 3, false, "");
 		add(eeprom3);

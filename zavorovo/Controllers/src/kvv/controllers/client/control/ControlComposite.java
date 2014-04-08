@@ -66,7 +66,10 @@ public class ControlComposite extends Composite implements ControlChild {
 		for (ControlChild controlComposite : children) {
 			if (result == null
 					|| controlComposite.getAddrs().contains(result.addr))
-				controlComposite.refresh(result);
+				try {
+					controlComposite.refresh(result);
+				} catch (Exception e) {
+				}
 		}
 	}
 
