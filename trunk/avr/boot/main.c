@@ -24,17 +24,18 @@ uint8_t getAddr() {
 }
 
 Globals globals;
+/*
+void on() {
+	DDRD |= 1 << 2;
+	PORTD |= 1 << 2;
+}
 
-//void on() {
-//	DDRD |= 1 << 2;
-//	PORTD |= 1 << 2;
-//}
-//
-//void off() {
-//	DDRD |= 1 << 2;
-//	PORTD &= ~(1 << 2);
-//}
-
+void off() {
+	DDRD |= 1 << 2;
+	PORTD &= ~(1 << 2);
+	_delay_ms(200);
+}
+*/
 register uint8_t reg_r1 asm("r1");
 #define init() do { SP = RAMEND; reg_r1 = 0; SREG = reg_r1; } while(0)
 
@@ -42,7 +43,7 @@ int main() {
 	cli();
 	init();
 
-//	on();
+	//on();
 
 	memset(&globals, 0, sizeof(globals));
 	globals.lastPage = 0xFFFF;
@@ -50,9 +51,14 @@ int main() {
 	hwInit();
 
 	while (globals.startCnt < (unsigned int) (START_TIMEOUT_US / WAIT_UNIT_US)
-			|| !isAppOK()) {
+
+			 || !isAppOK()
+
+			) {
 
 		int b = rdByte();
+
+
 		if (b == -1) {
 			if (globals.inputIdx) {
 				globals.magic16 = MAGIC16;
@@ -65,18 +71,18 @@ int main() {
 			if (globals.inputIdx < BOOT_INPUT_BUFFER_SIZE)
 				globals.inputBuffer[globals.inputIdx++] = b;
 		}
+
 	}
 
-//	off();
+	//off();
 
 #if defined(__AVR_ATmega168__)
 	asm volatile ( "jmp 0");
-
-#define BOOTSIZE 512 // in words
 #else
 #ifdef __AVR_ATmega8__
 
-	asm volatile ( "rjmp 0");
+	((void (*)())0x0)();
+	//asm volatile ( "rjmp 0");
 
 #else
 #error

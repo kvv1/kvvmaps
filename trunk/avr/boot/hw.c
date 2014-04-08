@@ -116,10 +116,6 @@ void stopTX() {
 	PORTB &= ~0x80;
 }
 
-//void incCnt() {
-//	startCnt++;
-//}
-
 int rdByte() {
 	int8_t cnt = TIMEOUT_US / WAIT_UNIT_US;
 	while (!(UCSRA & (1 << RXC))) { //ждём байта данных с COM-порта
@@ -129,7 +125,6 @@ int rdByte() {
 		cnt--;
 		if (globals.startCnt < 0xFFFFU)
 			globals.startCnt++;
-//		incCnt();
 	}
 	return (uint8_t) UDR;
 }
