@@ -18,7 +18,7 @@ avr-gcc %LFLAGS% -o "boot.elf"  ./hw.o ./main.o ./packet.o ./utils.o
 
 avr-objdump -h -S boot.elf  >"boot.lss"
 avr-objcopy -R .eeprom -O ihex boot.elf  "boot.hex" 
-avr-size --format=avr --mcu=atmega8 boot.elf
+avr-size --format=avr --mcu=%mcu% boot.elf
 
 if %mcu%==atmega8 avrdude -pm8 -cavr910 -PCOM3 -u -Uflash:w:boot.hex:a -Ulfuse:w:0x24:m -Uhfuse:w:0xda:m
 if %mcu%==atmega168 avrdude -pm168 -cavr910 -PCOM3 -u -Uflash:w:boot.hex:a -Ulfuse:w:0xe2:m -Uhfuse:w:0xdc:m -Uefuse:w:0x02:m
