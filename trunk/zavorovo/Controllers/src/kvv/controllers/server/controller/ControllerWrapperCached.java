@@ -26,7 +26,7 @@ public class ControllerWrapperCached extends ControllerAdapter {
 	@Override
 	public synchronized void setReg(int addr, int reg, int val)
 			throws IOException {
-		//System.out.println("+" + addr + "(" + reg + ")=" + val);
+		// System.out.println("+" + addr + "(" + reg + ")=" + val);
 		AllRegs allRegs = map.get(addr);
 		try {
 			wrapped.setReg(addr, reg, val);
@@ -83,14 +83,17 @@ public class ControllerWrapperCached extends ControllerAdapter {
 			controllersList = new LinkedList<ControllerDescr>(
 					Arrays.asList(controllers.getControllers()));
 
-		if (!controllersList.isEmpty()) {
-			int addr = controllersList.remove(0).addr;
+		while (!controllersList.isEmpty()) {
+			ControllerDescr controllerDescr = controllersList.remove(0);
+			int addr = controllerDescr.addr;
+			if (addr == 0 || !controllerDescr.enabled)
+				continue;
+
 			try {
-				if (addr != 0) {
-					synchronized (this) {
-						AllRegs allRegs = wrapped.getAllRegs(addr);
-						map.put(addr, allRegs);
-					}
+				synchronized (this) {
+					AllRegs allRegs = wrapped.getAllRegs(addr);
+					map.put(addr, allRegs);
+					break;
 				}
 			} catch (IOException e) {
 				synchronized (this) {

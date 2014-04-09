@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import kvv.controllers.controller.IController;
 import kvv.controllers.server.Controllers;
+import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
@@ -46,18 +47,23 @@ public class Scheduler {
 						map = Utils.fromJson(sch, Schedule.class).map;
 					}
 
-					if (!map.isEmpty()) {
+					while (!map.isEmpty()) {
 						String regName = map.keySet().iterator().next();
 						RegisterSchedule registerSchedule = map.remove(regName);
+						if (!registerSchedule.enabled)
+							continue;
 						RegisterDescr reg = controllers.getRegister(regName);
+						ControllerDescr controllerDescr = controllers
+								.get(reg.controller);
+						if (!controllerDescr.enabled)
+							continue;
 
-						if (registerSchedule.enabled) {
-							Date date = new Date();
-							int minutes = date.getHours() * 60
-									+ date.getMinutes();
-							int value = registerSchedule.getValue(minutes);
-							wrapped.setReg(reg.addr, reg.register, value);
-						}
+						Date date = new Date();
+						int minutes = date.getHours() * 60 + date.getMinutes();
+						int value = registerSchedule.getValue(minutes);
+						wrapped.setReg(reg.addr, reg.register, value);
+
+						break;
 					}
 				} catch (Exception e) {
 				}
