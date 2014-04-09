@@ -18,6 +18,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -165,7 +166,7 @@ public class ConfigurationPage extends Composite {
 
 	class ControllersTree extends EditableTree {
 		{
-			setWidth("500px");
+			setWidth("600px");
 		}
 
 		public void set(ControllerDescr[] controllerDescrs) {
@@ -212,6 +213,7 @@ public class ConfigurationPage extends Composite {
 				cd.name = form.name.getText();
 				cd.addr = form.addr.getNum();
 				cd.type = form.type.getItemText(form.type.getSelectedIndex());
+				cd.enabled = form.enabled.getValue();
 
 				TreeItem regsItem = controllersItem.getChild(i).getChild(0);
 
@@ -309,6 +311,7 @@ public class ConfigurationPage extends Composite {
 
 	static class ControllerForm extends Composite {
 		HorizontalPanel hp = new HorizontalPanel();
+		CheckBox enabled = new CheckBox("Вкл.");
 		TextWithLabel name = new TextWithLabel("", 150, false);
 		TextWithLabel addr = new TextWithLabel("Адрес", 30, true);
 		ListBox type = new ListBox();
@@ -329,8 +332,10 @@ public class ConfigurationPage extends Composite {
 
 			hp.setSpacing(2);
 			hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+			enabled.setValue(cd.enabled);
 			this.name.textBox.setText(name);
 			this.addr.textBox.setText("" + addr);
+			hp.add(enabled);
 			hp.add(this.name);
 			hp.add(this.addr);
 			hp.add(this.type);
