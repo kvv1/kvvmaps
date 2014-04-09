@@ -1,5 +1,6 @@
 package kvv.evlang.rt;
 
+import java.io.IOException;
 import java.util.List;
 
 public abstract class Interpreter {
@@ -10,9 +11,10 @@ public abstract class Interpreter {
 		this.context = cont;
 	}
 
-	public abstract void setExtReg(int addr, int reg, int value);
+	public abstract void setExtReg(int addr, int reg, int value)
+			throws IOException;
 
-	public abstract int getExtReg(int addr, int reg);
+	public abstract int getExtReg(int addr, int reg) throws IOException;
 
 	private short ip;
 	private short fp;
@@ -316,13 +318,21 @@ public abstract class Interpreter {
 			case GETEXTREG: {
 				short addr = (short) (code.get(ip++) & 0xFF);
 				reg = code.get(ip++) & 0xFF;
-				context.stack.push(getExtReg(addr, reg));
+				try {
+					context.stack.push(getExtReg(addr, reg));
+				} catch (IOException e) {
+					throwException(Exc.IO_EXCEPTION.ordinal());
+				}
 				break;
 			}
 			case SETEXTREG: {
 				short addr = (short) (code.get(ip++) & 0xFF);
 				reg = code.get(ip++) & 0xFF;
-				setExtReg(addr, reg, context.stack.pop());
+				try {
+					setExtReg(addr, reg, context.stack.pop());
+				} catch (IOException e) {
+					throwException(Exc.IO_EXCEPTION.ordinal());
+				}
 				break;
 			}
 			case BRANCH:

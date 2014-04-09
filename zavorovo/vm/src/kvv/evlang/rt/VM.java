@@ -1,11 +1,14 @@
 package kvv.evlang.rt;
 
+import java.io.IOException;
+
 import kvv.evlang.rt.RTContext.TTEntry;
 
 public abstract class VM {
-	public abstract void setExtReg(int addr, int reg, int value);
+	public abstract void setExtReg(int addr, int reg, int value)
+			throws IOException;
 
-	public abstract int getExtReg(int addr, int reg);
+	public abstract int getExtReg(int addr, int reg) throws IOException;
 
 	private Interpreter interpreter;
 
@@ -20,12 +23,13 @@ public abstract class VM {
 	public void init() throws UncaughtExceptionException {
 		interpreter = new Interpreter(cont) {
 			@Override
-			public void setExtReg(int addr, int reg, int value) {
+			public void setExtReg(int addr, int reg, int value)
+					throws IOException {
 				VM.this.setExtReg(addr, reg, value);
 			}
 
 			@Override
-			public int getExtReg(int addr, int reg) {
+			public int getExtReg(int addr, int reg) throws IOException {
 				return VM.this.getExtReg(addr, reg);
 			}
 		};

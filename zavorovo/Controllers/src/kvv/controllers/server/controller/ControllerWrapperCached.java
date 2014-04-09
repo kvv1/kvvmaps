@@ -11,7 +11,8 @@ import kvv.controllers.controller.IController;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.ControllerDescr;
-import kvv.evlang.rt.Const;
+
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 
 public class ControllerWrapperCached extends ControllerAdapter {
 
@@ -61,7 +62,7 @@ public class ControllerWrapperCached extends ControllerAdapter {
 		for (int i = 0; i < n; i++) {
 			Integer val = allRegs.values.get(reg + i);
 			if (val == null)
-				val = Const.INVALID_VALUE;
+				val = 0;
 			res[i] = val;
 		}
 		return res;
