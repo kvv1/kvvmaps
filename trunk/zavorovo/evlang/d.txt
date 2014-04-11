@@ -1,0 +1,43 @@
+int TEMP_ZERO = 0;
+int DURATION = 30;
+int PERIOD = 60;
+
+struct TimerS : Timer {
+	int n;
+	
+	void runS();
+
+	void startS(int s) {
+		this.n = s;
+		this.start(1000);
+	}
+
+	void run() {
+		this.n = this.n - 1;
+		if(this.n <= 0)
+			this.runS();
+		else
+			this.start(1000);
+	}
+}
+int regx;
+/*
+struct T1 : Timer {
+	void run() {
+		this.start(60000);
+		regx = !regx;
+	}
+}
+*/
+struct T2 : TimerS {
+	void runS() {
+		this.startS(2);
+		print 555;
+		regx = !regx;
+	}
+}
+
+void main() {
+	//new T1(0).start(10000);
+	new T2(0,0).startS(1);
+}

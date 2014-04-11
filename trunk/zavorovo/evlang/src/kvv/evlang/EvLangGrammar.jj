@@ -171,8 +171,9 @@ Type typeBase() :
   }
 }
 
-void proc(Type type, String name, Type thisType) :{  Code bytes = null;  Locals locals = new Locals();}{  "(" [ argListDef(locals) ] ")"  {
-    if(thisType != null)      	locals.addThis(thisType);
+void proc(Type type, String name, Type thisType) :{  Code bytes = null;  Locals locals = new Locals();    if(thisType != null)
+      	locals.addThis(thisType);
+}{  "(" [ argListDef(locals) ] ")"  {
    	declareFunc(type, thisType, name, locals); 
   }  (    bytes = stmtBlock()    {      Code.procCode(this, bytes);    }  | ";"  )}
 
