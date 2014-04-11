@@ -7,6 +7,7 @@ import java.util.Set;
 
 import kvv.evlang.ParseException;
 import kvv.evlang.rt.BC;
+import kvv.evlang.rt.BC_SHORT;
 
 public class CodeBase {
 	public final Context context;
@@ -35,7 +36,11 @@ public class CodeBase {
 		code.add((byte) c.ordinal());
 	}
 
-	void add(int c) {
+	void addBC(BC_SHORT bc, int n) {
+		code.add((byte) (bc.n | (n & 0x0F)));
+	}
+
+	void addN(int c) {
 		code.add((byte) c);
 	}
 
@@ -44,112 +49,112 @@ public class CodeBase {
 	void compileLit(short s) {
 		Integer poolIdx = context.constPool.add(s);
 		if (poolIdx != null) {
-			add(BC.LIT_SHORT | poolIdx);
+			addBC(BC_SHORT.LIT_SHORT, poolIdx);
 		} else {
 			add(BC.LIT);
-			add(s >>> 8);
-			add(s & 0xFF);
+			addN(s >>> 8);
+			addN(s & 0xFF);
 		}
 	}
 
 	void compileGetreg(short reg) {
 		Integer poolIdx = context.regPool.add(reg);
 		if (poolIdx != null) {
-			add(BC.GETREG_SHORT | poolIdx);
+			addBC(BC_SHORT.GETREG_SHORT, poolIdx);
 		} else {
 			add(BC.GETREG);
-			add(reg);
+			addN(reg);
 		}
 	}
 
 	void compileSetreg(short reg) {
 		Integer poolIdx = context.regPool.add(reg);
 		if (poolIdx != null) {
-			add(BC.SETREG_SHORT | poolIdx);
+			addBC(BC_SHORT.SETREG_SHORT, poolIdx);
 		} else {
 			add(BC.SETREG);
-			add(reg);
+			addN(reg);
 		}
 	}
 
 	void compileGetLocal(int n) throws ParseException {
 		if (n >= 16)
 			context.throwExc("too mamy locals");
-		add(BC.GETLOCAL_SHORT | n);
+		addBC(BC_SHORT.GETLOCAL_SHORT, n);
 		locals.add((int) size());
 	}
 
 	void compileSetLocal(int n) throws ParseException {
 		if (n >= 16)
 			context.throwExc("too mamy locals");
-		add(BC.SETLOCAL_SHORT | n);
+		addBC(BC_SHORT.SETLOCAL_SHORT, n);
 		locals.add((int) size());
 	}
 
 	protected void compileSetregExt(int addr, int reg) {
 		add(BC.SETEXTREG);
-		add(addr);
-		add(reg);
+		addN(addr);
+		addN(reg);
 	}
 
 	protected void compileGetregExt(int addr, int reg) {
 		add(BC.GETEXTREG);
-		add(addr);
-		add(reg);
+		addN(addr);
+		addN(reg);
 	}
 
 	protected void compileCall(int n) {
 		if (n < 16) {
-			add(BC.CALL_SHORT | n);
+			addBC(BC_SHORT.CALL_SHORT, n);
 		} else {
 			add(BC.CALL);
-			add(n);
+			addN(n);
 		}
 	}
 
 	public void compileVCall(int argCnt, int n) {
 		add(BC.VCALL);
-		add((argCnt << 4) + n);
+		addN((argCnt << 4) + n);
 	}
 
 	protected void compileRetI(int n) throws ParseException {
 		if (n >= 16)
 			context.throwExc("too mamy locals");
-		add(BC.RETI_SHORT | n);
+		addBC(BC_SHORT.RETI_SHORT, n);
 	}
 
 	protected void compileRet(int n) throws ParseException {
 		if (n >= 16)
 			context.throwExc("too mamy locals");
-		add(BC.RET_SHORT | n);
+		addBC(BC_SHORT.RET_SHORT, n);
 	}
 
 	public void compileEnter(int extraLocals) throws ParseException {
 		if (extraLocals > 0)
-			add(BC.ENTER_SHORT | extraLocals);
+			addBC(BC_SHORT.ENTER_SHORT, extraLocals);
 	}
 
 	void compileGetfield(int n) throws ParseException {
 		if (n >= 16)
 			context.throwExc("too mamy fields");
-		add(BC.GETFIELD_SHORT | n);
+		addBC(BC_SHORT.GETFIELD_SHORT, n);
 	}
 
 	void compileSetfield(int n) throws ParseException {
 		if (n >= 16)
 			context.throwExc("too mamy fields");
-		add(BC.SETFIELD_SHORT | n);
+		addBC(BC_SHORT.SETFIELD_SHORT, n);
 	}
 
 	public void compileNew(int n) {
 		if (n >= 16) {
 			add(BC.NEW);
-			add(n);
+			addN(n);
 		} else {
-			add(BC.NEW_SHORT | n);
+			addBC(BC_SHORT.NEW_SHORT, n);
 		}
 	}
-	
+
 	public void compileNewObjArr() {
 		add(BC.NEWOBJARR);
 	}

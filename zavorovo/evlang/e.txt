@@ -1,0 +1,20 @@
+struct TimerS {
+//	int n;
+	
+	void startS(int s, int s1) {
+		print s;
+		print s1;
+//		this.n = s;
+	}
+}
+
+void main() {
+/*	int x1 = 100;
+	int x2 = 200;
+	print x1;
+	print x2;
+*/
+
+	TimerS t = new TimerS();
+	t.startS(33, 55);
+}

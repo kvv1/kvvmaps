@@ -34,7 +34,7 @@ public class Code extends CodeBase {
 		context.checkROReg(descr);
 		Code res = new Code(context);
 		res.add(BC.DEC);
-		res.add(descr.reg);
+		res.addN(descr.reg);
 		return res;
 	}
 
@@ -45,7 +45,7 @@ public class Code extends CodeBase {
 		context.checkROReg(descr);
 		Code res = new Code(context);
 		res.add(BC.INC);
-		res.add(descr.reg);
+		res.addN(descr.reg);
 		return res;
 	}
 
@@ -80,15 +80,15 @@ public class Code extends CodeBase {
 		return res;
 	}
 
-	public static Code assignField(Context context, Expr expr, String field,
-			Expr t) throws ParseException {
-		int idx = context.structs.getFieldIndex(expr.type, field);
-		Type type = context.structs.get(expr.type.name).fields.get(idx).type;
-		t.type.checkAssignableTo(context, type);
+	public static Code assignField(Context context, Expr obj, String field,
+			Expr val) throws ParseException {
+		int idx = context.structs.getFieldIndex(obj.type, field);
+		Type type = context.structs.get(obj.type.name).fields.get(idx).type;
+		val.type.checkAssignableTo(context, type);
 
 		Code res = new Code(context);
-		res.addAll(expr.getCode());
-		res.addAll(t.getCode());
+		res.addAll(obj.getCode());
+		res.addAll(val.getCode());
 		res.compileSetfield(idx);
 		return res;
 	}
@@ -136,7 +136,7 @@ public class Code extends CodeBase {
 	public int compileBranch(BC bc, int... off) {
 		add(bc);
 		for (int n : off)
-			add(n);
+			addN(n);
 		return code.size();
 	}
 
