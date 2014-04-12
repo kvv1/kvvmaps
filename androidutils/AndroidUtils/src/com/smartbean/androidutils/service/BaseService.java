@@ -78,6 +78,8 @@ public abstract class BaseService extends Service {
 				getString(notifTextId), pIntent);
 
 		notif.number = 1;
+		
+		notif.defaults |= Notification.DEFAULT_SOUND;
 
 		return notif;
 	}
