@@ -15,6 +15,8 @@
 #define CMD_UPLOAD_END 105
 #define CMD_GETUI 106 //
 #define CMD_VMINIT 107 //
+#define CMD_GETRULES 108 // -> N rules
+#define CMD_SETRULE 109 // N rule ->
 
 uint8_t handleStdCmd(PDU* pdu, uint8_t cmdlen);
 

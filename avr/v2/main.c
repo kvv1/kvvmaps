@@ -15,7 +15,7 @@
 
 #define INPUT_BUFFER_SIZE 64
 
-#define VERSION 2
+#define VERSION 4
 
 void packetReceived(uint8_t* buffer, uint8_t len);
 
