@@ -21,18 +21,18 @@ public enum BC {
 	public int stackBalance;
 	public int args;
 
-	public static final int GETREG_SHORT = 0x40;
-	public static final int SETREG_SHORT = 0x50;
-	public static final int GETLOCAL_SHORT = 0x60;
-	public static final int SETLOCAL_SHORT = 0x70;
-	public static final int GETFIELD_SHORT = 0x80;
-	public static final int SETFIELD_SHORT = 0x90;
-	public static final int CALL_SHORT = 0xA0;
-	public static final int RET_SHORT = 0xB0;
-	public static final int RETI_SHORT = 0xC0;
-	public static final int LIT_SHORT = 0xD0;
-	public static final int ENTER_SHORT = 0xE0;
-	public static final int NEW_SHORT = 0xF0;
+//	public static final int GETREG_SHORT = 0x40;
+//	public static final int SETREG_SHORT = 0x50;
+//	public static final int GETLOCAL_SHORT = 0x60;
+//	public static final int SETLOCAL_SHORT = 0x70;
+//	public static final int GETFIELD_SHORT = 0x80;
+//	public static final int SETFIELD_SHORT = 0x90;
+//	public static final int CALL_SHORT = 0xA0;
+//	public static final int RET_SHORT = 0xB0;
+//	public static final int RETI_SHORT = 0xC0;
+//	public static final int LIT_SHORT = 0xD0;
+//	public static final int ENTER_SHORT = 0xE0;
+//	public static final int NEW_SHORT = 0xF0;
 
 //	public static final int OR_BRANCH_SHORT = 0xE0;
 //	public static final int AND_BRANCH_SHORT = 0xF0;

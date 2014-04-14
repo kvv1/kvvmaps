@@ -14,4 +14,5 @@ public class Command {
 	public static final byte CMD_UPLOAD_END = 105;
 	public static final byte CMD_GETUI = 106;
 	public static final byte CMD_VMINIT = 107;
+	public static final byte MODBUS_GETRULES = 0;
 }

@@ -37,7 +37,7 @@ public abstract class Heap2 implements Heap {
 	});
 	
 	{
-		out = System.out;
+		//out = System.out;
 	}
 
 	private void draw() {

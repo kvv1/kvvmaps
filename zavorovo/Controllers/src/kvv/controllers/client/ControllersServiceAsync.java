@@ -1,6 +1,7 @@
 package kvv.controllers.client;
 
 import kvv.controllers.register.AllRegs;
+import kvv.controllers.register.Rule;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -17,4 +18,6 @@ public interface ControllersServiceAsync {
 	void vmInit(int addr, AsyncCallback<Void> callback);
 
 	void hello(int addr, AsyncCallback<Integer> callback);
+
+	void getRules(int addr, AsyncCallback<Rule[]> callback);
 }

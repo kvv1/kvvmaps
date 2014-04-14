@@ -8,6 +8,7 @@ import kvv.controllers.client.control.simple.GetRegControl;
 import kvv.controllers.client.control.simple.GetSetRegControl;
 import kvv.controllers.client.control.simple.GetSetRegControl2;
 import kvv.controllers.client.control.simple.SimpleRelayControl;
+import kvv.controllers.client.control.vm.RuleControl;
 import kvv.controllers.client.control.vm.VMControl;
 import kvv.controllers.shared.ControllerType;
 import kvv.controllers.shared.ControllerUI;
@@ -135,6 +136,10 @@ public class CommonForm extends ControlComposite {
 			VMControl vmControl = new VMControl(addr, name, controllerType.def);
 			add(vmControl);
 			return vmControl;
+		case RULES:
+			RuleControl rc = new RuleControl(addr, controllerType.def);
+			add(rc);
+			return rc;
 		case UPLOAD:
 			return new UploadForm("Загрузить", GWT.getModuleBaseURL()
 					+ "upload?addr=" + addr);

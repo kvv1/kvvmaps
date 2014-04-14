@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Map;
 
 import kvv.controllers.controller.IController;
+import kvv.controllers.register.Rule;
 import kvv.controllers.server.Controllers;
 
 public abstract class ControllerAdapter implements IController {
@@ -55,4 +56,8 @@ public abstract class ControllerAdapter implements IController {
 		return wrapped.hello(addr);
 	}
 
+	@Override
+	public Rule[] getRules(int addr) throws IOException {
+		return wrapped.getRules(addr);
+	}
 }
