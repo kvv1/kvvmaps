@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.register.AllRegs;
+import kvv.controllers.register.Rule;
 import kvv.controllers.server.context.Context;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.utils.Constants;
@@ -128,6 +129,15 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	public Integer hello(int addr) throws Exception {
 		try {
 			return Context.getInstance().controller.hello(addr);
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	@Override
+	public Rule[] getRules(int addr) throws Exception{
+		try {
+			return Context.getInstance().controller.getRules(addr);
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}

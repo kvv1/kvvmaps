@@ -91,21 +91,25 @@ public abstract class Interpreter {
 			byte c = code.get(ip++);
 
 			if ((c & 0xC0) != 0) {
+				BC_SHORT bc = BC_SHORT.fromN(c & 0xF0);
 				short param = (short) (c & 0x0F);
-				switch (c & 0xF0) {
-				case BC.GETREG_SHORT:
+				//System.out.println((ip - 1) + ": " + bc.name() + " " + param);
+				switch (bc) {
+				case GETREG_SHORT:
 					getreg(context.regPool[param]);
 					break;
-				case BC.SETREG_SHORT:
+				case SETREG_SHORT:
 					setreg(context.regPool[param]);
 					break;
-				case BC.GETLOCAL_SHORT:
-					context.stack.push(context.stack.getAt(fp, 2 + param));
+				case GETLOCAL_SHORT:
+					short v = context.stack.getAt(fp, 2 + param);
+					//System.out.println("   " + v);
+					context.stack.push(v);
 					break;
-				case BC.SETLOCAL_SHORT:
+				case SETLOCAL_SHORT:
 					context.stack.setAt(fp, 2 + param, context.stack.pop());
 					break;
-				case BC.GETFIELD_SHORT:
+				case GETFIELD_SHORT:
 					short a = context.stack.pop();
 					if (a == 0) {
 						throwException(Exc.NULLPOINTER_EXCEPTION.ordinal());
@@ -113,7 +117,7 @@ public abstract class Interpreter {
 					}
 					context.stack.push(context.heap.get(a, param));
 					break;
-				case BC.SETFIELD_SHORT:
+				case SETFIELD_SHORT:
 					short n = context.stack.pop();
 					a = context.stack.pop();
 					if (a == 0) {
@@ -122,11 +126,11 @@ public abstract class Interpreter {
 					}
 					context.heap.set(a, param, n);
 					break;
-				case BC.CALL_SHORT:
+				case CALL_SHORT:
 					short addr = context.funcs[param];
 					call(addr);
 					break;
-				case BC.RETI_SHORT:
+				case RETI_SHORT:
 					short res = context.stack.pop();
 					ret();
 					while (param-- > 0)
@@ -135,17 +139,17 @@ public abstract class Interpreter {
 					if (ip == 0)
 						return;
 					break;
-				case BC.RET_SHORT:
+				case RET_SHORT:
 					ret();
 					while (param-- > 0)
 						context.stack.pop();
 					if (ip == 0)
 						return;
 					break;
-				case BC.LIT_SHORT:
+				case LIT_SHORT:
 					context.stack.push(context.constPool[param]);
 					break;
-				case BC.ENTER_SHORT:
+				case ENTER_SHORT:
 					short link = context.stack.pop();
 					short ret = context.stack.pop();
 					while (param-- > 0)
@@ -154,7 +158,7 @@ public abstract class Interpreter {
 					context.stack.push(link);
 					fp = context.stack.getSP();
 					break;
-				case BC.NEW_SHORT:
+				case NEW_SHORT:
 					_new(param);
 					break;
 				default:
@@ -165,6 +169,7 @@ public abstract class Interpreter {
 			}
 
 			BC bc = BC.values()[c];
+			//System.out.println((ip - 1) + ": " + bc.name());
 			switch (bc) {
 			case CALL: {
 				short addr = context.funcs[code.get(ip++)];
@@ -434,9 +439,9 @@ public abstract class Interpreter {
 		context.stack.push(a);
 	}
 
-	private void _new(short n) throws UncaughtExceptionException {
-		int sz = context.types[n].sz;
-		int a = context.heap.alloc2(n, false, false);
+	private void _new(short typeIdx) throws UncaughtExceptionException {
+		int sz = context.types[typeIdx].sz;
+		int a = context.heap.alloc2(typeIdx, false, false);
 		if (a == 0) {
 			throwException(Exc.OUTOFMEMORY_EXCEPTION.ordinal());
 			return;

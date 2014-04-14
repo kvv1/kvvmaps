@@ -1,6 +1,7 @@
 package kvv.controllers.controller;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -19,8 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 import kvv.controllers.register.AllRegs;
+import kvv.controllers.register.Operation;
 import kvv.controllers.register.RegType;
 import kvv.controllers.register.RegisterUI;
+import kvv.controllers.register.Rule;
 import kvv.controllers.utils.CRC16;
 
 import com.google.gson.Gson;
@@ -165,10 +168,12 @@ public class Controller implements IController {
 					throw new WrongResponseException("response PDU len = 0");
 				if (res[0] != bytes[0]) {
 					if ((res[0] & 0xFF) != (bytes[0] | 0x80) || res.length < 2)
-						throw new WrongResponseException("response PDU format error");
+						throw new WrongResponseException(
+								"response PDU format error");
 					int code = res[1] & 0xFF;
-					if(code >= ErrorCode.values().length)
-						throw new WrongResponseException("wrong error code: " + code);
+					if (code >= ErrorCode.values().length)
+						throw new WrongResponseException("wrong error code: "
+								+ code);
 					throw new ModbusCmdException(code);
 				}
 			}
@@ -325,6 +330,32 @@ public class Controller implements IController {
 		if (resp.length > 1)
 			return (int) resp[1];
 		return null;
+	}
+
+	@Override
+	public Rule[] getRules(int addr) throws IOException {
+		byte[] resp = send(addr, new byte[] { Command.MODBUS_GETRULES });
+
+		List<Rule> rules = new ArrayList<Rule>();
+		DataInputStream dis = new DataInputStream(
+				new ByteArrayInputStream(resp));
+
+		try {
+			dis.readByte();
+			while (true) {
+				Rule rule = new Rule();
+				rule.en = dis.readByte() != 1;
+				rule.srcReg = dis.readByte() & 0xFF;
+				rule.op = Operation.values()[dis.readByte()];
+				rule.srcVal = dis.readShort();
+				rule.dstReg = dis.readByte() & 0xFF;
+				rule.dstVal = dis.readShort();
+				rules.add(rule);
+			}
+		} catch (Exception e) {
+		}
+
+		return rules.toArray(new Rule[0]);
 	}
 
 	public static void main(String[] args) throws IOException,

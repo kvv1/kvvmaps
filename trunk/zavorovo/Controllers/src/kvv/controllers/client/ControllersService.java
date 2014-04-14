@@ -1,6 +1,7 @@
 package kvv.controllers.client;
 
 import kvv.controllers.register.AllRegs;
+import kvv.controllers.register.Rule;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -18,4 +19,6 @@ public interface ControllersService extends RemoteService {
 	void vmInit(int addr) throws Exception;
 
 	Integer hello(int addr) throws Exception;
+
+	Rule[] getRules(int addr) throws Exception;
 }

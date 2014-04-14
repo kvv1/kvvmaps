@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Map;
 
 import kvv.controllers.register.AllRegs;
+import kvv.controllers.register.Rule;
 
 public interface IController {
 	public class Statistics {
@@ -38,4 +39,6 @@ public interface IController {
 	Integer hello(int addr) throws IOException;
 
 	void close();
+
+	Rule[] getRules(int addr) throws IOException;
 }
