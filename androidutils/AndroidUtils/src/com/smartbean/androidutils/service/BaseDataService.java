@@ -5,7 +5,8 @@ import android.app.Activity;
 import com.smartbean.androidutils.service.RemoteData.RemoteDataListener;
 import com.smartbean.androidutils.util.Utils;
 
-public abstract class BaseDataService<TData, TMsg> extends BaseService implements RemoteDataListener<TData, TMsg>{
+public abstract class BaseDataService<TData, TMsg> extends BaseService
+		implements RemoteDataListener<TData, TMsg> {
 	public RemoteData<TData, TMsg> remoteData;
 
 	protected abstract void dataChanged();
@@ -14,30 +15,32 @@ public abstract class BaseDataService<TData, TMsg> extends BaseService implement
 
 	public BaseDataService(int iconId, int iconGrayId,
 			Class<? extends Activity> activityClass, int appNameId,
-			int notifTextId) {
-		super(iconId, iconGrayId, activityClass, appNameId, notifTextId);
+			int notifTextId, boolean notifSound) {
+		super(iconId, iconGrayId, activityClass, appNameId, notifTextId,
+				notifSound);
 	}
 
-//	public class CarabiDataListener implements RemoteDataListener<TData, TMsg> {
-		@Override
-		public void remoteDataReceived(TData remote) {
-			TData stored = getStoredData();
-			TData merged = merge(stored, remote);
-			setOnline(true);
-			if (merged != null) {
-				storeData(merged);
-				dataChanged();
-				setAlert(true);
-			}
+	// public class CarabiDataListener implements RemoteDataListener<TData,
+	// TMsg> {
+	@Override
+	public void remoteDataReceived(TData remote) {
+		TData stored = getStoredData();
+		TData merged = merge(stored, remote);
+		setOnline(true);
+		if (merged != null) {
+			storeData(merged);
+			dataChanged();
+			setAlert(true);
 		}
+	}
 
-		@Override
-		public void remoteDataFailure(Exception cause) {
-			//cause.printStackTrace();
-			setOnline(false);
-		}
+	@Override
+	public void remoteDataFailure(Exception cause) {
+		// cause.printStackTrace();
+		setOnline(false);
+	}
 
-//	}
+	// }
 
 	@Override
 	public void onCreate() {
