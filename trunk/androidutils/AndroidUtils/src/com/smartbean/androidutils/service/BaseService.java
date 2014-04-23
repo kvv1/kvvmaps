@@ -25,15 +25,17 @@ public abstract class BaseService extends Service {
 	private boolean online;
 	private boolean alert;
 	private boolean alertEnabled;
+	private final boolean notifSound;
 
 	public BaseService(int iconId, int iconGrayId,
 			Class<? extends Activity> activityClass, int appNameId,
-			int notifTextId) {
+			int notifTextId, boolean notifSound) {
 		this.iconId = iconId;
 		this.iconIdBW = iconGrayId;
 		this.activityClass = activityClass;
 		this.appNameId = appNameId;
 		this.notifTextId = notifTextId;
+		this.notifSound = notifSound;
 	}
 
 	@Override
@@ -78,8 +80,9 @@ public abstract class BaseService extends Service {
 				getString(notifTextId), pIntent);
 
 		notif.number = 1;
-		
-		notif.defaults |= Notification.DEFAULT_SOUND;
+
+		if (notifSound)
+			notif.defaults |= Notification.DEFAULT_SOUND;
 
 		return notif;
 	}
