@@ -60,4 +60,9 @@ public abstract class ControllerAdapter implements IController {
 	public Rule[] getRules(int addr) throws IOException {
 		return wrapped.getRules(addr);
 	}
+
+	@Override
+	public void setRules(int addr, Rule[] rules) throws IOException {
+		wrapped.setRules(addr, rules);
+	}
 }

@@ -132,8 +132,6 @@ public class VMControl extends ControlComposite {
 		HorizontalPanel p = new HorizontalPanel();
 		p.setBorderWidth(1);
 		
-		p.add(new RuleControl(addr, def));
-		
 		p.add(panel);
 		initWidget(p);
 	}

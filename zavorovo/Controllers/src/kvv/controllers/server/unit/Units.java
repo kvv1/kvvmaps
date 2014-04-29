@@ -19,23 +19,12 @@ import kvv.evlang.rt.RTContext;
 import kvv.evlang.rt.VM;
 
 public class Units {
+
+	public UnitDescr[] units;
+
 	public static void save(UnitDescr[] units) throws Exception {
 		Utils.jsonWrite(Constants.unitsFile, units);
 		Context.reload();
-	}
-
-	public static UnitDescr[] getUnits() throws IOException {
-		UnitDescr[] units = Utils.jsonRead(Constants.unitsFile,
-				UnitDescr[].class);
-
-		// try {
-		// unit.script = Utils.readFile(Constants.ROOT + "/scripts/"
-		// + unit.name);
-		// unit.scriptEnabled = scriptEnabled(unit.name);
-		// } catch (Exception e) {
-		// }
-		// }
-		return units;
 	}
 
 	public void setScript(String unitName, String script) throws Exception {
@@ -63,8 +52,7 @@ public class Units {
 		return Boolean.valueOf(Utils.getProp(Constants.scriptsFile, unitName));
 	}
 
-	public RTContext parse(String unitName) throws IOException,
-			ParseException {
+	public RTContext parse(String unitName) throws IOException, ParseException {
 
 		EG1 parser = new EG1(Constants.scriptsDir + unitName) {
 			@Override
@@ -110,13 +98,15 @@ public class Units {
 	private volatile boolean stopped;
 
 	public Units(Controllers controllers, IController controller) {
+		try {
+			units = Utils.jsonRead(Constants.unitsFile, UnitDescr[].class);
+		} catch (IOException e) {
+			this.units = new UnitDescr[0];
+		}
+
 		this.controllers = controllers;
 		this.controller = controller;
-		try {
-			loadScripts();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		loadScripts();
 		thread.start();
 	}
 
@@ -124,11 +114,10 @@ public class Units {
 		return vmErrors.get(pageName);
 	}
 
-	public synchronized void loadScripts() throws IOException {
+	private synchronized void loadScripts() {
 		vms.clear();
 		vmErrors.clear();
 
-		UnitDescr[] units = Units.getUnits();
 		for (UnitDescr unit : units)
 			if (scriptEnabled(unit.name))
 				_loadScript(unit.name);

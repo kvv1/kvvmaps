@@ -69,6 +69,7 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 		this.unit = unit;
 
 		Button refreshButton = new Button("Обновить");
+		refreshButton.setWidth("100%");
 		refreshButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {

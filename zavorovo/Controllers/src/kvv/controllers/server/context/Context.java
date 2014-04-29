@@ -41,8 +41,8 @@ public class Context {
 	private final Scheduler scheduler;
 
 	private void close() {
-		units.close();
 		scheduler.close();
+		units.close();
 		controller.close();
 	}
 
@@ -63,7 +63,7 @@ public class Context {
 										new kvv.controllers.controller.Controller(
 												busURL)))));
 
-		scheduler = new Scheduler(controllers, controller);
 		units = new Units(controllers, controller);
+		scheduler = new Scheduler(controllers, units, controller);
 	}
 }

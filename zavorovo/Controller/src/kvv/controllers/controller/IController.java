@@ -41,4 +41,6 @@ public interface IController {
 	void close();
 
 	Rule[] getRules(int addr) throws IOException;
+
+	void setRules(int addr, Rule[] rules) throws IOException;
 }

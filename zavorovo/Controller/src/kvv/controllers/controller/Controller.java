@@ -340,13 +340,17 @@ public class Controller implements IController {
 		DataInputStream dis = new DataInputStream(
 				new ByteArrayInputStream(resp));
 
+		dis.readByte(); // cmd
+		
 		try {
-			dis.readByte();
 			while (true) {
 				Rule rule = new Rule();
-				rule.en = dis.readByte() != 1;
+				rule.en = dis.readByte() == 1;
 				rule.srcReg = dis.readByte() & 0xFF;
-				rule.op = Operation.values()[dis.readByte()];
+				int op1 = dis.readByte();
+				if (op1 < 0 || op1 >= Operation.values().length)
+					op1 = 0;
+				rule.op = Operation.values()[op1];
 				rule.srcVal = dis.readShort();
 				rule.dstReg = dis.readByte() & 0xFF;
 				rule.dstVal = dis.readShort();
@@ -356,6 +360,28 @@ public class Controller implements IController {
 		}
 
 		return rules.toArray(new Rule[0]);
+	}
+
+	@Override
+	public void setRules(int addr, Rule[] rules) throws IOException {
+		int i = 0;
+		for (Rule rule : rules) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			DataOutputStream dos = new DataOutputStream(baos);
+			dos.writeByte(Command.MODBUS_SETRULE);
+
+			dos.writeByte(i++);
+
+			dos.writeByte(rule.en ? 1 : 0);
+			dos.writeByte(rule.srcReg);
+			dos.writeByte(rule.op.ordinal());
+			dos.writeShort(rule.srcVal);
+			dos.writeByte(rule.dstReg);
+			dos.writeShort(rule.dstVal);
+
+			send(addr, baos.toByteArray());
+
+		}
 	}
 
 	public static void main(String[] args) throws IOException,

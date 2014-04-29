@@ -21,4 +21,6 @@ public interface ControllersService extends RemoteService {
 	Integer hello(int addr) throws Exception;
 
 	Rule[] getRules(int addr) throws Exception;
+
+	void setRules(int addr, Rule[] array) throws Exception;
 }
