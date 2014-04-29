@@ -20,4 +20,6 @@ public interface ControllersServiceAsync {
 	void hello(int addr, AsyncCallback<Integer> callback);
 
 	void getRules(int addr, AsyncCallback<Rule[]> callback);
+
+	void setRules(int addr, Rule[] array, AsyncCallback<Void> callback);
 }

@@ -138,11 +138,14 @@ public class CommonForm extends ControlComposite {
 			return vmControl;
 		case RULES:
 			RuleControl rc = new RuleControl(addr, controllerType.def);
-			add(rc);
+			//add(rc);
 			return rc;
 		case UPLOAD:
 			return new UploadForm("Загрузить", GWT.getModuleBaseURL()
 					+ "upload?addr=" + addr);
+		case DETAILS:
+			return new DetailsPanel(ui.label,
+					createWidget(ui.children[0]));
 		default:
 			return new Label("<unknown>");
 		}

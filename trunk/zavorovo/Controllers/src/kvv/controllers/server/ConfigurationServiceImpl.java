@@ -1,7 +1,6 @@
 package kvv.controllers.server;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 
 import kvv.controllers.client.ConfigurationService;
@@ -21,19 +20,15 @@ public class ConfigurationServiceImpl extends RemoteServiceServlet implements
 	@SuppressWarnings("deprecation")
 	@Override
 	public SystemDescr getSystemDescr() throws Exception {
-		try {
-			SystemDescr systemDescr = new SystemDescr();
-			systemDescr.controllers = Context.getInstance().controllers
-					.getControllers();
-			systemDescr.units = Units.getUnits();
-			systemDescr.timeZoneOffset = new Date().getTimezoneOffset();
+		SystemDescr systemDescr = new SystemDescr();
+		systemDescr.controllers = Context.getInstance().controllers
+				.getControllers();
+		systemDescr.units = Context.getInstance().units.units;
+		systemDescr.timeZoneOffset = new Date().getTimezoneOffset();
 
-			systemDescr.controllerTypes = Context.getInstance().controllers
-					.getControllerTypes();
-			return systemDescr;
-		} catch (IOException e) {
-			throw new Exception(e.getMessage());
-		}
+		systemDescr.controllerTypes = Context.getInstance().controllers
+				.getControllerTypes();
+		return systemDescr;
 	}
 
 	@Override
