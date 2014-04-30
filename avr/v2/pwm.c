@@ -30,21 +30,22 @@ void initPWM() {
 //	return eeprom_read_word(pwm + port);
 //}
 
-
 void setPWM(uint8_t port, uint16_t value) {
-	EEPROM_writeWord((uint16_t)(pwm + port), value);
+	EEPROM_writeWord((uint16_t) (pwm + port), value);
 }
 
 uint16_t getPWM(uint8_t port) {
-	return EEPROM_readWord((uint16_t)(pwm + port));
+	return EEPROM_readWord((uint16_t) (pwm + port));
 }
 
 void setOutput(uint8_t port, uint8_t state) {
 	uint8_t mask = 1 << port;
 	if (state) {
-		outState |= mask;
-		outCnt[port] = 0;
-		setPort(PORT(port), getPWM(port) & 0xFF);
+		if (!(outState & mask)) {
+			outState |= mask;
+			outCnt[port] = 0;
+			setPort(PORT(port), getPWM(port) & 0xFF);
+		}
 	} else {
 		outState &= ~mask;
 		setPort(PORT(port), 0);

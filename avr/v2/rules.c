@@ -35,3 +35,13 @@ void execRule(uint8_t n) {
 		setReg(rule.dstReg, rule.dstValue);
 
 }
+
+static uint8_t nextRule;
+
+void stepRules() {
+	if (nextRule >= NRULES)
+		nextRule = 0;
+	execRule(nextRule);
+	nextRule++;
+}
+

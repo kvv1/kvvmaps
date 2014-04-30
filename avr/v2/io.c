@@ -70,8 +70,12 @@ static uint8_t volatile tx_buffer[TX_BUFFER_SIZE];
 
 static uint8_t volatile tx_wr_index, tx_rd_index, tx_counter;
 
+int8_t transmitting() {
+	return RS485_PORT & (1 << RS485_BIT);
+}
+
 void waitTransmitted() {
-	while (RS485_PORT & (1 << RS485_BIT))
+	while (transmitting())
 		;
 }
 
