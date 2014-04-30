@@ -18,9 +18,10 @@ uint16_t sendPacketStart() {
 	return sendByte(bl_getAddr(), CRC16_INIT);
 }
 
-uint16_t sendPacketBodyPart(uint8_t* data, uint16_t len, uint16_t S) {
+uint16_t sendPacketBodyPart(void* data, uint16_t len, uint16_t S) {
+	uint8_t* data1 = (uint8_t*) data;
 	while (len--)
-		S = sendByte(*(data++), S);
+		S = sendByte(*(data1++), S);
 	return S;
 }
 

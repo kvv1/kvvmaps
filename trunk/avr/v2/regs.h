@@ -1,7 +1,9 @@
 #ifndef REGS_H_
 #define REGS_H_
 
-#include "stdint.h"
+#include <stdint.h>
+
+#include "ee.h"
 
 #define REG_RELAY0 0
 #define REG_RELAY1 1
@@ -17,6 +19,9 @@
 
 #define REG_TEMP 9
 #define REG_TEMP2 10
+
+#define REG_WDTCNT 11
+#define REG_BODCNT 12
 
 #define REG_VMONOFF 13
 #define REG_VMSTATE 14
@@ -80,6 +85,9 @@
 
 char getReg(uint8_t reg, int* val);
 char setReg(uint8_t reg, int val);
+
+ee_8_decl(wdtCnt);
+ee_8_decl(bodCnt);
 
 
 #endif /* REGS_H_ */

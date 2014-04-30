@@ -3,12 +3,13 @@
 
 #include <stdint.h>
 
-#define CONDITION_EQ 0
-#define CONDITION_NE 1
-#define CONDITION_LT 2
-#define CONDITION_GT 3
-#define CONDITION_LE 4
-#define CONDITION_GE 5
+#define CONDITION_INVALID 0
+#define CONDITION_EQ 1
+#define CONDITION_NE 2
+#define CONDITION_LT 3
+#define CONDITION_GT 4
+#define CONDITION_LE 5
+#define CONDITION_GE 6
 
 #define NRULES 8
 
@@ -21,5 +22,9 @@ typedef struct {
 	uint8_t dstReg;
 	int16_t dstValue;
 } Rule;
+
+uint8_t setRule(Rule* rule, uint8_t n);
+void getRule(Rule* rule, uint8_t n);
+void stepRules();
 
 #endif /* RULES_H_ */
