@@ -24,7 +24,7 @@ public class Scheduler {
 	private final Set<String> regNames = new HashSet<String>();
 
 	public Scheduler(Controllers controllers, Units units, IController wrapped) {
-		this.wrapped = wrapped;
+		this.wrapped = wrapped; 
 		this.controllers = controllers;
 
 		System.out.println("scheduler regs loading");
