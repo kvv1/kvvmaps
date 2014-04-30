@@ -61,36 +61,37 @@ public class Mars {
 
 	// RS2, I96, 8N1, E96, F10, PF, N0, D4321, AFFFF, C0001, M0
 
-	//RS2, I96, 8N1, E96, F10, PF, N0, D4321, AFFFF, C0001, M0,
-	
+	// RS2, I96, 8N1, E96, F10, PF, N0, D4321, AFFFF, C0001, M0,
+
 	private static long sleepTime = 2000;
-	
+
 	public static void main(String[] args) throws Exception {
-		Mars rs = new Mars("COM4");
+		Mars rs = new Mars("COM10");
 		rs.serPort.setRTS(false);
 
 		if (JOptionPane.OK_OPTION != JOptionPane.showConfirmDialog(null,
-				"�������� ������� � ������� ��",
-				"���������������� �����������", JOptionPane.WARNING_MESSAGE))
-			return;
+				"подайте питание", "подайте питание",
+				JOptionPane.WARNING_MESSAGE)) {
+			rs.cmd("?");
+			System.exit(0);
+		}
 
-		
 		Thread.sleep(sleepTime);
 
-//		rs.outStream.write("00#RS4".getBytes());
-//		rs.outStream.write(3);
-//		System.out.println(1);
-//		Thread.sleep(500);
+		// rs.outStream.write("00#RS4".getBytes());
+		// rs.outStream.write(3);
+		// System.out.println(1);
+		// Thread.sleep(500);
 
-//		rs.cmd("RS4");
+		rs.cmd("RS2");
+		rs.cmd("I96");
+		rs.cmd("E96");
+		rs.cmd("F10");
+		rs.cmd("D4321");
+		rs.cmd("AFFFF");
 		
-//		rs.cmd("I96");
-//		rs.cmd("E96");
-//		rs.cmd("F10");
-//		rs.cmd("D4321");
-//		rs.cmd("AFFFF");
 		rs.cmd("?");
-		
+
 		System.exit(0);
 	}
 
