@@ -18,7 +18,7 @@
 
 #define INPUT_BUFFER_SIZE 64
 
-#define VERSION 6
+#define VERSION 9
 
 void packetReceived(uint8_t* buffer, uint8_t len);
 
@@ -26,15 +26,17 @@ int main() {
 	int mcucsr = MCUCSR;
 	MCUCSR = 0;
 
-//	ee_magic = MAGIC16;
-//	if (mcucsr & (1 << PORF))
-//			{
-//	}
-//	else if (mcucsr & (1 << BORF))
-//		setbodCnt(getbodCnt() + 1);
-//	else if (mcucsr & (1 << WDRF))
-//		setwdtCnt(getwdtCnt() + 1);
-//	ee_magic = 0;
+	ee_magic = MAGIC16;
+	if (mcucsr & (1 << WDRF))
+		setresetByWd(1);
+	else
+		setresetByWd(0);
+	ee_magic = 0;
+
+	ee_magic = MAGIC16;
+	if (getwdOnReceive() == 255)
+		setwdOnReceive(0);
+	ee_magic = 0;
 
 	hwInit(1);
 	timer0Init();
@@ -69,8 +71,8 @@ int main() {
 			stepRules();
 		}
 
-//		if(!transmitting())
-//			wdt_reset();
+		if (!getwdOnReceive() && !transmitting() && checkHW())
+			wdt_reset();
 
 		uint8_t* buf;
 		uint8_t bufSz;
@@ -80,7 +82,9 @@ int main() {
 			packetReceived(buf, bufSz);
 			ee_magic = 0;
 			startReceiving();
-			wdt_reset();
+
+			if (getwdOnReceive() && checkHW())
+				wdt_reset();
 		}
 	}
 }
@@ -92,14 +96,17 @@ void packetReceived(uint8_t* buffer, uint8_t len) { // returns consumed flag
 		return;
 
 	uint8_t addr = adu->addr;
-	if (addr != bl_getAddr() && addr != 0)
+	if (addr != bl_getAddr() && addr != 0) {
 		return;
+	}
 
 	uint16_t sum = bl_crc16(buffer, len - 2);
 
 	if ((buffer[len - 2] != (char) sum)
-			|| (buffer[len - 1] != (char) (sum >> 8)))
+			|| (buffer[len - 1] != (char) (sum >> 8))) {
+		sendError(adu->pdu.func, ERR_WRONG_CS);
 		return;
+	}
 
 	switch (adu->pdu.func) {
 	case 100:

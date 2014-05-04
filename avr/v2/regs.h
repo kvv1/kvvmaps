@@ -20,8 +20,8 @@
 #define REG_TEMP 9
 #define REG_TEMP2 10
 
-#define REG_WDTCNT 11
-#define REG_BODCNT 12
+#define REG_RESET_BY_WD 11
+#define REG_WD_ON_RECEIVE 12
 
 #define REG_VMONOFF 13
 #define REG_VMSTATE 14
@@ -86,8 +86,8 @@
 char getReg(uint8_t reg, int* val);
 char setReg(uint8_t reg, int val);
 
-ee_8_decl(wdtCnt);
-ee_8_decl(bodCnt);
+ee_8_decl(resetByWd);
+ee_8_decl(wdOnReceive);
 
 
 #endif /* REGS_H_ */
