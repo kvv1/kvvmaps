@@ -2,7 +2,6 @@ package kvv.controllers.server.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 import kvv.controllers.controller.IController;
 import kvv.controllers.register.Rule;
@@ -37,13 +36,8 @@ public abstract class ControllerAdapter implements IController {
 	}
 
 	@Override
-	public Map<Integer, Statistics> getStatistics() {
-		return wrapped.getStatistics();
-	}
-
-	@Override
-	public void clearStatistics() {
-		wrapped.clearStatistics();
+	public String getStatistics(boolean clear) throws IOException {
+		return wrapped.getStatistics(clear);
 	}
 
 	@Override

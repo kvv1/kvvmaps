@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import com.google.gson.Gson;
@@ -67,15 +69,28 @@ public class Utils {
 		wr.close();
 	}
 
+	static class Props {
+		Properties props = new Properties();
+		long time = System.currentTimeMillis();
+	}
+
+	private static final Map<String, Props> propsMap = new HashMap<String, Props>();
+
 	public static synchronized Properties getProps(String file) {
+		Props props = propsMap.get(file);
+		if (props != null && System.currentTimeMillis() - props.time < 3000)
+			return props.props;
+
 		try {
-			Properties props = new Properties();
+			props = new Props();
 			InputStreamReader rd = new InputStreamReader(new FileInputStream(
 					file), "Windows-1251");
-			props.load(rd);
+			props.props.load(rd);
 			rd.close();
-			return props;
+			propsMap.put(file, props);
+			return props.props;
 		} catch (Exception e) {
+			propsMap.remove(file);
 			return null;
 		}
 	}
@@ -87,24 +102,30 @@ public class Utils {
 		return props.getProperty(prop);
 	}
 
+	public static synchronized Integer getPropInt(String file, String prop) {
+		String val = getProp(file, prop);
+		try {
+			return Integer.parseInt(val);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 	public static synchronized boolean changeProp(String file, String prop,
 			String value) {
+		Properties props = getProps(file);
+		if (props == null)
+			props = new Properties();
+		props.setProperty(prop, value);
+
 		try {
-			Properties props = new Properties();
-			try {
-				InputStreamReader rd = new InputStreamReader(
-						new FileInputStream(file), "Windows-1251");
-				props.load(rd);
-				rd.close();
-			} catch (Exception e) {
-			}
-			props.setProperty(prop, value);
 			OutputStreamWriter wr = new OutputStreamWriter(
 					new FileOutputStream(file), "Windows-1251");
 			props.store(wr, "");
 			wr.close();
 			return true;
 		} catch (IOException e) {
+			propsMap.remove(file);
 			return false;
 		}
 	}

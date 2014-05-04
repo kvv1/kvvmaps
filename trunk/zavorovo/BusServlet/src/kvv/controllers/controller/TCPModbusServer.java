@@ -58,7 +58,7 @@ public class TCPModbusServer {
 		byte[] data = new byte[len - 2];
 		for (int i = 0; i < len - 1; i++)
 			data[i] = dis.readByte();
-		byte[] res = ADUTransceiver.handle(addr, data);
+		byte[] res = ADUTransceiver.handle(addr, data, 400);
 		socket.getOutputStream().write(res);
 	}
 }

@@ -29,14 +29,15 @@
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
-	<!-- Add a mapping for our new default servlet -->
+	<servlet>
+		<servlet-name>StatisticsServlet</servlet-name>
+		<servlet-class>kvv.controllers.controller.StatisticsServlet</servlet-class>
+	</servlet>
 	<servlet-mapping>
-		<servlet-name>DefaultServletOverride</servlet-name>
-		<url-pattern>/</url-pattern>
+		<servlet-name>StatisticsServlet</servlet-name>
+		<url-pattern>/statistics</url-pattern>
 	</servlet-mapping>
-	<!-- <servlet> <servlet-name>BusServlet</servlet-name> <servlet-class>kvv.controllers.controller.BusServlet</servlet-class> 
-		</servlet> <servlet-mapping> <servlet-name>BusServlet</servlet-name> <url-pattern>/</url-pattern> 
-		</servlet-mapping> -->
+
 	<listener>
 		<listener-class>kvv.controllers.controller.ContextListener</listener-class>
 	</listener>

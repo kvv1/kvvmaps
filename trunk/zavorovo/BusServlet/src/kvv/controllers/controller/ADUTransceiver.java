@@ -13,7 +13,10 @@ import kvv.controllers.utils.PDU;
 public class ADUTransceiver {
 	private static Set<Integer> failedAddrs = new HashSet<Integer>();
 
-	public static synchronized byte[] handle(int addr, byte[] body) {
+	public static Statistics statistics = new Statistics();
+
+	public static synchronized byte[] handle(int addr, byte[] body,
+			int packetTimeout) {
 		PDU pdu = new PDU(body);
 		ADU adu = new ADU(addr, pdu);
 
@@ -23,7 +26,7 @@ public class ADUTransceiver {
 			byte[] res = null;
 			try {
 				res = PacketTransceiver.getInstance().sendPacket(adu.toBytes(),
-						addr != 0);
+						addr != 0, packetTimeout);
 				if (res == null)
 					return null;
 
@@ -33,13 +36,26 @@ public class ADUTransceiver {
 				if (adu1.addr != addr)
 					throw new IOException("wrong response ADU addr");
 
+				byte[] request = adu.pdu.data;
+				byte[] response = adu1.pdu.data;
+				if (response[0] != request[0]) {
+					if ((response[0] & 0xFF) != (request[0] | 0x80)
+							|| response.length < 2)
+						throw new IOException("response PDU format error");
+					int code = response[1] & 0xFF;
+					throw new IOException("modbus code: " + code);
+				}
 				BusLogger.logSuccess(addr);
+				statistics.addSuccess(addr);
 				return adu1.pdu.toBytes();
 			} catch (Exception e) {
 				try {
 					Thread.sleep(200);
 				} catch (InterruptedException ee) {
 				}
+
+				statistics.addError(addr, e.getClass().getSimpleName() + " "
+						+ e.getMessage());
 
 				handleError(addr, i, body, res, e);
 

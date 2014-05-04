@@ -13,7 +13,9 @@ import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.Rule;
 import kvv.controllers.server.context.Context;
 import kvv.controllers.shared.ControllerDescr;
+import kvv.controllers.shared.Statistics;
 import kvv.controllers.utils.Constants;
+import kvv.controllers.utils.Utils;
 import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
 import kvv.evlang.Token;
@@ -149,6 +151,16 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 			Context.getInstance().controller.setRules(addr, rules);
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
+		}
+	}
+
+	@Override
+	public Statistics getStatistics(boolean clear) {
+		try {
+			String s = Context.getInstance().controller.getStatistics(clear);
+			return Utils.fromJson(s, Statistics.class);
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
