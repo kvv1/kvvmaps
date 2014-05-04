@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.Operation;
@@ -136,11 +135,13 @@ public class Controller implements IController {
 	public void close() {
 	}
 
-	protected byte[] send1(int addr, byte[] bytes) throws IOException {
-		String url1 = url + "/PDU?addr=" + addr + "&body="
-				+ new Gson().toJson(bytes);
+	protected byte[] send1(int addr, byte[] bytes, Integer timeout)
+			throws IOException {
+		String url1 = url + "/PDU?addr=" + addr;
+		if (timeout != null)
+			url1 += "&timeout=" + timeout;
+		url1 += "&body=" + new Gson().toJson(bytes);
 		HttpURLConnection conn = null;
-		Reader r = null;
 
 		try {
 			conn = (HttpURLConnection) new URL(url1).openConnection();
@@ -148,36 +149,40 @@ public class Controller implements IController {
 			conn.connect();
 			if (addr == 0)
 				return null;
-			r = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			Reader r = new BufferedReader(new InputStreamReader(
+					conn.getInputStream()));
 			return new Gson().fromJson(r, byte[].class);
 		} finally {
 			if (conn != null)
 				conn.disconnect();
-			if (r != null)
-				r.close();
 		}
 	}
 
 	public byte[] send(int addr, byte[] bytes) throws IOException {
+		return send(addr, bytes, null);
+	}
+
+	public byte[] send(int addr, byte[] request, Integer timeout)
+			throws IOException {
 		try {
-			byte[] res = send1(addr, bytes);
+			byte[] response = send1(addr, request, timeout);
 			if (addr != 0) {
-				if (res == null)
+				if (response == null)
 					throw new NoResponseException("no response");
-				if (res.length == 0)
+				if (response.length == 0)
 					throw new WrongResponseException("response PDU len = 0");
-				if (res[0] != bytes[0]) {
-					if ((res[0] & 0xFF) != (bytes[0] | 0x80) || res.length < 2)
+				if (response[0] != request[0]) {
+					if ((response[0] & 0xFF) != (request[0] | 0x80) || response.length < 2)
 						throw new WrongResponseException(
 								"response PDU format error");
-					int code = res[1] & 0xFF;
+					int code = response[1] & 0xFF;
 					if (code >= ErrorCode.values().length)
 						throw new WrongResponseException("wrong error code: "
 								+ code);
 					throw new ModbusCmdException(code);
 				}
 			}
-			return res;
+			return response;
 		} catch (NoResponseException e) {
 			throw e;
 		} catch (IOException e) {
@@ -190,21 +195,29 @@ public class Controller implements IController {
 	}
 
 	@Override
-	public Map<Integer, Statistics> getStatistics() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void clearStatistics() {
-		// TODO Auto-generated method stub
-
+	public String getStatistics(boolean clear) throws IOException {
+		String url1 = url + "/statistics";
+		if (clear)
+			url1 += "?clear=true";
+		HttpURLConnection conn = null;
+		try {
+			conn = (HttpURLConnection) new URL(url1).openConnection();
+			conn.setRequestMethod("GET");
+			conn.connect();
+			BufferedReader r = new BufferedReader(new InputStreamReader(
+					conn.getInputStream()));
+			return r.readLine();
+		} finally {
+			if (conn != null)
+				conn.disconnect();
+		}
 	}
 
 	public static void _main(String[] args) throws IOException {
 		Controller c = new Controller("") {
 			@Override
-			protected byte[] send1(int addr, byte[] bytes) throws IOException {
+			protected byte[] send1(int addr, byte[] bytes, Integer timeout)
+					throws IOException {
 				Socket s = null;
 				try {
 					s = new Socket("localhost", 502);
@@ -237,11 +250,11 @@ public class Controller implements IController {
 				}
 			}
 		};
-		c.send1(1, new byte[] { 6, 0, 4, 0x66, 0x34 });
+		c.send1(1, new byte[] { 6, 0, 4, 0x66, 0x34 }, null);
 	}
 
-	private void s(int addr, byte[] bytes) throws IOException {
-		byte[] resp = send(addr, bytes);
+	private void s(int addr, byte[] bytes, Integer timeout) throws IOException {
+		byte[] resp = send(addr, bytes, timeout);
 		for (byte b : resp)
 			System.out.print(b + " ");
 	}
@@ -295,9 +308,9 @@ public class Controller implements IController {
 
 		Integer ver = hello(addr);
 		if (ver != null && ver > 0)
-			s(addr, new byte[] { Command.MODBUS_BOOTLOADER });
+			s(addr, new byte[] { Command.MODBUS_BOOTLOADER }, null);
 
-		s(addr, new byte[] { Command.MODBUS_ENABLE_APP, 0 });
+		s(addr, new byte[] { Command.MODBUS_ENABLE_APP, 0 }, null);
 		int a = 0;
 		while (a < image.length) {
 			int l = image.length - a;
@@ -312,11 +325,11 @@ public class Controller implements IController {
 
 			System.out.print("u" + a + " ");
 
-			s(addr, bytes);
+			s(addr, bytes, 800);
 			a += BLOCK_SIZE;
 		}
 		System.out.println("e");
-		s(addr, new byte[] { Command.MODBUS_ENABLE_APP, 1 });
+		s(addr, new byte[] { Command.MODBUS_ENABLE_APP, 1 }, null);
 	}
 
 	@Override
@@ -341,7 +354,7 @@ public class Controller implements IController {
 				new ByteArrayInputStream(resp));
 
 		dis.readByte(); // cmd
-		
+
 		try {
 			while (true) {
 				Rule rule = new Rule();
@@ -395,14 +408,14 @@ public class Controller implements IController {
 		// c.s(new byte[] { Command.MODBUS_BOOTLOADER });
 		// c.s(new byte[] { Command.MODBUS_HELLO });
 
-		c.s(addr, new byte[] { Command.MODBUS_BOOTLOADER });
-		c.s(addr, new byte[] { Command.MODBUS_HELLO });
+		c.s(addr, new byte[] { Command.MODBUS_BOOTLOADER }, null);
+		c.s(addr, new byte[] { Command.MODBUS_HELLO }, null);
 
 		c.uploadApp(addr, c.getImageHex(new FileInputStream(path)));
 
 		Thread.sleep(2000);
 
-		c.s(addr, new byte[] { Command.MODBUS_HELLO });
+		c.s(addr, new byte[] { Command.MODBUS_HELLO }, null);
 
 		// byte[] bytes = "_:101C600067D08091A3009091A400A091A500B091AD"
 		// .getBytes();

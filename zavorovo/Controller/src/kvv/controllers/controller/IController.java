@@ -2,21 +2,11 @@ package kvv.controllers.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.register.Rule;
 
 public interface IController {
-	public class Statistics {
-	}
-
-	// public enum REG_TYPE {
-	// COIL,
-	// DISCRETE_INPUT,
-	// PHYSICAL_INPUT,
-	// STORAGE
-	// }
 
 	void setReg(int addr, int reg, int val) throws IOException;
 
@@ -30,9 +20,7 @@ public interface IController {
 
 	void vmInit(int addr) throws IOException;
 
-	Map<Integer, Statistics> getStatistics();
-
-	void clearStatistics();
+	String getStatistics(boolean clear) throws IOException;
 
 	void uploadAppHex(int addr, InputStream is) throws IOException;
 

@@ -7,20 +7,17 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import kvv.controllers.controller.BusLogger;
+import kvv.controllers.utils.Utils;
 
 public class PacketTransceiver {
 	private final static int BAUD = 9600;
-
-	private static final long PACKET_TIMEOUT = 400;
 
 	private static final long BYTE_TIMEOUT = 100;
 
@@ -36,12 +33,8 @@ public class PacketTransceiver {
 
 	public static synchronized PacketTransceiver getInstance() throws Exception {
 		if (instance == null) {
-			Properties props = new Properties();
-			FileInputStream is = new FileInputStream(
-					"c:/zavorovo/controller.properties");
-			props.load(is);
-			is.close();
-			String com = props.getProperty("COM");
+			String com = Utils.getProp("c:/zavorovo/controller.properties",
+					"COM");
 			if (com == null)
 				return null;
 			instance = new PacketTransceiver(com);
@@ -95,33 +88,10 @@ public class PacketTransceiver {
 		}
 	}
 
-	public synchronized byte[] _sendPacket(byte[] data, boolean waitResponse)
-			throws IOException {
+	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse,
+			int packetTimeout) throws IOException {
 		try {
-			long t = System.currentTimeMillis();
-			while (System.currentTimeMillis() - t < 500) {
-				try {
-					init();
-					break;
-				} catch (Exception e) {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e1) {
-					}
-				}
-			}
-			return __sendPacket(data, waitResponse);
-		} finally {
-			if (serPort != null)
-				serPort.close();
-			serPort = null;
-		}
-	}
-
-	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse)
-			throws IOException {
-		try {
-			return __sendPacket(data, waitResponse);
+			return __sendPacket(data, waitResponse, packetTimeout);
 		} catch (PacketTimeoutException e) {
 			throw e;
 		} catch (IOException e) {
@@ -135,8 +105,8 @@ public class PacketTransceiver {
 		}
 	}
 
-	private synchronized byte[] __sendPacket(byte[] data, boolean waitResponse)
-			throws IOException {
+	private synchronized byte[] __sendPacket(byte[] data, boolean waitResponse,
+			int packetTimeout) throws IOException {
 
 		synchronized (inputBuffer) {
 			if (!inputBuffer.isEmpty()) {
@@ -162,7 +132,7 @@ public class PacketTransceiver {
 				if (!inputBuffer.isEmpty())
 					break;
 			}
-			if (System.currentTimeMillis() > sendTime + PACKET_TIMEOUT)
+			if (System.currentTimeMillis() > sendTime + packetTimeout)
 				throw new PacketTimeoutException();
 			try {
 				Thread.sleep(2);

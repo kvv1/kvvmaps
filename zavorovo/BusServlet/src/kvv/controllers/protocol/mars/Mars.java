@@ -83,7 +83,7 @@ public class Mars {
 		// System.out.println(1);
 		// Thread.sleep(500);
 
-		rs.cmd("RS2");
+		rs.cmd("RS4");
 		rs.cmd("I96");
 		rs.cmd("E96");
 		rs.cmd("F10");
