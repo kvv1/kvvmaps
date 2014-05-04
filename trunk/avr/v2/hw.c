@@ -47,10 +47,10 @@ void hwInit(uint8_t interrupts) {
 		UCSRB |= (1 << RXCIE) | (1 << TXCIE);
 
 #if defined(__AVR_ATmega48__) || defined(__AVR_ATmega168__)
-	UCSRC = 0x06;
+	UCSRC = (1 << UCSZ1) | (1 << UCSZ0);
 #else
 #ifdef __AVR_ATmega8__
-	UCSRC = 0x86;
+	UCSRC = (1 << URSEL) | (1 << UCSZ1) | (1 << UCSZ0);
 #else
 #error
 #endif
@@ -64,9 +64,9 @@ void hwInit(uint8_t interrupts) {
 	//RXB8-расширенный стоп-бит
 	//TXB8-расширенный стоп-бит
 	//вычисляем значение регистра скорости передачи данных
-	unsigned long speed = F_CPU / (16UL);
-	speed = (speed / UART_SPEED) - 1UL;
-	UBRRH = (speed >> 8) & 0xff;
+	unsigned long speed = (F_CPU / (16UL) / UART_SPEED) - 1UL;
+//	speed = (speed / UART_SPEED) - 1UL;
+	UBRRH = (speed >> 8) & 0xFF;
 	UBRRL = speed & 0xFF;
 
 	RS485_DDR |= (1 << RS485_BIT);
@@ -118,6 +118,66 @@ void hwInit(uint8_t interrupts) {
 //#define MODULO 78
 //#define TIMER_PERIOD 10
 #endif
+
+static int8_t _checkHW() {
+	if (!(RS485_DDR & (1 << RS485_BIT)))
+		return 0;
+	if (RX_DDR & (1 << RX_BIT))
+		return 0;
+	if (!(RX_PORT & (1 << RX_BIT)))
+		return 0;
+	if ((UCSRA & ((1 << U2X) | (1 << MPCM))) != 0)
+		return 0;
+	if ((UCSRB
+			& ((1 << RXEN) | (1 << TXEN) | (1 << RXCIE) | (1 << TXCIE)
+					| (1 << UDRIE) | (1 << UCSZ2)))
+			!= ((1 << RXEN) | (1 << TXEN) | (1 << RXCIE) | (1 << TXCIE)))
+		return 0;
+	unsigned long speed = (F_CPU / (16UL) / UART_SPEED) - 1UL;
+	if (UBRRH != ((speed >> 8) & 0xFF))
+		return 0;
+	if (UBRRL != (speed & 0xFF))
+		return 0;
+
+#if defined(__AVR_ATmega48__) || defined(__AVR_ATmega168__)
+	if(TIMSK0 != 0x01)
+	return 0;
+	if ((UCSRC
+					& ((1 << URSEL) | (1 << UMSEL) | (1 << UPM0) | (1 << UPM1)
+							| (1 << USBS) | (1 << UCSZ1) | (1 << UCSZ0)))
+			!= ((1 << URSEL) | (1 << UCSZ1) | (1 << UCSZ0)))
+	return 0;
+#else
+#ifdef __AVR_ATmega8__
+	if ((TIMSK & 0x01) != 0x01)
+		return 0;
+//	return 1;
+
+	{
+		unsigned char ucsrc;
+		ucsrc = UBRRH; // read twice
+		ucsrc = UCSRC; // read twice
+
+		if ((ucsrc
+				& ((1 << UMSEL) | (1 << UPM0) | (1 << UPM1) | (1 << USBS)
+						| (1 << UCSZ1) | (1 << UCSZ0)))
+				!= ((1 << UCSZ1) | (1 << UCSZ0)))
+			return 0;
+	}
+#else
+#error
+#endif
+#endif
+	return 1;
+}
+
+int8_t checkHW() {
+	int8_t res;
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+		res = _checkHW();
+	}
+	return res;
+}
 
 static volatile char timerTicks;
 

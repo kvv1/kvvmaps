@@ -31,4 +31,6 @@ void wrByte(uint8_t b);
 char getClearTimerTicks();
 void timer0Init();
 
+int8_t checkHW();
+
 #endif /* HW_H_ */

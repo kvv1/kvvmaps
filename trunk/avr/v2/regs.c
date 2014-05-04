@@ -12,8 +12,8 @@ static char adcs[] PROGMEM = { ADC0, ADC1, ADC2, ADC3, ADC0, ADC1, ADC2, ADC3 };
 static EEMEM int16_t eepromRegisters[REG_EEPROM_CNT];
 static int16_t ramRegisters[REG_RAM_CNT];
 
-ee_8(wdtCnt);
-ee_8(bodCnt);
+ee_8(resetByWd);
+ee_8(wdOnReceive);
 
 char getReg(uint8_t reg, int* val) {
 	if (reg >= REG_RELAY0 && reg < REG_RELAY0 + REG_RELAY_CNT) {
@@ -28,10 +28,10 @@ char getReg(uint8_t reg, int* val) {
 		*val = w1_temp(0);
 	} else if (reg == REG_TEMP2) {
 		*val = w1_temp(1);
-	} else if (reg == REG_WDTCNT) {
-		*val = getwdtCnt();
-	} else if (reg == REG_BODCNT) {
-		*val = getbodCnt();
+	} else if (reg == REG_RESET_BY_WD) {
+		*val = getresetByWd();
+	} else if (reg == REG_WD_ON_RECEIVE) {
+		*val = getwdOnReceive();
 //	} else if (reg == REG_VMONOFF) {
 //		*val = getvmonoff();
 //	} else if (reg == REG_VMSTATE) {
@@ -68,10 +68,10 @@ char setReg(uint8_t reg, int val) {
 		setPullup(reg - REG_INPULLUP0, val);
 	} else if (reg >= REG_RAM0 && reg < REG_RAM0 + REG_RAM_CNT) {
 		ramRegisters[reg] = val;
-	} else if (reg == REG_WDTCNT) {
-		setwdtCnt(val);
-	} else if (reg == REG_BODCNT) {
-		setbodCnt(val);
+	} else if (reg == REG_RESET_BY_WD) {
+		setresetByWd(val);
+	} else if (reg == REG_WD_ON_RECEIVE) {
+		setwdOnReceive(val);
 	} else {
 		return 0;
 	}

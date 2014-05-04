@@ -37,13 +37,15 @@ void ioMillis() {
 }
 
 uint8_t* getPacket(uint8_t* len) {
+	uint8_t res = NULL;
+
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
 		if (rxBufReady && rxIdx) {
 			*len = rxIdx;
-			return rxBuf;
+			res = rxBuf;
 		}
 	}
-	return NULL;
+	return res;
 }
 
 void startReceiving() {
