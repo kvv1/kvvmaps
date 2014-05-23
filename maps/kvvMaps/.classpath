@@ -6,5 +6,12 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/kvvMapsView"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/AndroidUtils"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/kvvMapsAdapter"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/kvvMapsMaps"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/kvvMapsPlacemark"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/kvvMapsTiles"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/kvvMapsUtil"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/KvvMapsWin"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

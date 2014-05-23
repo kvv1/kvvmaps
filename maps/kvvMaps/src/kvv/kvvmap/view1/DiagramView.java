@@ -1,8 +1,10 @@
-package kvv.kvvmap.view;
+package kvv.kvvmap.view1;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.placemark.PathSelection;
+import kvv.kvvmap.view.Diagram;
+import kvv.kvvmap.view.IPlatformView;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;

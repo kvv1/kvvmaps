@@ -1,4 +1,4 @@
-package kvv.kvvmap.view;
+package kvv.kvvmap.view1;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
