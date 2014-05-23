@@ -1,6 +1,7 @@
-package kvv.kvvmap.view;
+package kvv.kvvmap.view1;
 
 import kvv.kvvmap.MyActivity;
+import kvv.kvvmap.R;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
@@ -9,7 +10,12 @@ import kvv.kvvmap.util.COLOR;
 import kvv.kvvmap.util.ISelectable;
 import kvv.kvvmap.util.InfoLevel;
 import kvv.kvvmap.util.Utils;
+import kvv.kvvmap.view.CommonView;
 import kvv.kvvmap.view.CommonView.RotationMode;
+import kvv.kvvmap.view.Environment;
+import kvv.kvvmap.view.ICommonView;
+import kvv.kvvmap.view.IPlatformView;
+import kvv.kvvmap.view.ViewHelper;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -64,6 +70,7 @@ public class MapView extends View implements IPlatformView {
 
 		setRotationMode(rotationMode);
 
+		hideButtons();
 	}
 
 	public ISelectable getSel() {
@@ -140,17 +147,43 @@ public class MapView extends View implements IPlatformView {
 
 	}
 
+	private void hideButtons() {
+		if(activity == null)
+			return;
+		View buttons = activity.findViewById(R.id.buttons);
+		if (buttons != null)
+			buttons.setVisibility(View.GONE);
+	}
+
+	private void showButtons() {
+		if(activity == null)
+			return;
+		View buttons = activity.findViewById(R.id.buttons);
+		if (buttons != null)
+			buttons.setVisibility(View.VISIBLE);
+	}
+
+	private Runnable buttonsRunnable = new Runnable() {
+		@Override
+		public void run() {
+			hideButtons();
+		}
+	};
+
 	private Runnable endScrollNotifier = new Runnable() {
 		@Override
 		public void run() {
-			commonView.endScrolling();
+			if (commonView != null)
+				commonView.endScrolling();
 		}
 	};
 
 	private void move() {
-		commonView.startScrolling();
-		removeCallbacks(endScrollNotifier);
-		postDelayed(endScrollNotifier, 200);
+		if (commonView != null) {
+			commonView.startScrolling();
+			removeCallbacks(endScrollNotifier);
+			postDelayed(endScrollNotifier, 200);
+		}
 	}
 
 	private final Scroller mScroller = new Scroller(getContext());
@@ -219,8 +252,12 @@ public class MapView extends View implements IPlatformView {
 		public boolean onDown(MotionEvent e) {
 			if (!mScroller.isFinished()) { // is flinging
 				mScroller.forceFinished(true); // to stop flinging on
-												// touch
 			}
+
+			showButtons();
+			removeCallbacks(buttonsRunnable);
+			postDelayed(buttonsRunnable, 2000);
+
 			return true; // else won't work
 		}
 

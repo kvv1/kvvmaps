@@ -1,4 +1,4 @@
-package kvv.kvvmap.view;
+package kvv.kvvmap.view1;
 
 import android.content.Context;
 import android.util.AttributeSet;
