@@ -30,7 +30,6 @@ public abstract class RLFragment<A extends Activity, IService> extends Fragment 
 
 	private final Class<?> serviceClass;
 
-	
 	protected abstract void createUI(IService service);
 
 	protected abstract int getLayout();
@@ -58,7 +57,9 @@ public abstract class RLFragment<A extends Activity, IService> extends Fragment 
 		super.onCreate(savedInstanceState);
 		getActivity().bindService(new Intent(getActivity(), serviceClass),
 				conn, Context.BIND_AUTO_CREATE);
-		id = getArguments().getLong("id");
+		Bundle args = getArguments();
+		if (args != null)
+			id = getArguments().getLong("id");
 	}
 
 	@Override
