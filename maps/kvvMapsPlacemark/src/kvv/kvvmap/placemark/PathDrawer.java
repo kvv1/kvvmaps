@@ -16,8 +16,9 @@ import kvv.kvvmap.util.Utils;
 
 public class PathDrawer {
 
-	public static void drawLabel(GC gc, String text, int x, int y) {
-		gc.setTextSize(16);
+	public static void drawLabel(GC gc, String text, int x, int y,
+			float scaleFactor) {
+		gc.setTextSize((int) (16 * scaleFactor));
 
 		RectX rect = gc.getTextBounds(text);
 		rect.offset(x, y);
@@ -96,7 +97,7 @@ public class PathDrawer {
 	public static void drawPathInZoom(PathInZoom pathInZoom, GC gc, long id,
 			InfoLevel infoLevel, int color, int width) {
 		gc.setColor(color);
-		gc.setStrokeWidth(width);
+		gc.setStrokeWidth((int)(width * gc.getScaleFactor()));
 
 		int nx = TileId.nx(id);
 		int ny = TileId.ny(id);
@@ -113,7 +114,7 @@ public class PathDrawer {
 	}
 
 	public static void drawPlacemarks(PlaceMarks pms, GC gc, long id,
-			InfoLevel infoLevel, ISelectable sel) {
+			InfoLevel infoLevel, ISelectable sel, float scaleFactor) {
 		int dx = TileId.nx(id) * Adapter.TILE_SIZE;
 		int dy = TileId.ny(id) * Adapter.TILE_SIZE;
 		for (LocationX pm : pms.getPlaceMarks()) {
@@ -127,30 +128,36 @@ public class PathDrawer {
 			int diam;
 
 			if (pm == sel) {
-				gc.setStrokeWidth(2);
+				gc.setStrokeWidth((int) (3 * scaleFactor));
 				diam = 5;
 			} else {
-				gc.setStrokeWidth(1);
+				gc.setStrokeWidth((int) (2 * scaleFactor));
 				diam = 3;
 			}
 
+			diam = (int) (diam * scaleFactor);
+			
 			if (pm == pms.getTarget())
 				gc.setColor(COLOR.TARG_COLOR);
 			else
 				gc.setColor(COLOR.RED);
 
-			gc.drawLine(x, y, x + 5, y - 15);
-			gc.fillCircle(x + 5, y - 15, diam);
+			int _5 = (int) (5 * scaleFactor);
+			int _15 = (int) (15 * scaleFactor);
+			
+			gc.drawLine(x, y, x + _5, y - _15);
+			gc.fillCircle(x + _5, y - _15, diam);
 
 			String name = pm.name;
 			if (infoLevel.ordinal() > InfoLevel.MEDIUM.ordinal()
 					&& name != null) {
-				PathDrawer.drawLabel(gc, name, x + 5, y + 5);
+				PathDrawer.drawLabel(gc, name, x + _5, y + _5, scaleFactor);
 			}
 		}
 	}
 
-	public static void drawDiagram(GC gc, PathSelection sel, boolean speedProfile) {
+	public static void drawDiagram(GC gc, PathSelection sel,
+			boolean speedProfile) {
 		int y = gc.getHeight();
 		int w = gc.getWidth();
 
@@ -188,7 +195,7 @@ public class PathDrawer {
 				minAlt = Math.min(minAlt, (int) pm.getAltitude());
 				maxAlt = Math.max(maxAlt, (int) pm.getAltitude());
 				if (speed >= 0 && speed < 127) {
-					if(minSpeed >= 0) {
+					if (minSpeed >= 0) {
 						minSpeed = Math.min(minSpeed, (int) speed);
 						maxSpeed = Math.max(maxSpeed, (int) speed);
 					} else {
@@ -212,17 +219,18 @@ public class PathDrawer {
 			int rectY = y - 5 * lineHeight;
 			int rectW = w * 4 / 6;
 			int rectH = 4 * lineHeight;
-			
+
 			for (LocationX pm : pms) {
 				if (prevPm != null)
 					len0 += pm.distanceTo(prevPm);
-				
+
 				float speed = pm.getSpeed();
 
 				int _x = (int) (rectX + (len0 * rectW / len));
-				int _y = (int) (rectY + rectH - (int) ((pm
-						.getAltitude() - minAlt) * rectH / altDif));
-				int _y1 = (int) (rectY + rectH - (int) ((speed - minSpeed) * rectH / speedDif));
+				int _y = (int) (rectY + rectH - (int) ((pm.getAltitude() - minAlt)
+						* rectH / altDif));
+				int _y1 = (int) (rectY + rectH - (int) ((speed - minSpeed)
+						* rectH / speedDif));
 
 				PointInt pt = new PointInt(_x, _y);
 				PointInt pt1 = new PointInt(_x, _y1);
@@ -254,15 +262,11 @@ public class PathDrawer {
 				gc.fillCircle(pmPt.x, pmPt.y, 5);
 			}
 
-			gc.drawText("" + maxAlt + "m", 2,
-					rectY + lineHeight - 1);
-			gc.drawText("" + minAlt + "m", 2, rectY + lineHeight
-					* 4 - 2);
+			gc.drawText("" + maxAlt + "m", 2, rectY + lineHeight - 1);
+			gc.drawText("" + minAlt + "m", 2, rectY + lineHeight * 4 - 2);
 
-			gc.drawText("" + len + "m", 2,
-					rectY + lineHeight * 2 - 2);
-			gc.drawText("" + pms.size(), 2,
-					rectY + lineHeight * 3 - 2);
+			gc.drawText("" + len + "m", 2, rectY + lineHeight * 2 - 2);
+			gc.drawText("" + pms.size(), 2, rectY + lineHeight * 3 - 2);
 		}
 
 		y -= 5 * lineHeight;

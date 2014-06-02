@@ -140,7 +140,7 @@ public class CommonView implements ICommonView {
 					ISelectable sel1 = sel;
 					PathDrawer.drawPaths(envir.paths, gc, id, infoLevel, sel1);
 					PathDrawer.drawPlacemarks(envir.placemarks, gc, id,
-							infoLevel, sel1);
+							infoLevel, sel1, envir.adapter.getScaleFactor());
 				}
 
 				// t1 = System.currentTimeMillis() - t1;
@@ -383,7 +383,7 @@ public class CommonView implements ICommonView {
 				myLocationDimmed);
 
 		ViewHelper.drawCross(gc, x0, y0);
-		ViewHelper.drawScale(gc, viewParams);
+		ViewHelper.drawScale(gc, viewParams, envir.adapter.getScaleFactor());
 		// long time2 = System.currentTimeMillis();
 		// System.out.println("t2 = " + (time2 - time1));
 

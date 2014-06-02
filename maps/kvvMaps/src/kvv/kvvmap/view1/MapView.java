@@ -33,6 +33,7 @@ public class MapView extends View implements IPlatformView {
 	private ICommonView commonView;
 
 	private MyActivity activity;
+	private Environment envir;
 
 	public MapView(Context ctxt, AttributeSet attrs) {
 		super(ctxt, attrs);
@@ -51,6 +52,8 @@ public class MapView extends View implements IPlatformView {
 		Adapter.log("MapView.init " + ++cnt);
 
 		this.activity = activity;
+		this.envir = envir;
+
 		commonView = new CommonView(this, envir);
 
 		// Adapter.logMem();
@@ -98,7 +101,8 @@ public class MapView extends View implements IPlatformView {
 
 		Paint paint = new Paint();
 
-		GC gc = new GC(canvas, paint, getWidth(), getHeight());
+		GC gc = new GC(canvas, paint, getWidth(), getHeight(),
+				envir.adapter.getScaleFactor());
 
 		commonView.draw(gc);
 
@@ -148,7 +152,7 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	private void hideButtons() {
-		if(activity == null)
+		if (activity == null)
 			return;
 		View buttons = activity.findViewById(R.id.buttons);
 		if (buttons != null)
@@ -156,7 +160,7 @@ public class MapView extends View implements IPlatformView {
 	}
 
 	private void showButtons() {
-		if(activity == null)
+		if (activity == null)
 			return;
 		View buttons = activity.findViewById(R.id.buttons);
 		if (buttons != null)
@@ -229,7 +233,7 @@ public class MapView extends View implements IPlatformView {
 			if (!activity.isKineticScrolling())
 				return true;
 
-			int max = 400;
+			int max = (int) (400 * envir.adapter.getScaleFactor());
 
 			int v = (int) Math.sqrt(vX * vX + vY * vY);
 
@@ -238,7 +242,8 @@ public class MapView extends View implements IPlatformView {
 				vY = vY * max / v;
 			}
 
-			// System.out.println("onFling " + vX + " " + vY);
+			System.out.println("onFling " + vX + " " + vY);
+
 			mScroller.fling(oldx, oldy, -(int) vX, -(int) vY,
 					Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE,
 					Integer.MAX_VALUE);
@@ -292,7 +297,7 @@ public class MapView extends View implements IPlatformView {
 							mScaleFactor *= detector.getScaleFactor();
 
 							int newZoom = (int) (initZoom
-									+ Math.log(mScaleFactor) + 0.5);
+									+ Math.log(mScaleFactor) * 3 + 0.5);
 							newZoom = Math.max(Utils.MIN_ZOOM,
 									Math.min(Utils.MAX_ZOOM, newZoom));
 
@@ -314,8 +319,7 @@ public class MapView extends View implements IPlatformView {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		if (mGestureDetector == null)
-			mGestureDetector = new GestureDetector1(getContext(),
-					new MyOnGestureListener());
+			mGestureDetector = new GestureDetector1(new MyOnGestureListener());
 
 		if (mScaleDetector == null)
 			mScaleDetector = new MyScaleGestureDetector(getContext());

@@ -46,15 +46,13 @@ public class Adapter {
 		else
 			ROOT = Environment.getExternalStorageDirectory().getAbsolutePath()
 					+ "/kvvMaps";
+		
+		Log.w("KVVMAPS", "ROOT = " + ROOT);
 	}
 
 	public final static String MAPS_ROOT = ROOT + "/maps";
 	public static final String PATH_ROOT = ROOT + "/paths";
 	public static final String PLACEMARKS = ROOT + "/placemarks.pms";
-
-	static {
-		Log.w("KVVMAPS", "MAPS_ROOT = " + MAPS_ROOT);
-	}
 
 	public static int TILE_SIZE_0;
 	public static int TILE_SIZE;
@@ -98,6 +96,16 @@ public class Adapter {
 		});
 	}
 
+	private float scaleFactor;
+	
+	public void setScaleFactor(float f) {
+		this.scaleFactor = f;
+	}
+	
+	public float getScaleFactor() {
+		return scaleFactor;
+	}
+	
 	public synchronized void setTileSize(int sz, int widthPixels,
 			int heightPixels) {
 		freeBitmaps.clear();
@@ -107,6 +115,7 @@ public class Adapter {
 		int cachesz = (widthPixels / Adapter.TILE_SIZE + 2)
 				* (heightPixels / Adapter.TILE_SIZE + 2);
 		cachesz = cachesz * 2;
+		
 		MAP_TILES_CACHE_SIZE = cachesz;
 		RAF_CACHE_SIZE = cachesz * 2;
 	}
@@ -165,7 +174,7 @@ public class Adapter {
 		Bitmap bm1 = (Bitmap) bm;
 		Canvas c1 = new Canvas(bm1);
 		Paint paint = new Paint();
-		return new GC(c1, paint, bm1.getWidth(), bm1.getHeight());
+		return new GC(c1, paint, bm1.getWidth(), bm1.getHeight(), scaleFactor);
 	}
 
 	private Set<Recycleable> recycleables = new HashSet<Recycleable>();

@@ -145,4 +145,8 @@ public class GC {
 	public void clearTransform() {
 	}
 
+	public int getScaleFactor() {
+		return 1;
+	}
+
 }

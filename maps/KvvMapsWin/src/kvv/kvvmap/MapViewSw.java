@@ -120,6 +120,7 @@ public class MapViewSw extends JComponent {
 				// TODO Auto-generated method stub
 				
 			}
+
 		}, envir);
 
 		animateTo(new LocationX(30, 60));

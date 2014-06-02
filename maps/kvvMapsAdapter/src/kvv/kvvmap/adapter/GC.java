@@ -22,13 +22,19 @@ public class GC {
 	private float textSize;
 	private int flags;
 	private Arrow arrow;
+	
+	private float scaleFactor;
 
-	public GC(Canvas canvas, Paint paint, int w, int h) {
+	public GC(Canvas canvas, Paint paint, int w, int h, float scaleFactor) {
 		this.canvas = canvas;
 		this.paint = paint;
 		this.width = w;
 		this.height = h;
-		arrow = new Arrow(16);
+		this.scaleFactor = scaleFactor;
+	}
+
+	public float getScaleFactor() {
+		return scaleFactor;
 	}
 
 	private DashPathEffect pathEffect = new DashPathEffect(new float[] { 15, 5,
@@ -175,6 +181,8 @@ public class GC {
 	}
 
 	public void drawArrow(int x, int y, float rot, boolean dimmed) {
+		if(arrow == null)
+			arrow = new Arrow((int) (12 * scaleFactor));
 		arrow.draw(canvas, x, y, rot, dimmed);
 	}
 
