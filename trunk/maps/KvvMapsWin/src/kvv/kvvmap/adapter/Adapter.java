@@ -176,4 +176,8 @@ public class Adapter {
 		return ((BufferedImage)img).getWidth();
 	}
 
+	public float getScaleFactor() {
+		return 1;
+	}
+
 }

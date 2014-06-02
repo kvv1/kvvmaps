@@ -15,12 +15,14 @@ public class DiagramView extends View implements IPlatformView {
 
 	private Diagram diagram;
 	public boolean speedProfile;
+	private Adapter adapter;
 
 	public DiagramView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
 
 	public void init(Adapter adapter) {
+		this.adapter = adapter;
 		diagram = new Diagram(adapter, this);
 	}
 
@@ -41,7 +43,7 @@ public class DiagramView extends View implements IPlatformView {
 		int h = getHeight();
 
 		if (diagram != null)
-			diagram.draw(new GC(canvas, new Paint(), w, h), 0);
+			diagram.draw(new GC(canvas, new Paint(), w, h, adapter.getScaleFactor()), 0);
 
 		// Paint paint = new Paint();
 		// canvas.drawLine(0, 0, w, h, paint);

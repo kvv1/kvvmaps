@@ -97,7 +97,7 @@ class SelectionThread {
 				// System.out.println("sz= " + pms.size());
 
 				LocationX pm = getNearest(pms.keySet(), params.x, params.y,
-						params.zoom, 10);
+						params.zoom, (int) (8 * adapter.getScaleFactor()));
 				if (pm != null) {
 					Path path = pms.get(pm);
 					if (path == null)

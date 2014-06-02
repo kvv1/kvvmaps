@@ -10,8 +10,6 @@ import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import com.smartbean.androidutils.util.Drawables;
-
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.dlg.PathDlg;
@@ -27,11 +25,10 @@ import kvv.kvvmap.util.ISelectable;
 import kvv.kvvmap.util.InfoLevel;
 import kvv.kvvmap.util.Utils;
 import kvv.kvvmap.view.CommonView.RotationMode;
+import kvv.kvvmap.view.Environment;
 import kvv.kvvmap.view1.DiagramView;
 import kvv.kvvmap.view1.KvvMapsButton;
 import kvv.kvvmap.view1.MapView;
-import kvv.kvvmap.view.Environment;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -61,14 +58,16 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.smartbean.androidutils.activity.ActivityX;
+import com.smartbean.androidutils.util.Drawables;
+
 @SuppressWarnings("deprecation")
-public class MyActivity extends Activity {
+public class MyActivity extends ActivityX {
 
 	private static final String BUTTONS_VISIBLE_SETTING = "buttonsVisible";
 	private static final String FOLLOW_GPS_SETTING = "followGPS";
@@ -112,6 +111,9 @@ public class MyActivity extends Activity {
 	private LocationListener locationListener;
 
 	private final Handler handler = new Handler();
+	
+	private DisplayMetrics metrics = new DisplayMetrics();
+
 
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
@@ -154,7 +156,8 @@ public class MyActivity extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	private void onFG() {
+	@Override
+	protected void onFG() {
 		if (sensorListener == null) {
 			sensorListener = new SensorListener() {
 				public void onSensorChanged(int sensor, float[] values) {
@@ -166,12 +169,12 @@ public class MyActivity extends Activity {
 				}
 			};
 
-		}
+			((SensorManager) getSystemService(Context.SENSOR_SERVICE))
+					.registerListener(sensorListener,
+							SensorManager.SENSOR_ORIENTATION,
+							SensorManager.SENSOR_DELAY_NORMAL);
 
-		((SensorManager) getSystemService(Context.SENSOR_SERVICE))
-				.registerListener(sensorListener,
-						SensorManager.SENSOR_ORIENTATION,
-						SensorManager.SENSOR_DELAY_NORMAL);
+		}
 
 		if (wakeLock == null) {
 			wakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE))
@@ -187,44 +190,20 @@ public class MyActivity extends Activity {
 
 	}
 
-	private void onBG() {
+	@Override
+	protected void onBG() {
 		if (wakeLock != null) {
 			wakeLock.release();
 			wakeLock = null;
 		}
 
-		((SensorManager) getSystemService(Context.SENSOR_SERVICE))
-				.unregisterListener(sensorListener);
+		if (sensorListener != null) {
+			((SensorManager) getSystemService(Context.SENSOR_SERVICE))
+					.unregisterListener(sensorListener);
+			sensorListener = null;
+		}
 
 		stopGPS();
-	}
-
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-		Adapter.log("onWindowFocusChanged " + hasFocus);
-
-		if (hasFocus)
-			onFG();
-		else
-			onBG();
-
-		super.onWindowFocusChanged(hasFocus);
-	}
-
-	@Override
-	protected void onPause() {
-		Adapter.log("onPause");
-		onBG();
-
-		super.onPause();
-		System.gc();
-	}
-
-	@Override
-	protected void onResume() {
-		Adapter.log("onResume");
-
-		super.onResume();
 	}
 
 	@Override
@@ -288,8 +267,6 @@ public class MyActivity extends Activity {
 	}
 
 	private void setLarge(boolean large) {
-		DisplayMetrics metrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		adapter.setTileSize(large ? Adapter.TILE_SIZE_0 * 2
 				: Adapter.TILE_SIZE_0, metrics.widthPixels,
 				metrics.heightPixels);
@@ -301,9 +278,9 @@ public class MyActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		Adapter.log("onCreate " + this);
 		super.onCreate(savedInstanceState);
-
 		setDefaultUncaughtExceptionHandler();
 
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		settings = getSharedPreferences(PREFS_NAME, 0);
 
 		if (!MapLoader.checkMaps(this))
@@ -312,6 +289,8 @@ public class MyActivity extends Activity {
 		initTileSize();
 
 		adapter = new Adapter(this);
+		adapter.setScaleFactor(metrics.xdpi / 145);
+		
 		setLarge(settings.getBoolean(LARGE_SETTING, false));
 		Adapter.debugDraw = settings.getBoolean("debugDraw", false);
 
@@ -357,9 +336,6 @@ public class MyActivity extends Activity {
 	}
 
 	private void initTileSize() {
-		DisplayMetrics metrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
 		int tileSz = 256;
 		if (metrics.xdpi > 160)
 			tileSz = (int) (tileSz * metrics.xdpi / 145);
@@ -905,40 +881,47 @@ public class MyActivity extends Activity {
 		return locationListener != null;
 	}
 
+	class MyLocationListener implements LocationListener {
+		private boolean scroll;
+		
+		public MyLocationListener(boolean scroll) {
+			this.scroll = scroll;
+		}
+
+		public void onStatusChanged(String provider, int status,
+				Bundle extras) {
+			if (status == LocationProvider.OUT_OF_SERVICE) {
+				Adapter.log("GPS onStatusChanged " + status);
+				// stopFollow();
+			}
+		}
+
+		public void onProviderEnabled(String provider) {
+			Adapter.log("GPS onProviderEnabled " + provider);
+		}
+
+		public void onProviderDisabled(String provider) {
+			Adapter.log("GPS onProviderDisabled " + provider);
+			// stopFollow();
+		}
+
+		public void onLocationChanged(Location location) {
+			Adapter.log("GPS onLocationChanged ");
+			LocationX loc = new LocationX(location);
+			if (view != null)
+				view.setMyLocation(loc, scroll);
+			updateButtons();
+			scroll = false;
+
+			altSpeed.setText("" + (int) loc.getAltitude() + "m "
+					+ (int) (loc.getSpeed() * 3.6f) + "km/h");
+		}
+	}
+	
+	
 	private void startGPS(final boolean fromMenu) {
 		if (locationListener == null) {
-			locationListener = new LocationListener() {
-				public void onStatusChanged(String provider, int status,
-						Bundle extras) {
-					if (status == LocationProvider.OUT_OF_SERVICE) {
-						Adapter.log("GPS onStatusChanged " + status);
-						// stopFollow();
-					}
-				}
-
-				public void onProviderEnabled(String provider) {
-					Adapter.log("GPS onProviderEnabled " + provider);
-				}
-
-				public void onProviderDisabled(String provider) {
-					Adapter.log("GPS onProviderDisabled " + provider);
-					// stopFollow();
-				}
-
-				private boolean scroll = fromMenu;
-
-				public void onLocationChanged(Location location) {
-					Adapter.log("GPS onLocationChanged ");
-					LocationX loc = new LocationX(location);
-					if (view != null)
-						view.setMyLocation(loc, scroll);
-					updateButtons();
-					scroll = false;
-
-					altSpeed.setText("" + (int) loc.getAltitude() + "m "
-							+ (int) (loc.getSpeed() * 3.6f) + "km/h");
-				}
-			};
+			locationListener = new MyLocationListener(fromMenu);
 
 			locationManager.requestLocationUpdates(
 					LocationManager.GPS_PROVIDER, 5000L, 20.0f,
@@ -959,13 +942,6 @@ public class MyActivity extends Activity {
 			updateButtons();
 		}
 	}
-
-	// private Runnable stopGPS = new Runnable() {
-	// @Override
-	// public void run() {
-	// stopGPS();
-	// }
-	// };
 
 	private void gpsOn() {
 		startGPS(true);

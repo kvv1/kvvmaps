@@ -38,7 +38,7 @@ public class ViewHelper {
 			return mul;
 	}
 
-	public static void drawScale(GC gc, MapViewParams mapPos) {
+	public static void drawScale(GC gc, MapViewParams mapPos, float scaleFactor) {
 		int lineHeight = gc.getHeight() / 24;
 		int scaleWidth = 5;
 
@@ -50,7 +50,7 @@ public class ViewHelper {
 		int len = gc.getWidth() / 2 * m1 / m;
 
 		int x = 4;
-		int y = gc.getHeight() - scaleWidth * 2 - 40;
+		int y = gc.getHeight() - scaleWidth * 2 - (int)(40 * scaleFactor);
 
 		gc.setColor(COLOR.BLACK);
 		gc.fillRect(x, y, x + len / 4, y + scaleWidth);

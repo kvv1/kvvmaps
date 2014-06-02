@@ -25,7 +25,7 @@ public class KvvMapsService extends BaseService {
 
 	public KvvMapsService() {
 		super(R.drawable.icon, R.drawable.icon, MyActivity.class,
-				R.string.app_name, R.string.app_name, false);
+				R.string.app_name, R.string.app_name, false, true);
 	}
 
 	public interface KvvMapsServiceListener {
