@@ -27,20 +27,25 @@ public abstract class BaseService extends Service {
 	private boolean alertEnabled;
 	private final boolean notifSound;
 
+	private final boolean sticky;
+
 	public BaseService(int iconId, int iconGrayId,
 			Class<? extends Activity> activityClass, int appNameId,
-			int notifTextId, boolean notifSound) {
+			int notifTextId, boolean notifSound, boolean sticky) {
 		this.iconId = iconId;
 		this.iconIdBW = iconGrayId;
 		this.activityClass = activityClass;
 		this.appNameId = appNameId;
 		this.notifTextId = notifTextId;
 		this.notifSound = notifSound;
+		this.sticky = sticky;
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		return START_STICKY;
+		if (sticky)
+			return START_STICKY;
+		return super.onStartCommand(intent, flags, startId);
 	}
 
 	@Override
