@@ -15,9 +15,9 @@ public abstract class BaseDataService<TData, TMsg> extends BaseService
 
 	public BaseDataService(int iconId, int iconGrayId,
 			Class<? extends Activity> activityClass, int appNameId,
-			int notifTextId, boolean notifSound) {
+			int notifTextId, boolean notifSound, boolean sticky) {
 		super(iconId, iconGrayId, activityClass, appNameId, notifTextId,
-				notifSound);
+				notifSound, sticky);
 	}
 
 	// public class CarabiDataListener implements RemoteDataListener<TData,
