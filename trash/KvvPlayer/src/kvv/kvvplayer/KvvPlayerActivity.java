@@ -80,6 +80,7 @@ public class KvvPlayerActivity extends Activity {
 		progress = (ProgressBar) findViewById(R.id.ProgressBar);
 		trackProgress = (ProgressBar) findViewById(R.id.TrackProgress);
 
+		new File(root).mkdirs();
 		addFiles(new File(root));
 		Collections.sort(folders, new Comparator<Folder>() {
 			@Override
