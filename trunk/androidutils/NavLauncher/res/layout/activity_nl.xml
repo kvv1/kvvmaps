@@ -58,6 +58,15 @@
                 android:text="Яркость мин."
                 android:textSize="30sp" />
             <Button
+                android:id="@+id/off"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#FF8080"
+                android:text="OFF"
+                android:textSize="30sp" />
+
+            <Button
                 android:id="@+id/brightness_max"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
