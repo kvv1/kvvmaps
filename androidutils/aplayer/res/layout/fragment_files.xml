@@ -21,19 +21,42 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#FFC0FFC0"
-            android:text="Large Text"
+            android:text="&lt;not selected>"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/list"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_above="@+id/bottom"
+        android:layout_below="@+id/top" >
+
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="#0000" >
+        </ListView>
+
+        <Button
+            android:id="@+id/goto1"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:text="Play"
+            android:textColor="#00C000"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/bottom"
         android:layout_below="@+id/top"
-        android:divider="#0000" >
-    </ListView>
+        android:orientation="horizontal" >
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/bottom"
@@ -58,6 +81,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:text="&lt;"
+                android:textColor="#008080"
                 android:textSize="30sp"
                 android:textStyle="bold" />
 
@@ -68,6 +92,7 @@
                 android:layout_toLeftOf="@+id/next"
                 android:layout_toRightOf="@+id/prev"
                 android:text="Play/Pause"
+                android:textColor="#00C000"
                 android:textSize="30sp"
                 android:textStyle="bold" />
 
@@ -77,6 +102,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:text=">"
+                android:textColor="#008080"
                 android:textSize="30sp"
                 android:textStyle="bold" />
         </RelativeLayout>

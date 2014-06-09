@@ -16,8 +16,7 @@ public interface IAPService {
 	void play_pause();
 	int getDuration();
 	int getCurrentPosition();
-	void seekForward(int seekStep);
-	void seekBack(int seekStep);
+	void seek(int seekStep);
 	boolean isPlaying();
 	List<Bookmark> getBookmarks();
 	void addBookmark();

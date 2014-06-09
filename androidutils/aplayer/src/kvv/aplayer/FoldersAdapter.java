@@ -11,6 +11,7 @@ public class FoldersAdapter extends ArrayAdapter<Folder> {
 
 	private Activity activity;
 	private IAPService service;
+	public int sel;
 
 	public FoldersAdapter(Activity activity, IAPService service) {
 		super(activity, R.layout.folder_item, service.getFolders());
@@ -33,8 +34,12 @@ public class FoldersAdapter extends ArrayAdapter<Folder> {
 		tv.setText(folder.shortName);
 		tv.setPadding(folder.indent * 20, 0, 0, 0);
 
-		v.setBackgroundColor(position == service.getCurrentFolder() ? 0xFFFFFF80
-				: 0xFFFFFFFF);
+		if (position == sel)
+			v.setBackgroundColor(0xFFFFFF80);
+		else if (sel < 0 && position == service.getCurrentFolder())
+			v.setBackgroundColor(0xFFFFFF80);
+		else
+			v.setBackgroundColor(0xFFFFFFFF);
 
 		return v;
 	}

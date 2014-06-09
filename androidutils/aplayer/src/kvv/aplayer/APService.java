@@ -11,12 +11,15 @@ import java.util.Set;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.telephony.PhoneStateListener;
@@ -33,6 +36,18 @@ public class APService extends BaseService {
 
 	private Player player;
 
+	private Handler handler = new Handler();
+
+	class Saver implements Runnable {
+		@Override
+		public void run() {
+			save();
+			handler.postDelayed(this, 10000);
+		}
+	}
+
+	private Saver saver;
+
 	private SharedPreferences settings;
 
 	private TelephonyManager telephonyManager;
@@ -43,11 +58,15 @@ public class APService extends BaseService {
 	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			String action = intent.getAction();
+			player.setMaxVolume();
 
+			String action = intent.getAction();
 			System.out.println("BroadcastReceiver " + action);
 
 			if ("kvv.aplayer.PAUSE".equals(action)) {
+				player.pause();
+			}
+			if ("kvv.aplayer.PLAY_PAUSE".equals(action)) {
 				player.play_pause();
 			}
 			if ("kvv.aplayer.PREV".equals(action)) {
@@ -76,7 +95,18 @@ public class APService extends BaseService {
 		player = new Player(folders) {
 			@Override
 			protected void onChanged() {
-				save();
+				System.out.println("onChanged " + isPlaying());
+
+				if (!isPlaying()) {
+					handler.removeCallbacks(saver);
+					saver = null;
+				} else {
+					if (saver == null) {
+						saver = new Saver();
+						handler.post(saver);
+					}
+				}
+
 				for (APServiceListener l : listeners)
 					l.onChanged();
 			}
@@ -114,17 +144,16 @@ public class APService extends BaseService {
 
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("kvv.aplayer.PAUSE");
+		filter.addAction("kvv.aplayer.PLAY_PAUSE");
 		filter.addAction("kvv.aplayer.NEXT");
 		filter.addAction("kvv.aplayer.PREV");
 		filter.addAction(Intent.ACTION_SCREEN_OFF);
 		filter.addAction(Intent.ACTION_SCREEN_ON);
 		registerReceiver(broadcastReceiver, filter);
 
-		// AudioManager am = (AudioManager)
-		// getSystemService(Context.AUDIO_SERVICE);
-		// am.registerMediaButtonEventReceiver(new
-		// ComponentName(getPackageName(),
-		// RemoteControlReceiver.class.getName()));
+		AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		am.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
+				RemoteControlReceiver.class.getName()));
 	}
 
 	@Override
@@ -164,7 +193,8 @@ public class APService extends BaseService {
 		public void addBookmark() {
 			Folder folder = getFolders().get(getCurrentFolder());
 			bookmarks.add(new Bookmark(folder.displayName,
-					folder.files[getFile()].getName(), getCurrentPosition()));
+					folder.files[getFile()].getName(), getDuration(),
+					getCurrentPosition()));
 			for (APServiceListener l : listeners)
 				l.onBookmarksChanged();
 			saveBookmarks();
@@ -246,13 +276,8 @@ public class APService extends BaseService {
 		}
 
 		@Override
-		public void seekForward(int seekStep) {
-			player.seekForward(seekStep);
-		}
-
-		@Override
-		public void seekBack(int seekStep) {
-			player.seekBack(seekStep);
+		public void seek(int seekStep) {
+			player.seek(seekStep);
 		}
 
 		@Override
@@ -338,6 +363,8 @@ public class APService extends BaseService {
 			return;
 
 		Folder folder = player.getFolders().get(player.getCurrentFolder());
+
+		System.out.println("SAVE " + folder.shortName + " " + player.getFile());
 
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putInt(folder.path + "|file", player.getFile());
