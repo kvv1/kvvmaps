@@ -8,6 +8,8 @@ import java.util.List;
 
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaPlayer.OnErrorListener;
+import android.media.MediaPlayer.OnInfoListener;
 
 public abstract class Player {
 
@@ -29,16 +31,38 @@ public abstract class Player {
 		mp.setOnCompletionListener(new OnCompletionListener() {
 			@Override
 			public void onCompletion(MediaPlayer mp) {
+				System.out.println("onCompletion");
 				next(true);
+				onChanged();
 			}
 		});
 
-		// try {
-		// setDataSource();
-		// mp.prepare();
-		// mp.start();
-		// } catch (Exception e) {
+		mp.setOnErrorListener(new OnErrorListener() {
+			@Override
+			public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
+				onChanged();
+				return false;
+			}
+		});
+
+		mp.setOnInfoListener(new OnInfoListener() {
+			@Override
+			public boolean onInfo(MediaPlayer arg0, int arg1, int arg2) {
+				onChanged();
+				return false;
+			}
+		});
+
+		// mp.setOnSeekCompleteListener(new OnSeekCompleteListener() {
+		// @Override
+		// public void onSeekComplete(MediaPlayer mp) {
+		// onChanged();
 		// }
+		// });
+	}
+
+	public void setMaxVolume() {
+		mp.setVolume(1, 1);
 	}
 
 	private void setDataSource() throws Exception {
@@ -91,10 +115,12 @@ public abstract class Player {
 
 		curFolder = folder;
 		toFile(file, curPos, true);
+		onChanged();
 	}
 
 	public void toFile(int idx) {
 		toFile(idx, 0, true);
+		onChanged();
 	}
 
 	private void toFile(int idx, int pos, boolean forcePlay) {
@@ -112,45 +138,65 @@ public abstract class Player {
 		mp.seekTo(pos);
 	}
 
-	public void seekBack(int seekStep) {
+	public void seek(int seekStep) {
 		if (folders.size() == 0 || curFolder < 0)
 			return;
 
 		if (!mp.isPlaying())
 			return;
 
+		Folder folder = folders.get(curFolder);
+
 		int cur = mp.getCurrentPosition();
 
-		if (cur < seekStep && curFile != 0) {
-			toFile(curFile - 1, 0, true);
-			mp.seekTo(Math.max(0, mp.getDuration() - seekStep));
+		if (seekStep < 0) {
+			seekStep = -seekStep;
+			if (cur < seekStep && curFile > 0) {
+				toFile(curFile - 1, 0, true);
+				mp.seekTo(Math.max(0, mp.getDuration() - seekStep));
+			} else {
+				mp.seekTo(Math.max(0, cur - seekStep));
+			}
 		} else {
-			mp.seekTo(Math.max(0, cur - seekStep));
+			if (cur + seekStep >= mp.getDuration()) {
+				if (curFile < folder.files.length - 1) {
+					toFile(curFile + 1, 0, true);
+				}
+			} else {
+				mp.seekTo(cur + seekStep);
+			}
 		}
 	}
 
-	public void seekForward(int seekStep) {
-		if (folders.size() == 0 || curFolder < 0)
-			return;
-
-		if (!mp.isPlaying())
-			return;
-
-		int dur = mp.getDuration();
-		int cur = mp.getCurrentPosition();
-		if (cur + seekStep < dur) {
-			mp.seekTo(cur + seekStep);
-		}
-	}
-
+	/*
+	 * public void seekBack(int seekStep) { if (folders.size() == 0 || curFolder
+	 * < 0) return;
+	 * 
+	 * if (!mp.isPlaying()) return;
+	 * 
+	 * int cur = mp.getCurrentPosition();
+	 * 
+	 * if (cur < seekStep && curFile != 0) { toFile(curFile - 1, 0, true);
+	 * mp.seekTo(Math.max(0, mp.getDuration() - seekStep)); } else {
+	 * mp.seekTo(Math.max(0, cur - seekStep)); } }
+	 * 
+	 * public void seekForward(int seekStep) { if (folders.size() == 0 ||
+	 * curFolder < 0) return;
+	 * 
+	 * if (!mp.isPlaying()) return;
+	 * 
+	 * int dur = mp.getDuration(); int cur = mp.getCurrentPosition(); if (cur +
+	 * seekStep < dur) { mp.seekTo(cur + seekStep); } }
+	 */
 	public void prev() {
 		if (folders.size() == 0 || curFolder < 0)
 			return;
 
 		int cur = mp.getCurrentPosition();
-		if (cur < 1000 && curFile > 0)
+		if (cur < 3000 && curFile > 0)
 			toFile(curFile - 1, 0, true);
 		restart(false);
+		onChanged();
 	}
 
 	public void next(boolean forcePlay) {
@@ -161,12 +207,16 @@ public abstract class Player {
 		if (curFile >= folder.files.length - 1)
 			return;
 		toFile(curFile + 1, 0, forcePlay);
+		onChanged();
 	}
 
 	private void restart(boolean forcePlay) {
 		try {
 			boolean playing = mp.isPlaying();
-			mp.stop();
+			if (playing) {
+				mp.stop();
+				onChanged();
+			}
 			mp.reset();
 			setDataSource();
 			initialized = true;
@@ -174,13 +224,14 @@ public abstract class Player {
 			if (playing || forcePlay)
 				mp.start();
 		} catch (Exception e) {
-		} finally {
-			onChanged();
 		}
 	}
 
 	public void pause() {
-		mp.pause();
+		if (mp.isPlaying()) {
+			mp.pause();
+			onChanged();
+		}
 	}
 
 	public void play_pause() {
@@ -188,6 +239,7 @@ public abstract class Player {
 			mp.pause();
 		else
 			mp.start();
+		onChanged();
 	}
 
 	public void close() {

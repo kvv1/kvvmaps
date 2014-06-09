@@ -74,7 +74,8 @@ public class NLActivity extends Activity {
 					@Override
 					public void onClick(View arg0) {
 						sendBroadcast(new Intent()
-								.setAction("kvv.aplayer.PAUSE"));
+								.setAction("kvv.aplayer.PLAY_PAUSE"));
+						finish();
 					}
 				});
 
@@ -84,6 +85,7 @@ public class NLActivity extends Activity {
 					public void onClick(View arg0) {
 						sendBroadcast(new Intent()
 								.setAction("kvv.aplayer.PREV"));
+						finish();
 					}
 				});
 
@@ -93,6 +95,7 @@ public class NLActivity extends Activity {
 					public void onClick(View arg0) {
 						sendBroadcast(new Intent()
 								.setAction("kvv.aplayer.NEXT"));
+						finish();
 					}
 				});
 
@@ -109,6 +112,7 @@ public class NLActivity extends Activity {
 								.putInt(getContentResolver(),
 										"screen_brightness",
 										(int) (localLayoutParams.screenBrightness * 255));
+						finish();
 					}
 				});
 
@@ -125,6 +129,16 @@ public class NLActivity extends Activity {
 								.putInt(getContentResolver(),
 										"screen_brightness",
 										(int) (localLayoutParams.screenBrightness * 255));
+						finish();
+					}
+				});
+
+		((Button) findViewById(R.id.off))
+				.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View arg0) {
+						sendBroadcast(new Intent()
+								.setAction("kvv.aplayer.PAUSE"));
 					}
 				});
 

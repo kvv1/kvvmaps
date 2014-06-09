@@ -1,25 +1,22 @@
 package kvv.aplayer;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class BookmarksAdapter extends ArrayAdapter<Bookmark> {
 
 	private Activity activity;
-	private IAPService service;
-	private List<Folder> folders;
+
+	public int sel = -1;
 
 	public BookmarksAdapter(Activity activity, IAPService service) {
 		super(activity, R.layout.folder_item, service.getBookmarks());
 		this.activity = activity;
-		this.service = service;
-		this.folders = service.getFolders();
 	}
 
 	@Override
@@ -34,7 +31,15 @@ public class BookmarksAdapter extends ArrayAdapter<Bookmark> {
 		Bookmark bookmark = getItem(position);
 		((TextView) v.findViewById(R.id.folder)).setText(bookmark.folder);
 		((TextView) v.findViewById(R.id.track)).setText(bookmark.track);
-		((TextView) v.findViewById(R.id.time)).setText(bookmark.time + "");
+
+		ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress);
+		progressBar.setMax(bookmark.duration);
+		progressBar.setProgress(bookmark.time);
+
+		if (position == sel)
+			v.setBackgroundColor(0xFFFFFF80);
+		else
+			v.setBackgroundColor(0xFFFFFFFF);
 
 		return v;
 	}

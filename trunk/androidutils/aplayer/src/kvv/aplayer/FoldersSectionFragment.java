@@ -1,29 +1,36 @@
 package kvv.aplayer;
 
+import android.os.Handler;
+import android.support.v4.view.ViewPager;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.smartbean.androidutils.fragment.RLFragment;
-import com.smartbean.androidutils.util.AsyncCallback;
-import com.smartbean.androidutils.util.Utils;
 
 public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 	private boolean noSel;
 
+	private Handler handler = new Handler();
+
 	private final APServiceListener listener = new APServiceListener() {
 		@Override
 		public void onChanged() {
-			if (conn.service != null) {
-				int curFolder = conn.service.getCurrentFolder();
-				if (curFolder < list.getCount()) {
-					list.setSelection(curFolder);
-					list.invalidateViews();
-					if (!noSel)
-						list.setSelection(curFolder);
-				}
+			if (conn.service == null)
+				return;
+
+			clearGoto();
+
+			int curFolder = conn.service.getCurrentFolder();
+			if (curFolder < list.getCount()) {
+				list.invalidateViews();
+				if (!noSel)
+					list.setSelection(curFolder - 2);
 			}
+
 		}
 
 		@Override
@@ -48,6 +55,25 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	private FoldersAdapter adapter;
 
+	private Runnable gotoRunnable = new Runnable() {
+		@Override
+		public void run() {
+			if (rootView != null) {
+				clearGoto();
+			}
+		}
+	};
+
+	private void clearGoto() {
+		handler.removeCallbacks(gotoRunnable);
+		rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
+		FoldersAdapter adapter = (FoldersAdapter) list.getAdapter();
+		if (adapter != null) {
+			adapter.sel = -1;
+			list.invalidateViews();
+		}
+	}
+
 	@Override
 	protected void createUI(IAPService service) {
 		list = (ListView) rootView.findViewById(R.id.list);
@@ -56,43 +82,60 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 		service.addListener(listener);
 		listener.onChanged();
 
-		list.setOnItemLongClickListener(new OnItemLongClickListener() {
-			@Override
-			public boolean onItemLongClick(AdapterView<?> adapterView,
-					View view, final int position, long id) {
-				if (conn.service == null)
-					return false;
+		list.setOnItemClickListener(new OnItemClickListener() {
 
-				Utils.select(getActivity(), "", new String[] { "Play",
-						"Play random" }, new AsyncCallback<Integer>() {
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view,
+					final int position, long id) {
+				rootView.findViewById(R.id.buttons).setVisibility(View.VISIBLE);
+				handler.removeCallbacks(gotoRunnable);
+				handler.postDelayed(gotoRunnable, APActivity.BUTTONS_DELAY);
+				FoldersAdapter adapter = (FoldersAdapter) list.getAdapter();
+				if (adapter != null) {
+					adapter.sel = position;
+					list.invalidateViews();
+				}
+			}
+		});
+
+		((Button) rootView.findViewById(R.id.goto1))
+				.setOnClickListener(new OnClickListener() {
 					@Override
-					public void onSuccess(Integer res) {
-						if (res == 0) {
+					public void onClick(View arg0) {
+						FoldersAdapter adapter = (FoldersAdapter) list
+								.getAdapter();
+						if (adapter != null && adapter.sel >= 0
+								&& conn.service != null) {
 							try {
 								noSel = true;
-								conn.service.toFolder(position);
+								conn.service.toFolder(adapter.sel);
+								APActivity activity = (APActivity) getActivity();
+								ViewPager pager = (ViewPager) activity
+										.findViewById(activity.getPagerId());
+								pager.setCurrentItem(0, true);
 							} finally {
 								noSel = false;
 							}
 						}
-						if (res == 1) {
-							noSel = true;
-							conn.service.toRandom(position);
-							noSel = false;
-						}
 					}
 				});
 
-				// try {
-				// noSel = true;
-				// conn.service.toFolder(position);
-				// } finally {
-				// noSel = false;
-				// }
-
-				return false;
-			}
-		});
+		((Button) rootView.findViewById(R.id.random))
+				.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View arg0) {
+						FoldersAdapter adapter = (FoldersAdapter) list
+								.getAdapter();
+						if (adapter != null && adapter.sel >= 0
+								&& conn.service != null) {
+							conn.service.toRandom(adapter.sel);
+							APActivity activity = (APActivity) getActivity();
+							ViewPager pager = (ViewPager) activity
+									.findViewById(activity.getPagerId());
+							pager.setCurrentItem(0, true);
+						}
+					}
+				});
 	}
 
 	@Override

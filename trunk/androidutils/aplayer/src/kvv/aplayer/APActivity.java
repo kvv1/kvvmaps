@@ -19,6 +19,9 @@ import com.smartbean.androidutils.activity.FragmentActivityX;
 import com.smartbean.androidutils.service.ServiceConnectionAdapter;
 
 public class APActivity extends FragmentActivityX {
+	
+	public static final int BUTTONS_DELAY = 2000;
+	
 	@Override
 	protected int getLayoutId() {
 		return R.layout.activity_ap;
