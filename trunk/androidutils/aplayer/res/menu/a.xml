@@ -3,24 +3,20 @@
     <item
         android:id="@+id/action_bookmark"
         android:orderInCategory="100"
-        android:showAsAction="never"
         android:title="Add bookmark"/>
 
     <item
         android:id="@+id/action_update"
         android:orderInCategory="100"
-        android:showAsAction="never"
         android:title="Update"/>
 
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
-        android:showAsAction="never"
         android:title="@string/action_settings"/>
     
     <item
         android:id="@+id/action_exit"
         android:orderInCategory="100"
-        android:showAsAction="never"
         android:title="Exit"/>
 </menu>

@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import kvv.aplayer.StorageUtils.StorageInfo;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -42,7 +43,7 @@ public class APService extends BaseService {
 		@Override
 		public void run() {
 			save();
-			handler.postDelayed(this, 10000);
+			handler.postDelayed(this, 60000);
 		}
 	}
 
@@ -77,7 +78,11 @@ public class APService extends BaseService {
 			}
 
 			if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-				player.pause();
+				SharedPreferences settings = PreferenceManager
+						.getDefaultSharedPreferences(APService.this);
+				if (settings.getBoolean(getString(R.string.prefNavigatorMode),
+						false))
+					player.pause();
 			}
 		}
 	};
@@ -90,7 +95,15 @@ public class APService extends BaseService {
 	@Override
 	public void onCreate() {
 		List<Folder> folders = new ArrayList<Folder>();
-		readFolders(ROOT, 0, folders);
+
+		List<StorageInfo> list = StorageUtils.getStorageList();
+
+		for (StorageInfo info : list) {
+			// readFolders(new File(info.path), 0, folders);
+			read(new File(info.path), folders, 0);
+		}
+
+		// readFolders(ROOT, 0, folders);
 
 		player = new Player(folders) {
 			@Override
@@ -154,6 +167,7 @@ public class APService extends BaseService {
 		AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		am.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
 				RemoteControlReceiver.class.getName()));
+
 	}
 
 	@Override
@@ -311,17 +325,28 @@ public class APService extends BaseService {
 
 	}
 
-	private void readFolders(File dir, int indent, List<Folder> folders) {
-
+	private static int read(File dir, List<Folder> folders, int indent) {
+		File[] files = listFiles(dir);
 		File[] dirs = listDirs(dir);
-		for (File d : dirs) {
 
-			Folder folder = new Folder(d.getAbsolutePath(), indent,
-					listFiles(d));
+		int sum = 0;
 
-			folders.add(folder);
-			readFolders(d, indent + 1, folders);
+		if (files != null)
+			sum = files.length;
+
+		List<Folder> folders2 = new ArrayList<Folder>();
+
+		if (dirs != null)
+			for (File d : dirs)
+				if (indent != 0 || !d.getName().equals("external_sd"))
+					sum += read(d, folders2, indent + 1);
+
+		if (sum > 0) {
+			folders.add(new Folder(dir.getAbsolutePath(), indent, files));
+			folders.addAll(folders2);
 		}
+
+		return sum;
 	}
 
 	private static File[] listFiles(File dir) {
@@ -333,12 +358,13 @@ public class APService extends BaseService {
 						&& pathname.getName().toLowerCase().endsWith(".mp3");
 			}
 		});
-		Arrays.sort(res, new Comparator<File>() {
-			@Override
-			public int compare(File lhs, File rhs) {
-				return lhs.getName().compareTo(rhs.getName());
-			}
-		});
+		if (res != null)
+			Arrays.sort(res, new Comparator<File>() {
+				@Override
+				public int compare(File lhs, File rhs) {
+					return lhs.getName().compareTo(rhs.getName());
+				}
+			});
 		return res;
 	}
 
@@ -349,12 +375,13 @@ public class APService extends BaseService {
 				return pathname.isDirectory();
 			}
 		});
-		Arrays.sort(res, new Comparator<File>() {
-			@Override
-			public int compare(File lhs, File rhs) {
-				return lhs.getName().compareTo(rhs.getName());
-			}
-		});
+		if (res != null)
+			Arrays.sort(res, new Comparator<File>() {
+				@Override
+				public int compare(File lhs, File rhs) {
+					return lhs.getName().compareTo(rhs.getName());
+				}
+			});
 		return res;
 	}
 
