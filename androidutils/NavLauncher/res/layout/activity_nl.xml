@@ -16,36 +16,18 @@
                 android:id="@+id/aplayer"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:drawableTop="@drawable/cd"
                 android:layout_weight="1"
+                android:drawableTop="@drawable/cd"
                 android:text="Player"
                 android:textSize="20sp" />
 
             <Button
-                android:id="@+id/yamaps"
+                android:id="@+id/navigator"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:drawableTop="@drawable/yamap"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
                 android:text="Яндекс карты"
-                android:textSize="20sp" />
-
-            <Button
-                android:id="@+id/gmaps"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:drawableTop="@drawable/gmaps"
-                android:text="Карты Гугл"
-                android:textSize="20sp" />
-
-            <Button
-                android:id="@+id/kvvmaps"
-                android:layout_width="0dp"
-                android:drawableTop="@drawable/kvvmaps"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="KVV Maps"
                 android:textSize="20sp" />
         </TableRow>
 
@@ -55,31 +37,22 @@
             android:layout_height="wrap_content" >
 
             <Button
-                android:id="@+id/brightness_min"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:drawableTop="@drawable/night1"
-                android:text="Яркость мин."
-                android:textSize="20sp" />
-            <Button
                 android:id="@+id/off"
-                android:drawableTop="@drawable/off"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:drawableTop="@drawable/off"
                 android:text="OFF"
                 android:textSize="20sp" />
 
             <Button
-                android:id="@+id/brightness_max"
+                android:id="@+id/brightness"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:drawableTop="@drawable/day1"
-                android:text="Яркость макс."
-                android:textSize="20sp"
-                 />
+                android:text="Яркость"
+                android:textSize="20sp" />
         </TableRow>
     </TableLayout>
 

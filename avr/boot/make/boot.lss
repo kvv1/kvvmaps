@@ -87,7 +87,7 @@ Disassembly of section .text:
     1c8a:	08 95       	ret
 
 00001c8c <getAddr>:
-    1c8c:	8d e4       	ldi	r24, 0x4D	; 77
+    1c8c:	89 e1       	ldi	r24, 0x19	; 25
     1c8e:	08 95       	ret
 
 00001c90 <main>:
@@ -241,7 +241,7 @@ Disassembly of section .text:
 
 00001dc6 <sendPacketStart>:
     1dc6:	30 df       	rcall	.-416    	; 0x1c28 <startTX>
-    1dc8:	8d e4       	ldi	r24, 0x4D	; 77
+    1dc8:	89 e1       	ldi	r24, 0x19	; 25
     1dca:	6f ef       	ldi	r22, 0xFF	; 255
     1dcc:	7f ef       	ldi	r23, 0xFF	; 255
     1dce:	e6 cf       	rjmp	.-52     	; 0x1d9c <sendByte>
@@ -431,7 +431,7 @@ Disassembly of section .text:
     1f2a:	0c f4       	brge	.+2      	; 0x1f2e <packetReceived+0x14>
     1f2c:	47 c0       	rjmp	.+142    	; 0x1fbc <packetReceived+0xa2>
     1f2e:	88 81       	ld	r24, Y
-    1f30:	8d 34       	cpi	r24, 0x4D	; 77
+    1f30:	89 31       	cpi	r24, 0x19	; 25
     1f32:	09 f0       	breq	.+2      	; 0x1f36 <packetReceived+0x1c>
     1f34:	43 c0       	rjmp	.+134    	; 0x1fbc <packetReceived+0xa2>
     1f36:	62 50       	subi	r22, 0x02	; 2
