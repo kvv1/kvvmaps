@@ -28,14 +28,21 @@ public abstract class FragmentActivityX extends FragmentActivity {
 	}
 
 	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-		if (hasFocus)
-			onFG();
-		else
-			onBG();
-
-		super.onWindowFocusChanged(hasFocus);
+	protected void onResume() {
+		super.onResume();
+		onFG();
 	}
+	
+//	@Override
+//	public void onWindowFocusChanged(boolean hasFocus) {
+//		System.out.println("onWindowFocusChanged " + hasFocus);
+//		if (hasFocus)
+//			onFG();
+//		else
+//			onBG();
+//
+//		super.onWindowFocusChanged(hasFocus);
+//	}
 
 	@Override
 	protected void onPause() {

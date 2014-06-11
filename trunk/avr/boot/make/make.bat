@@ -1,7 +1,7 @@
 @path=%path%;F:\WinAVR-20100110\bin
 
-@set myaddr=%1
-@set mcu=%2
+@set myaddr=%2
+@set mcu=%1
 
 if %mcu%==atmega8 set bootaddr=0x1C00
 if %mcu%==atmega168 set bootaddr=0x3C00
