@@ -73,7 +73,7 @@ public class NLActivity extends Activity {
 		setContentView(R.layout.activity_nl);
 
 		navigators = new Navigator[] {
-				new Navigator("яндекс кары", R.drawable.yamap,
+				new Navigator("яндекс карты", R.drawable.yamap,
 						getPackageManager().getLaunchIntentForPackage(
 								"ru.yandex.yandexmaps")),
 				new Navigator("яндекс навигатор", R.drawable.yanavi,
