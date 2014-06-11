@@ -4,5 +4,7 @@
     <string name="app_name">aplayer</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="prefNavigatorMode">prefNavigatorMode</string>
+    <string name="title_activity_preferences">Настройки</string>
 
 </resources>

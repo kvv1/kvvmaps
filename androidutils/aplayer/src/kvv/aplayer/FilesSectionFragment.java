@@ -131,7 +131,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	private void clearGoto() {
 		handler.removeCallbacks(gotoRunnable);
-		rootView.findViewById(R.id.goto1).setVisibility(View.GONE);
+		rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
 		FilesAdapter adapter = (FilesAdapter) list.getAdapter();
 		if (adapter != null) {
 			adapter.sel = -1;
@@ -143,13 +143,13 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 	protected void createUI(final IAPService service) {
 		folder = -1;
 		list = (ListView) rootView.findViewById(R.id.list);
-		rootView.findViewById(R.id.goto1).setVisibility(View.GONE);
+		rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
 
 		list.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view,
 					int position, long id) {
-				rootView.findViewById(R.id.goto1).setVisibility(View.VISIBLE);
+				rootView.findViewById(R.id.buttons).setVisibility(View.VISIBLE);
 				handler.removeCallbacks(gotoRunnable);
 				handler.postDelayed(gotoRunnable, APActivity.BUTTONS_DELAY);
 				FilesAdapter adapter = (FilesAdapter) list.getAdapter();

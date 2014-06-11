@@ -39,15 +39,22 @@
             android:divider="#0000" >
         </ListView>
 
-        <Button
-            android:id="@+id/goto1"
+        <FrameLayout
+            android:id="@+id/buttons"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:text="Play"
-            android:textColor="#00C000"
-            android:textSize="30sp"
-            android:textStyle="bold" />
+            android:background="#FFFFFF" >
+
+            <Button
+            android:id="@+id/goto1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Play"
+                android:textColor="@color/greendark"
+                android:textSize="30sp"
+                android:textStyle="bold" />
+        </FrameLayout>
     </RelativeLayout>
 
     <LinearLayout
@@ -81,7 +88,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:text="&lt;"
-                android:textColor="#008080"
+                android:textColor="@color/bluedark"
                 android:textSize="30sp"
                 android:textStyle="bold" />
 
@@ -92,7 +99,7 @@
                 android:layout_toLeftOf="@+id/next"
                 android:layout_toRightOf="@+id/prev"
                 android:text="Play/Pause"
-                android:textColor="#00C000"
+                android:textColor="@color/greendark"
                 android:textSize="30sp"
                 android:textStyle="bold" />
 
@@ -102,7 +109,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:text=">"
-                android:textColor="#008080"
+                android:textColor="@color/bluedark"
                 android:textSize="30sp"
                 android:textStyle="bold" />
         </RelativeLayout>
