@@ -87,6 +87,7 @@ public class Convert {
 									ty, z);
 							createTiles(mapDescr, z, 0, outDir);
 						} catch (Exception e) {
+							e.printStackTrace();
 						}
 					}
 				}
