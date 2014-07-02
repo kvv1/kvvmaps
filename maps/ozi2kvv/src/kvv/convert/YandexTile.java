@@ -14,8 +14,13 @@ public class YandexTile implements MapDescr1 {
 	private int y;
 
 	public YandexTile(File dir, int tx, int ty, int z) throws IOException {
-		img = ImageIO
-				.read(new File(dir, "z" + z + "/" + ty + "/" + tx + ".png"));
+		try {
+			img = ImageIO.read(new File(dir, "z" + z + "/" + ty + "/" + tx
+					+ ".png"));
+		} catch (Exception e) {
+			img = ImageIO.read(new File(dir, "z" + z + "/" + ty + "/" + tx
+					+ ".jpg"));
+		}
 		this.z = z;
 		this.x = tx << 8;
 		this.y = ty << 8;
