@@ -1,5 +1,8 @@
 package kvv.controllers.controller;
 
+import gnu.io.CommPortIdentifier;
+import gnu.io.NoSuchPortException;
+
 import java.io.IOException;
 
 import javax.servlet.ServletContextEvent;
@@ -12,6 +15,11 @@ public class ContextListener implements ServletContextListener {
 	private TCPModbusServer tcpModbusServer;
 
 	public void contextInitialized(ServletContextEvent event) {
+//		try {
+//			CommPortIdentifier.getPortIdentifier("COM4");
+//		} catch (NoSuchPortException e1) {
+//			e1.printStackTrace();
+//		}
 		BusLogger.log("STARTED");
 		try {
 			tcpModbusServer = new TCPModbusServer();

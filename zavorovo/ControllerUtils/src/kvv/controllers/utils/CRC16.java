@@ -7,7 +7,7 @@ public class CRC16 {
 		short crc_val = CRC16_INIT;
 
 		for (int i = 0; i < len; i++) {
-			byte b = buf[i];
+			byte b = buf[offset + i];
 			crc_val ^= b & 0xFF;
 			int j = 8;
 			while (j-- > 0) {

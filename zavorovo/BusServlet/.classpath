@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="lib" path="D:/Program Files/Apache Software Foundation/Tomcat 7.0/lib/servlet-api.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ControllerUtils"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6">
 		<attributes>
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
-	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
-	<classpathentry kind="lib" path="C:/Program Files/Apache Software Foundation/Tomcat 7.0/lib/servlet-api.jar"/>
-	<classpathentry kind="lib" path="RXTXcomm.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/ControllerUtils"/>
-	<classpathentry kind="lib" path="/Controllers/war/WEB-INF/lib/gson-1.7.1.jar"/>
+	<classpathentry kind="lib" path="D:/Program Files/Apache Software Foundation/Tomcat 7.0/lib/RXTXcomm.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="D:/Program Files/Apache Software Foundation/Tomcat 7.0/bin"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
