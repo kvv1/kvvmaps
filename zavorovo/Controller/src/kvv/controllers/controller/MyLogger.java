@@ -18,9 +18,11 @@ public class MyLogger {
 			ps = new PrintStream(new FileOutputStream(Constants.logFile, true),
 					true, "Windows-1251");
 			ps.println(df.format(new Date()) + " " + txt);
-			ps.close();
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			if (ps != null)
+				ps.close();
 		}
 	}
 }
