@@ -330,9 +330,11 @@ public class ConfigurationPage extends Composite {
 					if (this.type.getItemText(i).equals(cd.type))
 						this.type.setSelectedIndex(i);
 
+			boolean en = cd == null ? true : cd.enabled;
+			
 			hp.setSpacing(2);
 			hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-			enabled.setValue(cd.enabled);
+			enabled.setValue(en);
 			this.name.textBox.setText(name);
 			this.addr.textBox.setText("" + addr);
 			hp.add(enabled);
