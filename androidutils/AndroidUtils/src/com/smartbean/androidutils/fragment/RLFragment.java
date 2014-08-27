@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,5 +73,10 @@ public abstract class RLFragment<A extends Activity, IService> extends Fragment 
 		rootView = null;
 		super.onDestroy();
 	}
+	
+	//YjdsqGfhjkm2014
 
+	public A getActivity1() {
+		return (A) getActivity();
+	}
 }
