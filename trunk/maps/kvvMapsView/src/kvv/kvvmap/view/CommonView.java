@@ -8,20 +8,11 @@ import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.LocationX;
 import kvv.kvvmap.adapter.RectInt;
 import kvv.kvvmap.adapter.RectX;
-import kvv.kvvmap.maps.Maps.MapsListener;
-import kvv.kvvmap.placemark.IPlaceMarksListener;
-import kvv.kvvmap.placemark.PathDrawer;
+import kvv.kvvmap.maps.Tile;
 import kvv.kvvmap.placemark.PathSelection;
-import kvv.kvvmap.tiles.Tile;
-import kvv.kvvmap.tiles.TileContent;
 import kvv.kvvmap.tiles.TileDrawer;
-import kvv.kvvmap.tiles.TileLoader;
-import kvv.kvvmap.tiles.TileLoader.Callback;
-import kvv.kvvmap.tiles.TileLoader.TileSource;
-import kvv.kvvmap.tiles.Tiles;
 import kvv.kvvmap.util.COLOR;
 import kvv.kvvmap.util.ISelectable;
-import kvv.kvvmap.util.Img;
 import kvv.kvvmap.util.InfoLevel;
 import kvv.kvvmap.util.LongSet;
 import kvv.kvvmap.util.TileId;
@@ -29,15 +20,11 @@ import kvv.kvvmap.util.Utils;
 
 public class CommonView implements ICommonView {
 
-	private volatile ISelectable sel;
-
 	private final IPlatformView platformView;
 
 	private final MapViewParams viewParams = new MapViewParams();
 
-	private volatile InfoLevel infoLevel = InfoLevel.HIGH;
-
-	private final Tiles tiles;
+	private final TilesWithSel tiles;
 
 	private final SelectionThread selectionThread;
 	private final LongSet tilesDrawn = new LongSet();
@@ -48,12 +35,9 @@ public class CommonView implements ICommonView {
 
 	private final Environment envir;
 
-	private boolean scrolling;
-
 	private RotationMode rotationMode = RotationMode.ROTATION_NONE;
 
 	private final TileDrawer tileDrawer;
-
 
 	public enum RotationMode {
 		ROTATION_NONE, ROTATION_COMPASS, ROTATION_GPS
@@ -75,95 +59,14 @@ public class CommonView implements ICommonView {
 		this.platformView = platformView;
 		selectionThread = new SelectionThread(envir.adapter);
 
-		IPlaceMarksListener pmListener = new IPlaceMarksListener() {
-
+		this.tiles = new TilesWithSel(envir) {
 			@Override
-			public void onPathTilesChanged() {
-				invalidateTiles();
-				updateSel();
-			}
-
-			@Override
-			public void onPathTileChanged(long id) {
-				envir.adapter.assertUIThread();
-				if (tiles != null) {
-					tiles.setInvalid(id);
-					updateSel();
-					if (tilesDrawn.contains(id)) {
-						repaint();
-					}
-				}
-			}
-
-			private Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					onPathTilesChanged();
-				}
-			};
-
-			@Override
-			public void onPathTilesChangedAsync() {
-				envir.adapter.execUI(r);
+			protected void onTilesChanged(Tile tile) {
+				if (tile == null || tilesDrawn.contains(tile.id))
+					repaint();
 			}
 		};
 
-		envir.placemarks.setListener(pmListener);
-		envir.paths.setListener(pmListener);
-		envir.maps.setListener(new MapsListener() {
-			@Override
-			public void mapAdded(String name) {
-				invalidateTiles();
-			}
-		});
-
-		TileSource tileSource = new TileSource() {
-			@Override
-			public Tile loadAsync(long id) {
-				TileContent content = new TileContent();
-
-				// long t = System.currentTimeMillis();
-
-				Img img = envir.maps.loadAsync(TileId.nx(id), TileId.ny(id),
-						TileId.zoom(id), content);
-				if (img == null)
-					return null;
-
-				// long t1 = System.currentTimeMillis();
-				// t = t1 - t;
-
-				GC gc = envir.adapter.getGC(img.img);
-
-				InfoLevel infoLevel = CommonView.this.infoLevel;
-				if (infoLevel.ordinal() > 0) {
-					gc.setAntiAlias(true);
-					ISelectable sel1 = sel;
-					PathDrawer.drawPaths(envir.paths, gc, id, infoLevel, sel1);
-					PathDrawer.drawPlacemarks(envir.placemarks, gc, id,
-							infoLevel, sel1, envir.adapter.getScaleFactor());
-				}
-
-				// t1 = System.currentTimeMillis() - t1;
-				// Adapter.log("load tile " + t + " " + t1);
-
-				return new Tile(envir.adapter, id, img, content);
-			}
-		};
-
-		TileLoader tileLoader = new TileLoader(envir.adapter, tileSource, new Callback() {
-			@Override
-			public void loaded(Tile tile) {
-				tiles.putTile(tile);
-			}
-		});
-		
-		this.tiles = new Tiles(envir.adapter, tileLoader) {
-			@Override
-			protected void onTileLoaded(Tile tile) {
-				repaint();
-			}
-		};
-		
 		this.tileDrawer = new TileDrawer(envir.adapter, this.tiles);
 	}
 
@@ -185,9 +88,9 @@ public class CommonView implements ICommonView {
 		return myLocation;
 	}
 
-//	public boolean isMyLocationDimmed() {
-//		return myLocationDimmed;
-//	}
+	// public boolean isMyLocationDimmed() {
+	// return myLocationDimmed;
+	// }
 
 	private void scrollToRotationGPS() {
 		if (myLocation == null)
@@ -239,13 +142,11 @@ public class CommonView implements ICommonView {
 
 	@Override
 	public void startScrolling() {
-		scrolling = true;
 		cancelSel();
 	}
 
 	@Override
 	public void endScrolling() {
-		scrolling = false;
 		updateSel();
 		repaint();
 		System.gc();
@@ -264,7 +165,7 @@ public class CommonView implements ICommonView {
 		Tile tile = getCenterTile();
 		if (tile == null)
 			return Collections.emptyList();
-		return tile.content.maps;
+		return tile.maps;
 	}
 
 	private Tile getCenterTile() {
@@ -284,8 +185,7 @@ public class CommonView implements ICommonView {
 	public void reorderMaps() {
 		Tile tile = getCenterTile();
 		if (tile != null && tile.isMultiple()) {
-			envir.maps.reorder(tile.content.maps.getLast());
-			invalidateTiles();
+			envir.maps.reorder(tile.maps.getLast());
 		}
 	}
 
@@ -293,15 +193,14 @@ public class CommonView implements ICommonView {
 	public String getTopMap() {
 		envir.adapter.assertUIThread();
 		Tile tile = getCenterTile();
-		if (tile == null || tile.content.maps.size() == 0)
+		if (tile == null || tile.maps.size() == 0)
 			return null;
-		return tile.content.maps.getFirst();
+		return tile.maps.getFirst();
 	}
 
 	@Override
 	public void setTopMap(String map) {
 		envir.maps.setTopMap(map);
-		invalidateTiles();
 	}
 
 	@Override
@@ -424,7 +323,6 @@ public class CommonView implements ICommonView {
 			for (int ny = ny0; ny <= ny1; ny++, y += Adapter.TILE_SIZE) {
 				long id = TileId.make(nx, ny, getZoom());
 				tileDrawer.drawTile(gc, centerX, centerY, id, x, y,
-						platformView.loadDuringScrolling() || !scrolling,
 						viewParams.getZoom(), viewParams.getPrevZoom());
 				tilesDrawn.add(id);
 			}
@@ -437,54 +335,44 @@ public class CommonView implements ICommonView {
 
 	@Override
 	public ISelectable getSel() {
-		return sel;
+		return tiles.getSel();
 	}
 
 	@Override
 	public void dispose() {
+		tiles.dispose();
 	}
 
 	@Override
 	public void incInfoLevel() {
 		envir.adapter.assertUIThread();
-		if (infoLevel.ordinal() < InfoLevel.values().length - 1) {
-			infoLevel = InfoLevel.values()[infoLevel.ordinal() + 1];
-			invalidateTiles();
-			updateSel();
-		}
+		if (getInfoLevel().ordinal() < InfoLevel.values().length - 1)
+			setInfoLevel(InfoLevel.values()[getInfoLevel().ordinal() + 1]);
 	}
 
 	@Override
 	public void decInfoLevel() {
 		envir.adapter.assertUIThread();
-		if (infoLevel.ordinal() > 0) {
-			infoLevel = InfoLevel.values()[infoLevel.ordinal() - 1];
-			invalidateTiles();
-			updateSel();
-		}
+		if (getInfoLevel().ordinal() > 0)
+			setInfoLevel(InfoLevel.values()[getInfoLevel().ordinal() - 1]);
 	}
 
 	@Override
 	public void setInfoLevel(InfoLevel level) {
-		infoLevel = level;
-		invalidateTiles();
+		tiles.setInfoLevel(level);
 		updateSel();
 	}
 
 	@Override
 	public InfoLevel getInfoLevel() {
-		return infoLevel;
+		return tiles.getInfoLevel();
 	}
 
-	@Override
-	public void invalidateTiles() {
+	private void invalidateTiles() {
 		envir.adapter.assertUIThread();
 		// viewParams.reset();
-		if (tiles != null) {
-			tiles.cancelLoading();
+		if (tiles != null)
 			tiles.setInvalidAll();
-			repaint();
-		}
 	}
 
 	@Override
@@ -498,11 +386,11 @@ public class CommonView implements ICommonView {
 		return viewParams.getLocation();
 	}
 
-//	public LocationX getLocation(int dx, int dy) {
-//		envir.adapter.assertUIThread();
-//		return new LocationX(viewParams.scr2lon(dx, dy), viewParams.scr2lat(dx,
-//				dy));
-//	}
+	// public LocationX getLocation(int dx, int dy) {
+	// envir.adapter.assertUIThread();
+	// return new LocationX(viewParams.scr2lon(dx, dy), viewParams.scr2lat(dx,
+	// dy));
+	// }
 
 	private void cancelSel() {
 		envir.adapter.assertUIThread();
@@ -510,8 +398,7 @@ public class CommonView implements ICommonView {
 	}
 
 	private void select(ISelectable sel) {
-		CommonView.this.sel = sel;
-		CommonView.this.invalidateTiles();
+		tiles.select(sel);
 		if (sel instanceof PathSelection) {
 			platformView.pathSelected((PathSelection) sel);
 		} else {
@@ -528,7 +415,7 @@ public class CommonView implements ICommonView {
 
 	private void updateSel() {
 		envir.adapter.assertUIThread();
-		if (infoLevel != InfoLevel.HIGH
+		if (getInfoLevel() != InfoLevel.HIGH
 				|| rotationMode == RotationMode.ROTATION_GPS) {
 			cancelSel();
 			select(null);

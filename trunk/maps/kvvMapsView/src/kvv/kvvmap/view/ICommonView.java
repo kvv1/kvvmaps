@@ -49,8 +49,6 @@ public interface ICommonView {
 	void incInfoLevel();
 	void decInfoLevel();
 	
-	void invalidateTiles();
-
 	LocationX getTarget();
 
 	boolean isMultiple();

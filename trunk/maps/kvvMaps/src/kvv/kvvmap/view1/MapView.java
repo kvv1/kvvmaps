@@ -422,11 +422,6 @@ public class MapView extends View implements IPlatformView {
 			commonView.decInfoLevel();
 	}
 
-	public void invalidateTiles() {
-		if (commonView != null)
-			commonView.invalidateTiles();
-	}
-
 	@Override
 	protected void finalize() throws Throwable {
 		Adapter.log("~MapView");
@@ -446,11 +441,6 @@ public class MapView extends View implements IPlatformView {
 	public void fixMap(String mapName) {
 		if (commonView != null)
 			commonView.fixMap(mapName);
-	}
-
-	@Override
-	public boolean loadDuringScrolling() {
-		return activity == null || activity.loadDuringScrolling();
 	}
 
 	public void setRotationMode(RotationMode rotationMode) {

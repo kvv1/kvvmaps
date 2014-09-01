@@ -153,7 +153,7 @@ class SelectionThread {
 
 	public synchronized void set(int x, int y, RectX screenRect, int zoom,
 			PlaceMarks placemarks, Paths paths, Callback callback) {
-		this.params = new Params(x, y, screenRect, zoom, adapter, placemarks,
+		params = new Params(x, y, screenRect, zoom, adapter, placemarks,
 				paths, callback);
 		cancelled = false;
 

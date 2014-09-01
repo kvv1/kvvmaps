@@ -6,13 +6,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.maps.MapsDir.MapsDirListener;
-import kvv.kvvmap.tiles.TileContent;
 import kvv.kvvmap.util.Img;
 
 public class Maps {
 
 	public static interface MapsListener {
-		void mapAdded(String name);
+		void mapsChanged();
 	}
 
 	private MapsListener listener;
@@ -46,7 +45,7 @@ public class Maps {
 			MapDir[] mapDir = mapsDir.get(name);
 			maps.add(new MapDescr(name, adapter, mapDir));
 			if (listener != null)
-				listener.mapAdded(name);
+				listener.mapsChanged();
 			//Adapter.log("map " + name + " loaded");
 			//Adapter.logMem();
 		} catch (FileNotFoundException e) {
@@ -63,6 +62,8 @@ public class Maps {
 			if (md.getName().equals(map)) {
 				maps.remove(md);
 				maps.add(0, md);
+				if (listener != null)
+					listener.mapsChanged();
 				return;
 			}
 		}
@@ -73,6 +74,8 @@ public class Maps {
 			if (md.getName().equals(map)) {
 				maps.remove(md);
 				maps.add(0, md);
+				if (listener != null)
+					listener.mapsChanged();
 				return;
 			}
 	}
@@ -86,15 +89,17 @@ public class Maps {
 	public void fixMap(String map) {
 		if (map == null) {
 			fixedMap = null;
+			if (listener != null)
+				listener.mapsChanged();
 		} else {
 			for (MapDescrBase md : maps)
 				if (md.getName().equals(map)) {
 					fixedMap = md;
+					if (listener != null)
+						listener.mapsChanged();
 					return;
 				}
 		}
-		Adapter.log("fixed map = "
-				+ (fixedMap != null ? fixedMap.getName() : null));
 	}
 /*
 	class GoogleMapDescr extends MapDescrBase {
@@ -154,7 +159,7 @@ public class Maps {
 	}
 	*/
 
-	public Img loadAsync(int nx, int ny, int zoom, TileContent content) {
-		return MapDescrBase.loadAsync(maps, fixedMap, nx, ny, zoom, content, adapter);
+	public Tile loadAsync(long tileId) {
+		return MapDescrBase.loadAsync(maps, fixedMap, tileId, adapter);
 	}
 }

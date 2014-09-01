@@ -111,11 +111,6 @@ public class MapViewSw extends JComponent {
 			}
 
 			@Override
-			public boolean loadDuringScrolling() {
-				return true;
-			}
-
-			@Override
 			public void pathSelected(PathSelection sel) {
 				// TODO Auto-generated method stub
 				
@@ -237,8 +232,6 @@ public class MapViewSw extends JComponent {
 	}
 
 	public void setLarge(boolean selected) {
-		Adapter.TILE_SIZE = selected ? 512 : 256;
-		commonView.invalidateTiles();
 	}
 
 }

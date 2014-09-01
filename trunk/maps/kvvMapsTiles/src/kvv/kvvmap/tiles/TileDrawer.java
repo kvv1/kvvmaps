@@ -3,6 +3,7 @@ package kvv.kvvmap.tiles;
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.adapter.GC;
 import kvv.kvvmap.adapter.RectInt;
+import kvv.kvvmap.maps.Tile;
 import kvv.kvvmap.util.TileId;
 import kvv.kvvmap.util.Utils;
 
@@ -25,7 +26,7 @@ public class TileDrawer {
 	}
 
 	public void drawTile(GC gc, int centerX, int centerY, long id, int x,
-			int y, boolean loadIfNeeded, int zoom, int prevZoom) {
+			int y, int zoom, int prevZoom) {
 		adapter.assertUIThread();
 
 		int _sz = Adapter.TILE_SIZE;
@@ -35,7 +36,7 @@ public class TileDrawer {
 		int _ny = TileId.ny(id);
 		int _z = TileId.zoom(id);
 
-		Tile tile = tiles.getTile(id, centerX, centerY, loadIfNeeded);
+		Tile tile = tiles.getTile(id, centerX, centerY, true);
 		if (tile != null) {
 			src.set(_x, _y, _sz, _sz);
 			dst.set(x, y, Adapter.TILE_SIZE, Adapter.TILE_SIZE);
