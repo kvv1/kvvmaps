@@ -56,11 +56,6 @@ public class DiagramView extends View implements IPlatformView {
 	}
 
 	@Override
-	public boolean loadDuringScrolling() {
-		return false;
-	}
-
-	@Override
 	protected void finalize() throws Throwable {
 		Adapter.log("~DiagramView");
 		super.finalize();

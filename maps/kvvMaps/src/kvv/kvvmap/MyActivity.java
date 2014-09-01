@@ -72,7 +72,6 @@ public class MyActivity extends ActivityX {
 	private static final String BUTTONS_VISIBLE_SETTING = "buttonsVisible";
 	private static final String FOLLOW_GPS_SETTING = "followGPS";
 	private static final String KINETIC_SCROLLING_SETTING = "kineticScrolling";
-	private static final String LOAD_DURING_SCROLLING_SETTING = "loadDuringScrolling";
 	private static final String LARGE_SETTING = "largeZoom";
 	private static final String SPEED_PROFILE_SETTING = "speedProfile";
 	private static final String DEBUG_DRAW_SETTING = "debugDraw";
@@ -267,11 +266,6 @@ public class MyActivity extends ActivityX {
 	}
 
 	private void setLarge(boolean large) {
-		adapter.setTileSize(large ? Adapter.TILE_SIZE_0 * 2
-				: Adapter.TILE_SIZE_0, metrics.widthPixels,
-				metrics.heightPixels);
-		if (view != null)
-			view.invalidateTiles();
 	}
 
 	@Override
@@ -291,6 +285,9 @@ public class MyActivity extends ActivityX {
 		adapter = new Adapter(this);
 		adapter.setScaleFactor(metrics.xdpi / 145);
 		
+		adapter.setTileSize(Adapter.TILE_SIZE_0, metrics.widthPixels,
+				metrics.heightPixels);
+
 		setLarge(settings.getBoolean(LARGE_SETTING, false));
 		Adapter.debugDraw = settings.getBoolean("debugDraw", false);
 
@@ -654,17 +651,12 @@ public class MyActivity extends ActivityX {
 				public void set(boolean value) {
 					super.set(value);
 					Adapter.debugDraw = value;
-					if (view != null)
-						view.invalidateTiles();
 				}
 			},
 			new Option(this, MENU_TOGGLE_BUTTONS, "Экранные кнопки",
 					BUTTONS_VISIBLE_SETTING, true),
 			new Option(this, MENU_KINETIC_SCROLLING, "Плавная прокрутка",
 					KINETIC_SCROLLING_SETTING, true),
-			new Option(this, MENU_LOAD_DURING_SCROLLING,
-					"Подгружать при прокрутке", LOAD_DURING_SCROLLING_SETTING,
-					true),
 			new Option(this, MENU_LARGE, "Крупный размер", LARGE_SETTING, false) {
 				public void set(boolean value) {
 					super.set(value);
@@ -1010,11 +1002,6 @@ public class MyActivity extends ActivityX {
 	public boolean isKineticScrolling() {
 		return settings == null
 				|| settings.getBoolean(KINETIC_SCROLLING_SETTING, true);
-	}
-
-	public boolean loadDuringScrolling() {
-		return settings == null
-				|| settings.getBoolean(LOAD_DURING_SCROLLING_SETTING, true);
 	}
 
 	@Override

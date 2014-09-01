@@ -8,6 +8,5 @@ public interface IPlatformView {
 	int getWidth();
 	int getHeight();
 	void getLocationOnScreen(int[] res);
-	boolean loadDuringScrolling();
 	public void pathSelected(PathSelection sel);
 }

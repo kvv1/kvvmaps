@@ -1,4 +1,6 @@
-package kvv.kvvmap.tiles;
+package kvv.kvvmap.maps;
+
+import java.util.LinkedList;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.util.Img;
@@ -7,16 +9,16 @@ public final class Tile {
 	private final Adapter adapter;
 	public final long id;
 	public Img img;
-	public final TileContent content;
+	public int zoom = -1;
+	public LinkedList<String> maps;
 	public boolean expired;
 	
 	private static int cnt;
 
-	public Tile(Adapter adapter, long id, Img img, TileContent context) {
+	public Tile(Adapter adapter, long id, Img img) {
 		this.adapter = adapter;
 		this.id = id;
 		this.img = img;
-		this.content = context;
 		Adapter.log("Tile " + ++cnt);
 	}
 
@@ -27,7 +29,7 @@ public final class Tile {
 	}
 
 	public boolean isMultiple() {
-		return content != null && content.maps.size() > 1;
+		return maps != null && maps.size() > 1;
 	}
 	
 	public synchronized void dispose() {

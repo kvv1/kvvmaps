@@ -1,11 +1,12 @@
 package kvv.kvvmap.maps;
 
 import java.util.Collection;
+import java.util.LinkedList;
 
 import kvv.kvvmap.adapter.Adapter;
-import kvv.kvvmap.tiles.TileContent;
 import kvv.kvvmap.util.Cache;
 import kvv.kvvmap.util.Img;
+import kvv.kvvmap.util.TileId;
 import kvv.kvvmap.util.Utils;
 
 public abstract class MapDescrBase {
@@ -49,13 +50,18 @@ public abstract class MapDescrBase {
 	protected abstract void loadAsync(int nx, int ny, int zoom, int x, int y,
 			int sz, Img imgBase);
 
-	public static Img loadAsync(Collection<MapDescrBase> maps,
-			MapDescrBase fixedMap, int nx, int ny, int zoom,
-			TileContent content, Adapter adapter) {
+	public static Tile loadAsync(Collection<MapDescrBase> maps,
+			MapDescrBase fixedMap, long tileId, Adapter adapter) {
 
 		Img img = new Img(adapter.allocBitmap(), true);
 		if (img.img == null)
 			return null;
+
+		Tile tile = new Tile(adapter, tileId, img);
+
+		int nx = TileId.nx(tileId);
+		int ny = TileId.ny(tileId);
+		int zoom = TileId.zoom(tileId);
 
 		// Object bm = adapter.allocBitmap(Utils.TILE_SIZE_G,
 		// Utils.TILE_SIZE_G);
@@ -69,7 +75,7 @@ public abstract class MapDescrBase {
 			int zoom1 = zoom;
 
 			while (zoom1 >= Utils.MIN_ZOOM && img.transparent) {
-				fixedMap.loadInZoomAsync(nx1, ny1, zoom1, x, y, sz, img, null);
+				fixedMap.loadInZoomAsync(nx1, ny1, zoom1, x, y, sz, tile);
 				x = x / 2 + ((nx1 & 1) << 7);
 				y = y / 2 + ((ny1 & 1) << 7);
 				nx1 >>>= 1;
@@ -83,32 +89,33 @@ public abstract class MapDescrBase {
 		int y = 0;
 		int sz = Utils.TILE_SIZE_G;
 
+		tile.maps = new  LinkedList<String>();
+		
 		while (zoom >= Utils.MIN_ZOOM && img.transparent) {
 			for (MapDescrBase map : maps)
-				map.loadInZoomAsync(nx, ny, zoom, x, y, sz, img, content);
+				map.loadInZoomAsync(nx, ny, zoom, x, y, sz, tile);
 			x = x / 2 + ((nx & 1) << 7);
 			y = y / 2 + ((ny & 1) << 7);
 			nx >>>= 1;
 			ny >>>= 1;
-			zoom = zoom - 1;
+			zoom--;
 			sz >>>= 1;
 		}
 
 		// img.transparent = adapter.isTransparent(img.img);
 
-		return img;
+		return tile;
 	}
 
-	private Img loadInZoomAsync(int nx, int ny, int zoom, int x, int y, int sz,
-			Img img, TileContent content) {
+	private void loadInZoomAsync(int nx, int ny, int zoom, int x, int y, int sz,
+			Tile tile) {
 		if (hasTile(nx, ny, zoom)) {
-			loadAsync(nx, ny, zoom, x, y, sz, img);
-			if (content != null && (content.zoom == -1 || content.zoom == zoom)) {
-				content.zoom = zoom;
-				content.maps.add(name);
+			loadAsync(nx, ny, zoom, x, y, sz, tile.img);
+			if (tile.maps != null && (tile.zoom == -1 || tile.zoom == zoom)) {
+				tile.zoom = zoom;
+				tile.maps.add(name);
 			}
 		}
-		return img;
 	}
 
 	private static final long table[] = { 0x0000000000000000L,
