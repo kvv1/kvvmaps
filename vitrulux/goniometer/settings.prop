@@ -1,0 +1,18 @@
+#
+#Sun Oct 19 22:20:24 MSK 2014
+y_end_degrees=180
+y_port=COM10
+y_speed=10000
+x_step_degrees=20
+y_start_degrees=0
+y_range=5000
+x_speed=10000
+sensor_port=COM9
+x_end_degrees=90
+x_range=10000
+sim_motors=true
+x_port=COM8
+x_start_degrees=-90
+sensor_delay=0
+sim_sensor=true
+y_step_degrees=20
