@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.regex.Matcher;
 
 import kvv.goniometer.Motor;
 
@@ -27,6 +26,10 @@ public abstract class SMSD implements Motor {
 	protected abstract String getPort();
 
 	protected abstract int getSpeed();
+	protected abstract boolean isAutoOff();
+	protected abstract int getAdditioalDelay();
+	
+	protected abstract boolean isSim();
 
 	private Collection<MotorListener> listeners = new HashSet<MotorListener>();
 
@@ -49,6 +52,9 @@ public abstract class SMSD implements Motor {
 	private String port;
 
 	public void init() throws Exception {
+		if(isSim())
+			return;
+		
 		if (!getPort().equals(port))
 			close();
 
@@ -89,6 +95,21 @@ public abstract class SMSD implements Motor {
 			protected int getSpeed() {
 				return 10000;
 			}
+
+			@Override
+			protected boolean isAutoOff() {
+				return false;
+			}
+
+			@Override
+			protected int getAdditioalDelay() {
+				return 250;
+			}
+
+			@Override
+			protected boolean isSim() {
+				return false;
+			}
 		};
 
 		smsd.moveTo(10000);
@@ -103,6 +124,12 @@ public abstract class SMSD implements Motor {
 	private String cmd(String cmd) throws Exception {
 
 		String responseExpected = cmd + "E10*";
+		
+		if(isSim()) {
+			System.out.println(responseExpected);
+			return responseExpected;
+		}
+
 
 		if (serPort == null)
 			init();
@@ -111,14 +138,14 @@ public abstract class SMSD implements Motor {
 
 			long t = System.currentTimeMillis();
 
-			while (System.currentTimeMillis() - t < 200) {
+			while (System.currentTimeMillis() - t < 300) {
 				if (inStream.available() > 0)
 					break;
 			}
 
 			StringBuilder sb = new StringBuilder();
 
-			while (System.currentTimeMillis() - t < 100
+			while (System.currentTimeMillis() - t < 200
 					&& !sb.toString().equals(responseExpected)) {
 				while (inStream.available() > 0) {
 					sb.append((char) inStream.read());
@@ -127,11 +154,10 @@ public abstract class SMSD implements Motor {
 				Thread.sleep(10);
 			}
 
-			if (!sb.toString().equals(cmd + "E10*"))
+			if (!sb.toString().equals(responseExpected))
 				throw new IOException("Wrong SMSD response: " + sb);
 
-			// System.out.println(sb);
-
+			System.out.println(sb);
 			return sb.toString();
 		} catch (Exception e) {
 			close();
@@ -141,7 +167,7 @@ public abstract class SMSD implements Motor {
 
 	private Timer timer;
 
-	private void scheduleDS(int delay, final int dist) {
+	private void scheduleTimer(int delay, final int dist) {
 		final Timer t = new Timer();
 		timer = t;
 		timer.schedule(new TimerTask() {
@@ -149,11 +175,14 @@ public abstract class SMSD implements Motor {
 			public void run() {
 				synchronized (SMSD.this) {
 					if (timer == t) {
-						try {
-							cmd("DS*");
-						} catch (Exception e) {
-						}
 						timer = null;
+						if(isAutoOff()) {
+							try {
+								onOff(false);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
 						if (pos >= 0)
 							pos += dist;
 						SMSD.this.notifyAll();
@@ -222,7 +251,7 @@ public abstract class SMSD implements Motor {
 			else
 				cmd("DL*");
 			cmd("MV" + Math.abs(pos1 - pos) + "*");
-			scheduleDS(Math.abs(pos1 - pos) * 1000 / getSpeed() + 100, pos1
+			scheduleTimer(Math.abs(pos1 - pos) * 1000 / getSpeed() + getAdditioalDelay(), pos1
 					- pos);
 		} catch (Exception e) {
 			stopNoExc();
@@ -242,7 +271,7 @@ public abstract class SMSD implements Motor {
 		try {
 			pos = -1;
 			cmd("SP*");
-			cmd("DS*");
+			onOff(false);
 		} finally {
 			if (timer != null)
 				timer.cancel();
@@ -254,6 +283,15 @@ public abstract class SMSD implements Motor {
 	@Override
 	public synchronized int getPos() {
 		return pos;
+	}
+
+	@Override
+	public synchronized void onOff(boolean on) throws Exception {
+		if (on)
+			cmd("EN*");
+		else
+			cmd("DS*");
+		onChange();
 	}
 
 }

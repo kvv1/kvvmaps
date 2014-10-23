@@ -8,23 +8,27 @@ import kvv.goniometer.Motor;
 public class MotorSim implements Motor {
 
 	private int pos = -1;
+	private boolean on;
 	private Collection<MotorListener> listeners = new HashSet<MotorListener>();
 
 	@Override
 	public void zero() throws Exception {
 		pos = -1;
+		on = true;
 		onChange();
 	}
 
 	@Override
 	public void zeroOK() throws Exception {
 		pos = 0;
+		on = true;
 		onChange();
 	}
 
 	@Override
 	public void moveTo(int pos) throws Exception {
 		this.pos = pos;
+		on = true;
 		onChange();
 	}
 
@@ -36,6 +40,7 @@ public class MotorSim implements Motor {
 	@Override
 	public void stop() throws Exception {
 		pos = -1;
+		on = true;
 		onChange();
 	}
 
@@ -52,6 +57,12 @@ public class MotorSim implements Motor {
 	private void onChange() {
 		for (MotorListener listener : listeners)
 			listener.onChanged();
+	}
+
+	@Override
+	public void onOff(boolean on) {
+		this.on = on;
+		onChange();
 	}
 
 }

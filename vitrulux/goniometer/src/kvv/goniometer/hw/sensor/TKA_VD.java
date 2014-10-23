@@ -89,12 +89,17 @@ public class TKA_VD implements Sensor {
 	}
 
 	private synchronized void received1(byte[] data) {
+		
+		for(byte b : data)
+			System.out.print(b + " ");
+		System.out.println();
+		
 		SensorData sensorData = new SensorData();
 		sensorData.e = getInt(data, 25);
 		sensorData.x = getShort(data, 17);
 		sensorData.y = getShort(data, 19);
 
-		int n = data[29];
+		int n = data[29] + 1;
 		for (int i = 0; i < n; i++) {
 			int lambda = getShort(data, 30 + i * 2);
 			int k = getShort(data, 30 + n * 2 + i * 2);

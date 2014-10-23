@@ -281,36 +281,44 @@ public abstract class MainPanel extends JPanel {
 			sensor.addListener(listener);
 
 			try {
-				l1: for (float y = getDegStartY(); y <= getDegEndY(); y += getDegStepY()) {
-					if (motorX.getPos() < 0 || motorY.getPos() < 0)
-						break l1;
-					while (!motorY.completed())
-						sleep(100);
+				for (float y = getDegStartY(); y <= getDegEndY(); y += getDegStepY()) {
+					new Interruptor() {
+						@Override
+						protected boolean readyToContinue() {
+							return motorY.completed();
+						}
+					}.pause();
 					motorY.moveTo((int) ((y - getDegStartY()) * getRangeY() / (getDegEndY() - getDegStartY())));
 					for (float x = getDegStartX(); x <= getDegEndX(); x += getDegStepX()) {
-						if (motorX.getPos() < 0 || motorY.getPos() < 0)
-							break l1;
-						while (!motorX.completed())
-							sleep(100);
+						new Interruptor() {
+							@Override
+							protected boolean readyToContinue() {
+								return motorX.completed();
+							}
+						}.pause();
 						motorX.moveTo((int) ((x - getDegStartX()) * getRangeX() / (getDegEndX() - getDegStartX())));
-						while (!motorY.completed() || !motorX.completed())
-							sleep(100);
+						new Interruptor() {
+							@Override
+							protected boolean readyToContinue() {
+								return motorY.completed() && motorX.completed();
+							}
+						}.pause();
 
 						synchronized (listener) {
 							cnt = 0;
 							data = null;
 						}
 
-						SensorData d;
-						while ((d = data) == null) {
-							if (motorX.getPos() < 0 || motorY.getPos() < 0)
-								break l1;
-							sleep(100);
-						}
+						new Interruptor() {
+							@Override
+							protected boolean readyToContinue() {
+								return data != null;
+							}
+						}.pause();
 
 						final float x1 = x;
 						final float y1 = y;
-						final SensorData d1 = d;
+						final SensorData d1 = data;
 
 						SwingUtilities.invokeLater(new Runnable() {
 							@Override
@@ -322,20 +330,21 @@ public abstract class MainPanel extends JPanel {
 					}
 				}
 
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							motorX.moveTo(0);
-							motorY.moveTo(0);
-						} catch (Exception e) {
-						}
-					}
-				});
+				motorX.moveTo(0);
+				motorY.moveTo(0);
+				
 			} catch (Exception e) {
 				status.setText(e.getClass().getSimpleName() + " "
 						+ e.getMessage());
 			} finally {
+				try {
+					motorX.stop();
+				} catch (Exception e) {
+				}
+				try {
+					motorY.stop();
+				} catch (Exception e) {
+				}
 				sensor.removeListener(listener);
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
@@ -346,6 +355,18 @@ public abstract class MainPanel extends JPanel {
 				});
 			}
 		}
+	}
+
+	abstract class Interruptor {
+		protected abstract boolean readyToContinue();
+
+		public void pause() throws InterruptedException {
+			do {
+				if (motorX.getPos() < 0 || motorY.getPos() < 0)
+					throw new InterruptedException("операция прервана");
+			} while (!readyToContinue());
+		}
+
 	}
 
 	private void doSave(File file) {

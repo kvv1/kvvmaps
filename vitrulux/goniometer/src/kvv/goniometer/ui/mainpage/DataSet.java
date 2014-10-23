@@ -41,7 +41,7 @@ public class DataSet extends JPanel {
 	}
 
 	void addMeasure(float x, float y, SensorData d) {
-		System.out.println(x + " " + y + " " + d);
+		//System.out.println(x + " " + y + " " + d);
 		data.add(new Data(x, y, d));
 		if (wnd != null)
 			wnd.updateData(y);
