@@ -12,14 +12,19 @@ import javax.swing.JTextField;
 public class PropertyPanel extends JPanel {
 
 	private final String propName;
+	private final String defaultValue;
 	private final JTextField text = new JTextField(8);
 
 	public PropertyPanel(String propName, String label) {
-		//super(new FlowLayout(FlowLayout.LEFT));
+		this(propName, label, "");
+	}
+
+	public PropertyPanel(String propName, String label, String  defaultValue) {
 		this.propName = propName;
+		this.defaultValue = defaultValue;
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		JLabel jlabel = new JLabel(label);
-		jlabel.setPreferredSize(new Dimension(320, 0));
+		jlabel.setPreferredSize(new Dimension(360, 0));
 		add(jlabel);
 		add(text);
 	}
@@ -29,7 +34,9 @@ public class PropertyPanel extends JPanel {
 	}
 
 	public void get(Properties properties) {
-		text.setText(properties.getProperty(propName, ""));
+		text.setText(properties.getProperty(propName, defaultValue));
+		if(defaultValue.length() > 0)
+			put(properties);
 	}
 
 }

@@ -6,6 +6,7 @@ public interface Motor {
 		void onChanged();
 	}
 	
+	void onOff(boolean on) throws Exception;
 	void zero() throws Exception;
 	void zeroOK() throws Exception;
 	void moveTo(int pos) throws Exception;

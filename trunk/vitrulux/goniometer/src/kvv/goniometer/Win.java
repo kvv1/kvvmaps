@@ -109,13 +109,30 @@ public class Win extends JFrame {
 		propertiesPanel.addExt(new PropertyPanel(Prop.SENSOR_DELAY,
 				"Время ожидания сенсора (отсчетов)"));
 
+		propertiesPanel.addExt(new PropertyPanel(Prop.AUTO_MOTOR_OFF,
+				"Выключать моторы после каждого перемещения (true/false)"));
+
+		propertiesPanel.addExt(new PropertyPanel(Prop.MOTOR_ADDITIONAL_DELAY,
+				"Дополнительная пауза между командами (ms)", "200"));
+
 		propertiesPanel.load();
 
-		if (propertiesPanel.properties.getProperty(Prop.SIM_MOTORS, "false")
-				.equals("true")) {
-			smsdX = new MotorSim();
-			smsdY = new MotorSim();
-		} else {
+		if (propertiesPanel.properties.getProperty(Prop.DEBUG, "false").equals(
+				"true")) {
+
+			propertiesPanel.addExt(new PropertyPanel(Prop.SIM_MOTORS,
+					"Симуляция моторов (true/false)"));
+			propertiesPanel.addExt(new PropertyPanel(Prop.SIM_SENSOR,
+					"Симуляция сенсора (true/false)"));
+
+			propertiesPanel.load();
+		}
+
+//		if (propertiesPanel.properties.getProperty(Prop.SIM_MOTORS, "false")
+//				.equals("true")) {
+//			smsdX = new MotorSim();
+//			smsdY = new MotorSim();
+//		} else {
 			smsdX = new SMSD() {
 				@Override
 				protected String getPort() {
@@ -127,6 +144,25 @@ public class Win extends JFrame {
 				protected int getSpeed() {
 					return Integer.parseInt(propertiesPanel.properties
 							.getProperty(Prop.X_SPEED, "10000"));
+				}
+
+				@Override
+				protected boolean isAutoOff() {
+					return propertiesPanel.properties.getProperty(
+							Prop.AUTO_MOTOR_OFF, "false").equals("true");
+				}
+
+				@Override
+				protected int getAdditioalDelay() {
+					String s = propertiesPanel.properties
+							.getProperty(Prop.MOTOR_ADDITIONAL_DELAY);
+					return Integer.parseInt(s);
+				}
+
+				@Override
+				protected boolean isSim() {
+					return propertiesPanel.properties.getProperty(
+							Prop.SIM_MOTORS, "false").equals("true");
 				}
 			};
 
@@ -142,8 +178,26 @@ public class Win extends JFrame {
 					return Integer.parseInt(propertiesPanel.properties
 							.getProperty(Prop.Y_SPEED, "10000"));
 				}
+
+				@Override
+				protected boolean isAutoOff() {
+					return propertiesPanel.properties.getProperty(
+							Prop.AUTO_MOTOR_OFF, "false").equals("true");
+				}
+
+				@Override
+				protected int getAdditioalDelay() {
+					return Integer.parseInt(propertiesPanel.properties
+							.getProperty(Prop.MOTOR_ADDITIONAL_DELAY));
+				}
+
+				@Override
+				protected boolean isSim() {
+					return propertiesPanel.properties.getProperty(
+							Prop.SIM_MOTORS, "false").equals("true");
+				}
 			};
-		}
+//		}
 
 		if (propertiesPanel.properties.getProperty(Prop.SIM_SENSOR, "false")
 				.equals("true"))
