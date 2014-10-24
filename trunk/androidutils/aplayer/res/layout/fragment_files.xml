@@ -39,6 +39,16 @@
             android:divider="#0000" >
         </ListView>
 
+        <Button
+            android:id="@+id/timing"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:text="Button"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+        
         <FrameLayout
             android:id="@+id/buttons"
             android:layout_width="wrap_content"
@@ -47,7 +57,7 @@
             android:background="#FFFFFF" >
 
             <Button
-            android:id="@+id/goto1"
+                android:id="@+id/goto1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="Play"
@@ -55,15 +65,8 @@
                 android:textSize="30sp"
                 android:textStyle="bold" />
         </FrameLayout>
-    </RelativeLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/bottom"
-        android:layout_below="@+id/top"
-        android:orientation="horizontal" >
-    </LinearLayout>
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/bottom"
