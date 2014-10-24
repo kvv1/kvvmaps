@@ -20,6 +20,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 	private Handler handler = new Handler();
 
 	private Button pause;
+	private Button timing;
 	private ProgressBar progressBar;
 
 	private Runnable progressRunnable = new Runnable() {
@@ -61,12 +62,30 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		}
 	};
 
+	private static String convertSecondsToHMmSs(long seconds) {
+		long s = seconds % 60;
+		long m = (seconds / 60) % 60;
+		long h = (seconds / (60 * 60)) % 24;
+
+		if (h != 0)
+			return String.format("%d:%02d:%02d", h, m, s);
+		return String.format("%02d:%02d", m, s);
+	}
+
 	private void updateUI() {
 		if (conn.service == null)
 			return;
-		progressBar.setMax(conn.service.getDuration());
-		progressBar.setProgress(conn.service.getCurrentPosition());
+
+		int dur = conn.service.getDuration();
+		int pos = conn.service.getCurrentPosition();
+
+		progressBar.setMax(dur);
+		progressBar.setProgress(pos);
+
 		pause.setText(conn.service.isPlaying() ? "Pause" : "Play");
+
+		timing.setText(convertSecondsToHMmSs(pos / 1000) + "("
+				+ convertSecondsToHMmSs(dur / 1000) + ")");
 	}
 
 	private final APServiceListener listener = new APServiceListener() {
@@ -75,18 +94,22 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 			if (conn.service == null)
 				return;
 
-			if (conn.service.getCurrentFolder() != folder
-					&& conn.service.getFolders().size() > 0) {
-				FilesAdapter adapter = new FilesAdapter(getActivity(),
-						conn.service);
-				list.setAdapter(adapter);
-				folder = conn.service.getCurrentFolder();
-
-				Folder fold = conn.service.getFolders().get(folder);
-				TextView folderTextView = (TextView) rootView
-						.findViewById(R.id.folder);
-				folderTextView.setText(fold.displayName);
-
+			if (conn.service.getFolders().size() > 0) {
+				if (conn.service.getCurrentFolder() != folder
+						&& conn.service.getFolders().size() > 0) {
+					FilesAdapter adapter = new FilesAdapter(getActivity(),
+							conn.service);
+					list.setAdapter(adapter);
+					folder = conn.service.getCurrentFolder();
+				}
+				if (folder >= 0) {
+					Folder fold = conn.service.getFolders().get(folder);
+					TextView folderTextView = (TextView) rootView
+							.findViewById(R.id.folder);
+					folderTextView.setText(fold.displayName + " ("
+							+ (conn.service.getFile() + 1) + "/"
+							+ fold.files.length + ")");
+				}
 			}
 
 			clearGoto();
@@ -238,6 +261,8 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 				updateUI();
 			}
 		});
+
+		timing = (Button) rootView.findViewById(R.id.timing);
 
 		progressBar = (ProgressBar) rootView.findViewById(R.id.progress);
 

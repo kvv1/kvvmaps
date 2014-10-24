@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import kvv.aplayer.StorageUtils.StorageInfo;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -28,6 +27,8 @@ import android.telephony.TelephonyManager;
 
 import com.google.gson.Gson;
 import com.smartbean.androidutils.service.BaseService;
+import com.smartbean.androidutils.util.StorageUtils;
+import com.smartbean.androidutils.util.StorageUtils.StorageInfo;
 
 public class APService extends BaseService {
 	public final static File ROOT = new File(
@@ -129,6 +130,7 @@ public class APService extends BaseService {
 				for (APServiceListener l : listeners)
 					l.onRandomChanged();
 			}
+
 		};
 		super.onCreate();
 		settings = PreferenceManager.getDefaultSharedPreferences(this);

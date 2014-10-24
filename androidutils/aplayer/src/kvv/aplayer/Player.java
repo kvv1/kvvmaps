@@ -14,7 +14,6 @@ import android.media.MediaPlayer.OnInfoListener;
 public abstract class Player {
 
 	protected abstract void onChanged();
-
 	protected abstract void onRandomChanged();
 
 	private MediaPlayer mp = new MediaPlayer();
@@ -32,6 +31,18 @@ public abstract class Player {
 			@Override
 			public void onCompletion(MediaPlayer mp) {
 				System.out.println("onCompletion");
+				if (Player.this.folders.size() == 0 || curFolder < 0)
+					return;
+				Folder folder = Player.this.folders.get(curFolder);
+				if (curFile >= folder.files.length - 1) {
+					mp.stop();
+					curFile = 0;
+					restart(false);
+					//mp.reset();
+					onChanged();
+					return;
+				}
+				
 				next(true);
 				onChanged();
 			}
@@ -204,8 +215,9 @@ public abstract class Player {
 			return;
 
 		Folder folder = folders.get(curFolder);
-		if (curFile >= folder.files.length - 1)
+		if (curFile >= folder.files.length - 1) {
 			return;
+		}
 		toFile(curFile + 1, 0, forcePlay);
 		onChanged();
 	}
