@@ -252,6 +252,7 @@ public class NLActivity extends Activity {
 		case R.id.action_camera:
 			i = getPackageManager().getLaunchIntentForPackage(
 					"com.sec.android.app.camera");
+			i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 			i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 			startActivity(i);
 			return true;
