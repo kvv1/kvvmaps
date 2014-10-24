@@ -35,18 +35,32 @@ import android.os.Handler;
 import android.text.format.DateFormat;
 import android.util.Log;
 
+import com.smartbean.androidutils.util.StorageUtils;
+import com.smartbean.androidutils.util.StorageUtils.StorageInfo;
+
 public class Adapter {
-	public final static String ROOT;
+	public static String ROOT;
 
 	static {
-		if (new File(Environment.getExternalStorageDirectory()
-				.getAbsolutePath() + "/external_sd/kvvMaps").exists())
-			ROOT = Environment.getExternalStorageDirectory().getAbsolutePath()
-					+ "/external_sd/kvvMaps";
-		else
+		// if (new File(Environment.getExternalStorageDirectory()
+		// .getAbsolutePath() + "/external_sd/kvvMaps").exists())
+		// ROOT = Environment.getExternalStorageDirectory().getAbsolutePath()
+		// + "/external_sd/kvvMaps";
+		// else
+		// ROOT = Environment.getExternalStorageDirectory().getAbsolutePath()
+		// + "/kvvMaps";
+
+		List<StorageInfo> list = StorageUtils.getStorageList();
+
+		for (StorageInfo info : list) {
+			if (new File(info.path, "kvvMaps").exists())
+				ROOT = info.path + "/kvvMaps";
+		}
+
+		if (ROOT == null)
 			ROOT = Environment.getExternalStorageDirectory().getAbsolutePath()
 					+ "/kvvMaps";
-		
+
 		Log.w("KVVMAPS", "ROOT = " + ROOT);
 	}
 
@@ -97,15 +111,15 @@ public class Adapter {
 	}
 
 	private float scaleFactor;
-	
+
 	public void setScaleFactor(float f) {
 		this.scaleFactor = f;
 	}
-	
+
 	public float getScaleFactor() {
 		return scaleFactor;
 	}
-	
+
 	public synchronized void setTileSize(int sz, int widthPixels,
 			int heightPixels) {
 		freeBitmaps.clear();
@@ -115,7 +129,7 @@ public class Adapter {
 		int cachesz = (widthPixels / Adapter.TILE_SIZE + 2)
 				* (heightPixels / Adapter.TILE_SIZE + 2);
 		cachesz = cachesz * 2;
-		
+
 		MAP_TILES_CACHE_SIZE = cachesz;
 		RAF_CACHE_SIZE = cachesz * 2;
 	}
