@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,10 @@ import com.google.gson.GsonBuilder;
 public class Utils {
 	public static <T> T fromJson(String str, Class<T> clazz) {
 		return new Gson().fromJson(str, clazz);
+	}
+	
+	public static String toJson(Object o) {
+		return new Gson().toJson(o);
 	}
 
 	public static <T> T jsonRead(String file, Class<T> clazz)
@@ -102,6 +107,13 @@ public class Utils {
 		return props.getProperty(prop);
 	}
 
+	public static synchronized String getProp(String file, String prop, String defaultValue) {
+		Properties props = getProps(file);
+		if (props == null)
+			return null;
+		return props.getProperty(prop, defaultValue);
+	}
+
 	public static synchronized Integer getPropInt(String file, String prop) {
 		String val = getProp(file, prop);
 		try {
@@ -128,6 +140,32 @@ public class Utils {
 			propsMap.remove(file);
 			return false;
 		}
+	}
+
+	public static String win2utf(String str) {
+		// return str;
+		byte[] bytes = new byte[str.length()];
+		for (int i = 0; i < str.length(); i++)
+			bytes[i] = (byte) str.charAt(i);
+		try {
+			return new String(bytes, "Windows-1251");
+		} catch (UnsupportedEncodingException e) {
+			return "###";
+		}
+	}
+
+	public static String utf2win(String str) {
+		byte[] bytes;
+		try {
+			bytes = str.getBytes("Windows-1251");
+			StringBuilder sb = new StringBuilder();
+			for(byte b : bytes)
+				sb.append((char)b);
+			return sb.toString();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return "xaxa";
 	}
 
 }

@@ -38,7 +38,7 @@ public class Context {
 	public final Controllers controllers;
 	public final Units units;
 	public final IController controller;
-	private final Scheduler scheduler;
+	public final Scheduler scheduler;
 
 	private void close() {
 		scheduler.close();

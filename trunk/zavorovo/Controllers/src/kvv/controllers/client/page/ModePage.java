@@ -1,11 +1,16 @@
 package kvv.controllers.client.page;
 
+import java.util.Date;
+
+import kvv.controllers.client.Controllers;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -48,6 +53,9 @@ public class ModePage extends Composite {
 				Cookies.setCookie("ControlMode", Boolean.toString(controlMode));
 			}
 		});
+
+		panel.add(new Label("" + Controllers.systemDescr.timeZoneOffset + " "
+				+ new Date().getTimezoneOffset()));
 
 		initWidget(panel);
 	}

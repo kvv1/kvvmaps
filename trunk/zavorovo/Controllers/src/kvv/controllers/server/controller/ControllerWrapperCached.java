@@ -44,10 +44,10 @@ public class ControllerWrapperCached extends ControllerAdapter {
 	public synchronized int getReg(int addr, int reg) throws IOException {
 		AllRegs allRegs = map.get(addr);
 		if (allRegs == null)
-			throw new IOException();
+			throw new IOException("Не найден контроллер с адресом " + addr);
 		Integer val = allRegs.values.get(reg);
 		if (val == null)
-			throw new IOException();
+			throw new IOException("Не найдено значение регистра " + reg + "контроллера " + addr);
 		return val;
 	}
 

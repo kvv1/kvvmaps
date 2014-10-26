@@ -5,10 +5,12 @@ import java.util.Date;
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.history.HistoryFile;
 import kvv.controllers.history.shared.History;
+import kvv.controllers.server.context.Context;
+import kvv.controllers.server.controller.ExprCalculator;
+import kvv.controllers.server.controller.Scheduler;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
 import kvv.controllers.shared.ScheduleAndHistory;
-import kvv.controllers.utils.Constants;
 import kvv.controllers.utils.Utils;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -18,51 +20,38 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 		ScheduleService {
 
 	@Override
-	public synchronized void update(String regName,
+	public synchronized RegisterSchedule update(String regName,
 			RegisterSchedule registerSchedule) throws Exception {
 		try {
-			Schedule schedule = getSchedule();
-			if (registerSchedule != null)
-				schedule.map.put(regName, registerSchedule);
-			else
-				schedule.map.remove(regName);
-			setSchedule(schedule);
+			Scheduler scheduler = Context.getInstance().scheduler;
+			scheduler.put(regName, registerSchedule);
+			return registerSchedule;
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		}
 	}
 
-	@Override
-	public synchronized void enable(String regName, boolean b) throws Exception {
-		try {
-			Schedule schedule = getSchedule();
-			RegisterSchedule registerSchedule = schedule.map.get(regName);
-			if (registerSchedule != null) {
-				registerSchedule.enabled = b;
-				setSchedule(schedule);
-			}
-		} catch (Exception e) {
-			throw new Exception(e.getMessage());
-		}
-	}
+	/*
+	 * @Override public synchronized RegisterSchedule enable(String regName,
+	 * boolean b) throws Exception { try { Schedule schedule = getSchedule();
+	 * RegisterSchedule registerSchedule = schedule.map.get(regName); if
+	 * (registerSchedule != null) { registerSchedule.enabled = b;
+	 * setSchedule(schedule); } return registerSchedule; } catch (Exception e) {
+	 * throw new Exception(e.getMessage()); } }
+	 * 
+	 * @Override public synchronized RegisterSchedule enableExpr(String regName,
+	 * boolean b) throws Exception { try { Schedule schedule = getSchedule();
+	 * RegisterSchedule registerSchedule = schedule.map.get(regName); if
+	 * (registerSchedule != null) { registerSchedule.exprEnabled = b;
+	 * setSchedule(schedule); } return registerSchedule; } catch (Exception e) {
+	 * throw new Exception(e.getMessage()); } }
+	 */
 
 	@Override
 	public synchronized ScheduleAndHistory getScheduleAndHistory(Date date) {
-		return new ScheduleAndHistory(getSchedule(), getHistory(date));
-	}
-
-	private Schedule getSchedule() {
-		try {
-			Schedule schedule = Utils.jsonRead(Constants.scheduleFile,
-					Schedule.class);
-			return schedule;
-		} catch (Exception e) {
-			return new Schedule();
-		}
-	}
-
-	private void setSchedule(Schedule sched) throws Exception {
-		Utils.jsonWrite(Constants.scheduleFile, sched);
+		Scheduler scheduler = Context.getInstance().scheduler;
+		Schedule schedule = scheduler.getSchedule();
+		return new ScheduleAndHistory(schedule, getHistory(date));
 	}
 
 	private synchronized History getHistory(Date date) {
@@ -70,6 +59,15 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 			return null;
 		History log = HistoryFile.load(date);
 		return log;
+	}
+
+	@Override
+	public short eval(String expr) throws Exception {
+		try {
+			return new ExprCalculator(Utils.utf2win(expr)).parse();
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
 	}
 
 }

@@ -46,14 +46,16 @@ public abstract class ControlCompositeWithDiagrams extends ControlComposite {
 					@Override
 					public void onSuccess(ScheduleAndHistory result) {
 						for (AutoRelayControl c : diagrams) {
-							RegisterSchedule registerSchedule = result.schedule.map
-									.get(c.reg.name);
 							ArrayList<HistoryItem> logItems = result.history == null ? null
 									: result.history.items.get(c.reg.name);
 							int markerSeconds = now.getHours() * 3600
 									+ now.getMinutes() * 60 + now.getSeconds();
 							int historyEndSeconds = now.equals(dateForHistory) ? markerSeconds
 									: 24 * 3600;
+							RegisterSchedule registerSchedule = result.schedule.map
+									.get(c.reg.name);
+							if (registerSchedule == null)
+								registerSchedule = new RegisterSchedule();
 							c.refreshSchedule(registerSchedule, logItems,
 									markerSeconds, historyEndSeconds);
 						}
