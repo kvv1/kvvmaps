@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.history.shared.HistoryItem;
-import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.ScheduleItem;
+import kvv.controllers.shared.RegisterSchedule.State;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -48,14 +48,12 @@ public abstract class ScheduleCanvas extends Composite {
 
 	private final int registerHeight;
 	private final int height;
-	
+
 	private boolean isBool;
 
-	protected abstract void save(String regName,
-			RegisterSchedule registerSchedule);
+	protected abstract void save(RegisterSchedule registerSchedule);
 
-	public ScheduleCanvas(final RegisterDescr reg,
-			final RegisterPresentation _presentation,
+	public ScheduleCanvas(final RegisterPresentation _presentation,
 			final MouseMoveHandler mouseMoveHandler) {
 
 		isBool = _presentation.isBool();
@@ -101,6 +99,9 @@ public abstract class ScheduleCanvas extends Composite {
 
 			@Override
 			public void onMouseDown(MouseDownEvent event) {
+				if (registerSchedule == null)
+					return;
+
 				int m = x2sec(event.getX()) / 60;
 
 				if ((m < 0 || m >= 24 * 60))
@@ -114,12 +115,10 @@ public abstract class ScheduleCanvas extends Composite {
 					if (!ModePage.check())
 						return;
 
-					if (registerSchedule == null)
-						registerSchedule = new RegisterSchedule();
 					registerSchedule.add(minute, minVal);
-					if (registerSchedule.items.size() == 0)
-						registerSchedule = null;
-					save(reg.name, registerSchedule);
+					if(registerSchedule.items.size() == 0 && registerSchedule.state == State.SCHEDULE)
+						registerSchedule.state = State.MANUAL;
+					save(registerSchedule);
 					// setDirty(true);
 					refresh();
 				}
@@ -127,12 +126,10 @@ public abstract class ScheduleCanvas extends Composite {
 					if (!ModePage.check())
 						return;
 
-					if (registerSchedule == null)
-						registerSchedule = new RegisterSchedule();
 					registerSchedule.add(minute, maxVal);
-					if (registerSchedule.items.size() == 0)
-						registerSchedule = null;
-					save(reg.name, registerSchedule);
+					if(registerSchedule.items.size() == 0 && registerSchedule.state == State.SCHEDULE)
+						registerSchedule.state = State.MANUAL;
+					save(registerSchedule);
 					// setDirty(true);
 					refresh();
 				}
@@ -243,7 +240,8 @@ public abstract class ScheduleCanvas extends Composite {
 		context.save();
 		context.translate(0, getRegY());
 
-		if (registerSchedule != null) {
+		if (registerSchedule != null && registerSchedule.items != null
+				&& registerSchedule.items.size() != 0) {
 			int val = registerSchedule.getValue(0);
 			context.beginPath();
 			context.setStrokeStyle("#00FF00");

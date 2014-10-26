@@ -4,8 +4,6 @@
 options
 {
   JDK_VERSION = "1.5";
-//  LOOKAHEAD=2;
-
   static = false;
 }
 
@@ -16,6 +14,7 @@ import java.util.*;
 import kvv.evlang.impl.*;
 import kvv.evlang.impl.Locals.Local;
 import kvv.controllers.register.*;
+import kvv.controllers.utils.Utils;
 
 public abstract class EG1 extends EG
 {
@@ -607,7 +606,7 @@ String id() :
 {
   t = < ID >
   {
-    return win2utf(t.image);
+    return Utils.win2utf(t.image);
   }
 }
 

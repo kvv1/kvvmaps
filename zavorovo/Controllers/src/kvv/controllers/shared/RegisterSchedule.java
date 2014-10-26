@@ -5,8 +5,28 @@ import java.util.ArrayList;
 
 @SuppressWarnings("serial")
 public class RegisterSchedule implements Serializable {
-	public ArrayList<ScheduleItem> items = new ArrayList<ScheduleItem>();
+
+	public enum State {
+		MANUAL, SCHEDULE, EXPRESSION
+	}
+
+	public ArrayList<ScheduleItem> items = new ArrayList<>();
+
+	public static class Expr implements Serializable {
+		public String expr;
+		public String errMsg;
+
+		public Expr() {
+		}
+		
+		public Expr(String expr) {
+			this.expr = expr;
+		}
+	}
+
+	public ArrayList<Expr> expressions = new ArrayList<>();
 	public boolean enabled;
+	public State state = State.MANUAL;
 
 	public int getValue(int minutes) {
 		if (items.size() == 0)

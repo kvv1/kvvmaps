@@ -2,7 +2,7 @@
 /* JavaCCOptions:KEEP_LINE_COL=null */
 package kvv.evlang;
 
-import kvv.evlang.impl.Context;
+import kvv.controllers.utils.Utils;
 
 /**
  * This exception is thrown when parse errors are encountered. You can
@@ -30,7 +30,7 @@ public class ParseException extends Exception {
 	public ParseException(Token currentTokenVal,
 			int[][] expectedTokenSequencesVal, String[] tokenImageVal) {
 		this(currentTokenVal.next, "'"
-				+ Context.win2utf(currentTokenVal.next.image)
+				+ Utils.win2utf(currentTokenVal.next.image)
 				+ "' Syntax error");
 	}
 

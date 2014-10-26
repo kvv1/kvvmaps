@@ -24,7 +24,10 @@ public class ConfigurationServiceImpl extends RemoteServiceServlet implements
 		systemDescr.controllers = Context.getInstance().controllers
 				.getControllers();
 		systemDescr.units = Context.getInstance().units.units;
-		systemDescr.timeZoneOffset = new Date().getTimezoneOffset();
+		//systemDescr.timeZoneOffset = new Date().getTimezoneOffset();
+		
+		systemDescr.timeZoneOffset = Integer.parseInt(Utils.getProp(
+				Constants.propsFile, "timezoneOffset", "-180"));
 
 		systemDescr.controllerTypes = Context.getInstance().controllers
 				.getControllerTypes();

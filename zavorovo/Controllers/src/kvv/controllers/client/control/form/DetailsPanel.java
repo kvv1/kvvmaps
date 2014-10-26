@@ -7,10 +7,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class DetailsPanel extends VerticalPanel {
+	public final Button b = new Button("?");
 
 	public DetailsPanel(final String label, final Widget widget) {
-		final Button b = new Button("?");
-
 		b.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {

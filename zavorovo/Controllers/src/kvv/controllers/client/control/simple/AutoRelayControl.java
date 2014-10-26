@@ -7,19 +7,15 @@ import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.control.ControlComposite;
-import kvv.controllers.client.page.ModePage;
 import kvv.controllers.history.shared.HistoryItem;
 import kvv.controllers.register.AllRegs;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.RegisterSchedule;
+import kvv.controllers.shared.RegisterSchedule.State;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -34,7 +30,8 @@ public class AutoRelayControl extends ControlComposite {
 	private final HorizontalPanel schedulePanel = new HorizontalPanel();
 	private final ScheduleCanvas scheduleCanvas;
 
-	private final CheckBox autoButton;
+	private final AutoButton autoButton;
+	private final ExprButton exprButton;
 	private final ChildComposite relayControl;
 
 	public final RegisterDescr reg;
@@ -43,26 +40,22 @@ public class AutoRelayControl extends ControlComposite {
 	public void refresh() {
 		super.refresh();
 	}
-	
+
 	@Override
 	public void refresh(AllRegs result) {
-		// TODO Auto-generated method stub
-		if(result != null)
-			result = result;
 		super.refresh(result);
 	}
-	
-	public AutoRelayControl(final RegisterDescr reg, RegisterPresentation presentation,
-			MouseMoveHandler mouseMoveHandler) {
+
+	public AutoRelayControl(final RegisterDescr reg,
+			RegisterPresentation presentation, MouseMoveHandler mouseMoveHandler) {
 		this.reg = reg;
 
-		scheduleCanvas = new ScheduleCanvas(reg, presentation, mouseMoveHandler) {
-			public void save(String regName,
-					final RegisterSchedule registerSchedule) {
-				scheduleService.update(regName, registerSchedule,
-						new CallbackAdapter<Void>() {
-							public void onSuccess(Void result) {
-								refreshButtons(registerSchedule);
+		scheduleCanvas = new ScheduleCanvas(presentation, mouseMoveHandler) {
+			public void save(final RegisterSchedule registerSchedule) {
+				scheduleService.update(reg.name, registerSchedule,
+						new CallbackAdapter<RegisterSchedule>() {
+							public void onSuccess(RegisterSchedule result) {
+								refreshButtons(result);
 							};
 						});
 			}
@@ -71,11 +64,9 @@ public class AutoRelayControl extends ControlComposite {
 		// framePanel.setBorderWidth(1);
 		framePanel.add(horizontalPanel);
 
-		horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		//horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		horizontalPanel.add(schedulePanel);
 		enableSchedule(true);
-
-		autoButton = new CheckBox("Авто");
 
 		if (presentation.isBool()) {
 			relayControl = new SimpleRelayControl(reg.addr, reg.register, "");
@@ -84,56 +75,54 @@ public class AutoRelayControl extends ControlComposite {
 		}
 		add(relayControl);
 
-		autoButton.setValue(false);
-		autoButton.setEnabled(false);
+		autoButton = new AutoButton() {
+			@Override
+			public void save(RegisterSchedule registerSchedule) {
+				scheduleService.update(reg.name, registerSchedule,
+						new CallbackAdapter<RegisterSchedule>() {
+							public void onSuccess(RegisterSchedule result) {
+								refreshButtons(result);
+							};
+						});
+			}
+		};
+
+		exprButton = new ExprButton() {
+			@Override
+			public void save(RegisterSchedule registerSchedule) {
+				scheduleService.update(reg.name, registerSchedule,
+						new CallbackAdapter<RegisterSchedule>() {
+							public void onSuccess(RegisterSchedule result) {
+								refreshButtons(result);
+							};
+						});
+			}
+		};
 
 		VerticalPanel panel = new VerticalPanel();
-		//panel.setBorderWidth(1);
+		// panel.setBorderWidth(1);
 		VerticalPanel labelPanel = new VerticalPanel();
 		labelPanel.setWidth("200px");
 		labelPanel.add(new Label(reg.name));
 		panel.add(labelPanel);
 		HorizontalPanel panel1 = new HorizontalPanel();
-		//panel1.setBorderWidth(1);
+		// panel1.setBorderWidth(1);
 		// panel1.setWidth("200px");
 		panel1.add(relayControl);
 		panel1.add(autoButton);
+		panel1.add(exprButton);
+
 		panel1.setCellWidth(relayControl, "40px");
 		panel.add(panel1);
 		horizontalPanel.add(panel);
-
-		autoButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				if (!ModePage.check()) {
-					autoButton.setValue(!autoButton.getValue());
-					return;
-				}
-
-				final boolean auto = autoButton.getValue();
-				scheduleService.enable(reg.name, auto,
-						new CallbackAdapter<Void>() {
-							@Override
-							public void onSuccess(Void result) {
-								relayControl.setEnabled(!auto);
-							}
-						});
-			}
-		});
 
 		initWidget(framePanel);
 	}
 
 	private void refreshButtons(RegisterSchedule registerSchedule) {
-		if (registerSchedule != null) {
-			autoButton.setEnabled(true);
-			autoButton.setValue(registerSchedule.enabled);
-			relayControl.setEnabled(!registerSchedule.enabled);
-		} else {
-			autoButton.setEnabled(false);
-			autoButton.setValue(false);
-			relayControl.setEnabled(true);
-		}
+		autoButton.updateUI(registerSchedule);
+		exprButton.updateUI(registerSchedule);
+		relayControl.setEnabled(registerSchedule.state == State.MANUAL);
 	}
 
 	public void refreshSchedule(RegisterSchedule registerSchedule,

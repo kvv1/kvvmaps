@@ -83,18 +83,6 @@ public abstract class Context {
 		funcs.initFunc.code.compileRet(0);
 	}
 
-	public static String win2utf(String str) {
-		// return str;
-		byte[] bytes = new byte[str.length()];
-		for (int i = 0; i < str.length(); i++)
-			bytes[i] = (byte) str.charAt(i);
-		try {
-			return new String(bytes, "Windows-1251");
-		} catch (UnsupportedEncodingException e) {
-			return "###";
-		}
-	}
-
 	public void throwWatIsIt(String txt) throws ParseException {
 		throwExc(txt + " - ?");
 	}
