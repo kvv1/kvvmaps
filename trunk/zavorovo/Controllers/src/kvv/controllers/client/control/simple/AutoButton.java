@@ -1,21 +1,17 @@
 package kvv.controllers.client.control.simple;
 
-import kvv.controllers.client.CallbackAdapter;
-import kvv.controllers.client.ScheduleService;
-import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.RegisterSchedule.State;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 
 public abstract class AutoButton extends Composite {
-	private final ScheduleServiceAsync scheduleService = GWT
-			.create(ScheduleService.class);
+//	private final ScheduleServiceAsync scheduleService = GWT
+//			.create(ScheduleService.class);
 
 	private final CheckBox autoButton = new CheckBox("Расп.");
 

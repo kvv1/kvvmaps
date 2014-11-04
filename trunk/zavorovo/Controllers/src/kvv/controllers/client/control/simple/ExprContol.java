@@ -19,14 +19,16 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class ExprContol extends Composite {
 	private final ScheduleServiceAsync scheduleService = GWT
 			.create(ScheduleService.class);
-	VerticalPanel verticalPanel = new VerticalPanel();
-	HorizontalPanel horizontalPanel = new HorizontalPanel();
+	private final VerticalPanel verticalPanel = new VerticalPanel();
+	public HorizontalPanel buttonsPanel = new HorizontalPanel();
 
 	Label errMsg = new Label("err");
 	TextArea expr = new TextArea();
 	Button testButton = new Button("Test");
 
 	public ExprContol(String expr2, String errMsg2) {
+		//verticalPanel.setBorderWidth(1);
+		
 		expr.setSize("300px", "50px");
 		expr.setText(expr2);
 		errMsg.setText(errMsg2);
@@ -34,11 +36,11 @@ public class ExprContol extends Composite {
 		
 		errMsg.getElement().getStyle().setColor("red");
 
-		horizontalPanel.add(expr);
-		horizontalPanel.add(testButton);
+		verticalPanel.add(expr);
+		buttonsPanel.add(testButton);
 
-		verticalPanel.add(horizontalPanel);
 		verticalPanel.add(errMsg);
+		verticalPanel.add(buttonsPanel);
 
 		if (!ModePage.controlMode)
 			expr.setReadOnly(true);

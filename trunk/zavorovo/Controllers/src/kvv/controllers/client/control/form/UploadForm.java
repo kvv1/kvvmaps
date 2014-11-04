@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 
 public class UploadForm extends FormPanel {
 	public UploadForm(String buttonText, String uploadURL) {
@@ -29,7 +28,7 @@ public class UploadForm extends FormPanel {
 				submit();
 			}
 		});
-		
+
 		addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
 			@Override
 			public void onSubmitComplete(SubmitCompleteEvent event) {
@@ -40,8 +39,8 @@ public class UploadForm extends FormPanel {
 			}
 		});
 
-//		upload.setStyleName(button.getStyleName());
-		
+		// upload.setStyleName(button.getStyleName());
+
 		button.setStyleName("");
 		panel.add(button);
 	}

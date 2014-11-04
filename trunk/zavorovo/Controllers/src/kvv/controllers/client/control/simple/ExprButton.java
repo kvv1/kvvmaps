@@ -1,20 +1,19 @@
 package kvv.controllers.client.control.simple;
 
-import kvv.controllers.client.ScheduleService;
-import kvv.controllers.client.ScheduleServiceAsync;
-import kvv.controllers.client.control.form.DetailsPanel;
+import kvv.controllers.client.control.form.DetPanel;
+import kvv.controllers.client.control.form.EditablePanel;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.RegisterSchedule.Expr;
 import kvv.controllers.shared.RegisterSchedule.State;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public abstract class ExprButton extends Composite {
@@ -22,17 +21,29 @@ public abstract class ExprButton extends Composite {
 	private final VerticalPanel vp = new VerticalPanel();
 	private final VerticalPanel details = new VerticalPanel();
 	private final CheckBox cb = new CheckBox();
-	private final Button save = new Button("Set");
-	private final Button add = new Button("Add");
+	private final HorizontalPanel savePanel = new HorizontalPanel();
+	private final Button save = new Button("Сохранить");
 
-	private final DetailsPanel detailsPanel;
+	private final DetPanel<Label, VerticalPanel> detailsPanel;
 
-	private final VerticalPanel expressions = new VerticalPanel();
+	private final EditablePanel<ExprContol> expressions = new EditablePanel<ExprContol>(
+			!ModePage.controlMode, "Добавить выражение") {
+		@Override
+		protected ExprContol createItem() {
+			return new ExprContol("", null);
+		}
+
+		protected void addAddButton(Button button) {
+			savePanel.add(button);
+		}
+
+		protected void addNavPanel(ExprContol widget,
+				EditablePanel<ExprContol>.NavPanel navPanel) {
+			widget.buttonsPanel.add(navPanel);
+		};
+	};
 
 	private RegisterSchedule registerSchedule;
-
-	private final ScheduleServiceAsync scheduleService = GWT
-			.create(ScheduleService.class);
 
 	public ExprButton() {
 
@@ -61,9 +72,7 @@ public abstract class ExprButton extends Composite {
 				if (registerSchedule == null)
 					return;
 				registerSchedule.expressions.clear();
-				for (int i = 0; i < expressions.getWidgetCount(); i++) {
-					ExprContol exprContol = (ExprContol) expressions
-							.getWidget(i);
+				for (ExprContol exprContol : expressions.getItems()) {
 					if (!exprContol.getText().trim().isEmpty())
 						registerSchedule.expressions.add(new Expr(exprContol
 								.getText()));
@@ -72,24 +81,15 @@ public abstract class ExprButton extends Composite {
 			}
 		});
 
-		add.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				expressions.add(new ExprContol("", null));
-			}
-		});
-
 		panel.add(cb);
 
 		details.add(expressions);
 		if (ModePage.controlMode) {
-			HorizontalPanel hp = new HorizontalPanel();
-			hp.add(save);
-			hp.add(add);
-			details.add(hp);
+			savePanel.add(save);
+			details.add(savePanel);
 		}
 
-		detailsPanel = new DetailsPanel("Формула", details);
+		detailsPanel = new DetPanel<Label, VerticalPanel>("Формула", details);
 
 		vp.add(detailsPanel);
 
@@ -110,7 +110,8 @@ public abstract class ExprButton extends Composite {
 			err |= (e.errMsg != null);
 		}
 
-		detailsPanel.b.getElement().getStyle().setColor(err ? "red" : "black");
+		detailsPanel.label.getElement().getStyle()
+				.setColor(err ? "red" : "black");
 
 	}
 
