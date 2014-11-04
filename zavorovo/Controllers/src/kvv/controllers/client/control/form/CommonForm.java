@@ -144,7 +144,7 @@ public class CommonForm extends ControlComposite {
 			return new UploadForm("Загрузить", GWT.getModuleBaseURL()
 					+ "upload?addr=" + addr);
 		case DETAILS:
-			return new DetailsPanel(ui.label,
+			return new DetPanel<Widget, Widget>(ui.label,
 					createWidget(ui.children[0]));
 		default:
 			return new Label("<unknown>");

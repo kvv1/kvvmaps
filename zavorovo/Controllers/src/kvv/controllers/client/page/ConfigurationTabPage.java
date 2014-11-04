@@ -5,6 +5,7 @@ import kvv.controllers.client.ConfigurationService;
 import kvv.controllers.client.ConfigurationServiceAsync;
 import kvv.controllers.client.Controllers;
 import kvv.controllers.client.control.simple.TextWithSaveButton;
+import kvv.controllers.client.page.configuration.ConfigurationPage1;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,7 +25,8 @@ public class ConfigurationTabPage extends Composite {
 		TabPanel tabs = new TabPanel();
 		tabs.setHeight("200px");
 
-		tabs.add(new ConfigurationPage(), "Контроллеры и страницы");
+		tabs.add(new ConfigurationPage1(), "Контроллеры и страницы");
+		//tabs.add(new ConfigurationPage1(), "Test");
 		tabs.add(new ConfigurationTextPage(), "Контроллеры и страницы(текст)");
 
 		tabs.add(createControllerTypesPanel(), "Типы контроллеров");
@@ -35,7 +37,7 @@ public class ConfigurationTabPage extends Composite {
 
 	}
 
-	Widget createControllerTypesPanel() {
+	private Widget createControllerTypesPanel() {
 		VerticalPanel vp = new VerticalPanel();
 
 		HorizontalPanel buttonsPanel = new HorizontalPanel();

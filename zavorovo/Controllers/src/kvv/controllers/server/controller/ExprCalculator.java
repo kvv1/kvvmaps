@@ -1,9 +1,12 @@
 package kvv.controllers.server.controller;
 
+import java.io.IOException;
+
 import kvv.controllers.server.context.Context;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.evlang.EXPR;
 import kvv.evlang.ParseException;
+import kvv.evlang.TokenMgrError;
 
 public class ExprCalculator extends EXPR {
 
@@ -24,4 +27,12 @@ public class ExprCalculator extends EXPR {
 		}
 	}
 
+	@Override
+	public short parse() throws ParseException, IOException {
+		try {
+			return super.parse();
+		} catch (TokenMgrError e) {
+			throw new ParseException(e.getMessage());
+		}
+	}
 }
