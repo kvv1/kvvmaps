@@ -14,4 +14,5 @@ public interface Motor {
 	void stop() throws Exception;
 	int getPos();
 	void addListener(MotorListener listener);
+	void close();
 }

@@ -30,12 +30,7 @@ public class SensorPanel extends JPanel {
 		sensor.addListener(new SensorListener() {
 			@Override
 			public void onChanged(final SensorData data) {
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						setValue((float) data.e / 10);
-					}
-				});
+				setValue((float) data.e / 10);
 			}
 		});
 

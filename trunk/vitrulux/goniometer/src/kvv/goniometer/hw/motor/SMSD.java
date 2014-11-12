@@ -12,7 +12,11 @@ import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.swing.SwingUtilities;
+
 import kvv.goniometer.Motor;
+import kvv.goniometer.Props;
+import kvv.goniometer.ui.props.Prop;
 
 public abstract class SMSD implements Motor {
 	private final static int BAUD = 9600;
@@ -20,27 +24,35 @@ public abstract class SMSD implements Motor {
 	private SerialPort serPort;
 	private InputStream inStream;
 	private OutputStream outStream;
+	private final Props props;
 
 	private int pos = -1;
 
 	protected abstract String getPort();
 
 	protected abstract int getSpeed();
-	protected abstract boolean isAutoOff();
-	protected abstract int getAdditioalDelay();
-	
-	protected abstract boolean isSim();
 
 	private Collection<MotorListener> listeners = new HashSet<MotorListener>();
 
+	public SMSD(Props props) {
+		this.props = props;
+	}
+
 	@Override
-	public void addListener(MotorListener listener) {
+	public synchronized void addListener(MotorListener listener) {
 		listeners.add(listener);
 	}
 
 	private void onChange() {
-		for (MotorListener listener : listeners)
-			listener.onChanged();
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				synchronized (SMSD.this) {
+					for (MotorListener listener : listeners)
+						listener.onChanged();
+				}
+			}
+		});
 	}
 
 	@Override
@@ -52,9 +64,9 @@ public abstract class SMSD implements Motor {
 	private String port;
 
 	public void init() throws Exception {
-		if(isSim())
+		if (isSim())
 			return;
-		
+
 		if (!getPort().equals(port))
 			close();
 
@@ -68,12 +80,15 @@ public abstract class SMSD implements Motor {
 			serPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
 			inStream = serPort.getInputStream();
 			outStream = serPort.getOutputStream();
+			cmd("AL0*");
+			cmd("SD" + getSpeed() + "*");
 		} catch (NoSuchPortException e) {
 			throw new kvv.goniometer.NoSuchPortException(getPort());
 		}
 	}
 
-	public void close() {
+	@Override
+	public synchronized void close() {
 		if (serPort != null) {
 			serPort.close();
 			serPort = null;
@@ -83,53 +98,16 @@ public abstract class SMSD implements Motor {
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
-		SMSD smsd = new SMSD() {
-
-			@Override
-			protected String getPort() {
-				return "COM8";
-			}
-
-			@Override
-			protected int getSpeed() {
-				return 10000;
-			}
-
-			@Override
-			protected boolean isAutoOff() {
-				return false;
-			}
-
-			@Override
-			protected int getAdditioalDelay() {
-				return 250;
-			}
-
-			@Override
-			protected boolean isSim() {
-				return false;
-			}
-		};
-
-		smsd.moveTo(10000);
-		smsd.moveTo(20000);
-
-		while (!smsd.completed())
-			Thread.sleep(100);
-
-		smsd.close();
-	}
-
 	private String cmd(String cmd) throws Exception {
 
+		System.out.println("> " + cmd);
+
 		String responseExpected = cmd + "E10*";
-		
-		if(isSim()) {
-			System.out.println(responseExpected);
+
+		if (isSim()) {
+			System.out.println("< " + responseExpected);
 			return responseExpected;
 		}
-
 
 		if (serPort == null)
 			init();
@@ -154,12 +132,16 @@ public abstract class SMSD implements Motor {
 				Thread.sleep(10);
 			}
 
+			System.out.println("< " + sb);
+
 			if (!sb.toString().equals(responseExpected))
 				throw new IOException("Wrong SMSD response: " + sb);
 
 			System.out.println(sb);
 			return sb.toString();
 		} catch (Exception e) {
+			System.out.println(e.getClass().getSimpleName() + " "
+					+ e.getMessage());
 			close();
 			throw e;
 		}
@@ -176,7 +158,8 @@ public abstract class SMSD implements Motor {
 				synchronized (SMSD.this) {
 					if (timer == t) {
 						timer = null;
-						if(isAutoOff()) {
+						System.out.println("timer:");
+						if (isAutoOff()) {
 							try {
 								onOff(false);
 							} catch (Exception e) {
@@ -185,6 +168,7 @@ public abstract class SMSD implements Motor {
 						}
 						if (pos >= 0)
 							pos += dist;
+						System.out.println("pos -> " + pos);
 						SMSD.this.notifyAll();
 						onChange();
 					}
@@ -203,14 +187,13 @@ public abstract class SMSD implements Motor {
 
 	@Override
 	public synchronized void zero() throws Exception {
+		System.out.println("zero");
 		try {
 			stop();
 			while (timer != null)
 				wait();
 			pos = -1;
 			cmd("EN*");
-			cmd("AL0*");
-			cmd("SD" + getSpeed() + "*");
 			cmd("DL*");
 			cmd("HM*");
 		} catch (Exception e) {
@@ -223,6 +206,7 @@ public abstract class SMSD implements Motor {
 
 	@Override
 	public synchronized void zeroOK() throws Exception {
+		System.out.println("zeroOK");
 		try {
 			stop();
 			pos = 0;
@@ -233,6 +217,8 @@ public abstract class SMSD implements Motor {
 
 	@Override
 	public synchronized void moveTo(final int pos1) throws Exception {
+		System.out.println("moveTo " + pos1);
+
 		if (pos < 0 || pos1 < 0)
 			return;
 
@@ -244,15 +230,16 @@ public abstract class SMSD implements Motor {
 
 		try {
 			cmd("EN*");
-			cmd("AL0*");
-			cmd("SD" + getSpeed() + "*");
 			if (pos1 > pos)
 				cmd("DR*");
 			else
 				cmd("DL*");
 			cmd("MV" + Math.abs(pos1 - pos) + "*");
-			scheduleTimer(Math.abs(pos1 - pos) * 1000 / getSpeed() + getAdditioalDelay(), pos1
-					- pos);
+			if (isSim())
+				scheduleTimer(getAdditioalDelay(), pos1 - pos);
+			else
+				scheduleTimer(Math.abs(pos1 - pos) * 1000 / getSpeed()
+						+ getAdditioalDelay(), pos1 - pos);
 		} catch (Exception e) {
 			stopNoExc();
 			throw e;
@@ -268,6 +255,7 @@ public abstract class SMSD implements Motor {
 
 	@Override
 	public synchronized void stop() throws Exception {
+		System.out.println("stop");
 		try {
 			pos = -1;
 			cmd("SP*");
@@ -287,11 +275,25 @@ public abstract class SMSD implements Motor {
 
 	@Override
 	public synchronized void onOff(boolean on) throws Exception {
-		if (on)
+		if (on) {
+			System.out.println("on");
 			cmd("EN*");
-		else
+		} else {
+			System.out.println("off");
 			cmd("DS*");
+		}
 		onChange();
 	}
 
+	private boolean isAutoOff() {
+		return props.get(Prop.AUTO_MOTOR_OFF, "false").equals("true");
+	}
+
+	private int getAdditioalDelay() {
+		return props.getInt(Prop.MOTOR_ADDITIONAL_DELAY, 200);
+	}
+
+	private boolean isSim() {
+		return props.get(Prop.SIM_MOTORS, "false").equals("true");
+	}
 }

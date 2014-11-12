@@ -1,9 +1,10 @@
 package kvv.goniometer.ui.mainpage;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
 
 import javax.swing.JComponent;
@@ -14,14 +15,16 @@ import kvv.goniometer.ui.mainpage.DataSet.Data;
 @SuppressWarnings("serial")
 public class DiagramView extends JPanel implements IMainView {
 	private final DataSet dataSet;
-	private float polar;
+	private Float primary;
+	private DIR primaryDir = DIR.AZIMUTH;
 
 	public DiagramView(DataSet dataSet) {
 		this.dataSet = dataSet;
 	}
 
-	public void setPolar(float polar) {
-		this.polar = polar;
+	public void setPrimary(DIR primaryDir, float primary) {
+		this.primaryDir = primaryDir;
+		this.primary = primary;
 		repaint();
 	}
 
@@ -30,8 +33,7 @@ public class DiagramView extends JPanel implements IMainView {
 	}
 
 	@Override
-	public void setParams(float minX, float maxX, float stepX, float minY,
-			float maxY, float stepY) {
+	public void setParams() {
 	}
 
 	@Override
@@ -39,11 +41,12 @@ public class DiagramView extends JPanel implements IMainView {
 		Graphics2D g = (Graphics2D) _g;
 
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, // Anti-alias!
-		        RenderingHints.VALUE_ANTIALIAS_ON);
-		
+				RenderingHints.VALUE_ANTIALIAS_ON);
 
 		g.setColor(Color.LIGHT_GRAY);
 		g.fillRect(0, 0, getWidth(), getHeight());
+
+		int R = getWidth() / 2 - 22;
 
 		int centerX = getWidth() / 2;
 		int centerY = getHeight() / 2;
@@ -57,25 +60,70 @@ public class DiagramView extends JPanel implements IMainView {
 					+ (int) ((getWidth() + getHeight()) * sin));
 		}
 
+		g.drawOval(centerX - R, centerY - R, 2 * R, 2 * R);
+		g.drawOval(centerX - R * 3 / 4, centerY - R * 3 / 4, R * 3 / 2,
+				R * 3 / 2);
+		g.drawOval(centerX - R / 2, centerY - R / 2, R, R);
+		g.drawOval(centerX - R / 4, centerY - R / 4, R / 2, R / 2);
+
+		g.setColor(Color.LIGHT_GRAY);
+		g.fillOval(centerX - 10, centerY - 10, 20, 20);
+
 		int maxValue = 1;
 		for (Data d : dataSet.getData()) {
-			if (d.y == polar && d.value.e > maxValue)
+			float v = d.getPrim(primaryDir);
+			if (v == primary && d.value.e > maxValue)
 				maxValue = d.value.e;
 		}
 
-		int r = getHeight() / 2;
+		Point old = null;
 
-		g.setColor(Color.DARK_GRAY);
+		g.setStroke(new BasicStroke(2));
+		
+		g.setColor(new Color(0x008080));
 		for (Data d : dataSet.getData()) {
-			if (d.y != polar)
+			float v = d.getPrim(primaryDir);
+			if (v != primary)
 				continue;
 
-			float a = d.x;
+			float a = d.getSec(primaryDir);
 			double sin = Math.sin(a * Math.PI / 180);
 			double cos = Math.cos(a * Math.PI / 180);
-			oval(g, centerX + (int) (d.value.e * r / maxValue * cos), centerY
-					- (int) (d.value.e * r / maxValue * sin), 4);
+			int x = centerX + (int) (d.value.e * R * cos / maxValue);
+			int y = centerY - (int) (d.value.e * R * sin / maxValue);
+			oval(g, x, y, 4);
+
+			if (old != null)
+				g.drawLine(old.x, old.y, x, y);
+
+			old = new Point(x, y);
+
 		}
+
+		Color c = Color.LIGHT_GRAY;
+		Color c1 = new Color(c.getRed(), c.getGreen(), c.getBlue(), 128);
+
+		for (int a = -180 + 30; a <= 180; a += 30) {
+			int r = getWidth() / 2 - 10;
+			double sin = Math.sin(a * Math.PI / 180);
+			double cos = Math.cos(a * Math.PI / 180);
+			int x = centerX + (int) (r * cos);
+			int y = centerY - (int) (r * sin);
+			String txt = "" + a;
+
+			int w = g.getFontMetrics().stringWidth(txt);
+			int h = g.getFontMetrics().getHeight();
+			int descent = g.getFontMetrics().getDescent();
+			int leading = g.getFontMetrics().getLeading();
+
+			g.setColor(c1);
+			g.fillRect(x - w / 2, y - (h - leading - descent) / 2, w, (h
+					- leading - descent));
+			g.setColor(Color.BLACK);
+			g.drawString(txt, x - w / 2, y - h / 2 + h - descent);
+
+		}
+
 	}
 
 	@Override
@@ -84,8 +132,8 @@ public class DiagramView extends JPanel implements IMainView {
 	}
 
 	@Override
-	public void updateData(Float polar) {
-		if (polar == null || polar == this.polar)
+	public void updateData(Data data) {
+		if (data == null || data.getPrim(primaryDir) == this.primary)
 			repaint();
 	}
 

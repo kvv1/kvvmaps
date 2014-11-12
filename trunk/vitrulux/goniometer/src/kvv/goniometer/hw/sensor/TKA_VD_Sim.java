@@ -34,8 +34,8 @@ public class TKA_VD_Sim implements Sensor {
 					data.y = 20;
 					data.t = 30;
 
-					for (int i = 0; i < 20; i++) {
-						data.spectrum.put(i * 100 + 1000,
+					for (int i = 0; i < 9; i++) {
+						data.spectrum.put(i * 50 + 350,
 								(int) (2000 + Math.random() * 1000));
 					}
 

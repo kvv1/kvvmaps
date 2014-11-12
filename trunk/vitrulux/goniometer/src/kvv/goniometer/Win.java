@@ -11,7 +11,6 @@ import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
-import kvv.goniometer.hw.motor.MotorSim;
 import kvv.goniometer.hw.motor.SMSD;
 import kvv.goniometer.hw.sensor.TKA_VD;
 import kvv.goniometer.hw.sensor.TKA_VD_Sim;
@@ -31,6 +30,7 @@ public class Win extends JFrame {
 	Sensor sensor;
 
 	Thread thread;
+	final MainPanel mainPanel;
 
 	public static ImageIcon logo;
 
@@ -72,6 +72,9 @@ public class Win extends JFrame {
 			public void onChanged() {
 				try {
 					sensor.init(properties.getProperty(Prop.SENSOR_PORT, ""));
+					smsdX.close();
+					smsdY.close();
+					mainPanel.paramsChanged();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -80,10 +83,6 @@ public class Win extends JFrame {
 
 		propertiesPanel.add(new PropertyPanel(Prop.X_PORT,
 				"Порт азимутального мотора"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.X_SPEED,
-				"Скорость азимутального мотора (шагов/сек.)"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.X_RANGE,
-				"Диапазон азимутального мотора (шагов)"));
 		propertiesPanel.add(new PropertyPanel(Prop.X_START_DEGREES,
 				"Начальное значение азимутального угла (градусов)"));
 		propertiesPanel.add(new PropertyPanel(Prop.X_END_DEGREES,
@@ -93,10 +92,6 @@ public class Win extends JFrame {
 
 		propertiesPanel.add(new PropertyPanel(Prop.Y_PORT,
 				"Порт полярного мотора"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.Y_SPEED,
-				"Скорость полярного мотора (шагов/сек.)"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.Y_RANGE,
-				"Диапазон полярного мотора (шагов)"));
 		propertiesPanel.add(new PropertyPanel(Prop.Y_START_DEGREES,
 				"Начальное значение полярного угла (градусов)"));
 		propertiesPanel.add(new PropertyPanel(Prop.Y_END_DEGREES,
@@ -106,14 +101,29 @@ public class Win extends JFrame {
 
 		propertiesPanel
 				.add(new PropertyPanel(Prop.SENSOR_PORT, "Порт сенсора"));
+
+		propertiesPanel.addExt(new PropertyPanel(Prop.X_SPEED,
+				"Скорость азимутального мотора (шагов/сек.)"));
+		propertiesPanel.addExt(new PropertyPanel(Prop.X_RANGE,
+				"Диапазон азимутального мотора (шагов)"));
+		propertiesPanel.addExt(new PropertyPanel(Prop.Y_SPEED,
+				"Скорость полярного мотора (шагов/сек.)"));
+		propertiesPanel.addExt(new PropertyPanel(Prop.Y_RANGE,
+				"Диапазон полярного мотора (шагов)"));
 		propertiesPanel.addExt(new PropertyPanel(Prop.SENSOR_DELAY,
 				"Время ожидания сенсора (отсчетов)"));
-
 		propertiesPanel.addExt(new PropertyPanel(Prop.AUTO_MOTOR_OFF,
 				"Выключать моторы после каждого перемещения (true/false)"));
-
 		propertiesPanel.addExt(new PropertyPanel(Prop.MOTOR_ADDITIONAL_DELAY,
 				"Дополнительная пауза между командами (ms)", "200"));
+		propertiesPanel.addExt(new PropertyPanel(Prop.LAMBLA_BEGIN,
+				"Мин. lambla (нм)", "400"));
+		propertiesPanel.addExt(new PropertyPanel(Prop.LAMBLA_END,
+				"Макс. lambla (нм)", "750"));
+		propertiesPanel.addExt(new PropertyPanel(Prop.LAMBLA_STEP,
+				"Шаг lambla (нм)", "50"));
+		propertiesPanel.addExt(new PropertyPanel(Prop.SENSOR_DIST,
+				"Расстояние до сенсора (м)", "10"));
 
 		propertiesPanel.load();
 
@@ -128,76 +138,51 @@ public class Win extends JFrame {
 			propertiesPanel.load();
 		}
 
-//		if (propertiesPanel.properties.getProperty(Prop.SIM_MOTORS, "false")
-//				.equals("true")) {
-//			smsdX = new MotorSim();
-//			smsdY = new MotorSim();
-//		} else {
-			smsdX = new SMSD() {
-				@Override
-				protected String getPort() {
-					return propertiesPanel.properties.getProperty(Prop.X_PORT,
-							"");
-				}
+		Props props = new Props() {
+			@Override
+			public int getInt(String name, int defaultValue) {
+				return Integer.parseInt(propertiesPanel.properties.getProperty(
+						name, "" + defaultValue));
+			}
 
-				@Override
-				protected int getSpeed() {
-					return Integer.parseInt(propertiesPanel.properties
-							.getProperty(Prop.X_SPEED, "10000"));
-				}
+			@Override
+			public float getFloat(String name, float defaultValue) {
+				return Float.parseFloat(propertiesPanel.properties.getProperty(
+						name, "" + defaultValue));
+			}
 
-				@Override
-				protected boolean isAutoOff() {
-					return propertiesPanel.properties.getProperty(
-							Prop.AUTO_MOTOR_OFF, "false").equals("true");
-				}
+			@Override
+			public String get(String name, String defaultValue) {
+				return propertiesPanel.properties.getProperty(name,
+						defaultValue);
+			}
+		};
 
-				@Override
-				protected int getAdditioalDelay() {
-					String s = propertiesPanel.properties
-							.getProperty(Prop.MOTOR_ADDITIONAL_DELAY);
-					return Integer.parseInt(s);
-				}
+		smsdX = new SMSD(props) {
+			@Override
+			protected String getPort() {
+				return propertiesPanel.properties.getProperty(Prop.X_PORT, "");
+			}
 
-				@Override
-				protected boolean isSim() {
-					return propertiesPanel.properties.getProperty(
-							Prop.SIM_MOTORS, "false").equals("true");
-				}
-			};
+			@Override
+			protected int getSpeed() {
+				return Integer.parseInt(propertiesPanel.properties.getProperty(
+						Prop.X_SPEED, "10000"));
+			}
+		};
 
-			smsdY = new SMSD() {
-				@Override
-				protected String getPort() {
-					return propertiesPanel.properties.getProperty(Prop.Y_PORT,
-							"");
-				}
+		smsdY = new SMSD(props) {
+			@Override
+			protected String getPort() {
+				return propertiesPanel.properties.getProperty(Prop.Y_PORT, "");
+			}
 
-				@Override
-				protected int getSpeed() {
-					return Integer.parseInt(propertiesPanel.properties
-							.getProperty(Prop.Y_SPEED, "10000"));
-				}
-
-				@Override
-				protected boolean isAutoOff() {
-					return propertiesPanel.properties.getProperty(
-							Prop.AUTO_MOTOR_OFF, "false").equals("true");
-				}
-
-				@Override
-				protected int getAdditioalDelay() {
-					return Integer.parseInt(propertiesPanel.properties
-							.getProperty(Prop.MOTOR_ADDITIONAL_DELAY));
-				}
-
-				@Override
-				protected boolean isSim() {
-					return propertiesPanel.properties.getProperty(
-							Prop.SIM_MOTORS, "false").equals("true");
-				}
-			};
-//		}
+			@Override
+			protected int getSpeed() {
+				return Integer.parseInt(propertiesPanel.properties.getProperty(
+						Prop.Y_SPEED, "10000"));
+			}
+		};
 
 		if (propertiesPanel.properties.getProperty(Prop.SIM_SENSOR, "false")
 				.equals("true"))
@@ -205,65 +190,7 @@ public class Win extends JFrame {
 		else
 			sensor = new TKA_VD();
 
-		propertiesPanel.onChanged();
-
-		MainPanel mainPanel = new MainPanel(smsdX, smsdY, sensor) {
-
-			@Override
-			protected int getRangeX() {
-				return Integer.parseInt(propertiesPanel.properties.getProperty(
-						Prop.X_RANGE, "0"));
-			}
-
-			@Override
-			protected float getDegStartX() {
-				return Float.parseFloat(propertiesPanel.properties.getProperty(
-						Prop.X_START_DEGREES, "0"));
-			}
-
-			@Override
-			protected float getDegEndX() {
-				return Float.parseFloat(propertiesPanel.properties.getProperty(
-						Prop.X_END_DEGREES, "0"));
-			}
-
-			@Override
-			protected float getDegStepX() {
-				return Float.parseFloat(propertiesPanel.properties.getProperty(
-						Prop.X_STEP_DEGREES, "0"));
-			}
-
-			@Override
-			protected int getRangeY() {
-				return Integer.parseInt(propertiesPanel.properties.getProperty(
-						Prop.Y_RANGE, "0"));
-			}
-
-			@Override
-			protected float getDegStartY() {
-				return Float.parseFloat(propertiesPanel.properties.getProperty(
-						Prop.Y_START_DEGREES, "0"));
-			}
-
-			@Override
-			protected float getDegEndY() {
-				return Float.parseFloat(propertiesPanel.properties.getProperty(
-						Prop.Y_END_DEGREES, "0"));
-			}
-
-			@Override
-			protected float getDegStepY() {
-				return Float.parseFloat(propertiesPanel.properties.getProperty(
-						Prop.Y_STEP_DEGREES, "0"));
-			}
-
-			@Override
-			protected int getSensorDelay() {
-				return Integer.parseInt(propertiesPanel.properties.getProperty(
-						Prop.SENSOR_DELAY, "0"));
-			}
-
-		};
+		mainPanel = new MainPanel(smsdX, smsdY, sensor, props);
 
 		tabbedPane.add("Главная", mainPanel);
 		tabbedPane.add("Оборудование", new ControlPanel(smsdX, smsdY, sensor,
@@ -272,9 +199,13 @@ public class Win extends JFrame {
 				propertiesPanel));
 
 		// setSize(400, 500);
+		propertiesPanel.onChanged();
+
 		pack();
 		setResizable(false);
 		setTitle("Гониометр");
+
+		// setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setVisible(true);
 	}
 
