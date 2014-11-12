@@ -202,11 +202,11 @@ public class MainPanel extends JPanel {
 			}
 		});
 
-		paramsChanged();
+		propsChanged();
 	}
 
-	public void paramsChanged() {
-		mainView.setParams();
+	public void propsChanged() {
+		mainView.propsChanged();
 		update();
 	}
 

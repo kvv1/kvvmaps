@@ -74,7 +74,7 @@ public class Win extends JFrame {
 					sensor.init(properties.getProperty(Prop.SENSOR_PORT, ""));
 					smsdX.close();
 					smsdY.close();
-					mainPanel.paramsChanged();
+					mainPanel.propsChanged();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
