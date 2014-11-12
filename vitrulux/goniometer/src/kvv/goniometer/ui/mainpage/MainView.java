@@ -23,8 +23,8 @@ import kvv.goniometer.ui.utils.VericalBoxPanel;
 
 @SuppressWarnings("serial")
 public class MainView extends JPanel implements IMainView {
-	private static final int WIDTH = 600;
-	private static final int HEIGHT = 600;
+	private static final int WIDTH = 500;
+	private static final int HEIGHT = 500;
 
 	private final DiagramView diagramView;
 	private final JSlider slider = new JSlider(JSlider.VERTICAL, 0, 100, 0);
