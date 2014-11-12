@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
+import javax.swing.SwingUtilities;
+
 import kvv.goniometer.Sensor;
 import kvv.goniometer.SensorData;
 
@@ -19,7 +21,7 @@ import com.google.gson.Gson;
 
 public class TKA_VD implements Sensor {
 
-	//private String port;
+	// private String port;
 	private SerialPort serPort;
 	private InputStream inStream;
 
@@ -33,17 +35,23 @@ public class TKA_VD implements Sensor {
 
 	@Override
 	public void addListener(SensorListener listener) {
-		listeners.add(listener);
+		synchronized (listeners) {
+			listeners.add(listener);
+		}
 	}
 
 	@Override
 	public void removeListener(SensorListener listener) {
-		listeners.remove(listener);
+		synchronized (listeners) {
+			listeners.remove(listener);
+		}
 	}
 
 	private void onChange(SensorData data) {
-		for (SensorListener listener : listeners)
-			listener.onChanged(data);
+		synchronized (listeners) {
+			for (SensorListener listener : listeners)
+				listener.onChanged(data);
+		}
 	}
 
 	private class Listener implements SerialPortEventListener {
@@ -64,7 +72,14 @@ public class TKA_VD implements Sensor {
 						Thread.sleep(100);
 					}
 
-					received1(Arrays.copyOf(buf, cnt));
+					final byte[] received = Arrays.copyOf(buf, cnt);
+
+					SwingUtilities.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							received1(received);
+						}
+					});
 
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -88,32 +103,35 @@ public class TKA_VD implements Sensor {
 
 	}
 
-	private synchronized void received1(byte[] data) {
-		
-		for(byte b : data)
-			System.out.print(b + " ");
-		System.out.println();
-		
-		SensorData sensorData = new SensorData();
-		sensorData.e = getInt(data, 25);
-		sensorData.x = getShort(data, 17);
-		sensorData.y = getShort(data, 19);
+	private void received1(byte[] data) {
+		try {
+			// for(byte b : data)
+			// System.out.print(b + " ");
+			// System.out.println();
 
-		int n = data[29] + 1;
-		for (int i = 0; i < n; i++) {
-			int lambda = getShort(data, 30 + i * 2);
-			int k = getShort(data, 30 + n * 2 + i * 2);
-			sensorData.spectrum.put(lambda, k);
+			SensorData sensorData = new SensorData();
+			sensorData.e = getInt(data, 25);
+			sensorData.x = getShort(data, 17);
+			sensorData.y = getShort(data, 19);
+
+			int n = data[29] + 1;
+			for (int i = 0; i < n; i++) {
+				int lambda = getShort(data, 30 + i * 2) / 10;
+				int k = getShort(data, 30 + n * 2 + i * 2);
+				sensorData.spectrum.put(lambda, k);
+			}
+
+			sensorData.t = getInt(data, 30 + n * 2 + n * 2);
+
+			onChange(sensorData);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-
-		sensorData.t = getInt(data, 30 + n * 2 + n * 2);
-
-		onChange(sensorData);
 	}
 
 	private String errMsg;
 
-	public synchronized void init(String port) throws Exception {
+	public void init(String port) throws Exception {
 		close();
 		errMsg = null;
 
@@ -134,11 +152,11 @@ public class TKA_VD implements Sensor {
 		}
 	}
 
-	public synchronized void close() {
+	public void close() {
 		if (serPort != null) {
 			serPort.close();
 			serPort = null;
-//			port = null;
+			// port = null;
 		}
 	}
 

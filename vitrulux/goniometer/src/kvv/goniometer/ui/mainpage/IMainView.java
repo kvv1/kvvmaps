@@ -2,11 +2,12 @@ package kvv.goniometer.ui.mainpage;
 
 import javax.swing.JComponent;
 
-public interface IMainView {
-	void setParams(float minX, float maxX, float stepX, float minY, float maxY,
-			float stepY);
+import kvv.goniometer.ui.mainpage.DataSet.Data;
 
-	void updateData(Float polar);
+public interface IMainView {
+	void setParams();
+
+	void updateData(Data data);
 
 	JComponent getComponent();
 

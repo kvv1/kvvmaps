@@ -1,20 +1,24 @@
 #
-#Wed Oct 22 16:27:30 MSK 2014
-sensor_port=COM11
-y_end_degrees=180
-x_speed=10000
+#Wed Nov 12 16:39:53 AST 2014
+sensor_port=COM9
+y_end_degrees=90
+x_speed=2500
 sim_sensor=true
+lambda_begin=400
 sim_motors=true
-x_start_degrees=-90
-y_range=5000
-y_start_degrees=0
+x_start_degrees=0
+y_range=88000
+y_start_degrees=-90
 x_step_degrees=45
-auto_motor_off=true
-y_speed=10000
+auto_motor_off=false
+motor_additional_delay=100
+y_speed=2500
 sensor_delay=0
-debug=false
+lambda_step=50
+debug=true
 x_port=COM8
-y_step_degrees=45
-x_end_degrees=90
-x_range=10000
+lambda_end=750
+y_step_degrees=90
+x_end_degrees=180
+x_range=88000
 y_port=COM10

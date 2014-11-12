@@ -16,23 +16,24 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import kvv.goniometer.Motor;
 import kvv.goniometer.Motor.MotorListener;
+import kvv.goniometer.Props;
 import kvv.goniometer.Sensor;
 import kvv.goniometer.Sensor.SensorListener;
 import kvv.goniometer.SensorData;
 import kvv.goniometer.Win;
 import kvv.goniometer.ui.mainpage.DataSet.Data;
+import kvv.goniometer.ui.props.Prop;
 import kvv.goniometer.ui.utils.FlowWrapper;
 import kvv.goniometer.ui.utils.HorizontalBoxPanel;
 import kvv.goniometer.ui.utils.SwingLink;
 import kvv.goniometer.ui.utils.VericalBoxPanel;
 
 @SuppressWarnings("serial")
-public abstract class MainPanel extends JPanel {
+public class MainPanel extends JPanel {
 
 	private final JButton startButton = new JButton("Старт");
 	private final JButton stopButton = new JButton("Стоп");
@@ -46,35 +47,22 @@ public abstract class MainPanel extends JPanel {
 
 	private final DataSet dataSet = new DataSet();
 	// private final DataCanvas canvas = new DataCanvas(dataSet);
-	private final IMainView mainView = new MainView(dataSet);
+	private final IMainView mainView;
 
 	private final Motor motorX;
 	private final Motor motorY;
 	private final Sensor sensor;
 
-	protected abstract int getRangeX();
+	private final Props props;
 
-	protected abstract float getDegStartX();
-
-	protected abstract float getDegEndX();
-
-	protected abstract float getDegStepX();
-
-	protected abstract int getRangeY();
-
-	protected abstract float getDegStartY();
-
-	protected abstract float getDegEndY();
-
-	protected abstract float getDegStepY();
-
-	protected abstract int getSensorDelay();
-
-	public MainPanel(final Motor motorX, final Motor motorY, Sensor sensor) {
+	public MainPanel(final Motor motorX, final Motor motorY, Sensor sensor,
+			Props props) {
 		this.motorX = motorX;
 		this.motorY = motorY;
 		this.sensor = sensor;
+		this.props = props;
 
+		mainView = new MainView(dataSet, props);
 		dataSet.setWnd(mainView);
 
 		// setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -115,8 +103,6 @@ public abstract class MainPanel extends JPanel {
 
 		add(bottomPanel, BorderLayout.PAGE_END);
 
-		update();
-
 		motorX.addListener(motorListener);
 		motorY.addListener(motorListener);
 
@@ -153,9 +139,6 @@ public abstract class MainPanel extends JPanel {
 				status.setText(" ");
 				if (thread != null)
 					return;
-
-				mainView.setParams(getDegStartX(), getDegEndX(), getDegStepX(),
-						getDegStartY(), getDegEndY(), getDegStepY());
 
 				dataSet.clear();
 
@@ -219,21 +202,56 @@ public abstract class MainPanel extends JPanel {
 			}
 		});
 
-		update();
-
+		paramsChanged();
 	}
 
-	MotorListener motorListener = new MotorListener() {
+	public void paramsChanged() {
+		mainView.setParams();
+		update();
+	}
+
+	private MotorListener motorListener = new MotorListener() {
 		@Override
 		public void onChanged() {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					update();
-				}
-			});
+			update();
 		}
 	};
+
+	private int getRangeX() {
+		return props.getInt(Prop.X_RANGE, 0);
+	}
+
+	private float getDegStartX() {
+		return props.getFloat(Prop.X_START_DEGREES, 0);
+	}
+
+	private float getDegEndX() {
+		return props.getFloat(Prop.X_END_DEGREES, 0);
+	}
+
+	private float getDegStepX() {
+		return props.getFloat(Prop.X_STEP_DEGREES, 0);
+	}
+
+	private int getRangeY() {
+		return props.getInt(Prop.Y_RANGE, 0);
+	}
+
+	private float getDegStartY() {
+		return props.getFloat(Prop.Y_START_DEGREES, 0);
+	}
+
+	private float getDegEndY() {
+		return props.getFloat(Prop.Y_END_DEGREES, 0);
+	}
+
+	private float getDegStepY() {
+		return props.getFloat(Prop.Y_STEP_DEGREES, 0);
+	}
+
+	private int getSensorDelay() {
+		return props.getInt(Prop.SENSOR_DELAY, 0);
+	}
 
 	private void update() {
 		startButton.setEnabled(motorX.completed() && motorX.getPos() == 0
@@ -244,8 +262,8 @@ public abstract class MainPanel extends JPanel {
 		} else {
 			float degX = getDegStartX() + p * (getDegEndX() - getDegStartX())
 					/ getRangeX();
-			posDegX.setText("X: " + degX + " (" + getDegStartX() + "..."
-					+ getDegEndX() + ")");
+			posDegX.setText("Азимутальный угол: " + degX + " ("
+					+ getDegStartX() + "..." + getDegEndX() + ")");
 		}
 
 		p = motorY.getPos();
@@ -254,12 +272,12 @@ public abstract class MainPanel extends JPanel {
 		} else {
 			float degY = getDegStartY() + p * (getDegEndY() - getDegStartY())
 					/ getRangeY();
-			posDegY.setText("Y: " + degY + " (" + getDegStartY() + "..."
-					+ getDegEndY() + ")");
+			posDegY.setText("Полярный угол: " + degY + " (" + getDegStartY()
+					+ "..." + getDegEndY() + ")");
 		}
 	}
 
-	volatile T thread;
+	private volatile T thread;
 
 	class T extends Thread {
 		int cnt;
@@ -332,18 +350,29 @@ public abstract class MainPanel extends JPanel {
 
 				motorX.moveTo(0);
 				motorY.moveTo(0);
-				
+
 			} catch (Exception e) {
 				status.setText(e.getClass().getSimpleName() + " "
 						+ e.getMessage());
 			} finally {
 				try {
-					motorX.stop();
-				} catch (Exception e) {
-				}
-				try {
-					motorY.stop();
-				} catch (Exception e) {
+					new Interruptor() {
+						@Override
+						protected boolean readyToContinue() {
+							return motorY.completed() && motorX.completed();
+						}
+					}.pause();
+					try {
+						motorX.onOff(false);
+					} catch (Exception e) {
+					}
+					try {
+						motorY.onOff(false);
+					} catch (Exception e) {
+					}
+				} catch (InterruptedException e1) {
+					status.setText(e1.getClass().getSimpleName() + " "
+							+ e1.getMessage());
 				}
 				sensor.removeListener(listener);
 				SwingUtilities.invokeLater(new Runnable() {

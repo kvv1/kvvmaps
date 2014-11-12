@@ -12,7 +12,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 import kvv.goniometer.Motor;
 import kvv.goniometer.Motor.MotorListener;
@@ -55,49 +54,39 @@ public abstract class MotorPanel extends JPanel {
 	}
 
 	public MotorPanel(final Motor motor, String name) {
-//		setLayout(new FlowLayout());
+		// setLayout(new FlowLayout());
 
 		setBorder(BorderFactory.createTitledBorder(name));
 		status.setForeground(new Color(255, 0, 0));
-		
+
 		setLayout(new BorderLayout(0, 0));
-		
+
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
-		
-		panel.add(new FlowWrapper(FlowLayout.LEFT, posTo, startAbsButton, startDegButton));
+
+		panel.add(new FlowWrapper(FlowLayout.LEFT, posTo, startAbsButton,
+				startDegButton));
 		panel.add(new FlowWrapper(FlowLayout.LEFT, posAbs));
 		panel.add(new FlowWrapper(FlowLayout.LEFT, posDeg));
 		panel.add(new FlowWrapper(FlowLayout.LEFT, status));
 
 		add(panel, BorderLayout.PAGE_START);
-		add(new FlowWrapper(FlowLayout.LEFT, zeroButton, zeroOkButton, stopButton), BorderLayout.PAGE_END);
-		
+		add(new FlowWrapper(FlowLayout.LEFT, zeroButton, zeroOkButton,
+				stopButton), BorderLayout.PAGE_END);
+
 		motor.addListener(new MotorListener() {
 			@Override
 			public void onChanged() {
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						update(motor);
-					}
-				});
+				update(motor);
 			}
 		});
 
 		setButtons(motor);
-		
+
 		update(motor);
 	}
 
 	private void setButtons(final Motor motor) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				//status.setText(" ");
-			}
-		});
-		
 		startAbsButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -125,8 +114,7 @@ public abstract class MotorPanel extends JPanel {
 						status.setText("Заданная позиция вне диапазона");
 					else {
 						status.setText(" ");
-						motor.moveTo((int) ((d - getDegStart()) * getRange()
-								/ (getDegEnd() - getDegStart())));
+						motor.moveTo((int) ((d - getDegStart()) * getRange() / (getDegEnd() - getDegStart())));
 					}
 				} catch (Exception e1) {
 					status.setText(e1.getClass().getSimpleName() + " "

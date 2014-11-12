@@ -10,15 +10,23 @@ import kvv.goniometer.SensorData;
 @SuppressWarnings("serial")
 public class DataSet extends JPanel {
 
-	static class Data {
-		float x;
-		float y;
+	public static class Data {
+		public final float x;
+		public final float y;
 		SensorData value;
 
 		public Data(float x, float y, SensorData value) {
 			this.x = x;
 			this.y = y;
 			this.value = value;
+		}
+
+		public float getPrim(DIR dir) {
+			return dir == DIR.AZIMUTH ? x : y;
+		}
+
+		public float getSec(DIR dir) {
+			return dir == DIR.AZIMUTH ? y : x;
 		}
 	}
 
@@ -41,9 +49,10 @@ public class DataSet extends JPanel {
 	}
 
 	void addMeasure(float x, float y, SensorData d) {
-		//System.out.println(x + " " + y + " " + d);
-		data.add(new Data(x, y, d));
+		// System.out.println(x + " " + y + " " + d);
+		Data dd = new Data(x, y, d);
+		data.add(dd);
 		if (wnd != null)
-			wnd.updateData(y);
+			wnd.updateData(dd);
 	}
 }

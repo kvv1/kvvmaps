@@ -30,7 +30,7 @@ public class Prop {
 	public static final String SENSOR_DELAY = "sensor_delay";
 
 	public static final String DEBUG = "debug";
-	
+
 	public static final String SIM_MOTORS = "sim_motors";
 
 	public static final String SIM_SENSOR = "sim_sensor";
@@ -38,4 +38,11 @@ public class Prop {
 	public static final String AUTO_MOTOR_OFF = "auto_motor_off";
 
 	public static final String MOTOR_ADDITIONAL_DELAY = "motor_additional_delay";
+
+	public static final String LAMBLA_BEGIN = "lambda_begin";
+	public static final String LAMBLA_END = "lambda_end";
+	public static final String LAMBLA_STEP = "lambda_step";
+
+	public static final String SENSOR_DIST = "sensor_dist";
+
 }
