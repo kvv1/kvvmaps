@@ -26,6 +26,8 @@ public abstract class TableView extends JPanel {
 	private final SpectrumView spectrum;
 
 	protected abstract DIR getDir();
+	
+	private DIR dir;
 
 	protected abstract float getPrim();
 
@@ -73,9 +75,9 @@ public abstract class TableView extends JPanel {
 			if (d.getPrim(getDir()) == getPrim()) {
 				model.addRow(new Object[] { sec1, (float) d.value.e / 10,
 						d.value.x, d.value.y, d.value.t });
-				if (sec != null && sec == sec1)
-					table.setRowSelectionInterval(table.getRowCount() - 1,
-							table.getRowCount() - 1);
+//				if (sec != null && sec == sec1)
+//					table.setRowSelectionInterval(table.getRowCount() - 1,
+//							table.getRowCount() - 1);
 			}
 		}
 	}
@@ -104,7 +106,7 @@ public abstract class TableView extends JPanel {
 			model.removeRow(model.getRowCount() - 1);
 
 		if (getDir() == DIR.AZIMUTH) {
-			table.setModel(new DefaultTableModel(new Object[] { DIR.POLAR.text,
+			table.setModel(new DefaultTableModel(new Object[] { dir.text,
 					"E", "x", "y", "T" }, 0) {
 				public boolean isCellEditable(int row, int column) {
 					return false;

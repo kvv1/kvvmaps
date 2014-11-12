@@ -35,10 +35,10 @@ public class MainView extends JPanel implements IMainView {
 	private float stepPrim;
 
 	private final JRadioButton primLabelAzim = new JRadioButton(
-			DIR.AZIMUTH.text, true);
-	private final JRadioButton primLabelPol = new JRadioButton(DIR.POLAR.text);
+			DIR.AZIMUTH.text);
+	private final JRadioButton primLabelPol = new JRadioButton(DIR.POLAR.text, true);
 
-	private DIR primDir = DIR.AZIMUTH;
+	private DIR primDir = DIR.POLAR;
 
 	private float prim;
 	private final Props props;
