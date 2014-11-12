@@ -7,33 +7,31 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import kvv.goniometer.ui.mainpage.DataSet.Data;
 
 @SuppressWarnings("serial")
-public class DiagramView extends JPanel implements IMainView {
+public abstract class DiagramView extends JPanel {
 	private final DataSet dataSet;
-	private Float primary;
-	private DIR primaryDir = DIR.AZIMUTH;
+
+	private final Color c = Color.LIGHT_GRAY;
+	private final Color c1 = new Color(c.getRed(), c.getGreen(), c.getBlue(),
+			128);
+
+	protected abstract DIR getDir();
+
+	protected abstract float getPrim();
 
 	public DiagramView(DataSet dataSet) {
 		this.dataSet = dataSet;
-	}
-
-	public void setPrimary(DIR primaryDir, float primary) {
-		this.primaryDir = primaryDir;
-		this.primary = primary;
-		repaint();
 	}
 
 	private static void oval(Graphics2D g, int x, int y, int r) {
 		g.fillOval(x - r / 2, y - r / 2, r, r);
 	}
 
-	@Override
-	public void setParams() {
+	public void propsChanged() {
 	}
 
 	@Override
@@ -71,22 +69,22 @@ public class DiagramView extends JPanel implements IMainView {
 
 		int maxValue = 1;
 		for (Data d : dataSet.getData()) {
-			float v = d.getPrim(primaryDir);
-			if (v == primary && d.value.e > maxValue)
+			float v = d.getPrim(getDir());
+			if (v == getPrim() && d.value.e > maxValue)
 				maxValue = d.value.e;
 		}
 
 		Point old = null;
 
 		g.setStroke(new BasicStroke(2));
-		
+
 		g.setColor(new Color(0x008080));
 		for (Data d : dataSet.getData()) {
-			float v = d.getPrim(primaryDir);
-			if (v != primary)
+			float v = d.getPrim(getDir());
+			if (v != getPrim())
 				continue;
 
-			float a = d.getSec(primaryDir);
+			float a = d.getSec(getDir());
 			double sin = Math.sin(a * Math.PI / 180);
 			double cos = Math.cos(a * Math.PI / 180);
 			int x = centerX + (int) (d.value.e * R * cos / maxValue);
@@ -100,9 +98,6 @@ public class DiagramView extends JPanel implements IMainView {
 
 		}
 
-		Color c = Color.LIGHT_GRAY;
-		Color c1 = new Color(c.getRed(), c.getGreen(), c.getBlue(), 128);
-
 		for (int a = -180 + 30; a <= 180; a += 30) {
 			int r = getWidth() / 2 - 10;
 			double sin = Math.sin(a * Math.PI / 180);
@@ -113,28 +108,29 @@ public class DiagramView extends JPanel implements IMainView {
 
 			int w = g.getFontMetrics().stringWidth(txt);
 			int h = g.getFontMetrics().getHeight();
-			int descent = g.getFontMetrics().getDescent();
-			int leading = g.getFontMetrics().getLeading();
-
-			g.setColor(c1);
-			g.fillRect(x - w / 2, y - (h - leading - descent) / 2, w, (h
-					- leading - descent));
-			g.setColor(Color.BLACK);
-			g.drawString(txt, x - w / 2, y - h / 2 + h - descent);
-
+			drawText(g, txt, x - w / 2, y - h / 2);
 		}
 
+		drawText(g,
+				getDir() == DIR.AZIMUTH ? DIR.POLAR.text : DIR.AZIMUTH.text,
+				4, 4);
+
 	}
 
-	@Override
-	public JComponent getComponent() {
-		return this;
+	private void drawText(Graphics2D g, String txt, int x, int y) {
+		int w = g.getFontMetrics().stringWidth(txt);
+		int h = g.getFontMetrics().getHeight();
+		int descent = g.getFontMetrics().getDescent();
+		int leading = g.getFontMetrics().getLeading();
+
+		g.setColor(c1);
+		g.fillRect(x, y - (-leading - descent) / 2, w, (h - leading - descent));
+		g.setColor(Color.BLACK);
+		g.drawString(txt, x, y + h - descent);
 	}
 
-	@Override
-	public void updateData(Data data) {
-		if (data == null || data.getPrim(primaryDir) == this.primary)
-			repaint();
+	public void updateData() {
+		repaint();
 	}
 
 }
