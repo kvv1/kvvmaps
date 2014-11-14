@@ -35,16 +35,22 @@ public class MainView extends JPanel implements IMainView {
 	private float stepPrim;
 
 	private final JRadioButton primLabelAzim = new JRadioButton(
-			DIR.AZIMUTH.text);
-	private final JRadioButton primLabelPol = new JRadioButton(DIR.POLAR.text, true);
+			DIR.AZIMUTH.text, true);
+	private final JRadioButton primLabelPol = new JRadioButton(DIR.POLAR.text);
 
-	private DIR primDir = DIR.POLAR;
+	private DIR primDir = DIR.AZIMUTH;
 
 	private float prim;
 	private final Props props;
 
 	public MainView(DataSet dataSet, Props props) {
 		this.props = props;
+
+		try {
+			primDir = DIR.valueOf(props.get(Prop.PRIMARY_DIR));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		this.diagramView = new DiagramView(dataSet) {
 			@Override
@@ -59,7 +65,6 @@ public class MainView extends JPanel implements IMainView {
 		};
 
 		diagramView.setPreferredSize(new Dimension(WIDTH, HEIGHT));
-
 
 		JPanel sliderPanel = new JPanel(new BorderLayout());
 		sliderPanel.setPreferredSize(new Dimension(100, HEIGHT));
@@ -142,13 +147,13 @@ public class MainView extends JPanel implements IMainView {
 	@Override
 	public void propsChanged() {
 		if (getDir() == DIR.AZIMUTH) {
-			minPrim = props.getFloat(Prop.X_START_DEGREES, 0);
-			maxPrim = props.getFloat(Prop.X_END_DEGREES, 0);
-			stepPrim = props.getFloat(Prop.X_STEP_DEGREES, 0);
+			minPrim = props.getFloat(Prop.X_START_DEGREES);
+			maxPrim = props.getFloat(Prop.X_END_DEGREES);
+			stepPrim = props.getFloat(Prop.X_STEP_DEGREES);
 		} else {
-			minPrim = props.getFloat(Prop.Y_START_DEGREES, 0);
-			maxPrim = props.getFloat(Prop.Y_END_DEGREES, 0);
-			stepPrim = props.getFloat(Prop.Y_STEP_DEGREES, 0);
+			minPrim = props.getFloat(Prop.Y_START_DEGREES);
+			maxPrim = props.getFloat(Prop.Y_END_DEGREES);
+			stepPrim = props.getFloat(Prop.Y_STEP_DEGREES);
 		}
 
 		tableView.propsChanged();

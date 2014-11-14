@@ -55,9 +55,9 @@ public class SpectrumView extends JPanel {
 		g.setColor(Color.LIGHT_GRAY);
 		g.drawLine(0, h, getWidth(), h);
 
-		for (int lambda = props.getInt(Prop.LAMBLA_BEGIN, 0); lambda <= props
-				.getInt(Prop.LAMBLA_END, 0); lambda += props.getInt(
-				Prop.LAMBLA_STEP, 1)) {
+		for (int lambda = props.getInt(Prop.LAMBLA_BEGIN); lambda <= props
+				.getInt(Prop.LAMBLA_END); lambda += props
+				.getInt(Prop.LAMBLA_STEP)) {
 
 			int x = (lambda - minLambda) * getWidth() / (maxLambda - minLambda);
 
@@ -89,7 +89,6 @@ public class SpectrumView extends JPanel {
 
 			int y = value * h / maxValue;
 
-
 			if (prev != null) {
 				g.setColor(wvColor((lambda + prevLambda) / 2, 1f));
 				g.drawLine(prev.x, h - prev.y, x, h - y);
@@ -98,7 +97,7 @@ public class SpectrumView extends JPanel {
 
 			g.setColor(wvColor(lambda, 1f));
 			oval(g, x, h - y, 4);
-			
+
 			prev = new Point(x, y);
 		}
 

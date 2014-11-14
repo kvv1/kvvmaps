@@ -22,7 +22,6 @@ import kvv.goniometer.Motor;
 import kvv.goniometer.Motor.MotorListener;
 import kvv.goniometer.Props;
 import kvv.goniometer.Sensor;
-import kvv.goniometer.Sensor.SensorListener;
 import kvv.goniometer.SensorData;
 import kvv.goniometer.Win;
 import kvv.goniometer.ui.mainpage.DataSet.Data;
@@ -55,12 +54,57 @@ public class MainPanel extends JPanel {
 
 	private final Props props;
 
-	public MainPanel(final Motor motorX, final Motor motorY, Sensor sensor,
-			Props props) {
+	private final ScanParams scanParamsX;
+	private final ScanParams scanParamsY;
+	private final SensorPrams sensorPrams;
+
+	private ScanThread thread;
+
+	class ScanThread1 extends ScanThread {
+		private final DIR primDir;
+		private final float R;
+
+		public ScanThread1(DIR primDir, float R, Motor motorPrim,
+				Motor motorSec, ScanParams scanParamsPrim,
+				ScanParams scanParamsSec, Sensor sensor, SensorPrams sensorPrams) {
+			super(primDir == DIR.AZIMUTH ? motorPrim : motorSec,
+					primDir == DIR.AZIMUTH ? motorSec : motorPrim,
+					primDir == DIR.AZIMUTH ? scanParamsPrim : scanParamsSec,
+					primDir == DIR.AZIMUTH ? scanParamsSec : scanParamsPrim,
+					sensor, sensorPrams);
+			this.primDir = primDir;
+			this.R = R;
+		}
+
+		@Override
+		protected void onData(float prim, float sec, SensorData data) {
+			dataSet.addMeasure(primDir == DIR.AZIMUTH ? prim : sec,
+					primDir == DIR.AZIMUTH ? sec : prim, R, data);
+		}
+
+		@Override
+		protected void onErr(Exception e) {
+			status.setText(e.getClass().getSimpleName() + " " + e.getMessage());
+		}
+
+		@Override
+		protected void onFinished() {
+			thread = null;
+			update();
+		}
+	}
+
+	public MainPanel(final Motor motorX, final Motor motorY,
+			final Sensor sensor, final ScanParams scanParamsX,
+			final ScanParams scanParamsY, final SensorPrams sensorPrams,
+			final Props props) {
 		this.motorX = motorX;
 		this.motorY = motorY;
 		this.sensor = sensor;
 		this.props = props;
+		this.scanParamsX = scanParamsX;
+		this.scanParamsY = scanParamsY;
+		this.sensorPrams = sensorPrams;
 
 		mainView = new MainView(dataSet, props);
 		dataSet.setWnd(mainView);
@@ -142,8 +186,13 @@ public class MainPanel extends JPanel {
 
 				dataSet.clear();
 
-				thread = new T();
+				DIR primDir = DIR.valueOf(props.get(Prop.PRIMARY_DIR));
+				final Float R = props.getFloat(Prop.SENSOR_DIST);
+
+				thread = new ScanThread1(primDir, R, motorX, motorY,
+						scanParamsX, scanParamsY, sensor, sensorPrams);
 				thread.start();
+
 				update();
 			}
 		});
@@ -217,42 +266,6 @@ public class MainPanel extends JPanel {
 		}
 	};
 
-	private int getRangeX() {
-		return props.getInt(Prop.X_RANGE, 0);
-	}
-
-	private float getDegStartX() {
-		return props.getFloat(Prop.X_START_DEGREES, 0);
-	}
-
-	private float getDegEndX() {
-		return props.getFloat(Prop.X_END_DEGREES, 0);
-	}
-
-	private float getDegStepX() {
-		return props.getFloat(Prop.X_STEP_DEGREES, 0);
-	}
-
-	private int getRangeY() {
-		return props.getInt(Prop.Y_RANGE, 0);
-	}
-
-	private float getDegStartY() {
-		return props.getFloat(Prop.Y_START_DEGREES, 0);
-	}
-
-	private float getDegEndY() {
-		return props.getFloat(Prop.Y_END_DEGREES, 0);
-	}
-
-	private float getDegStepY() {
-		return props.getFloat(Prop.Y_STEP_DEGREES, 0);
-	}
-
-	private int getSensorDelay() {
-		return props.getInt(Prop.SENSOR_DELAY, 0);
-	}
-
 	private void update() {
 		startButton.setEnabled(motorX.completed() && motorX.getPos() == 0
 				&& motorY.completed() && motorY.getPos() == 0);
@@ -260,151 +273,34 @@ public class MainPanel extends JPanel {
 		if (p < 0) {
 			posDegX.setText("Азимутальный угол: Неизвестно");
 		} else {
-			float degX = getDegStartX() + p * (getDegEndX() - getDegStartX())
-					/ getRangeX();
+			float degX = scanParamsX.getDegStart() + p
+					* (scanParamsX.getDegEnd() - scanParamsX.getDegStart())
+					/ scanParamsX.getRange();
 			posDegX.setText("Азимутальный угол: " + degX + " ("
-					+ getDegStartX() + "..." + getDegEndX() + ")");
+					+ scanParamsX.getDegStart() + "..."
+					+ scanParamsX.getDegEnd() + ")");
 		}
 
 		p = motorY.getPos();
 		if (p < 0) {
 			posDegY.setText("Полярный угол: Неизвестно");
 		} else {
-			float degY = getDegStartY() + p * (getDegEndY() - getDegStartY())
-					/ getRangeY();
-			posDegY.setText("Полярный угол: " + degY + " (" + getDegStartY()
-					+ "..." + getDegEndY() + ")");
+			float degY = scanParamsY.getDegStart() + p
+					* (scanParamsY.getDegEnd() - scanParamsY.getDegStart())
+					/ scanParamsY.getRange();
+			posDegY.setText("Полярный угол: " + degY + " ("
+					+ scanParamsY.getDegStart() + "..."
+					+ scanParamsY.getDegEnd() + ")");
 		}
-	}
-
-	private volatile T thread;
-
-	class T extends Thread {
-		int cnt;
-		volatile SensorData data;
-
-		@Override
-		public void run() {
-			SensorListener listener = new SensorListener() {
-				@Override
-				public synchronized void onChanged(SensorData data) {
-					if (cnt < getSensorDelay()) {
-						cnt++;
-					} else {
-						T.this.data = data;
-					}
-				}
-			};
-
-			sensor.addListener(listener);
-
-			try {
-				for (float y = getDegStartY(); y <= getDegEndY(); y += getDegStepY()) {
-					new Interruptor() {
-						@Override
-						protected boolean readyToContinue() {
-							return motorY.completed();
-						}
-					}.pause();
-					motorY.moveTo((int) ((y - getDegStartY()) * getRangeY() / (getDegEndY() - getDegStartY())));
-					for (float x = getDegStartX(); x <= getDegEndX(); x += getDegStepX()) {
-						new Interruptor() {
-							@Override
-							protected boolean readyToContinue() {
-								return motorX.completed();
-							}
-						}.pause();
-						motorX.moveTo((int) ((x - getDegStartX()) * getRangeX() / (getDegEndX() - getDegStartX())));
-						new Interruptor() {
-							@Override
-							protected boolean readyToContinue() {
-								return motorY.completed() && motorX.completed();
-							}
-						}.pause();
-
-						synchronized (listener) {
-							cnt = 0;
-							data = null;
-						}
-
-						new Interruptor() {
-							@Override
-							protected boolean readyToContinue() {
-								return data != null;
-							}
-						}.pause();
-
-						final float x1 = x;
-						final float y1 = y;
-						final SensorData d1 = data;
-
-						SwingUtilities.invokeLater(new Runnable() {
-							@Override
-							public void run() {
-								dataSet.addMeasure(x1, y1, d1);
-							}
-						});
-
-					}
-				}
-
-				motorX.moveTo(0);
-				motorY.moveTo(0);
-
-			} catch (Exception e) {
-				status.setText(e.getClass().getSimpleName() + " "
-						+ e.getMessage());
-			} finally {
-				try {
-					new Interruptor() {
-						@Override
-						protected boolean readyToContinue() {
-							return motorY.completed() && motorX.completed();
-						}
-					}.pause();
-					try {
-						motorX.onOff(false);
-					} catch (Exception e) {
-					}
-					try {
-						motorY.onOff(false);
-					} catch (Exception e) {
-					}
-				} catch (InterruptedException e1) {
-					status.setText(e1.getClass().getSimpleName() + " "
-							+ e1.getMessage());
-				}
-				sensor.removeListener(listener);
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						thread = null;
-						update();
-					}
-				});
-			}
-		}
-	}
-
-	abstract class Interruptor {
-		protected abstract boolean readyToContinue();
-
-		public void pause() throws InterruptedException {
-			do {
-				if (motorX.getPos() < 0 || motorY.getPos() < 0)
-					throw new InterruptedException("операция прервана");
-			} while (!readyToContinue());
-		}
-
 	}
 
 	private void doSave(File file) {
 		try {
 			PrintWriter wr = new PrintWriter(file);
 			for (Data d : dataSet.getData()) {
-				wr.print(d.x + "\t" + d.y + "\t" + d.value.e + "\t" + d.value.x
-						+ "\t" + d.value.y + "\t" + d.value.t + "\t"
-						+ d.value.spectrum.size());
+				wr.print(d.x + "\t" + d.y + "\t" + d.R + "\t" + d.value.e
+						+ "\t" + d.value.x + "\t" + d.value.y + "\t"
+						+ d.value.t + "\t" + d.value.spectrum.size());
 				for (Integer lambda : d.value.spectrum.keySet())
 					wr.print("\t" + lambda + "\t"
 							+ d.value.spectrum.get(lambda));

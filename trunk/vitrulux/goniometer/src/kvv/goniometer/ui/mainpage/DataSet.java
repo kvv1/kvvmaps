@@ -13,11 +13,13 @@ public class DataSet extends JPanel {
 	public static class Data {
 		public final float x;
 		public final float y;
+		public final float R;
 		SensorData value;
 
-		public Data(float x, float y, SensorData value) {
+		public Data(float x, float y, float R, SensorData value) {
 			this.x = x;
 			this.y = y;
+			this.R = R;
 			this.value = value;
 		}
 
@@ -48,9 +50,9 @@ public class DataSet extends JPanel {
 			wnd.updateData(null);
 	}
 
-	void addMeasure(float x, float y, SensorData d) {
+	void addMeasure(float x, float y, float R, SensorData d) {
 		// System.out.println(x + " " + y + " " + d);
-		Data dd = new Data(x, y, d);
+		Data dd = new Data(x, y, R, d);
 		data.add(dd);
 		if (wnd != null)
 			wnd.updateData(dd);

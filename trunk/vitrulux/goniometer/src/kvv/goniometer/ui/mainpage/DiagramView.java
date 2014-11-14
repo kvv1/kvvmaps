@@ -53,9 +53,8 @@ public abstract class DiagramView extends JPanel {
 		for (int a = 0; a < 360; a += 10) {
 			double sin = Math.sin(a * Math.PI / 180);
 			double cos = Math.cos(a * Math.PI / 180);
-			g.drawLine(centerX, centerY, centerX
-					+ (int) ((getWidth() + getHeight()) * cos), centerY
-					+ (int) ((getWidth() + getHeight()) * sin));
+			g.drawLine(centerX, centerY, centerX + (int) (R * cos), centerY
+					+ (int) (R * sin));
 		}
 
 		g.drawOval(centerX - R, centerY - R, 2 * R, 2 * R);
@@ -112,8 +111,8 @@ public abstract class DiagramView extends JPanel {
 		}
 
 		drawText(g,
-				getDir() == DIR.AZIMUTH ? DIR.POLAR.text : DIR.AZIMUTH.text,
-				4, 4);
+				getDir() == DIR.AZIMUTH ? DIR.POLAR.text : DIR.AZIMUTH.text, 4,
+				4);
 
 	}
 

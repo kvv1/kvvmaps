@@ -15,6 +15,8 @@ import kvv.goniometer.hw.motor.SMSD;
 import kvv.goniometer.hw.sensor.TKA_VD;
 import kvv.goniometer.hw.sensor.TKA_VD_Sim;
 import kvv.goniometer.ui.mainpage.MainPanel;
+import kvv.goniometer.ui.mainpage.ScanParams;
+import kvv.goniometer.ui.mainpage.SensorPrams;
 import kvv.goniometer.ui.props.Prop;
 import kvv.goniometer.ui.props.PropertiesPanel;
 import kvv.goniometer.ui.props.PropertyPanel;
@@ -113,7 +115,8 @@ public class Win extends JFrame {
 		propertiesPanel.addExt(new PropertyPanel(Prop.SENSOR_DELAY,
 				"Время ожидания сенсора (отсчетов)"));
 		propertiesPanel.addExt(new PropertyPanel(Prop.AUTO_MOTOR_OFF,
-				"Выключать моторы после каждого перемещения (true/false)"));
+				"Выключать моторы после каждого перемещения (true/false)",
+				"false"));
 		propertiesPanel.addExt(new PropertyPanel(Prop.MOTOR_ADDITIONAL_DELAY,
 				"Дополнительная пауза между командами (ms)", "200"));
 		propertiesPanel.addExt(new PropertyPanel(Prop.LAMBLA_BEGIN,
@@ -124,6 +127,8 @@ public class Win extends JFrame {
 				"Шаг lambla (нм)", "50"));
 		propertiesPanel.addExt(new PropertyPanel(Prop.SENSOR_DIST,
 				"Расстояние до сенсора (м)", "10"));
+		propertiesPanel.addExt(new PropertyPanel(Prop.PRIMARY_DIR,
+				"Плоскость сканирования (AZIMUTH/POLAR)", "AZIMUTH"));
 
 		propertiesPanel.load();
 
@@ -131,30 +136,47 @@ public class Win extends JFrame {
 				"true")) {
 
 			propertiesPanel.addExt(new PropertyPanel(Prop.SIM_MOTORS,
-					"Симуляция моторов (true/false)"));
+					"Симуляция моторов (true/false)", "false"));
 			propertiesPanel.addExt(new PropertyPanel(Prop.SIM_SENSOR,
-					"Симуляция сенсора (true/false)"));
+					"Симуляция сенсора (true/false)", "false"));
 
 			propertiesPanel.load();
 		}
 
-		Props props = new Props() {
+		final Props props = new Props() {
+			// @Override
+			// public int getInt(String name, int defaultValue) {
+			// return Integer.parseInt(propertiesPanel.properties.getProperty(
+			// name, "" + defaultValue));
+			// }
+			//
+			// @Override
+			// public float getFloat(String name, float defaultValue) {
+			// return Float.parseFloat(propertiesPanel.properties.getProperty(
+			// name, "" + defaultValue));
+			// }
+			//
+			// @Override
+			// public String get(String name, String defaultValue) {
+			// return propertiesPanel.properties.getProperty(name,
+			// defaultValue);
+			// }
+
 			@Override
-			public int getInt(String name, int defaultValue) {
-				return Integer.parseInt(propertiesPanel.properties.getProperty(
-						name, "" + defaultValue));
+			public int getInt(String name) {
+				return Integer.parseInt(propertiesPanel.properties
+						.getProperty(name));
 			}
 
 			@Override
-			public float getFloat(String name, float defaultValue) {
-				return Float.parseFloat(propertiesPanel.properties.getProperty(
-						name, "" + defaultValue));
+			public float getFloat(String name) {
+				return Float.parseFloat(propertiesPanel.properties
+						.getProperty(name));
 			}
 
 			@Override
-			public String get(String name, String defaultValue) {
-				return propertiesPanel.properties.getProperty(name,
-						defaultValue);
+			public String get(String name) {
+				return propertiesPanel.properties.getProperty(name);
 			}
 		};
 
@@ -184,17 +206,69 @@ public class Win extends JFrame {
 			}
 		};
 
-		if (propertiesPanel.properties.getProperty(Prop.SIM_SENSOR, "false")
-				.equals("true"))
+		if (propertiesPanel.properties.getProperty(Prop.SIM_SENSOR).equals(
+				"true"))
 			sensor = new TKA_VD_Sim();
 		else
 			sensor = new TKA_VD();
 
-		mainPanel = new MainPanel(smsdX, smsdY, sensor, props);
+		ScanParams scanParamsX = new ScanParams() {
+			@Override
+			public int getRange() {
+				return props.getInt(Prop.X_RANGE);
+			}
+
+			@Override
+			public float getDegStart() {
+				return props.getFloat(Prop.X_START_DEGREES);
+			}
+
+			@Override
+			public float getDegEnd() {
+				return props.getFloat(Prop.X_END_DEGREES);
+			}
+
+			@Override
+			public float getDegStep() {
+				return props.getFloat(Prop.X_STEP_DEGREES);
+			}
+		};
+
+		ScanParams scanParamsY = new ScanParams() {
+			@Override
+			public int getRange() {
+				return props.getInt(Prop.Y_RANGE);
+			}
+
+			@Override
+			public float getDegStart() {
+				return props.getFloat(Prop.Y_START_DEGREES);
+			}
+
+			@Override
+			public float getDegEnd() {
+				return props.getFloat(Prop.Y_END_DEGREES);
+			}
+
+			@Override
+			public float getDegStep() {
+				return props.getFloat(Prop.Y_STEP_DEGREES);
+			}
+		};
+
+		SensorPrams sensorPrams = new SensorPrams() {
+			@Override
+			public int getSensorDelay() {
+				return props.getInt(Prop.SENSOR_DELAY);
+			}
+		};
+
+		mainPanel = new MainPanel(smsdX, smsdY, sensor, scanParamsX,
+				scanParamsY, sensorPrams, props);
 
 		tabbedPane.add("Главная", mainPanel);
-		tabbedPane.add("Оборудование", new ControlPanel(smsdX, smsdY, sensor,
-				propertiesPanel));
+		tabbedPane.add("Оборудование", new ControlPanel(smsdX, smsdY,
+				scanParamsX, scanParamsY, sensor, propertiesPanel));
 		tabbedPane.add("Настройки", new FlowWrapper(FlowLayout.LEFT, 0, 0,
 				propertiesPanel));
 
