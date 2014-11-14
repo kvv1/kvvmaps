@@ -16,7 +16,7 @@ public class PropertyPanel extends JPanel {
 	private final JTextField text = new JTextField(8);
 
 	public PropertyPanel(String propName, String label) {
-		this(propName, label, "");
+		this(propName, label, "0");
 	}
 
 	public PropertyPanel(String propName, String label, String  defaultValue) {

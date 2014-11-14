@@ -15,27 +15,24 @@ import javax.swing.JTextField;
 
 import kvv.goniometer.Motor;
 import kvv.goniometer.Motor.MotorListener;
+import kvv.goniometer.ui.mainpage.ScanParams;
 import kvv.goniometer.ui.utils.FlowWrapper;
 
 @SuppressWarnings("serial")
-public abstract class MotorPanel extends JPanel {
+public class MotorPanel extends JPanel {
 
-	JButton startAbsButton = new JButton("Старт абс.");
-	JButton startDegButton = new JButton("Старт град.");
-	JTextField posTo = new JTextField(10);
+	private final JButton startAbsButton = new JButton("Старт абс.");
+	private final JButton startDegButton = new JButton("Старт град.");
+	private final JTextField posTo = new JTextField(10);
 
-	JButton stopButton = new JButton("Стоп");
-	JButton zeroButton = new JButton("Ноль");
-	JButton zeroOkButton = new JButton("Ноль Ok");
-	JLabel posAbs = new JLabel("xaxa");
-	JLabel posDeg = new JLabel("xaxa");
-	JLabel status = new JLabel(" ");
+	private final JButton stopButton = new JButton("Стоп");
+	private final JButton zeroButton = new JButton("Ноль");
+	private final JButton zeroOkButton = new JButton("Ноль Ok");
+	private final JLabel posAbs = new JLabel("xaxa");
+	private final JLabel posDeg = new JLabel("xaxa");
+	private final JLabel status = new JLabel(" ");
 
-	protected abstract int getRange();
-
-	protected abstract float getDegStart();
-
-	protected abstract float getDegEnd();
+	private final ScanParams scanParams;
 
 	private void update(Motor motor) {
 		startAbsButton.setEnabled(motor.completed() && motor.getPos() >= 0);
@@ -45,16 +42,17 @@ public abstract class MotorPanel extends JPanel {
 			posAbs.setText("Позиция: Неизвестно");
 			posDeg.setText("Угол: Неизвестно");
 		} else {
-			float deg = getDegStart() + p * (getDegEnd() - getDegStart())
-					/ getRange();
-			posAbs.setText("Позиция: " + p + " (" + getRange() + ")");
-			posDeg.setText("Угол: " + deg + " (" + getDegStart() + "..."
-					+ getDegEnd() + ")");
+			float deg = scanParams.getDegStart() + p
+					* (scanParams.getDegEnd() - scanParams.getDegStart())
+					/ scanParams.getRange();
+			posAbs.setText("Позиция: " + p + " (" + scanParams.getRange() + ")");
+			posDeg.setText("Угол: " + deg + " (" + scanParams.getDegStart()
+					+ "..." + scanParams.getDegEnd() + ")");
 		}
 	}
 
-	public MotorPanel(final Motor motor, String name) {
-		// setLayout(new FlowLayout());
+	public MotorPanel(final Motor motor, String name, ScanParams scanParams) {
+		this.scanParams = scanParams;
 
 		setBorder(BorderFactory.createTitledBorder(name));
 		status.setForeground(new Color(255, 0, 0));
@@ -92,7 +90,7 @@ public abstract class MotorPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					int p = Integer.parseInt(posTo.getText());
-					if (p < 0 || p > getRange())
+					if (p < 0 || p > scanParams.getRange())
 						status.setText("Заданная позиция вне диапазона");
 					else {
 						status.setText(" ");
@@ -110,11 +108,14 @@ public abstract class MotorPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					float d = Float.parseFloat(posTo.getText());
-					if (d < getDegStart() || d > getDegEnd())
+					if (d < scanParams.getDegStart()
+							|| d > scanParams.getDegEnd())
 						status.setText("Заданная позиция вне диапазона");
 					else {
 						status.setText(" ");
-						motor.moveTo((int) ((d - getDegStart()) * getRange() / (getDegEnd() - getDegStart())));
+						motor.moveTo((int) ((d - scanParams.getDegStart())
+								* scanParams.getRange() / (scanParams
+								.getDegEnd() - scanParams.getDegStart())));
 					}
 				} catch (Exception e1) {
 					status.setText(e1.getClass().getSimpleName() + " "

@@ -286,14 +286,14 @@ public abstract class SMSD implements Motor {
 	}
 
 	private boolean isAutoOff() {
-		return props.get(Prop.AUTO_MOTOR_OFF, "false").equals("true");
+		return props.get(Prop.AUTO_MOTOR_OFF).equals("true");
 	}
 
 	private int getAdditioalDelay() {
-		return props.getInt(Prop.MOTOR_ADDITIONAL_DELAY, 200);
+		return props.getInt(Prop.MOTOR_ADDITIONAL_DELAY);
 	}
 
 	private boolean isSim() {
-		return props.get(Prop.SIM_MOTORS, "false").equals("true");
+		return props.get(Prop.SIM_MOTORS).equals("true");
 	}
 }
