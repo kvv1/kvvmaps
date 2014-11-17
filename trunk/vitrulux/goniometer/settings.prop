@@ -1,11 +1,12 @@
 #
-#Fri Nov 14 17:06:34 AST 2014
+#Mon Nov 17 17:48:05 AST 2014
+scan_dir=POLAR
 sensor_port=COM9
 y_end_degrees=90
 x_speed=2500
 sim_sensor=true
 lambda_begin=400
-primary_dir=AZIMUTH
+primary_dir=AZIMUTH5
 sim_motors=true
 sensor_dist=10
 x_start_degrees=0
@@ -18,9 +19,9 @@ y_speed=2500
 sensor_delay=0
 lambda_step=50
 debug=true
-x_port=COM8
-y_step_degrees=5
+x_port=COM10
+y_step_degrees=45
 lambda_end=750
 x_end_degrees=180
 x_range=88000
-y_port=COM10
+y_port=COM8

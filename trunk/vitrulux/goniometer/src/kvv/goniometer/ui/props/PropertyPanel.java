@@ -11,8 +11,8 @@ import javax.swing.JTextField;
 @SuppressWarnings("serial")
 public class PropertyPanel extends JPanel {
 
-	private final String propName;
-	private final String defaultValue;
+	public final String propName;
+	public final String defaultValue;
 	private final JTextField text = new JTextField(8);
 
 	public PropertyPanel(String propName, String label) {

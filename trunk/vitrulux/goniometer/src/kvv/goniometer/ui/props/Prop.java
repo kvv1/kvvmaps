@@ -45,5 +45,5 @@ public class Prop {
 
 	public static final String SENSOR_DIST = "sensor_dist";
 
-	public static final String PRIMARY_DIR = "primary_dir";
+	public static final String SCAN_DIR = "scan_dir";
 }

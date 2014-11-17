@@ -7,6 +7,8 @@ import java.awt.event.ActionListener;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.swing.BoxLayout;
@@ -82,12 +84,27 @@ public class PropertiesPanel extends JPanel {
 
 	}
 
+	Map<String, PropertyPanel> map = new HashMap<>();
+
 	public void add(PropertyPanel propertyPanel) {
 		propsPanel.add(propertyPanel);
+		map.put(propertyPanel.propName, propertyPanel);
 	}
 
 	public void addExt(PropertyPanel propertyPanel) {
 		propsPanelExt.add(propertyPanel);
+		map.put(propertyPanel.propName, propertyPanel);
+	}
+
+	public void addHidden(PropertyPanel propertyPanel) {
+		map.put(propertyPanel.propName, propertyPanel);
+	}
+
+	public String get(String name) {
+		PropertyPanel panel = map.get(name);
+
+		return properties.getProperty(name, panel.defaultValue);
+
 	}
 
 	public void load() {

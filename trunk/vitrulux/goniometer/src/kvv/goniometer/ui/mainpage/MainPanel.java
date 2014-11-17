@@ -186,13 +186,19 @@ public class MainPanel extends JPanel {
 
 				dataSet.clear();
 
-				DIR primDir = DIR.valueOf(props.get(Prop.PRIMARY_DIR));
-				final Float R = props.getFloat(Prop.SENSOR_DIST);
+				try {
+					DIR scanDir = DIR.valueOf(props.get(Prop.SCAN_DIR));
+					DIR primDir = DIR.values()[(scanDir.ordinal() + 1)
+							% DIR.values().length];
+					final Float R = props.getFloat(Prop.SENSOR_DIST);
 
-				thread = new ScanThread1(primDir, R, motorX, motorY,
-						scanParamsX, scanParamsY, sensor, sensorPrams);
-				thread.start();
-
+					thread = new ScanThread1(primDir, R, motorX, motorY,
+							scanParamsX, scanParamsY, sensor, sensorPrams);
+					thread.start();
+				} catch (Exception e1) {
+					status.setText(e1.getClass().getSimpleName() + " "
+							+ e1.getMessage());
+				}
 				update();
 			}
 		});

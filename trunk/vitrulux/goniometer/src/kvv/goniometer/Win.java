@@ -73,7 +73,7 @@ public class Win extends JFrame {
 			@Override
 			public void onChanged() {
 				try {
-					sensor.init(properties.getProperty(Prop.SENSOR_PORT, ""));
+					sensor.init(get(Prop.SENSOR_PORT));
 					smsdX.close();
 					smsdY.close();
 					mainPanel.propsChanged();
@@ -127,8 +127,8 @@ public class Win extends JFrame {
 				"Шаг lambla (нм)", "50"));
 		propertiesPanel.addExt(new PropertyPanel(Prop.SENSOR_DIST,
 				"Расстояние до сенсора (м)", "10"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.PRIMARY_DIR,
-				"Плоскость сканирования (AZIMUTH/POLAR)", "AZIMUTH"));
+		propertiesPanel.addExt(new PropertyPanel(Prop.SCAN_DIR,
+				"Плоскость сканирования (AZIMUTH/POLAR)", "POLAR"));
 
 		propertiesPanel.load();
 
@@ -141,6 +141,12 @@ public class Win extends JFrame {
 					"Симуляция сенсора (true/false)", "false"));
 
 			propertiesPanel.load();
+		} else {
+			propertiesPanel.addHidden(new PropertyPanel(Prop.SIM_MOTORS,
+					"Симуляция моторов (true/false)", "false"));
+			propertiesPanel.addHidden(new PropertyPanel(Prop.SIM_SENSOR,
+					"Симуляция сенсора (true/false)", "false"));
+
 		}
 
 		final Props props = new Props() {
@@ -164,39 +170,36 @@ public class Win extends JFrame {
 
 			@Override
 			public int getInt(String name) {
-				return Integer.parseInt(propertiesPanel.properties
-						.getProperty(name));
+				return Integer.parseInt(propertiesPanel.get(name));
 			}
 
 			@Override
 			public float getFloat(String name) {
-				return Float.parseFloat(propertiesPanel.properties
-						.getProperty(name));
+				return Float.parseFloat(propertiesPanel.get(name));
 			}
 
 			@Override
 			public String get(String name) {
-				return propertiesPanel.properties.getProperty(name);
+				return propertiesPanel.get(name);
 			}
 		};
 
 		smsdX = new SMSD(props) {
 			@Override
 			protected String getPort() {
-				return propertiesPanel.properties.getProperty(Prop.X_PORT, "");
+				return propertiesPanel.get(Prop.X_PORT);
 			}
 
 			@Override
 			protected int getSpeed() {
-				return Integer.parseInt(propertiesPanel.properties.getProperty(
-						Prop.X_SPEED, "10000"));
+				return Integer.parseInt(propertiesPanel.get(Prop.X_SPEED));
 			}
 		};
 
 		smsdY = new SMSD(props) {
 			@Override
 			protected String getPort() {
-				return propertiesPanel.properties.getProperty(Prop.Y_PORT, "");
+				return propertiesPanel.get(Prop.Y_PORT);
 			}
 
 			@Override
@@ -206,8 +209,8 @@ public class Win extends JFrame {
 			}
 		};
 
-		if (propertiesPanel.properties.getProperty(Prop.SIM_SENSOR).equals(
-				"true"))
+		if (propertiesPanel.properties.getProperty(Prop.SIM_SENSOR, "false")
+				.equals("true"))
 			sensor = new TKA_VD_Sim();
 		else
 			sensor = new TKA_VD();
