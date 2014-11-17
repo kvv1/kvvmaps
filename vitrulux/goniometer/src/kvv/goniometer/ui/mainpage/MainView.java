@@ -35,7 +35,7 @@ public class MainView extends JPanel implements IMainView {
 	private float stepPrim;
 
 	private final JRadioButton primLabelAzim = new JRadioButton(
-			DIR.AZIMUTH.text, true);
+			DIR.AZIMUTH.text);
 	private final JRadioButton primLabelPol = new JRadioButton(DIR.POLAR.text);
 
 	private DIR primDir = DIR.AZIMUTH;
@@ -47,10 +47,17 @@ public class MainView extends JPanel implements IMainView {
 		this.props = props;
 
 		try {
-			primDir = DIR.valueOf(props.get(Prop.PRIMARY_DIR));
+			DIR scanDir = DIR.valueOf(props.get(Prop.SCAN_DIR));
+			primDir = DIR.values()[(scanDir.ordinal() + 1)
+					% DIR.values().length];
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		if (primDir == DIR.AZIMUTH)
+			primLabelAzim.setSelected(true);
+		else
+			primLabelPol.setSelected(true);
 
 		this.diagramView = new DiagramView(dataSet) {
 			@Override

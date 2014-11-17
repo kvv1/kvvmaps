@@ -83,6 +83,7 @@ public class TKA_VD implements Sensor {
 
 				} catch (IOException e) {
 					e.printStackTrace();
+					throw new RuntimeException(e);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
