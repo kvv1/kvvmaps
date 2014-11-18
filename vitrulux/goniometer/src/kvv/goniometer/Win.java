@@ -17,6 +17,9 @@ import kvv.goniometer.hw.sensor.TKA_VD_Sim;
 import kvv.goniometer.ui.mainpage.MainPanel;
 import kvv.goniometer.ui.mainpage.ScanParams;
 import kvv.goniometer.ui.mainpage.SensorPrams;
+import kvv.goniometer.ui.props.BoolPropertyPanel;
+import kvv.goniometer.ui.props.FloatPropertyPanel;
+import kvv.goniometer.ui.props.IntPropertyPanel;
 import kvv.goniometer.ui.props.Prop;
 import kvv.goniometer.ui.props.PropertiesPanel;
 import kvv.goniometer.ui.props.PropertyPanel;
@@ -85,47 +88,47 @@ public class Win extends JFrame {
 
 		propertiesPanel.add(new PropertyPanel(Prop.X_PORT,
 				"Порт азимутального мотора"));
-		propertiesPanel.add(new PropertyPanel(Prop.X_START_DEGREES,
+		propertiesPanel.add(new FloatPropertyPanel(Prop.X_START_DEGREES,
 				"Начальное значение азимутального угла (градусов)"));
-		propertiesPanel.add(new PropertyPanel(Prop.X_END_DEGREES,
+		propertiesPanel.add(new FloatPropertyPanel(Prop.X_END_DEGREES,
 				"Конечное значение азимутального угла (градусов)"));
-		propertiesPanel.add(new PropertyPanel(Prop.X_STEP_DEGREES,
+		propertiesPanel.add(new FloatPropertyPanel(Prop.X_STEP_DEGREES,
 				"Шаг азимутального угла (градусов)"));
 
 		propertiesPanel.add(new PropertyPanel(Prop.Y_PORT,
 				"Порт полярного мотора"));
-		propertiesPanel.add(new PropertyPanel(Prop.Y_START_DEGREES,
+		propertiesPanel.add(new FloatPropertyPanel(Prop.Y_START_DEGREES,
 				"Начальное значение полярного угла (градусов)"));
-		propertiesPanel.add(new PropertyPanel(Prop.Y_END_DEGREES,
+		propertiesPanel.add(new FloatPropertyPanel(Prop.Y_END_DEGREES,
 				"Конечное значение полярного угла (градусов)"));
-		propertiesPanel.add(new PropertyPanel(Prop.Y_STEP_DEGREES,
+		propertiesPanel.add(new FloatPropertyPanel(Prop.Y_STEP_DEGREES,
 				"Шаг полярного угла (градусов)"));
 
 		propertiesPanel
 				.add(new PropertyPanel(Prop.SENSOR_PORT, "Порт сенсора"));
 
-		propertiesPanel.addExt(new PropertyPanel(Prop.X_SPEED,
+		propertiesPanel.addExt(new IntPropertyPanel(Prop.X_SPEED,
 				"Скорость азимутального мотора (шагов/сек.)"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.X_RANGE,
+		propertiesPanel.addExt(new IntPropertyPanel(Prop.X_RANGE,
 				"Диапазон азимутального мотора (шагов)"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.Y_SPEED,
+		propertiesPanel.addExt(new IntPropertyPanel(Prop.Y_SPEED,
 				"Скорость полярного мотора (шагов/сек.)"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.Y_RANGE,
+		propertiesPanel.addExt(new IntPropertyPanel(Prop.Y_RANGE,
 				"Диапазон полярного мотора (шагов)"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.SENSOR_DELAY,
+		propertiesPanel.addExt(new IntPropertyPanel(Prop.SENSOR_DELAY,
 				"Время ожидания сенсора (отсчетов)"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.AUTO_MOTOR_OFF,
+		propertiesPanel.addExt(new BoolPropertyPanel(Prop.AUTO_MOTOR_OFF,
 				"Выключать моторы после каждого перемещения (true/false)",
 				"false"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.MOTOR_ADDITIONAL_DELAY,
+		propertiesPanel.addExt(new IntPropertyPanel(Prop.MOTOR_ADDITIONAL_DELAY,
 				"Дополнительная пауза между командами (ms)", "200"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.LAMBLA_BEGIN,
+		propertiesPanel.addExt(new IntPropertyPanel(Prop.LAMBLA_BEGIN,
 				"Мин. lambla (нм)", "400"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.LAMBLA_END,
+		propertiesPanel.addExt(new IntPropertyPanel(Prop.LAMBLA_END,
 				"Макс. lambla (нм)", "750"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.LAMBLA_STEP,
+		propertiesPanel.addExt(new IntPropertyPanel(Prop.LAMBLA_STEP,
 				"Шаг lambla (нм)", "50"));
-		propertiesPanel.addExt(new PropertyPanel(Prop.SENSOR_DIST,
+		propertiesPanel.addExt(new FloatPropertyPanel(Prop.SENSOR_DIST,
 				"Расстояние до сенсора (м)", "10"));
 		propertiesPanel.addExt(new PropertyPanel(Prop.SCAN_DIR,
 				"Плоскость сканирования (AZIMUTH/POLAR)", "POLAR"));
@@ -135,16 +138,16 @@ public class Win extends JFrame {
 		if (propertiesPanel.properties.getProperty(Prop.DEBUG, "false").equals(
 				"true")) {
 
-			propertiesPanel.addExt(new PropertyPanel(Prop.SIM_MOTORS,
+			propertiesPanel.addExt(new BoolPropertyPanel(Prop.SIM_MOTORS,
 					"Симуляция моторов (true/false)", "false"));
-			propertiesPanel.addExt(new PropertyPanel(Prop.SIM_SENSOR,
+			propertiesPanel.addExt(new BoolPropertyPanel(Prop.SIM_SENSOR,
 					"Симуляция сенсора (true/false)", "false"));
 
 			propertiesPanel.load();
 		} else {
-			propertiesPanel.addHidden(new PropertyPanel(Prop.SIM_MOTORS,
+			propertiesPanel.addHidden(new BoolPropertyPanel(Prop.SIM_MOTORS,
 					"Симуляция моторов (true/false)", "false"));
-			propertiesPanel.addHidden(new PropertyPanel(Prop.SIM_SENSOR,
+			propertiesPanel.addHidden(new BoolPropertyPanel(Prop.SIM_SENSOR,
 					"Симуляция сенсора (true/false)", "false"));
 
 		}
