@@ -2,8 +2,10 @@ package kvv.goniometer.ui.mainpage;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.Point;
 import java.awt.RenderingHints;
 
@@ -17,6 +19,7 @@ import kvv.goniometer.ui.props.Prop;
 public class SpectrumView extends JPanel {
 
 	private static final int LAMBDA_PANEL_HEIGHT = 20;
+	// private static final int BAND_PANEL_HEIGHT = 20;
 
 	private final Props props;
 
@@ -101,6 +104,18 @@ public class SpectrumView extends JPanel {
 			prev = new Point(x, y);
 		}
 
+		Paint paint = g.getPaint();
+		int slambda = (maxLambda - minLambda) / 10;
+		for (int lambda = minLambda; lambda <= maxLambda; lambda += slambda) {
+			int x = (lambda - minLambda) * getWidth() / (maxLambda - minLambda);
+			int w = slambda * getWidth() / (maxLambda - minLambda);
+			GradientPaint gp = new GradientPaint(x, 0, wvColor(lambda, 1f), x+w,
+					0, wvColor(lambda + slambda, 1f));
+			g.setPaint(gp);
+			g.fillRect(x, h - 4, w, 4);
+		}
+		g.setPaint(paint);
+		
 	}
 
 	SensorData sensorData;
