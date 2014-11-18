@@ -44,6 +44,8 @@ public class Win extends JFrame {
 
 			logo = new ImageIcon(ImageIO.read(getClass().getResource(
 					"vitrulux.png")));
+//			logo = new ImageIcon(ImageIO.read(getClass().getResource(
+//					"gonio_design.png")));
 		} catch (IOException e) {
 		}
 
