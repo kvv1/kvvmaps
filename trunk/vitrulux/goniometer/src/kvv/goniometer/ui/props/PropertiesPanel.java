@@ -102,9 +102,7 @@ public class PropertiesPanel extends JPanel {
 
 	public String get(String name) {
 		PropertyPanel panel = map.get(name);
-
 		return properties.getProperty(name, panel.defaultValue);
-
 	}
 
 	public void load() {
