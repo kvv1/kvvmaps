@@ -10,22 +10,108 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
+import android.media.audiofx.Equalizer;
+import android.media.audiofx.Visualizer;
+import android.media.audiofx.Visualizer.OnDataCaptureListener;
 
 public abstract class Player {
 
 	protected abstract void onChanged();
+
 	protected abstract void onRandomChanged();
 
-	private MediaPlayer mp = new MediaPlayer();
+	private void onChanged1() {
+		onChanged();
+	}
+	
+	
+	
+	// MyAudioTrack at = new MyAudioTrack();
+
+	private final MediaPlayer mp = new MediaPlayer();
+	private final Equalizer eq = new Equalizer(100, mp.getAudioSessionId());
+	// private final Equalizer eq = new Equalizer(0,
+	// at.audioTrack.getAudioSessionId());
+	private final Visualizer visualizer;
+
+	short[] bandRange;
+	short nBands;
+
 	private boolean initialized;
 
 	private List<Folder> folders;
 	private int curFolder = -1;
 	private int curFile = 0;
 
+	int curGain = 0;
+	
+	volatile float maxA = 128;
+
+	boolean autoVol = true;
+	int g;
+
 	public Player(List<Folder> folders) {
 		this.folders = folders;
 		folders.add(new Folder("RANDOM", 0, new File[0]));
+
+		mp.setVolume(1f, 1f);
+
+		eq.setEnabled(true);
+		nBands = eq.getNumberOfBands();
+		//System.out.println("nBands = " + nBands);
+		bandRange = eq.getBandLevelRange();
+		//System.out.println("min=" + bandRange[0] + " max=" + bandRange[1]);
+
+		visualizer = new Visualizer(mp.getAudioSessionId());
+//		int[] rr = Visualizer.getCaptureSizeRange();
+//		System.out.println(rr[0] + " " + rr[1]);
+
+		// at.start();
+
+		final int maxGain = bandRange[1];
+
+		visualizer.setDataCaptureListener(new OnDataCaptureListener() {
+			int gain;
+
+			@Override
+			public void onWaveFormDataCapture(Visualizer arg0, byte[] waveform,
+					int samplingRate) {
+				int max = 0;
+				for (byte b : waveform) {
+					int a = ((int) b & 0xFF) - 128;
+					max = Math.max(max, Math.abs(a));
+					// System.out.print(a + " ");
+				}
+
+				if (max == 0)
+					max = 1;
+
+				int g = (int) (20 * Math.log10(maxA / max) * 100);
+				// int g = (128 - max) * bandRange[1] / 128;
+				if (g > gain)
+					gain += 10;
+				else
+					gain -= 20;
+//					gain = g;
+
+				if (gain > maxGain)
+					gain = maxGain;
+
+
+				if (autoVol) {
+					//System.out.println(max + " " + g + " " + gain);
+					setVol(gain);
+				} else {
+					setVol(Player.this.g);
+				}
+			}
+
+			@Override
+			public void onFftDataCapture(Visualizer arg0, byte[] arg1, int arg2) {
+			}
+		}, 8000, true, false);
+
+		visualizer.setEnabled(true);
 
 		mp.setOnCompletionListener(new OnCompletionListener() {
 			@Override
@@ -38,20 +124,20 @@ public abstract class Player {
 					mp.stop();
 					curFile = 0;
 					restart(false);
-					//mp.reset();
-					onChanged();
+					// mp.reset();
+					onChanged1();
 					return;
 				}
-				
+
 				next(true);
-				onChanged();
+				onChanged1();
 			}
 		});
 
 		mp.setOnErrorListener(new OnErrorListener() {
 			@Override
 			public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
-				onChanged();
+				onChanged1();
 				return false;
 			}
 		});
@@ -59,7 +145,7 @@ public abstract class Player {
 		mp.setOnInfoListener(new OnInfoListener() {
 			@Override
 			public boolean onInfo(MediaPlayer arg0, int arg1, int arg2) {
-				onChanged();
+				onChanged1();
 				return false;
 			}
 		});
@@ -70,10 +156,13 @@ public abstract class Player {
 		// onChanged();
 		// }
 		// });
+		
+		onChanged1();
+		
 	}
 
-	public void setMaxVolume() {
-		mp.setVolume(1, 1);
+	public void setVolume(float v) {
+		// mp.setVolume(v, v);
 	}
 
 	private void setDataSource() throws Exception {
@@ -126,12 +215,12 @@ public abstract class Player {
 
 		curFolder = folder;
 		toFile(file, curPos, true);
-		onChanged();
+		onChanged1();
 	}
 
 	public void toFile(int idx) {
 		toFile(idx, 0, true);
-		onChanged();
+		onChanged1();
 	}
 
 	private void toFile(int idx, int pos, boolean forcePlay) {
@@ -207,7 +296,7 @@ public abstract class Player {
 		if (cur < 3000 && curFile > 0)
 			toFile(curFile - 1, 0, true);
 		restart(false);
-		onChanged();
+		onChanged1();
 	}
 
 	public void next(boolean forcePlay) {
@@ -219,7 +308,7 @@ public abstract class Player {
 			return;
 		}
 		toFile(curFile + 1, 0, forcePlay);
-		onChanged();
+		onChanged1();
 	}
 
 	private void restart(boolean forcePlay) {
@@ -227,7 +316,7 @@ public abstract class Player {
 			boolean playing = mp.isPlaying();
 			if (playing) {
 				mp.stop();
-				onChanged();
+				onChanged1();
 			}
 			mp.reset();
 			setDataSource();
@@ -242,7 +331,7 @@ public abstract class Player {
 	public void pause() {
 		if (mp.isPlaying()) {
 			mp.pause();
-			onChanged();
+			onChanged1();
 		}
 	}
 
@@ -251,11 +340,7 @@ public abstract class Player {
 			mp.pause();
 		else
 			mp.start();
-		onChanged();
-	}
-
-	public void close() {
-		mp.release();
+		onChanged1();
 	}
 
 	public int getDuration() {
@@ -277,4 +362,39 @@ public abstract class Player {
 	public boolean isPlaying() {
 		return mp.isPlaying();
 	}
+
+	public void close() {
+		eq.release();
+		mp.release();
+		visualizer.release();
+	}
+
+	private void setVol(int j) {
+		for (short i = 0; i < nBands; i++) {
+			if (eq.getEnabled())
+				eq.setBandLevel(i, (short) j);
+		}
+	}
+
+	public void vol0() {
+		autoVol = false;
+		g = 0;
+	}
+
+	public void volPlus1() {
+		maxA = 120;
+		autoVol = true;
+	}
+
+	public void volPlus2() {
+		maxA = 128;
+		autoVol = true;
+	}
+
+	public void enVis() {
+		boolean b = mp.isPlaying();
+		System.out.println("*** " + b);
+		visualizer.setEnabled(b);
+	}
+	
 }

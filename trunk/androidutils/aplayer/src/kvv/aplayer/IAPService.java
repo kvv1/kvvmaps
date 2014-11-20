@@ -23,4 +23,7 @@ public interface IAPService {
 	void delBookmark(Bookmark bookmark);
 	void toBookmark(Bookmark bookmark);
 	void toRandom(int position);
+	void vol0();
+	void volPlus1();
+	void volPlus2();
 }
