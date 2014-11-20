@@ -154,6 +154,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	private void clearGoto() {
 		handler.removeCallbacks(gotoRunnable);
+		rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
 		rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
 		FilesAdapter adapter = (FilesAdapter) list.getAdapter();
 		if (adapter != null) {
@@ -167,6 +168,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		folder = -1;
 		list = (ListView) rootView.findViewById(R.id.list);
 		rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
+		rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
 
 		list.setOnItemClickListener(new OnItemClickListener() {
 			@Override
@@ -263,6 +265,86 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		});
 
 		timing = (Button) rootView.findViewById(R.id.timing);
+
+		final View extButtons = rootView.findViewById(R.id.extButtons);
+
+		timing.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				extButtons.setVisibility(View.VISIBLE);
+				handler.removeCallbacks(gotoRunnable);
+				handler.postDelayed(gotoRunnable, APActivity.BUTTONS_DELAY);
+			}
+		});
+
+		((Button) rootView.findViewById(R.id.vol0))
+				.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View arg0) {
+						service.vol0();
+						handler.removeCallbacks(gotoRunnable);
+						handler.postDelayed(gotoRunnable,
+								APActivity.BUTTONS_DELAY);
+					}
+				});
+
+		((Button) rootView.findViewById(R.id.volPlus1))
+				.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View arg0) {
+						service.volPlus1();
+						handler.removeCallbacks(gotoRunnable);
+						handler.postDelayed(gotoRunnable,
+								APActivity.BUTTONS_DELAY);
+					}
+				});
+
+		((Button) rootView.findViewById(R.id.volPlus2))
+				.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View arg0) {
+						service.volPlus2();
+						handler.removeCallbacks(gotoRunnable);
+						handler.postDelayed(gotoRunnable,
+								APActivity.BUTTONS_DELAY);
+					}
+				});
+
+		((Button) rootView.findViewById(R.id.back10s))
+				.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View arg0) {
+						service.seek(-10000);
+						handler.removeCallbacks(gotoRunnable);
+						handler.postDelayed(gotoRunnable,
+								APActivity.BUTTONS_DELAY);
+					}
+				});
+
+		((Button) rootView.findViewById(R.id.back30s))
+				.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View arg0) {
+						service.seek(-30000);
+						handler.removeCallbacks(gotoRunnable);
+						handler.postDelayed(gotoRunnable,
+								APActivity.BUTTONS_DELAY);
+					}
+				});
+
+		((Button) rootView.findViewById(R.id.back1min))
+				.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View arg0) {
+						service.seek(-60000);
+						handler.removeCallbacks(gotoRunnable);
+						handler.postDelayed(gotoRunnable,
+								APActivity.BUTTONS_DELAY);
+					}
+				});
 
 		progressBar = (ProgressBar) rootView.findViewById(R.id.progress);
 

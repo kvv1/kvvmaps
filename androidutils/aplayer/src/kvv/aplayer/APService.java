@@ -60,7 +60,7 @@ public class APService extends BaseService {
 	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			player.setMaxVolume();
+			player.setVolume(1f);
 
 			String action = intent.getAction();
 			System.out.println("BroadcastReceiver " + action);
@@ -93,6 +93,13 @@ public class APService extends BaseService {
 				R.string.app_name, R.string.app_name, false, false);
 	}
 
+	Runnable visEnabler = new Runnable() {
+		@Override
+		public void run() {
+			player.enVis();
+		}
+	};
+	
 	@Override
 	public void onCreate() {
 		List<Folder> folders = new ArrayList<Folder>();
@@ -123,6 +130,9 @@ public class APService extends BaseService {
 
 				for (APServiceListener l : listeners)
 					l.onChanged();
+				
+				handler.removeCallbacks(visEnabler);
+				handler.postDelayed(visEnabler, 200);
 			}
 
 			@Override
@@ -323,6 +333,21 @@ public class APService extends BaseService {
 				}
 				f++;
 			}
+		}
+
+		@Override
+		public void vol0() {
+			player.vol0();
+		}
+
+		@Override
+		public void volPlus1() {
+			player.volPlus1();
+		}
+
+		@Override
+		public void volPlus2() {
+			player.volPlus2();
 		}
 
 	}
