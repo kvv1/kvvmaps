@@ -23,7 +23,8 @@ public interface IAPService {
 	void delBookmark(Bookmark bookmark);
 	void toBookmark(Bookmark bookmark);
 	void toRandom(int position);
-	void vol0();
-	void volPlus1();
-	void volPlus2();
+	void setGain(int db);
+	void setCompr(boolean b );
+	int getGain();
+	boolean getCompr();
 }

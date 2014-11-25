@@ -1,6 +1,9 @@
 package kvv.aplayer;
 
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -16,6 +19,8 @@ import android.widget.TextView;
 import com.smartbean.androidutils.fragment.RLFragment;
 
 public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
+
+	SharedPreferences settings;
 
 	private Handler handler = new Handler();
 
@@ -86,6 +91,22 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 		timing.setText(convertSecondsToHMmSs(pos / 1000) + "("
 				+ convertSecondsToHMmSs(dur / 1000) + ")");
+
+		((Button) rootView.findViewById(R.id.comprOff)).setTypeface(null,
+				conn.service.getCompr() ? Typeface.NORMAL : Typeface.BOLD);
+
+		((Button) rootView.findViewById(R.id.comprOn)).setTypeface(null,
+				conn.service.getCompr() ? Typeface.BOLD : Typeface.NORMAL);
+
+		((Button) rootView.findViewById(R.id.vol0)).setTypeface(null,
+				conn.service.getGain() == 0 ? Typeface.BOLD : Typeface.NORMAL);
+
+		((Button) rootView.findViewById(R.id.volPlus1)).setTypeface(null,
+				conn.service.getGain() == 5 ? Typeface.BOLD : Typeface.NORMAL);
+
+		((Button) rootView.findViewById(R.id.volPlus2)).setTypeface(null,
+				conn.service.getGain() == 10 ? Typeface.BOLD : Typeface.NORMAL);
+
 	}
 
 	private final APServiceListener listener = new APServiceListener() {
@@ -154,7 +175,8 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	private void clearGoto() {
 		handler.removeCallbacks(gotoRunnable);
-		rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
+		if (!settings.getBoolean(getString(R.string.prefTestMode), false))
+			rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
 		rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
 		FilesAdapter adapter = (FilesAdapter) list.getAdapter();
 		if (adapter != null) {
@@ -165,10 +187,14 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	@Override
 	protected void createUI(final IAPService service) {
+		settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
 		folder = -1;
 		list = (ListView) rootView.findViewById(R.id.list);
 		rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
-		rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
+
+		if (!settings.getBoolean(getString(R.string.prefTestMode), false))
+			rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
 
 		list.setOnItemClickListener(new OnItemClickListener() {
 			@Override
@@ -277,14 +303,39 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 			}
 		});
 
+		((Button) rootView.findViewById(R.id.comprOff))
+				.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View arg0) {
+						service.setCompr(false);
+						handler.removeCallbacks(gotoRunnable);
+						handler.postDelayed(gotoRunnable,
+								APActivity.BUTTONS_DELAY);
+						updateUI();
+					}
+				});
+
+		((Button) rootView.findViewById(R.id.comprOn))
+				.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View arg0) {
+						service.setCompr(true);
+						handler.removeCallbacks(gotoRunnable);
+						handler.postDelayed(gotoRunnable,
+								APActivity.BUTTONS_DELAY);
+						updateUI();
+					}
+				});
+
 		((Button) rootView.findViewById(R.id.vol0))
 				.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View arg0) {
-						service.vol0();
+						service.setGain(0);
 						handler.removeCallbacks(gotoRunnable);
 						handler.postDelayed(gotoRunnable,
 								APActivity.BUTTONS_DELAY);
+						updateUI();
 					}
 				});
 
@@ -292,10 +343,11 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 				.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View arg0) {
-						service.volPlus1();
+						service.setGain(5);
 						handler.removeCallbacks(gotoRunnable);
 						handler.postDelayed(gotoRunnable,
 								APActivity.BUTTONS_DELAY);
+						updateUI();
 					}
 				});
 
@@ -303,10 +355,11 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 				.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View arg0) {
-						service.volPlus2();
+						service.setGain(10);
 						handler.removeCallbacks(gotoRunnable);
 						handler.postDelayed(gotoRunnable,
 								APActivity.BUTTONS_DELAY);
+						updateUI();
 					}
 				});
 
