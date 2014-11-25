@@ -15,7 +15,7 @@ public class ControllerWrapperGlobals extends ControllerAdapter {
 		super(controllers, wrapped);
 	}
 
-	private AllRegs globals = new AllRegs(0, new ArrayList<RegisterUI>(),
+	private final AllRegs globals = new AllRegs(0, new ArrayList<RegisterUI>(),
 			new HashMap<Integer, Integer>());
 	{
 		for (int i = 0; i < 256; i++)
@@ -27,7 +27,9 @@ public class ControllerWrapperGlobals extends ControllerAdapter {
 		if (addr != 0) {
 			wrapped.setReg(addr, reg, val);
 		} else {
-			globals.values.put(reg, val);
+			synchronized (globals) {
+				globals.values.put(reg, val);
+			}
 		}
 	}
 
@@ -36,7 +38,9 @@ public class ControllerWrapperGlobals extends ControllerAdapter {
 		if (addr != 0) {
 			return wrapped.getReg(addr, reg);
 		} else {
-			return globals.values.get(reg);
+			synchronized (globals) {
+				return globals.values.get(reg);
+			}
 		}
 	}
 
@@ -45,10 +49,12 @@ public class ControllerWrapperGlobals extends ControllerAdapter {
 		if (addr != 0) {
 			return wrapped.getRegs(addr, reg, n);
 		} else {
-			int[] res = new int[n];
-			for (int i = 0; i < n; i++)
-				res[i] = globals.values.get(reg + i);
-			return res;
+			synchronized (globals) {
+				int[] res = new int[n];
+				for (int i = 0; i < n; i++)
+					res[i] = globals.values.get(reg + i);
+				return res;
+			}
 		}
 	}
 
@@ -57,7 +63,13 @@ public class ControllerWrapperGlobals extends ControllerAdapter {
 		if (addr != 0) {
 			return wrapped.getAllRegs(addr);
 		} else {
-			return globals;
+			synchronized (globals) {
+				AllRegs ar = new AllRegs(0, new ArrayList<RegisterUI>(),
+						new HashMap<Integer, Integer>());
+				for (int r : globals.values.keySet())
+					ar.values.put(r, globals.values.get(r));
+				return ar;
+			}
 		}
 	}
 }

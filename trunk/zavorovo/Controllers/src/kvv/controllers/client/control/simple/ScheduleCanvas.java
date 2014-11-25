@@ -39,9 +39,6 @@ public abstract class ScheduleCanvas extends Composite {
 		public int to;
 	};
 
-	//
-	// private Range sel;
-
 	private final int minVal;
 	private final int maxVal;
 	private final int step;
@@ -99,6 +96,9 @@ public abstract class ScheduleCanvas extends Composite {
 
 			@Override
 			public void onMouseDown(MouseDownEvent event) {
+				if (!ModePage.check())
+					return;
+
 				if (registerSchedule == null)
 					return;
 
@@ -110,32 +110,20 @@ public abstract class ScheduleCanvas extends Composite {
 				int minute = (m + 5) / 10 * 10;
 				double y0 = getY(minVal) + getRegY();
 				double y1 = getY(maxVal) + getRegY();
+				
+				double y = event.getY();
+				
+				int val = (int) (minVal + (y - y0) * (maxVal - minVal) / (y1 - y0) + 0.5);
 
-				if (Math.abs(event.getY() - y0) < 3) {
-					if (!ModePage.check())
-						return;
+				System.out.println(val);
 
-					registerSchedule.add(minute, minVal);
-					if(registerSchedule.items.size() == 0 && registerSchedule.state == State.SCHEDULE)
-						registerSchedule.state = State.MANUAL;
-					save(registerSchedule);
-					// setDirty(true);
-					refresh();
-				}
-				if (Math.abs(event.getY() - y1) < 3) {
-					if (!ModePage.check())
-						return;
+				registerSchedule.add(minute, val);
+				if(registerSchedule.items.size() == 0 && registerSchedule.state == State.SCHEDULE)
+					registerSchedule.state = State.MANUAL;
+				save(registerSchedule);
+				// setDirty(true);
+				refresh();
 
-					registerSchedule.add(minute, maxVal);
-					if(registerSchedule.items.size() == 0 && registerSchedule.state == State.SCHEDULE)
-						registerSchedule.state = State.MANUAL;
-					save(registerSchedule);
-					// setDirty(true);
-					refresh();
-				}
-
-				// sel = new Range();
-				// sel.from = sel.to = x2sec(event.getX());
 			}
 		});
 

@@ -1,4 +1,4 @@
-package kvv.controllers.client.page.config;
+package kvv.controllers.client.page.configuration;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;

@@ -12,8 +12,6 @@ import kvv.controllers.register.AllRegs;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.ControllerDescr;
 
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
-
 public class ControllerWrapperCached extends ControllerAdapter {
 
 	private Map<Integer, AllRegs> map = new HashMap<Integer, AllRegs>();
@@ -47,7 +45,8 @@ public class ControllerWrapperCached extends ControllerAdapter {
 			throw new IOException("Не найден контроллер с адресом " + addr);
 		Integer val = allRegs.values.get(reg);
 		if (val == null)
-			throw new IOException("Не найдено значение регистра " + reg + "контроллера " + addr);
+			throw new IOException("Не найдено значение регистра " + reg
+					+ "контроллера " + addr);
 		return val;
 	}
 
@@ -87,7 +86,7 @@ public class ControllerWrapperCached extends ControllerAdapter {
 		while (!controllersList.isEmpty()) {
 			ControllerDescr controllerDescr = controllersList.remove(0);
 			int addr = controllerDescr.addr;
-			if (addr == 0 || !controllerDescr.enabled)
+			if (!controllerDescr.enabled)
 				continue;
 
 			try {

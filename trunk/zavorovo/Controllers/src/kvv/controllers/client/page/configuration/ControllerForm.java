@@ -3,7 +3,6 @@ package kvv.controllers.client.page.configuration;
 import java.util.List;
 
 import kvv.controllers.client.Controllers;
-import kvv.controllers.client.page.config.TextWithLabel;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.RegisterDescr;
 

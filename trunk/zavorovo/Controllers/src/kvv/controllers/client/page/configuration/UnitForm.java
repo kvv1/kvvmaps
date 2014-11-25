@@ -2,7 +2,6 @@ package kvv.controllers.client.page.configuration;
 
 import java.util.List;
 
-import kvv.controllers.client.page.config.TextWithLabel;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.UnitDescr;
 

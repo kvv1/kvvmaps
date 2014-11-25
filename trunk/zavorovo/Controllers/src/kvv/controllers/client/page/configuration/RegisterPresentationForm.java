@@ -1,6 +1,5 @@
 package kvv.controllers.client.page.configuration;
 
-import kvv.controllers.client.page.config.TextWithLabel;
 import kvv.controllers.shared.RegisterPresentation;
 
 import com.google.gwt.user.client.ui.Composite;
