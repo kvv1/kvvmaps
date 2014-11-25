@@ -52,11 +52,11 @@ public class Context {
 		String busURL = Utils.getProp(Constants.propsFile, "busURL");
 		if (busURL == null)
 			busURL = "http://localhost/rs485";
-		controller = new ControllerWrapperGlobals(
+		controller = new ControllerWrapperCached(
 				controllers,
-				new ControllerWrapperCached(
+				new ControllerWrapperLogger(
 						controllers,
-						new ControllerWrapperLogger(
+						new ControllerWrapperGlobals(
 								controllers,
 								new ControllerWrapperUni(
 										controllers,

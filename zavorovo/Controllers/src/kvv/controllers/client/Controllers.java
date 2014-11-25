@@ -64,9 +64,9 @@ public class Controllers implements EntryPoint {
 					}
 					tabs.selectTab(0);
 					// Window.alert("zzz");
-					String st = e.getClass().getName() + ": " + e.getMessage();
-					for (StackTraceElement ste : e.getStackTrace())
-						st += "\n" + ste.toString();
+//					String st = e.getClass().getName() + ": " + e.getMessage();
+//					for (StackTraceElement ste : e.getStackTrace())
+//						st += "\n" + ste.toString();
 					// Window.alert(st);
 				}
 				tabs.selectTab(0);

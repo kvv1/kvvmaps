@@ -29,8 +29,6 @@ public class Controllers {
 	private HashMap<String, ControllerType> controllerTypes = new HashMap<String, ControllerType>();
 
 	public Controllers() {
-		int nextGlobalReg = 0;
-
 		try {
 			new File(Constants.controllerTypesDir).mkdirs();
 			FileFilter ff = new FileFilter() {
@@ -63,13 +61,8 @@ public class Controllers {
 					if (regs != null) {
 						for (RegisterDescr reg : regs) {
 							if (reg != null) {
-								if (c.addr == 0) {
-									reg.register = nextGlobalReg++;
-									reg.addr = 0;
-								} else {
-									reg.controller = c.name;
-									reg.addr = c.addr;
-								}
+								reg.controller = c.name;
+								reg.addr = c.addr;
 								registers.put(reg.name, reg);
 								ar2register.put(
 										(reg.addr << 16) + reg.register, reg);
