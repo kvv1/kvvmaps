@@ -5,6 +5,9 @@
         <CheckBoxPreference
             android:key="@string/prefNavigatorMode"
             android:title="Режим навигатора" />
+        <CheckBoxPreference
+            android:key="@string/prefTestMode"
+            android:title="Тестовый режим" />
     </PreferenceCategory>
 
 </PreferenceScreen>

@@ -99,9 +99,12 @@ public class APService extends BaseService {
 			player.enVis();
 		}
 	};
-	
+
 	@Override
 	public void onCreate() {
+		super.onCreate();
+		settings = PreferenceManager.getDefaultSharedPreferences(this);
+
 		List<Folder> folders = new ArrayList<Folder>();
 
 		List<StorageInfo> list = StorageUtils.getStorageList();
@@ -130,7 +133,7 @@ public class APService extends BaseService {
 
 				for (APServiceListener l : listeners)
 					l.onChanged();
-				
+
 				handler.removeCallbacks(visEnabler);
 				handler.postDelayed(visEnabler, 200);
 			}
@@ -142,8 +145,6 @@ public class APService extends BaseService {
 			}
 
 		};
-		super.onCreate();
-		settings = PreferenceManager.getDefaultSharedPreferences(this);
 
 		String sBookmarks = settings.getString("Bookmarks", null);
 		if (sBookmarks != null)
@@ -180,6 +181,9 @@ public class APService extends BaseService {
 		am.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
 				RemoteControlReceiver.class.getName()));
 
+		player.setGain(settings.getInt("gain", 0));
+		player.setCompr(settings.getBoolean("compr", false));
+
 	}
 
 	@Override
@@ -192,10 +196,8 @@ public class APService extends BaseService {
 	}
 
 	private void saveBookmarks() {
-		SharedPreferences.Editor editor = settings.edit();
-		editor.putString("Bookmarks",
+		setPref("Bookmarks",
 				new Gson().toJson(bookmarks.toArray(new Bookmark[0])));
-		editor.commit();
 	}
 
 	@Override
@@ -336,20 +338,26 @@ public class APService extends BaseService {
 		}
 
 		@Override
-		public void vol0() {
-			player.vol0();
+		public void setGain(int db) {
+			player.setGain(db);
+			setPrefInt("gain", db);
 		}
 
 		@Override
-		public void volPlus1() {
-			player.volPlus1();
+		public void setCompr(boolean b) {
+			player.setCompr(b);
+			setPrefBool("compr", b);
 		}
 
 		@Override
-		public void volPlus2() {
-			player.volPlus2();
+		public int getGain() {
+			return player.getGain();
 		}
 
+		@Override
+		public boolean getCompr() {
+			return player.getCompr();
+		}
 	}
 
 	private static int read(File dir, List<Folder> folders, int indent) {
@@ -423,6 +431,24 @@ public class APService extends BaseService {
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putInt(folder.path + "|file", player.getFile());
 		editor.putInt(folder.path + "|pos", player.getCurrentPosition());
+		editor.commit();
+	}
+
+	private void setPref(String name, String val) {
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(name, val);
+		editor.commit();
+	}
+
+	private void setPrefInt(String name, int val) {
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putInt(name, val);
+		editor.commit();
+	}
+
+	private void setPrefBool(String name, boolean val) {
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putBoolean(name, val);
 		editor.commit();
 	}
 

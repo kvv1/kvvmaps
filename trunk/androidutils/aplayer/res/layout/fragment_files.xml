@@ -65,7 +65,7 @@
                     android:id="@+id/volPlus2"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:text="Громкость +2"
+                    android:text="+10db"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
@@ -73,7 +73,7 @@
                     android:id="@+id/volPlus1"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:text="Громкость +1"
+                    android:text="+5db"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
@@ -82,7 +82,31 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:text="Громкость 0"
+                    android:text="0db"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"
+                android:orientation="vertical" >
+
+                <Button
+                    android:id="@+id/comprOn"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Compr On"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+                <Button
+                    android:id="@+id/comprOff"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:text="Compr Off"
                     android:textSize="20sp"
                     android:textStyle="bold" />
             </LinearLayout>
