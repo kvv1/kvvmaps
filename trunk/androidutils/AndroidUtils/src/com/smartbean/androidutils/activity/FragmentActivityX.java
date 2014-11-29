@@ -1,15 +1,15 @@
 package com.smartbean.androidutils.activity;
 
-import com.smartbean.androidutils.util.Drawables;
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 
+import com.smartbean.androidutils.util.Drawables;
+
 public abstract class FragmentActivityX extends FragmentActivity {
-	private ViewPager mViewPager;
+	protected ViewPager mViewPager;
 
 	protected abstract int getLayoutId();
 
@@ -32,17 +32,17 @@ public abstract class FragmentActivityX extends FragmentActivity {
 		super.onResume();
 		onFG();
 	}
-	
-//	@Override
-//	public void onWindowFocusChanged(boolean hasFocus) {
-//		System.out.println("onWindowFocusChanged " + hasFocus);
-//		if (hasFocus)
-//			onFG();
-//		else
-//			onBG();
-//
-//		super.onWindowFocusChanged(hasFocus);
-//	}
+
+	// @Override
+	// public void onWindowFocusChanged(boolean hasFocus) {
+	// System.out.println("onWindowFocusChanged " + hasFocus);
+	// if (hasFocus)
+	// onFG();
+	// else
+	// onBG();
+	//
+	// super.onWindowFocusChanged(hasFocus);
+	// }
 
 	@Override
 	protected void onPause() {
