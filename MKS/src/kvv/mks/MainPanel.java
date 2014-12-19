@@ -17,9 +17,9 @@ import javax.swing.JPanel;
 
 import kvv.mks.cloud.Cloud;
 import kvv.mks.draw.CloudDrawable;
-import kvv.mks.matrix.M;
-import kvv.mks.matrix.Matrix3x3;
-import kvv.mks.matrix.Rot;
+import kvv.mks.rot.M;
+import kvv.mks.rot.Rot;
+import kvv.mks.rot.matrix.Matrix3x3;
 
 @SuppressWarnings("serial")
 public class MainPanel extends JPanel {

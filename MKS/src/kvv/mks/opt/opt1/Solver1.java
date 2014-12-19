@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kvv.mks.Solver;
-import kvv.mks.State;
+import kvv.mks.opt.State;
 import kvv.mks.opt.TargetSumFunc;
+import kvv.mks.rot.M;
 
 public class Solver1 implements Solver {
-	public State state = new State();
+	public State state = new State(M.instance.rot(0, 0, 0), 0, 0, 0);
 
 	private final TargetSumFunc targetFunc;
 
@@ -21,8 +22,8 @@ public class Solver1 implements Solver {
 	}
 
 	abstract class Opt extends Optimizer {
-		public Opt(double from, double to) {
-			super(from, to);
+		public Opt(double d) {
+			super(d);
 		}
 
 		@Override
@@ -34,50 +35,59 @@ public class Solver1 implements Solver {
 		}
 	}
 
-	public Solver1(double maxAngle, double maxDist, TargetSumFunc targetFunc, State init) {
+	public Solver1(double maxAngle, double maxDist, TargetSumFunc targetFunc,
+			State init) {
 		this.targetFunc = targetFunc;
-		if(init != null)
+		if (init != null)
 			state = init;
+		
+//		state.rot = M.instance.rot(0.1, 0, 0).mul(state.rot, null);
+//		state.rot = M.instance.rot(-0.2, 0, 0).mul(state.rot, null);
+//		state.rot = M.instance.rot(0.1, 0, 0).mul(state.rot, null);
+		
 
-		optimizers.add(new Opt(-maxAngle, maxAngle) {
+		optimizers.add(new Opt(maxAngle) {
 			@Override
-			public void setParam(double value) {
-				state.ax = value;
+			public void incParam(double value) {
+				state.rot = M.instance.rot(value, 0, 0).mul(state.rot, null);
+//				state.rot = state.rot.mul(M.instance.rot(value, 0, 0), null);
 			}
 		});
 
-		optimizers.add(new Opt(-maxAngle, maxAngle) {
+		optimizers.add(new Opt(maxAngle) {
 			@Override
-			public void setParam(double value) {
-				state.ay = value;
+			public void incParam(double value) {
+				state.rot = M.instance.rot(0, value, 0).mul(state.rot, null);
+//				state.rot = state.rot.mul(M.instance.rot(0,value,  0), null);
 			}
 		});
 
-		optimizers.add(new Opt(-maxAngle, maxAngle) {
+		optimizers.add(new Opt(maxAngle) {
 			@Override
-			public void setParam(double value) {
-				state.az = value;
+			public void incParam(double value) {
+				state.rot = M.instance.rot(0, 0, value).mul(state.rot, null);
+//				state.rot = state.rot.mul(M.instance.rot(0,0,value), null);
 			}
 		});
 
-		optimizers.add(new Opt(-maxDist, maxDist) {
+		optimizers.add(new Opt(maxDist) {
 			@Override
-			public void setParam(double value) {
-				state.dx = value;
+			public void incParam(double value) {
+				state.dx += value;
 			}
 		});
 
-		optimizers.add(new Opt(-maxDist, maxDist) {
+		optimizers.add(new Opt(maxDist) {
 			@Override
-			public void setParam(double value) {
-				state.dy = value;
+			public void incParam(double value) {
+				state.dy += value;
 			}
 		});
 
-		optimizers.add(new Opt(-maxDist, maxDist) {
+		optimizers.add(new Opt(maxDist) {
 			@Override
-			public void setParam(double value) {
-				state.dz = value;
+			public void incParam(double value) {
+				state.dz += value;
 			}
 		});
 	}

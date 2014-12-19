@@ -2,7 +2,6 @@ package kvv.mks.opt;
 
 import java.util.Collection;
 
-import kvv.mks.State;
 import kvv.mks.cloud.Pt;
 
 public class TargetSumFuncImpl implements TargetSumFunc {
@@ -21,7 +20,10 @@ public class TargetSumFuncImpl implements TargetSumFunc {
 		Pt pt1 = new Pt();
 
 		for (Pt pt : scan) {
-			pt.rotTrans(state.ax, state.ay, state.az, state.dx, state.dy, state.dz, pt1);
+			state.rot.apply(pt, pt1);
+			pt1.x += state.dx;
+			pt1.y += state.dy;
+			pt1.z += state.dz;
 			n += targetFunc.getValue(pt1.x, pt1.y, pt1.z);
 		}
 		return n;

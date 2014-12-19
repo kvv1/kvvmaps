@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 import kvv.mks.Util;
+import kvv.mks.rot.Rot;
 
 public class Cloud {
 
@@ -77,7 +78,7 @@ public class Cloud {
 		}
 		return 2 * max;
 	}
-
+/*
 	public void rotate(double ax, double ay, double az) {
 		double cosx = Math.cos(ax);
 		double sinx = Math.sin(ax);
@@ -94,8 +95,6 @@ public class Cloud {
 	}
 
 	public void rotate1(double ax, double ay, double az) {
-		
-		
 		double cosx = Math.cos(ax);
 		double sinx = Math.sin(ax);
 		double cosy = Math.cos(ay);
@@ -109,7 +108,14 @@ public class Cloud {
 			pt.rotateX(cosx, sinx, pt);
 		}
 	}
-
+*/
+	public void rot(Rot rot) {
+		for (int i = 0; i < data.size(); i++) {
+			Pt pt = data.get(i);
+			data.set(i,rot.apply(pt, null));
+		}
+	}
+	
 	public void translate(double x, double y, double z) {
 		for (int i = 0; i < data.size(); i++) {
 			Pt pt = data.get(i);

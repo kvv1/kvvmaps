@@ -12,12 +12,13 @@ import kvv.mks.cloud.Cloud;
 import kvv.mks.cloud.FuncGridArray;
 import kvv.mks.cloud.Pt;
 import kvv.mks.cloud.PtGrid;
+import kvv.mks.opt.State;
 import kvv.mks.opt.TargetFunc;
 import kvv.mks.opt.TargetFuncImpl;
 import kvv.mks.opt.TargetSumFunc;
 import kvv.mks.opt.TargetSumFuncImpl;
-import kvv.mks.opt.annealing.AnnealingSolver;
 import kvv.mks.opt.opt1.Solver1;
+import kvv.mks.rot.M;
 
 public class TestMKS {
 
@@ -49,23 +50,30 @@ public class TestMKS {
 
 			double a = Util.g2r(MAX_GRAD);
 
-			State modif = new State(Util.rand(-a, a), Util.rand(-a, a),
-					Util.rand(-a, a), Util.rand(-MAX_DIST, MAX_DIST),
-					Util.rand(-MAX_DIST, MAX_DIST), Util.rand(-MAX_DIST,
-							MAX_DIST));
+			double ax = Util.rand(-a, a);
+			double ay = Util.rand(-a, a);
+			double az = Util.rand(-a, a);
+
+			double dx = Util.rand(-MAX_DIST, MAX_DIST);
+			double dy = Util.rand(-MAX_DIST, MAX_DIST);
+			double dz = Util.rand(-MAX_DIST, MAX_DIST);
+
+			State modif = new State(M.instance.rot(ax, ay, az), dx, dy, dz);
 
 			System.out.println(modif);
 
 			scan1.translate(-modif.dx, -modif.dy, -modif.dz);
-			scan1.rotate1(-modif.ax, -modif.ay, -modif.az);
+
+			scan1.rot(modif.rot.inverse());
+
 			scan1.addNoise(0.2);
 
 			State state = solve(scan1.data, modif, targetFunc, null);
 
-//			if (Util.r2g(da) > 5) {
-//				scan1.save(ROOT + "/bad" + errCnt + ".txt");
-//				errCnt++;
-//			}
+			// if (Util.r2g(da) > 5) {
+			// scan1.save(ROOT + "/bad" + errCnt + ".txt");
+			// errCnt++;
+			// }
 
 		}
 
@@ -75,21 +83,21 @@ public class TestMKS {
 		System.out.println();
 	}
 
-	
-	public static State solve(List<Pt> data, State modif, TargetFunc targetFunc, State init) {
+	public static State solve(List<Pt> data, State modif,
+			TargetFunc targetFunc, State init) {
 		TargetSumFunc targetFuncSum = new TargetSumFuncImpl(targetFunc, data);
 
 		Solver solver;
 		solver = new Solver1(Util.g2r(MAX_GRAD / 4), MAX_DIST / 4,
 				targetFuncSum, init);
-		//solver = new AnnealingSolver(targetFuncSum, Util.g2r(MAX_GRAD), MAX_DIST);
+		// solver = new AnnealingSolver(targetFuncSum, Util.g2r(MAX_GRAD),
+		// MAX_DIST);
 
 		long t = System.currentTimeMillis();
 		State state = solver.solve();
 		t = System.currentTimeMillis() - t;
 
-		double da = Util.dist2(modif.ax - state.ax, modif.ay - state.ay,
-				modif.az - state.az);
+		double da = state.rot.dist(modif.rot);
 
 		double dd = Util.dist2(modif.dx - state.dx, modif.dy - state.dy,
 				modif.dz - state.dz);
@@ -103,7 +111,7 @@ public class TestMKS {
 		System.out.print(Util.getScale(10, 0.2, dd) + " ");
 		System.out.printf("t=%3d ", (int) t);
 		System.out.println();
-		
+
 		return state;
 	}
 

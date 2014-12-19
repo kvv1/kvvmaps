@@ -1,7 +1,7 @@
-package kvv.mks.q;
+package kvv.mks.rot.quaternion;
 
 import kvv.mks.cloud.Pt;
-import kvv.mks.matrix.Rot;
+import kvv.mks.rot.Rot;
 
 public class Quaternion implements Rot {
 	public double r, i, j, k;
@@ -12,6 +12,11 @@ public class Quaternion implements Rot {
 		this.j = j;
 		this.k = k;
 	}
+
+	@Override
+	public Rot inverse() {
+		return inverse(null);
+	};
 
 	public double mag() {
 		return Math.sqrt(r * r + i * i + j * j + k * k);
@@ -71,22 +76,26 @@ public class Quaternion implements Rot {
 		return null;
 	}
 
+	static Quaternion p = new Quaternion(0, 0, 0, 0);
+	static Quaternion qres = new Quaternion(0, 0, 0, 0);
+
 	@Override
 	public Pt apply(Pt pt, Pt res) {
 		if (res == null)
 			res = new Pt();
 
-		Quaternion p = new Quaternion(0, pt.x, pt.y, pt.z);
+		p.i = pt.x;
+		p.j = pt.y;
+		p.k = pt.z;
 
-		Quaternion r = new Quaternion(0, 0, 0, 0);
-		inverse(r);
+		inverse(qres);
 
-		p.mul(r, r);
-		mul(r, r);
+		p.mul(qres, qres);
+		mul(qres, qres);
 
-		res.x = r.i;
-		res.y = r.j;
-		res.z = r.k;
+		res.x = qres.i;
+		res.y = qres.j;
+		res.z = qres.k;
 
 		// r = q.mul(p.mul(q.inverse()));
 
@@ -133,5 +142,20 @@ public class Quaternion implements Rot {
 		r = (cx * cy * cz + sx * sy * sz);
 
 		unit(this);
-	};
+	}
+
+	@Override
+	public Rot getCopy() {
+		return new Quaternion(r, i, j, k);
+	}
+
+	@Override
+	public double dist(Rot r) {
+		Rot d = mul(r.inverse(), null);
+		Pt pt = new Pt(1,1,1);
+		Pt pt1 = d.apply(pt, null);
+		
+		return pt.dist(pt1);
+	}
+
 }

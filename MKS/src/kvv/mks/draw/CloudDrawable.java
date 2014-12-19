@@ -5,9 +5,9 @@ import java.awt.Graphics2D;
 
 import kvv.mks.cloud.Cloud;
 import kvv.mks.cloud.Pt;
-import kvv.mks.matrix.M;
-import kvv.mks.matrix.Matrix3x3;
-import kvv.mks.matrix.Rot;
+import kvv.mks.rot.M;
+import kvv.mks.rot.Rot;
+import kvv.mks.rot.matrix.Matrix3x3;
 
 public class CloudDrawable extends DrawableCached{
 

@@ -1,12 +1,13 @@
-package kvv.mks.matrix;
+package kvv.mks.rot.matrix;
 
 import kvv.mks.cloud.Pt;
+import kvv.mks.rot.Rot;
 
 public class Matrix3x3 implements Rot {
 
 	private double[][] elems = new double[3][3];
 
-	Matrix3x3() {
+	public Matrix3x3() {
 		this(1, 0, 0, 0, 1, 0, 0, 0, 1);
 	}
 
@@ -64,6 +65,10 @@ public class Matrix3x3 implements Rot {
 		Matrix3x3 m = (Matrix3x3) _m;
 		Matrix3x3 res = (Matrix3x3) _res;
 
+		if (this == res)
+			throw new IllegalArgumentException();
+
+		
 		if (res == null)
 			res = new Matrix3x3();
 
@@ -94,17 +99,42 @@ public class Matrix3x3 implements Rot {
 	}
 
 	public static Rot rot(double xrot, double yrot, double zrot) {
+//		Rot res1 = new Matrix3x3();
 		Rot res = rotX(xrot);
-		res = res.mul(rotY(yrot), res);
-		res = res.mul(rotZ(zrot), res);
+		Rot res1 = res.mul(rotY(yrot), null);
+		res = res1.mul(rotZ(zrot), res);
 		return res;
 	}
 
 	public static Rot rot1(double xrot, double yrot, double zrot) {
 		Rot res = rotZ(zrot);
-		res = res.mul(rotY(yrot), res);
-		res = res.mul(rotX(xrot), res);
+		Rot res1 = res.mul(rotY(yrot), null);
+		res = res1.mul(rotX(xrot), res);
 		return res;
 	}
 
+	@Override
+	public Rot getCopy() {
+		return new Matrix3x3(
+				elems[0][0], elems[0][1], elems[0][2],
+				elems[1][0], elems[1][1], elems[1][2], 
+				elems[2][0], elems[2][1], elems[2][2]);
+	}
+
+	@Override
+	public Rot inverse() {
+		return new Matrix3x3(
+				elems[0][0], elems[1][0], elems[2][0],
+				elems[0][1], elems[1][1], elems[2][1], 
+				elems[0][2], elems[1][2], elems[2][2]);
+	}
+
+	@Override
+	public double dist(Rot r) {
+		Rot d = mul(r.inverse(), null);
+		Pt pt = new Pt(1,1,1);
+		Pt pt1 = d.apply(pt, null);
+		
+		return pt.dist(pt1);
+	}
 }
