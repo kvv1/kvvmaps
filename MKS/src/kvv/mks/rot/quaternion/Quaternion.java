@@ -40,7 +40,7 @@ public class Quaternion implements Rot {
 		if (res == null)
 			res = new Quaternion(0, 0, 0, 0);
 
-		double mag = this.mag();
+		double mag = mag();
 
 		res.r = r;
 		res.i = i / mag;
@@ -152,10 +152,44 @@ public class Quaternion implements Rot {
 	@Override
 	public double dist(Rot r) {
 		Rot d = mul(r.inverse(), null);
-		Pt pt = new Pt(1,1,1);
+		Pt pt = new Pt(1, 1, 1);
 		Pt pt1 = d.apply(pt, null);
-		
+
 		return pt.dist(pt1);
+	}
+
+	public static Quaternion fromDir(Pt pt) {
+		Quaternion q = new Quaternion(0, 0, 0, 0);
+		q.SetRotationVDir(pt.norm());
+		return q;
+	}
+	
+	private void SetRotationVDir(Pt vdir) {
+		// set default initialisation for up-vector
+		r = 0.70710676908493042;
+		i = (vdir.z + vdir.z) * 0.35355338454246521;
+		j = 0;
+		k = 0;
+		double l = Math.sqrt(vdir.x * vdir.x + vdir.y * vdir.y);
+		if (l > 0.00001) {
+			// calculate LookAt quaternion
+			Pt hv = new Pt(vdir.x / l, vdir.y / l + 1.0, l + 1.0);
+			double r = Math.sqrt(hv.x * hv.x + hv.y * hv.y);
+			double s = Math.sqrt(hv.z * hv.z + vdir.z * vdir.z);
+			// generate the half-angle sine&cosine
+			double hacos0 = 0.0;
+			double hasin0 = -1.0;
+			if (r > 0.00001) {
+				hacos0 = hv.y / r;
+				hasin0 = -hv.x / r;
+			} // yaw
+			double hacos1 = hv.z / s;
+			double hasin1 = vdir.z / s; // pitch
+			this.r = hacos0 * hacos1;
+			i = hacos0 * hasin1;
+			j = hasin0 * hasin1;
+			k = hasin0 * hacos1;
+		}
 	}
 
 }

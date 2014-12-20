@@ -52,16 +52,18 @@ public class MKS extends JFrame {
 				try {
 					MKS mks = new MKS();
 
-					Cloud base = new Cloud(new File(
-							"D:\\Users\\kvv\\Google Drive\\Mks\\skeleton.txt"));
-					base.thinOut(0.2);
-					mks.add(base);
+//					Cloud base = new Cloud(new File(
+//							"D:\\Users\\kvv\\Google Drive\\Mks\\skeleton.txt"));
+//					base.thinOut(0.2);
+//					mks.add(base);
 
 					Cloud scan = new Cloud(new File(
-							"D:\\Users\\kvv\\Google Drive\\Mks\\bad0.txt"));
+							"D:\\Users\\kvv\\Google Drive\\Mks\\mks_cloud.txt"));
+					scan = new Cloud(scan.data, 100000);
+					
 					mks.add(scan);
 
-					System.out.println(base.data.size() + " points in base");
+//					System.out.println(base.data.size() + " points in base");
 					System.out.println(scan.data.size() + " points in scan");
 				} catch (IOException e) {
 					e.printStackTrace();

@@ -28,7 +28,7 @@ public class TestMKS {
 
 	static double THINOUT_DIST = 0.2;
 
-	static int SCAN_POINTS = 400;
+	static int SCAN_POINTS = 200;
 
 	static double OPT_DIST = 0.8;
 
@@ -66,7 +66,7 @@ public class TestMKS {
 
 			scan1.rot(modif.rot.inverse());
 
-			scan1.addNoise(0.2);
+			//scan1.addNoise(0.2);
 
 			State state = solve(scan1.data, modif, targetFunc, null);
 

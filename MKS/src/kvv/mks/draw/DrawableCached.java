@@ -6,9 +6,9 @@ import java.awt.image.BufferedImage;
 
 public abstract class DrawableCached implements Drawable {
 
-	BufferedImage im;
+	private BufferedImage im;
 	private boolean on;
-
+	
 	public abstract void _draw(Graphics2D g, int w, int h);
 
 	public void invalidateCache() {

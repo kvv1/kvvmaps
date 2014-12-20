@@ -16,10 +16,11 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import kvv.mks.cloud.Cloud;
+import kvv.mks.cloud.Pt;
 import kvv.mks.draw.CloudDrawable;
 import kvv.mks.rot.M;
 import kvv.mks.rot.Rot;
-import kvv.mks.rot.matrix.Matrix3x3;
+import kvv.mks.rot.quaternion.Quaternion;
 
 @SuppressWarnings("serial")
 public class MainPanel extends JPanel {
@@ -33,6 +34,68 @@ public class MainPanel extends JPanel {
 
 	private Rot matrix = M.instance.create();
 
+	public static List<Rot> directions = new ArrayList<>();
+
+	static {
+
+			Rot qq = Quaternion.rot(0, Util.g2r(20), 0);
+		
+			Rot q;
+			q = Quaternion.fromDir(new Pt(0, 1, 1)).mul(qq, null);
+			directions.add(q);
+			
+			q = Quaternion.fromDir(new Pt(0, 1, 0)).mul(qq, null);
+			directions.add(q);
+			
+			q = Quaternion.fromDir(new Pt(0, 1, -1)).mul(qq, null);
+			directions.add(q);
+			
+			q = Quaternion.fromDir(new Pt(0, 0, -1)).mul(qq, null);
+			directions.add(q);
+			
+			q = Quaternion.fromDir(new Pt(0, -1, -1)).mul(qq, null);
+			directions.add(q);
+			
+			q = Quaternion.fromDir(new Pt(0, -1, 0)).mul(qq, null);
+			directions.add(q);
+			
+			q = Quaternion.fromDir(new Pt(0, -1, 1)).mul(qq, null);
+			directions.add(q);
+			
+			q = Quaternion.fromDir(new Pt(0, 0, 1)).mul(qq, null);
+			directions.add(q);
+			
+			
+			
+/*
+		for (int x : new int[] { -1, 1 })
+			for (int y : new int[] { -1, 1 })
+				for (int z : new int[] { -1, 1 })
+					// for (int x : new int[] { -1, 0, 1 })
+					// for (int y : new int[] { -1, 0, 1 })
+					// for (int z : new int[] { -1, 0, 1 })
+					if (x != 0 || y != 0 || z != 0)
+						for (int a = 0; a < 180; a += 15) {
+							// directions[n++] = Quaternion.fromDir(new Pt(x, y,
+							// z));
+							double cos = Math.cos(Util.g2r(a) / 2);
+							double sin = Math.sin(Util.g2r(a) / 2);
+							directions.add(new Quaternion(cos, x * sin,
+									y * sin, z * sin).unit(null));
+						}
+*/						
+	}
+
+	int n = 0;
+
+	private void nextDir() {
+		matrix = directions.get(n++);
+		setMatrix(matrix);
+		if (n == directions.size())
+			n=0;
+		repaint();
+	}
+
 	public MainPanel() {
 
 		JButton zero = new JButton("0");
@@ -40,12 +103,20 @@ public class MainPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				matrix = M.instance.create();
-				for (CloudDrawable drawable : clouds)
-					drawable.setMatrix(matrix);
+				setMatrix(matrix);
 				repaint();
 			}
 		});
 		add(zero);
+
+		JButton next = new JButton("next");
+		next.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				nextDir();
+			}
+		});
+		add(next);
 
 		addMouseListener(new MouseAdapter() {
 			@Override
@@ -68,8 +139,7 @@ public class MainPanel extends JPanel {
 						matrix, null);
 				matrix = M.instance.rot(0, (p1.x - p.x) / 100.0, 0).mul(matrix,
 						null);
-				for (CloudDrawable drawable : clouds)
-					drawable.setMatrix(matrix);
+				setMatrix(matrix);
 				p = e.getPoint();
 				repaint();
 			}
@@ -78,10 +148,14 @@ public class MainPanel extends JPanel {
 		// pcd.rotate(0, 0, 0.1);
 	}
 
+	public void setMatrix(Rot matrix) {
+		for (CloudDrawable drawable : clouds)
+			drawable.setMatrix(matrix);
+	}
+
 	@Override
-	public void paint(Graphics _g) {
+	public void paintComponent(Graphics _g) {
 		Graphics2D g = (Graphics2D) _g;
-		super.paint(g);
 
 		int w = getWidth();
 		int h = getHeight();
