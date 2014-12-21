@@ -119,7 +119,7 @@ public class RemoteData<TData, TMsg> {
 			}
 
 			final TData d = dataProvider._getRemoteData(login);
-			if (_get() == null) {
+			if (d != null && _get() == null) {
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
@@ -143,8 +143,9 @@ public class RemoteData<TData, TMsg> {
 						step(login);
 					}
 				} catch (final IOException e) {
-					log("* failure " + e.getClass().getName() + " " + e.getMessage());
-//					e.printStackTrace();
+					log("* failure " + e.getClass().getName() + " "
+							+ e.getMessage());
+					// e.printStackTrace();
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
