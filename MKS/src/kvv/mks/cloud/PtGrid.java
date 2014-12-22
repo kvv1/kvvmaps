@@ -68,6 +68,7 @@ public class PtGrid {
 				for (int x = x1; x <= x2; x++) {
 					long hash = hashInt(x, y, z);
 					List<Pt> list = map.get(hash);
+					
 					if (list != null)
 						for (Pt pt : list)
 							if (pt.dist(_x, _y, _z) < r)

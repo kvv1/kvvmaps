@@ -47,7 +47,10 @@ public class FuncGridArray implements TargetFunc, Serializable{
 
 		int n = 0;
 
-		for (int nx = 0; nx < NX; nx++)
+		
+		System.out.println(NX);
+		for (int nx = 0; nx < NX; nx++) {
+			System.out.print("* ");
 			for (int ny = 0; ny < NY; ny++)
 				for (int nz = 0; nz < NZ; nz++) {
 					double x1 = minx1 + nx * step;
@@ -58,7 +61,8 @@ public class FuncGridArray implements TargetFunc, Serializable{
 						n++;
 					set(nx, ny, nz, val / step / step / step);
 				}
-
+		}
+		System.out.println();
 		System.out.println("N = " + n);
 	}
 

@@ -8,27 +8,44 @@ import kvv.mks.cloud.Cloud;
 import kvv.mks.cloud.Pt;
 import kvv.mks.rot.M;
 import kvv.mks.rot.Rot;
-import kvv.mks.rot.matrix.Matrix3x3;
+import kvv.mks.rot.Transform;
 
 public class CloudDrawable extends DrawableCached {
 
 	private Cloud pcd;
-	private Color color;
 
 	private double maxSz;
 
 	private float[][] zbuf;
 
+	private Color[] colors = new Color[256];
+
 	public CloudDrawable(Cloud pcd, Color color) {
 		this.pcd = pcd;
-		this.color = color;
-		maxSz = pcd.getMaxSize();
+
+		int r = color.getRed();
+		int g = color.getGreen();
+		int b = color.getBlue();
+		for (int i = 0; i < 256; i++) {
+			int _r = (r * i + 240 * (256 - i)) / 256;
+			int _g = (g * i + 240 * (256 - i)) / 256;
+			int _b = (b * i + 240 * (256 - i)) / 256;
+			colors[i] = new Color(_r, _g, _b);
+		}
+
+		for (Pt pt : pcd.data) {
+			double mod = pt.mod();
+			maxSz = Math.max(maxSz, 2 * mod);
+		}
+
 		cacheOn();
 	}
 
-	int d = 3;
+	private final static int d = 2;
 
-	private Rot maxtrix = M.instance.create();
+	private Transform maxtrix = new Transform();
+
+	double L = 0.5;
 
 	@Override
 	public void _draw(Graphics2D g, int w, int h) {
@@ -36,56 +53,51 @@ public class CloudDrawable extends DrawableCached {
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, w, h);
 
-		zbuf = new float[w][h];
-
 		if (zbuf == null || zbuf.length != w || zbuf[0].length != h) {
-			zbuf = new float[w + 10][h + 10];
+			zbuf = new float[w][h];
 		}
 
 		for (int i = 0; i < zbuf.length; i++)
-			Arrays.fill(zbuf[i], -1000);
+			Arrays.fill(zbuf[i], 1000);
 
-		// TODO Auto-generated method stub
 		double mul = Math.min(w, h) / maxSz;
 
 		Color oldColor = g.getColor();
-		g.setColor(color);
 
 		Pt pt1 = new Pt();
 
 		for (Pt pt : pcd.data) {
 			maxtrix.apply(pt, pt1);
+
+			pt1.z += 100;
+			
+			if (pt1.z < L)
+				continue;
+
+			mul = 20;
+
 			int _x = (int) (pt1.x * mul + w / 2);
 			int _y = (int) (pt1.y * mul + h / 2);
 
-			int c = 255 - (int) (255 * (pt1.z + maxSz / 2) / maxSz);
-			if (c < 0)
-				c = 0;
-			if (c > 255)
-				c = 255;
-			Color color = new Color(c, c, c);
+			int cidx = Math.min(255,
+					Math.max(0, (int) (255 * (pt1.z + maxSz / 2) / maxSz)));
+			Color color = colors[255 - cidx];
 			g.setColor(color);
 
-			for (int i = 0; i < d; i++)
-				for (int j = 0; j < d; j++) {
-					int x = _x + i;
-					int y = _y + j;
+			int x = _x / d;
+			int y = _y / d;
 
-					try {
-						if (pt1.z > zbuf[x][y]) {
-							g.fillRect(x, y, 1, 1);
-							zbuf[x][y] = (float) pt1.z;
-						}
-					} catch (Exception e) {
-					}
-
-				}
-
+			if (x < 0 || x >= zbuf.length || y < 0 || y >= zbuf[0].length)
+				continue;
+			if (pt1.z < zbuf[x][y]) {
+				g.fillRect(x * d, y * d, d, d);
+				zbuf[x][y] = (float) pt1.z;
+			}
 		}
 		g.setColor(oldColor);
 	}
 
-	public void setMatrix(Rot matrix) {
+	public void setMatrix(Transform matrix) {
 		this.maxtrix = matrix;
 		invalidateCache();
 	}

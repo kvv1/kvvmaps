@@ -6,29 +6,31 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import kvv.mks.cloud.Cloud;
 import kvv.mks.cloud.FuncGridArray;
 import kvv.mks.cloud.Pt;
 import kvv.mks.cloud.PtGrid;
-import kvv.mks.opt.State;
 import kvv.mks.opt.TargetFunc;
 import kvv.mks.opt.TargetFuncImpl;
 import kvv.mks.opt.TargetSumFunc;
 import kvv.mks.opt.TargetSumFuncImpl;
 import kvv.mks.opt.opt1.Solver1;
 import kvv.mks.rot.M;
+import kvv.mks.rot.Transform;
 
 public class TestMKS {
 
 	public static final String ROOT = "D:/Users/kvv/Google Drive/Mks";
 
-	static int N = 100;
+	static int NTESTS = 100;
 
 	static double THINOUT_DIST = 0.2;
 
-	static int SCAN_POINTS = 200;
+	static int SCAN_POINTS = 400;
 
 	static double OPT_DIST = 0.8;
 
@@ -41,11 +43,12 @@ public class TestMKS {
 		Cloud scan = new Cloud(ROOT + "/mks_cloud.txt");
 		loading.print();
 
-		TargetFunc targetFunc = getCreateFuncGrid(0.2);
+		TargetFunc targetFunc = getCreateFuncGrid(0.2, OPT_DIST);
+		//TargetFunc targetFunc = getCreateFuncGrid(0.2, OPT_DIST * 2);
 
 		int errCnt = 0;
 
-		for (int i = 0; i < N; i++) {
+		for (int i = 0; i < NTESTS; i++) {
 			Cloud scan1 = new Cloud(scan.data, SCAN_POINTS);
 
 			double a = Util.g2r(MAX_GRAD);
@@ -58,17 +61,15 @@ public class TestMKS {
 			double dy = Util.rand(-MAX_DIST, MAX_DIST);
 			double dz = Util.rand(-MAX_DIST, MAX_DIST);
 
-			State modif = new State(M.instance.rot(ax, ay, az), dx, dy, dz);
+			Transform modif = new Transform(M.rot(ax, ay, az), dx, dy, dz);
 
 			System.out.println(modif);
 
-			scan1.translate(-modif.dx, -modif.dy, -modif.dz);
+			scan1.apply1(modif);
+			
+			// scan1.addNoise(0.2);
 
-			scan1.rot(modif.rot.inverse());
-
-			//scan1.addNoise(0.2);
-
-			State state = solve(scan1.data, modif, targetFunc, null);
+			Transform state = solve(new TargetSumFuncImpl(targetFunc, scan1.data), modif, null);
 
 			// if (Util.r2g(da) > 5) {
 			// scan1.save(ROOT + "/bad" + errCnt + ".txt");
@@ -83,9 +84,8 @@ public class TestMKS {
 		System.out.println();
 	}
 
-	public static State solve(List<Pt> data, State modif,
-			TargetFunc targetFunc, State init) {
-		TargetSumFunc targetFuncSum = new TargetSumFuncImpl(targetFunc, data);
+	public static Transform solve(TargetSumFunc targetFuncSum, Transform modif,
+			Transform init) {
 
 		Solver solver;
 		solver = new Solver1(Util.g2r(MAX_GRAD / 4), MAX_DIST / 4,
@@ -94,7 +94,7 @@ public class TestMKS {
 		// MAX_DIST);
 
 		long t = System.currentTimeMillis();
-		State state = solver.solve();
+		Transform state = solver.solve();
 		t = System.currentTimeMillis() - t;
 
 		double da = state.rot.dist(modif.rot);
@@ -115,30 +115,45 @@ public class TestMKS {
 		return state;
 	}
 
-	public static TargetFunc getCreateFuncGrid(double step) throws IOException {
-		File file = new File(ROOT, "grid" + (int) (step * 100) + ".bin");
+	public static TargetFunc getCreateFuncGrid(double step, double optDist)
+			throws IOException {
+		File file = new File(ROOT, "grid" + (int) (step * 100) + "_"
+				+ (int) (optDist * 100) + ".bin");
 		if (!file.exists()) {
 			Cloud model = new Cloud(ROOT + "/skeleton.txt");
 			Prof thinOutProf = new Prof("thinOut");
-			model.thinOut(THINOUT_DIST);
+			model = thinOut(model.data, THINOUT_DIST);
 			thinOutProf.print();
 
 			System.out.println(model.data.size() + " points in model");
 
-			PtGrid grid = new PtGrid(OPT_DIST * 3);
+			PtGrid grid = new PtGrid(optDist * 3);
 			grid.addAll(model.data);
+			TargetFunc targetFunc = new TargetFuncImpl(grid, optDist);
 
-			TargetFunc targetFunc = new TargetFuncImpl(grid, OPT_DIST);
 
-			model.getMaxSize();
+			double minX = Integer.MAX_VALUE;
+			double maxX = Integer.MIN_VALUE;
+			double minY = Integer.MAX_VALUE;
+			double maxY = Integer.MIN_VALUE;
+			double minZ = Integer.MAX_VALUE;
+			double maxZ = Integer.MIN_VALUE;
 
-			System.out.println("minX=" + model.minX + " maxX=" + model.maxX
-					+ " minY=" + model.minY + " maxY=" + model.maxY + " minZ="
-					+ model.minZ + " maxZ=" + model.maxZ);
+			for (Pt pt : model.data) {
+				minX = Math.min(minX, pt.x);
+				maxX = Math.max(maxX, pt.x);
+				minY = Math.min(minY, pt.y);
+				maxY = Math.max(maxY, pt.y);
+				minZ = Math.min(minZ, pt.z);
+				maxZ = Math.max(maxZ, pt.z);
+			}
 
-			TargetFunc funcGrid = new FuncGridArray(targetFunc, model.minX - 1,
-					model.maxX + 1, model.minY - 1, model.maxY + 1,
-					model.minZ - 1, model.maxZ + 1, step);
+			System.out.println("minX=" + minX + " maxX=" + maxX + " minY="
+					+ minY + " maxY=" + maxY + " minZ=" + minZ + " maxZ="
+					+ maxZ);
+
+			TargetFunc funcGrid = new FuncGridArray(targetFunc, minX - 1,
+					maxX + 1, minY - 1, maxY + 1, minZ - 1, maxZ + 1, step);
 
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(
 					new FileOutputStream(file));
@@ -162,4 +177,23 @@ public class TestMKS {
 
 		return funcGrid;
 	}
+
+	public static Cloud thinOut(List<Pt> data1, double dist) {
+		data1 = new ArrayList<>(data1);
+		Collections.shuffle(data1);
+
+		List<Pt> data = new ArrayList<>();
+		PtGrid grid = new PtGrid(dist * 4);
+
+		for (Pt pt : data1) {
+			List<Pt> cand = grid.getNeighbours(pt.x, pt.y, pt.z, dist);
+			if (cand.size() > 0)
+				continue;
+			data.add(pt);
+			grid.add(pt);
+		}
+
+		return new Cloud(data);
+	}
+
 }

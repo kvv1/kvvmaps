@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kvv.mks.Solver;
-import kvv.mks.opt.State;
 import kvv.mks.opt.TargetSumFunc;
 import kvv.mks.rot.M;
+import kvv.mks.rot.Transform;
 
 public class Solver1 implements Solver {
-	public State state = new State(M.instance.rot(0, 0, 0), 0, 0, 0);
+	public Transform state = new Transform();
 
 	private final TargetSumFunc targetFunc;
 
@@ -36,37 +36,29 @@ public class Solver1 implements Solver {
 	}
 
 	public Solver1(double maxAngle, double maxDist, TargetSumFunc targetFunc,
-			State init) {
+			Transform init) {
 		this.targetFunc = targetFunc;
 		if (init != null)
 			state = init;
 		
-//		state.rot = M.instance.rot(0.1, 0, 0).mul(state.rot, null);
-//		state.rot = M.instance.rot(-0.2, 0, 0).mul(state.rot, null);
-//		state.rot = M.instance.rot(0.1, 0, 0).mul(state.rot, null);
-		
-
 		optimizers.add(new Opt(maxAngle) {
 			@Override
 			public void incParam(double value) {
-				state.rot = M.instance.rot(value, 0, 0).mul(state.rot, null);
-//				state.rot = state.rot.mul(M.instance.rot(value, 0, 0), null);
+				state.rot = M.rot(value, 0, 0).mul(state.rot, null);
 			}
 		});
 
 		optimizers.add(new Opt(maxAngle) {
 			@Override
 			public void incParam(double value) {
-				state.rot = M.instance.rot(0, value, 0).mul(state.rot, null);
-//				state.rot = state.rot.mul(M.instance.rot(0,value,  0), null);
+				state.rot = M.rot(0, value, 0).mul(state.rot, null);
 			}
 		});
 
 		optimizers.add(new Opt(maxAngle) {
 			@Override
 			public void incParam(double value) {
-				state.rot = M.instance.rot(0, 0, value).mul(state.rot, null);
-//				state.rot = state.rot.mul(M.instance.rot(0,0,value), null);
+				state.rot = M.rot(0, 0, value).mul(state.rot, null);
 			}
 		});
 
@@ -95,7 +87,7 @@ public class Solver1 implements Solver {
 	int steps;
 
 	@Override
-	public State solve() {
+	public Transform solve() {
 		double lastValue = Double.MIN_VALUE;
 
 		steps = 0;

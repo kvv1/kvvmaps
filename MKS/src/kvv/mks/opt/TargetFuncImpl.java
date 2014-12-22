@@ -19,8 +19,6 @@ public class TargetFuncImpl implements TargetFunc{
 		int n = 0;
 		
 		Collection<Pt> candidates = model.getNeighbours(x, y, z, dist);
-		if(candidates.size() > 0)
-			n++;
 		n += candidates.size();
 		for (Pt pt2 : candidates) {
 			if (pt2.dist(x, y, z) < dist / 2)

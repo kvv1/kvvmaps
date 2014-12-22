@@ -3,11 +3,11 @@ package kvv.mks;
 import java.io.IOException;
 
 import kvv.mks.cloud.Cloud;
-import kvv.mks.opt.State;
 import kvv.mks.opt.TargetFunc;
 import kvv.mks.opt.TargetSumFuncImpl;
 import kvv.mks.rot.M;
 import kvv.mks.rot.Rot;
+import kvv.mks.rot.Transform;
 
 //10,259 -10,330 -15,140  -1,718  -1,802   1,752
 //-10,500  -0,950  -1,450   0,595  -0,050  -0,150 10  1908   2701  10182 da=26,577 dd=3,469 ########## ########## t=218 
@@ -16,13 +16,6 @@ public class Test1 {
 
 	public static void main(String[] args) throws IOException {
 
-		// Pt pt = new Pt(0, 1, 1).norm();
-		//
-		// Quaternion q = Quaternion.fromDir(pt);
-		//
-		// Pt pt1 = q.inverse().apply(pt, null);
-		// Pt pt2 = q.apply(pt1, null);
-
 		Cloud scan = new Cloud(TestMKS.ROOT + "/mks_cloud.txt");
 		Cloud scan1 = new Cloud(scan.data, 400);
 
@@ -30,19 +23,20 @@ public class Test1 {
 		double ay = Util.g2r(165);
 		double az = Util.g2r(55);
 
-		State modif = new State(M.instance.rot(ax, ay, az), 0, 0, 0);
-		scan1.rot(modif.rot.inverse());
+		Transform modif = new Transform(M.rot(ax, ay, az), 0, 2, 0);
+		scan1.apply1(modif);
 
-		TargetFunc targetFunc = TestMKS.getCreateFuncGrid(0.2);
+		TargetFunc targetFunc = TestMKS.getCreateFuncGrid(0.2, 0.8);
 
 		TargetSumFuncImpl targetSumFuncImpl = new TargetSumFuncImpl(targetFunc,
 				scan1.data);
 
-		State maxState = findBestView(targetSumFuncImpl);
+		Transform maxState = findBestView(targetSumFuncImpl);
 
 		System.out.println();
 
-		TestMKS.solve(scan1.data, modif, targetFunc, maxState);
+		TestMKS.solve(new TargetSumFuncImpl(targetFunc, scan1.data), modif,
+				maxState);
 
 		/*
 		 * for (int i = 0; i < 200; i++) { Rot rot = M.directions[(int)
@@ -63,24 +57,24 @@ public class Test1 {
 
 	static boolean print = false;
 
-	static final double MAX_D = 4;
+	static final double MAX_D = 2;
 	static final double STEP_D = 1;
 
-	private static State findBestView(TargetSumFuncImpl targetSumFuncImpl) {
+	private static Transform findBestView(TargetSumFuncImpl targetSumFuncImpl) {
 		int maxVal = Integer.MIN_VALUE;
-		State maxState = null;
+		Transform maxState = null;
 
 		for (double x = -MAX_D; x <= MAX_D; x += STEP_D)
 			for (double y = -MAX_D; y <= MAX_D; y += STEP_D)
 				for (double z = -MAX_D; z <= MAX_D; z += STEP_D) {
 					long t = System.currentTimeMillis();
-					
+
 					int n = 0;
 					for (Rot rot : M.directions) {
 						if (print && n % 8 == 0)
 							System.out.println();
 
-						State state = new State(rot, x, y, z);
+						Transform state = new Transform(rot, x, y, z);
 						int val = (int) targetSumFuncImpl.getValue(state);
 
 						if (print)
@@ -93,8 +87,9 @@ public class Test1 {
 
 						n++;
 					}
-					
-					//System.out.println("t=" + (System.currentTimeMillis() - t));
+
+					// System.out.println("t=" + (System.currentTimeMillis() -
+					// t));
 				}
 		return maxState;
 	}

@@ -1,9 +1,9 @@
 package kvv.mks;
 
-import kvv.mks.opt.State;
+import kvv.mks.rot.Transform;
 
 
 public interface Solver {
-	public State solve();
+	public Transform solve();
 	public String getAddPrint();
 }
