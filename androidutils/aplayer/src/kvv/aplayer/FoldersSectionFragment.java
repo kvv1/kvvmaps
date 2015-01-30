@@ -1,14 +1,11 @@
 package kvv.aplayer;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -100,22 +97,22 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 			}
 		});
 
-//		list.setOnItemLongClickListener(new OnItemLongClickListener() {
-//			@Override
-//			public boolean onItemLongClick(AdapterView<?> adapterView, View view,
-//					final int position, long id) {
-//				new AlertDialog.Builder(getActivity())
-//				.setMessage(
-//						"Play random?")
-//				.setPositiveButton("OK",
-//						new DialogInterface.OnClickListener() {
-//							public void onClick(DialogInterface dialog,
-//									int which) {
-//							}
-//						}).show();
-//				return false;
-//			}
-//		});
+		// list.setOnItemLongClickListener(new OnItemLongClickListener() {
+		// @Override
+		// public boolean onItemLongClick(AdapterView<?> adapterView, View view,
+		// final int position, long id) {
+		// new AlertDialog.Builder(getActivity())
+		// .setMessage(
+		// "Play random?")
+		// .setPositiveButton("OK",
+		// new DialogInterface.OnClickListener() {
+		// public void onClick(DialogInterface dialog,
+		// int which) {
+		// }
+		// }).show();
+		// return false;
+		// }
+		// });
 
 		((Button) rootView.findViewById(R.id.goto1))
 				.setOnClickListener(new OnClickListener() {

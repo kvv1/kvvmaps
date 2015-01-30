@@ -1,5 +1,6 @@
 package kvv.aplayer;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Handler;
@@ -15,7 +16,6 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.smartbean.androidutils.fragment.RLFragment;
 
 public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
@@ -67,6 +67,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		}
 	};
 
+	@SuppressLint("DefaultLocale")
 	private static String convertSecondsToHMmSs(long seconds) {
 		long s = seconds % 60;
 		long m = (seconds / 60) % 60;
@@ -92,8 +93,9 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		timing.setText(convertSecondsToHMmSs(pos / 1000) + "("
 				+ convertSecondsToHMmSs(dur / 1000) + ")");
 
-		((Button) rootView.findViewById(R.id.comprOff)).setTypeface(null,
-				conn.service.getCompr() ? Typeface.NORMAL : Typeface.BOLD);
+		((Button) rootView.findViewById(R.id.speedOn))
+				.setText(APService.dBPer100kmh[conn.service.getDBPer100Idx()]
+						+ " db/100km/h");
 
 		((Button) rootView.findViewById(R.id.comprOn)).setTypeface(null,
 				conn.service.getCompr() ? Typeface.BOLD : Typeface.NORMAL);
@@ -133,7 +135,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 				}
 			}
 
-			clearGoto();
+			clearButtons();
 
 			list.invalidateViews();
 			list.setSelection(conn.service.getFile() - 2);
@@ -164,17 +166,17 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		return R.layout.fragment_files;
 	}
 
-	private Runnable gotoRunnable = new Runnable() {
+	private Runnable buttonsRunnable = new Runnable() {
 		@Override
 		public void run() {
 			if (rootView != null) {
-				clearGoto();
+				clearButtons();
 			}
 		}
 	};
 
-	private void clearGoto() {
-		handler.removeCallbacks(gotoRunnable);
+	private void clearButtons() {
+		handler.removeCallbacks(buttonsRunnable);
 		if (!settings.getBoolean(getString(R.string.prefTestMode), false))
 			rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
 		rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
@@ -201,8 +203,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 			public void onItemClick(AdapterView<?> adapterView, View view,
 					int position, long id) {
 				rootView.findViewById(R.id.buttons).setVisibility(View.VISIBLE);
-				handler.removeCallbacks(gotoRunnable);
-				handler.postDelayed(gotoRunnable, APActivity.BUTTONS_DELAY);
+				restartButtonsTimer();
 				FilesAdapter adapter = (FilesAdapter) list.getAdapter();
 				if (adapter != null) {
 					adapter.sel = position;
@@ -298,19 +299,18 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 			@Override
 			public void onClick(View arg0) {
 				extButtons.setVisibility(View.VISIBLE);
-				handler.removeCallbacks(gotoRunnable);
-				handler.postDelayed(gotoRunnable, APActivity.BUTTONS_DELAY);
+				restartButtonsTimer();
 			}
 		});
 
-		((Button) rootView.findViewById(R.id.comprOff))
+		((Button) rootView.findViewById(R.id.speedOn))
 				.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View arg0) {
-						service.setCompr(false);
-						handler.removeCallbacks(gotoRunnable);
-						handler.postDelayed(gotoRunnable,
-								APActivity.BUTTONS_DELAY);
+						int idx = (service.getDBPer100Idx() + 1)
+								% APService.dBPer100kmh.length;
+						service.setDBPer100Idx(idx);
+						restartButtonsTimer();
 						updateUI();
 					}
 				});
@@ -319,10 +319,8 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 				.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View arg0) {
-						service.setCompr(true);
-						handler.removeCallbacks(gotoRunnable);
-						handler.postDelayed(gotoRunnable,
-								APActivity.BUTTONS_DELAY);
+						service.setCompr(!service.getCompr());
+						restartButtonsTimer();
 						updateUI();
 					}
 				});
@@ -332,9 +330,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 					@Override
 					public void onClick(View arg0) {
 						service.setGain(0);
-						handler.removeCallbacks(gotoRunnable);
-						handler.postDelayed(gotoRunnable,
-								APActivity.BUTTONS_DELAY);
+						restartButtonsTimer();
 						updateUI();
 					}
 				});
@@ -344,9 +340,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 					@Override
 					public void onClick(View arg0) {
 						service.setGain(5);
-						handler.removeCallbacks(gotoRunnable);
-						handler.postDelayed(gotoRunnable,
-								APActivity.BUTTONS_DELAY);
+						restartButtonsTimer();
 						updateUI();
 					}
 				});
@@ -356,46 +350,35 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 					@Override
 					public void onClick(View arg0) {
 						service.setGain(10);
-						handler.removeCallbacks(gotoRunnable);
-						handler.postDelayed(gotoRunnable,
-								APActivity.BUTTONS_DELAY);
+						restartButtonsTimer();
 						updateUI();
 					}
 				});
 
 		((Button) rootView.findViewById(R.id.back10s))
 				.setOnClickListener(new OnClickListener() {
-
 					@Override
 					public void onClick(View arg0) {
 						service.seek(-10000);
-						handler.removeCallbacks(gotoRunnable);
-						handler.postDelayed(gotoRunnable,
-								APActivity.BUTTONS_DELAY);
+						restartButtonsTimer();
 					}
 				});
 
 		((Button) rootView.findViewById(R.id.back30s))
 				.setOnClickListener(new OnClickListener() {
-
 					@Override
 					public void onClick(View arg0) {
 						service.seek(-30000);
-						handler.removeCallbacks(gotoRunnable);
-						handler.postDelayed(gotoRunnable,
-								APActivity.BUTTONS_DELAY);
+						restartButtonsTimer();
 					}
 				});
 
 		((Button) rootView.findViewById(R.id.back1min))
 				.setOnClickListener(new OnClickListener() {
-
 					@Override
 					public void onClick(View arg0) {
 						service.seek(-60000);
-						handler.removeCallbacks(gotoRunnable);
-						handler.postDelayed(gotoRunnable,
-								APActivity.BUTTONS_DELAY);
+						restartButtonsTimer();
 					}
 				});
 
@@ -403,6 +386,11 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 		service.addListener(listener);
 		listener.onChanged();
+	}
+
+	private void restartButtonsTimer() {
+		handler.removeCallbacks(buttonsRunnable);
+		handler.postDelayed(buttonsRunnable, APActivity.BUTTONS_DELAY);
 	}
 
 	private long lastKeyUp;

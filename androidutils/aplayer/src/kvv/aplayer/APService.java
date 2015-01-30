@@ -16,8 +16,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -34,9 +38,11 @@ public class APService extends BaseService {
 	public final static File ROOT = new File(
 			Environment.getExternalStorageDirectory(), "/external_sd/aplayer/");
 
+	public static final float[] dBPer100kmh = { 0, 5f, 10f, 15f };
+
 	private Set<APServiceListener> listeners = new HashSet<APServiceListener>();
 
-	private Player player;
+	private Player1 player;
 
 	private Handler handler = new Handler();
 
@@ -116,7 +122,7 @@ public class APService extends BaseService {
 
 		// readFolders(ROOT, 0, folders);
 
-		player = new Player(folders) {
+		player = new Player1(folders) {
 			@Override
 			protected void onChanged() {
 				System.out.println("onChanged " + isPlaying());
@@ -124,11 +130,13 @@ public class APService extends BaseService {
 				if (!isPlaying()) {
 					handler.removeCallbacks(saver);
 					saver = null;
+					stopGpsDelayed();
 				} else {
 					if (saver == null) {
 						saver = new Saver();
 						handler.post(saver);
 					}
+					startGps();
 				}
 
 				for (APServiceListener l : listeners)
@@ -184,6 +192,14 @@ public class APService extends BaseService {
 		player.setGain(settings.getInt("gain", 0));
 		player.setCompr(settings.getBoolean("compr", false));
 
+		int dBPer100Idx = settings.getInt("dBPer100Idx", 0);
+		if (dBPer100Idx >= dBPer100kmh.length) {
+			dBPer100Idx = 0;
+			setPrefInt("dBPer100Idx", dBPer100Idx);
+		}
+		player.setDbPer100(dBPer100kmh[dBPer100Idx]);
+
+		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 	}
 
 	@Override
@@ -192,6 +208,7 @@ public class APService extends BaseService {
 		player.close();
 		telephonyManager.listen(phoneStateListener,
 				PhoneStateListener.LISTEN_NONE);
+		stopGpsRunnable.run();
 		super.onDestroy();
 	}
 
@@ -350,6 +367,12 @@ public class APService extends BaseService {
 		}
 
 		@Override
+		public void setDBPer100Idx(int n) {
+			player.setDbPer100(dBPer100kmh[n]);
+			setPrefInt("dBPer100Idx", n);
+		}
+
+		@Override
 		public int getGain() {
 			return player.getGain();
 		}
@@ -358,6 +381,12 @@ public class APService extends BaseService {
 		public boolean getCompr() {
 			return player.getCompr();
 		}
+
+		@Override
+		public int getDBPer100Idx() {
+			return settings.getInt("dBPer100Idx", 0);
+		}
+
 	}
 
 	private static int read(File dir, List<Folder> folders, int indent) {
@@ -450,6 +479,52 @@ public class APService extends BaseService {
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(name, val);
 		editor.commit();
+	}
+
+	private LocationManager locationManager;
+	private LocationListener locationListener;
+
+	private Runnable stopGpsRunnable = new Runnable() {
+		@Override
+		public void run() {
+			if (locationListener != null) {
+				locationManager.removeUpdates(locationListener);
+				locationListener = null;
+			}
+		}
+	};
+
+	private void startGps() {
+		handler.removeCallbacks(stopGpsRunnable);
+		if (locationListener == null) {
+			locationListener = new MyLocationListener() {
+				@Override
+				public void onLocationChanged(Location location) {
+					player.setSpeedKMH(location.getSpeed() * 3.6f);
+//					player.setSpeedKMH(80f);
+				}
+			};
+			locationManager.requestLocationUpdates(
+					LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		}
+	}
+
+	private void stopGpsDelayed() {
+		handler.removeCallbacks(stopGpsRunnable);
+		handler.postDelayed(stopGpsRunnable, 600000);
+	}
+
+	static abstract class MyLocationListener implements LocationListener {
+
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+		}
+
+		public void onProviderEnabled(String provider) {
+		}
+
+		public void onProviderDisabled(String provider) {
+		}
+
 	}
 
 }

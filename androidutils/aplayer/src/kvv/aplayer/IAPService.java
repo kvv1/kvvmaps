@@ -27,4 +27,6 @@ public interface IAPService {
 	void setCompr(boolean b );
 	int getGain();
 	boolean getCompr();
+	void setDBPer100Idx(int n);
+	int getDBPer100Idx();
 }

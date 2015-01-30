@@ -7,7 +7,6 @@ import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Handler;
 import android.view.KeyEvent;
-import android.widget.Toast;
 
 public class RemoteControlReceiver extends BroadcastReceiver {
 
@@ -95,6 +94,6 @@ public class RemoteControlReceiver extends BroadcastReceiver {
 			}
 			break;
 		}
-		//abortBroadcast();
+		// abortBroadcast();
 	}
 }
