@@ -12,8 +12,8 @@ public class Compressor {
 
 	private volatile boolean autoVol = false;
 
-	float k = 0.5f;
-	volatile float gain;
+	private volatile float k = 0.5f;
+	private volatile float gain;
 
 	public Compressor(MediaPlayer mp) {
 		this.mp = mp;
@@ -55,9 +55,9 @@ public class Compressor {
 		resetGain();
 	}
 
-	LPF lpf;
-	LPF lpf2;
-	int sr;
+	private LPF lpf;
+	private LPF lpf2;
+	private int sr;
 
 	class OnDataCaptureListener2 implements OnDataCaptureListener {
 

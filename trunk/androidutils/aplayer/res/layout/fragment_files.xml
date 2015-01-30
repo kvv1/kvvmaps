@@ -102,11 +102,11 @@
                     android:textSize="20sp"
                     android:textStyle="bold" />
                 <Button
-                    android:id="@+id/comprOff"
+                    android:id="@+id/speedOn"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:text="Compr Off"
+                    android:text="Скорость"
                     android:textSize="20sp"
                     android:textStyle="bold" />
             </LinearLayout>

@@ -10,7 +10,6 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
-import android.media.audiofx.Equalizer;
 
 public abstract class Player {
 
@@ -22,9 +21,7 @@ public abstract class Player {
 		onChanged();
 	}
 
-	private final MediaPlayer mp = new MediaPlayer();
-	private final Compressor compr = new Compressor(mp);
-	private Equalizer eq = new Equalizer(0, mp.getAudioSessionId());
+	protected final MediaPlayer mp = new MediaPlayer();
 
 	private boolean initialized;
 
@@ -32,21 +29,7 @@ public abstract class Player {
 	private int curFolder = -1;
 	private int curFile = 0;
 
-	short[] bandRange;
-	short nBands;
-	int maxGain;
-
 	public Player(List<Folder> folders) {
-
-		nBands = eq.getNumberOfBands();
-		bandRange = eq.getBandLevelRange();
-		maxGain = bandRange[1];
-
-		System.out.println("min=" + bandRange[0] + " max=" + bandRange[1]);
-		eq.setEnabled(true);
-		setEq(0);
-
-		compr.init();
 
 		this.folders = folders;
 		folders.add(new Folder("RANDOM", 0, new File[0]));
@@ -90,19 +73,7 @@ public abstract class Player {
 			}
 		});
 
-		eq.setEnabled(true);
-		compr.setEnabled(true);
-
-		setGain(0);
 		onChanged1();
-
-	}
-
-	private void setEq(int j) {
-		if (eq.getEnabled())
-			for (short i = 0; i < nBands; i++) {
-				eq.setBandLevel(i, (short) j);
-			}
 	}
 
 	public void setVolume(float v) {
@@ -266,7 +237,7 @@ public abstract class Player {
 			setDataSource();
 			initialized = true;
 			mp.prepare();
-			compr.resetGain();
+			resetGain();
 			if (playing || forcePlay)
 				mp.start();
 		} catch (Exception e) {
@@ -281,7 +252,7 @@ public abstract class Player {
 	}
 
 	public void play_pause() {
-		compr.resetGain();
+		resetGain();
 		if (mp.isPlaying())
 			mp.pause();
 		else
@@ -310,36 +281,9 @@ public abstract class Player {
 	}
 
 	public void close() {
-		eq.release();
-		compr.release();
 		mp.release();
 	}
 
-	private int gain;
-
-	public void setGain(int db) {
-		float k = compr.getK();
-		int comprDB = (int) (20 * Math.log10(1 / k));
-		setEq(comprDB + db * 100);
-		gain = db;
+	protected void resetGain() {
 	}
-
-	public void setCompr(boolean b) {
-		compr.setAuto(b);
-	}
-
-	public int getGain() {
-		return gain;
-	}
-
-	public boolean getCompr() {
-		return compr.getAuto();
-	}
-
-	public void enVis() {
-		boolean b = mp.isPlaying();
-		System.out.println("*** " + b);
-		compr.setEnabled(b);
-	}
-
 }
