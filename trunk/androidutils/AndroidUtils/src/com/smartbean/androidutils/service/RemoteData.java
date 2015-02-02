@@ -42,11 +42,11 @@ public class RemoteData<TData, TMsg> {
 
 	private volatile boolean stopped;
 
-	private final RemoteDataProvider<TData, TMsg> dataProvider;
-	private final RemoteDataListener<TData, TMsg> dataListener;
-	private final RemoteDataMessages<TMsg> dataMessages;
+	private RemoteDataProvider<TData, TMsg> dataProvider;
+	private RemoteDataListener<TData, TMsg> dataListener;
+	private RemoteDataMessages<TMsg> dataMessages;
 
-	public RemoteData(RemoteDataProvider<TData, TMsg> dataProvider,
+	public void init(RemoteDataProvider<TData, TMsg> dataProvider,
 			RemoteDataListener<TData, TMsg> dataListener,
 			RemoteDataMessages<TMsg> dataMessages) {
 		this.dataMessages = dataMessages;
