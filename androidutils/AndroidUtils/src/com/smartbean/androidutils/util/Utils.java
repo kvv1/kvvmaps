@@ -10,7 +10,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 public class Utils {
 	public static void log(Object obj, String message) {
@@ -47,7 +51,7 @@ public class Utils {
 	public static <T> String[] toStringArray(T[] arr, ToString<T> toString) {
 		return toStringArray(Arrays.asList(arr), toString);
 	}
-	
+
 	public static <T> String[] toStringArray(List<T> list, ToString<T> toString) {
 		String[] res = new String[list.size()];
 		int i = 0;
@@ -74,6 +78,13 @@ public class Utils {
 			}
 		});
 		builder.show();
+	}
+
+	public static void playDefaultNotificationSound(Context context) {
+		Uri notification = RingtoneManager
+				.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+		Ringtone r = RingtoneManager.getRingtone(context, notification);
+		r.play();
 	}
 
 }
