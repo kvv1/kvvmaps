@@ -14,6 +14,8 @@ public abstract class RemoteData1<TData, TMsg> {
 
 	protected abstract List<TMsg> loadMessages();
 
+	protected abstract void progress(boolean on);
+
 	protected abstract void storeMessages(List<TMsg> messages);
 
 	protected abstract void _send(TMsg msg) throws IOException;
@@ -59,9 +61,13 @@ public abstract class RemoteData1<TData, TMsg> {
 	private Runnable runnable = new Runnable() {
 		@Override
 		public void run() {
+			log("handler entered");
+			progress(true);
 			posted = false;
 			if (!messages.isEmpty()) {
 				final TMsg msg = messages.get(0);
+				if (msg != null)
+					log("sending message");
 				new Step<Void>() {
 					@Override
 					protected Void asyncFunc() throws Exception {
@@ -72,6 +78,8 @@ public abstract class RemoteData1<TData, TMsg> {
 
 					@Override
 					protected void onComplete(Void data) {
+						if (msg != null)
+							log("message sent ok");
 						messages.remove(msg);
 						storeMessages(messages);
 						handler.removeCallbacks(runnable);
@@ -81,6 +89,9 @@ public abstract class RemoteData1<TData, TMsg> {
 
 					@Override
 					protected void handleException(Exception e) {
+						if (msg != null)
+							log("message not sent");
+						progress(false);
 						handler.removeCallbacks(runnable);
 						log("* failure " + e.getClass().getName() + " "
 								+ e.getMessage());
@@ -90,6 +101,7 @@ public abstract class RemoteData1<TData, TMsg> {
 					}
 				}.exec();
 			} else {
+				log("reading data");
 				new Step<TData>() {
 					@Override
 					protected TData asyncFunc() throws Exception {
@@ -98,9 +110,12 @@ public abstract class RemoteData1<TData, TMsg> {
 
 					@Override
 					protected void onComplete(TData data) {
+						log("data read ok");
 						handler.removeCallbacks(runnable);
-						if (messages.isEmpty() && data != null) {
-							remoteDataReceived(data);
+						if (messages.isEmpty()) {
+							if (data != null)
+								remoteDataReceived(data);
+							progress(false);
 							handler.postDelayed(runnable, updateInterval * 1000);
 						} else {
 							handler.post(runnable);
@@ -110,6 +125,8 @@ public abstract class RemoteData1<TData, TMsg> {
 
 					@Override
 					protected void handleException(Exception e) {
+						log("data not read");
+						progress(false);
 						handler.removeCallbacks(runnable);
 						log("* failure " + e.getClass().getName() + " "
 								+ e.getMessage());
