@@ -10,7 +10,7 @@ import android.content.Intent;
 public abstract class BaseService extends Service {
 
 	protected final int iconId;
-	protected final int iconIdBW;
+	protected final int iconGrayId;
 	private final Class<? extends Activity> activityClass;
 	private final int appNameId;
 	private final int notifTextId;
@@ -33,7 +33,7 @@ public abstract class BaseService extends Service {
 			Class<? extends Activity> activityClass, int appNameId,
 			int notifTextId, boolean notifSound, boolean sticky) {
 		this.iconId = iconId;
-		this.iconIdBW = iconGrayId;
+		this.iconGrayId = iconGrayId;
 		this.activityClass = activityClass;
 		this.appNameId = appNameId;
 		this.notifTextId = notifTextId;
@@ -54,7 +54,7 @@ public abstract class BaseService extends Service {
 		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
 		defaultNotif = createNotif(iconId);
-		grayNotif = createNotif(iconIdBW);
+		grayNotif = createNotif(iconGrayId);
 		alertNotif = createAlertNotif();
 		// currentNotif = grayNotif;
 
@@ -93,23 +93,34 @@ public abstract class BaseService extends Service {
 	}
 
 	public void setOnline(boolean online) {
-		if (this.online != online && !alert) {
-			nm.notify(3333, online ? defaultNotif : grayNotif);
-		}
+//		if (this.online != online && !alert) {
+//			nm.notify(3333, online ? defaultNotif : grayNotif);
+//		}
 		this.online = online;
+		updateNotif();
 	}
 
 	public void setAlert(boolean alert) {
-		if (alert && !this.alert && alertEnabled)
-			nm.notify(3333, alertNotif);
-		else if (!alert && this.alert)
-			nm.notify(3333, online ? defaultNotif : grayNotif);
+//		if (alert && !this.alert && alertEnabled)
+//			nm.notify(3333, alertNotif);
+//		else if (!alert && this.alert)
+//			nm.notify(3333, online ? defaultNotif : grayNotif);
 		this.alert = alert;
+		updateNotif();
 	}
 
 	public void enableAlert(boolean b) {
 		if (!b)
-			setAlert(false);
+			alert = false;
+			//setAlert(false);
 		this.alertEnabled = b;
+		updateNotif();
+	}
+
+	private void updateNotif() {
+		if (alert && alertEnabled)
+			nm.notify(3333, alertNotif);
+		else
+			nm.notify(3333, online ? defaultNotif : grayNotif);
 	}
 }
