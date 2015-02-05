@@ -460,25 +460,25 @@ public class APService extends BaseService {
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putInt(folder.path + "|file", player.getFile());
 		editor.putInt(folder.path + "|pos", player.getCurrentPosition());
-		editor.commit();
+		editor.apply();
 	}
 
 	private void setPref(String name, String val) {
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(name, val);
-		editor.commit();
+		editor.apply();
 	}
 
 	private void setPrefInt(String name, int val) {
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putInt(name, val);
-		editor.commit();
+		editor.apply();
 	}
 
 	private void setPrefBool(String name, boolean val) {
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(name, val);
-		editor.commit();
+		editor.apply();
 	}
 
 	private LocationManager locationManager;
@@ -500,8 +500,9 @@ public class APService extends BaseService {
 			locationListener = new MyLocationListener() {
 				@Override
 				public void onLocationChanged(Location location) {
-					player.setSpeedKMH(location.getSpeed() * 3.6f);
-//					player.setSpeedKMH(80f);
+					if (location.hasSpeed())
+						player.setSpeedKMH(location.getSpeed() * 3.6f);
+					// player.setSpeedKMH(80f);
 				}
 			};
 			locationManager.requestLocationUpdates(
