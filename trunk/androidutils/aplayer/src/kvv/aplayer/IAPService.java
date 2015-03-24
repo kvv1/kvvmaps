@@ -24,9 +24,9 @@ public interface IAPService {
 	void toBookmark(Bookmark bookmark);
 	void toRandom(int position);
 	void setGain(int db);
-	void setCompr(boolean b );
+	void setComprIdx(int n);
 	int getGain();
-	boolean getCompr();
+	int getComprIdx();
 	void setDBPer100Idx(int n);
 	int getDBPer100Idx();
 }

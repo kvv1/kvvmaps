@@ -6,4 +6,6 @@ public interface APServiceListener {
 	void onBookmarksChanged();
 	
 	void onRandomChanged();
+	
+	void onSpeedChanged(boolean hasSpeed, int fromLocation, int fromPlayer);
 }

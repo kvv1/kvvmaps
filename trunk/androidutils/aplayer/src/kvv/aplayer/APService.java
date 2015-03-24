@@ -38,7 +38,8 @@ public class APService extends BaseService {
 	public final static File ROOT = new File(
 			Environment.getExternalStorageDirectory(), "/external_sd/aplayer/");
 
-	public static final float[] dBPer100kmh = { 0, 5f, 10f, 15f };
+	public static final float[] dBPer100kmh = { 0, 5f};
+	public static final int[] compr = { 0, 6, 10};
 
 	private Set<APServiceListener> listeners = new HashSet<APServiceListener>();
 
@@ -190,7 +191,13 @@ public class APService extends BaseService {
 				RemoteControlReceiver.class.getName()));
 
 		player.setGain(settings.getInt("gain", 0));
-		player.setCompr(settings.getBoolean("compr", false));
+		
+		int comprIdx = settings.getInt("comprIdx", 0);
+		if (comprIdx >= compr.length) {
+			comprIdx = 0;
+			setPrefInt("comprIdx", comprIdx);
+		}
+		player.setCompr(compr[comprIdx]);
 
 		int dBPer100Idx = settings.getInt("dBPer100Idx", 0);
 		if (dBPer100Idx >= dBPer100kmh.length) {
@@ -361,9 +368,14 @@ public class APService extends BaseService {
 		}
 
 		@Override
-		public void setCompr(boolean b) {
-			player.setCompr(b);
-			setPrefBool("compr", b);
+		public void setComprIdx(int n) {
+			player.setCompr(compr[n]);
+			setPrefInt("comprIdx", n);
+		}
+
+		@Override
+		public int getComprIdx() {
+			return settings.getInt("comprIdx", 0);
 		}
 
 		@Override
@@ -373,18 +385,13 @@ public class APService extends BaseService {
 		}
 
 		@Override
-		public int getGain() {
-			return player.getGain();
-		}
-
-		@Override
-		public boolean getCompr() {
-			return player.getCompr();
-		}
-
-		@Override
 		public int getDBPer100Idx() {
 			return settings.getInt("dBPer100Idx", 0);
+		}
+
+		@Override
+		public int getGain() {
+			return player.getGain();
 		}
 
 	}
@@ -495,14 +502,23 @@ public class APService extends BaseService {
 	};
 
 	private void startGps() {
+		if (settings.getBoolean(getString(R.string.prefTestMode), false))
+			return;
+		
 		handler.removeCallbacks(stopGpsRunnable);
 		if (locationListener == null) {
 			locationListener = new MyLocationListener() {
+				float speed;
 				@Override
 				public void onLocationChanged(Location location) {
-					if (location.hasSpeed())
-						player.setSpeedKMH(location.getSpeed() * 3.6f);
-					// player.setSpeedKMH(80f);
+					if (!location.hasSpeed())
+						return;
+					
+					float s = location.getSpeed() * 3.6f;
+					if(speed > 30 && s < 5)
+						return;
+					speed = s;
+					player.setSpeedKMH(speed);
 				}
 			};
 			locationManager.requestLocationUpdates(

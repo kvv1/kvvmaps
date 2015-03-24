@@ -4,16 +4,20 @@ import android.media.MediaPlayer;
 import android.media.audiofx.Visualizer;
 import android.media.audiofx.Visualizer.OnDataCaptureListener;
 
-public class Compressor {
+public abstract class Compressor {
+
+	private static final double MEAN = 90;
+
 
 	private MediaPlayer mp;
 
 	private Visualizer visualizer;
 
 	private volatile boolean autoVol = false;
-
-	private volatile float k = 0.5f;
+	private volatile int db;
 	private volatile float gain;
+
+	protected abstract void setGain(float db);
 
 	public Compressor(MediaPlayer mp) {
 		this.mp = mp;
@@ -33,30 +37,16 @@ public class Compressor {
 		visualizer.release();
 	}
 
-	public void setAuto(boolean b) {
-		autoVol = b;
+	public void setComprLevel(int db) {
+		autoVol = db != 0;
+		this.db = db;
 	}
 
 	public void setEnabled(boolean b) {
 		visualizer.setEnabled(b);
 	}
 
-	private void setVol(float v) {
-		if (mp != null)
-			mp.setVolume(v, v);
-	}
-
-	public void resetGain() {
-		gain = k;
-	}
-
-	public void setK(float k) {
-		this.k = k;
-		resetGain();
-	}
-
 	private LPF lpf;
-	private LPF lpf2;
 	private int sr;
 
 	class OnDataCaptureListener2 implements OnDataCaptureListener {
@@ -66,8 +56,7 @@ public class Compressor {
 				int samplingRate) {
 
 			if (samplingRate != sr) {
-				lpf = new LPF(samplingRate / 1000, 2, 2);
-				lpf2 = new LPF(samplingRate / 1000, 2, 2);
+				lpf = new LPF(samplingRate / 1000, 0.01, 0.5);
 				sr = samplingRate;
 			}
 
@@ -76,37 +65,25 @@ public class Compressor {
 			for (byte b : waveform) {
 				int a = ((int) b & 0xFF) - 128;
 				a = Math.abs(a);
+				// a *= gain;
 				max = Math.max(max, a);
 				lpf.add(a);
-				lpf2.add(a * a);
 			}
 
-			if (max == 0)
-				max = 1;
+			double mean = lpf.get();
 
-			float v = max / 128f;
+			gain = (float) n2db(MEAN / mean);
+			if (gain > db)
+				gain = db;
 
-			float v1 = k / v;
-			if (v1 > 1)
-				v1 = 1;
+			setGain(gain);
 
-			if (v1 > gain)
-				gain += 0.02f * gain;
-			else if (v1 < gain)
-				gain -= 0.05f * gain;
-
-			if (gain > 1)
-				gain = 1;
-			if (gain < k)
-				gain = k;
-
-//			System.out.println((int) lpf.get() + " " + (int) lpf2.get() + " "
-//					+ max + " " + v1 + " " + gain);
+			System.out.printf("m=%f g=%f\n", mean, gain);
 
 			if (autoVol) {
-				setVol(gain);
+				setGain(gain);
 			} else {
-				setVol(k);
+				setGain(0);
 			}
 		}
 
@@ -115,11 +92,16 @@ public class Compressor {
 		}
 	}
 
-	public float getK() {
-		return k;
+	public static double n2db(double n) {
+		return 20 * Math.log10(n);
 	}
 
-	public boolean getAuto() {
-		return autoVol;
+	public static double db2n(double db) {
+		return Math.pow(10, db / 20);
+	}
+
+	public void resetGain() {
+		if(lpf != null)
+			lpf.set(MEAN);
 	}
 }

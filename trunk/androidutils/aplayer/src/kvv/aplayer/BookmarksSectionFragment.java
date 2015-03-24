@@ -47,10 +47,7 @@ public class BookmarksSectionFragment extends
 
 	private BookmarksAdapter adapter;
 
-	private APServiceListener listener = new APServiceListener() {
-		@Override
-		public void onChanged() {
-		}
+	private APServiceListener listener = new APServiceListenerAdapter() {
 
 		@Override
 		public void onBookmarksChanged() {
@@ -60,9 +57,6 @@ public class BookmarksSectionFragment extends
 			list.setAdapter(adapter);
 		}
 
-		@Override
-		public void onRandomChanged() {
-		}
 	};
 
 	@Override

@@ -16,7 +16,7 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	private Handler handler = new Handler();
 
-	private final APServiceListener listener = new APServiceListener() {
+	private final APServiceListener listener = new APServiceListenerAdapter() {
 		@Override
 		public void onChanged() {
 			if (conn.service == null)
@@ -31,14 +31,6 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 					list.setSelection(curFolder - 2);
 			}
 
-		}
-
-		@Override
-		public void onBookmarksChanged() {
-		}
-
-		@Override
-		public void onRandomChanged() {
 		}
 	};
 

@@ -12,13 +12,19 @@ public abstract class Player1 extends Player {
 	private short[] bandRange;
 	private short nBands;
 
-	private int gain;
-	private float dBPer100;
-	private float speed;
+	private volatile int gain;
+	private volatile float comprGain;
+	private volatile float dBPer100;
+	private volatile float speed;
 
 	public Player1(List<Folder> folders) {
 		super(folders);
-		compr = new Compressor(mp);
+		compr = new Compressor(mp){
+			@Override
+			protected void setGain(float db) {
+				comprGain = db;
+				setEq();
+			}};
 		eq = new Equalizer(0, mp.getAudioSessionId());
 
 		nBands = eq.getNumberOfBands();
@@ -52,12 +58,9 @@ public abstract class Player1 extends Player {
 		return gain;
 	}
 
-	public void setCompr(boolean b) {
-		compr.setAuto(b);
-	}
-
-	public boolean getCompr() {
-		return compr.getAuto();
+	public void setCompr(int db) {
+		compr.setComprLevel(db);
+		setEq();
 	}
 
 	public void enVis() {
@@ -78,22 +81,18 @@ public abstract class Player1 extends Player {
 	}
 
 	private void setEq() {
-		float k = compr.getK();
-		int comprDB = (int) (20 * Math.log10(1 / k));
-
 		float g = gain;
 		g += speed * dBPer100 / 100;
 
-		System.out.println("g=" + g);
+		g += comprGain;
 
-		setEq(comprDB + (int) (g * 100));
+		setEq(g * 100);
 	}
 
-	private void setEq(int level) {
+	private void setEq(float level) {
 		if (eq.getEnabled())
-			for (short i = 0; i < nBands; i++) {
+			for (short i = 0; i < nBands; i++)
 				eq.setBandLevel(i, (short) level);
-			}
 	}
 
 	@Override
