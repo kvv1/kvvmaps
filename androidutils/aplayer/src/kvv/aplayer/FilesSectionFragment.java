@@ -94,11 +94,11 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 				+ convertSecondsToHMmSs(dur / 1000) + ")");
 
 		((Button) rootView.findViewById(R.id.speedOn))
-				.setText(APService.dBPer100kmh[conn.service.getDBPer100Idx()]
-						+ " db/100km/h");
+				.setText((int) APService.dBPer100kmh[conn.service
+						.getDBPer100Idx()] + " db/100kmh");
 
-		((Button) rootView.findViewById(R.id.comprOn)).setTypeface(null,
-				conn.service.getCompr() ? Typeface.BOLD : Typeface.NORMAL);
+		((Button) rootView.findViewById(R.id.comprOn)).setText("compr "
+				+ APService.compr[conn.service.getComprIdx()] + " db");
 
 		((Button) rootView.findViewById(R.id.vol0)).setTypeface(null,
 				conn.service.getGain() == 0 ? Typeface.BOLD : Typeface.NORMAL);
@@ -111,7 +111,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	}
 
-	private final APServiceListener listener = new APServiceListener() {
+	private final APServiceListener listener = new APServiceListenerAdapter() {
 		@Override
 		public void onChanged() {
 			if (conn.service == null)
@@ -144,10 +144,6 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		}
 
 		@Override
-		public void onBookmarksChanged() {
-		}
-
-		@Override
 		public void onRandomChanged() {
 			folder = -1;
 			onChanged();
@@ -177,7 +173,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	private void clearButtons() {
 		handler.removeCallbacks(buttonsRunnable);
-		if (!settings.getBoolean(getString(R.string.prefTestMode), false))
+		//if (!settings.getBoolean(getString(R.string.prefTestMode), false))
 			rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
 		rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
 		FilesAdapter adapter = (FilesAdapter) list.getAdapter();
@@ -319,7 +315,9 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 				.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View arg0) {
-						service.setCompr(!service.getCompr());
+						int idx = (service.getComprIdx() + 1)
+								% APService.compr.length;
+						service.setComprIdx(idx);
 						restartButtonsTimer();
 						updateUI();
 					}

@@ -20,7 +20,7 @@ import com.smartbean.androidutils.service.ServiceConnectionAdapter;
 
 public class APActivity extends FragmentActivityX {
 
-	public static final int BUTTONS_DELAY = 2000;
+	public static final int BUTTONS_DELAY = 3000;
 
 	private static final int RESULT_SETTINGS = 1;
 
@@ -36,7 +36,44 @@ public class APActivity extends FragmentActivityX {
 		return R.id.pager;
 	}
 
-	private APServiceListener listener = new APServiceListener() {
+	@Override
+	protected int getCount() {
+		return 3;
+	}
+
+	@Override
+	protected Fragment getItem(int position) {
+		switch (position) {
+		case 0:
+			return new FilesSectionFragment();
+		case 1:
+			return new FoldersSectionFragment();
+		case 2:
+			return new BookmarksSectionFragment();
+		case 3:
+			return new ChartsFragment();
+		}
+		return null;
+
+	}
+
+	@Override
+	protected CharSequence getPageTitle(int position) {
+		switch (position) {
+		case 0:
+			return "Files";
+		case 1:
+			return "Folders";
+		case 2:
+			return "Bookmarks";
+		case 3:
+			return "Charts";
+		}
+		return null;
+	}
+
+
+	private APServiceListener listener = new APServiceListenerAdapter() {
 
 		private Runnable r = new Runnable() {
 			@Override
@@ -46,18 +83,11 @@ public class APActivity extends FragmentActivityX {
 		};
 
 		@Override
-		public void onRandomChanged() {
-		}
-
-		@Override
 		public void onChanged() {
 			handler.removeCallbacks(r);
 			handler.postDelayed(r, 1000);
 		}
 
-		@Override
-		public void onBookmarksChanged() {
-		}
 	};
 
 	@Override
@@ -143,42 +173,6 @@ public class APActivity extends FragmentActivityX {
 				System.exit(0);
 			}
 		}, 5000);
-	}
-
-	@Override
-	protected Fragment getItem(int position) {
-		// getItem is called to instantiate the fragment for the given page.
-		// Return a DummySectionFragment (defined as a static inner class
-		// below) with the page number as its lone argument.
-
-		switch (position) {
-		case 0:
-			return new FilesSectionFragment();
-		case 1:
-			return new FoldersSectionFragment();
-		case 2:
-			return new BookmarksSectionFragment();
-		}
-		return null;
-
-	}
-
-	@Override
-	protected int getCount() {
-		return 3;
-	}
-
-	@Override
-	protected CharSequence getPageTitle(int position) {
-		switch (position) {
-		case 0:
-			return "Files";
-		case 1:
-			return "Folders";
-		case 2:
-			return "Bookmarks";
-		}
-		return null;
 	}
 
 	private ServiceConnectionAdapter<IAPService> conn = new ServiceConnectionAdapter<IAPService>() {

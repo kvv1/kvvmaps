@@ -1,8 +1,8 @@
 package kvv.aplayer;
 
 public class LPF {
-	private double k1;
-	private double k2;
+	private final double k1;
+	private final double k2;
 	private double acc;
 
 	public LPF(int samplingRate, double t1, double t2) {
@@ -10,7 +10,7 @@ public class LPF {
 		k2 = Math.exp(-1.0 / samplingRate / t2);
 	}
 
-	public double add(double v) {
+	public synchronized double add(double v) {
 		if (v > acc)
 			acc = acc * k1 + v * (1 - k1);
 		else
@@ -18,7 +18,11 @@ public class LPF {
 		return acc;
 	}
 	
-	public double get() {
+	public synchronized void set(double v) {
+		acc = v;
+	}
+	
+	public synchronized double get() {
 		return acc;
 	}
 }
