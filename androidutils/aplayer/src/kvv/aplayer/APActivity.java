@@ -93,6 +93,7 @@ public class APActivity extends FragmentActivityX {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		startService(new Intent(this, APService.class));
 		bindService(new Intent(this, APService.class), conn,
 				Context.BIND_AUTO_CREATE);

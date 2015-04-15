@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import android.annotation.SuppressLint;
@@ -21,6 +22,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -28,6 +30,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.smartbean.androidutils.service.BaseService;
@@ -38,8 +41,8 @@ public class APService extends BaseService {
 	public final static File ROOT = new File(
 			Environment.getExternalStorageDirectory(), "/external_sd/aplayer/");
 
-	public static final float[] dBPer100kmh = { 0, 5f};
-	public static final int[] compr = { 0, 6, 10};
+	public static final float[] dBPer100kmh = { 0, 5f };
+	public static final int[] compr = { 0, 6, 10 };
 
 	private Set<APServiceListener> listeners = new HashSet<APServiceListener>();
 
@@ -110,16 +113,37 @@ public class APService extends BaseService {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+
+		// //////////////////////////////////////
+
+		System.out.println("---");
+		for (StorageInfo info : StorageUtils.getStorageList())
+			System.out.println(info.path);
+		System.out.println("---");
+		for (String key : MemoryStorage.getAllStorageLocations().keySet())
+			System.out.println(key + " "
+					+ MemoryStorage.getAllStorageLocations().get(key));
+		System.out.println("---");
+		for (String s : StorageUtils.getStorageDirectories())
+			System.out.println(s);
+		System.out.println("---");
+
+		for (String f : new File("/storage/sdcard1").list())
+			System.out.println(f);
+		System.out.println("---");
+
+		// //////////////////////////////////////
+
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
 
 		List<Folder> folders = new ArrayList<Folder>();
 
-		List<StorageInfo> list = StorageUtils.getStorageList();
-
-		for (StorageInfo info : list) {
-			// readFolders(new File(info.path), 0, folders);
-			read(new File(info.path), folders, 0);
-		}
+		if (Build.VERSION.SDK_INT < 14)
+			for (StorageInfo info : StorageUtils.getStorageList())
+				read(new File(info.path), folders, 0);
+		else
+			for (String s : StorageUtils.getStorageDirectories())
+				read(new File(s), folders, 0);
 
 		// readFolders(ROOT, 0, folders);
 
@@ -191,7 +215,7 @@ public class APService extends BaseService {
 				RemoteControlReceiver.class.getName()));
 
 		player.setGain(settings.getInt("gain", 0));
-		
+
 		int comprIdx = settings.getInt("comprIdx", 0);
 		if (comprIdx >= compr.length) {
 			comprIdx = 0;
@@ -504,18 +528,19 @@ public class APService extends BaseService {
 	private void startGps() {
 		if (settings.getBoolean(getString(R.string.prefTestMode), false))
 			return;
-		
+
 		handler.removeCallbacks(stopGpsRunnable);
 		if (locationListener == null) {
 			locationListener = new MyLocationListener() {
 				float speed;
+
 				@Override
 				public void onLocationChanged(Location location) {
 					if (!location.hasSpeed())
 						return;
-					
+
 					float s = location.getSpeed() * 3.6f;
-					if(speed > 30 && s < 5)
+					if (speed > 30 && s < 5)
 						return;
 					speed = s;
 					player.setSpeedKMH(speed);
@@ -544,4 +569,19 @@ public class APService extends BaseService {
 
 	}
 
+	void ff() {
+		Map<String, File> externalLocations = MemoryStorage
+				.getAllStorageLocations();
+		File sdCard = externalLocations.get(MemoryStorage.SD_CARD);
+		File externalSdCard = externalLocations
+				.get(MemoryStorage.EXTERNAL_SD_CARD);
+		if (sdCard != null) {
+			Log.i("TAG", "Internal SD path: " + sdCard.getPath());
+
+		}
+		if (externalSdCard != null) {
+			Log.i("TAG", "External SD path: " + externalSdCard.getPath());
+
+		}
+	}
 }
