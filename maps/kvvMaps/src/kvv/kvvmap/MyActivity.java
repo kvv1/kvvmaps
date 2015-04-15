@@ -317,7 +317,7 @@ public class MyActivity extends ActivityX {
 			public void uncaughtException(Thread thread, Throwable ex) {
 				PrintStream errPrintStream;
 				try {
-					OutputStream errOS = new FileOutputStream(Adapter.ROOT
+					OutputStream errOS = new FileOutputStream(Adapter.ROOT_INT
 							+ "/" + System.currentTimeMillis() + ".log");
 					errPrintStream = new PrintStream(errOS, true);
 					ex.printStackTrace(errPrintStream);
