@@ -13,6 +13,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.os.Environment;
 
 public class MapLoader {
 	public static final String DEFAULT_MAP_DIR_NAME = "default.dir";
@@ -114,26 +115,19 @@ public class MapLoader {
 	};
 	
 	public static boolean checkMaps(final Activity activity) {
-		if (new File(Adapter.MAPS_ROOT + "/default.dir").exists()
-				&& new File(Adapter.MAPS_ROOT + "/default.pac").exists())
-			return true;
-		if (new File(Adapter.MAPS_ROOT + "/land.dir").exists()
-				&& new File(Adapter.MAPS_ROOT + "/land.pac").exists())
-			return true;
-
+		
 		try {
+			if (!new File(Adapter.ROOT_INT).exists())
+				new File(Adapter.ROOT_INT).mkdirs();
 
-			if (!new File(Adapter.MAPS_ROOT).exists()) {
+			if (!new File(Adapter.MAPS_ROOT).exists())
 				new File(Adapter.MAPS_ROOT).mkdirs();
-			}
 
-			if (!new File(Adapter.PATH_ROOT).exists()) {
+			if (!new File(Adapter.PATH_ROOT).exists()) 
 				new File(Adapter.PATH_ROOT).mkdirs();
-			}
 
-			if (!new File(Adapter.PLACEMARKS).exists()) {
+			if (!new File(Adapter.PLACEMARKS).exists()) 
 				new File(Adapter.PLACEMARKS).createNewFile();
-			}
 		} catch (IOException e) {
 			new AlertDialog.Builder(activity)
 					.setMessage("Нет карточки памяти")
@@ -145,6 +139,13 @@ public class MapLoader {
 					}).show();
 			return false;
 		}
+
+		if (new File(Adapter.MAPS_ROOT + "/default.dir").exists()
+				&& new File(Adapter.MAPS_ROOT + "/default.pac").exists())
+			return true;
+		if (new File(Adapter.MAPS_ROOT + "/land.dir").exists()
+				&& new File(Adapter.MAPS_ROOT + "/land.pac").exists())
+			return true;
 
 		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
 			@Override

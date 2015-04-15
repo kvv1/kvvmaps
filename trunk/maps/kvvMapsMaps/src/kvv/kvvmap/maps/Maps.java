@@ -1,12 +1,12 @@
 package kvv.kvvmap.maps;
 
 import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import kvv.kvvmap.adapter.Adapter;
 import kvv.kvvmap.maps.MapsDir.MapsDirListener;
-import kvv.kvvmap.util.Img;
 
 public class Maps {
 
@@ -17,7 +17,7 @@ public class Maps {
 	private MapsListener listener;
 
 	private final Adapter adapter;
-	public final CopyOnWriteArrayList<MapDescrBase> maps = new CopyOnWriteArrayList<MapDescrBase>();
+	public final List<MapDescrBase> maps = new CopyOnWriteArrayList<MapDescrBase>();
 
 	public volatile MapDescrBase fixedMap;
 

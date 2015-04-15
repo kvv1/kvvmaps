@@ -29,6 +29,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.Handler;
@@ -39,34 +40,28 @@ import com.smartbean.androidutils.util.StorageUtils;
 import com.smartbean.androidutils.util.StorageUtils.StorageInfo;
 
 public class Adapter {
-	public static String ROOT;
+	public static final String ROOT_INT = Environment
+			.getExternalStorageDirectory().getAbsolutePath() + "/kvvMaps";
+	public static final String PATH_ROOT = ROOT_INT + "/paths";
+	public static final String PLACEMARKS = ROOT_INT + "/placemarks.pms";
+
+	public final static String MAPS_ROOT;
 
 	static {
-		// if (new File(Environment.getExternalStorageDirectory()
-		// .getAbsolutePath() + "/external_sd/kvvMaps").exists())
-		// ROOT = Environment.getExternalStorageDirectory().getAbsolutePath()
-		// + "/external_sd/kvvMaps";
-		// else
-		// ROOT = Environment.getExternalStorageDirectory().getAbsolutePath()
-		// + "/kvvMaps";
-
-		List<StorageInfo> list = StorageUtils.getStorageList();
-
-		for (StorageInfo info : list) {
-			if (new File(info.path, "kvvMaps").exists())
-				ROOT = info.path + "/kvvMaps";
+		String extRootPath;
+		if (Build.VERSION.SDK_INT < 14) {
+			List<StorageInfo> sl = StorageUtils.getStorageList();
+			extRootPath = sl.get(sl.size() - 1).path + "/kvvMaps";
+		} else {
+			String[] roots = StorageUtils.getStorageDirectories();
+			extRootPath = roots[roots.length-1] + "/kvvMaps";
 		}
 
-		if (ROOT == null)
-			ROOT = Environment.getExternalStorageDirectory().getAbsolutePath()
-					+ "/kvvMaps";
-
-		Log.w("KVVMAPS", "ROOT = " + ROOT);
+		if (new File(extRootPath).exists())
+			MAPS_ROOT = extRootPath + "/maps";
+		else
+			MAPS_ROOT = ROOT_INT + "/maps";
 	}
-
-	public final static String MAPS_ROOT = ROOT + "/maps";
-	public static final String PATH_ROOT = ROOT + "/paths";
-	public static final String PLACEMARKS = ROOT + "/placemarks.pms";
 
 	public static int TILE_SIZE_0;
 	public static int TILE_SIZE;
@@ -224,7 +219,7 @@ public class Adapter {
 					// Toast.LENGTH_LONG);
 					try {
 						OutputStream errOutputStream = new FileOutputStream(
-								Adapter.ROOT + "/" + System.currentTimeMillis()
+								Adapter.ROOT_INT + "/" + System.currentTimeMillis()
 										+ ".log");
 						PrintStream errPrintStream = new PrintStream(
 								errOutputStream, true);
@@ -337,7 +332,7 @@ public class Adapter {
 	public static void appendLog(String text) {
 		text = DateFormat.format("MM/dd/yy hh:mm:ss", new Date()) + " " + text;
 
-		File logFile = new File(ROOT + "/log.txt");
+		File logFile = new File(ROOT_INT + "/log.txt");
 		if (!logFile.exists()) {
 			try {
 				logFile.createNewFile();

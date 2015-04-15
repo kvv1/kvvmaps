@@ -11,6 +11,16 @@ import kvv.kvvmap.util.TileId;
 
 public class PathInZoomBase {
 
+	protected final int zoom;
+	protected final List<LocationX> placemarks = new ArrayList<LocationX>();
+	private TileMap tiles = new TileMap();
+
+	private IPlaceMarksListener doc;
+
+	protected PathInZoomBase(int zoom) {
+		this.zoom = zoom;
+	}
+
 	class TileMap {
 		private final LongHashMap<IntArray> tiles = new LongHashMap<IntArray>();
 
@@ -68,16 +78,6 @@ public class PathInZoomBase {
 				}
 		}
 
-	}
-
-	protected final int zoom;
-	protected final List<LocationX> placemarks = new ArrayList<LocationX>();
-	private TileMap tiles = new TileMap();
-
-	private IPlaceMarksListener doc;
-
-	protected PathInZoomBase(int zoom) {
-		this.zoom = zoom;
 	}
 
 	public synchronized void setDoc(IPlaceMarksListener doc) {
