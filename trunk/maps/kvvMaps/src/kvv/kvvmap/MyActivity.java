@@ -72,7 +72,6 @@ public class MyActivity extends ActivityX {
 	private static final String BUTTONS_VISIBLE_SETTING = "buttonsVisible";
 	private static final String FOLLOW_GPS_SETTING = "followGPS";
 	private static final String KINETIC_SCROLLING_SETTING = "kineticScrolling";
-	private static final String LARGE_SETTING = "largeZoom";
 	private static final String SPEED_PROFILE_SETTING = "speedProfile";
 	private static final String DEBUG_DRAW_SETTING = "debugDraw";
 
@@ -265,9 +264,6 @@ public class MyActivity extends ActivityX {
 		}
 	}
 
-	private void setLarge(boolean large) {
-	}
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Adapter.log("onCreate " + this);
@@ -288,7 +284,6 @@ public class MyActivity extends ActivityX {
 		adapter.setTileSize(Adapter.TILE_SIZE_0, metrics.widthPixels,
 				metrics.heightPixels);
 
-		setLarge(settings.getBoolean(LARGE_SETTING, false));
 		Adapter.debugDraw = settings.getBoolean("debugDraw", false);
 
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -333,8 +328,10 @@ public class MyActivity extends ActivityX {
 	}
 
 	private void initTileSize() {
+		System.out.println("metrics.xdpi = " + metrics.xdpi);
+		
 		int tileSz = 256;
-		if (metrics.xdpi > 160)
+		if (metrics.xdpi > 145)
 			tileSz = (int) (tileSz * metrics.xdpi / 145);
 
 		// tileSz = 384;
@@ -657,12 +654,6 @@ public class MyActivity extends ActivityX {
 					BUTTONS_VISIBLE_SETTING, true),
 			new Option(this, MENU_KINETIC_SCROLLING, "Плавная прокрутка",
 					KINETIC_SCROLLING_SETTING, true),
-			new Option(this, MENU_LARGE, "Крупный размер", LARGE_SETTING, false) {
-				public void set(boolean value) {
-					super.set(value);
-					setLarge(!get());
-				};
-			},
 			new Option(this, MENU_SPEED_PROFILE, "Скоростной профиль",
 					SPEED_PROFILE_SETTING, false), };
 
