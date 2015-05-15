@@ -1,0 +1,2 @@
+serviceClass: kvv.heliostat.client.HeliostatService
+path: FA45B8D7196BE77A1681DFC974AE65AF.gwt.rpc
