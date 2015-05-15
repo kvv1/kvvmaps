@@ -75,8 +75,7 @@ public abstract class ScheduleCanvas extends Composite {
 
 		initWidget(canvas);
 
-		canvas.setWidth(width + "px");
-		canvas.setHeight(height + "px");
+		canvas.setPixelSize(width, height);
 		canvas.setCoordinateSpaceWidth(width);
 		canvas.setCoordinateSpaceHeight(height);
 
@@ -321,8 +320,7 @@ public abstract class ScheduleCanvas extends Composite {
 		Canvas bgCanvas = Canvas.createIfSupported();
 		Context2d context = bgCanvas.getContext2d();
 
-		bgCanvas.setWidth(width + "px");
-		bgCanvas.setHeight(height + "px");
+		bgCanvas.setPixelSize(width, height);
 		bgCanvas.setCoordinateSpaceWidth(width);
 		bgCanvas.setCoordinateSpaceHeight(height);
 
