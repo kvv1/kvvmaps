@@ -1,6 +1,7 @@
 package kvv.controllers.utils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,7 +21,7 @@ public class Utils {
 	public static <T> T fromJson(String str, Class<T> clazz) {
 		return new Gson().fromJson(str, clazz);
 	}
-	
+
 	public static String toJson(Object o) {
 		return new Gson().toJson(o);
 	}
@@ -42,16 +43,8 @@ public class Utils {
 	}
 
 	public static <T> void jsonWrite(String file, T src) throws Exception {
-		Writer writer = null;
-		try {
-			writer = new OutputStreamWriter(new FileOutputStream(file),
-					"Windows-1251");
-			Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			writer.write(gson.toJson(src));
-		} finally {
-			if (writer != null)
-				writer.close();
-		}
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		writeFile(file, gson.toJson(src));
 	}
 
 	public static String readFile(String file) throws IOException {
@@ -68,6 +61,7 @@ public class Utils {
 	}
 
 	public static void writeFile(String name, String text) throws IOException {
+		new File(name).renameTo(new File(name + ".bak"));
 		Writer wr = new OutputStreamWriter(new FileOutputStream(name),
 				"Windows-1251");
 		wr.write(text);
@@ -107,7 +101,8 @@ public class Utils {
 		return props.getProperty(prop);
 	}
 
-	public static synchronized String getProp(String file, String prop, String defaultValue) {
+	public static synchronized String getProp(String file, String prop,
+			String defaultValue) {
 		Properties props = getProps(file);
 		if (props == null)
 			return null;
@@ -131,6 +126,7 @@ public class Utils {
 		props.setProperty(prop, value);
 
 		try {
+			new File(file).renameTo(new File(file + ".bak"));
 			OutputStreamWriter wr = new OutputStreamWriter(
 					new FileOutputStream(file), "Windows-1251");
 			props.store(wr, "");
@@ -159,8 +155,8 @@ public class Utils {
 		try {
 			bytes = str.getBytes("Windows-1251");
 			StringBuilder sb = new StringBuilder();
-			for(byte b : bytes)
-				sb.append((char)b);
+			for (byte b : bytes)
+				sb.append((char) b);
 			return sb.toString();
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();

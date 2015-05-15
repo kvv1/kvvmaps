@@ -1,7 +1,6 @@
 package kvv.controllers.client.control.form;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -10,7 +9,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -105,21 +103,5 @@ public abstract class EditablePanel<T extends IsWidget> extends Composite {
 			}));
 			initWidget(panel);
 		}
-	}
-
-	class Space extends Panel {
-
-		@Override
-		public Iterator<Widget> iterator() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public boolean remove(Widget child) {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
 	}
 }

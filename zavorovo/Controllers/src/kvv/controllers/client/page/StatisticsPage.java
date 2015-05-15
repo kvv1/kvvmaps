@@ -115,7 +115,7 @@ public class StatisticsPage extends Composite {
 		}
 
 		int width = sum;
-		canvas.setSize(width + "px", height + "px");
+		canvas.setPixelSize(width, height);
 		canvas.setCoordinateSpaceWidth(width);
 		canvas.setCoordinateSpaceHeight(height);
 

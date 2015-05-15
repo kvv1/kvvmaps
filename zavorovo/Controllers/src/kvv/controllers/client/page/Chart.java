@@ -37,8 +37,7 @@ public class Chart extends Composite {
 		Canvas canvas = Canvas.createIfSupported();
 		Context2d context = canvas.getContext2d();
 
-		canvas.setWidth(width + "px");
-		canvas.setHeight(height + "px");
+		canvas.setPixelSize(width, height);
 		canvas.setCoordinateSpaceWidth(width);
 		canvas.setCoordinateSpaceHeight(height);
 
