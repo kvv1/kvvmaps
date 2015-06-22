@@ -4,8 +4,9 @@
 #include "heap.h"
 #include "config.h"
 #include <string.h>
+#include <stdint.h>
 
-static int stepTimers(int step);
+static void stepTimers(int step);
 
 typedef struct {
 	int8_t flag;

@@ -6,7 +6,7 @@
 #include "rules.h"
 
 static uint8_t regs[] PROGMEM
-= { REG_RELAYS, REG_INPUTS, REG_TEMP, REG_TEMP2, REG_RESET_BY_WD, REG_WD_ON_RECEIVE, /*REG_VMONOFF, REG_VMSTATE,*/
+= { REG_RELAYS, REG_INPUTS, REG_TEMP, REG_ADC_CONF, REG_RESET_BY_WD, REG_WD_ON_RECEIVE, /*REG_VMONOFF, REG_VMSTATE,*/
 REG_ADC0, REG_ADC1, REG_ADC2, REG_ADC3, REG_RAM0, REG_RAM1, REG_RAM2, REG_RAM3,
 		REG_PWM0, REG_PWM1, REG_PWM2, REG_PWM3, REG_EEPROM0, REG_EEPROM1,
 		REG_EEPROM2, REG_EEPROM3 };
@@ -66,7 +66,7 @@ uint8_t handleStdCmd(PDU* pdu, uint8_t cmdlen) {
 		S = sendByte(command, S);
 		S = sendByte(n * 2, S);
 		while (n--) {
-			int val;
+			int val = 0;
 			getReg(reg++, &val);
 			S = sendWord(val, S);
 		}
