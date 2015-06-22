@@ -45,21 +45,21 @@ public class AndroidController extends Activity {
 
 		System.out.println("IP " + HTTPServer.getLocalIpAddress());
 
-		server.addHandler(new HTTPHandler("/hello") {
-			@Override
-			public String handle(String queryString) {
-				return "HELLO " + queryString;
-			}
-		});
-
-		server.addHandler(new HTTPHandler("/preved") {
-			@Override
-			public String handle(String queryString) {
-				return "PREVED " + queryString;
-			}
-		});
-
-		server.start();
+//		server.addHandler(new HTTPHandler("/hello") {
+//			@Override
+//			public String handle(String queryString) {
+//				return "HELLO " + queryString;
+//			}
+//		});
+//
+//		server.addHandler(new HTTPHandler("/preved") {
+//			@Override
+//			public String handle(String queryString) {
+//				return "PREVED " + queryString;
+//			}
+//		});
+//
+//		server.start();
 
 		wakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE))
 				.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "My Tag");
