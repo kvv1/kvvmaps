@@ -14,6 +14,7 @@ static int16_t ramRegisters[REG_RAM_CNT];
 
 ee_8(resetByWd);
 ee_8(wdOnReceive);
+ee_8(adcconf);
 
 char getReg(uint8_t reg, int* val) {
 	if (reg >= REG_RELAY0 && reg < REG_RELAY0 + REG_RELAY_CNT) {
@@ -26,8 +27,8 @@ char getReg(uint8_t reg, int* val) {
 		*val = getInputs();
 	} else if (reg == REG_TEMP) {
 		*val = w1_temp(0);
-	} else if (reg == REG_TEMP2) {
-		*val = w1_temp(1);
+	} else if (reg == REG_ADC_CONF) {
+		*val = getadcconf();
 	} else if (reg == REG_RESET_BY_WD) {
 		*val = getresetByWd();
 	} else if (reg == REG_WD_ON_RECEIVE) {
@@ -37,7 +38,11 @@ char getReg(uint8_t reg, int* val) {
 //	} else if (reg == REG_VMSTATE) {
 //		*val = vmGetStatus();
 	} else if (reg >= REG_ADC0 && reg < REG_ADC0 + REG_ADC_CNT) {
-		*val = read_adc(pgm_read_byte(&(adcs[reg - REG_ADC0])), AVCC_VREF_TYPE);
+		if (getadcconf() & (1 << (reg - REG_ADC0)))
+			*val = w1_temp(reg - REG_ADC0 + 1);
+		else
+			*val = read_adc(pgm_read_byte(&(adcs[reg - REG_ADC0])),
+					AVCC_VREF_TYPE);
 	} else if (reg >= REG_IN0 && reg < REG_IN0 + REG_IN_CNT) {
 		*val = getInput(reg - REG_IN0);
 	} else if (reg >= REG_EEPROM0 && reg < REG_EEPROM0 + REG_EEPROM_CNT) {
@@ -68,6 +73,8 @@ char setReg(uint8_t reg, int val) {
 		setPullup(reg - REG_INPULLUP0, val);
 	} else if (reg >= REG_RAM0 && reg < REG_RAM0 + REG_RAM_CNT) {
 		ramRegisters[reg] = val;
+	} else if (reg == REG_ADC_CONF) {
+		setadcconf(val);
 	} else if (reg == REG_RESET_BY_WD) {
 		setresetByWd(val);
 	} else if (reg == REG_WD_ON_RECEIVE) {

@@ -18,7 +18,7 @@
 
 #define INPUT_BUFFER_SIZE 64
 
-#define VERSION 9
+#define VERSION 12
 
 void packetReceived(uint8_t* buffer, uint8_t len);
 
@@ -65,7 +65,14 @@ int main() {
 		while (tticks) {
 			tticks--;
 			ds18b20_step(0, TIME_UNIT);
-			ds18b20_step(1, TIME_UNIT);
+			int adcconf = getadcconf();
+			for (int i = 0; i < 4; i++) {
+				if (adcconf & 1)
+					ds18b20_step(i + 1, TIME_UNIT);
+				else
+					W1_OFF(i + 1);
+				adcconf >>= 1;
+			}
 			//vmStep(TIME_UNIT);
 			handlePWM(TIME_UNIT);
 			stepRules();

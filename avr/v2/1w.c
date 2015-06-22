@@ -8,31 +8,25 @@
 //#define W1_HIGH() (setDDR(PIN_1W, 0), setPort(PIN_1W, 1))
 //#define W1_LOW() (setDDR(PIN_1W, 1), setPort(PIN_1W, 0))
 
+static PORTPIN pins[] = { PIN_1W, PIN_1W_0, PIN_1W_1, PIN_1W_2, PIN_1W_3 };
+
 static char W1_IN(char n) {
-	if (n)
-		return getPin(PIN_1W_1);
-	else
-		return getPin(PIN_1W);
+	return getPin(pins[n]);
 }
 
 static void W1_HIGH(char n) {
-	if (n) {
-		setDDR(PIN_1W_1, 0);
-		setPort(PIN_1W_1, 1);
-	} else {
-		setDDR(PIN_1W, 0);
-		setPort(PIN_1W, 1);
-	}
+	setDDR(pins[n], 0);
+	setPort(pins[n], 1);
 }
 
 static void W1_LOW(char n) {
-	if (n) {
-		setDDR(PIN_1W_1, 1);
-		setPort(PIN_1W_1, 0);
-	} else {
-		setDDR(PIN_1W, 1);
-		setPort(PIN_1W, 0);
-	}
+	setDDR(pins[n], 1);
+	setPort(pins[n], 0);
+}
+
+void W1_OFF(char n) {
+	setDDR(pins[n], 0);
+	setPort(pins[n], 0);
 }
 
 #define CONVERT_TEMP        0x44 //Команда к началу измерения температуры.
@@ -151,7 +145,7 @@ static int oneWireGetConversionResult(char n) {
 	for (int i = 0; i < 9; i++)
 		ds18b20[i] = oneWireReadByte(n);
 
-	if(checkCRC8(ds18b20, 9))
+	if (checkCRC8(ds18b20, 9))
 		return ((ds18b20[1] << 8) + ds18b20[0]) >> 4;
 	else
 		return TEMPERATURE_INVALID;
@@ -174,18 +168,26 @@ typedef struct {
 	int temperature;
 } DS1820STATE;
 
-static DS1820STATE states[2];
+static DS1820STATE states[5];
 
 int w1_temp(uint8_t n) {
 	int t = states[n].temperature;
-	if(t < -50 || t > 120 || t == 85)
+	if (t < -50 || t > 120 || t == 85)
 		t = TEMPERATURE_INVALID;
 	return t;
 }
 
+//uint8_t w1_tempX(uint8_t n, int* res) {
+//	int t = states[n].temperature;
+//	if (t < -50 || t > 120 || t == 85 || t == TEMPERATURE_INVALID)
+//		return 0;
+//	*res = t;
+//	return 1;
+//}
+//
 void w1Init() {
 	uint8_t i;
-	for(i = 0; i < sizeof(states) / sizeof(states[0]); i++)
+	for (i = 0; i < sizeof(states) / sizeof(states[0]); i++)
 		states[i].temperature = TEMPERATURE_INVALID;
 }
 
@@ -235,9 +237,10 @@ void ds18b20_step(uint8_t n, int ms) {
 		break;
 	case 7:
 		state->buffer[state->idx++] = oneWireReadByte(n);
-		if(state->idx == 9) {
-			if(checkCRC8(state->buffer, 9))
-				state->temperature = ((state->buffer[1] << 8) + state->buffer[0]) >> 4;
+		if (state->idx == 9) {
+			if (checkCRC8(state->buffer, 9))
+				state->temperature =
+						((state->buffer[1] << 8) + state->buffer[0]) >> 4;
 			else
 				state->temperature = TEMPERATURE_INVALID;
 			state->state = 0;

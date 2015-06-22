@@ -26,7 +26,10 @@
 #define PIN_MARS_RTS P_D6
 
 #define PIN_1W P_D5
+#define PIN_1W_0 P_C2
 #define PIN_1W_1 P_C1
+#define PIN_1W_2 P_C4
+#define PIN_1W_3 P_C3
 
 #define INT_VREF_TYPE 0xC0 // INTERNAL
 #define AVCC_VREF_TYPE 0x40 // AVCC

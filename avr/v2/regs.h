@@ -18,7 +18,7 @@
 #define REG_RELAYS 8
 
 #define REG_TEMP 9
-#define REG_TEMP2 10
+#define REG_ADC_CONF 10
 
 #define REG_RESET_BY_WD 11
 #define REG_WD_ON_RECEIVE 12
@@ -88,6 +88,7 @@ char setReg(uint8_t reg, int val);
 
 ee_8_decl(resetByWd);
 ee_8_decl(wdOnReceive);
+ee_8_decl(adcconf);
 
 
 #endif /* REGS_H_ */
