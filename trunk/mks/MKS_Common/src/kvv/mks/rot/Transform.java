@@ -19,6 +19,11 @@ public class Transform {
 		this.pt = pt;
 	}
 
+	//TODO
+	public Transform(Rot matrix, double x, double y, double z) {
+		this(matrix, new Pt(x, y, z));
+	}
+
 	@Override
 	public String toString() {
 		return String
@@ -46,5 +51,11 @@ public class Transform {
 		res.z = pt.z - this.pt.z;
 
 		return rot.inverse().apply(res, res);
+	}
+
+	//TODO
+	public Pt apply(Pt pt, Pt res) {
+		//return relToAbs(pt, res);
+		return absToRel(pt, res);
 	}
 }

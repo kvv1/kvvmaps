@@ -24,7 +24,7 @@ public class Test1 {
 		double az = Util.g2r(55);
 
 		Transform modif = new Transform(M.rot(ax, ay, az), 0, 2, 0);
-		scan1.apply1(modif);
+		scan1.relToAbs(modif);
 
 		TargetFunc targetFunc = TestMKS.getCreateFuncGrid(0.2, 0.8);
 

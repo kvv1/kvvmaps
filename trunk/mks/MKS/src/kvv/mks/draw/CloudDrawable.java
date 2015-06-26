@@ -6,8 +6,6 @@ import java.util.Arrays;
 
 import kvv.mks.cloud.Cloud;
 import kvv.mks.cloud.Pt;
-import kvv.mks.rot.M;
-import kvv.mks.rot.Rot;
 import kvv.mks.rot.Transform;
 
 public class CloudDrawable extends DrawableCached {
@@ -38,10 +36,10 @@ public class CloudDrawable extends DrawableCached {
 			maxSz = Math.max(maxSz, 2 * mod);
 		}
 
-		cacheOn();
+//		cacheOn();
 	}
 
-	private final static int d = 2;
+	private final static int d = 1;
 
 	private Transform maxtrix = new Transform();
 
@@ -70,7 +68,7 @@ public class CloudDrawable extends DrawableCached {
 			maxtrix.apply(pt, pt1);
 
 			pt1.z += 100;
-			
+
 			if (pt1.z < L)
 				continue;
 

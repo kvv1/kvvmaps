@@ -24,7 +24,7 @@ import kvv.mks.rot.Transform;
 
 public class TestMKS {
 
-	public static final String ROOT = "D:/Users/kvv/Google Drive/Mks";
+	public static final String ROOT = "c:/Mks";
 
 	static int NTESTS = 100;
 
@@ -65,7 +65,7 @@ public class TestMKS {
 
 			System.out.println(modif);
 
-			scan1.apply1(modif);
+			scan1.relToAbs(modif);
 			
 			// scan1.addNoise(0.2);
 
@@ -99,8 +99,8 @@ public class TestMKS {
 
 		double da = state.rot.dist(modif.rot);
 
-		double dd = Util.dist2(modif.dx - state.dx, modif.dy - state.dy,
-				modif.dz - state.dz);
+		double dd = Util.dist2(modif.pt.x - state.pt.x, modif.pt.y - state.pt.y,
+				modif.pt.z - state.pt.z);
 
 		System.out.print(state + " ");
 		System.out.print(solver.getAddPrint() + " ");

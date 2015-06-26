@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 public abstract class DrawableCached implements Drawable {
 
 	private BufferedImage im;
-	private boolean on;
+//	private boolean on;
 	
 	public abstract void _draw(Graphics2D g, int w, int h);
 
@@ -16,21 +16,21 @@ public abstract class DrawableCached implements Drawable {
 	}
 	
 
-	public void cacheOn() {
-		on = true;
-	}
-
-	public void cacheOff() {
-		on = false;
-		invalidateCache();
-	}
-
+//	public void cacheOn() {
+//		on = true;
+//	}
+//
+//	public void cacheOff() {
+//		on = false;
+//		invalidateCache();
+//	}
+//
 	@Override
 	public final void draw(Graphics2D g, int w, int h) {
-		if(!on) {
-			_draw(g, w, h);
-			return;
-		}
+//		if(!on) {
+//			_draw(g, w, h);
+//			return;
+//		}
 		
 		if (im == null || im.getWidth() != w || im.getHeight() != h) {
 			im = null;
