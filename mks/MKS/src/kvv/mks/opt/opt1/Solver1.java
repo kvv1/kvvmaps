@@ -65,21 +65,21 @@ public class Solver1 implements Solver {
 		optimizers.add(new Opt(maxDist) {
 			@Override
 			public void incParam(double value) {
-				state.dx += value;
+				state.pt.x += value;
 			}
 		});
 
 		optimizers.add(new Opt(maxDist) {
 			@Override
 			public void incParam(double value) {
-				state.dy += value;
+				state.pt.y += value;
 			}
 		});
 
 		optimizers.add(new Opt(maxDist) {
 			@Override
 			public void incParam(double value) {
-				state.dz += value;
+				state.pt.z += value;
 			}
 		});
 	}

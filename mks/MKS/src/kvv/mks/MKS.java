@@ -58,7 +58,7 @@ public class MKS extends JFrame {
 //					mks.add(base);
 
 					Cloud scan = new Cloud(new File(
-							"D:\\Users\\kvv\\Google Drive\\Mks\\mks_cloud.txt"));
+							"c:\\Mks\\mks_cloud.txt"));
 					//scan = new Cloud(scan.data, 100000);
 					
 					mks.add(scan);
