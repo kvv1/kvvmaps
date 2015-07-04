@@ -77,7 +77,7 @@ public class MotorsView extends Composite implements View {
 		if (state == null)
 			return;
 
-		context.setFillStyle("#808080");
+		context.setFillStyle("gray");
 		context.fillRect(0, 0, width, height);
 
 		if (state.motorState[0] != null) {
@@ -131,68 +131,72 @@ public class MotorsView extends Composite implements View {
 			}
 		}
 
-		context.beginPath();
+/*		{
+			context.beginPath();
 
-		context.setStrokeStyle("#FFFF00");
-		context.setLineWidth(2);
+			context.setStrokeStyle("yellow");
+			context.setLineWidth(2);
 
-		boolean moved = false;
+			boolean moved = false;
 
-		for (double t = 5; t < 19; t += 0.1) {
-			double alt = Environment.getMirrorAltitude(state.day, t);
-			double az = Environment.getMirrorAzimuth(state.day, t);
-			if (alt > 0) {
-				double x1 = width * Environment.azDeg2Steps.value(az)
-						/ Environment.MAX_STEPS;
-				double y1 = height - height
-						* Environment.altDeg2Steps.value(alt)
-						/ Environment.MAX_STEPS;
+			for (double t = 5; t < 19; t += 0.1) {
+				double alt = Environment.getMirrorAltitude(state.day, t);
+				double az = Environment.getMirrorAzimuth(state.day, t);
+				if (alt > 0) {
+					double x1 = width * Environment.azDeg2Steps.value(az)
+							/ Environment.MAX_STEPS;
+					double y1 = height - height
+							* Environment.altDeg2Steps.value(alt)
+							/ Environment.MAX_STEPS;
 
-				if (!moved)
-					context.moveTo(x1, y1);
-				else
-					context.lineTo(x1, y1);
-				moved = true;
+					if (!moved)
+						context.moveTo(x1, y1);
+					else
+						context.lineTo(x1, y1);
+					moved = true;
+				}
 			}
-		}
 
-		context.stroke();
-		context.closePath();
-
-		context.beginPath();
-		context.setStrokeStyle("green");
-		context.setFillStyle("green");
-
-		if (state.trajectory != null && state.motorState[0].max != null
-				&& state.motorState[1].max != null) {
-
-			Function azFunc = FunctionFactory.getFunction(state.trajectory[0],
-					state.trajectory[1]);
-			Function altFunc = FunctionFactory.getFunction(state.trajectory[0],
-					state.trajectory[2]);
-
-			for (double t = 5; t <= 19; t += 0.1) {
-				double x = width * azFunc.value(t) / state.motorState[0].max;
-				double y = height - height * altFunc.value(t)
-						/ state.motorState[1].max;
-				if (t == 5)
-					context.moveTo(x, y);
-				else
-					context.lineTo(x, y);
-			}
 			context.stroke();
+			context.closePath();
+		}*/
+		{
+			context.beginPath();
+			context.setStrokeStyle("white");
+			context.setFillStyle("white");
 
-			for (int i = 0; i < state.trajectory[0].length; i++) {
-				double x1 = width * state.trajectory[1][i]
-						/ state.motorState[0].max;
-				double y1 = height - height * state.trajectory[2][i]
-						/ state.motorState[1].max;
+			if (state.trajectory != null && state.motorState[0].max != null
+					&& state.motorState[1].max != null) {
 
-				context.fillRect(x1 - 2, y1 - 2, 4, 4);
+				Function azFunc = FunctionFactory.getFunction(
+						state.trajectory[0], state.trajectory[1]);
+				Function altFunc = FunctionFactory.getFunction(
+						state.trajectory[0], state.trajectory[2]);
+
+				for (double t = 5; t <= 19; t += 0.1) {
+					double x = width * azFunc.value(t)
+							/ state.motorState[0].max;
+					double y = height - height * altFunc.value(t)
+							/ state.motorState[1].max;
+					if (t == 5)
+						context.moveTo(x, y);
+					else
+						context.lineTo(x, y);
+				}
+				context.stroke();
+
+				for (int i = 0; i < state.trajectory[0].length; i++) {
+					double x1 = width * state.trajectory[1][i]
+							/ state.motorState[0].max;
+					double y1 = height - height * state.trajectory[2][i]
+							/ state.motorState[1].max;
+
+					context.fillRect(x1 - 2, y1 - 2, 4, 4);
+				}
 			}
-		}
 
-		context.closePath();
+			context.closePath();
+		}
 	}
 
 }

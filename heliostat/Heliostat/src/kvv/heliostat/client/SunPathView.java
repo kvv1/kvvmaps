@@ -1,10 +1,14 @@
 package kvv.heliostat.client;
 
 import kvv.heliostat.shared.HeliostatState;
+import kvv.heliostat.shared.MotorId;
 import kvv.heliostat.shared.environment.Environment;
+import kvv.heliostat.shared.spline.FunctionFactory;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 
@@ -15,15 +19,10 @@ public class SunPathView extends Composite implements View {
 	private final Canvas canvas = Canvas.createIfSupported();
 	private final Context2d context = canvas.getContext2d();
 
-	private final Model model;
-
 	private int width = 360;
 	private int height = 360;
 
-	private Integer day;
-
-	public SunPathView(Model model) {
-		this.model = model;
+	public SunPathView(final Model model) {
 		model.add(this);
 
 		canvas.setPixelSize(width, height);
@@ -37,6 +36,23 @@ public class SunPathView extends Composite implements View {
 		context.fillRect(0, 0, canvas.getCoordinateSpaceWidth(),
 				canvas.getCoordinateSpaceHeight());
 		context.closePath();
+
+		canvas.addMouseDownHandler(new MouseDownHandler() {
+			@Override
+			public void onMouseDown(MouseDownEvent event) {
+				double az = x2az(0.5 + event.getX());
+				double alt = y2alt(0.5 + event.getY());
+
+				int xPos = (int) Environment.azDeg2Steps.value(az);
+				int yPos = (int) Environment.altDeg2Steps.value(alt);
+
+				model.heliostatService.move(MotorId.AZ, xPos,
+						new Callback<Void>());
+
+				model.heliostatService.move(MotorId.ALT, yPos,
+						new Callback<Void>());
+			}
+		});
 
 		initWidget(panel);
 	}
@@ -61,11 +77,8 @@ public class SunPathView extends Composite implements View {
 		double az = Environment.getMirrorAzimuth(state.day, state.time);
 		double alt = Environment.getMirrorAltitude(state.day, state.time);
 
-		double x = (az - Environment.MIN_AZIMUTH) * width
-				/ (Environment.MAX_AZIMUTH - Environment.MIN_AZIMUTH);
-
-		double y = height - (alt - Environment.MIN_ALTITUDE) * height
-				/ (Environment.MAX_ALTITUDE - Environment.MIN_ALTITUDE);
+		double x = az2x(az);
+		double y = alt2y(alt);
 
 		context.beginPath();
 		context.setFillStyle(state.sun ? "yellow" : "light-gray");
@@ -77,11 +90,8 @@ public class SunPathView extends Composite implements View {
 			double az1 = Environment.getMirrorAzimuth(state.day, t);
 			double alt1 = Environment.getMirrorAltitude(state.day, t);
 
-			double x1 = (az1 - Environment.MIN_AZIMUTH) * width
-					/ (Environment.MAX_AZIMUTH - Environment.MIN_AZIMUTH);
-
-			double y1 = height - (alt1 - Environment.MIN_ALTITUDE) * height
-					/ (Environment.MAX_ALTITUDE - Environment.MIN_ALTITUDE);
+			double x1 = az2x(az1);
+			double y1 = alt2y(alt1);
 
 			if (t == 5)
 				context.moveTo(x1, y1);
@@ -92,6 +102,51 @@ public class SunPathView extends Composite implements View {
 
 		context.closePath();
 
+		if (state.motorState[0].posValid && state.motorState[1].posValid) {
+			context.beginPath();
+			context.setStrokeStyle("black");
+
+			double motorAz = FunctionFactory.solve(Environment.azDeg2Steps,
+					state.motorState[0].motorRawSimState.pos,
+					Environment.MIN_AZIMUTH, Environment.MAX_AZIMUTH, 0.01);
+			double motorAlt = FunctionFactory.solve(Environment.altDeg2Steps,
+					state.motorState[1].motorRawSimState.pos,
+					Environment.MIN_ALTITUDE, Environment.MAX_ALTITUDE, 0.01);
+
+			double x1 = az2x(motorAz);
+			double y1 = alt2y(motorAlt);
+
+			context.moveTo(x1 - 10, y1);
+			context.lineTo(x1 + 10, y1);
+
+			context.moveTo(x1, y1 - 10);
+			context.lineTo(x1, y1 + 10);
+
+			context.stroke();
+			context.closePath();
+		}
+	}
+
+	private double az2x(double az) {
+		return (az - Environment.MIN_AZIMUTH) * width
+				/ (Environment.MAX_AZIMUTH - Environment.MIN_AZIMUTH);
+	}
+
+	private double x2az(double x) {
+		return Environment.MIN_AZIMUTH
+				+ (Environment.MAX_AZIMUTH - Environment.MIN_AZIMUTH) * x
+				/ width;
+	}
+
+	private double alt2y(double alt) {
+		return height - (alt - Environment.MIN_ALTITUDE) * height
+				/ (Environment.MAX_ALTITUDE - Environment.MIN_ALTITUDE);
+	}
+
+	private double y2alt(double y) {
+		return Environment.MIN_ALTITUDE
+				+ (Environment.MAX_ALTITUDE - Environment.MIN_ALTITUDE)
+				* (height - y) / height;
 	}
 
 }

@@ -7,6 +7,7 @@ import kvv.heliostat.server.controller.Controller;
 import kvv.heliostat.server.motor.Motor;
 import kvv.heliostat.server.motor.MotorRawSim;
 import kvv.heliostat.server.sensor.Sensor;
+import kvv.heliostat.server.sensor.SensorImpl;
 import kvv.heliostat.server.sensor.SensorSim;
 import kvv.heliostat.server.trajectory.Trajectory;
 import kvv.heliostat.server.trajectory.TrajectoryImpl;
@@ -35,7 +36,7 @@ public class Heliostat {
 			new Motor(motorAltitudeRaw) };
 	private final Sensor sensor = new SensorSim(motorAzimuthRaw,
 			motorAltitudeRaw);
-	// private final Sensor sensor = new SensorImpl(controller);
+	private final Sensor sensor1 = new SensorImpl(controller);
 
 	public Params params = new Params();
 
