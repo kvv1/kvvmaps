@@ -3,7 +3,6 @@ package kvv.heliostat.server.sensor;
 import kvv.heliostat.server.Heliostat;
 import kvv.heliostat.server.Time;
 import kvv.heliostat.server.motor.MotorRawSim;
-import kvv.heliostat.shared.PtD;
 import kvv.heliostat.shared.SensorState;
 import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.spline.Function;
@@ -54,17 +53,7 @@ public class SensorSim implements Sensor {
 		double br = sensorSensitivity.value(dist(SENSOR_SEGMENT_SENTER_DIST,
 				-SENSOR_SEGMENT_SENTER_DIST, dAz, dAlt)) * brightness;
 
-		double sum = tr + tl + br + bl;
-		double x = tr - tl + br - bl;
-		double y = tl - bl + tr - br;
-
-		PtD deflection = null;
-
-		if (sum != 0)
-			deflection = new PtD(x / sum * 4, y / sum * 4);
-
-		return new SensorState(sum > 100, deflection, (int) tl, (int) tr,
-				(int) bl, (int) br);
+		return new SensorState((int) tl, (int) tr, (int) bl, (int) br);
 	}
 
 	@Override

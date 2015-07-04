@@ -1,7 +1,6 @@
 package kvv.heliostat.server.trajectory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import kvv.heliostat.server.Time;
@@ -15,23 +14,23 @@ import kvv.heliostat.shared.spline.FunctionFactory;
 
 public class TrajectoryImpl extends TrajectoryBase {
 
-//	private static class MotorPoint {
-//		float angle;
-//		int pos;
-//
-//		public MotorPoint(float angle, int pos) {
-//			this.angle = angle;
-//			this.pos = pos;
-//		}
-//	}
+	// private static class MotorPoint {
+	// float angle;
+	// int pos;
+	//
+	// public MotorPoint(float angle, int pos) {
+	// this.angle = angle;
+	// this.pos = pos;
+	// }
+	// }
 
 	private static class MotorsProps {
 		List<ValueMapEntry<Integer>> azimuth;
 		List<ValueMapEntry<Integer>> altitude;
 	}
-	
+
 	private final static String MOTORS_PROP = "c:/heliostat/motors.txt";
-	private final static String MOTORS_PROP_DEFAULT = "c:/heliostat/motors_default.txt";
+//	private final static String MOTORS_PROP_DEFAULT = "c:/heliostat/motors_default.txt";
 
 	private ValueMap<Integer> az2steps = new ValueMap<>(-60, 60, 2);
 	private ValueMap<Integer> alt2steps = new ValueMap<>(-10, 60, 2);
@@ -46,8 +45,7 @@ public class TrajectoryImpl extends TrajectoryBase {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	protected void addValidPos(PtI motorsPos) {
 		PtD angles = new PtD(Environment.getMirrorAzimuth(Time.getDay(),
 				Time.getTime()), Environment.getMirrorAltitude(Time.getDay(),
@@ -55,6 +53,11 @@ public class TrajectoryImpl extends TrajectoryBase {
 		az2steps.add(angles.x, motorsPos.x);
 		alt2steps.add(angles.y, motorsPos.y);
 		updateFuncs();
+		try {
+			saveCurrent();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void updateFuncs() {
@@ -140,10 +143,10 @@ public class TrajectoryImpl extends TrajectoryBase {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private boolean save(String file) throws IOException {
 		MotorsProps motorsProps = new MotorsProps();
-		
+
 		motorsProps.azimuth = az2steps.getPoints();
 		if (motorsProps.azimuth.size() < 2)
 			return false;
@@ -159,35 +162,35 @@ public class TrajectoryImpl extends TrajectoryBase {
 	private void load(String file) throws IOException {
 		ValueMap<Integer> az2steps = new ValueMap<>(-60, 60, 2);
 		ValueMap<Integer> alt2steps = new ValueMap<>(-10, 60, 2);
-		
+
 		az2steps.clear();
 		alt2steps.clear();
 
 		MotorsProps motorsProps = Utils.jsonRead(file, MotorsProps.class);
-		
-		for(ValueMapEntry<Integer> e : motorsProps.azimuth)
+
+		for (ValueMapEntry<Integer> e : motorsProps.azimuth)
 			az2steps.add(e.arg, e.val);
-		
-		for(ValueMapEntry<Integer> e : motorsProps.altitude)
+
+		for (ValueMapEntry<Integer> e : motorsProps.altitude)
 			alt2steps.add(e.arg, e.val);
 
 		this.az2steps = az2steps;
 		this.alt2steps = alt2steps;
-		
+
 		updateFuncs();
 	}
-	
+
 	public void saveCurrent() throws IOException {
 		save(MOTORS_PROP);
 	}
-	
-	public boolean saveCurrentAsDefault() throws IOException {
-		return save(MOTORS_PROP);
-	}
 
-	public void loadDefault() throws IOException {
-		load(MOTORS_PROP_DEFAULT);
-		saveCurrent();
-	}
+//	public boolean saveCurrentAsDefault() throws IOException {
+//		return save(MOTORS_PROP_DEFAULT);
+//	}
+
+//	public void loadDefault() throws IOException {
+//		load(MOTORS_PROP_DEFAULT);
+//		saveCurrent();
+//	}
 
 }
