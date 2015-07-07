@@ -42,7 +42,7 @@ public class SensorSim implements Sensor {
 
 		double brightness = 1000 * Environment.getMirrorAltitude(day, time) / 45;
 		if (!Heliostat.instance.isSunny())
-			brightness /= 200;
+			brightness /= 50;
 
 		double tl = sensorSensitivity.value(dist(-SENSOR_SEGMENT_SENTER_DIST,
 				SENSOR_SEGMENT_SENTER_DIST, dAz, dAlt)) * brightness;
