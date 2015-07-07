@@ -1,6 +1,7 @@
 package kvv.heliostat.server.trajectory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ValueMap<T> {
@@ -53,7 +54,7 @@ public class ValueMap<T> {
 		}
 
 		if (first == null)
-			return null;
+			return Collections.emptyList();
 
 		if (l.size() == 1 && l.get(0) != first
 				&& l.get(0).arg - first.arg > cellSize / 10)

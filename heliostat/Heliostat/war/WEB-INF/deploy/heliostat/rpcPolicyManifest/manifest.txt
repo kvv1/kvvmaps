@@ -1,3 +1,2 @@
 # Module heliostat
 # RPC service class, partial path of RPC policy file
-kvv.heliostat.client.HeliostatService, CAA8670B684709B2A952867AB452690B.gwt.rpc

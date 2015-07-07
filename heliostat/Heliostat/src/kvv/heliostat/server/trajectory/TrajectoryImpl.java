@@ -1,6 +1,7 @@
 package kvv.heliostat.server.trajectory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import kvv.heliostat.server.Time;
@@ -112,6 +113,56 @@ public class TrajectoryImpl extends TrajectoryBase {
 	public double[][] getPoints() {
 		if (azFunc == null || altFunc == null)
 			return null;
+		
+		List<ValueMapEntry<Integer>> azPoints = az2steps.getPoints();
+		List<ValueMapEntry<Integer>> altPoints = alt2steps.getPoints();
+		
+		List<Float> timeList = new ArrayList<>();
+		List<Double> azPosList = new ArrayList<>();
+		List<Double> altPosList = new ArrayList<>();
+		
+		for(float t = 0; t < 24; t += 0.25) {
+			double az = Environment.getMirrorAzimuth(Time.getDay(), t);
+			double alt = Environment.getMirrorAltitude(Time.getDay(), t);
+			
+			boolean found = false;
+			for(ValueMapEntry<Integer> entry : azPoints)
+				if(Math.abs(entry.arg - az) < 5) {
+					found = true;
+					break;
+				}
+			if(!found)
+				continue;
+			
+			found = false;
+			for(ValueMapEntry<Integer> entry : altPoints)
+				if(Math.abs(entry.arg - alt) < 5) {
+					found = true;
+					break;
+				}
+			if(!found)
+				continue;
+			
+			timeList.add(t);
+			azPosList.add(azFunc.value(az));
+			altPosList.add(altFunc.value(alt));
+		}
+
+		double[] time = new double[timeList.size()];
+		double[] azPos = new double[timeList.size()];
+		double[] altPos = new double[timeList.size()];
+
+		for(int i = 0; i < timeList.size(); i++) {
+			time[i] = timeList.get(i);
+			azPos[i] = azPosList.get(i);
+			altPos[i] = altPosList.get(i);
+		}
+		
+		return new double[][] { time, azPos, altPos };
+		
+/*		
+		if (azFunc == null || altFunc == null)
+			return null;
 
 		int n = 48;
 
@@ -130,6 +181,7 @@ public class TrajectoryImpl extends TrajectoryBase {
 		}
 
 		return new double[][] { time, azPos, altPos };
+*/		
 	}
 
 	@Override
