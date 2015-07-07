@@ -1,0 +1,1 @@
+Android navigation client that uses raster maps from Google Map Cache and OZI
