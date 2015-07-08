@@ -55,6 +55,6 @@ public class AnglesChart  extends Chart{
 				new ChartData(az2, "cyan"), new ChartData(alt, "LawnGreen"),
 				new ChartData(alt1, "LawnGreen"), new ChartData(alt2,
 						"LawnGreen"));
-	}fd
+	}
 
 }
