@@ -1,12 +1,12 @@
 package kvv.heliostat.client;
 
-import kvv.heliostat.client.chart.Chart1;
+import kvv.heliostat.client.chart.Chart;
 import kvv.heliostat.client.chart.ChartData;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.spline.FunctionFactory;
 
-public class MotorsChart extends Chart1 {
+public class MotorsChart extends Chart {
 	public double[][] azData = new double[][] { new double[0], new double[0] };
 	public double[][] altData = new double[][] { new double[0], new double[0] };
 

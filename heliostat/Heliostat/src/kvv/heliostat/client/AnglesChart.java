@@ -1,12 +1,12 @@
 package kvv.heliostat.client;
 
-import kvv.heliostat.client.chart.Chart1;
+import kvv.heliostat.client.chart.Chart;
 import kvv.heliostat.client.chart.ChartData;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.spline.Function;
 
-public class AnglesChart extends Chart1 {
+public class AnglesChart extends Chart {
 
 	private int day = -1;
 

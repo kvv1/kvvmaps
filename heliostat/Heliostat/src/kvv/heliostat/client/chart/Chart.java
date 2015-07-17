@@ -16,7 +16,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 
-public class Chart1 extends Composite implements View {
+public class Chart extends Composite implements View {
 
 	public final HeliostatServiceAsync heliostatService = GWT
 			.create(HeliostatService.class);
@@ -45,7 +45,7 @@ public class Chart1 extends Composite implements View {
 
 	private final boolean withTime;
 
-	public Chart1(final int width, int height, double minx, double maxx,
+	public Chart(final int width, int height, double minx, double maxx,
 			double stepx, double miny, double maxy, double stepy,
 			boolean withTime) {
 		this.width = width;
