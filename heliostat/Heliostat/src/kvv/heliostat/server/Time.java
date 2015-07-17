@@ -35,7 +35,7 @@ public class Time {
 	}
 
 	public static int getDay() {
-		return calendar.get(Calendar.DAY_OF_YEAR);
+		return Math.min(365, calendar.get(Calendar.DAY_OF_YEAR));
 	}
 
 	public static Calendar getCalendar() {
@@ -65,8 +65,7 @@ public class Time {
 
 	private final static DateFormat tf = DateFormat
 			.getTimeInstance(DateFormat.LONG);
-	
-	
+
 	public static String getDayS() {
 		return df.format(calendar.getTime());
 	}

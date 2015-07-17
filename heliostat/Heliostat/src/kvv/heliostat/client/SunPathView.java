@@ -19,8 +19,8 @@ public class SunPathView extends Composite implements View {
 	private final Canvas canvas = Canvas.createIfSupported();
 	private final Context2d context = canvas.getContext2d();
 
-	private int width = 360;
-	private int height = 360;
+	private int width = 250;
+	private int height = 250;
 
 	public SunPathView(final Model model) {
 		model.add(this);

@@ -7,8 +7,5 @@ import kvv.heliostat.shared.PtI;
 public interface Trajectory {
 
 	PtI getMotorsPositions(AutoMode auto, PtD deflection, PtI motorsPos, double step);
-
-	double[][] getPoints();
-
 	void clearHistory();
 }

@@ -52,4 +52,6 @@ public interface HeliostatService extends RemoteService {
 	Weather resetSim(int firstDay);
 
 	void shortDay(boolean value);
+
+	void setRange(MotorId id, int max);
 }

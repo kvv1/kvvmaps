@@ -7,8 +7,6 @@ import kvv.heliostat.shared.math.MirrorAngles;
 
 public class test {
 
-	private static final double PI = Math.PI;
-
 	public static void main(String[] args) {
 
 		Calendar calendar = Calendar.getInstance();

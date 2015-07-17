@@ -1,7 +1,6 @@
 package kvv.heliostat.server.trajectory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import kvv.heliostat.server.Time;
@@ -31,10 +30,13 @@ public class TrajectoryImpl extends TrajectoryBase {
 	}
 
 	private final static String MOTORS_PROP = "c:/heliostat/motors.txt";
-//	private final static String MOTORS_PROP_DEFAULT = "c:/heliostat/motors_default.txt";
+	// private final static String MOTORS_PROP_DEFAULT =
+	// "c:/heliostat/motors_default.txt";
 
-	private ValueMap<Integer> az2steps = new ValueMap<>(-60, 60, 2);
-	private ValueMap<Integer> alt2steps = new ValueMap<>(-10, 60, 2);
+	private ValueMap<Integer> az2steps = new ValueMap<>(-60, 60,
+			Environment.ANGLE_STEP);
+	private ValueMap<Integer> alt2steps = new ValueMap<>(-10, 60,
+			Environment.ANGLE_STEP);
 
 	private Function azFunc;
 	private Function altFunc;
@@ -42,7 +44,7 @@ public class TrajectoryImpl extends TrajectoryBase {
 	public TrajectoryImpl() {
 		try {
 			load(MOTORS_PROP);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -65,32 +67,14 @@ public class TrajectoryImpl extends TrajectoryBase {
 		azFunc = null;
 		altFunc = null;
 
-		List<ValueMapEntry<Integer>> azPoints = az2steps.getPoints();
-		if (azPoints.size() < 2)
+		double[][] azData = getAzData();
+		double[][] altData = getAltData();
+
+		if (azData.length < 2 || altData.length < 2)
 			return;
 
-		List<ValueMapEntry<Integer>> altPoints = alt2steps.getPoints();
-		if (altPoints.size() < 2)
-			return;
-
-		double[] azArr = new double[azPoints.size()];
-		double[] azPos = new double[azPoints.size()];
-
-		for (int i = 0; i < azPoints.size(); i++) {
-			azArr[i] = azPoints.get(i).arg;
-			azPos[i] = azPoints.get(i).val;
-		}
-
-		double[] altArr = new double[altPoints.size()];
-		double[] altPos = new double[altPoints.size()];
-
-		for (int i = 0; i < altPoints.size(); i++) {
-			altArr[i] = altPoints.get(i).arg;
-			altPos[i] = altPoints.get(i).val;
-		}
-
-		azFunc = FunctionFactory.getFunction(azArr, azPos);
-		altFunc = FunctionFactory.getFunction(altArr, altPos);
+		azFunc = FunctionFactory.getFunction(azData[0], azData[1]);
+		altFunc = FunctionFactory.getFunction(altData[0], altData[1]);
 	}
 
 	@Override
@@ -109,79 +93,32 @@ public class TrajectoryImpl extends TrajectoryBase {
 		return new PtI(x, y);
 	}
 
-	@Override
-	public double[][] getPoints() {
-		if (azFunc == null || altFunc == null)
-			return null;
-		
-		List<ValueMapEntry<Integer>> azPoints = az2steps.getPoints();
-		List<ValueMapEntry<Integer>> altPoints = alt2steps.getPoints();
-		
-		List<Float> timeList = new ArrayList<>();
-		List<Double> azPosList = new ArrayList<>();
-		List<Double> altPosList = new ArrayList<>();
-		
-		for(float t = 0; t < 24; t += 0.25) {
-			double az = Environment.getMirrorAzimuth(Time.getDay(), t);
-			double alt = Environment.getMirrorAltitude(Time.getDay(), t);
-			
-			boolean found = false;
-			for(ValueMapEntry<Integer> entry : azPoints)
-				if(Math.abs(entry.arg - az) < 5) {
-					found = true;
-					break;
-				}
-			if(!found)
-				continue;
-			
-			found = false;
-			for(ValueMapEntry<Integer> entry : altPoints)
-				if(Math.abs(entry.arg - alt) < 5) {
-					found = true;
-					break;
-				}
-			if(!found)
-				continue;
-			
-			timeList.add(t);
-			azPosList.add(azFunc.value(az));
-			altPosList.add(altFunc.value(alt));
+	public double[][] getAzData() {
+		List<ValueMapEntry<Integer>> points = az2steps.getPoints();
+
+		double[] ang = new double[points.size()];
+		double[] pos = new double[points.size()];
+
+		for (int i = 0; i < points.size(); i++) {
+			ang[i] = points.get(i).arg;
+			pos[i] = points.get(i).val;
 		}
 
-		double[] time = new double[timeList.size()];
-		double[] azPos = new double[timeList.size()];
-		double[] altPos = new double[timeList.size()];
+		return new double[][] { ang, pos };
+	}
 
-		for(int i = 0; i < timeList.size(); i++) {
-			time[i] = timeList.get(i);
-			azPos[i] = azPosList.get(i);
-			altPos[i] = altPosList.get(i);
-		}
-		
-		return new double[][] { time, azPos, altPos };
-		
-/*		
-		if (azFunc == null || altFunc == null)
-			return null;
+	public double[][] getAltData() {
+		List<ValueMapEntry<Integer>> points = alt2steps.getPoints();
 
-		int n = 48;
+		double[] ang = new double[points.size()];
+		double[] pos = new double[points.size()];
 
-		double[] time = new double[n];
-		double[] azPos = new double[n];
-		double[] altPos = new double[n];
-
-		for (int i = 0; i < n; i++) {
-			double t = i * 24.0 / n;
-			double az = Environment.getMirrorAzimuth(Time.getDay(), t);
-			double alt = Environment.getMirrorAltitude(Time.getDay(), t);
-
-			time[i] = t;
-			azPos[i] = azFunc.value(az);
-			altPos[i] = altFunc.value(alt);
+		for (int i = 0; i < points.size(); i++) {
+			ang[i] = points.get(i).arg;
+			pos[i] = points.get(i).val;
 		}
 
-		return new double[][] { time, azPos, altPos };
-*/		
+		return new double[][] { ang, pos };
 	}
 
 	@Override
@@ -212,8 +149,10 @@ public class TrajectoryImpl extends TrajectoryBase {
 	}
 
 	private void load(String file) throws IOException {
-		ValueMap<Integer> az2steps = new ValueMap<>(-60, 60, 2);
-		ValueMap<Integer> alt2steps = new ValueMap<>(-10, 60, 2);
+		ValueMap<Integer> az2steps = new ValueMap<>(-60, 60,
+				Environment.ANGLE_STEP);
+		ValueMap<Integer> alt2steps = new ValueMap<>(-10, 60,
+				Environment.ANGLE_STEP);
 
 		az2steps.clear();
 		alt2steps.clear();
@@ -236,13 +175,13 @@ public class TrajectoryImpl extends TrajectoryBase {
 		save(MOTORS_PROP);
 	}
 
-//	public boolean saveCurrentAsDefault() throws IOException {
-//		return save(MOTORS_PROP_DEFAULT);
-//	}
+	// public boolean saveCurrentAsDefault() throws IOException {
+	// return save(MOTORS_PROP_DEFAULT);
+	// }
 
-//	public void loadDefault() throws IOException {
-//		load(MOTORS_PROP_DEFAULT);
-//		saveCurrent();
-//	}
+	// public void loadDefault() throws IOException {
+	// load(MOTORS_PROP_DEFAULT);
+	// saveCurrent();
+	// }
 
 }

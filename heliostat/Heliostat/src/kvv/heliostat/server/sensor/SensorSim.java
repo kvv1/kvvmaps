@@ -37,10 +37,11 @@ public class SensorSim implements Sensor {
 		double sunAz = Environment.getMirrorAzimuth(day, time);
 		double sunAlt = Environment.getMirrorAltitude(day, time);
 
-		double dAz = motorAz - sunAz;
-		double dAlt = motorAlt - sunAlt;
+		double dAz = motorAz - sunAz/* + (Math.random() - 0.5)*/;
+		double dAlt = motorAlt - sunAlt/* + (Math.random() - 0.5)*/;
 
-		double brightness = 1000 * Environment.getMirrorAltitude(day, time) / 45;
+		double brightness = 1000;// * Environment.getMirrorAltitude(day, time) /
+									// 45;
 		if (!Heliostat.instance.isSunny())
 			brightness /= 50;
 

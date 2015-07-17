@@ -25,8 +25,8 @@ public class MotorsView extends Composite implements View {
 
 	private final Model model;
 
-	private int width = 400;
-	private int height = 400;
+	private int width = 250;
+	private int height = 250;
 
 	private Button clearHistory = new Button("Clear history",
 			new ClickHandler() {
@@ -50,16 +50,18 @@ public class MotorsView extends Composite implements View {
 			public void onMouseDown(MouseDownEvent event) {
 				if (model.lastState == null)
 					return;
+
+				int azRange = model.lastState.params.range[0];
+				int altRange = model.lastState.params.range[1];
+
 				MotorState[] state = model.lastState.motorState;
 				if (state[0] == null || state[1] == null)
-					return;
-				if (state[0].max == null || state[1].max == null)
 					return;
 				if (!state[0].posValid || !state[1].posValid)
 					return;
 
-				int posX = (int) (0.5 + event.getX() * state[0].max / width);
-				int posY = (int) (0.5 + (height - event.getY()) * state[1].max
+				int posX = (int) (0.5 + event.getX() * azRange / width);
+				int posY = (int) (0.5 + (height - event.getY()) * altRange
 						/ height);
 
 				model.heliostatService.move(MotorId.AZ, posX,
@@ -69,7 +71,7 @@ public class MotorsView extends Composite implements View {
 			}
 		});
 
-		initWidget(new VertPanel(canvas, new Gap(8, 8), clearHistory));
+		initWidget(new VertPanel(canvas, new Gap(4, 4), clearHistory));
 	}
 
 	@Override
@@ -80,10 +82,22 @@ public class MotorsView extends Composite implements View {
 		context.setFillStyle("gray");
 		context.fillRect(0, 0, width, height);
 
+		int azRange = model.lastState.params.range[0];
+		int altRange = model.lastState.params.range[1];
+
 		if (state.motorState[0] != null) {
-			if (state.motorState[0].motorRawSimState != null) {
+			if (state.motorState[0].posValid) {
 				context.beginPath();
-				context.setLineWidth(4);
+				context.setLineWidth(2);
+				context.setStrokeStyle(Heliostat.AZ_COLOR);
+				double x = (double) state.motorState[0].pos * width / azRange;
+				context.moveTo(x, 0);
+				context.lineTo(x, height);
+				context.stroke();
+				context.closePath();
+			} else if (state.motorState[0].motorRawSimState != null) {
+				context.beginPath();
+				context.setLineWidth(2);
 				context.setStrokeStyle("#C0C0C0");
 				double x = (double) state.motorState[0].motorRawSimState.pos
 						* width / state.motorState[0].motorRawSimState.max;
@@ -92,38 +106,26 @@ public class MotorsView extends Composite implements View {
 				context.stroke();
 				context.closePath();
 			}
-			if (state.motorState[0].posValid) {
-				context.beginPath();
-				context.setLineWidth(2);
-				context.setStrokeStyle("#00FFFF");
-				double x = (double) state.motorState[0].pos * width
-						/ state.motorState[0].max;
-				context.moveTo(x, 0);
-				context.lineTo(x, height);
-				context.stroke();
-				context.closePath();
-			}
 		}
 
 		if (state.motorState[1] != null) {
-			if (state.motorState[1].motorRawSimState != null) {
+			if (state.motorState[1].posValid) {
 				context.beginPath();
-				context.setLineWidth(4);
-				context.setStrokeStyle("#C0C0C0");
-				double y = (double) height
-						- state.motorState[1].motorRawSimState.pos * height
-						/ state.motorState[1].motorRawSimState.max;
+				context.setLineWidth(2);
+				context.setStrokeStyle(Heliostat.ALT_COLOR);
+				double y = height - (double) state.motorState[1].pos * height
+						/ altRange;
 				context.moveTo(0, y);
 				context.lineTo(width, y);
 				context.stroke();
 				context.closePath();
-			}
-			if (state.motorState[1].posValid) {
+			} else if (state.motorState[1].motorRawSimState != null) {
 				context.beginPath();
 				context.setLineWidth(2);
-				context.setStrokeStyle("#00FFFF");
-				double y = (double) height - state.motorState[1].pos * height
-						/ state.motorState[1].max;
+				context.setStrokeStyle("#C0C0C0");
+				double y = height
+						- (double) state.motorState[1].motorRawSimState.pos
+						* height / state.motorState[1].motorRawSimState.max;
 				context.moveTo(0, y);
 				context.lineTo(width, y);
 				context.stroke();
@@ -131,71 +133,94 @@ public class MotorsView extends Composite implements View {
 			}
 		}
 
-/*		{
-			context.beginPath();
-
-			context.setStrokeStyle("yellow");
-			context.setLineWidth(2);
-
-			boolean moved = false;
-
-			for (double t = 5; t < 19; t += 0.1) {
-				double alt = Environment.getMirrorAltitude(state.day, t);
-				double az = Environment.getMirrorAzimuth(state.day, t);
-				if (alt > 0) {
-					double x1 = width * Environment.azDeg2Steps.value(az)
-							/ Environment.MAX_STEPS;
-					double y1 = height - height
-							* Environment.altDeg2Steps.value(alt)
-							/ Environment.MAX_STEPS;
-
-					if (!moved)
-						context.moveTo(x1, y1);
-					else
-						context.lineTo(x1, y1);
-					moved = true;
-				}
-			}
-
-			context.stroke();
-			context.closePath();
-		}*/
 		{
-			context.beginPath();
-			context.setStrokeStyle("white");
-			context.setFillStyle("white");
 
-			if (state.trajectory != null && state.motorState[0].max != null
-					&& state.motorState[1].max != null) {
-
-				Function azFunc = FunctionFactory.getFunction(
-						state.trajectory[0], state.trajectory[1]);
+			if (state.altData != null && state.altData != null) {
+				Function azFunc = FunctionFactory.getFunction(state.azData[0],
+						state.azData[1]);
 				Function altFunc = FunctionFactory.getFunction(
-						state.trajectory[0], state.trajectory[2]);
+						state.altData[0], state.altData[1]);
 
-				for (double t = 5; t <= 19; t += 0.1) {
-					double x = width * azFunc.value(t)
-							/ state.motorState[0].max;
-					double y = height - height * altFunc.value(t)
-							/ state.motorState[1].max;
-					if (t == 5)
-						context.moveTo(x, y);
-					else
+				if (azFunc != null && altFunc != null) {
+					String styleOld = null;
+
+					context.beginPath();
+					context.setLineWidth(2);
+
+					for (double t = 5; t <= 19; t += 0.1) {
+						String style = Heliostat.TRAJ_COLOR;
+
+						double az = Environment.getMirrorAzimuth(state.day, t);
+						double alt = Environment
+								.getMirrorAltitude(state.day, t);
+
+						double azSteps = azFunc.value(az);
+						double altSteps = altFunc.value(alt);
+
+						boolean azFound = false;
+						for (double az1 : state.azData[0]) {
+							if (Math.abs(az - az1) < Environment.ANGLE_STEP) {
+								azFound = true;
+								break;
+							}
+						}
+
+						boolean altFound = false;
+						for (double alt1 : state.altData[0]) {
+							if (Math.abs(alt - alt1) < Environment.ANGLE_STEP) {
+								altFound = true;
+								break;
+							}
+						}
+
+						if (azFound && altFound)
+							style = Heliostat.TRAJ_COLOR_LIGHT_LIGHT;
+
+						double x = width * azSteps / azRange;
+						double y = height - height * altSteps / altRange;
+
+						if (!style.equals(styleOld)) {
+							if (styleOld != null)
+								context.lineTo(x, y);
+							context.stroke();
+							context.closePath();
+							context.beginPath();
+							styleOld = style;
+							context.setStrokeStyle(styleOld);
+							context.moveTo(x, y);
+						}
+
 						context.lineTo(x, y);
-				}
-				context.stroke();
 
-				for (int i = 0; i < state.trajectory[0].length; i++) {
-					double x1 = width * state.trajectory[1][i]
-							/ state.motorState[0].max;
-					double y1 = height - height * state.trajectory[2][i]
-							/ state.motorState[1].max;
+					}
+					context.stroke();
+					context.closePath();
 
-					context.fillRect(x1 - 2, y1 - 2, 4, 4);
+					context.beginPath();
+					context.setStrokeStyle("yellow");
+					context.setFillStyle("yellow");
+					{
+						double az = Environment.getMirrorAzimuth(state.day,
+								state.time);
+						double alt = Environment.getMirrorAltitude(state.day,
+								state.time);
+
+						double azSteps = azFunc.value(az);
+						double altSteps = altFunc.value(alt);
+
+						double x = width * azSteps / azRange;
+						double y = height - height * altSteps / altRange;
+
+						int rad = 3;
+						context.arc(x, y, rad, 0, Math.PI * 2.0, true);
+						if (state.sun)
+							context.fill();
+						context.stroke();
+					}
+					context.closePath();
+
 				}
 			}
-
-			context.closePath();
 		}
 	}
 

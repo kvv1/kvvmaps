@@ -1,0 +1,64 @@
+package kvv.heliostat.client;
+
+import kvv.heliostat.client.chart.Chart1;
+import kvv.heliostat.client.chart.ChartData;
+import kvv.heliostat.shared.HeliostatState;
+import kvv.heliostat.shared.environment.Environment;
+import kvv.heliostat.shared.spline.FunctionFactory;
+
+public class MotorsChart extends Chart1 {
+	public double[][] azData = new double[][] { new double[0], new double[0] };
+	public double[][] altData = new double[][] { new double[0], new double[0] };
+
+	public MotorsChart() {
+		super(500, 200, -60, 60, 10, 0, Environment.MAX_STEPS, 10000, false);
+		
+		ChartData cd1 = new ChartData(Environment.azDeg2Steps,
+				Heliostat.AZ_COLOR_LIGHT);
+		ChartData cd2 = new ChartData(Environment.altDeg2Steps,
+				Heliostat.ALT_COLOR_LIGHT);
+
+		set(0, cd1);
+		set(1, cd2);
+	}
+
+	private boolean eqArr(double[] a1, double[] a2) {
+		if (a1.length != a2.length)
+			return false;
+
+		for (int i = 0; i < a1.length; i++)
+			if (a1[i] != a2[i])
+				return false;
+
+		return true;
+	}
+
+	@Override
+	public void updateView(HeliostatState state) {
+		super.updateView(state);
+
+		if (state == null)
+			return;
+
+		if (!eqArr(azData[0], state.azData[0])
+				|| !eqArr(azData[1], state.azData[1])
+				|| !eqArr(altData[0], state.altData[0])
+				|| !eqArr(altData[1], state.altData[1])) {
+			azData = state.azData;
+			altData = state.altData;
+
+			ChartData cd3 = new ChartData(FunctionFactory.getFunction(
+					state.azData[0], state.azData[1]), state.azData[0],
+					state.azData[1], Heliostat.AZ_COLOR);
+			ChartData cd4 = new ChartData(FunctionFactory.getFunction(
+					state.altData[0], state.altData[1]), state.altData[0],
+					state.altData[1], Heliostat.ALT_COLOR);
+
+			set(2, cd3);
+			set(3, cd4);
+			
+			//set(cd1, cd2, cd3, cd4);
+		}
+
+	}
+}

@@ -9,7 +9,6 @@ import kvv.heliostat.server.motor.MotorRawSim;
 import kvv.heliostat.server.sensor.Sensor;
 import kvv.heliostat.server.sensor.SensorImpl;
 import kvv.heliostat.server.sensor.SensorSim;
-import kvv.heliostat.server.trajectory.Trajectory;
 import kvv.heliostat.server.trajectory.TrajectoryImpl;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.MotorId;
@@ -32,8 +31,23 @@ public class Heliostat {
 	private final MotorRawSim motorAzimuthRaw = new MotorRawSim();
 	private final MotorRawSim motorAltitudeRaw = new MotorRawSim();
 
-	private final Motor[] motors = { new Motor(motorAzimuthRaw),
-			new Motor(motorAltitudeRaw) };
+	private Motor azMotor = new Motor(motorAzimuthRaw) {
+		@Override
+		protected void calibrated(int max) {
+			params.range[0] = max;
+			writeParams();
+		}
+	};
+
+	private Motor altMotor = new Motor(motorAltitudeRaw) {
+		@Override
+		protected void calibrated(int max) {
+			params.range[1] = max;
+			writeParams();
+		}
+	};
+
+	private final Motor[] motors = { azMotor, altMotor };
 	private final Sensor sensor = new SensorSim(motorAzimuthRaw,
 			motorAltitudeRaw);
 	private final Sensor sensor1 = new SensorImpl(controller);
@@ -42,7 +56,7 @@ public class Heliostat {
 
 	private volatile boolean stopped;
 
-	private final Trajectory trajectory = new TrajectoryImpl();
+	private final TrajectoryImpl trajectory = new TrajectoryImpl();
 
 	private Thread thread = new Thread() {
 		public void run() {
@@ -86,8 +100,8 @@ public class Heliostat {
 		heliostatState = new HeliostatState(new MotorState[] {
 				motors[0].getState(), motors[1].getState() },
 				sensor.getState(), params, Time.getDay(), Time.getDayS(),
-				Time.getTime(), Time.getTimeS(), trajectory.getPoints(),
-				isSunny());
+				Time.getTime(), Time.getTimeS(), trajectory.getAzData(),
+				trajectory.getAltData(), isSunny());
 
 		if (heliostatState.motorState[0].posValid
 				&& heliostatState.motorState[1].posValid) {
@@ -245,6 +259,11 @@ public class Heliostat {
 
 	public synchronized void shortDay(boolean value) {
 		params.shortDay = value;
+		writeParams();
+	}
+
+	public synchronized void setRange(MotorId id, int max) {
+		params.range[id.ordinal()] = max;
 		writeParams();
 	}
 

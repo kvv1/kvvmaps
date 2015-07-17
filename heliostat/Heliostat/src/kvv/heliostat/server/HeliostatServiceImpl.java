@@ -114,4 +114,9 @@ public class HeliostatServiceImpl extends RemoteServiceServlet implements
 		Heliostat.instance.shortDay(value);
 	}
 
+	@Override
+	public void setRange(MotorId id, int max) {
+		Heliostat.instance.setRange(id, max);
+	}
+
 }

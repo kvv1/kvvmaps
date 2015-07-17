@@ -19,7 +19,6 @@ public class MotorState implements Serializable {
 
 	}
 
-	public Integer max;
 	public int pos;
 	public boolean posValid;
 	public boolean home;
@@ -30,9 +29,8 @@ public class MotorState implements Serializable {
 	public MotorState() {
 	}
 
-	public MotorState(Integer max, int pos, boolean posValid, boolean home,
+	public MotorState(int pos, boolean posValid, boolean home,
 			boolean end, int dir, MotorRawSimState motorRawSimState) {
-		this.max = max;
 		this.pos = pos;
 		this.posValid = posValid;
 		this.home = home;

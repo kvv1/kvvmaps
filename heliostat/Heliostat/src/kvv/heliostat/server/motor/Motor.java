@@ -2,11 +2,10 @@ package kvv.heliostat.server.motor;
 
 import kvv.heliostat.shared.MotorState;
 
-public class Motor {
+public abstract class Motor {
 
 	private final MotorRaw motorRaw;
 
-	private Integer max;
 	private boolean posValid;
 
 	enum State {
@@ -18,6 +17,9 @@ public class Motor {
 	}
 
 	private State state;
+
+	protected abstract void calibrated(int max);
+
 
 	public Motor(MotorRaw motorRaw) {
 		this.motorRaw = motorRaw;
@@ -31,14 +33,11 @@ public class Motor {
 	}
 	
 	public void calibrate() {
-		max = null;
 		posValid = false;
 		setState(State.CALIBRATING);
 	}
 
 	public void goHome() {
-		if (max == null)
-			return;
 		posValid = false;
 		setState(State.GOING_HOME);
 	}
@@ -73,7 +72,7 @@ public class Motor {
 	public MotorState getState() {
 		int cnt = motorRaw.getStepsCounter();
 		boolean dir = motorRaw.getDir();
-		return new MotorState(max, motorRaw.getPosition(), posValid,
+		return new MotorState(motorRaw.getPosition(), posValid,
 				motorRaw.getIn1(), motorRaw.getIn2(), cnt == 0 ? 0 : dir ? -1
 						: 1, motorRaw.getState());
 	}
@@ -114,10 +113,11 @@ public class Motor {
 		case CALIBRATING3:
 			if (motorRaw.getIn1()) {
 				motorRaw.stop();
-				max = -motorRaw.getPosition();
+				int max = -motorRaw.getPosition();
 				motorRaw.setPosition(0);
 				posValid = true;
 				setState(State.IDLE);
+				calibrated(max);
 			}
 			break;
 		case GOING_HOME:

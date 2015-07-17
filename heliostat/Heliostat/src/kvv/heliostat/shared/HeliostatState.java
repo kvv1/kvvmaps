@@ -11,8 +11,9 @@ public class HeliostatState implements Serializable {
 	public double time;
 	public String timeS;
 	public Params params;
-	public double[][] trajectory;
-	
+	public double[][] azData;
+	public double[][] altData;
+
 	public boolean sun;
 
 	public HeliostatState() {
@@ -20,7 +21,8 @@ public class HeliostatState implements Serializable {
 
 	public HeliostatState(MotorState[] motorState, SensorState sensorState,
 			Params params, int day, String dayS, double time, String timeS,
-			double[][] trajectory, boolean sun) {
+			double[][] azData, double[][] altData,
+			boolean sun) {
 		this.motorState = motorState;
 		this.sensorState = sensorState;
 		this.params = params;
@@ -28,7 +30,8 @@ public class HeliostatState implements Serializable {
 		this.timeS = timeS;
 		this.day = day;
 		this.dayS = dayS;
-		this.trajectory = trajectory;
+		this.azData = azData;
+		this.altData = altData;
 		this.sun = sun;
 	}
 }

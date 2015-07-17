@@ -51,4 +51,6 @@ public interface HeliostatServiceAsync {
 	void resetSim(int firstDay, AsyncCallback<Weather> callback);
 
 	void shortDay(boolean value, AsyncCallback<Void> callback);
+
+	void setRange(MotorId id, int max, AsyncCallback<Void> callback);
 }

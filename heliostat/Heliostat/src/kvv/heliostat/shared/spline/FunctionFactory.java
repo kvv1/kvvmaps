@@ -2,6 +2,9 @@ package kvv.heliostat.shared.spline;
 
 public class FunctionFactory {
 	public static Function getFunction(final double[] args, final double[] vals) {
+		if(args.length == 0)
+			return null;
+		
 		if (args.length == 1)
 			return new Function() {
 				@Override

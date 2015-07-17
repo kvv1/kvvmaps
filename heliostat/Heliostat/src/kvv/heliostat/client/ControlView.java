@@ -1,12 +1,8 @@
 package kvv.heliostat.client;
 
-import kvv.heliostat.client.chart.Chart;
-import kvv.heliostat.client.chart.Chart.ChartData;
-import kvv.heliostat.client.panel.CaptPanel;
 import kvv.heliostat.client.panel.HorPanel;
 import kvv.heliostat.client.panel.VertPanel;
 import kvv.heliostat.shared.HeliostatState;
-import kvv.heliostat.shared.environment.Environment;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -55,18 +51,9 @@ public class ControlView extends Composite implements View {
 
 		SunPathView sunPathView = new SunPathView(model);
 
-		Chart chart = new Chart(600, 100, -60, 60, 10, 0,
-				Environment.MAX_STEPS, 10000, false);
-		model.add(chart);
-
-		ChartData cd1 = new ChartData(Environment.azDeg2Steps, "cyan");
-		ChartData cd2 = new ChartData(Environment.altDeg2Steps, "LawnGreen");
-
-		chart.set(cd1, cd2);
-
 		Panel panel = new VertPanel(new HorPanel(true, 10, clock, shortDay,
-				clockRate), weatherTable, new Gap(10, 10), new HorPanel(false, 10,
-				sunPathView, new MirrorView(model)), new Gap(10, 10), chart);
+				clockRate), weatherTable, new Gap(10, 10), new HorPanel(false,
+				10, sunPathView, new MirrorView(model)));
 
 		initWidget(panel);
 	}

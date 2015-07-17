@@ -160,6 +160,10 @@ public class MirrorAngles {
 	private static final double timezone = -5.5;
 
 	public static void main(String[] args) {
+		
+//		double[] mirrorAngles = calcMirror(new double[] {10,45});
+//		System.out.printf("%f %f\n", mirrorAngles[0], mirrorAngles[1]);
+		
 		/*
 		 * for (int d = 0; d < 366; d++) { System.out.printf("%3d   ", d); for
 		 * (int t = 6; t <= 18; t++) { double[] sun = calcSun(d, t, lat, lon,

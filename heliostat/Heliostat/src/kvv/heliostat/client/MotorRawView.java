@@ -82,12 +82,12 @@ public class MotorRawView extends Composite implements View {
 		}
 	});
 
-	private Button calibr = new Button("Calibrate", new ClickHandler() {
-		@Override
-		public void onClick(ClickEvent event) {
-			model.heliostatService.calibrate(id, new Callback<Void>());
-		}
-	});
+//	private Button calibr = new Button("Calibrate", new ClickHandler() {
+//		@Override
+//		public void onClick(ClickEvent event) {
+//			model.heliostatService.calibrate(id, new Callback<Void>());
+//		}
+//	});
 
 	private Button home = new Button("Home", new ClickHandler() {
 		@Override
@@ -114,7 +114,7 @@ public class MotorRawView extends Composite implements View {
 		this.model = model;
 		this.id = id;
 		horPanel = new HorPanel(true, 2, m1000, m100, m10, m1, pos, new Gap(4,4), p1, p10, p100, p1000,
-				new Gap(4,4), stop, home, calibr);
+				new Gap(4,4), stop, home/*, calibr*/);
 
 		model.add(this);
 		initWidget(horPanel);

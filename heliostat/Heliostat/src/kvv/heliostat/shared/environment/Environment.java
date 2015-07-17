@@ -16,6 +16,9 @@ public class Environment {
 		return alt;
 	}
 
+	public static final int ANGLE_STEP = 4;
+
+
 	public static final int MIN_AZIMUTH = -60;
 	public static final int MAX_AZIMUTH = 60;
 	public static final int MIN_ALTITUDE = -10;
