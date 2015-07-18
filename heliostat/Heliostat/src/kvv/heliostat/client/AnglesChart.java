@@ -1,12 +1,12 @@
 package kvv.heliostat.client;
 
-import kvv.heliostat.client.chart.Chart;
 import kvv.heliostat.client.chart.ChartData;
+import kvv.heliostat.client.chart.TimeChart;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.spline.Function;
 
-public class AnglesChart extends Chart {
+public class AnglesChart extends TimeChart {
 
 	private int day = -1;
 
@@ -38,8 +38,8 @@ public class AnglesChart extends Chart {
 		}
 	};
 
-	public AnglesChart() {
-		super(500, 160, 0, 24, 1, -60, 60, 10, true);
+	public AnglesChart(Model model) {
+		super(model, 500, 160, 0, 24, 1, -60, 60, 10, null);
 
 		set(0, new ChartData(az, Heliostat.AZ_COLOR_LIGHT));
 		set(1, new ChartData(az2, Heliostat.AZ_COLOR_LIGHT));
@@ -55,7 +55,7 @@ public class AnglesChart extends Chart {
 
 		if (state.day != day) {
 			day = state.day;
-			
+
 			Function az1 = new Function() {
 				@Override
 				public double value(double t) {

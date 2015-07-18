@@ -1,35 +1,29 @@
 package kvv.heliostat.client.chart;
 
-import kvv.heliostat.client.Callback;
-import kvv.heliostat.client.HeliostatService;
-import kvv.heliostat.client.HeliostatServiceAsync;
-import kvv.heliostat.client.View;
-import kvv.heliostat.shared.HeliostatState;
-
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.TextMetrics;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.Widget;
 
-public class Chart extends Composite implements View {
-
-	public final HeliostatServiceAsync heliostatService = GWT
-			.create(HeliostatService.class);
+public class Chart extends Composite {
 
 	private final AbsolutePanel panel = new AbsolutePanel();
 
-	private InnerCanvas[] canvas = new InnerCanvas[10];
+	private Composite[] layers = new Composite[10];
 
 	private final Canvas timeCanvas = Canvas.createIfSupported();
 	private final Context2d timeContext = timeCanvas.getContext2d();
 
-	private final Canvas ycanvas = Canvas.createIfSupported();
-	private final Context2d ycontext = ycanvas.getContext2d();
+	private final Canvas canvas = Canvas.createIfSupported();
+	private final Context2d context = canvas.getContext2d();
+
+	private final AbsolutePanel layersPanel = new AbsolutePanel();
 
 	private static final int leftMargin = 30;
 	private static final int bottomMargin = 12;
@@ -42,12 +36,11 @@ public class Chart extends Composite implements View {
 	private final double maxy;
 	private final double stepx;
 	private final double stepy;
-
-	private final boolean withTime;
+	private final double[] solidVals;
 
 	public Chart(final int width, int height, double minx, double maxx,
 			double stepx, double miny, double maxy, double stepy,
-			boolean withTime) {
+			double[] solidVals) {
 		this.width = width;
 		this.height = height;
 		this.minx = minx;
@@ -56,115 +49,135 @@ public class Chart extends Composite implements View {
 		this.maxy = maxy;
 		this.stepx = stepx;
 		this.stepy = stepy;
-		this.withTime = withTime;
-
-		ycanvas.setPixelSize(width + leftMargin, height + bottomMargin);
-		ycanvas.setCoordinateSpaceWidth(width + leftMargin);
-		ycanvas.setCoordinateSpaceHeight(height + bottomMargin);
-		panel.add(ycanvas);
-		panel.setWidgetPosition(ycanvas, 0, 0);
+		this.solidVals = solidVals;
 
 		panel.setPixelSize(width + leftMargin, height + bottomMargin);
 
-		if (withTime) {
-			timeCanvas.setPixelSize(2, height);
-			timeCanvas.setCoordinateSpaceWidth(2);
-			timeCanvas.setCoordinateSpaceHeight(height);
+		canvas.setPixelSize(width + leftMargin, height + bottomMargin);
+		canvas.setCoordinateSpaceWidth(width + leftMargin);
+		canvas.setCoordinateSpaceHeight(height + bottomMargin);
+		panel.add(canvas);
+		panel.setWidgetPosition(canvas, 0, 0);
 
-			timeContext.beginPath();
-			timeContext.setStrokeStyle("yellow");
-			timeContext.setLineWidth(2);
-			timeContext.moveTo(1, 0);
-			timeContext.lineTo(1, height);
-			timeContext.stroke();
-			timeContext.closePath();
+		layersPanel.setPixelSize(width, height);
+		panel.add(layersPanel);
+		panel.setWidgetPosition(layersPanel, leftMargin, 0);
 
-			panel.add(timeCanvas);
+		timeCanvas.setPixelSize(2, height);
+		timeCanvas.setCoordinateSpaceWidth(2);
+		timeCanvas.setCoordinateSpaceHeight(height);
 
-		}
+		timeContext.beginPath();
+		timeContext.setStrokeStyle("yellow");
+		timeContext.setLineWidth(2);
+		timeContext.moveTo(1, 0);
+		timeContext.lineTo(1, height);
+		timeContext.stroke();
+		timeContext.closePath();
+
+		panel.add(timeCanvas);
+
+		panel.setWidgetPosition(timeCanvas, -10, 0);
+
+		FocusPanel w = new FocusPanel();
+		w.setPixelSize(width, height);
+		panel.add(w);
+		panel.setWidgetPosition(w, leftMargin, 0);
+		w.addMouseDownHandler(new MouseDownHandler() {
+			@Override
+			public void onMouseDown(MouseDownEvent event) {
+				onClick(x2arg(event.getX()));
+			}
+		});
 
 		draw();
 
 		initWidget(panel);
 	}
 
+	protected void onClick(double arg) {
+	}
+
 	public void set(int idx, ChartData data) {
-		if (canvas[idx] != null)
-			panel.remove(canvas[idx]);
+		if (layers[idx] != null)
+			layersPanel.remove(layers[idx]);
 
 		if (data != null) {
-			canvas[idx] = new InnerCanvas(data);
-
-			if (withTime) {
-				canvas[idx].addMouseDownHandler(new MouseDownHandler() {
-					@Override
-					public void onMouseDown(MouseDownEvent event) {
-						int x = event.getX();
-						heliostatService.setTime(x * 24.0 / width,
-								new Callback<Void>());
-					}
-				});
-			}
-			panel.add(canvas[idx]);
-			panel.setWidgetPosition(canvas[idx], leftMargin, 0);
+			layers[idx] = new InnerCanvas(data);
+			layersPanel.add(layers[idx]);
+			layersPanel.setWidgetPosition(layers[idx], 0, 0);
 		}
 	}
 
 	public void draw() {
-		ycontext.beginPath();
+		context.setFillStyle("#808080");
+		context.fillRect(0, 0, canvas.getCoordinateSpaceWidth(),
+				canvas.getCoordinateSpaceHeight());
 
-		ycontext.setFillStyle("#808080");
-		ycontext.fillRect(0, 0, ycanvas.getCoordinateSpaceWidth(),
-				ycanvas.getCoordinateSpaceHeight());
+		context.setStrokeStyle("#404040");
 
-		ycontext.setStrokeStyle("#404040");
-		ycontext.setLineWidth(2);
+		context.beginPath();
+		context.setLineWidth(2);
 
 		for (double arg = minx + stepx; arg < maxx; arg += stepx) {
-			ycontext.moveTo(leftMargin + arg2x(arg), 0);
-			ycontext.lineTo(leftMargin + arg2x(arg), height);
+			context.moveTo(leftMargin + arg2x(arg), 0);
+			context.lineTo(leftMargin + arg2x(arg), height);
 		}
 
 		for (double val = miny + stepy; val < maxy; val += stepy) {
-			ycontext.moveTo(leftMargin, val2y(val));
-			ycontext.lineTo(leftMargin + width, val2y(val));
+			context.moveTo(leftMargin, val2y(val));
+			context.lineTo(leftMargin + width, val2y(val));
 		}
 
-		ycontext.stroke();
-		ycontext.closePath();
+		context.stroke();
+		context.closePath();
+
+		if (solidVals != null) {
+			context.beginPath();
+			context.setStrokeStyle("black");
+
+			for (double val : solidVals) {
+				context.moveTo(leftMargin, val2y(val));
+				context.lineTo(leftMargin + width, val2y(val));
+			}
+
+			context.stroke();
+			context.closePath();
+		}
 
 		NumberFormat decimalFormat = NumberFormat.getFormat("#.##");
 
-		ycontext.beginPath();
-		ycontext.setFillStyle("yellow");
+		context.beginPath();
+		context.setFillStyle("yellow");
 		for (double x = minx; x < maxx; x += stepx) {
 			if (x != minx) {
 				String text = decimalFormat.format(x);
-				TextMetrics tm = ycontext.measureText(text);
-				ycontext.fillText(text, leftMargin + arg2x(x) - tm.getWidth()
+				TextMetrics tm = context.measureText(text);
+				context.fillText(text, leftMargin + arg2x(x) - tm.getWidth()
 						/ 2, height + 10);
 			}
 		}
 		for (double y = miny; y < maxy; y += stepy) {
 			if (y != miny) {
 				String text = decimalFormat.format(y);
-				TextMetrics tm = ycontext.measureText(text);
-				ycontext.fillText(text, leftMargin - tm.getWidth() - 2,
+				TextMetrics tm = context.measureText(text);
+				context.fillText(text, leftMargin - tm.getWidth() - 2,
 						val2y(y) + 2);
 			}
 		}
 
-		ycontext.closePath();
+		context.closePath();
+
+		for (Widget w : layers) {
+			if (w instanceof InnerCanvas)
+				((InnerCanvas) w).draw();
+		}
+
 	}
 
-	@Override
-	public void updateView(HeliostatState state) {
-		if (state == null)
-			return;
-
-		if (withTime)
-			panel.setWidgetPosition(timeCanvas, (int) arg2x(state.time)
-					+ leftMargin - 1, 0);
+	public void setCursor(double arg) {
+		panel.setWidgetPosition(timeCanvas, (int) arg2x(arg) + leftMargin - 1,
+				0);
 	}
 
 	public double arg2x(double arg) {

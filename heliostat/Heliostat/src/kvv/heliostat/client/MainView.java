@@ -1,6 +1,7 @@
 package kvv.heliostat.client;
 
 import kvv.heliostat.client.chart.Chart;
+import kvv.heliostat.client.chart.TimeChart;
 import kvv.heliostat.client.panel.CaptPanel;
 import kvv.heliostat.client.panel.HorPanel;
 import kvv.heliostat.client.panel.VertPanel;
@@ -149,11 +150,9 @@ public class MainView extends Composite implements View {
 		Widget motorsPanel = new CaptPanel("Motors", motorsView);
 		Widget sensorPanel = new CaptPanel("Sensor", sensorView);
 
-		Chart anglesChart = new AnglesChart();
-		model.add(anglesChart);
+		TimeChart anglesChart = new AnglesChart(model);
 
-		Chart motorsChart = new MotorsChart();
-		model.add(motorsChart);
+		MotorsChart motorsChart = new MotorsChart(model);
 
 		Widget centralPanel = new HorPanel(
 				new VertPanel(autoPanel, sensorPanel), motorsPanel,

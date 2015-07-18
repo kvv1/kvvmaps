@@ -6,12 +6,14 @@ import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.spline.FunctionFactory;
 
-public class MotorsChart extends Chart {
+public class MotorsChart extends Chart implements View{
 	public double[][] azData = new double[][] { new double[0], new double[0] };
 	public double[][] altData = new double[][] { new double[0], new double[0] };
 
-	public MotorsChart() {
-		super(500, 200, -60, 60, 10, 0, Environment.MAX_STEPS, 10000, false);
+	public MotorsChart(Model model) {
+		super(500, 200, -60, 60, 10, 0, Environment.MAX_STEPS, 10000, null);
+		
+		model.add(this);
 		
 		ChartData cd1 = new ChartData(Environment.azDeg2Steps,
 				Heliostat.AZ_COLOR_LIGHT);
@@ -35,8 +37,6 @@ public class MotorsChart extends Chart {
 
 	@Override
 	public void updateView(HeliostatState state) {
-		super.updateView(state);
-
 		if (state == null)
 			return;
 

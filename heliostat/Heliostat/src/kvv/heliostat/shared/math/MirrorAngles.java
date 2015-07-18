@@ -8,9 +8,9 @@ public class MirrorAngles {
 	private static final int FIRST_HOUR = 4;
 	private static final int LAST_HOUR = 20;
 
-	private static final double LAT = 12.0066228;
-	private static final double LON = -79.8104811;
-	private static final double TIMEZONE = -5.5;
+	public static final double LAT = 12.0066228;
+	public static final double LON = -79.8104811;
+	public static final double TIMEZONE = -5.5;
 
 	private static double[][][] mirrorTable = new double[366][LAST_HOUR
 			- FIRST_HOUR + 1][2];
@@ -60,7 +60,7 @@ public class MirrorAngles {
 		return new PtD(az, alt);
 	}
 
-	private static double[] calcMirror(double[] arg) {
+	public static double[] calcMirror(double[] arg) {
 		double[] res = new double[2];
 
 		double alpha = Math.toRadians(arg[0]);
