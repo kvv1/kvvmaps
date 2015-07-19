@@ -1,5 +1,6 @@
 package kvv.gwtutils.server.login;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,12 +13,6 @@ import kvv.gwtutils.client.login.LoginService;
 @SuppressWarnings("serial")
 public class LoginServiceImpl extends LoginServlet implements LoginService {
 
-	private static Map<String, String> users = new HashMap<>();
-	static {
-		users.put("u1", "p1");
-		users.put("u2", "p2");
-	}
-
 	@Override
 	public String getSessionId() {
 		HttpSession session = getSession();
@@ -25,6 +20,10 @@ public class LoginServiceImpl extends LoginServlet implements LoginService {
 		return id;
 	}
 
+	protected Map<String, String> getUsers() {
+		return Collections.emptyMap();
+	}
+	
 	@Override
 	public String getUser() {
 		HttpSession session = getSession();
@@ -37,7 +36,7 @@ public class LoginServiceImpl extends LoginServlet implements LoginService {
 	@Override
 	public boolean login(String name, String passwordEncoded)
 			throws AuthException {
-		String pw = users.get(name);
+		String pw = getUsers().get(name);
 		if (pw == null)
 			throw new AuthException("AuthException");
 

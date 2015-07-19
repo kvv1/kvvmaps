@@ -32,7 +32,7 @@ public class LoginPanel extends Composite {
 	private final TextBox nameBox = new TextBox();
 	private final TextBox passwordBox = new PasswordTextBox();
 
-	private final CheckBox storePwd = new CheckBox("Store password");
+	private final CheckBox storePwd = new CheckBox("Save password");
 
 	private final HorizontalPanel loginPanel = new HorizontalPanel();
 	private final HorizontalPanel logoutPanel = new HorizontalPanel();
@@ -46,7 +46,7 @@ public class LoginPanel extends Composite {
 
 		loginPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		loginPanel.setSpacing(4);
-		loginPanel.add(new Label("User:"));
+		loginPanel.add(new Label("User name:"));
 		loginPanel.add(nameBox);
 		loginPanel.add(new Label("Password:"));
 		loginPanel.add(passwordBox);
