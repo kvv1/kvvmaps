@@ -1,7 +1,6 @@
 package kvv.gwtutils.server.login;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
@@ -23,7 +22,7 @@ public class LoginServiceImpl extends LoginServlet implements LoginService {
 	protected Map<String, String> getUsers() {
 		return Collections.emptyMap();
 	}
-	
+
 	@Override
 	public String getUser() {
 		HttpSession session = getSession();

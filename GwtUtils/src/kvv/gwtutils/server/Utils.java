@@ -129,6 +129,7 @@ public class Utils {
 		if (props == null)
 			props = new Properties();
 		props.setProperty(prop, value);
+		propsMap.remove(file);
 
 		try {
 			OutputStreamWriter wr = new OutputStreamWriter(
@@ -137,7 +138,6 @@ public class Utils {
 			wr.close();
 			return true;
 		} catch (IOException e) {
-			propsMap.remove(file);
 			return false;
 		}
 	}
