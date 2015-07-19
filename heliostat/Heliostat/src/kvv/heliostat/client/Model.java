@@ -6,6 +6,7 @@ import java.util.Collection;
 import kvv.heliostat.shared.HeliostatState;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -45,9 +46,24 @@ public class Model {
 		views.add(view);
 	}
 
-	public Model() {
-		Timer timer = new Timer() {
+	private Timer timer;
 
+	public int getPeriod() {
+		String speriod = Cookies.getCookie(Heliostat.REFRESH_PERIOD);
+		if(speriod == null) {
+			speriod = "1000";
+			Cookies.setCookie(Heliostat.REFRESH_PERIOD, speriod);
+		}
+		int period = Integer.parseInt(speriod);
+		return period;
+	}
+	
+	public void start() {
+		if (timer != null)
+			return;
+
+		
+		timer = new Timer() {
 			@Override
 			public void run() {
 				heliostatService.getState(new AsyncCallback<HeliostatState>() {
@@ -58,7 +74,7 @@ public class Model {
 						if (updates)
 							for (View view : views)
 								view.updateView(null);
-						schedule(200);
+						schedule(getPeriod());
 					}
 
 					@Override
@@ -68,13 +84,23 @@ public class Model {
 							for (View view : views)
 								view.updateView(result);
 
-						schedule(200);
+						schedule(getPeriod());
 					}
 				});
 			}
 		};
 
-		timer.schedule(200);
+		timer.schedule(getPeriod());
+	}
+
+	public void stop() {
+		if(timer == null)
+			return;
+		timer.cancel();
+		timer = null;
+	}
+
+	public Model() {
 	}
 
 }

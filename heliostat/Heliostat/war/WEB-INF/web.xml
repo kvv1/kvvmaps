@@ -15,6 +15,16 @@
     <servlet-name>heliostatServlet</servlet-name>
     <url-pattern>/heliostat/heliostat</url-pattern>
   </servlet-mapping>
+
+  <servlet>
+    <servlet-name>loginServlet</servlet-name>
+    <servlet-class>kvv.gwtutils.server.login.LoginServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>loginServlet</servlet-name>
+    <url-pattern>/heliostat/login</url-pattern>
+  </servlet-mapping>
   
   <!-- Default page to serve -->
   <welcome-file-list>

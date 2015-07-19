@@ -3,8 +3,8 @@ package kvv.heliostat.server.trajectory;
 import java.io.IOException;
 import java.util.List;
 
+import kvv.gwtutils.server.Utils;
 import kvv.heliostat.server.Time;
-import kvv.heliostat.server.Utils;
 import kvv.heliostat.server.trajectory.ValueMap.ValueMapEntry;
 import kvv.heliostat.shared.PtD;
 import kvv.heliostat.shared.PtI;

@@ -2,6 +2,7 @@ package kvv.heliostat.server;
 
 import java.io.IOException;
 
+import kvv.gwtutils.server.Utils;
 import kvv.heliostat.shared.Weather;
 
 public class SimEnvironment {

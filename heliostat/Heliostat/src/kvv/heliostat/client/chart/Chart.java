@@ -15,7 +15,7 @@ public class Chart extends Composite {
 
 	private final AbsolutePanel panel = new AbsolutePanel();
 
-	private Composite[] layers = new Composite[10];
+	private Widget[] layers = new Widget[10];
 
 	private final Canvas timeCanvas = Canvas.createIfSupported();
 	private final Context2d timeContext = timeCanvas.getContext2d();
@@ -98,15 +98,77 @@ public class Chart extends Composite {
 	protected void onClick(double arg) {
 	}
 
-	public void set(int idx, ChartData data) {
+	public void set(int idx, Widget w) {
 		if (layers[idx] != null)
 			layersPanel.remove(layers[idx]);
-
-		if (data != null) {
-			layers[idx] = new InnerCanvas(data);
-			layersPanel.add(layers[idx]);
-			layersPanel.setWidgetPosition(layers[idx], 0, 0);
+		
+		layers[idx] = null;
+		
+		if(w != null) {
+			layers[idx] = w;
+			layersPanel.add(w);
+			layersPanel.setWidgetPosition(w, 0, 0);
 		}
+	}
+		
+	public void set(int idx, ChartData chartData) {
+		if(chartData == null) {
+			set(idx, (Widget)null);
+			return;
+		}
+			
+		Canvas canvas = createCanvas();
+		Context2d context = canvas.getContext2d();
+		context.beginPath();
+		context.setStrokeStyle(chartData.color);
+		context.setLineWidth(2);
+
+		if (chartData.function != null) {
+			for (int x = 0; x <= width; x += 4) {
+				double arg = x2arg(x);
+				double val = chartData.function.value(arg);
+				double y = val2y(val);
+
+				if (x == 0)
+					context.moveTo(x, y);
+				else
+					context.lineTo(x, y);
+			}
+		} else {
+			for (int i = 0; i < chartData.xx.length; i++) {
+				double x = arg2x(chartData.xx[i]);
+				double y = val2y(chartData.yy[i]);
+
+				if (i == 0)
+					context.moveTo(x, y);
+				else
+					context.lineTo(x, y);
+			}
+		}
+
+		context.stroke();
+
+		context.setFillStyle("#FFFFFF");
+
+		if (chartData.xx != null) {
+			for (int i = 0; i < chartData.xx.length; i++) {
+				double x = arg2x(chartData.xx[i]);
+				double y = val2y(chartData.yy[i]);
+				context.fillRect(x - 2, y - 2, 4, 4);
+			}
+		}
+
+		context.closePath();
+
+		set(idx, canvas);
+	}
+
+	public Canvas createCanvas() {
+		Canvas canvas = Canvas.createIfSupported();
+		canvas.setPixelSize(width, height);
+		canvas.setCoordinateSpaceWidth(width);
+		canvas.setCoordinateSpaceHeight(height);
+		return canvas;
 	}
 
 	public void draw() {
@@ -167,12 +229,6 @@ public class Chart extends Composite {
 		}
 
 		context.closePath();
-
-		for (Widget w : layers) {
-			if (w instanceof InnerCanvas)
-				((InnerCanvas) w).draw();
-		}
-
 	}
 
 	public void setCursor(double arg) {
@@ -192,66 +248,4 @@ public class Chart extends Composite {
 		return minx + x * (maxx - minx) / width;
 	}
 
-	class InnerCanvas extends Composite {
-		private final Canvas canvas = Canvas.createIfSupported();
-		private final Context2d context = canvas.getContext2d();
-
-		private final ChartData chartData;
-
-		private InnerCanvas(ChartData chartData) {
-			this.chartData = chartData;
-			canvas.setPixelSize(width, height);
-			canvas.setCoordinateSpaceWidth(width);
-			canvas.setCoordinateSpaceHeight(height);
-			initWidget(canvas);
-			draw();
-		}
-
-		public void addMouseDownHandler(MouseDownHandler handler) {
-			canvas.addMouseDownHandler(handler);
-		}
-
-		public void draw() {
-			context.beginPath();
-			context.setStrokeStyle(chartData.color);
-			context.setLineWidth(2);
-
-			if (chartData.function != null) {
-				for (int x = 0; x <= width; x += 4) {
-					double arg = x2arg(x);
-					double val = chartData.function.value(arg);
-					double y = val2y(val);
-
-					if (x == 0)
-						context.moveTo(x, y);
-					else
-						context.lineTo(x, y);
-				}
-			} else {
-				for (int i = 0; i < chartData.xx.length; i++) {
-					double x = arg2x(chartData.xx[i]);
-					double y = val2y(chartData.yy[i]);
-
-					if (i == 0)
-						context.moveTo(x, y);
-					else
-						context.lineTo(x, y);
-				}
-			}
-
-			context.stroke();
-
-			context.setFillStyle("#FFFFFF");
-
-			if (chartData.xx != null) {
-				for (int i = 0; i < chartData.xx.length; i++) {
-					double x = arg2x(chartData.xx[i]);
-					double y = val2y(chartData.yy[i]);
-					context.fillRect(x - 2, y - 2, 4, 4);
-				}
-			}
-
-			context.closePath();
-		}
-	}
 }

@@ -1,7 +1,10 @@
 package kvv.heliostat.client;
 
-import kvv.heliostat.client.panel.HorPanel;
-import kvv.heliostat.client.panel.VertPanel;
+import kvv.gwtutils.client.Callback;
+import kvv.gwtutils.client.Gap;
+import kvv.gwtutils.client.HorPanel;
+import kvv.gwtutils.client.TextFieldView;
+import kvv.gwtutils.client.VertPanel;
 import kvv.heliostat.shared.HeliostatState;
 
 import com.google.gwt.event.dom.client.ClickEvent;

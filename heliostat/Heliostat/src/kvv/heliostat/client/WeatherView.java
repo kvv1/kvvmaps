@@ -1,6 +1,8 @@
 package kvv.heliostat.client;
 
-import kvv.heliostat.client.panel.VertPanel;
+import kvv.gwtutils.client.Callback;
+import kvv.gwtutils.client.TextFieldView;
+import kvv.gwtutils.client.VertPanel;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.Weather;
 

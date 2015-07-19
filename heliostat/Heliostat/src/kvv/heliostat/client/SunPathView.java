@@ -1,5 +1,6 @@
 package kvv.heliostat.client;
 
+import kvv.gwtutils.client.Callback;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.MotorId;
 import kvv.heliostat.shared.environment.Environment;

@@ -1,19 +1,25 @@
 package kvv.heliostat.client;
 
-import kvv.heliostat.client.chart.Chart;
+import kvv.gwtutils.client.Callback;
+import kvv.gwtutils.client.CaptPanel;
+import kvv.gwtutils.client.Gap;
+import kvv.gwtutils.client.HorPanel;
+import kvv.gwtutils.client.TextFieldView;
+import kvv.gwtutils.client.VertPanel;
+import kvv.gwtutils.client.login.LoginPanel;
 import kvv.heliostat.client.chart.TimeChart;
-import kvv.heliostat.client.panel.CaptPanel;
-import kvv.heliostat.client.panel.HorPanel;
-import kvv.heliostat.client.panel.VertPanel;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.MotorId;
 import kvv.heliostat.shared.Params.AutoMode;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RadioButton;
@@ -93,6 +99,34 @@ public class MainView extends Composite implements View {
 				}
 			});
 
+	
+	private TextFieldView refreshPeriod = new TextFieldView("Refresh (ms):", 120,
+			40) {
+		
+		String speriod = Cookies.getCookie(Heliostat.REFRESH_PERIOD);
+		{
+			text.setText(speriod);
+		}
+		@Override
+		protected void onClick(ClickEvent event) {
+			try {
+				int period = Integer.parseInt(text.getText());
+				if(period < 0 && period > 10000)
+					return;
+				speriod = text.getText();
+				Cookies.setCookie(Heliostat.REFRESH_PERIOD, speriod);
+				model.stop();
+				model.start();
+			} finally {
+				text.setText(speriod);
+			}
+			
+			Cookies.setCookie(Heliostat.REFRESH_PERIOD, speriod);
+		}
+	};
+
+	
+	
 	public MainView(final Model model) {
 		this.model = model;
 
@@ -140,7 +174,7 @@ public class MainView extends Composite implements View {
 		Widget settingsPanel = new CaptPanel("Settings", new VertPanel(
 				HasHorizontalAlignment.ALIGN_RIGHT, stepsPerDegreeAz,
 				stepsPerDegreeAlt, stepRate, azRange, azCalibr, altRange,
-				altCalibr));
+				altCalibr, refreshPeriod));
 
 		Widget dateTime = new HorPanel(false, 10, date, time);
 
@@ -158,7 +192,16 @@ public class MainView extends Composite implements View {
 				new VertPanel(autoPanel, sensorPanel), motorsPanel,
 				settingsPanel);
 
-		Panel p = new HorPanel(new VertPanel(dateTime, centralPanel,
+		LoginPanel loginPanel = new LoginPanel();
+		
+		HorizontalPanel hp1 = new HorizontalPanel();
+		hp1.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		hp1.add(dateTime);
+		hp1.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+		hp1.add(loginPanel);
+		hp1.setWidth("100%");
+		
+		Panel p = new HorPanel(new VertPanel(hp1, centralPanel,
 				azMotPanel, altMotPanel, new Gap(6, 6), motorsChart, new Gap(6,
 						6), anglesChart), controlView);
 

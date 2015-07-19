@@ -1,6 +1,9 @@
 package kvv.heliostat.client;
 
-import kvv.heliostat.client.panel.HorPanel;
+import kvv.gwtutils.client.Callback;
+import kvv.gwtutils.client.Gap;
+import kvv.gwtutils.client.HorPanel;
+import kvv.gwtutils.client.TextFieldView;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.MotorId;
 import kvv.heliostat.shared.MotorState;
@@ -9,8 +12,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.Label;
 
 public class MotorRawView extends Composite implements View {
 

@@ -1,6 +1,6 @@
 package kvv.heliostat.client.chart;
 
-import kvv.heliostat.client.Callback;
+import kvv.gwtutils.client.Callback;
 import kvv.heliostat.client.HeliostatService;
 import kvv.heliostat.client.HeliostatServiceAsync;
 import kvv.heliostat.client.Model;

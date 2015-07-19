@@ -1,8 +1,9 @@
 package kvv.heliostat.client;
 
+import kvv.gwtutils.client.Gap;
+import kvv.gwtutils.client.VertPanel;
 import kvv.heliostat.client.chart.Chart;
 import kvv.heliostat.client.chart.ChartData;
-import kvv.heliostat.client.panel.VertPanel;
 import kvv.heliostat.shared.math.MirrorAngles;
 import kvv.heliostat.shared.spline.Function;
 
@@ -17,7 +18,7 @@ public class AnglesTest extends Composite {
 		};
 	};
 
-	Chart chart = new Chart(1000, 600, 0, 24, 1, -180, 180, 10, new double[] {
+	Chart chart = new Chart(1000, 600, 5, 19, 1, -180, 180, 10, new double[] {
 			-90, 0, 90 });
 
 	{
