@@ -28,8 +28,6 @@ public class FunctionFactory {
 			double e) {
 
 		double y1 = f.value(x1);
-		if(x2 == 60)
-			x2 = x2;
 		double y2 = f.value(x2);
 		for (;;) {
 			if (y > y1 && y > y2 || y < y1 && y < y2)
