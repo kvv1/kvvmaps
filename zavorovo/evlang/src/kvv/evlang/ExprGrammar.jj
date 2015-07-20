@@ -14,6 +14,7 @@ package kvv.evlang;
 import java.io.*;
 import kvv.stdutils.Utils;
 
+@SuppressWarnings("unused")
 public abstract class EXPR
 {
   public EXPR(String text)

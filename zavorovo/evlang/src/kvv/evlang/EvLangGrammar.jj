@@ -16,6 +16,7 @@ import kvv.evlang.impl.Locals.Local;
 import kvv.controller.register.*;
 import kvv.stdutils.Utils;
 
+@SuppressWarnings("unused")
 public abstract class EG1 extends EG
 {
   public EG1(String fileName) throws FileNotFoundException
