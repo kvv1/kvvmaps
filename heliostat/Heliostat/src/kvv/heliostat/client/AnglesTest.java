@@ -2,10 +2,10 @@ package kvv.heliostat.client;
 
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.VertPanel;
-import kvv.heliostat.client.chart.Chart;
-import kvv.heliostat.client.chart.ChartData;
+import kvv.gwtutils.client.chart.Chart;
+import kvv.gwtutils.client.chart.ChartData;
 import kvv.heliostat.shared.math.MirrorAngles;
-import kvv.heliostat.shared.spline.Function;
+import kvv.simpleutils.spline.Function;
 
 import com.google.gwt.user.client.ui.Composite;
 

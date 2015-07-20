@@ -1,10 +1,10 @@
 package kvv.controllers.client.control.simple;
 
+import kvv.controller.register.AllRegs;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.page.ModePage;
-import kvv.controllers.register.AllRegs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

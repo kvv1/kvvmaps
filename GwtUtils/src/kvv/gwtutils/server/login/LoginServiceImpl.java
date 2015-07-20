@@ -5,9 +5,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
-import kvv.gwtutils.client.MD5;
 import kvv.gwtutils.client.login.AuthException;
 import kvv.gwtutils.client.login.LoginService;
+import kvv.simpleutils.src.MD5;
 
 @SuppressWarnings("serial")
 public class LoginServiceImpl extends LoginServlet implements LoginService {

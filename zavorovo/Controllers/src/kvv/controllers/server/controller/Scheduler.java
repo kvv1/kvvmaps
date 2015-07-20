@@ -17,7 +17,7 @@ import kvv.controllers.shared.RegisterSchedule.State;
 import kvv.controllers.shared.Schedule;
 import kvv.controllers.shared.UnitDescr;
 import kvv.controllers.utils.Constants;
-import kvv.controllers.utils.Utils;
+import kvv.stdutils.Utils;
 
 public class Scheduler {
 	private final IController wrapped;

@@ -2,7 +2,7 @@
 /* JavaCCOptions:KEEP_LINE_COL=null */
 package kvv.evlang;
 
-import kvv.controllers.utils.Utils;
+import kvv.stdutils.Utils;
 
 /**
  * This exception is thrown when parse errors are encountered. You can

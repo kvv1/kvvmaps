@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import kvv.controller.register.AllRegs;
+import kvv.controller.register.RegisterUI;
 import kvv.controllers.controller.IController;
-import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.RegisterUI;
 import kvv.controllers.server.Controllers;
 
 public class ControllerWrapperGlobals extends ControllerAdapter {

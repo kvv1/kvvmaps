@@ -13,8 +13,8 @@ import java.io.*;
 import java.util.*;
 import kvv.evlang.impl.*;
 import kvv.evlang.impl.Locals.Local;
-import kvv.controllers.register.*;
-import kvv.controllers.utils.Utils;
+import kvv.controller.register.*;
+import kvv.stdutils.Utils;
 
 public abstract class EG1 extends EG
 {

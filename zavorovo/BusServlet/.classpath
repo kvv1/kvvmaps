@@ -11,5 +11,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="D:/Tomcat 7.0/lib/RXTXcomm.jar"/>
 	<classpathentry kind="lib" path="D:/Tomcat 7.0/lib/servlet-api.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/StdUtils"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/SimpleUtils"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

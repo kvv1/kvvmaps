@@ -1,10 +1,10 @@
 package kvv.heliostat.client;
 
-import kvv.heliostat.client.chart.Chart;
-import kvv.heliostat.client.chart.ChartData;
+import kvv.gwtutils.client.chart.Chart;
+import kvv.gwtutils.client.chart.ChartData;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.environment.Environment;
-import kvv.heliostat.shared.spline.FunctionFactory;
+import kvv.simpleutils.spline.FunctionFactory;
 
 public class MotorsChart extends Chart implements View{
 	public double[][] azData = new double[][] { new double[0], new double[0] };

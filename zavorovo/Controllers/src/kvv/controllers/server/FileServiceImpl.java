@@ -1,10 +1,10 @@
 package kvv.controllers.server;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
 import kvv.controllers.client.FileService;
 import kvv.controllers.utils.Constants;
-import kvv.controllers.utils.Utils;
+import kvv.stdutils.Utils;
+
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")
 public class FileServiceImpl extends RemoteServiceServlet implements

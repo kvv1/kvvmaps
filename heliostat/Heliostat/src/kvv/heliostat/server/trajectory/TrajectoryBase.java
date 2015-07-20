@@ -1,9 +1,9 @@
 package kvv.heliostat.server.trajectory;
 
 import kvv.heliostat.server.Heliostat;
-import kvv.heliostat.shared.PtD;
-import kvv.heliostat.shared.PtI;
 import kvv.heliostat.shared.Params.AutoMode;
+import kvv.simpleutils.src.PtD;
+import kvv.simpleutils.src.PtI;
 
 public abstract class TrajectoryBase implements Trajectory {
 

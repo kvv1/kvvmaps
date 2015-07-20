@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import kvv.controller.register.AllRegs;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
-import kvv.controllers.register.AllRegs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;

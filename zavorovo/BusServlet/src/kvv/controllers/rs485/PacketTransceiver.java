@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kvv.controllers.controller.BusLogger;
-import kvv.controllers.utils.Utils;
+import kvv.stdutils.Utils;
 
 public class PacketTransceiver {
 	private final static int BAUD = 9600;

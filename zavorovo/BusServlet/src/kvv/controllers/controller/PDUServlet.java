@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import kvv.controllers.utils.Utils;
+import kvv.stdutils.Utils;
 
 import com.google.gson.Gson;
 

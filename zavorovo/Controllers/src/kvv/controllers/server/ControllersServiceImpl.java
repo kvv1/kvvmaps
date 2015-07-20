@@ -8,18 +8,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import kvv.controller.register.AllRegs;
+import kvv.controller.register.Rule;
 import kvv.controllers.client.ControllersService;
-import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.Rule;
 import kvv.controllers.server.context.Context;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.Statistics;
 import kvv.controllers.utils.Constants;
-import kvv.controllers.utils.Utils;
 import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
 import kvv.evlang.Token;
 import kvv.evlang.impl.ExtRegisterDescr;
+import kvv.stdutils.Utils;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 

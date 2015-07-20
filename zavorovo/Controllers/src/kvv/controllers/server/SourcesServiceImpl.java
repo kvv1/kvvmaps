@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import kvv.controllers.client.SourcesService;
 import kvv.controllers.utils.Constants;
-import kvv.controllers.utils.Utils;
+import kvv.stdutils.Utils;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 

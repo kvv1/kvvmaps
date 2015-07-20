@@ -1,10 +1,10 @@
 package kvv.heliostat.client;
 
-import kvv.heliostat.client.chart.ChartData;
+import kvv.gwtutils.client.chart.ChartData;
 import kvv.heliostat.client.chart.TimeChart;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.environment.Environment;
-import kvv.heliostat.shared.spline.Function;
+import kvv.simpleutils.spline.Function;
 
 public class AnglesChart extends TimeChart {
 

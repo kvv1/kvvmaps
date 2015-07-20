@@ -2,8 +2,8 @@ package kvv.heliostat.server;
 
 import java.io.IOException;
 
-import kvv.gwtutils.server.Utils;
 import kvv.heliostat.shared.Weather;
+import kvv.stdutils.Utils;
 
 public class SimEnvironment {
 	private static final String WEATHER_FILE = "c:/heliostat/weather.json";

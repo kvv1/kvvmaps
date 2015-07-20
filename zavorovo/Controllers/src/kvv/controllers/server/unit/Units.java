@@ -11,12 +11,12 @@ import kvv.controllers.server.context.Context;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.UnitDescr;
 import kvv.controllers.utils.Constants;
-import kvv.controllers.utils.Utils;
 import kvv.evlang.EG1;
 import kvv.evlang.ParseException;
 import kvv.evlang.impl.ExtRegisterDescr;
 import kvv.evlang.rt.RTContext;
 import kvv.evlang.rt.VM;
+import kvv.stdutils.Utils;
 
 public class Units {
 

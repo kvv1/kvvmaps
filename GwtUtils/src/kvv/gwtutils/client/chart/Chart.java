@@ -1,4 +1,4 @@
-package kvv.heliostat.client.chart;
+package kvv.gwtutils.client.chart;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;

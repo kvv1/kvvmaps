@@ -7,8 +7,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import kvv.controllers.rs485.PacketTransceiver;
-import kvv.controllers.utils.ADU;
-import kvv.controllers.utils.PDU;
 
 public class ADUTransceiver {
 	private static Set<Integer> failedAddrs = new HashSet<Integer>();

@@ -6,9 +6,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import kvv.controller.register.AllRegs;
 import kvv.controllers.controller.IController;
 import kvv.controllers.history.HistoryFile;
-import kvv.controllers.register.AllRegs;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.RegisterDescr;
 

@@ -3,7 +3,7 @@ package kvv.gwtutils.client.login;
 import java.util.Date;
 
 import kvv.gwtutils.client.Callback;
-import kvv.gwtutils.client.MD5;
+import kvv.simpleutils.src.MD5;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

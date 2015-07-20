@@ -1,7 +1,7 @@
 package kvv.heliostat.shared.math;
 
-import kvv.heliostat.shared.PtD;
-import kvv.heliostat.shared.spline.FunctionFactory;
+import kvv.simpleutils.spline.FunctionFactory;
+import kvv.simpleutils.src.PtD;
 
 public class MirrorAngles {
 

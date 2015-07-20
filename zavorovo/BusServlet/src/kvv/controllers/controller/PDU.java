@@ -1,4 +1,4 @@
-package kvv.controllers.utils;
+package kvv.controllers.controller;
 
 public class PDU {
 	public byte[] data;

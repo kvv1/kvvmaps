@@ -3,8 +3,7 @@ package kvv.heliostat.server;
 import java.io.File;
 import java.io.IOException;
 
-import kvv.gwtutils.server.Utils;
-import kvv.heliostat.server.controller.Controller;
+import kvv.controllers.controller.Controller;
 import kvv.heliostat.server.motor.Motor;
 import kvv.heliostat.server.motor.MotorRawSim;
 import kvv.heliostat.server.sensor.Sensor;
@@ -16,9 +15,10 @@ import kvv.heliostat.shared.MotorId;
 import kvv.heliostat.shared.MotorState;
 import kvv.heliostat.shared.Params;
 import kvv.heliostat.shared.Params.AutoMode;
-import kvv.heliostat.shared.PtI;
 import kvv.heliostat.shared.SensorState;
 import kvv.heliostat.shared.Weather;
+import kvv.simpleutils.src.PtI;
+import kvv.stdutils.Utils;
 
 public class Heliostat {
 

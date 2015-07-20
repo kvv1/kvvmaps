@@ -3,14 +3,14 @@ package kvv.heliostat.server.trajectory;
 import java.io.IOException;
 import java.util.List;
 
-import kvv.gwtutils.server.Utils;
 import kvv.heliostat.server.Time;
 import kvv.heliostat.server.trajectory.ValueMap.ValueMapEntry;
-import kvv.heliostat.shared.PtD;
-import kvv.heliostat.shared.PtI;
 import kvv.heliostat.shared.environment.Environment;
-import kvv.heliostat.shared.spline.Function;
-import kvv.heliostat.shared.spline.FunctionFactory;
+import kvv.simpleutils.spline.Function;
+import kvv.simpleutils.spline.FunctionFactory;
+import kvv.simpleutils.src.PtD;
+import kvv.simpleutils.src.PtI;
+import kvv.stdutils.Utils;
 
 public class TrajectoryImpl extends TrajectoryBase {
 

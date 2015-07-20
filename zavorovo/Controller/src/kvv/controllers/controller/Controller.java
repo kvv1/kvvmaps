@@ -18,12 +18,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.Operation;
-import kvv.controllers.register.RegType;
-import kvv.controllers.register.RegisterUI;
-import kvv.controllers.register.Rule;
-import kvv.controllers.utils.CRC16;
+import kvv.controller.register.AllRegs;
+import kvv.controller.register.Operation;
+import kvv.controller.register.RegType;
+import kvv.controller.register.RegisterUI;
+import kvv.controller.register.Rule;
+import kvv.simpleutils.src.CRC16;
 
 import com.google.gson.Gson;
 

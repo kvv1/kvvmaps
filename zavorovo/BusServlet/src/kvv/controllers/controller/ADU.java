@@ -1,6 +1,8 @@
-package kvv.controllers.utils;
+package kvv.controllers.controller;
 
 import java.util.Arrays;
+
+import kvv.simpleutils.src.CRC16;
 
 public class ADU {
 	public final int addr;

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import kvv.controllers.register.ControllerDef;
+import kvv.controller.register.ControllerDef;
 import kvv.controllers.server.context.Context;
 import kvv.controllers.server.controller.ControllerNotFoundException;
 import kvv.controllers.shared.ControllerDescr;
@@ -16,7 +16,7 @@ import kvv.controllers.shared.ControllerType;
 import kvv.controllers.shared.ControllerUI;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.utils.Constants;
-import kvv.controllers.utils.Utils;
+import kvv.stdutils.Utils;
 
 public class Controllers {
 	private final Map<String, ControllerDescr> nameMap = new HashMap<String, ControllerDescr>();

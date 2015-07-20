@@ -4,7 +4,7 @@ import kvv.gwtutils.client.Callback;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.MotorId;
 import kvv.heliostat.shared.environment.Environment;
-import kvv.heliostat.shared.spline.FunctionFactory;
+import kvv.simpleutils.spline.FunctionFactory;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;

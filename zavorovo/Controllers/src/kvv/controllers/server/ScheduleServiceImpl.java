@@ -11,7 +11,7 @@ import kvv.controllers.server.controller.Scheduler;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
 import kvv.controllers.shared.ScheduleAndHistory;
-import kvv.controllers.utils.Utils;
+import kvv.stdutils.Utils;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 

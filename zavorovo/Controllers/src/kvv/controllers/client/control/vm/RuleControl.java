@@ -3,15 +3,15 @@ package kvv.controllers.client.control.vm;
 import java.util.ArrayList;
 import java.util.List;
 
+import kvv.controller.register.AllRegs;
+import kvv.controller.register.ControllerDef;
+import kvv.controller.register.Operation;
+import kvv.controller.register.Rule;
 import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.page.ModePage;
-import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.ControllerDef;
-import kvv.controllers.register.Operation;
-import kvv.controllers.register.Rule;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

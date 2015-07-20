@@ -3,8 +3,8 @@ package kvv.controllers.controller;
 import java.io.IOException;
 import java.io.InputStream;
 
-import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.Rule;
+import kvv.controller.register.AllRegs;
+import kvv.controller.register.Rule;
 
 public interface IController {
 

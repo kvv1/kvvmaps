@@ -1,7 +1,7 @@
 package kvv.controllers.client;
 
-import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.Rule;
+import kvv.controller.register.AllRegs;
+import kvv.controller.register.Rule;
 import kvv.controllers.shared.Statistics;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;

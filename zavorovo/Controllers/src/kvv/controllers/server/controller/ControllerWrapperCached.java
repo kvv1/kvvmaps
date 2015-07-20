@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import kvv.controller.register.AllRegs;
 import kvv.controllers.controller.IController;
-import kvv.controllers.register.AllRegs;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.ControllerDescr;
 

@@ -11,7 +11,7 @@
   <!--<inherits name='com.google.gwt.user.theme.dark.Dark'/>-->
 
   <!-- Other module inherits                                      -->
-  <inherits name='kvv.controllers.Constants'/>
+  <inherits name='kvv.controller.ControllerRegisters'/>
   <inherits name='kvv.controllers.History'/>
 
   <!-- Specify the app entry point class.                         -->

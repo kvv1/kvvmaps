@@ -1,5 +1,7 @@
 package kvv.controllers.client.control.vm;
 
+import kvv.controller.register.AllRegs;
+import kvv.controller.register.ControllerDef;
 import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
@@ -10,8 +12,6 @@ import kvv.controllers.client.control.simple.GetRegControl;
 import kvv.controllers.client.control.simple.GetSetRegControl;
 import kvv.controllers.client.control.simple.SimpleRelayControl;
 import kvv.controllers.client.page.ModePage;
-import kvv.controllers.register.AllRegs;
-import kvv.controllers.register.ControllerDef;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

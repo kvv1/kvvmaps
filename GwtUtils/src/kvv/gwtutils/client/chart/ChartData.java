@@ -1,6 +1,6 @@
-package kvv.heliostat.client.chart;
+package kvv.gwtutils.client.chart;
 
-import kvv.heliostat.shared.spline.Function;
+import kvv.simpleutils.spline.Function;
 
 public class ChartData {
 

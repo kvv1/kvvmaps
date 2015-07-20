@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import kvv.controllers.register.ControllerDef;
-import kvv.controllers.register.RegType;
-import kvv.controllers.register.RegisterUI;
+import kvv.controller.register.ControllerDef;
+import kvv.controller.register.RegType;
+import kvv.controller.register.RegisterUI;
 import kvv.controllers.utils.Constants;
-import kvv.controllers.utils.Utils;
 import kvv.evlang.ParseException;
+import kvv.stdutils.Utils;
 
 public class Registers {
 	protected Map<String, RegisterDescr> registers = new LinkedHashMap<String, RegisterDescr>();

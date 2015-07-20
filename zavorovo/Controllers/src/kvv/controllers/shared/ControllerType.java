@@ -2,7 +2,7 @@ package kvv.controllers.shared;
 
 import java.io.Serializable;
 
-import kvv.controllers.register.ControllerDef;
+import kvv.controller.register.ControllerDef;
 
 @SuppressWarnings("serial")
 public class ControllerType implements Serializable{

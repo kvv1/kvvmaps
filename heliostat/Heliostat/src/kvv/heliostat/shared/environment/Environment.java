@@ -1,8 +1,8 @@
 package kvv.heliostat.shared.environment;
 
 import kvv.heliostat.shared.math.MirrorAngles;
-import kvv.heliostat.shared.spline.Function;
-import kvv.heliostat.shared.spline.FunctionFactory;
+import kvv.simpleutils.spline.Function;
+import kvv.simpleutils.spline.FunctionFactory;
 
 public class Environment {
 

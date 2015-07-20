@@ -5,9 +5,9 @@ import kvv.heliostat.server.Time;
 import kvv.heliostat.server.motor.MotorRawSim;
 import kvv.heliostat.shared.SensorState;
 import kvv.heliostat.shared.environment.Environment;
-import kvv.heliostat.shared.spline.Function;
-import kvv.heliostat.shared.spline.FunctionFactory;
-import kvv.heliostat.shared.spline.SplineInterpolator;
+import kvv.simpleutils.spline.Function;
+import kvv.simpleutils.spline.FunctionFactory;
+import kvv.simpleutils.spline.SplineInterpolator;
 
 public class SensorSim implements Sensor {
 
