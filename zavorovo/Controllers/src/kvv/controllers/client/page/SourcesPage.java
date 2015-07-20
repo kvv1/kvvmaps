@@ -1,9 +1,9 @@
 package kvv.controllers.client.page;
 
-import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.SourcesService;
 import kvv.controllers.client.SourcesServiceAsync;
 import kvv.controllers.client.page.source.SourcePage;
+import kvv.gwtutils.client.CallbackAdapter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

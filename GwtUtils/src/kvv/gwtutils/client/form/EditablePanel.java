@@ -1,4 +1,4 @@
-package kvv.controllers.client.control.form;
+package kvv.gwtutils.client.form;
 
 import java.util.ArrayList;
 import java.util.List;

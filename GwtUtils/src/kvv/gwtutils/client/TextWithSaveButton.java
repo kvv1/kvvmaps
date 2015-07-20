@@ -1,7 +1,4 @@
-package kvv.controllers.client.control.simple;
-
-import kvv.controllers.client.CallbackAdapter;
-import kvv.controllers.client.page.source.ExtendedTextArea;
+package kvv.gwtutils.client;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

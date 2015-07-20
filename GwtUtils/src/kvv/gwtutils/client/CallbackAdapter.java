@@ -1,4 +1,4 @@
-package kvv.controllers.client;
+package kvv.gwtutils.client;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;

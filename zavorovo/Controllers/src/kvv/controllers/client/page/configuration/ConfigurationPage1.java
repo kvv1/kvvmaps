@@ -3,18 +3,18 @@ package kvv.controllers.client.page.configuration;
 import java.util.HashSet;
 import java.util.List;
 
-import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ConfigurationService;
 import kvv.controllers.client.ConfigurationServiceAsync;
 import kvv.controllers.client.Controllers;
-import kvv.controllers.client.control.form.CaptPanel;
-import kvv.controllers.client.control.form.HorPanel;
-import kvv.controllers.client.control.form.PanelWithButton;
-import kvv.controllers.client.control.form.VertPanel;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.UnitDescr;
+import kvv.gwtutils.client.CallbackAdapter;
+import kvv.gwtutils.client.CaptPanel;
+import kvv.gwtutils.client.HorPanel;
+import kvv.gwtutils.client.VertPanel;
+import kvv.gwtutils.client.form.PanelWithButton;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Composite;

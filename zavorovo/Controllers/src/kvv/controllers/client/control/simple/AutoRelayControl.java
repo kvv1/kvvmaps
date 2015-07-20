@@ -3,7 +3,6 @@ package kvv.controllers.client.control.simple;
 import java.util.ArrayList;
 
 import kvv.controller.register.AllRegs;
-import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.control.ChildComposite;
@@ -13,6 +12,7 @@ import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.RegisterSchedule.State;
+import kvv.gwtutils.client.CallbackAdapter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.MouseMoveHandler;

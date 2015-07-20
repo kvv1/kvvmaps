@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.Controllers;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.Statistics;
 import kvv.controllers.shared.Statistics.AddrStaistics;
+import kvv.gwtutils.client.CallbackAdapter;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;

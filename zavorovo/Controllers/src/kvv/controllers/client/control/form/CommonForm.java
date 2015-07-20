@@ -12,6 +12,8 @@ import kvv.controllers.client.control.vm.RuleControl;
 import kvv.controllers.client.control.vm.VMControl;
 import kvv.controllers.shared.ControllerType;
 import kvv.controllers.shared.ControllerUI;
+import kvv.gwtutils.client.DetPanel;
+import kvv.gwtutils.client.form.UploadForm;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

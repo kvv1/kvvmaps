@@ -1,4 +1,4 @@
-package kvv.controllers.client.page.source;
+package kvv.gwtutils.client;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;

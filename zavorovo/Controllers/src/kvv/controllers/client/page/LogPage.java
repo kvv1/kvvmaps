@@ -1,8 +1,8 @@
 package kvv.controllers.client.page;
 
-import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.LogService;
 import kvv.controllers.client.LogServiceAsync;
+import kvv.gwtutils.client.CallbackAdapter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

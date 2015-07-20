@@ -2,20 +2,20 @@ package kvv.controllers.client.page;
 
 import java.util.Date;
 
-import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.Controllers;
 import kvv.controllers.client.UnitService;
 import kvv.controllers.client.UnitServiceAsync;
 import kvv.controllers.client.control.ControlCompositeWithDiagrams;
 import kvv.controllers.client.control.simple.AutoRelayControl;
 import kvv.controllers.client.control.simple.ControllerUIForm;
-import kvv.controllers.client.control.simple.TextWithSaveButton;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerType;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.ScriptData;
 import kvv.controllers.shared.UnitDescr;
+import kvv.gwtutils.client.CallbackAdapter;
+import kvv.gwtutils.client.TextWithSaveButton;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

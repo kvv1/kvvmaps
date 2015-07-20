@@ -1,9 +1,9 @@
 package kvv.controllers.client.control.simple;
 
-import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.page.ModePage;
+import kvv.gwtutils.client.CallbackAdapter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

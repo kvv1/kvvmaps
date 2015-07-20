@@ -10,5 +10,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/History"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/vm"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/StdUtils"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/GwtUtils"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

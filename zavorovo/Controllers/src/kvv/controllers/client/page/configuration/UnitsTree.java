@@ -3,11 +3,11 @@ package kvv.controllers.client.page.configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import kvv.controllers.client.control.form.DetPanel;
-import kvv.controllers.client.control.form.EditablePanel;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.UnitDescr;
+import kvv.gwtutils.client.DetPanel;
+import kvv.gwtutils.client.form.EditablePanel;
 
 public class UnitsTree
 		extends

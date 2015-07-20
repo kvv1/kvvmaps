@@ -1,11 +1,11 @@
 package kvv.controllers.client.page;
 
-import kvv.controllers.client.CallbackAdapter;
 import kvv.controllers.client.ConfigurationService;
 import kvv.controllers.client.ConfigurationServiceAsync;
 import kvv.controllers.client.Controllers;
-import kvv.controllers.client.control.simple.TextWithSaveButton;
 import kvv.controllers.client.page.configuration.ConfigurationPage1;
+import kvv.gwtutils.client.CallbackAdapter;
+import kvv.gwtutils.client.TextWithSaveButton;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

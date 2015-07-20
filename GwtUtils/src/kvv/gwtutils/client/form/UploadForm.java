@@ -1,4 +1,4 @@
-package kvv.controllers.client.control.form;
+package kvv.gwtutils.client.form;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
