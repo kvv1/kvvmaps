@@ -1,8 +1,5 @@
 package kvv.controllers.controller;
 
-import gnu.io.CommPortIdentifier;
-import gnu.io.NoSuchPortException;
-
 import java.io.IOException;
 
 import javax.servlet.ServletContextEvent;
