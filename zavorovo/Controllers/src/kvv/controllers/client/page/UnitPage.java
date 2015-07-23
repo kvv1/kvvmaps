@@ -3,8 +3,6 @@ package kvv.controllers.client.page;
 import java.util.Date;
 
 import kvv.controllers.client.Controllers;
-import kvv.controllers.client.UnitService;
-import kvv.controllers.client.UnitServiceAsync;
 import kvv.controllers.client.control.ControlCompositeWithDiagrams;
 import kvv.controllers.client.control.simple.AutoRelayControl;
 import kvv.controllers.client.control.simple.ControllerUIForm;
@@ -12,25 +10,18 @@ import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerType;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
-import kvv.controllers.shared.ScriptData;
 import kvv.controllers.shared.UnitDescr;
-import kvv.gwtutils.client.CallbackAdapter;
-import kvv.gwtutils.client.TextWithSaveButton;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class UnitPage extends ControlCompositeWithDiagrams {
-	private final UnitServiceAsync unitService = GWT.create(UnitService.class);
 	private final RadioButton historyOff = new RadioButton("history"
 			+ hashCode(), "Выкл");
 	private final RadioButton historyToday = new RadioButton("history"
@@ -38,32 +29,7 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 	private final RadioButton historyYesterday = new RadioButton("history"
 			+ hashCode(), "Вчера");
 
-	private final Label errMsg = new Label();
-	private final CheckBox vmCB = new CheckBox();
 	private final UnitDescr unit;
-
-	private final TextWithSaveButton script = new TextWithSaveButton("",
-			"100%", "400px") {
-		@Override
-		protected void save(final String text,
-				final AsyncCallback<Void> callback) {
-			unitService.savePageScript(unit.name, text,
-					new AsyncCallback<Void>() {
-
-						@Override
-						public void onFailure(Throwable caught) {
-							callback.onFailure(caught);
-							refreshScript();
-						}
-
-						@Override
-						public void onSuccess(Void result) {
-							callback.onSuccess(result);
-							refreshScript();
-						}
-					});
-		}
-	};
 
 	public UnitPage(final UnitDescr unit) {
 		this.unit = unit;
@@ -144,30 +110,6 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 			}
 		}
 
-		vmCB.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				unitService.enableScript(unit.name, vmCB.getValue(),
-						new CallbackAdapter<Void>() {
-							@Override
-							public void onSuccess(Void result) {
-								refreshScript();
-							}
-
-							@Override
-							public void onFailure(Throwable caught) {
-								refreshScript();
-							}
-						});
-			}
-		});
-
-		panel.add(vmCB);
-		panel.add(errMsg);
-
-		script.setWidth("100%");
-		panel.add(script);
-
 		initWidget(panel);
 		refresh();
 	}
@@ -176,22 +118,6 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 	public void refresh() {
 		super.refresh();
 		refreshDiagrams();
-		refreshScript();
-	}
-
-	private void refreshScript() {
-		unitService.getScriptData(unit.name, new CallbackAdapter<ScriptData>() {
-			@Override
-			public void onSuccess(ScriptData result) {
-				script.setText(result.text);
-				errMsg.setText(result.err);
-				vmCB.setValue(result.enabled);
-			}
-
-			@Override
-			public void onFailure(Throwable caught) {
-			}
-		});
 	}
 
 	@SuppressWarnings("deprecation")

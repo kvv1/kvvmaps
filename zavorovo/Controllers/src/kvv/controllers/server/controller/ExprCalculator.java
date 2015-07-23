@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import kvv.controllers.server.context.Context;
 import kvv.controllers.shared.RegisterDescr;
-import kvv.evlang.EXPR;
-import kvv.evlang.ParseException;
-import kvv.evlang.TokenMgrError;
+import kvv.exprcalc.EXPR;
+import kvv.exprcalc.ParseException;
+import kvv.exprcalc.TokenMgrError;
 
 public class ExprCalculator extends EXPR {
 

@@ -28,16 +28,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>unitServlet</servlet-name>
-		<servlet-class>kvv.controllers.server.UnitServiceImpl</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>unitServlet</servlet-name>
-		<url-pattern>/controllers/unit</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>scheduleServlet</servlet-name>
 		<servlet-class>kvv.controllers.server.ScheduleServiceImpl</servlet-class>
 	</servlet>
@@ -65,16 +55,6 @@
 	<servlet-mapping>
 		<servlet-name>fileServlet</servlet-name>
 		<url-pattern>/controllers/file</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>sourcesServlet</servlet-name>
-		<servlet-class>kvv.controllers.server.SourcesServiceImpl</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>sourcesServlet</servlet-name>
-		<url-pattern>/controllers/sources</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

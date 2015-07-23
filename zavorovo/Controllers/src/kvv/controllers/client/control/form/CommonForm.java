@@ -9,7 +9,6 @@ import kvv.controllers.client.control.simple.GetSetRegControl;
 import kvv.controllers.client.control.simple.GetSetRegControl2;
 import kvv.controllers.client.control.simple.SimpleRelayControl;
 import kvv.controllers.client.control.vm.RuleControl;
-import kvv.controllers.client.control.vm.VMControl;
 import kvv.controllers.shared.ControllerType;
 import kvv.controllers.shared.ControllerUI;
 import kvv.gwtutils.client.DetPanel;
@@ -134,10 +133,6 @@ public class CommonForm extends ControlComposite {
 			});
 
 			return helloButton;
-		case VM:
-			VMControl vmControl = new VMControl(addr, name, controllerType.def);
-			add(vmControl);
-			return vmControl;
 		case RULES:
 			RuleControl rc = new RuleControl(addr, controllerType.def);
 			//add(rc);

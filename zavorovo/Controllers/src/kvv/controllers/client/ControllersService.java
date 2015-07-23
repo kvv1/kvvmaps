@@ -15,10 +15,6 @@ public interface ControllersService extends RemoteService {
 
 	AllRegs getRegs(int addr) throws Exception;
 
-	String upload(int addr, String name);
-
-	void vmInit(int addr) throws Exception;
-
 	Integer hello(int addr) throws Exception;
 
 	Rule[] getRules(int addr) throws Exception;

@@ -42,7 +42,6 @@ public class Context {
 
 	private void close() {
 		scheduler.close();
-		units.close();
 		controller.close();
 	}
 

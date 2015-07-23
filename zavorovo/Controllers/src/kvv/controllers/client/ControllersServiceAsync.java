@@ -14,10 +14,6 @@ public interface ControllersServiceAsync {
 
 	void getRegs(int addr, AsyncCallback<AllRegs> callback);
 
-	void upload(int addr, String name, AsyncCallback<String> callback);
-
-	void vmInit(int addr, AsyncCallback<Void> callback);
-
 	void hello(int addr, AsyncCallback<Integer> callback);
 
 	void getRules(int addr, AsyncCallback<Rule[]> callback);
