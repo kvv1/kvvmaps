@@ -1,5 +1,11 @@
 package kvv.aplayer;
 
+import kvv.aplayer.files.FilesSectionFragmentList;
+import kvv.aplayer.folders.FoldersSectionFragment;
+import kvv.aplayer.service.APService;
+import kvv.aplayer.service.APServiceListener;
+import kvv.aplayer.service.APServiceListenerAdapter;
+import kvv.aplayer.service.IAPService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +18,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -38,19 +45,17 @@ public class APActivity extends FragmentActivityX {
 
 	@Override
 	protected int getCount() {
-		return 3;
+		return 2;
 	}
 
 	@Override
 	protected Fragment getItem(int position) {
 		switch (position) {
 		case 0:
-			return new FilesSectionFragment();
+			return new FilesSectionFragmentList();
 		case 1:
 			return new FoldersSectionFragment();
 		case 2:
-			return new BookmarksSectionFragment();
-		case 3:
 			return new ChartsFragment();
 		}
 		return null;
@@ -65,8 +70,6 @@ public class APActivity extends FragmentActivityX {
 		case 1:
 			return "Folders";
 		case 2:
-			return "Bookmarks";
-		case 3:
 			return "Charts";
 		}
 		return null;
@@ -93,7 +96,7 @@ public class APActivity extends FragmentActivityX {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		startService(new Intent(this, APService.class));
 		bindService(new Intent(this, APService.class), conn,
 				Context.BIND_AUTO_CREATE);
@@ -133,10 +136,6 @@ public class APActivity extends FragmentActivityX {
 		switch (item.getItemId()) {
 		case R.id.action_exit:
 			exit();
-			return true;
-		case R.id.action_bookmark:
-			if (conn.service != null)
-				conn.service.addBookmark();
 			return true;
 		case R.id.action_update:
 			startActivity(new Intent(Intent.ACTION_VIEW,
@@ -250,5 +249,10 @@ public class APActivity extends FragmentActivityX {
 	public void _onBG() {
 		fg = false;
 		updateWakeLock();
+	}
+
+	public void selectMainPage() {
+		ViewPager pager = (ViewPager) findViewById(getPagerId());
+		pager.setCurrentItem(0, true);
 	}
 }

@@ -1,4 +1,4 @@
-package kvv.aplayer;
+package kvv.aplayer.folders;
 
 import java.io.File;
 

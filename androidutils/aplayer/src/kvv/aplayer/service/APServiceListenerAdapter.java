@@ -1,4 +1,4 @@
-package kvv.aplayer;
+package kvv.aplayer.service;
 
 public class APServiceListenerAdapter implements APServiceListener {
 

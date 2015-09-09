@@ -1,6 +1,8 @@
-package kvv.aplayer;
+package kvv.aplayer.service;
 
 import java.util.List;
+
+import kvv.aplayer.folders.Folder;
 
 
 public interface IAPService {
@@ -9,6 +11,7 @@ public interface IAPService {
 	void removeListener(APServiceListener listener);
 	int getCurrentFolder();
 	int getFile();
+	int getFileCnt();
 	void toFolder(int position);
 	void toFile(int position);
 	void prev();
@@ -18,10 +21,6 @@ public interface IAPService {
 	int getCurrentPosition();
 	void seek(int seekStep);
 	boolean isPlaying();
-	List<Bookmark> getBookmarks();
-	void addBookmark();
-	void delBookmark(Bookmark bookmark);
-	void toBookmark(Bookmark bookmark);
 	void toRandom(int position);
 	void setGain(int db);
 	void setComprIdx(int n);
@@ -29,4 +28,5 @@ public interface IAPService {
 	int getComprIdx();
 	void setDBPer100Idx(int n);
 	int getDBPer100Idx();
+	float getLevel();
 }

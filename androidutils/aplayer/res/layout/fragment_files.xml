@@ -9,22 +9,31 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:orientation="vertical" >
+        android:layout_alignParentTop="true" >
+
+        <ProgressBar
+            android:id="@+id/folderProgress"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom" />
 
         <TextView
             android:id="@+id/folder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#FFC0FFC0"
+            android:background="#80C0FFC0"
+            android:ellipsize="start"
+            android:gravity="center_horizontal"
+            android:singleLine="true"
             android:text="&lt;not selected>"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:textStyle="bold" />
-    </LinearLayout>
+    </FrameLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -39,6 +48,27 @@
             android:divider="#0000" >
         </ListView>
 
+        <LinearLayout
+            android:id="@+id/tapePanel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" >
+
+            <kvv.aplayer.files.TapeView
+                android:id="@+id/tape"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+            </kvv.aplayer.files.TapeView>
+
+            <kvv.aplayer.files.LevelView
+                android:id="@+id/level"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="3" >
+            </kvv.aplayer.files.LevelView>
+        </LinearLayout>
+
         <Button
             android:id="@+id/timing"
             android:layout_width="wrap_content"
@@ -52,7 +82,8 @@
         <RelativeLayout
             android:id="@+id/extButtons"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:visibility="gone" >
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -90,8 +121,8 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
                 android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
                 android:orientation="vertical" >
 
                 <Button
@@ -101,6 +132,7 @@
                     android:text="Compr On"
                     android:textSize="20sp"
                     android:textStyle="bold" />
+
                 <Button
                     android:id="@+id/speedOn"
                     android:layout_width="fill_parent"
@@ -150,7 +182,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:background="#FFFFFF" >
+            android:background="#FFFFFF"
+            android:visibility="gone" >
 
             <Button
                 android:id="@+id/goto1"
@@ -170,11 +203,28 @@
         android:layout_alignParentBottom="true"
         android:orientation="vertical" >
 
-        <ProgressBar
-            android:id="@+id/progress"
-            style="?android:attr/progressBarStyleHorizontal"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content" >
+
+            <ProgressBar
+                android:id="@+id/progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom" />
+
+            <TextView
+                android:id="@+id/progressText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="start"
+                android:gravity="center_horizontal"
+                android:singleLine="true"
+                android:text="asdf"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textStyle="bold" />
+        </FrameLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"

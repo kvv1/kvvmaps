@@ -1,7 +1,8 @@
-package kvv.aplayer;
+package kvv.aplayer.player;
 
 import java.util.List;
 
+import kvv.aplayer.folders.Folder;
 import android.media.audiofx.Equalizer;
 
 public abstract class Player1 extends Player {
@@ -17,14 +18,22 @@ public abstract class Player1 extends Player {
 	private volatile float dBPer100;
 	private volatile float speed;
 
+	private volatile float level;
+
 	public Player1(List<Folder> folders) {
 		super(folders);
-		compr = new Compressor(mp){
+		compr = new Compressor(mp) {
 			@Override
 			protected void setGain(float db) {
 				comprGain = db;
 				setEq();
-			}};
+			}
+
+			@Override
+			protected void onLevel(float v) {
+				level = v;
+			}
+		};
 		eq = new Equalizer(0, mp.getAudioSessionId());
 
 		nBands = eq.getNumberOfBands();
@@ -98,5 +107,9 @@ public abstract class Player1 extends Player {
 	@Override
 	protected void resetGain() {
 		compr.resetGain();
+	}
+
+	public float getLevel() {
+		return level;
 	}
 }

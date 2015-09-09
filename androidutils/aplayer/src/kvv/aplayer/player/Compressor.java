@@ -1,4 +1,4 @@
-package kvv.aplayer;
+package kvv.aplayer.player;
 
 import android.media.MediaPlayer;
 import android.media.audiofx.Visualizer;
@@ -7,7 +7,6 @@ import android.media.audiofx.Visualizer.OnDataCaptureListener;
 public abstract class Compressor {
 
 	private static final double MEAN = 90;
-
 
 	private MediaPlayer mp;
 
@@ -19,6 +18,8 @@ public abstract class Compressor {
 
 	protected abstract void setGain(float db);
 
+	protected abstract void onLevel(float v);
+
 	public Compressor(MediaPlayer mp) {
 		this.mp = mp;
 	}
@@ -27,7 +28,7 @@ public abstract class Compressor {
 		visualizer = new Visualizer(mp.getAudioSessionId());
 
 		visualizer.setDataCaptureListener(new OnDataCaptureListener2() {
-		}, 8000, true, false);
+		}, 16000, true, false);
 
 		visualizer.setEnabled(true);
 	}
@@ -42,12 +43,22 @@ public abstract class Compressor {
 		this.db = db;
 	}
 
+	private volatile boolean en;
+
 	public void setEnabled(boolean b) {
 		visualizer.setEnabled(b);
+		en = b;
+		if (!b) {
+			if (lpfLevel != null)
+				lpfLevel.set(0);
+			onLevel(0);
+		}
 	}
 
 	private LPF lpf;
 	private int sr;
+
+	private LPF lpfLevel;
 
 	class OnDataCaptureListener2 implements OnDataCaptureListener {
 
@@ -56,7 +67,9 @@ public abstract class Compressor {
 				int samplingRate) {
 
 			if (samplingRate != sr) {
+				System.out.println("sr=" + samplingRate);
 				lpf = new LPF(samplingRate / 1000, 0.01, 0.5);
+				lpfLevel = new LPF(samplingRate / 1000, 0.1, 0.1);
 				sr = samplingRate;
 			}
 
@@ -68,6 +81,8 @@ public abstract class Compressor {
 				// a *= gain;
 				max = Math.max(max, a);
 				lpf.add(a);
+				if (en)
+					lpfLevel.add(a);
 			}
 
 			double mean = lpf.get();
@@ -76,9 +91,11 @@ public abstract class Compressor {
 			if (gain > db)
 				gain = db;
 
-			setGain(gain);
+			onLevel((float) lpfLevel.get());
 
-			System.out.printf("m=%f g=%f\n", mean, gain);
+			// setGain(gain);
+
+			// System.out.printf("m=%f g=%f\n", mean, gain);
 
 			if (autoVol) {
 				setGain(gain);
@@ -101,7 +118,7 @@ public abstract class Compressor {
 	}
 
 	public void resetGain() {
-		if(lpf != null)
+		if (lpf != null)
 			lpf.set(MEAN);
 	}
 }

@@ -1,4 +1,4 @@
-package kvv.aplayer;
+package kvv.aplayer.player;
 
 public class LPF {
 	private final double k1;

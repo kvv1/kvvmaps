@@ -1,4 +1,4 @@
-package kvv.aplayer;
+package kvv.aplayer.service;
 
 public interface APServiceListener {
 	void onChanged();

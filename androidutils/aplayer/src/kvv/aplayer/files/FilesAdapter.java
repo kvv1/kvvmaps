@@ -1,5 +1,11 @@
-package kvv.aplayer;
+package kvv.aplayer.files;
 
+import java.io.File;
+
+import kvv.aplayer.R;
+import kvv.aplayer.R.id;
+import kvv.aplayer.R.layout;
+import kvv.aplayer.service.IAPService;
 import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,14 +13,16 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class FoldersAdapter extends ArrayAdapter<Folder> {
+public class FilesAdapter extends ArrayAdapter<File> {
 
 	private Activity activity;
 	private IAPService service;
-	public int sel;
 
-	public FoldersAdapter(Activity activity, IAPService service) {
-		super(activity, R.layout.folder_item, service.getFolders());
+	public int sel = -1;
+
+	public FilesAdapter(Activity activity, IAPService service) {
+		super(activity, R.layout.folder_item, service.getFolders().get(
+				service.getCurrentFolder()).files);
 		this.activity = activity;
 		this.service = service;
 	}
@@ -28,15 +36,14 @@ public class FoldersAdapter extends ArrayAdapter<Folder> {
 
 		v = vi.inflate(R.layout.folder_item, null);
 
-		Folder folder = getItem(position);
+		File file = getItem(position);
 
 		TextView tv = (TextView) v.findViewById(R.id.text);
-		tv.setText(folder.shortName);
-		tv.setPadding(folder.indent * 20, 0, 0, 0);
+		tv.setText(file.getName());
 
 		if (position == sel)
 			v.setBackgroundColor(0xFFFFFF80);
-		else if (sel < 0 && position == service.getCurrentFolder())
+		else if (sel < 0 && position == service.getFile())
 			v.setBackgroundColor(0xFFFFFF80);
 		else
 			v.setBackgroundColor(0xFFFFFFFF);

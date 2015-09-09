@@ -1,4 +1,4 @@
-package kvv.aplayer;
+package kvv.aplayer.player;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import kvv.aplayer.folders.Folder;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;

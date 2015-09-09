@@ -1,5 +1,13 @@
-package kvv.aplayer;
+package kvv.aplayer.folders;
 
+import kvv.aplayer.APActivity;
+import kvv.aplayer.R;
+import kvv.aplayer.R.id;
+import kvv.aplayer.R.layout;
+import kvv.aplayer.service.APService;
+import kvv.aplayer.service.APServiceListener;
+import kvv.aplayer.service.APServiceListenerAdapter;
+import kvv.aplayer.service.IAPService;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.view.View;
@@ -37,12 +45,7 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 	private ListView list;
 
 	public FoldersSectionFragment() {
-		super(APService.class);
-	}
-
-	@Override
-	protected int getLayout() {
-		return R.layout.fragment_folders;
+		super(APService.class, R.layout.fragment_folders);
 	}
 
 	private FoldersAdapter adapter;
@@ -117,10 +120,8 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 							try {
 								noSel = true;
 								conn.service.toFolder(adapter.sel);
-								APActivity activity = (APActivity) getActivity();
-								ViewPager pager = (ViewPager) activity
-										.findViewById(activity.getPagerId());
-								pager.setCurrentItem(0, true);
+								APActivity activity = getActivity1();
+								activity.selectMainPage();
 							} finally {
 								noSel = false;
 							}
@@ -137,10 +138,8 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 						if (adapter != null && adapter.sel >= 0
 								&& conn.service != null) {
 							conn.service.toRandom(adapter.sel);
-							APActivity activity = (APActivity) getActivity();
-							ViewPager pager = (ViewPager) activity
-									.findViewById(activity.getPagerId());
-							pager.setCurrentItem(0, true);
+							APActivity activity = getActivity1();
+							activity.selectMainPage();
 						}
 					}
 				});

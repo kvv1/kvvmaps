@@ -1,5 +1,12 @@
-package kvv.aplayer;
+package kvv.aplayer.files;
 
+import kvv.aplayer.APActivity;
+import kvv.aplayer.R;
+import kvv.aplayer.folders.Folder;
+import kvv.aplayer.service.APService;
+import kvv.aplayer.service.APServiceListener;
+import kvv.aplayer.service.APServiceListenerAdapter;
+import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -10,23 +17,40 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.smartbean.androidutils.fragment.RLFragment;
 
 public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	SharedPreferences settings;
 
-	private Handler handler = new Handler();
+	protected Handler handler = new Handler();
 
 	private Button pause;
 	private Button timing;
 	private ProgressBar progressBar;
+	protected TextView folderTextView;
+
+	protected void folderChanged() {
+
+	}
+
+	protected void trackChanged() {
+
+	}
+
+	protected void restartButtonsTimer() {
+	}
+
+	protected void seekStart(int step) {
+	}
+
+	protected void seekEnd() {
+
+	}
 
 	private Runnable progressRunnable = new Runnable() {
 		@Override
@@ -43,6 +67,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		@Override
 		public void run() {
 			if (conn.service != null) {
+				seekStart(seekStep);
 				conn.service.seek(seekStep);
 				seekStep = seekStep + seekStep / 3;
 				if (seekStep > 20000)
@@ -57,6 +82,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		@Override
 		public void run() {
 			if (conn.service != null) {
+				seekStart(-seekStep);
 				conn.service.seek(-seekStep);
 				seekStep = seekStep + seekStep / 3;
 				if (seekStep > 20000)
@@ -78,7 +104,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		return String.format("%02d:%02d", m, s);
 	}
 
-	private void updateUI() {
+	protected void updateUI() {
 		if (conn.service == null)
 			return;
 
@@ -109,6 +135,8 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		((Button) rootView.findViewById(R.id.volPlus2)).setTypeface(null,
 				conn.service.getGain() == 10 ? Typeface.BOLD : Typeface.NORMAL);
 
+		System.out.println("level = " + conn.service.getLevel());
+
 	}
 
 	private final APServiceListener listener = new APServiceListenerAdapter() {
@@ -120,26 +148,21 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 			if (conn.service.getFolders().size() > 0) {
 				if (conn.service.getCurrentFolder() != folder
 						&& conn.service.getFolders().size() > 0) {
-					FilesAdapter adapter = new FilesAdapter(getActivity(),
-							conn.service);
-					list.setAdapter(adapter);
+					folderChanged();
 					folder = conn.service.getCurrentFolder();
 				}
 				if (folder >= 0) {
 					Folder fold = conn.service.getFolders().get(folder);
-					TextView folderTextView = (TextView) rootView
-							.findViewById(R.id.folder);
-					folderTextView.setText(fold.displayName + " ("
+					String name = fold.displayName;
+					if (name.lastIndexOf("/") >= 0)
+						name = name.substring(name.lastIndexOf("/") + 1);
+					folderTextView.setText(name /*+ " ("
 							+ (conn.service.getFile() + 1) + "/"
-							+ fold.files.length + ")");
+							+ fold.files.length + ")"*/);
 				}
 			}
 
-			clearButtons();
-
-			list.invalidateViews();
-			list.setSelection(conn.service.getFile() - 2);
-
+			trackChanged();
 			updateUI();
 		}
 
@@ -150,37 +173,10 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		}
 	};
 
-	private ListView list;
 	private int folder;
 
 	public FilesSectionFragment() {
-		super(APService.class);
-	}
-
-	@Override
-	protected int getLayout() {
-		return R.layout.fragment_files;
-	}
-
-	private Runnable buttonsRunnable = new Runnable() {
-		@Override
-		public void run() {
-			if (rootView != null) {
-				clearButtons();
-			}
-		}
-	};
-
-	private void clearButtons() {
-		handler.removeCallbacks(buttonsRunnable);
-		//if (!settings.getBoolean(getString(R.string.prefTestMode), false))
-			rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
-		rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
-		FilesAdapter adapter = (FilesAdapter) list.getAdapter();
-		if (adapter != null) {
-			adapter.sel = -1;
-			list.invalidateViews();
-		}
+		super(APService.class, R.layout.fragment_files);
 	}
 
 	@Override
@@ -188,37 +184,12 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
 		folder = -1;
-		list = (ListView) rootView.findViewById(R.id.list);
 		rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
+
+		folderTextView = (TextView) rootView.findViewById(R.id.folder);
 
 		if (!settings.getBoolean(getString(R.string.prefTestMode), false))
 			rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
-
-		list.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> adapterView, View view,
-					int position, long id) {
-				rootView.findViewById(R.id.buttons).setVisibility(View.VISIBLE);
-				restartButtonsTimer();
-				FilesAdapter adapter = (FilesAdapter) list.getAdapter();
-				if (adapter != null) {
-					adapter.sel = position;
-					list.invalidateViews();
-				}
-			}
-		});
-
-		((Button) rootView.findViewById(R.id.goto1))
-				.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View arg0) {
-						FilesAdapter adapter = (FilesAdapter) list.getAdapter();
-						if (adapter != null && adapter.sel >= 0
-								&& conn.service != null) {
-							conn.service.toFile(adapter.sel);
-						}
-					}
-				});
 
 		Button prev = (Button) rootView.findViewById(R.id.prev);
 
@@ -226,7 +197,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 			@Override
 			public void onClick(View v) {
 				if (System.currentTimeMillis() - lastKeyUp > 500)
-					service.prev();
+					onPrev();
 			}
 		});
 
@@ -254,8 +225,8 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		next.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (System.currentTimeMillis() > 500)
-					service.next();
+				if (System.currentTimeMillis() - lastKeyUp > 500)
+					onNext();
 			}
 		});
 
@@ -383,12 +354,13 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		progressBar = (ProgressBar) rootView.findViewById(R.id.progress);
 
 		service.addListener(listener);
-		listener.onChanged();
-	}
 
-	private void restartButtonsTimer() {
-		handler.removeCallbacks(buttonsRunnable);
-		handler.postDelayed(buttonsRunnable, APActivity.BUTTONS_DELAY);
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				listener.onChanged();
+			}
+		});
 	}
 
 	private long lastKeyUp;
@@ -397,6 +369,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 	private void keyUp() {
 		handler.removeCallbacks(seekForwardRunnable);
 		handler.removeCallbacks(seekBackRunnable);
+		seekEnd();
 
 		if (longClick)
 			lastKeyUp = System.currentTimeMillis();
@@ -408,6 +381,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		handler.removeCallbacks(progressRunnable);
 		handler.removeCallbacks(seekForwardRunnable);
 		handler.removeCallbacks(seekBackRunnable);
+		seekEnd();
 		super.onPause();
 	}
 
@@ -424,4 +398,13 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		super.onDestroy();
 	}
 
+	protected void onNext() {
+		if (conn.service != null)
+			conn.service.next();
+	}
+
+	protected void onPrev() {
+		if (conn.service != null)
+			conn.service.prev();
+	}
 }

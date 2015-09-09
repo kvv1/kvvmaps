@@ -1,4 +1,4 @@
-package kvv.aplayer;
+package kvv.aplayer.service;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -10,6 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import kvv.aplayer.APActivity;
+import kvv.aplayer.MemoryStorage;
+import kvv.aplayer.R;
+import kvv.aplayer.RemoteControlReceiver;
+import kvv.aplayer.folders.Folder;
+import kvv.aplayer.player.Player1;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -32,7 +38,6 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.google.gson.Gson;
 import com.smartbean.androidutils.service.BaseService;
 import com.smartbean.androidutils.util.StorageUtils;
 import com.smartbean.androidutils.util.StorageUtils.StorageInfo;
@@ -64,8 +69,6 @@ public class APService extends BaseService {
 
 	private TelephonyManager telephonyManager;
 	private PhoneStateListener phoneStateListener;
-
-	public List<Bookmark> bookmarks;
 
 	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
@@ -128,8 +131,10 @@ public class APService extends BaseService {
 			System.out.println(s);
 		System.out.println("---");
 
-		for (String f : new File("/storage/sdcard1").list())
-			System.out.println(f);
+		String[] ll = new File("/storage/sdcard1").list();
+		if (ll != null)
+			for (String f : ll)
+				System.out.println(f);
 		System.out.println("---");
 
 		// //////////////////////////////////////
@@ -178,13 +183,6 @@ public class APService extends BaseService {
 			}
 
 		};
-
-		String sBookmarks = settings.getString("Bookmarks", null);
-		if (sBookmarks != null)
-			bookmarks = new ArrayList<Bookmark>(Arrays.asList(new Gson()
-					.fromJson(sBookmarks, Bookmark[].class)));
-		else
-			bookmarks = new ArrayList<Bookmark>();
 
 		telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 		phoneStateListener = new PhoneStateListener() {
@@ -243,11 +241,6 @@ public class APService extends BaseService {
 		super.onDestroy();
 	}
 
-	private void saveBookmarks() {
-		setPref("Bookmarks",
-				new Gson().toJson(bookmarks.toArray(new Bookmark[0])));
-	}
-
 	@Override
 	public IBinder onBind(Intent arg0) {
 		return new APServiceBinder() {
@@ -258,30 +251,6 @@ public class APService extends BaseService {
 		@Override
 		public List<Folder> getFolders() {
 			return player.getFolders();
-		}
-
-		@Override
-		public List<Bookmark> getBookmarks() {
-			return bookmarks;
-		}
-
-		@Override
-		public void addBookmark() {
-			Folder folder = getFolders().get(getCurrentFolder());
-			bookmarks.add(new Bookmark(folder.displayName,
-					folder.files[getFile()].getName(), getDuration(),
-					getCurrentPosition()));
-			for (APServiceListener l : listeners)
-				l.onBookmarksChanged();
-			saveBookmarks();
-		}
-
-		@Override
-		public void delBookmark(Bookmark bookmark) {
-			bookmarks.remove(bookmark);
-			for (APServiceListener l : listeners)
-				l.onBookmarksChanged();
-			saveBookmarks();
 		}
 
 		@Override
@@ -367,25 +336,6 @@ public class APService extends BaseService {
 		}
 
 		@Override
-		public void toBookmark(Bookmark bookmark) {
-			int f = 0;
-			for (Folder folder : getFolders()) {
-				if (folder.displayName.equals(bookmark.folder)) {
-					int t = 0;
-					for (File file : folder.files) {
-						if (file.getName().equals(bookmark.track)) {
-							if (f != player.getCurrentFolder())
-								save();
-							player.toFolder(f, t, bookmark.time);
-						}
-						t++;
-					}
-				}
-				f++;
-			}
-		}
-
-		@Override
 		public void setGain(int db) {
 			player.setGain(db);
 			setPrefInt("gain", db);
@@ -416,6 +366,21 @@ public class APService extends BaseService {
 		@Override
 		public int getGain() {
 			return player.getGain();
+		}
+
+		@Override
+		public float getLevel() {
+			return player.getLevel();
+		}
+
+		@Override
+		public int getFileCnt() {
+			int folder = getCurrentFolder();
+			if (folder >= 0) {
+				Folder fold = getFolders().get(folder);
+				return fold.files.length;
+			}
+			return 0;
 		}
 
 	}
@@ -527,6 +492,8 @@ public class APService extends BaseService {
 
 	private void startGps() {
 		if (settings.getBoolean(getString(R.string.prefTestMode), false))
+			return;
+		if (!settings.getBoolean(getString(R.string.prefNavigatorMode), false))
 			return;
 
 		handler.removeCallbacks(stopGpsRunnable);
