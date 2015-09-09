@@ -32,8 +32,6 @@ public class ChartView extends View{
 
 		paint.setColor(Color.RED);
 		
-		int n = data.data.size() / 2;
-		
 		long max = Long.MIN_VALUE; 
 		long min = Long.MAX_VALUE; 
 		

@@ -31,7 +31,6 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	private Button pause;
 	private Button timing;
-	private View timing1;
 	private ProgressBar progressBar;
 	protected TextView folderTextView;
 
@@ -154,8 +153,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 				}
 				if (folder >= 0) {
 					Folder fold = conn.service.getFolders().get(folder);
-					String name = fold.displayName;
-					folderTextView.setText(name);
+					folderTextView.setText(fold.displayName);
 				}
 			}
 
@@ -272,34 +270,20 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		prev.setOnLongClickListener(prevOnLongClickListener);
 		prev.setOnTouchListener(prevOnTouchListener);
 
-		// View prev1 = rootView.findViewById(R.id.prev1);
-		// prev1.setOnClickListener(prevOnClickListener);
-		// prev1.setOnLongClickListener(prevOnLongClickListener);
-		// prev1.setOnTouchListener(prevOnTouchListener);
-
 		Button next = (Button) rootView.findViewById(R.id.next);
 		next.setOnClickListener(nextOnClickListener);
 		next.setOnLongClickListener(nextOnLongClickListener);
 		next.setOnTouchListener(nextOnTouchListener);
 
-		// View next1 = rootView.findViewById(R.id.next1);
-		// next1.setOnClickListener(nextOnClickListener);
-		// next1.setOnLongClickListener(nextOnLongClickListener);
-		// next1.setOnTouchListener(nextOnTouchListener);
-
-		OnClickListener pauseOnClickListener = new OnClickListener() {
+		pause = (Button) rootView.findViewById(R.id.pause);
+		pause.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				playPause();
 			}
-		};
-
-		pause = (Button) rootView.findViewById(R.id.pause);
-		pause.setOnClickListener(pauseOnClickListener);
-		// rootView.findViewById(R.id.plauPause1).setOnClickListener(
-		// pauseOnClickListener);
+		});
 
 		timing = (Button) rootView.findViewById(R.id.timing);
-		timing1 = rootView.findViewById(R.id.level);
 
 		final View extButtons = rootView.findViewById(R.id.extButtons);
 
@@ -312,7 +296,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		};
 
 		timing.setOnClickListener(timingListener);
-		timing1.setOnClickListener(timingListener);
+		rootView.findViewById(R.id.level).setOnClickListener(timingListener);
 
 		((Button) rootView.findViewById(R.id.speedOn))
 				.setOnClickListener(new OnClickListener() {

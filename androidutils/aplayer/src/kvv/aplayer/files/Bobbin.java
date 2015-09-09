@@ -2,7 +2,6 @@ package kvv.aplayer.files;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
@@ -30,9 +29,9 @@ public class Bobbin {
 	static final Paint tapePaint = new Paint();
 	static final Paint bgPaint = new Paint();
 	static final Paint axisPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
-	//private static final int TAPE_COLOR = 0xFF8b4513;
+	// private static final int TAPE_COLOR = 0xFF8b4513;
 	public static final int TAPE_COLOR = 0xFF401004;
-	
+
 	static {
 		bobbinPaint.setAlpha(200);
 		bgPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
@@ -111,9 +110,7 @@ public class Bobbin {
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setStrokeWidth(2);
 		canvas.drawArc(new RectF(-5, -35, 5, -25), 0, 180, false, paint);
-		
-		
-		
+
 		Canvas c = new Canvas(bmpAxis);
 		c.translate(bmpAxis.getWidth() / 2, bmpAxis.getHeight() / 2);
 		Paint p = new Paint();
@@ -143,7 +140,8 @@ public class Bobbin {
 				* r2);
 	}
 
-	private void drawTapeCircle(Canvas canvas, float cx, float cy, float drawSize) {
+	private void drawTapeCircle(Canvas canvas, float cx, float cy,
+			float drawSize) {
 		float r1 = getTapeR(tapeMinR, tapeMaxR, max, cur) * drawSize / bmSize;
 
 		float r0 = tapeMinR * drawSize / bmSize;

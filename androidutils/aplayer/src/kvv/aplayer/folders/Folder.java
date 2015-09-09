@@ -6,7 +6,7 @@ public class Folder {
 	public final String path;
 	public final String shortName;
 	public final int indent;
-	public final String displayName;
+	public String displayName;
 	
 	public File[] files;
 

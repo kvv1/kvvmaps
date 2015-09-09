@@ -1,7 +1,9 @@
-package kvv.aplayer;
+package kvv.aplayer.chart;
 
-import kvv.aplayer.chart.ChartData;
-import kvv.aplayer.chart.ChartView;
+import kvv.aplayer.APActivity;
+import kvv.aplayer.R;
+import kvv.aplayer.R.id;
+import kvv.aplayer.R.layout;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.APServiceListenerAdapter;

@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import kvv.aplayer.APActivity;
@@ -36,7 +35,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.smartbean.androidutils.service.BaseService;
 import com.smartbean.androidutils.util.StorageUtils;
@@ -536,19 +534,4 @@ public class APService extends BaseService {
 
 	}
 
-	void ff() {
-		Map<String, File> externalLocations = MemoryStorage
-				.getAllStorageLocations();
-		File sdCard = externalLocations.get(MemoryStorage.SD_CARD);
-		File externalSdCard = externalLocations
-				.get(MemoryStorage.EXTERNAL_SD_CARD);
-		if (sdCard != null) {
-			Log.i("TAG", "Internal SD path: " + sdCard.getPath());
-
-		}
-		if (externalSdCard != null) {
-			Log.i("TAG", "External SD path: " + externalSdCard.getPath());
-
-		}
-	}
 }

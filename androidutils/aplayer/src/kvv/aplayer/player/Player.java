@@ -112,6 +112,7 @@ public abstract class Player {
 		Folder randFolder = folders.get(folders.size() - 1);
 
 		randFolder.files = files.toArray(new File[0]);
+		randFolder.displayName = folder.displayName + " RND";
 
 		onRandomChanged();
 		toFolder(folders.size() - 1, 0, 0);
@@ -184,26 +185,6 @@ public abstract class Player {
 		}
 	}
 
-	/*
-	 * public void seekBack(int seekStep) { if (folders.size() == 0 || curFolder
-	 * < 0) return;
-	 * 
-	 * if (!mp.isPlaying()) return;
-	 * 
-	 * int cur = mp.getCurrentPosition();
-	 * 
-	 * if (cur < seekStep && curFile != 0) { toFile(curFile - 1, 0, true);
-	 * mp.seekTo(Math.max(0, mp.getDuration() - seekStep)); } else {
-	 * mp.seekTo(Math.max(0, cur - seekStep)); } }
-	 * 
-	 * public void seekForward(int seekStep) { if (folders.size() == 0 ||
-	 * curFolder < 0) return;
-	 * 
-	 * if (!mp.isPlaying()) return;
-	 * 
-	 * int dur = mp.getDuration(); int cur = mp.getCurrentPosition(); if (cur +
-	 * seekStep < dur) { mp.seekTo(cur + seekStep); } }
-	 */
 	public void prev() {
 		if (folders.size() == 0 || curFolder < 0)
 			return;

@@ -1,5 +1,6 @@
 package kvv.aplayer;
 
+import kvv.aplayer.chart.ChartsFragment;
 import kvv.aplayer.files.FilesSectionFragmentList;
 import kvv.aplayer.folders.FoldersSectionFragment;
 import kvv.aplayer.service.APService;
