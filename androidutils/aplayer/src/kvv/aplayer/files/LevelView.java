@@ -148,7 +148,7 @@ public class LevelView extends View {
 
 	@Override
 	public void draw(Canvas canvas) {
-		canvas.drawRGB(150, 150, 120);
+	//	canvas.drawRGB(150, 150, 120);
 
 		paint.setAntiAlias(true);
 

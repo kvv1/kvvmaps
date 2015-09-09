@@ -9,7 +9,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class TapeView extends View {
-	private final static int STEP_MS = 30; 
+	private final static int STEP_MS = 30;
 
 	private Handler handler = new Handler();
 
@@ -33,9 +33,10 @@ public class TapeView extends View {
 		bobbin2.setPercent(100, 0);
 	}
 
-	Paint paint = new Paint();
+	Paint tapePaint = new Paint();
 	{
-		paint.setAntiAlias(true);
+		tapePaint.setColor(Bobbin.TAPE_COLOR);
+		tapePaint.setAntiAlias(true);
 	}
 	Paint headboxPaint = new Paint();
 	{
@@ -54,53 +55,47 @@ public class TapeView extends View {
 		canvas.drawRGB(150, 150, 120);
 
 		float w = getWidth();
+		float h = getHeight();
 
-		float w1 = w;
-		if (w > getHeight() * 1.9)
-			w1 = (int) (getHeight() * 1.9);
+		if (h > w * 0.55)
+			h = w * 0.55f;
 
-		int drawSize = (int) (w1 / 2.1f);
-		float bobbinY = w1 / 4;
-		float bobbinX1 = w / 2 - w1 / 4;
-		float bobbinX2 = w / 2 + w1 / 4;
+		float bobbinSize = (w * 0.42f);
+		float bobbinY = w * 0.22f;
+		float bobbinX2 = w - w * 0.22f;
+		float bobbinX1 = w * 0.22f;
 
-		float r1 = bobbin1.getTapeR(drawSize);
-		float r2 = bobbin2.getTapeR(drawSize);
+		float r1 = bobbin1.getTapeR(bobbinSize);
+		float r2 = bobbin2.getTapeR(bobbinSize);
 
-		float hbLeft = w / 2 - w1 / 10;
-		float hbTop = bobbinY * 1.8f;
-		float hbRight = w / 2 + w1 / 10;
-		float hbBottom = bobbinY * 2.1f;
+		float hbLeft = w / 2 - w / 10;
+		float hbTop = h * 0.8f;
+		float hbRight = w / 2 + w / 10;
+		float hbBottom = h * 0.99f;
+
+		float hbGapY = hbTop + (hbBottom - hbTop) * 0.8f;
 
 		canvas.drawRoundRect(new RectF(hbLeft, hbTop, hbRight, hbBottom), 10,
 				10, headboxPaint);
 
-		canvas.drawLine(hbLeft, (hbTop + hbBottom) / 2, hbRight,
-				(hbTop + hbBottom) / 2, headboxPaint1);
+		canvas.drawLine(hbLeft, hbGapY, hbRight, hbGapY, headboxPaint1);
 
-		float grad = 15;
+		float grad = 25;
 
 		float x1 = (float) (bobbinX1 - r1 * Math.sin(Math.toRadians(grad)));
 		float y1 = (float) (bobbinY + r1 * Math.cos(Math.toRadians(grad)));
 		float x2 = (float) (bobbinX2 + r2 * Math.sin(Math.toRadians(grad)));
 		float y2 = (float) (bobbinY + r2 * Math.cos(Math.toRadians(grad)));
 
-		canvas.drawLine(hbLeft, (hbTop + hbBottom) / 2, x1, y1, paint);
-		canvas.drawLine(hbRight, (hbTop + hbBottom) / 2, x2, y2, paint);
+		canvas.drawLine(hbLeft, hbGapY, x1, y1, tapePaint);
+		canvas.drawLine(hbRight, hbGapY, x2, y2, tapePaint);
 
-		bobbin1.draw(canvas, bobbinX1, bobbinY, drawSize);
-		bobbin2.draw(canvas, bobbinX2, bobbinY, drawSize);
-		/*
-		 * float levelX; float levelY;
-		 * 
-		 * if (w == w1) { levelX = 0; levelY = hbBottom + 10; } else { levelY =
-		 * 0; levelX = w1; }
-		 * 
-		 * int levelSz = w1 / 8;
-		 * 
-		 * drawLevel(canvas, levelX, levelY, levelSz, levelSz);
-		 * drawLevel(canvas, levelX + levelSz + 2, levelY, levelSz, levelSz);
-		 */
+		bobbin1.draw(canvas, bobbinX1, bobbinY, bobbinSize);
+		bobbin2.draw(canvas, bobbinX2, bobbinY, bobbinSize);
+
+		// canvas.drawCircle(w / 10, h * 0.9f, w / 50, tapePaint);
+		// canvas.drawCircle(w- w / 10, h * 0.9f, w / 50, tapePaint);
+
 	}
 
 	public void setProgress(float max, float cur) {
@@ -124,7 +119,7 @@ public class TapeView extends View {
 					bobbin2.step(STEP_MS);
 				} else {
 					int step = seekStep / 5;
-					if(step > 500)
+					if (step > 500)
 						step = 500;
 					bobbin1.step(step);
 					bobbin2.step(step);
@@ -147,5 +142,4 @@ public class TapeView extends View {
 	public void setSeek(int step) {
 		seekStep = step;
 	}
-
 }

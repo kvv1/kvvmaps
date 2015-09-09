@@ -31,6 +31,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	private Button pause;
 	private Button timing;
+	private View timing1;
 	private ProgressBar progressBar;
 	protected TextView folderTextView;
 
@@ -154,11 +155,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 				if (folder >= 0) {
 					Folder fold = conn.service.getFolders().get(folder);
 					String name = fold.displayName;
-					if (name.lastIndexOf("/") >= 0)
-						name = name.substring(name.lastIndexOf("/") + 1);
-					folderTextView.setText(name /*+ " ("
-							+ (conn.service.getFile() + 1) + "/"
-							+ fold.files.length + ")"*/);
+					folderTextView.setText(name);
 				}
 			}
 
@@ -179,6 +176,39 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		super(APService.class, R.layout.fragment_files);
 	}
 
+	protected void prevClick() {
+		if (System.currentTimeMillis() - lastKeyUp > 500)
+			onPrev();
+	}
+
+	protected void prevLongClick() {
+		seekStep = 1000;
+		handler.postDelayed(seekBackRunnable, 200);
+		longClick = true;
+	}
+
+	protected void touch(MotionEvent event) {
+		if (event.getAction() == MotionEvent.ACTION_UP)
+			keyUp();
+	}
+
+	protected void nextClick() {
+		if (System.currentTimeMillis() - lastKeyUp > 500)
+			onNext();
+	}
+
+	protected void nextLongClick() {
+		seekStep = 1000;
+		handler.postDelayed(seekForwardRunnable, 200);
+		longClick = true;
+	}
+
+	protected void playPause() {
+		if (conn.service != null)
+			conn.service.play_pause();
+		updateUI();
+	}
+
 	@Override
 	protected void createUI(final IAPService service) {
 		settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -191,84 +221,98 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		if (!settings.getBoolean(getString(R.string.prefTestMode), false))
 			rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
 
-		Button prev = (Button) rootView.findViewById(R.id.prev);
-
-		prev.setOnClickListener(new OnClickListener() {
+		OnClickListener prevOnClickListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (System.currentTimeMillis() - lastKeyUp > 500)
-					onPrev();
+				prevClick();
 			}
-		});
+		};
 
-		prev.setOnLongClickListener(new OnLongClickListener() {
+		OnLongClickListener prevOnLongClickListener = new OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
-				seekStep = 1000;
-				handler.postDelayed(seekBackRunnable, 200);
-				longClick = true;
+				prevLongClick();
 				return true;
 			}
-		});
+		};
 
-		prev.setOnTouchListener(new OnTouchListener() {
+		OnTouchListener prevOnTouchListener = new OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				if (event.getAction() == MotionEvent.ACTION_UP)
-					keyUp();
+				touch(event);
 				return false;
 			}
-		});
+		};
+
+		OnClickListener nextOnClickListener = new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				nextClick();
+			}
+		};
+
+		OnLongClickListener nextOnLongClickListener = new OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				nextLongClick();
+				return true;
+			}
+		};
+
+		OnTouchListener nextOnTouchListener = new OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				touch(event);
+				return false;
+			}
+		};
+
+		Button prev = (Button) rootView.findViewById(R.id.prev);
+		prev.setOnClickListener(prevOnClickListener);
+		prev.setOnLongClickListener(prevOnLongClickListener);
+		prev.setOnTouchListener(prevOnTouchListener);
+
+		// View prev1 = rootView.findViewById(R.id.prev1);
+		// prev1.setOnClickListener(prevOnClickListener);
+		// prev1.setOnLongClickListener(prevOnLongClickListener);
+		// prev1.setOnTouchListener(prevOnTouchListener);
 
 		Button next = (Button) rootView.findViewById(R.id.next);
+		next.setOnClickListener(nextOnClickListener);
+		next.setOnLongClickListener(nextOnLongClickListener);
+		next.setOnTouchListener(nextOnTouchListener);
 
-		next.setOnClickListener(new OnClickListener() {
+		// View next1 = rootView.findViewById(R.id.next1);
+		// next1.setOnClickListener(nextOnClickListener);
+		// next1.setOnLongClickListener(nextOnLongClickListener);
+		// next1.setOnTouchListener(nextOnTouchListener);
+
+		OnClickListener pauseOnClickListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (System.currentTimeMillis() - lastKeyUp > 500)
-					onNext();
 			}
-		});
-
-		next.setOnLongClickListener(new OnLongClickListener() {
-			@Override
-			public boolean onLongClick(View v) {
-				seekStep = 1000;
-				handler.postDelayed(seekForwardRunnable, 200);
-				longClick = true;
-				return true;
-			}
-		});
-
-		next.setOnTouchListener(new OnTouchListener() {
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if (event.getAction() == MotionEvent.ACTION_UP)
-					keyUp();
-				return false;
-			}
-		});
+		};
 
 		pause = (Button) rootView.findViewById(R.id.pause);
-		pause.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				service.play_pause();
-				updateUI();
-			}
-		});
+		pause.setOnClickListener(pauseOnClickListener);
+		// rootView.findViewById(R.id.plauPause1).setOnClickListener(
+		// pauseOnClickListener);
 
 		timing = (Button) rootView.findViewById(R.id.timing);
+		timing1 = rootView.findViewById(R.id.level);
 
 		final View extButtons = rootView.findViewById(R.id.extButtons);
 
-		timing.setOnClickListener(new OnClickListener() {
+		OnClickListener timingListener = new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
 				extButtons.setVisibility(View.VISIBLE);
 				restartButtonsTimer();
 			}
-		});
+		};
+
+		timing.setOnClickListener(timingListener);
+		timing1.setOnClickListener(timingListener);
 
 		((Button) rootView.findViewById(R.id.speedOn))
 				.setOnClickListener(new OnClickListener() {
