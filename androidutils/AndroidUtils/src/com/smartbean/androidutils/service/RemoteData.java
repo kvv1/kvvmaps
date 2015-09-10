@@ -3,19 +3,17 @@ package com.smartbean.androidutils.service;
 import java.io.IOException;
 import java.util.List;
 
-import android.content.Context;
 import android.os.Handler;
 
 import com.smartbean.androidutils.util.Utils;
 
-public class RemoteData<TData, TMsg> {
+public final class RemoteData<TData, TMsg> {
+	
 	public interface RemoteDataProvider<TData, TMsg> {
 		Object _login(Object login) throws IOException;
 
 		TData _getRemoteData(Object login) throws IOException,
 				InterruptedException;
-
-		void updateSettings(Context context);
 
 		void _send(Object login, TMsg msg) throws IOException,
 				InterruptedException;

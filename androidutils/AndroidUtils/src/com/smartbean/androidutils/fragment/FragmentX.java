@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +16,7 @@ import com.smartbean.androidutils.service.ServiceConnectionAdapter;
 import com.smartbean.androidutils.util.Drawables;
 import com.smartbean.androidutils.util.Utils;
 
-public abstract class RLFragment<A extends Activity, IService> extends Fragment {
+public abstract class FragmentX<A extends Activity, IService> extends Fragment {
 
 	protected ServiceConnectionAdapter<IService> conn = new ServiceConnectionAdapter<IService>() {
 		public void onServiceConnected(android.content.ComponentName name,
@@ -37,7 +37,7 @@ public abstract class RLFragment<A extends Activity, IService> extends Fragment 
 
 	protected abstract void createUI(IService service);
 
-	private final int layout;
+	protected abstract int getLayout();
 
 	private void createUiIfPossible() {
 		if (conn.service != null && rootView != null) {
@@ -47,15 +47,14 @@ public abstract class RLFragment<A extends Activity, IService> extends Fragment 
 		}
 	}
 
-	public RLFragment(Class<?> serviceClass, int layout) {
+	public FragmentX(Class<?> serviceClass) {
 		this.serviceClass = serviceClass;
-		this.layout = layout;
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		rootView = inflater.inflate(layout, container, false);
+		rootView = inflater.inflate(getLayout(), container, false);
 		createUiIfPossible();
 		return rootView;
 	}

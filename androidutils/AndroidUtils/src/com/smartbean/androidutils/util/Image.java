@@ -23,6 +23,7 @@ public class Image {
 		Options bmpFactoryOptions = new Options();
 		bmpFactoryOptions.inJustDecodeBounds = true;
 		Bitmap bmp = BitmapFactory.decodeFile(imageFilePath, bmpFactoryOptions);
+		
 		int heightRatio = (int) Math.ceil(bmpFactoryOptions.outHeight
 				/ (float) height);
 		int widthRatio = (int) Math.ceil(bmpFactoryOptions.outWidth

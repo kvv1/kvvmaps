@@ -13,8 +13,9 @@ import android.content.DialogInterface.OnClickListener;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.text.InputType;
 import android.util.Log;
-import android.widget.Toast;
+import android.widget.EditText;
 
 public class Utils {
 	public static void log(Object obj, String message) {
@@ -61,6 +62,11 @@ public class Utils {
 	}
 
 	public static void select(Context context, String title,
+			List<String> choices, final AsyncCallback<Integer> callback) {
+		select(context, title, choices.toArray(new String[0]), callback);
+	}
+	
+	public static void select(Context context, String title,
 			final String[] choices, final AsyncCallback<Integer> callback) {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -69,6 +75,31 @@ public class Utils {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				callback.onSuccess(which);
+			}
+		});
+		builder.setOnCancelListener(new OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface arg0) {
+				callback.onFailure();
+			}
+		});
+		builder.show();
+	}
+
+	public static void enterNumber(Context context, String title,
+			final AsyncCallback<Integer> callback) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle(title);
+
+		final EditText input = new EditText(context);
+		input.setInputType(InputType.TYPE_CLASS_NUMBER);
+		builder.setView(input);
+
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				int cnt = Integer.parseInt(input.getText().toString());
+				callback.onSuccess(cnt);
 			}
 		});
 		builder.setOnCancelListener(new OnCancelListener() {
