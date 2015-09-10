@@ -1,6 +1,5 @@
 package kvv.aplayer.folders;
 
-import java.io.File;
 
 public class Folder {
 	public final String path;
@@ -8,9 +7,9 @@ public class Folder {
 	public final int indent;
 	public String displayName;
 	
-	public File[] files;
+	public String[] files;
 
-	public Folder(String pathName, int indent, File[] files) {
+	public Folder(String pathName, int indent, String[] files) {
 		this.path = pathName;
 		this.indent = indent;
 		this.files = files;

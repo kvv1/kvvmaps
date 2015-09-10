@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import kvv.aplayer.APActivity;
@@ -22,17 +25,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 
@@ -140,13 +144,13 @@ public class APService extends BaseService {
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
 
 		List<Folder> folders = new ArrayList<Folder>();
-
-		if (Build.VERSION.SDK_INT < 14)
-			for (StorageInfo info : StorageUtils.getStorageList())
-				read(new File(info.path), folders, 0);
-		else
-			for (String s : StorageUtils.getStorageDirectories())
-				read(new File(s), folders, 0);
+		/*
+		 * if (Build.VERSION.SDK_INT < 14) for (StorageInfo info :
+		 * StorageUtils.getStorageList()) read(new File(info.path), folders, 0);
+		 * else for (String s : StorageUtils.getStorageDirectories()) read(new
+		 * File(s), folders, 0);
+		 */
+		read1(null, folders, 0);
 
 		// readFolders(ROOT, 0, folders);
 
@@ -384,7 +388,7 @@ public class APService extends BaseService {
 	}
 
 	private static int read(File dir, List<Folder> folders, int indent) {
-		File[] files = listFiles(dir);
+		String[] files = listFiles(dir);
 		File[] dirs = listDirs(dir);
 
 		int sum = 0;
@@ -407,23 +411,26 @@ public class APService extends BaseService {
 		return sum;
 	}
 
-	private static File[] listFiles(File dir) {
+	private static String[] listFiles(File dir) {
 		File[] res = dir.listFiles(new FileFilter() {
 			@SuppressLint("DefaultLocale")
 			@Override
 			public boolean accept(File pathname) {
-				return pathname.isFile()
-						&& pathname.getName().toLowerCase().endsWith(".mp3");
+				String name = pathname.getName().toLowerCase();
+				return pathname.isFile() && (name.endsWith(".mp3"));
 			}
 		});
-		if (res != null)
-			Arrays.sort(res, new Comparator<File>() {
-				@Override
-				public int compare(File lhs, File rhs) {
-					return lhs.getName().compareTo(rhs.getName());
-				}
-			});
-		return res;
+
+		if (res == null)
+			return null;
+
+		String[] files = new String[res.length];
+		for (int i = 0; i < res.length; i++)
+			files[i] = res[i].getAbsolutePath();
+
+		Arrays.sort(files);
+
+		return files;
 	}
 
 	private static File[] listDirs(File dir) {
@@ -532,6 +539,59 @@ public class APService extends BaseService {
 		public void onProviderDisabled(String provider) {
 		}
 
+	}
+
+	private int read1(File dir, List<Folder> folders, int indent) {
+
+		Cursor mCursor = getContentResolver().query(
+				MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+				new String[] { MediaStore.Audio.Media.DISPLAY_NAME,
+						MediaStore.Audio.Media.DATA }, null, null, null);
+
+		System.out.println("total no of songs are=" + mCursor.getCount());
+
+		Map<String, List<String>> map = new HashMap<String, List<String>>();
+
+		while (mCursor.moveToNext()) {
+			String title = mCursor
+					.getString(mCursor
+							.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
+			String path = mCursor.getString(mCursor
+					.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+			System.out.println(title + " " + path);
+
+			String p = path.substring(path.indexOf('/', 1) + 1);
+			for (int i = 0; i < p.length(); i++)
+				if (p.charAt(i) == '/') {
+					String fold = p.substring(0, i);
+					if (!map.containsKey(fold))
+						map.put(fold, new ArrayList<String>());
+				}
+
+			String folder = p.substring(0, p.lastIndexOf('/'));
+
+			List<String> files = map.get(folder);
+			files.add(path);
+		}
+		mCursor.close();
+		System.out.println();
+
+		List<String> folds = new ArrayList<String>(map.keySet());
+		Collections.sort(folds);
+
+		for (String folder : folds) {
+			int ind = 0;
+			for (int i = 0; i < folder.length(); i++)
+				if (folder.charAt(i) == '/')
+					ind++;
+
+			List<String> files = map.get(folder);
+			Collections.sort(files);
+
+			folders.add(new Folder(folder, ind, files.toArray(new String[0])));
+		}
+
+		return 0;
 	}
 
 }

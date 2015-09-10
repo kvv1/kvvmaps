@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class FilesAdapter extends ArrayAdapter<File> {
+public class FilesAdapter extends ArrayAdapter<String> {
 
 	private Activity activity;
 	private IAPService service;
@@ -34,7 +34,7 @@ public class FilesAdapter extends ArrayAdapter<File> {
 
 		v = vi.inflate(R.layout.folder_item, null);
 
-		File file = getItem(position);
+		File file = new File(getItem(position));
 
 		TextView tv = (TextView) v.findViewById(R.id.text);
 		tv.setText(file.getName());

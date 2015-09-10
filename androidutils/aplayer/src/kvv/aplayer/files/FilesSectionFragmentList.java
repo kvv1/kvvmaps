@@ -1,5 +1,7 @@
 package kvv.aplayer.files;
 
+import java.io.File;
+
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
 import kvv.aplayer.files.LevelView.LevelProvider;
@@ -175,18 +177,20 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 			int folder = conn.service.getCurrentFolder();
 			if (folder >= 0) {
 				Folder fold = conn.service.getFolders().get(folder);
-				progressText.setText(fold.files[file].getName());
-				int dur = conn.service.getDuration();
-				int pos = conn.service.getCurrentPosition();
-				if (dur > 0) {
-					int max = fold.files.length * 100;
-					int cur = file * 100 + pos * 100 / dur;
-					tapeView.setProgress(max, cur);
+				if (fold.files != null) {
+					progressText.setText(new File(fold.files[file]).getName());
+					int dur = conn.service.getDuration();
+					int pos = conn.service.getCurrentPosition();
+					if (dur > 0) {
+						int max = fold.files.length * 100;
+						int cur = file * 100 + pos * 100 / dur;
+						tapeView.setProgress(max, cur);
 
-					ProgressBar folderProgressBar = (ProgressBar) rootView
-							.findViewById(R.id.folderProgress);
-					folderProgressBar.setMax(max);
-					folderProgressBar.setProgress(cur);
+						ProgressBar folderProgressBar = (ProgressBar) rootView
+								.findViewById(R.id.folderProgress);
+						folderProgressBar.setMax(max);
+						folderProgressBar.setProgress(cur);
+					}
 				}
 			}
 

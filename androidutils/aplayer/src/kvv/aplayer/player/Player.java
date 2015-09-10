@@ -1,6 +1,5 @@
 package kvv.aplayer.player;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,7 +32,7 @@ public abstract class Player {
 	public Player(List<Folder> folders) {
 
 		this.folders = folders;
-		folders.add(new Folder("RANDOM", 0, new File[0]));
+		folders.add(new Folder("RANDOM", 0, new String[0]));
 
 		mp.setVolume(1, 1);
 
@@ -89,7 +88,7 @@ public abstract class Player {
 		Folder folder = folders.get(curFolder);
 		if (curFile >= folder.files.length)
 			return;
-		mp.setDataSource(folder.files[curFile].getAbsolutePath());
+		mp.setDataSource(folder.files[curFile]);
 	}
 
 	public void makeRandom(int folderIdx) {
@@ -98,7 +97,7 @@ public abstract class Player {
 
 		Folder folder = folders.get(folderIdx);
 
-		List<File> files = new ArrayList<File>();
+		List<String> files = new ArrayList<String>();
 		files.addAll(Arrays.asList(folder.files));
 		for (int i = folderIdx + 1; i < folders.size(); i++) {
 			Folder f = folders.get(i);
@@ -111,7 +110,7 @@ public abstract class Player {
 
 		Folder randFolder = folders.get(folders.size() - 1);
 
-		randFolder.files = files.toArray(new File[0]);
+		randFolder.files = files.toArray(new String[0]);
 		randFolder.displayName = folder.displayName + " RND";
 
 		onRandomChanged();
