@@ -50,9 +50,24 @@ public class TapeView extends View {
 		headboxPaint1.setStrokeWidth(3);
 	}
 
+	private float bobbinSize(float w) {
+		return w * 0.42f;
+	}
+
+	private float bobbinY(float w) {
+		return w * 0.22f;
+	}
+
+	private float bobbinX2(float w) {
+		return w - w * 0.22f;
+	}
+
+	private float bobbinX1(float w) {
+		return w * 0.22f;
+	}
+
 	@Override
 	public void draw(Canvas canvas) {
-		canvas.drawRGB(150, 150, 120);
 
 		float w = getWidth();
 		float h = getHeight();
@@ -60,10 +75,10 @@ public class TapeView extends View {
 		if (h > w * 0.55)
 			h = w * 0.55f;
 
-		float bobbinSize = (w * 0.42f);
-		float bobbinY = w * 0.22f;
-		float bobbinX2 = w - w * 0.22f;
-		float bobbinX1 = w * 0.22f;
+		float bobbinSize = bobbinSize(w);
+		float bobbinY = bobbinY(w);
+		float bobbinX2 = bobbinX2(w);
+		float bobbinX1 = bobbinX1(w);
 
 		float r1 = bobbin1.getTapeR(bobbinSize);
 		float r2 = bobbin2.getTapeR(bobbinSize);
@@ -96,6 +111,21 @@ public class TapeView extends View {
 		// canvas.drawCircle(w / 10, h * 0.9f, w / 50, tapePaint);
 		// canvas.drawCircle(w- w / 10, h * 0.9f, w / 50, tapePaint);
 
+	}
+
+	private boolean hitTest(float x, float y, int bobbin) {
+		float w = getWidth();
+		float bx = bobbin < 0 ? bobbinX1(w) : bobbinX2(w);
+		float by = bobbinY(w);
+		return Math.sqrt(((x - bx) * (x - bx) + (y - by) * (y - by))) < bobbinSize(w) * 0.2;
+	}
+
+	public int hitTest(float x, float y) { // -1 - left, 1 = right
+		if (hitTest(x, y, -1))
+			return -1;
+		if (hitTest(x, y, 1))
+			return 1;
+		return 0;
 	}
 
 	public void setProgress(float max, float cur) {

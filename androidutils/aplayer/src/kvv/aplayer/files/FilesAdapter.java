@@ -19,8 +19,7 @@ public class FilesAdapter extends ArrayAdapter<String> {
 	public int sel = -1;
 
 	public FilesAdapter(Activity activity, IAPService service) {
-		super(activity, R.layout.folder_item, service.getFolders().get(
-				service.getCurrentFolder()).files);
+		super(activity, R.layout.folder_item, service.getFiles());
 		this.activity = activity;
 		this.service = service;
 	}

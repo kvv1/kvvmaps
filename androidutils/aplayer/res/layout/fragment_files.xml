@@ -67,6 +67,7 @@
             android:id="@+id/tapePanel"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="#969678"
             android:visibility="visible" >
 
             <kvv.aplayer.files.TapeView
@@ -221,6 +222,7 @@
                 android:id="@+id/progressText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="#80C0FFC0"
                 android:ellipsize="start"
                 android:gravity="center_horizontal"
                 android:singleLine="true"
@@ -233,8 +235,7 @@
             android:id="@+id/bottomButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#808080"
-            >
+            android:background="#808080" >
 
             <Button
                 android:id="@+id/prev"

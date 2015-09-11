@@ -12,6 +12,7 @@ public interface IAPService {
 	int getCurrentFolder();
 	int getFile();
 	int getFileCnt();
+	String[] getFiles();
 	void toFolder(int position);
 	void toFile(int position);
 	void prev();
@@ -29,4 +30,5 @@ public interface IAPService {
 	void setDBPer100Idx(int n);
 	int getDBPer100Idx();
 	float getLevel();
+	void reload();
 }

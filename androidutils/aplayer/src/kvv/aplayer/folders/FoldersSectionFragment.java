@@ -2,14 +2,11 @@ package kvv.aplayer.folders;
 
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
-import kvv.aplayer.R.id;
-import kvv.aplayer.R.layout;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.APServiceListenerAdapter;
 import kvv.aplayer.service.IAPService;
 import android.os.Handler;
-import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -38,7 +35,13 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 				if (!noSel)
 					list.setSelection(curFolder - 2);
 			}
+		}
 
+		public void onLoaded() {
+			if (conn.service == null)
+				return;
+			adapter = new FoldersAdapter(getActivity(), conn.service);
+			list.setAdapter(adapter);
 		}
 	};
 
@@ -72,9 +75,8 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 	@Override
 	protected void createUI(IAPService service) {
 		list = (ListView) rootView.findViewById(R.id.list);
-		adapter = new FoldersAdapter(getActivity(), service);
-		list.setAdapter(adapter);
 		service.addListener(listener);
+		listener.onLoaded();
 		listener.onChanged();
 
 		list.setOnItemClickListener(new OnItemClickListener() {
@@ -91,23 +93,6 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 				}
 			}
 		});
-
-		// list.setOnItemLongClickListener(new OnItemLongClickListener() {
-		// @Override
-		// public boolean onItemLongClick(AdapterView<?> adapterView, View view,
-		// final int position, long id) {
-		// new AlertDialog.Builder(getActivity())
-		// .setMessage(
-		// "Play random?")
-		// .setPositiveButton("OK",
-		// new DialogInterface.OnClickListener() {
-		// public void onClick(DialogInterface dialog,
-		// int which) {
-		// }
-		// }).show();
-		// return false;
-		// }
-		// });
 
 		((Button) rootView.findViewById(R.id.goto1))
 				.setOnClickListener(new OnClickListener() {

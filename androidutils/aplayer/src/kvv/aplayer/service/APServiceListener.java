@@ -8,4 +8,6 @@ public interface APServiceListener {
 	void onRandomChanged();
 	
 	void onSpeedChanged(boolean hasSpeed, int fromLocation, int fromPlayer);
+	
+	void onLoaded();
 }

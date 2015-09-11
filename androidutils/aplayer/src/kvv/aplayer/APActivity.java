@@ -1,8 +1,5 @@
 package kvv.aplayer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import kvv.aplayer.chart.ChartsFragment;
 import kvv.aplayer.files.FilesSectionFragmentList;
 import kvv.aplayer.folders.FoldersSectionFragment;
@@ -15,14 +12,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
@@ -81,7 +76,6 @@ public class APActivity extends FragmentActivityX {
 		return null;
 	}
 
-
 	private APServiceListener listener = new APServiceListenerAdapter() {
 
 		private Runnable r = new Runnable() {
@@ -126,13 +120,13 @@ public class APActivity extends FragmentActivityX {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		try {
-			menu.findItem(R.id.action_update).setTitle(
-					"Ver. "
-							+ getPackageManager().getPackageInfo(
-									this.getPackageName(), 0).versionName);
-		} catch (NameNotFoundException e) {
-		}
+//		try {
+//			menu.findItem(R.id.action_update).setTitle(
+//					"Ver. "
+//							+ getPackageManager().getPackageInfo(
+//									this.getPackageName(), 0).versionName);
+//		} catch (NameNotFoundException e) {
+//		}
 		// TODO Auto-generated method stub
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -143,9 +137,9 @@ public class APActivity extends FragmentActivityX {
 		case R.id.action_exit:
 			exit();
 			return true;
-		case R.id.action_update:
-			startActivity(new Intent(Intent.ACTION_VIEW,
-					Uri.parse("http://palermo.ru/vladimir/aplayer.apk")));
+		case R.id.action_reload:
+			if(conn.service != null)
+				conn.service.reload();
 			return true;
 		case R.id.action_settings:
 			Intent i = new Intent(this, Preferences.class);
@@ -236,7 +230,7 @@ public class APActivity extends FragmentActivityX {
 		boolean playing = conn.service != null && conn.service.isPlaying();
 
 		System.out.println("updateWakeLock playing=" + playing + " fg=" + fg);
-		
+
 		if (navMode) {
 			if (fg && playing)
 				lock();
@@ -261,5 +255,5 @@ public class APActivity extends FragmentActivityX {
 		ViewPager pager = (ViewPager) findViewById(getPagerId());
 		pager.setCurrentItem(0, true);
 	}
-	
+
 }

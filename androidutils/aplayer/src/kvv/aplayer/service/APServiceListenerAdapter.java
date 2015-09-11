@@ -18,5 +18,9 @@ public class APServiceListenerAdapter implements APServiceListener {
 	public void onSpeedChanged(boolean hasSpeed, int fromLocation,
 			int fromPlayer) {
 	}
+	
+	@Override
+	public void onLoaded() {
+	}
 
 }

@@ -10,8 +10,11 @@ import kvv.aplayer.service.IAPService;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLayoutChangeListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -102,14 +105,13 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 
 			@Override
 			public void onClick(View v) {
-				if (touchY > v.getWidth() / 3) {
+				int ht = tapeView.hitTest(touchX, touchY);
+				if (ht == 1)
+					nextClick();
+				else if (ht == -1)
+					prevClick();
+				else
 					playPause();
-				} else if (touchY > v.getWidth() / 15) {
-					if (touchX < v.getWidth() / 2)
-						prevClick();
-					else
-						nextClick();
-				}
 			}
 		});
 
@@ -117,13 +119,11 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 
 			@Override
 			public boolean onLongClick(View v) {
-				if (touchY > v.getWidth() / 3) {
-				} else if (touchY > v.getWidth() / 15) {
-					if (touchX < v.getWidth() / 2)
-						prevLongClick();
-					else
-						nextLongClick();
-				}
+				int ht = tapeView.hitTest(touchX, touchY);
+				if (ht == 1)
+					nextLongClick();
+				else if (ht == -1)
+					prevLongClick();
 				return false;
 			}
 		});
@@ -138,7 +138,30 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 			}
 		});
 
+		ViewTreeObserver vto = rootView.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				rootView.getViewTreeObserver().removeGlobalOnLayoutListener(
+						this);
+				int width = rootView.getMeasuredWidth();
+				int height = rootView.getMeasuredHeight();
+
+				View view_instance = levelView;
+				android.view.ViewGroup.LayoutParams params = view_instance
+						.getLayoutParams();
+				int newLayoutWidth = (int) (width * 0.19);
+				params.width = newLayoutWidth;
+				params.height = newLayoutWidth;
+				view_instance.setLayoutParams(params);// levelView.set
+			}
+		});
+
 		enDisViews();
+	}
+
+	public void onDestroy() {
+		super.onDestroy();
 	}
 
 	float touchX;
@@ -177,7 +200,7 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 			int folder = conn.service.getCurrentFolder();
 			if (folder >= 0) {
 				Folder fold = conn.service.getFolders().get(folder);
-				if (fold.files != null) {
+				if (fold.files != null && fold.files.length > 0) {
 					progressText.setText(new File(fold.files[file]).getName());
 					int dur = conn.service.getDuration();
 					int pos = conn.service.getCurrentPosition();

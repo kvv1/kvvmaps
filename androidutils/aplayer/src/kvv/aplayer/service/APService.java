@@ -1,11 +1,8 @@
 package kvv.aplayer.service;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +15,6 @@ import kvv.aplayer.R;
 import kvv.aplayer.RemoteControlReceiver;
 import kvv.aplayer.folders.Folder;
 import kvv.aplayer.player.Player1;
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -143,48 +139,16 @@ public class APService extends BaseService {
 
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
 
-		List<Folder> folders = new ArrayList<Folder>();
 		/*
 		 * if (Build.VERSION.SDK_INT < 14) for (StorageInfo info :
 		 * StorageUtils.getStorageList()) read(new File(info.path), folders, 0);
 		 * else for (String s : StorageUtils.getStorageDirectories()) read(new
 		 * File(s), folders, 0);
 		 */
-		read1(null, folders, 0);
 
 		// readFolders(ROOT, 0, folders);
 
-		player = new Player1(folders) {
-			@Override
-			protected void onChanged() {
-				System.out.println("onChanged " + isPlaying());
-
-				if (!isPlaying()) {
-					handler.removeCallbacks(saver);
-					saver = null;
-					stopGpsDelayed();
-				} else {
-					if (saver == null) {
-						saver = new Saver();
-						handler.post(saver);
-					}
-					startGps();
-				}
-
-				for (APServiceListener l : listeners)
-					l.onChanged();
-
-				handler.removeCallbacks(visEnabler);
-				handler.postDelayed(visEnabler, 200);
-			}
-
-			@Override
-			protected void onRandomChanged() {
-				for (APServiceListener l : listeners)
-					l.onRandomChanged();
-			}
-
-		};
+		createPlayer();
 
 		telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 		phoneStateListener = new PhoneStateListener() {
@@ -231,6 +195,45 @@ public class APService extends BaseService {
 		player.setDbPer100(dBPer100kmh[dBPer100Idx]);
 
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+	}
+
+	private void createPlayer() {
+		if (player != null)
+			player.close();
+		List<Folder> folders = read();
+		player = new Player1(folders) {
+			@Override
+			protected void onChanged() {
+				System.out.println("onChanged " + isPlaying());
+
+				if (!isPlaying()) {
+					handler.removeCallbacks(saver);
+					saver = null;
+					stopGpsDelayed();
+				} else {
+					if (saver == null) {
+						saver = new Saver();
+						handler.post(saver);
+					}
+					startGps();
+				}
+
+				for (APServiceListener l : listeners)
+					l.onChanged();
+
+				handler.removeCallbacks(visEnabler);
+				handler.postDelayed(visEnabler, 200);
+			}
+
+			@Override
+			protected void onRandomChanged() {
+				for (APServiceListener l : listeners)
+					l.onRandomChanged();
+			}
+
+		};
+		for (APServiceListener l : listeners)
+			l.onLoaded();
 	}
 
 	@Override
@@ -314,12 +317,20 @@ public class APService extends BaseService {
 
 		@Override
 		public int getDuration() {
-			return player.getDuration();
+			try {
+				return player.getDuration();
+			} catch (Exception e) {
+				return 1;
+			}
 		}
 
 		@Override
 		public int getCurrentPosition() {
-			return player.getCurrentPosition();
+			try {
+				return player.getCurrentPosition();
+			} catch (Exception e) {
+				return 0;
+			}
 		}
 
 		@Override
@@ -334,7 +345,11 @@ public class APService extends BaseService {
 
 		@Override
 		public boolean isPlaying() {
-			return player.isPlaying();
+			try {
+				return player.isPlaying();
+			} catch (Exception e) {
+				return false;
+			}
 		}
 
 		@Override
@@ -385,69 +400,19 @@ public class APService extends BaseService {
 			return 0;
 		}
 
-	}
-
-	private static int read(File dir, List<Folder> folders, int indent) {
-		String[] files = listFiles(dir);
-		File[] dirs = listDirs(dir);
-
-		int sum = 0;
-
-		if (files != null)
-			sum = files.length;
-
-		List<Folder> folders2 = new ArrayList<Folder>();
-
-		if (dirs != null)
-			for (File d : dirs)
-				if (indent != 0 || !d.getName().equals("external_sd"))
-					sum += read(d, folders2, indent + 1);
-
-		if (sum > 0) {
-			folders.add(new Folder(dir.getAbsolutePath(), indent, files));
-			folders.addAll(folders2);
+		@Override
+		public void reload() {
+			createPlayer();
 		}
 
-		return sum;
-	}
+		@Override
+		public String[] getFiles() {
+			int folder = getCurrentFolder();
+			if (folder < 0)
+				return new String[0];
+			return getFolders().get(folder).files;
+		}
 
-	private static String[] listFiles(File dir) {
-		File[] res = dir.listFiles(new FileFilter() {
-			@SuppressLint("DefaultLocale")
-			@Override
-			public boolean accept(File pathname) {
-				String name = pathname.getName().toLowerCase();
-				return pathname.isFile() && (name.endsWith(".mp3"));
-			}
-		});
-
-		if (res == null)
-			return null;
-
-		String[] files = new String[res.length];
-		for (int i = 0; i < res.length; i++)
-			files[i] = res[i].getAbsolutePath();
-
-		Arrays.sort(files);
-
-		return files;
-	}
-
-	private static File[] listDirs(File dir) {
-		File[] res = dir.listFiles(new FileFilter() {
-			@Override
-			public boolean accept(File pathname) {
-				return pathname.isDirectory();
-			}
-		});
-		if (res != null)
-			Arrays.sort(res, new Comparator<File>() {
-				@Override
-				public int compare(File lhs, File rhs) {
-					return lhs.getName().compareTo(rhs.getName());
-				}
-			});
-		return res;
 	}
 
 	private void save() {
@@ -541,12 +506,17 @@ public class APService extends BaseService {
 
 	}
 
-	private int read1(File dir, List<Folder> folders, int indent) {
+	private List<Folder> read() {
+
+		List<Folder> folders = new ArrayList<Folder>();
 
 		Cursor mCursor = getContentResolver().query(
 				MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
 				new String[] { MediaStore.Audio.Media.DISPLAY_NAME,
 						MediaStore.Audio.Media.DATA }, null, null, null);
+
+		if (mCursor == null)
+			return folders;
 
 		System.out.println("total no of songs are=" + mCursor.getCount());
 
@@ -591,7 +561,7 @@ public class APService extends BaseService {
 			folders.add(new Folder(folder, ind, files.toArray(new String[0])));
 		}
 
-		return 0;
+		return folders;
 	}
 
 }

@@ -46,7 +46,7 @@ public abstract class Player {
 				if (curFile >= folder.files.length - 1) {
 					mp.stop();
 					curFile = 0;
-					restart(false);
+					reload(false);
 					// mp.reset();
 					onChanged1();
 					return;
@@ -76,8 +76,34 @@ public abstract class Player {
 		onChanged1();
 	}
 
-	public void setVolume(float v) {
-		// mp.setVolume(v, v);
+	private void toFile(int idx, int pos, boolean forcePlay) {
+		if (folders.size() == 0 || curFolder < 0)
+			return;
+
+		Folder folder = folders.get(curFolder);
+		if (idx >= folder.files.length)
+			curFile = 0;
+		else
+			curFile = idx;
+
+		reload(forcePlay);
+		mp.seekTo(pos);
+	}
+
+	private void reload(boolean forcePlay) {
+		try {
+			boolean playing = mp.isPlaying();
+			if (playing)
+				mp.stop();
+			mp.reset();
+			setDataSource();
+			initialized = true;
+			mp.prepare();
+			resetGain();
+			if (playing || forcePlay)
+				mp.start();
+		} catch (Exception e) {
+		}
 	}
 
 	private void setDataSource() throws Exception {
@@ -89,6 +115,10 @@ public abstract class Player {
 		if (curFile >= folder.files.length)
 			return;
 		mp.setDataSource(folder.files[curFile]);
+	}
+
+	public void setVolume(float v) {
+		// mp.setVolume(v, v);
 	}
 
 	public void makeRandom(int folderIdx) {
@@ -139,21 +169,6 @@ public abstract class Player {
 		onChanged1();
 	}
 
-	private void toFile(int idx, int pos, boolean forcePlay) {
-		if (folders.size() == 0 || curFolder < 0)
-			return;
-
-		Folder folder = folders.get(curFolder);
-		if (idx >= folder.files.length)
-			curFile = 0;
-		else
-			curFile = idx;
-
-		restart(forcePlay);
-
-		mp.seekTo(pos);
-	}
-
 	public void seek(int seekStep) {
 		if (folders.size() == 0 || curFolder < 0)
 			return;
@@ -168,7 +183,7 @@ public abstract class Player {
 		if (seekStep < 0) {
 			seekStep = -seekStep;
 			if (cur < seekStep && curFile > 0) {
-				toFile(curFile - 1, 0, true);
+				toFile(curFile - 1);
 				mp.seekTo(Math.max(0, mp.getDuration() - seekStep));
 			} else {
 				mp.seekTo(Math.max(0, cur - seekStep));
@@ -176,12 +191,13 @@ public abstract class Player {
 		} else {
 			if (cur + seekStep >= mp.getDuration()) {
 				if (curFile < folder.files.length - 1) {
-					toFile(curFile + 1, 0, true);
+					toFile(curFile + 1);
 				}
 			} else {
 				mp.seekTo(cur + seekStep);
 			}
 		}
+		onChanged1();
 	}
 
 	public void prev() {
@@ -191,7 +207,8 @@ public abstract class Player {
 		int cur = mp.getCurrentPosition();
 		if (cur < 3000 && curFile > 0)
 			toFile(curFile - 1, 0, true);
-		restart(false);
+		else
+			reload(false);
 		onChanged1();
 	}
 
@@ -205,24 +222,6 @@ public abstract class Player {
 		}
 		toFile(curFile + 1, 0, forcePlay);
 		onChanged1();
-	}
-
-	private void restart(boolean forcePlay) {
-		try {
-			boolean playing = mp.isPlaying();
-			if (playing) {
-				mp.stop();
-				onChanged1();
-			}
-			mp.reset();
-			setDataSource();
-			initialized = true;
-			mp.prepare();
-			resetGain();
-			if (playing || forcePlay)
-				mp.start();
-		} catch (Exception e) {
-		}
 	}
 
 	public void pause() {
