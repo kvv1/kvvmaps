@@ -1,4 +1,4 @@
-package kvv.aplayer.folders;
+package kvv.aplayer.service;
 
 
 public class Folder {
@@ -7,9 +7,9 @@ public class Folder {
 	public final int indent;
 	public String displayName;
 	
-	public String[] files;
+	public File1[] files;
 
-	public Folder(String pathName, int indent, String[] files) {
+	public Folder(String pathName, int indent, File1[] files) {
 		this.path = pathName;
 		this.indent = indent;
 		this.files = files;

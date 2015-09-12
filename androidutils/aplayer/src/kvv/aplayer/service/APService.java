@@ -14,7 +14,6 @@ import kvv.aplayer.APActivity;
 import kvv.aplayer.MemoryStorage;
 import kvv.aplayer.R;
 import kvv.aplayer.RemoteControlReceiver;
-import kvv.aplayer.folders.Folder;
 import kvv.aplayer.player.Player1;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -420,10 +419,10 @@ public class APService extends BaseService {
 		}
 
 		@Override
-		public String[] getFiles() {
+		public File1[] getFiles() {
 			int folder = getCurrentFolder();
 			if (folder < 0)
-				return new String[0];
+				return new File1[0];
 			return getFolders().get(folder).files;
 		}
 
@@ -579,14 +578,15 @@ public class APService extends BaseService {
 		Cursor mCursor = getContentResolver().query(
 				MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
 				new String[] { MediaStore.Audio.Media.DISPLAY_NAME,
-						MediaStore.Audio.Media.DATA }, null, null, null);
+						MediaStore.Audio.Media.DATA,
+						MediaStore.Audio.Media.DURATION }, null, null, null);
 
 		if (mCursor == null)
 			return folders;
 
 		System.out.println("total no of songs are=" + mCursor.getCount());
 
-		Map<String, List<String>> map = new HashMap<String, List<String>>();
+		Map<String, List<File1>> map = new HashMap<String, List<File1>>();
 
 		while (mCursor.moveToNext()) {
 			String title = mCursor
@@ -594,20 +594,22 @@ public class APService extends BaseService {
 							.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
 			String path = mCursor.getString(mCursor
 					.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-			System.out.println(title + " " + path);
+			long dur = mCursor.getLong(mCursor
+					.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+			System.out.println(title + " " + path + " " + dur);
 
 			String p = path.substring(path.indexOf('/', 1) + 1);
 			for (int i = 0; i < p.length(); i++)
 				if (p.charAt(i) == '/') {
 					String fold = p.substring(0, i);
 					if (!map.containsKey(fold))
-						map.put(fold, new ArrayList<String>());
+						map.put(fold, new ArrayList<File1>());
 				}
 
 			String folder = p.substring(0, p.lastIndexOf('/'));
 
-			List<String> files = map.get(folder);
-			files.add(path);
+			List<File1> files = map.get(folder);
+			files.add(new File1(path, title, dur));
 		}
 		mCursor.close();
 		System.out.println();
@@ -621,10 +623,10 @@ public class APService extends BaseService {
 				if (folder.charAt(i) == '/')
 					ind++;
 
-			List<String> files = map.get(folder);
+			List<File1> files = map.get(folder);
 			Collections.sort(files);
 
-			folders.add(new Folder(folder, ind, files.toArray(new String[0])));
+			folders.add(new Folder(folder, ind, files.toArray(new File1[0])));
 		}
 
 		return folders;

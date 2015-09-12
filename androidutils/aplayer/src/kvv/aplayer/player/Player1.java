@@ -2,7 +2,7 @@ package kvv.aplayer.player;
 
 import java.util.List;
 
-import kvv.aplayer.folders.Folder;
+import kvv.aplayer.service.Folder;
 import android.media.audiofx.Equalizer;
 
 public abstract class Player1 extends Player {

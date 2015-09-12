@@ -1,6 +1,7 @@
 package kvv.aplayer.folders;
 
 import kvv.aplayer.R;
+import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
 import android.app.Activity;
 import android.view.LayoutInflater;

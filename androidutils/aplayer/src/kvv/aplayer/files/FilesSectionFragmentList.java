@@ -1,11 +1,9 @@
 package kvv.aplayer.files;
 
-import java.io.File;
-
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
 import kvv.aplayer.files.LevelView.LevelProvider;
-import kvv.aplayer.folders.Folder;
+import kvv.aplayer.service.File1;
 import kvv.aplayer.service.IAPService;
 import android.view.MotionEvent;
 import android.view.View;
@@ -265,23 +263,31 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 			pause.setText(conn.service.isPlaying() ? "Pause" : "Play");
 
 			int file = conn.service.getFile();
-			int folder = conn.service.getCurrentFolder();
-			if (folder >= 0) {
-				Folder fold = conn.service.getFolders().get(folder);
-				if (fold.files != null && fold.files.length > 0) {
-					progressText.setText(new File(fold.files[file]).getName());
-					int dur = conn.service.getDuration();
-					int pos = conn.service.getCurrentPosition();
-					if (dur > 0) {
-						int max = fold.files.length * 100;
-						int cur = file * 100 + pos * 100 / dur;
-						tapeView.setProgress(max, cur);
-
-						ProgressBar folderProgressBar = (ProgressBar) rootView
-								.findViewById(R.id.folderProgress);
-						folderProgressBar.setMax(max);
-						folderProgressBar.setProgress(cur);
+			File1[] files = conn.service.getFiles();
+			if (files.length > 0) {
+				progressText.setText(files[file].name);
+				int dur = conn.service.getDuration();
+				int pos = conn.service.getCurrentPosition();
+				if (dur > 0) {
+					int max = 0;
+					int cur = 0;
+					for (int i = 0; i < files.length; i++) {
+						File1 file1 = files[i];
+						max += file1.duration / 1000;
+						if (i < file)
+							cur += file1.duration / 1000;
+						if (i == file)
+							cur += pos / 1000;
 					}
+
+					// int max = files.length * 100;
+					// int cur = file * 100 + pos * 100 / dur;
+					tapeView.setProgress(max, cur);
+
+					ProgressBar folderProgressBar = (ProgressBar) rootView
+							.findViewById(R.id.folderProgress);
+					folderProgressBar.setMax(max);
+					folderProgressBar.setProgress(cur);
 				}
 			}
 

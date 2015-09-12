@@ -2,8 +2,6 @@ package kvv.aplayer.service;
 
 import java.util.List;
 
-import kvv.aplayer.folders.Folder;
-
 
 public interface IAPService {
 	List<Folder> getFolders();
@@ -12,7 +10,7 @@ public interface IAPService {
 	int getCurrentFolder();
 	int getFile();
 	int getFileCnt();
-	String[] getFiles();
+	File1[] getFiles();
 	void toFolder(int position);
 	void toFile(int position);
 	void prev();

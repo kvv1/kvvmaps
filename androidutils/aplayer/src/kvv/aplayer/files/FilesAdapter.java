@@ -3,6 +3,7 @@ package kvv.aplayer.files;
 import java.io.File;
 
 import kvv.aplayer.R;
+import kvv.aplayer.service.File1;
 import kvv.aplayer.service.IAPService;
 import android.app.Activity;
 import android.view.LayoutInflater;
@@ -11,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class FilesAdapter extends ArrayAdapter<String> {
+public class FilesAdapter extends ArrayAdapter<File1> {
 
 	private Activity activity;
 	private IAPService service;
@@ -33,7 +34,7 @@ public class FilesAdapter extends ArrayAdapter<String> {
 
 		v = vi.inflate(R.layout.folder_item, null);
 
-		File file = new File(getItem(position));
+		File file = new File(getItem(position).path);
 
 		TextView tv = (TextView) v.findViewById(R.id.text);
 		tv.setText(file.getName());

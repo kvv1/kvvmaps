@@ -2,10 +2,10 @@ package kvv.aplayer.files;
 
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
-import kvv.aplayer.folders.Folder;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.APServiceListenerAdapter;
+import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
@@ -28,7 +28,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 	protected Handler handler = new Handler();
 
 	private Button timing;
-	private ProgressBar progressBar;
+	private ProgressBar fileProgressBar;
 	protected TextView folderTextView;
 
 	protected void folderChanged() {
@@ -108,8 +108,8 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		int dur = conn.service.getDuration();
 		int pos = conn.service.getCurrentPosition();
 
-		progressBar.setMax(dur);
-		progressBar.setProgress(pos);
+		fileProgressBar.setMax(dur);
+		fileProgressBar.setProgress(pos);
 
 		timing.setText(convertSecondsToHMmSs(pos / 1000) + "("
 				+ convertSecondsToHMmSs(dur / 1000) + ")");
@@ -324,7 +324,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 					}
 				});
 
-		progressBar = (ProgressBar) rootView.findViewById(R.id.progress);
+		fileProgressBar = (ProgressBar) rootView.findViewById(R.id.progress);
 
 		service.addListener(listener);
 

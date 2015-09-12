@@ -5,7 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import kvv.aplayer.folders.Folder;
+import kvv.aplayer.service.File1;
+import kvv.aplayer.service.Folder;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
@@ -32,7 +33,7 @@ public abstract class Player {
 	public Player(List<Folder> folders) {
 
 		this.folders = folders;
-		folders.add(new Folder("RANDOM", 0, new String[0]));
+		folders.add(new Folder("RANDOM", 0, new File1[0]));
 
 		mp.setVolume(1, 1);
 
@@ -114,7 +115,7 @@ public abstract class Player {
 		Folder folder = folders.get(curFolder);
 		if (curFile >= folder.files.length)
 			return;
-		mp.setDataSource(folder.files[curFile]);
+		mp.setDataSource(folder.files[curFile].path);
 	}
 
 	public void setVolume(float v) {
@@ -127,7 +128,7 @@ public abstract class Player {
 
 		Folder folder = folders.get(folderIdx);
 
-		List<String> files = new ArrayList<String>();
+		List<File1> files = new ArrayList<File1>();
 		files.addAll(Arrays.asList(folder.files));
 		for (int i = folderIdx + 1; i < folders.size(); i++) {
 			Folder f = folders.get(i);
@@ -140,7 +141,7 @@ public abstract class Player {
 
 		Folder randFolder = folders.get(folders.size() - 1);
 
-		randFolder.files = files.toArray(new String[0]);
+		randFolder.files = files.toArray(new File1[0]);
 		randFolder.displayName = folder.displayName + " RND";
 
 		onRandomChanged();
