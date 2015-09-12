@@ -149,7 +149,7 @@ public class LevelView extends View {
 	@Override
 	public void draw(Canvas canvas) {
 	//	canvas.drawRGB(150, 150, 120);
-
+		
 		paint.setAntiAlias(true);
 
 		float w = getWidth();
@@ -184,10 +184,12 @@ public class LevelView extends View {
 
 	private Runnable r;
 
+	
 	public void start() {
-		System.out.println("LevelView.Start()");
 		if (r != null)
 			return;
+
+		System.out.println("LevelView.Start()");
 
 		r = new Runnable() {
 			@Override

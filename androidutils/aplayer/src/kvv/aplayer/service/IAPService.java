@@ -31,4 +31,6 @@ public interface IAPService {
 	int getDBPer100Idx();
 	float getLevel();
 	void reload();
+	void redo();
+	void undo();
 }

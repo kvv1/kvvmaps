@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -107,7 +108,10 @@ public class APService extends BaseService {
 	Runnable visEnabler = new Runnable() {
 		@Override
 		public void run() {
-			player.enVis();
+			try {
+				player.enVis();
+			} catch (Exception e) {
+			}
 		}
 	};
 
@@ -200,6 +204,10 @@ public class APService extends BaseService {
 	private void createPlayer() {
 		if (player != null)
 			player.close();
+
+		undoList.clear();
+		redoList.clear();
+
 		List<Folder> folders = read();
 		player = new Player1(folders) {
 			@Override
@@ -278,6 +286,8 @@ public class APService extends BaseService {
 			if (position == player.getCurrentFolder())
 				return;
 
+			storeUndo();
+
 			save();
 
 			Folder folder = player.getFolders().get(position);
@@ -291,22 +301,26 @@ public class APService extends BaseService {
 
 		@Override
 		public void toRandom(int position) {
+			storeUndo();
 			save();
 			player.makeRandom(position);
 		}
 
 		@Override
 		public void toFile(int position) {
+			storeUndo();
 			player.toFile(position);
 		}
 
 		@Override
 		public void prev() {
+			storeUndo();
 			player.prev();
 		}
 
 		@Override
 		public void next() {
+			storeUndo();
 			player.next(true);
 		}
 
@@ -413,7 +427,59 @@ public class APService extends BaseService {
 			return getFolders().get(folder).files;
 		}
 
+		@Override
+		public void redo() {
+			System.out.println("redo");
+			if (redoList.isEmpty())
+				return;
+			// if(lastItem == null)
+			UndoItem lastItem = new UndoItem(player.getCurrentFolder(),
+					player.getFile(), player.getCurrentPosition());
+			UndoItem item = redoList.removeLast();
+			undoList.add(lastItem);
+			// lastItem = item;
+			player.toFolder(item.folder, item.file, item.pos);
+		}
+
+		@Override
+		public void undo() {
+			System.out.println("undo");
+			if (undoList.isEmpty())
+				return;
+			// if(lastItem == null)
+			UndoItem lastItem = new UndoItem(player.getCurrentFolder(),
+					player.getFile(), player.getCurrentPosition());
+			UndoItem item = undoList.removeLast();
+			redoList.add(lastItem);
+			// lastItem = item;
+			player.toFolder(item.folder, item.file, item.pos);
+		}
+
 	}
+
+	private void storeUndo() {
+		if (player.getCurrentFolder() < 0)
+			return;
+		undoList.add(new UndoItem(player.getCurrentFolder(), player.getFile(),
+				player.getCurrentPosition()));
+		redoList.clear();
+	}
+
+	static class UndoItem {
+		int folder;
+		int file;
+		int pos;
+
+		public UndoItem(int folder, int file, int pos) {
+			super();
+			this.folder = folder;
+			this.file = file;
+			this.pos = pos;
+		}
+	}
+
+	private LinkedList<UndoItem> undoList = new LinkedList<APService.UndoItem>();
+	private LinkedList<UndoItem> redoList = new LinkedList<APService.UndoItem>();
 
 	private void save() {
 		if (player.getCurrentFolder() < 0)

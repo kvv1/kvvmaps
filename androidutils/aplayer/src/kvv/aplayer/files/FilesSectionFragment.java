@@ -15,8 +15,6 @@ import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
-import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -29,7 +27,6 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	protected Handler handler = new Handler();
 
-	private Button pause;
 	private Button timing;
 	private ProgressBar progressBar;
 	protected TextView folderTextView;
@@ -114,8 +111,6 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		progressBar.setMax(dur);
 		progressBar.setProgress(pos);
 
-		pause.setText(conn.service.isPlaying() ? "Pause" : "Play");
-
 		timing.setText(convertSecondsToHMmSs(pos / 1000) + "("
 				+ convertSecondsToHMmSs(dur / 1000) + ")");
 
@@ -135,7 +130,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		((Button) rootView.findViewById(R.id.volPlus2)).setTypeface(null,
 				conn.service.getGain() == 10 ? Typeface.BOLD : Typeface.NORMAL);
 
-		System.out.println("level = " + conn.service.getLevel());
+//		System.out.println("level = " + conn.service.getLevel());
 
 	}
 
@@ -207,6 +202,19 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		updateUI();
 	}
 
+	public void redo() {
+		if (conn.service != null)
+			conn.service.redo();
+		updateUI();
+	}
+
+	public void undo() {
+		if (conn.service != null)
+			conn.service.undo();
+		updateUI();
+	}
+
+	
 	@Override
 	protected void createUI(final IAPService service) {
 		settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -219,69 +227,6 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		if (!settings.getBoolean(getString(R.string.prefTestMode), false))
 			rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
 
-		OnClickListener prevOnClickListener = new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				prevClick();
-			}
-		};
-
-		OnLongClickListener prevOnLongClickListener = new OnLongClickListener() {
-			@Override
-			public boolean onLongClick(View v) {
-				prevLongClick();
-				return true;
-			}
-		};
-
-		OnTouchListener prevOnTouchListener = new OnTouchListener() {
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				touch(event);
-				return false;
-			}
-		};
-
-		OnClickListener nextOnClickListener = new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				nextClick();
-			}
-		};
-
-		OnLongClickListener nextOnLongClickListener = new OnLongClickListener() {
-			@Override
-			public boolean onLongClick(View v) {
-				nextLongClick();
-				return true;
-			}
-		};
-
-		OnTouchListener nextOnTouchListener = new OnTouchListener() {
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				touch(event);
-				return false;
-			}
-		};
-
-		Button prev = (Button) rootView.findViewById(R.id.prev);
-		prev.setOnClickListener(prevOnClickListener);
-		prev.setOnLongClickListener(prevOnLongClickListener);
-		prev.setOnTouchListener(prevOnTouchListener);
-
-		Button next = (Button) rootView.findViewById(R.id.next);
-		next.setOnClickListener(nextOnClickListener);
-		next.setOnLongClickListener(nextOnLongClickListener);
-		next.setOnTouchListener(nextOnTouchListener);
-
-		pause = (Button) rootView.findViewById(R.id.pause);
-		pause.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				playPause();
-			}
-		});
 
 		timing = (Button) rootView.findViewById(R.id.timing);
 

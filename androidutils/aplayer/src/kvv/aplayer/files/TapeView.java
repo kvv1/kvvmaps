@@ -1,6 +1,7 @@
 package kvv.aplayer.files;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
@@ -10,6 +11,77 @@ import android.view.View;
 
 public class TapeView extends View {
 	private final static int STEP_MS = 30;
+
+	private Bitmap bmp;
+	private int w;
+	private int h;
+
+	private float bobbinSize;
+	private float bobbinX1;
+	private float bobbinX2;
+	private float bobbinY;
+	private float r1;
+	private float r2;
+
+	static class Params {
+
+		protected float bobbinSize;
+		protected float bobbinX1;
+		protected float bobbinX2;
+		protected float bobbinY;
+		protected float r1;
+		protected float r2;
+
+		public Params(float bobbinSize, float bobbinX1, float bobbinX2,
+				float bobbinY, float r1, float r2) {
+			super();
+			this.bobbinSize = bobbinSize;
+			this.bobbinX1 = bobbinX1;
+			this.bobbinX2 = bobbinX2;
+			this.bobbinY = bobbinY;
+			this.r1 = r1;
+			this.r2 = r2;
+		}
+
+	}
+
+	private void createBmp() {
+		if (bmp == null)
+			return;
+
+		bobbinSize = bobbinSize(w);
+		bobbinY = bobbinY(w);
+		bobbinX2 = bobbinX2(w);
+		bobbinX1 = bobbinX1(w);
+		r1 = bobbin1.getTapeR(bobbinSize);
+		r2 = bobbin2.getTapeR(bobbinSize);
+
+		bmp.eraseColor(0);
+
+		Canvas canvas = new Canvas(bmp);
+
+		float hbLeft = w * 0.5f - w * 0.1f;
+		float hbTop = h * 0.8f;
+		float hbRight = w * 0.5f + w * 0.1f;
+		float hbBottom = h * 0.99f;
+
+		float hbGapY = hbTop + (hbBottom - hbTop) * 0.8f;
+
+		canvas.drawRoundRect(new RectF(hbLeft, hbTop, hbRight, hbBottom), 10,
+				10, headboxPaint);
+
+		canvas.drawLine(hbLeft, hbGapY, hbRight, hbGapY, headboxPaint1);
+
+		float grad = 25;
+
+		float x1 = (float) (bobbinX1 - r1 * Math.sin(Math.toRadians(grad)));
+		float y1 = (float) (bobbinY + r1 * Math.cos(Math.toRadians(grad)));
+		float x2 = (float) (bobbinX2 + r2 * Math.sin(Math.toRadians(grad)));
+		float y2 = (float) (bobbinY + r2 * Math.cos(Math.toRadians(grad)));
+
+		canvas.drawLine(hbLeft, hbGapY, x1, y1, tapePaint);
+		canvas.drawLine(hbRight, hbGapY, x2, y2, tapePaint);
+	}
 
 	private Handler handler = new Handler();
 
@@ -50,60 +122,39 @@ public class TapeView extends View {
 		headboxPaint1.setStrokeWidth(3);
 	}
 
-	private float bobbinSize(float w) {
+	private static float bobbinSize(float w) {
 		return w * 0.42f;
 	}
 
-	private float bobbinY(float w) {
+	private static float bobbinY(float w) {
 		return w * 0.22f;
 	}
 
-	private float bobbinX2(float w) {
+	private static float bobbinX2(float w) {
 		return w - w * 0.22f;
 	}
 
-	private float bobbinX1(float w) {
+	private static float bobbinX1(float w) {
 		return w * 0.22f;
 	}
 
 	@Override
 	public void draw(Canvas canvas) {
-
-		float w = getWidth();
-		float h = getHeight();
-
+		w = getWidth();
+		h = getHeight();
 		if (h > w * 0.55)
-			h = w * 0.55f;
+			h = (int) (w * 0.55f);
 
-		float bobbinSize = bobbinSize(w);
-		float bobbinY = bobbinY(w);
-		float bobbinX2 = bobbinX2(w);
-		float bobbinX1 = bobbinX1(w);
+		if (bmp == null || bmp.getWidth() != w || bmp.getHeight() != h) {
+			if (bmp != null) {
+				bmp.recycle();
+				bmp = null;
+			}
+			bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+			createBmp();
+		}
 
-		float r1 = bobbin1.getTapeR(bobbinSize);
-		float r2 = bobbin2.getTapeR(bobbinSize);
-
-		float hbLeft = w / 2 - w / 10;
-		float hbTop = h * 0.8f;
-		float hbRight = w / 2 + w / 10;
-		float hbBottom = h * 0.99f;
-
-		float hbGapY = hbTop + (hbBottom - hbTop) * 0.8f;
-
-		canvas.drawRoundRect(new RectF(hbLeft, hbTop, hbRight, hbBottom), 10,
-				10, headboxPaint);
-
-		canvas.drawLine(hbLeft, hbGapY, hbRight, hbGapY, headboxPaint1);
-
-		float grad = 25;
-
-		float x1 = (float) (bobbinX1 - r1 * Math.sin(Math.toRadians(grad)));
-		float y1 = (float) (bobbinY + r1 * Math.cos(Math.toRadians(grad)));
-		float x2 = (float) (bobbinX2 + r2 * Math.sin(Math.toRadians(grad)));
-		float y2 = (float) (bobbinY + r2 * Math.cos(Math.toRadians(grad)));
-
-		canvas.drawLine(hbLeft, hbGapY, x1, y1, tapePaint);
-		canvas.drawLine(hbRight, hbGapY, x2, y2, tapePaint);
+		canvas.drawBitmap(bmp, 0, 0, null);
 
 		bobbin1.draw(canvas, bobbinX1, bobbinY, bobbinSize);
 		bobbin2.draw(canvas, bobbinX2, bobbinY, bobbinSize);
@@ -125,12 +176,20 @@ public class TapeView extends View {
 			return -1;
 		if (hitTest(x, y, 1))
 			return 1;
+
+		if (x < w / 5 && y < h / 5)
+			return -2;
+
+		if (x > w - w / 5 && y < h / 5)
+			return 2;
+
 		return 0;
 	}
 
 	public void setProgress(float max, float cur) {
 		bobbin1.setPercent(max, max - cur);
 		bobbin2.setPercent(max, cur);
+		createBmp();
 	}
 
 	private Runnable r;

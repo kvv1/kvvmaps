@@ -10,7 +10,6 @@ import kvv.aplayer.service.IAPService;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLayoutChangeListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewTreeObserver;
@@ -31,7 +30,8 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 	private View listPanel;
 	private TapeView tapeView;
 	private LevelView levelView;
-	TextView progressText;
+	private TextView progressText;
+	private Button pause;
 
 	private Runnable buttonsRunnable = new Runnable() {
 		@Override
@@ -66,6 +66,48 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 				}
 			}
 		});
+
+		pause = (Button) rootView.findViewById(R.id.pause);
+		pause.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				playPause();
+			}
+		});
+
+		pause.setOnLongClickListener(new OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				rootView.findViewById(R.id.undoPanel).setVisibility(
+						View.VISIBLE);
+				return true;
+			}
+		});
+
+		rootView.findViewById(R.id.closeUndo).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						rootView.findViewById(R.id.undoPanel).setVisibility(
+								View.GONE);
+					}
+				});
+
+		rootView.findViewById(R.id.undo).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						undo();
+					}
+				});
+
+		rootView.findViewById(R.id.redo).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						redo();
+					}
+				});
 
 		progressText = (TextView) rootView.findViewById(R.id.progressText);
 		tapePanel = rootView.findViewById(R.id.tapePanel);
@@ -106,17 +148,28 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 			@Override
 			public void onClick(View v) {
 				int ht = tapeView.hitTest(touchX, touchY);
-				if (ht == 1)
-					nextClick();
-				else if (ht == -1)
+				switch (ht) {
+				case -1:
 					prevClick();
-				else
+					break;
+				case 1:
+					nextClick();
+					break;
+				case -2:
+					undo();
+					break;
+				case 2:
+					redo();
+					break;
+				default:
 					playPause();
+					break;
+				}
 			}
+
 		});
 
 		tapeView.setOnLongClickListener(new OnLongClickListener() {
-
 			@Override
 			public boolean onLongClick(View v) {
 				int ht = tapeView.hitTest(touchX, touchY);
@@ -124,7 +177,10 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 					nextLongClick();
 				else if (ht == -1)
 					prevLongClick();
-				return false;
+				else
+					rootView.findViewById(R.id.undoPanel).setVisibility(
+							View.VISIBLE);
+				return true;
 			}
 		});
 
@@ -137,6 +193,16 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 				return false;
 			}
 		});
+
+		Button prev = (Button) rootView.findViewById(R.id.prev);
+		prev.setOnClickListener(prevOnClickListener);
+		prev.setOnLongClickListener(prevOnLongClickListener);
+		prev.setOnTouchListener(prevOnTouchListener);
+
+		Button next = (Button) rootView.findViewById(R.id.next);
+		next.setOnClickListener(nextOnClickListener);
+		next.setOnLongClickListener(nextOnLongClickListener);
+		next.setOnTouchListener(nextOnTouchListener);
 
 		ViewTreeObserver vto = rootView.getViewTreeObserver();
 		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
@@ -196,6 +262,8 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 		super.updateUI();
 
 		if (conn.service != null) {
+			pause.setText(conn.service.isPlaying() ? "Pause" : "Play");
+
 			int file = conn.service.getFile();
 			int folder = conn.service.getCurrentFolder();
 			if (folder >= 0) {
@@ -298,4 +366,49 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 		handler.postDelayed(seekRunnable, 500);
 	}
 
+	OnClickListener prevOnClickListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			prevClick();
+		}
+	};
+
+	OnLongClickListener prevOnLongClickListener = new OnLongClickListener() {
+		@Override
+		public boolean onLongClick(View v) {
+			prevLongClick();
+			return true;
+		}
+	};
+
+	OnTouchListener prevOnTouchListener = new OnTouchListener() {
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			touch(event);
+			return false;
+		}
+	};
+
+	OnClickListener nextOnClickListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			nextClick();
+		}
+	};
+
+	OnLongClickListener nextOnLongClickListener = new OnLongClickListener() {
+		@Override
+		public boolean onLongClick(View v) {
+			nextLongClick();
+			return true;
+		}
+	};
+
+	OnTouchListener nextOnTouchListener = new OnTouchListener() {
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			touch(event);
+			return false;
+		}
+	};
 }

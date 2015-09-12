@@ -124,17 +124,6 @@ public class Bobbin {
 		c.drawLine(0, 0, 0, bmpAxis.getHeight() / 2, p);
 	}
 
-	private void drawAxis(Canvas canvas, float cx, float cy, float drawSize) {
-		canvas.save();
-		canvas.translate(cx, cy);
-		canvas.rotate(angle);
-		float w = drawSize / 20;
-		canvas.drawBitmap(bmpAxis,
-				new Rect(0, 0, bmpAxis.getWidth(), bmpAxis.getHeight()),
-				new RectF(-w, -w, w, w), axisPaint);
-		canvas.restore();
-	}
-
 	private float getTapeR(float r1, float r2, float max, float cur) {
 		return (float) Math.sqrt((cur - max) / max * (r2 * r2 - r1 * r1) + r2
 				* r2);
@@ -161,6 +150,17 @@ public class Bobbin {
 		canvas.drawBitmap(bmp, new Rect(0, 0, bmSize, bmSize), new RectF(
 				-drawSize / 2, -drawSize / 2, drawSize / 2, drawSize / 2),
 				bobbinPaint);
+		canvas.restore();
+	}
+
+	private void drawAxis(Canvas canvas, float cx, float cy, float drawSize) {
+		canvas.save();
+		canvas.translate(cx, cy);
+		canvas.rotate(angle);
+		float w = drawSize / 20;
+		canvas.drawBitmap(bmpAxis,
+				new Rect(0, 0, bmpAxis.getWidth(), bmpAxis.getHeight()),
+				new RectF(-w, -w, w, w), axisPaint);
 		canvas.restore();
 	}
 
