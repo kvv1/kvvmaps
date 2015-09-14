@@ -12,9 +12,7 @@ public abstract class Compressor {
 
 	private Visualizer visualizer;
 
-	private volatile boolean autoVol = false;
 	private volatile int db;
-	private volatile float gain;
 
 	protected abstract void setGain(float db);
 
@@ -26,10 +24,8 @@ public abstract class Compressor {
 
 	public void init() {
 		visualizer = new Visualizer(mp.getAudioSessionId());
-
 		visualizer.setDataCaptureListener(new OnDataCaptureListener2() {
 		}, 16000, true, false);
-
 		visualizer.setEnabled(true);
 	}
 
@@ -39,7 +35,6 @@ public abstract class Compressor {
 	}
 
 	public void setComprLevel(int db) {
-		autoVol = db != 0;
 		this.db = db;
 	}
 
@@ -68,7 +63,7 @@ public abstract class Compressor {
 
 			if (samplingRate != sr) {
 				System.out.println("sr=" + samplingRate);
-				lpf = new LPF(samplingRate / 1000, 0.01, 0.5);
+				lpf = new LPF(samplingRate / 1000, 0.01, 5);
 				lpfLevel = new LPF(samplingRate / 1000, 0.1, 0.1);
 				sr = samplingRate;
 			}
@@ -77,27 +72,28 @@ public abstract class Compressor {
 
 			for (byte b : waveform) {
 				int a = ((int) b & 0xFF) - 128;
-				a = Math.abs(a);
+				int a1 = Math.abs(a);
 				// a *= gain;
-				max = Math.max(max, a);
-				lpf.add(a);
+				max = Math.max(max, a1);
+				lpf.add(a1);
 				if (en)
-					lpfLevel.add(a);
+					lpfLevel.add(a1);
+
 			}
-
-			double mean = lpf.get();
-
-			gain = (float) n2db(MEAN / mean);
-			if (gain > db)
-				gain = db;
 
 			onLevel((float) lpfLevel.get());
 
+			double mean = lpf.get();
+
+			float gain = (float) n2db(MEAN / mean);
+			if (gain > db)
+				gain = db;
+
 			// setGain(gain);
 
-			// System.out.printf("m=%f g=%f\n", mean, gain);
+			//System.out.printf("m=%f g=%f\n", mean, gain);
 
-			if (autoVol) {
+			if (db != 0) {
 				setGain(gain);
 			} else {
 				setGain(0);

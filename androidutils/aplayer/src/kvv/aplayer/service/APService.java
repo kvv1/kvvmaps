@@ -45,7 +45,7 @@ public class APService extends BaseService {
 			Environment.getExternalStorageDirectory(), "/external_sd/aplayer/");
 
 	public static final float[] dBPer100kmh = { 0, 5f };
-	public static final int[] compr = { 0, 6, 10 };
+	public static final int[] compr = { 0, 10 };
 
 	private Set<APServiceListener> listeners = new HashSet<APServiceListener>();
 
@@ -71,8 +71,6 @@ public class APService extends BaseService {
 	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			player.setVolume(1f);
-
 			String action = intent.getAction();
 			System.out.println("BroadcastReceiver " + action);
 

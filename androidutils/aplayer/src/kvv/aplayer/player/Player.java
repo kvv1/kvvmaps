@@ -118,10 +118,6 @@ public abstract class Player {
 		mp.setDataSource(folder.files[curFile].path);
 	}
 
-	public void setVolume(float v) {
-		// mp.setVolume(v, v);
-	}
-
 	public void makeRandom(int folderIdx) {
 		if (folders.size() == 0)
 			return;

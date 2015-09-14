@@ -16,7 +16,7 @@ public abstract class Player1 extends Player {
 	private volatile int gain;
 	private volatile float comprGain;
 	private volatile float dBPer100;
-	private volatile float speed;
+	private volatile float speedKMH;
 
 	private volatile float level;
 
@@ -84,14 +84,14 @@ public abstract class Player1 extends Player {
 	}
 
 	public void setSpeedKMH(float speed) {
-		this.speed = speed;
+		this.speedKMH = speed;
 		System.out.println("speed=" + speed);
 		setEq();
 	}
 
 	private void setEq() {
 		float g = gain;
-		g += speed * dBPer100 / 100;
+		g += speedKMH * dBPer100 / 100;
 
 		g += comprGain;
 

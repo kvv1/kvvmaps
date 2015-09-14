@@ -130,7 +130,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		((Button) rootView.findViewById(R.id.volPlus2)).setTypeface(null,
 				conn.service.getGain() == 10 ? Typeface.BOLD : Typeface.NORMAL);
 
-//		System.out.println("level = " + conn.service.getLevel());
+	//	System.out.println("level = " + conn.service.getLevel());
 
 	}
 

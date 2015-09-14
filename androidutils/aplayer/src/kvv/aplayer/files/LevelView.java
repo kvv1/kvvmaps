@@ -117,7 +117,7 @@ public class LevelView extends View {
 				cy2(w) + r1), -125, 70, false, paint);
 
 		paint.setTextSize(20);
-		scaleCanvas.drawText("dB", cx3(w, r2 * 0.6f, 50) - 16,
+		scaleCanvas.drawText("dB", cx3(w, r2 * 0.6f, 50) - 13,
 				cy3(w, r2 * 0.6f, 50), paint);
 
 		Canvas bodyCanvas = new Canvas(bmpBody);
