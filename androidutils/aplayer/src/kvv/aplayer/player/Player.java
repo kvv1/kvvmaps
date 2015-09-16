@@ -24,11 +24,11 @@ public abstract class Player {
 
 	protected final MediaPlayer mp = new MediaPlayer();
 
-	private boolean initialized;
-
 	private List<Folder> folders;
 	private int curFolder = -1;
 	private int curFile = 0;
+
+	private boolean prepared;
 
 	public Player(List<Folder> folders) {
 
@@ -47,14 +47,15 @@ public abstract class Player {
 				if (curFile >= folder.files.length - 1) {
 					mp.stop();
 					curFile = 0;
-					reload(false);
-					// mp.reset();
+					boolean isPlaying = mp.isPlaying();
+					System.out.println("end of folder " + folder.displayName
+							+ " " + isPlaying);
+					reload();
 					onChanged1();
 					return;
 				}
 
-				next(true);
-				onChanged1();
+				next();// onChanged1();
 			}
 		});
 
@@ -62,6 +63,7 @@ public abstract class Player {
 			@Override
 			public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
 				onChanged1();
+				prepared = false;
 				return false;
 			}
 		});
@@ -77,7 +79,7 @@ public abstract class Player {
 		onChanged1();
 	}
 
-	private void toFile(int idx, int pos, boolean forcePlay) {
+	private void toFile(int idx, int pos) {
 		if (folders.size() == 0 || curFolder < 0)
 			return;
 
@@ -87,35 +89,41 @@ public abstract class Player {
 		else
 			curFile = idx;
 
-		reload(forcePlay);
+		reload();
+		mp.start();
 		mp.seekTo(pos);
 	}
 
-	private void reload(boolean forcePlay) {
+	private void reload() {
 		try {
 			boolean playing = mp.isPlaying();
+
 			if (playing)
 				mp.stop();
-			mp.reset();
-			setDataSource();
-			initialized = true;
-			mp.prepare();
-			resetGain();
-			if (playing || forcePlay)
-				mp.start();
-		} catch (Exception e) {
-		}
-	}
 
-	private void setDataSource() throws Exception {
-		if (folders.size() == 0 || curFolder < 0)
-			return;
-		if (curFolder >= folders.size())
-			return;
-		Folder folder = folders.get(curFolder);
-		if (curFile >= folder.files.length)
-			return;
-		mp.setDataSource(folder.files[curFile].path);
+			mp.reset();
+			prepared = false;
+
+			if (folders.size() == 0 || curFolder < 0)
+				return;
+
+			if (curFolder >= folders.size())
+				return;
+
+			Folder folder = folders.get(curFolder);
+
+			if (curFile >= folder.files.length)
+				return;
+
+			mp.setDataSource(folder.files[curFile].path);
+			mp.prepare();
+
+			prepared = true;
+
+			resetGain();
+		} catch (Exception e) {
+			prepared = false;
+		}
 	}
 
 	public void makeRandom(int folderIdx) {
@@ -157,12 +165,12 @@ public abstract class Player {
 			return;
 
 		curFolder = folder;
-		toFile(file, curPos, true);
+		toFile(file, curPos);
 		onChanged1();
 	}
 
 	public void toFile(int idx) {
-		toFile(idx, 0, true);
+		toFile(idx, 0);
 		onChanged1();
 	}
 
@@ -203,13 +211,13 @@ public abstract class Player {
 
 		int cur = mp.getCurrentPosition();
 		if (cur < 3000 && curFile > 0)
-			toFile(curFile - 1, 0, true);
+			toFile(curFile - 1, 0);
 		else
-			reload(false);
+			mp.seekTo(0);
 		onChanged1();
 	}
 
-	public void next(boolean forcePlay) {
+	public void next() {
 		if (folders.size() == 0 || curFolder < 0)
 			return;
 
@@ -217,7 +225,7 @@ public abstract class Player {
 		if (curFile >= folder.files.length - 1) {
 			return;
 		}
-		toFile(curFile + 1, 0, forcePlay);
+		toFile(curFile + 1, 0);
 		onChanged1();
 	}
 
@@ -238,26 +246,35 @@ public abstract class Player {
 	}
 
 	public int getDuration() {
-		if (!initialized)
-			return 0;
+		System.out.println("getDuration()");
+		if (!prepared)
+			return 1;
 		return mp.getDuration();
 	}
 
 	public int getCurrentPosition() {
-		if (!initialized)
+		System.out.println("getCurrentPosition()");
+		if (!prepared)
 			return 0;
 		return mp.getCurrentPosition();
 	}
 
 	public int getFile() {
+		System.out.println("getFile()");
+		if (!prepared)
+			return 0;
 		return curFile;
 	}
 
 	public boolean isPlaying() {
+		System.out.println("isPlaying()");
+		if (!prepared)
+			return false;
 		return mp.isPlaying();
 	}
 
 	public void close() {
+		prepared = false;
 		mp.release();
 	}
 

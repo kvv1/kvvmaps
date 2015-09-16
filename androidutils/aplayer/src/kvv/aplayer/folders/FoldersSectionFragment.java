@@ -32,7 +32,7 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 			int curFolder = conn.service.getCurrentFolder();
 			if (curFolder < list.getCount()) {
 				list.invalidateViews();
-				if (!noSel)
+				if (!noSel && conn.service.isPlaying())
 					list.setSelection(curFolder - 2);
 			}
 		}

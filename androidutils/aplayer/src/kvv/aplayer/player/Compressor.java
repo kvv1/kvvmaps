@@ -12,7 +12,7 @@ public abstract class Compressor {
 
 	private Visualizer visualizer;
 
-	private volatile int db;
+	private int db;
 
 	protected abstract void setGain(float db);
 
@@ -26,7 +26,6 @@ public abstract class Compressor {
 		visualizer = new Visualizer(mp.getAudioSessionId());
 		visualizer.setDataCaptureListener(new OnDataCaptureListener2() {
 		}, 16000, true, false);
-		visualizer.setEnabled(true);
 	}
 
 	public void release() {
@@ -38,16 +37,23 @@ public abstract class Compressor {
 		this.db = db;
 	}
 
-	private volatile boolean en;
+	public int getComprLevel() {
+		return db;
+	}
 
 	public void setEnabled(boolean b) {
+		System.out.println("setEnabled " + b);
 		visualizer.setEnabled(b);
-		en = b;
 		if (!b) {
 			if (lpfLevel != null)
 				lpfLevel.set(0);
 			onLevel(0);
+			setGain(0);
 		}
+	}
+
+	public void enDis(boolean visible) {
+		setEnabled(mp.isPlaying() && (visible | db != 0));
 	}
 
 	private LPF lpf;
@@ -76,12 +82,12 @@ public abstract class Compressor {
 				// a *= gain;
 				max = Math.max(max, a1);
 				lpf.add(a1);
-				if (en)
-					lpfLevel.add(a1);
+				lpfLevel.add(a1);
 
 			}
 
-			onLevel((float) lpfLevel.get());
+			if (visualizer.getEnabled())
+				onLevel((float) lpfLevel.get());
 
 			double mean = lpf.get();
 
@@ -91,9 +97,9 @@ public abstract class Compressor {
 
 			// setGain(gain);
 
-			//System.out.printf("m=%f g=%f\n", mean, gain);
+			// System.out.printf("m=%f g=%f\n", mean, gain);
 
-			if (db != 0) {
+			if (db != 0 && visualizer.getEnabled()) {
 				setGain(gain);
 			} else {
 				setGain(0);
@@ -117,4 +123,5 @@ public abstract class Compressor {
 		if (lpf != null)
 			lpf.set(MEAN);
 	}
+
 }

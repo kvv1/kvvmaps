@@ -130,7 +130,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		((Button) rootView.findViewById(R.id.volPlus2)).setTypeface(null,
 				conn.service.getGain() == 10 ? Typeface.BOLD : Typeface.NORMAL);
 
-	//	System.out.println("level = " + conn.service.getLevel());
+		// System.out.println("level = " + conn.service.getLevel());
 
 	}
 
@@ -214,7 +214,6 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		updateUI();
 	}
 
-	
 	@Override
 	protected void createUI(final IAPService service) {
 		settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -226,7 +225,6 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 		if (!settings.getBoolean(getString(R.string.prefTestMode), false))
 			rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
-
 
 		timing = (Button) rootView.findViewById(R.id.timing);
 

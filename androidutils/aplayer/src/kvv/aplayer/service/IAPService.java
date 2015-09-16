@@ -31,4 +31,5 @@ public interface IAPService {
 	void reload();
 	void redo();
 	void undo();
+	void setVisible(boolean vis);
 }

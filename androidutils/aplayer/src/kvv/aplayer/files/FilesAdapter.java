@@ -1,7 +1,5 @@
 package kvv.aplayer.files;
 
-import java.io.File;
-
 import kvv.aplayer.R;
 import kvv.aplayer.service.File1;
 import kvv.aplayer.service.IAPService;
@@ -28,17 +26,16 @@ public class FilesAdapter extends ArrayAdapter<File1> {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View v = convertView;
-		// if (v == null) {
-		LayoutInflater vi = activity.getLayoutInflater();
-		// }
-
-		v = vi.inflate(R.layout.folder_item, null);
-
-		File file = new File(getItem(position).path);
+		if (v == null) {
+			LayoutInflater vi = activity.getLayoutInflater();
+			v = vi.inflate(R.layout.folder_item, null);
+		}
 
 		TextView tv = (TextView) v.findViewById(R.id.text);
-		tv.setText(file.getName());
+		tv.setText(getItem(position).name);
 
+		System.out.print("%");
+		
 		if (position == sel)
 			v.setBackgroundColor(0xFFFFFF80);
 		else if (sel < 0 && position == service.getFile())

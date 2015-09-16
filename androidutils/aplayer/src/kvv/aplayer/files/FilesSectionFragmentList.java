@@ -34,9 +34,7 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 	private Runnable buttonsRunnable = new Runnable() {
 		@Override
 		public void run() {
-			if (rootView != null) {
-				clearButtons();
-			}
+			clearButtons();
 		}
 	};
 
@@ -232,10 +230,13 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 	float touchY;
 
 	private void clearButtons() {
+		System.out.println("clearButtons()");
 		handler.removeCallbacks(buttonsRunnable);
 		// if (!settings.getBoolean(getString(R.string.prefTestMode), false))
-		rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
-		rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
+		if (rootView != null) {
+			rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
+			rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
+		}
 		FilesAdapter adapter = (FilesAdapter) list.getAdapter();
 		if (adapter != null) {
 			adapter.sel = -1;
@@ -245,12 +246,14 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 
 	@Override
 	protected void folderChanged() {
+		System.out.println("folderChanged()");
 		FilesAdapter adapter = new FilesAdapter(getActivity(), conn.service);
 		list.setAdapter(adapter);
 	}
 
 	@Override
 	protected void trackChanged() {
+		System.out.println("trackChanged()");
 		clearButtons();
 		list.invalidateViews();
 		list.setSelection(conn.service.getFile() - 2);
@@ -297,8 +300,10 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 				tapeView.stop();
 			}
 
-			if (tape && fg)
+			if (tape && fg) {
 				levelView.start();
+				conn.service.setVisible(true);
+			}
 
 		}
 	}
@@ -326,6 +331,8 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 		if (tapeView != null) {
 			tapeView.stop();
 			levelView.stop();
+			if(conn.service != null)
+				conn.service.setVisible(false);
 		}
 		fg = false;
 		super.onPause();

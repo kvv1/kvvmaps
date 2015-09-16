@@ -13,10 +13,11 @@ public abstract class Player1 extends Player {
 	private short[] bandRange;
 	private short nBands;
 
-	private volatile int gain;
-	private volatile float comprGain;
-	private volatile float dBPer100;
-	private volatile float speedKMH;
+	private int gain;
+	private float comprGain;
+	private float dBPer100;
+	private float speedKMH;
+	private boolean visible;
 
 	private volatile float level;
 
@@ -46,9 +47,13 @@ public abstract class Player1 extends Player {
 		compr.init();
 
 		eq.setEnabled(true);
-		compr.setEnabled(true);
 
 		setGain(0);
+	}
+
+	@Override
+	protected void onChanged() {
+		compr.enDis(visible);
 	}
 
 	@Override
@@ -69,13 +74,8 @@ public abstract class Player1 extends Player {
 
 	public void setCompr(int db) {
 		compr.setComprLevel(db);
+		compr.enDis(visible);
 		setEq();
-	}
-
-	public void enVis() {
-		boolean b = mp.isPlaying();
-		System.out.println("*** " + b);
-		compr.setEnabled(b);
 	}
 
 	public void setDbPer100(float dBPer100) {
@@ -92,9 +92,7 @@ public abstract class Player1 extends Player {
 	private void setEq() {
 		float g = gain;
 		g += speedKMH * dBPer100 / 100;
-
 		g += comprGain;
-
 		setEq(g * 100);
 	}
 
@@ -111,5 +109,12 @@ public abstract class Player1 extends Player {
 
 	public float getLevel() {
 		return level;
+	}
+
+	public void setVisible(boolean vis) {
+		visible = vis;
+		compr.enDis(visible);
+		// TODO Auto-generated method stub
+
 	}
 }

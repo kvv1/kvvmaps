@@ -84,7 +84,7 @@ public class APService extends BaseService {
 				player.prev();
 			}
 			if ("kvv.aplayer.NEXT".equals(action)) {
-				player.next(true);
+				player.next();
 			}
 
 			if (Intent.ACTION_SCREEN_OFF.equals(action)) {
@@ -98,19 +98,9 @@ public class APService extends BaseService {
 	};
 
 	public APService() {
-		super(R.drawable.ic_launcher, R.drawable.ic_launcher, APActivity.class,
+		super(R.drawable.ap, R.drawable.ap, APActivity.class,
 				R.string.app_name, R.string.app_name, false, false);
 	}
-
-	Runnable visEnabler = new Runnable() {
-		@Override
-		public void run() {
-			try {
-				player.enVis();
-			} catch (Exception e) {
-			}
-		}
-	};
 
 	@Override
 	public void onCreate() {
@@ -225,9 +215,6 @@ public class APService extends BaseService {
 
 				for (APServiceListener l : listeners)
 					l.onChanged();
-
-				handler.removeCallbacks(visEnabler);
-				handler.postDelayed(visEnabler, 200);
 			}
 
 			@Override
@@ -318,7 +305,7 @@ public class APService extends BaseService {
 		@Override
 		public void next() {
 			storeUndo();
-			player.next(true);
+			player.next();
 		}
 
 		@Override
@@ -328,20 +315,12 @@ public class APService extends BaseService {
 
 		@Override
 		public int getDuration() {
-			try {
-				return player.getDuration();
-			} catch (Exception e) {
-				return 1;
-			}
+			return player.getDuration();
 		}
 
 		@Override
 		public int getCurrentPosition() {
-			try {
-				return player.getCurrentPosition();
-			} catch (Exception e) {
-				return 0;
-			}
+			return player.getCurrentPosition();
 		}
 
 		@Override
@@ -356,11 +335,7 @@ public class APService extends BaseService {
 
 		@Override
 		public boolean isPlaying() {
-			try {
-				return player.isPlaying();
-			} catch (Exception e) {
-				return false;
-			}
+			return player.isPlaying();
 		}
 
 		@Override
@@ -452,6 +427,11 @@ public class APService extends BaseService {
 			player.toFolder(item.folder, item.file, item.pos);
 		}
 
+		@Override
+		public void setVisible(boolean vis) {
+			player.setVisible(vis);
+		}
+		
 	}
 
 	private void storeUndo() {
