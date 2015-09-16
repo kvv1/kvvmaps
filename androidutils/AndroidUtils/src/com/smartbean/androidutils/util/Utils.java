@@ -13,6 +13,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Debug;
 import android.text.InputType;
 import android.util.Log;
 import android.widget.EditText;
@@ -117,5 +118,36 @@ public class Utils {
 		Ringtone r = RingtoneManager.getRingtone(context, notification);
 		r.play();
 	}
+
+	public static void printMem() {
+		long freeSize = 0L;
+		long totalSize = 0L;
+		long usedSize = -1L;
+		try {
+			Runtime.getRuntime().gc();
+
+			Runtime info = Runtime.getRuntime();
+			freeSize = info.freeMemory();
+			totalSize = info.totalMemory();
+			usedSize = totalSize - freeSize;
+
+			long usedMegs = Debug.getNativeHeapAllocatedSize();
+			long freeMegs = Debug.getNativeHeapFreeSize();
+			long allMegs = Debug.getNativeHeapSize();
+
+			// long div = 1048576L;
+			long div = 1024;
+
+			System.out.println(" TOTAL USED FREE");
+			System.out.println("J: " + totalSize / div + " " + usedSize / div
+					+ " " + freeSize / div + " ");
+			System.out.println("N: " + allMegs / div + " " + usedMegs / div
+					+ " " + freeMegs / div + " ");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 
 }

@@ -24,7 +24,6 @@ public class Route {
 
 	public static class LatLng {
 		public LatLng(double lat, double lon) {
-			super();
 			this.lat = lat;
 			this.lon = lon;
 		}

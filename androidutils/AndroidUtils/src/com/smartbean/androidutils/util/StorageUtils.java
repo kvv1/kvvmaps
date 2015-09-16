@@ -20,8 +20,6 @@ import android.text.TextUtils;
 
 public class StorageUtils {
 
-	private static final String TAG = "StorageUtils";
-
 	public static class StorageInfo {
 
 		public final String path;
