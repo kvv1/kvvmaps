@@ -1,17 +1,11 @@
 package kvv.aplayer.service;
 
+import kvv.aplayer.player.Player.OnChangedHint;
+
 public class APServiceListenerAdapter implements APServiceListener {
 
 	@Override
-	public void onChanged() {
-	}
-
-	@Override
-	public void onBookmarksChanged() {
-	}
-
-	@Override
-	public void onRandomChanged() {
+	public void onChanged(OnChangedHint hint) {
 	}
 
 	@Override

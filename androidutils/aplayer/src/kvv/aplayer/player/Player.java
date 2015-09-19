@@ -14,18 +14,20 @@ import android.media.MediaPlayer.OnInfoListener;
 
 public abstract class Player {
 
-	protected abstract void onChanged();
+	protected abstract void onChanged(OnChangedHint hint);
 
-	protected abstract void onRandomChanged();
+	public enum OnChangedHint {
+		FOLDER, FILE, POSITION
+	}
 
-	private void onChanged1() {
-		onChanged();
+	private void onChanged1(OnChangedHint hint) {
+		onChanged(hint);
 	}
 
 	protected final MediaPlayer mp = new MediaPlayer();
 
 	private List<Folder> folders;
-	private int curFolder = -1;
+	private int curFolder = 0;
 	private int curFile = 0;
 
 	private boolean prepared;
@@ -51,7 +53,7 @@ public abstract class Player {
 					System.out.println("end of folder " + folder.displayName
 							+ " " + isPlaying);
 					reload();
-					onChanged1();
+					onChanged1(OnChangedHint.FILE);
 					return;
 				}
 
@@ -62,7 +64,7 @@ public abstract class Player {
 		mp.setOnErrorListener(new OnErrorListener() {
 			@Override
 			public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
-				onChanged1();
+				onChanged1(OnChangedHint.FOLDER);
 				prepared = false;
 				return false;
 			}
@@ -71,12 +73,12 @@ public abstract class Player {
 		mp.setOnInfoListener(new OnInfoListener() {
 			@Override
 			public boolean onInfo(MediaPlayer arg0, int arg1, int arg2) {
-				onChanged1();
+				onChanged1(OnChangedHint.FOLDER);
 				return false;
 			}
 		});
 
-		onChanged1();
+		onChanged1(OnChangedHint.FOLDER);
 	}
 
 	private void toFile(int idx, int pos) {
@@ -148,7 +150,7 @@ public abstract class Player {
 		randFolder.files = files.toArray(new File1[0]);
 		randFolder.displayName = folder.displayName + " RND";
 
-		onRandomChanged();
+		onChanged1(OnChangedHint.FOLDER);
 		toFolder(folders.size() - 1, 0, 0);
 	}
 
@@ -166,12 +168,12 @@ public abstract class Player {
 
 		curFolder = folder;
 		toFile(file, curPos);
-		onChanged1();
+		onChanged1(OnChangedHint.FOLDER);
 	}
 
 	public void toFile(int idx) {
 		toFile(idx, 0);
-		onChanged1();
+		onChanged1(OnChangedHint.FILE);
 	}
 
 	public void seek(int seekStep) {
@@ -190,19 +192,22 @@ public abstract class Player {
 			if (cur < seekStep && curFile > 0) {
 				toFile(curFile - 1);
 				mp.seekTo(Math.max(0, mp.getDuration() - seekStep));
+				onChanged1(OnChangedHint.FILE);
 			} else {
 				mp.seekTo(Math.max(0, cur - seekStep));
+				onChanged1(OnChangedHint.POSITION);
 			}
 		} else {
 			if (cur + seekStep >= mp.getDuration()) {
 				if (curFile < folder.files.length - 1) {
 					toFile(curFile + 1);
+					onChanged1(OnChangedHint.FILE);
 				}
 			} else {
 				mp.seekTo(cur + seekStep);
+				onChanged1(OnChangedHint.POSITION);
 			}
 		}
-		onChanged1();
 	}
 
 	public void prev() {
@@ -210,11 +215,13 @@ public abstract class Player {
 			return;
 
 		int cur = mp.getCurrentPosition();
-		if (cur < 3000 && curFile > 0)
+		if (cur < 3000 && curFile > 0) {
 			toFile(curFile - 1, 0);
-		else
+			onChanged1(OnChangedHint.FILE);
+		} else {
 			mp.seekTo(0);
-		onChanged1();
+			onChanged1(OnChangedHint.POSITION);
+		}
 	}
 
 	public void next() {
@@ -226,13 +233,13 @@ public abstract class Player {
 			return;
 		}
 		toFile(curFile + 1, 0);
-		onChanged1();
+		onChanged1(OnChangedHint.FILE);
 	}
 
 	public void pause() {
 		if (mp.isPlaying()) {
 			mp.pause();
-			onChanged1();
+			onChanged1(OnChangedHint.POSITION);
 		}
 	}
 
@@ -242,7 +249,7 @@ public abstract class Player {
 			mp.pause();
 		else
 			mp.start();
-		onChanged1();
+		onChanged1(OnChangedHint.POSITION);
 	}
 
 	public int getDuration() {

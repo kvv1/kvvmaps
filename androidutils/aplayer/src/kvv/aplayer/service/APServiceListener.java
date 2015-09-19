@@ -1,13 +1,9 @@
 package kvv.aplayer.service;
 
-public interface APServiceListener {
-	void onChanged();
+import kvv.aplayer.player.Player.OnChangedHint;
 
-	void onBookmarksChanged();
-	
-	void onRandomChanged();
-	
+public interface APServiceListener {
+	void onChanged(OnChangedHint hint);
 	void onSpeedChanged(boolean hasSpeed, int fromLocation, int fromPlayer);
-	
 	void onLoaded();
 }

@@ -2,6 +2,7 @@ package kvv.aplayer.folders;
 
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
+import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.APServiceListenerAdapter;
@@ -23,17 +24,19 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	private final APServiceListener listener = new APServiceListenerAdapter() {
 		@Override
-		public void onChanged() {
+		public void onChanged(OnChangedHint hint) {
 			if (conn.service == null)
 				return;
 
 			clearGoto();
 
-			int curFolder = conn.service.getCurrentFolder();
-			if (curFolder < list.getCount()) {
-				list.invalidateViews();
-				if (!noSel && conn.service.isPlaying())
-					list.setSelection(curFolder - 2);
+			if (hint == OnChangedHint.FOLDER) {
+				int curFolder = conn.service.getCurrentFolder();
+				if (curFolder < list.getCount()) {
+					list.invalidateViews();
+					if (!noSel && conn.service.isPlaying())
+						list.setSelection(curFolder - 2);
+				}
 			}
 		}
 
@@ -77,7 +80,7 @@ public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
 		list = (ListView) rootView.findViewById(R.id.list);
 		service.addListener(listener);
 		listener.onLoaded();
-		listener.onChanged();
+		listener.onChanged(OnChangedHint.FOLDER);
 
 		list.setOnItemClickListener(new OnItemClickListener() {
 			@Override

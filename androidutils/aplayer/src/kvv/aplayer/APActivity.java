@@ -3,6 +3,7 @@ package kvv.aplayer;
 import kvv.aplayer.chart.ChartsFragment;
 import kvv.aplayer.files.FilesSectionFragmentList;
 import kvv.aplayer.folders.FoldersSectionFragment;
+import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.APServiceListenerAdapter;
@@ -11,8 +12,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -31,8 +30,6 @@ public class APActivity extends FragmentActivityX {
 	public static final int BUTTONS_DELAY = 3000;
 
 	private static final int RESULT_SETTINGS = 1;
-
-	private Handler handler = new Handler();
 
 	@Override
 	protected int getLayoutId() {
@@ -77,20 +74,10 @@ public class APActivity extends FragmentActivityX {
 	}
 
 	private APServiceListener listener = new APServiceListenerAdapter() {
-
-		private Runnable r = new Runnable() {
-			@Override
-			public void run() {
-				updateWakeLock();
-			}
-		};
-
 		@Override
-		public void onChanged() {
-			handler.removeCallbacks(r);
-			handler.postDelayed(r, 1000);
+		public void onChanged(OnChangedHint hint) {
+			updateWakeLock();
 		}
-
 	};
 
 	@Override
@@ -120,14 +107,13 @@ public class APActivity extends FragmentActivityX {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-//		try {
-//			menu.findItem(R.id.action_update).setTitle(
-//					"Ver. "
-//							+ getPackageManager().getPackageInfo(
-//									this.getPackageName(), 0).versionName);
-//		} catch (NameNotFoundException e) {
-//		}
-		// TODO Auto-generated method stub
+		// try {
+		// menu.findItem(R.id.action_update).setTitle(
+		// "Ver. "
+		// + getPackageManager().getPackageInfo(
+		// this.getPackageName(), 0).versionName);
+		// } catch (NameNotFoundException e) {
+		// }
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -138,7 +124,7 @@ public class APActivity extends FragmentActivityX {
 			exit();
 			return true;
 		case R.id.action_reload:
-			if(conn.service != null)
+			if (conn.service != null)
 				conn.service.reload();
 			return true;
 		case R.id.action_settings:

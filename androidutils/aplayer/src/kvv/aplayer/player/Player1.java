@@ -4,6 +4,7 @@ import java.util.List;
 
 import kvv.aplayer.service.Folder;
 import android.media.audiofx.Equalizer;
+import android.widget.Chronometer.OnChronometerTickListener;
 
 public abstract class Player1 extends Player {
 
@@ -52,8 +53,9 @@ public abstract class Player1 extends Player {
 	}
 
 	@Override
-	protected void onChanged() {
-		compr.enDis(visible);
+	protected void onChanged(OnChangedHint hint) {
+		if (compr != null)
+			compr.enDis(visible);
 	}
 
 	@Override

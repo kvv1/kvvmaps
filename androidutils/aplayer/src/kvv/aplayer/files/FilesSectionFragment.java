@@ -3,11 +3,7 @@ package kvv.aplayer.files;
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
 import kvv.aplayer.service.APService;
-import kvv.aplayer.service.APServiceListener;
-import kvv.aplayer.service.APServiceListenerAdapter;
-import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
-import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Handler;
@@ -16,8 +12,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.smartbean.androidutils.fragment.RLFragment;
 
@@ -27,92 +21,41 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	protected Handler handler = new Handler();
 
-	private Button timing;
-	private ProgressBar fileProgressBar;
-	protected TextView folderTextView;
-
-	protected void folderChanged() {
-
-	}
-
-	protected void trackChanged() {
-
+	protected void positionChanged() {
 	}
 
 	protected void restartButtonsTimer() {
 	}
 
-	protected void seekStart(int step) {
-	}
-
-	protected void seekEnd() {
-
-	}
-
 	private Runnable progressRunnable = new Runnable() {
 		@Override
 		public void run() {
-			updateUI();
+			positionChanged();
 			handler.removeCallbacks(this);
 			handler.postDelayed(this, 1000);
 		}
 	};
 
-	private int seekStep = 5000;
+	private int seekStep = 0;
 
-	private Runnable seekForwardRunnable = new Runnable() {
+	private Runnable seekRunnable = new Runnable() {
 		@Override
 		public void run() {
 			if (conn.service != null) {
-				seekStart(seekStep);
 				conn.service.seek(seekStep);
 				seekStep = seekStep + seekStep / 3;
 				if (seekStep > 20000)
 					seekStep = 20000;
+				if (seekStep < -20000)
+					seekStep = -20000;
 			}
-			updateUI();
 			handler.postDelayed(this, 200);
 		}
 	};
 
-	private Runnable seekBackRunnable = new Runnable() {
-		@Override
-		public void run() {
-			if (conn.service != null) {
-				seekStart(-seekStep);
-				conn.service.seek(-seekStep);
-				seekStep = seekStep + seekStep / 3;
-				if (seekStep > 20000)
-					seekStep = 20000;
-			}
-			updateUI();
-			handler.postDelayed(this, 200);
-		}
-	};
-
-	@SuppressLint("DefaultLocale")
-	private static String convertSecondsToHMmSs(long seconds) {
-		long s = seconds % 60;
-		long m = (seconds / 60) % 60;
-		long h = (seconds / (60 * 60)) % 24;
-
-		if (h != 0)
-			return String.format("%d:%02d:%02d", h, m, s);
-		return String.format("%02d:%02d", m, s);
-	}
-
-	protected void updateUI() {
+	private void updateExtButtons() {
 		if (conn.service == null)
 			return;
-
-		int dur = conn.service.getDuration();
-		int pos = conn.service.getCurrentPosition();
-
-		fileProgressBar.setMax(dur);
-		fileProgressBar.setProgress(pos);
-
-		timing.setText(convertSecondsToHMmSs(pos / 1000) + "("
-				+ convertSecondsToHMmSs(dur / 1000) + ")");
 
 		((Button) rootView.findViewById(R.id.speedOn))
 				.setText((int) APService.dBPer100kmh[conn.service
@@ -134,112 +77,70 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 
 	}
 
-	private final APServiceListener listener = new APServiceListenerAdapter() {
-		@Override
-		public void onChanged() {
-			if (conn.service == null)
-				return;
-
-			if (conn.service.getFolders().size() > 0) {
-				if (conn.service.getCurrentFolder() != folder
-						&& conn.service.getFolders().size() > 0) {
-					folderChanged();
-					folder = conn.service.getCurrentFolder();
-				}
-				if (folder >= 0) {
-					Folder fold = conn.service.getFolders().get(folder);
-					folderTextView.setText(fold.displayName);
-				}
-			}
-
-			trackChanged();
-			updateUI();
-		}
-
-		@Override
-		public void onRandomChanged() {
-			folder = -1;
-			onChanged();
-		}
-	};
-
-	private int folder;
-
 	public FilesSectionFragment() {
 		super(APService.class, R.layout.fragment_files);
 	}
 
+	private long lastKeyUp;
+	private boolean longClick;
+
 	protected void prevClick() {
 		if (System.currentTimeMillis() - lastKeyUp > 500)
-			onPrev();
+			if (conn.service != null)
+				conn.service.prev();
 	}
 
 	protected void prevLongClick() {
-		seekStep = 1000;
-		handler.postDelayed(seekBackRunnable, 200);
+		seekStep = -1000;
+		handler.postDelayed(seekRunnable, 200);
 		longClick = true;
 	}
 
 	protected void touch(MotionEvent event) {
-		if (event.getAction() == MotionEvent.ACTION_UP)
-			keyUp();
+		if (event.getAction() == MotionEvent.ACTION_UP) {
+			handler.removeCallbacks(seekRunnable);
+
+			if (longClick)
+				lastKeyUp = System.currentTimeMillis();
+			longClick = false;
+		}
 	}
 
 	protected void nextClick() {
 		if (System.currentTimeMillis() - lastKeyUp > 500)
-			onNext();
+			if (conn.service != null)
+				conn.service.next();
 	}
 
 	protected void nextLongClick() {
 		seekStep = 1000;
-		handler.postDelayed(seekForwardRunnable, 200);
+		handler.postDelayed(seekRunnable, 200);
 		longClick = true;
 	}
 
 	protected void playPause() {
 		if (conn.service != null)
 			conn.service.play_pause();
-		updateUI();
 	}
 
 	public void redo() {
 		if (conn.service != null)
 			conn.service.redo();
-		updateUI();
 	}
 
 	public void undo() {
 		if (conn.service != null)
 			conn.service.undo();
-		updateUI();
 	}
 
 	@Override
 	protected void createUI(final IAPService service) {
 		settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-		folder = -1;
 		rootView.findViewById(R.id.buttons).setVisibility(View.GONE);
-
-		folderTextView = (TextView) rootView.findViewById(R.id.folder);
 
 		if (!settings.getBoolean(getString(R.string.prefTestMode), false))
 			rootView.findViewById(R.id.extButtons).setVisibility(View.GONE);
-
-		timing = (Button) rootView.findViewById(R.id.timing);
-
-		final View extButtons = rootView.findViewById(R.id.extButtons);
-
-		OnClickListener timingListener = new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				extButtons.setVisibility(View.VISIBLE);
-				restartButtonsTimer();
-			}
-		};
-
-		timing.setOnClickListener(timingListener);
-		rootView.findViewById(R.id.level).setOnClickListener(timingListener);
 
 		((Button) rootView.findViewById(R.id.speedOn))
 				.setOnClickListener(new OnClickListener() {
@@ -249,7 +150,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 								% APService.dBPer100kmh.length;
 						service.setDBPer100Idx(idx);
 						restartButtonsTimer();
-						updateUI();
+						updateExtButtons();
 					}
 				});
 
@@ -261,7 +162,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 								% APService.compr.length;
 						service.setComprIdx(idx);
 						restartButtonsTimer();
-						updateUI();
+						updateExtButtons();
 					}
 				});
 
@@ -271,7 +172,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 					public void onClick(View arg0) {
 						service.setGain(0);
 						restartButtonsTimer();
-						updateUI();
+						updateExtButtons();
 					}
 				});
 
@@ -281,7 +182,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 					public void onClick(View arg0) {
 						service.setGain(5);
 						restartButtonsTimer();
-						updateUI();
+						updateExtButtons();
 					}
 				});
 
@@ -291,7 +192,7 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 					public void onClick(View arg0) {
 						service.setGain(10);
 						restartButtonsTimer();
-						updateUI();
+						updateExtButtons();
 					}
 				});
 
@@ -322,37 +223,12 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 					}
 				});
 
-		fileProgressBar = (ProgressBar) rootView.findViewById(R.id.progress);
-
-		service.addListener(listener);
-
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				listener.onChanged();
-			}
-		});
-	}
-
-	private long lastKeyUp;
-	private boolean longClick;
-
-	private void keyUp() {
-		handler.removeCallbacks(seekForwardRunnable);
-		handler.removeCallbacks(seekBackRunnable);
-		seekEnd();
-
-		if (longClick)
-			lastKeyUp = System.currentTimeMillis();
-		longClick = false;
 	}
 
 	@Override
 	public void onPause() {
 		handler.removeCallbacks(progressRunnable);
-		handler.removeCallbacks(seekForwardRunnable);
-		handler.removeCallbacks(seekBackRunnable);
-		seekEnd();
+		handler.removeCallbacks(seekRunnable);
 		super.onPause();
 	}
 
@@ -362,20 +238,4 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 		super.onResume();
 	}
 
-	@Override
-	public void onDestroy() {
-		if (conn.service != null)
-			conn.service.removeListener(listener);
-		super.onDestroy();
-	}
-
-	protected void onNext() {
-		if (conn.service != null)
-			conn.service.next();
-	}
-
-	protected void onPrev() {
-		if (conn.service != null)
-			conn.service.prev();
-	}
 }

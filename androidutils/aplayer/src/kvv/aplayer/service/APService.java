@@ -198,7 +198,8 @@ public class APService extends BaseService {
 		List<Folder> folders = read();
 		player = new Player1(folders) {
 			@Override
-			protected void onChanged() {
+			protected void onChanged(OnChangedHint hint) {
+				super.onChanged(hint);
 				System.out.println("onChanged " + isPlaying());
 
 				if (!isPlaying()) {
@@ -214,15 +215,8 @@ public class APService extends BaseService {
 				}
 
 				for (APServiceListener l : listeners)
-					l.onChanged();
+					l.onChanged(hint);
 			}
-
-			@Override
-			protected void onRandomChanged() {
-				for (APServiceListener l : listeners)
-					l.onRandomChanged();
-			}
-
 		};
 		for (APServiceListener l : listeners)
 			l.onLoaded();
@@ -431,7 +425,7 @@ public class APService extends BaseService {
 		public void setVisible(boolean vis) {
 			player.setVisible(vis);
 		}
-		
+
 	}
 
 	private void storeUndo() {

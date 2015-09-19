@@ -3,8 +3,11 @@ package kvv.aplayer.files;
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
 import kvv.aplayer.files.LevelView.LevelProvider;
+import kvv.aplayer.player.Player.OnChangedHint;
+import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.File1;
 import kvv.aplayer.service.IAPService;
+import android.annotation.SuppressLint;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,7 +22,10 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-public class FilesSectionFragmentList extends FilesSectionFragment {
+import com.smartbean.androidutils.util.Utils;
+
+public class FilesSectionFragmentList extends FilesSectionFragment implements
+		APServiceListener {
 
 	private static boolean tape;
 
@@ -30,6 +36,10 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 	private LevelView levelView;
 	private TextView progressText;
 	private Button pause;
+	private Button timing;
+	private ProgressBar fileProgressBar;
+	protected TextView folderTextView;
+	private View extButtons;
 
 	private Runnable buttonsRunnable = new Runnable() {
 		@Override
@@ -44,9 +54,50 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 		handler.postDelayed(buttonsRunnable, APActivity.BUTTONS_DELAY);
 	}
 
+	private OnClickListener timingListener = new OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			extButtons.setVisibility(View.VISIBLE);
+			restartButtonsTimer();
+		}
+	};
+
+	@Override
+	public void onChanged(OnChangedHint hint) {
+		if (conn.service == null)
+			return;
+
+		switch (hint) {
+		case FOLDER:
+			folderChanged();
+		case FILE:
+			trackChanged();
+		case POSITION:
+			positionChanged();
+		}
+	}
+
+	@Override
+	public void onSpeedChanged(boolean hasSpeed, int fromLocation,
+			int fromPlayer) {
+	}
+
+	@Override
+	public void onLoaded() {
+	}
+
+	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	protected void createUI(final IAPService service) {
 		super.createUI(service);
+
+		folderTextView = (TextView) rootView.findViewById(R.id.folder);
+		fileProgressBar = (ProgressBar) rootView.findViewById(R.id.progress);
+		timing = (Button) rootView.findViewById(R.id.timing);
+		timing.setOnClickListener(timingListener);
+
+		extButtons = rootView.findViewById(R.id.extButtons);
+
 		list = (ListView) rootView.findViewById(R.id.list);
 
 		list.setOnItemClickListener(new OnItemClickListener() {
@@ -110,6 +161,7 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 		listPanel = rootView.findViewById(R.id.listPanel);
 		tapeView = (TapeView) rootView.findViewById(R.id.tape);
 		levelView = (LevelView) rootView.findViewById(R.id.level);
+		levelView.setOnClickListener(timingListener);
 		levelView.setLevelProvider(new LevelProvider() {
 			@Override
 			public float getLevel() {
@@ -143,12 +195,19 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 
 			@Override
 			public void onClick(View v) {
+				if (conn.service == null)
+					return;
 				int ht = tapeView.hitTest(touchX, touchY);
 				switch (ht) {
 				case -1:
+					rotatePrev();
+					handler.postDelayed(seekRunnable, 500);
 					prevClick();
 					break;
 				case 1:
+					if (conn.service.getFile() < conn.service.getFileCnt() - 1)
+						rotateNext();
+					handler.postDelayed(seekRunnable, 500);
 					nextClick();
 					break;
 				case -2:
@@ -169,11 +228,13 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 			@Override
 			public boolean onLongClick(View v) {
 				int ht = tapeView.hitTest(touchX, touchY);
-				if (ht == 1)
+				if (ht == 1) {
+					rotateNext();
 					nextLongClick();
-				else if (ht == -1)
+				} else if (ht == -1) {
+					rotatePrev();
 					prevLongClick();
-				else
+				} else
 					rootView.findViewById(R.id.undoPanel).setVisibility(
 							View.VISIBLE);
 				return true;
@@ -186,6 +247,9 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 				touchX = event.getX();
 				touchY = event.getY();
 				touch(event);
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					seekRunnable.run();
+				}
 				return false;
 			}
 		});
@@ -207,8 +271,6 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 				rootView.getViewTreeObserver().removeGlobalOnLayoutListener(
 						this);
 				int width = rootView.getMeasuredWidth();
-				int height = rootView.getMeasuredHeight();
-
 				View view_instance = levelView;
 				android.view.ViewGroup.LayoutParams params = view_instance
 						.getLayoutParams();
@@ -220,9 +282,34 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 		});
 
 		enDisViews();
+
+		service.addListener(this);
+		onChanged(OnChangedHint.FOLDER);
+	}
+
+	private Runnable seekRunnable = new Runnable() {
+		@Override
+		public void run() {
+			if (tapeView != null)
+				tapeView.setSeek(0);
+		}
+	};
+
+	private void rotatePrev() {
+		if (tapeView != null && tape)
+			tapeView.setSeek(-2000);
+		handler.removeCallbacks(seekRunnable);
+	}
+
+	private void rotateNext() {
+		if (tapeView != null && tape)
+			tapeView.setSeek(2000);
+		handler.removeCallbacks(seekRunnable);
 	}
 
 	public void onDestroy() {
+		if (conn.service != null)
+			conn.service.removeListener(this);
 		super.onDestroy();
 	}
 
@@ -244,14 +331,14 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 		}
 	}
 
-	@Override
 	protected void folderChanged() {
 		System.out.println("folderChanged()");
 		FilesAdapter adapter = new FilesAdapter(getActivity(), conn.service);
 		list.setAdapter(adapter);
+		folderTextView.setText(conn.service.getFolders().get(
+				conn.service.getCurrentFolder()).displayName);
 	}
 
-	@Override
 	protected void trackChanged() {
 		System.out.println("trackChanged()");
 		clearButtons();
@@ -259,18 +346,23 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 		list.setSelection(conn.service.getFile() - 2);
 	}
 
-	protected void updateUI() {
-		super.updateUI();
-
+	@Override
+	protected void positionChanged() {
 		if (conn.service != null) {
 			pause.setText(conn.service.isPlaying() ? "Pause" : "Play");
+
+			int dur = conn.service.getDuration();
+			int pos = conn.service.getCurrentPosition();
+
+			fileProgressBar.setMax(dur);
+			fileProgressBar.setProgress(pos);
+			timing.setText(Utils.convertSecondsToHMmSs(pos / 1000) + "("
+					+ Utils.convertSecondsToHMmSs(dur / 1000) + ")");
 
 			int file = conn.service.getFile();
 			File1[] files = conn.service.getFiles();
 			if (files.length > 0) {
 				progressText.setText(files[file].name);
-				int dur = conn.service.getDuration();
-				int pos = conn.service.getCurrentPosition();
 				if (dur > 0) {
 					int max = 0;
 					int cur = 0;
@@ -283,8 +375,6 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 							cur += pos / 1000;
 					}
 
-					// int max = files.length * 100;
-					// int cur = file * 100 + pos * 100 / dur;
 					tapeView.setProgress(max, cur);
 
 					ProgressBar folderProgressBar = (ProgressBar) rootView
@@ -331,7 +421,7 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 		if (tapeView != null) {
 			tapeView.stop();
 			levelView.stop();
-			if(conn.service != null)
+			if (conn.service != null)
 				conn.service.setVisible(false);
 		}
 		fg = false;
@@ -343,50 +433,14 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 		fg = true;
 	}
 
-	@Override
-	protected void seekStart(int step) {
-		if (tapeView != null && tape)
-			tapeView.setSeek(step);
-	}
-
-	@Override
-	protected void seekEnd() {
-		if (tapeView != null && tape)
-			tapeView.setSeek(0);
-	}
-
-	private Runnable seekRunnable = new Runnable() {
-		@Override
-		public void run() {
-			seekEnd();
-		}
-	};
-
-	protected void onNext() {
-		if (conn.service != null
-				&& conn.service.getFile() < conn.service.getFileCnt() - 1)
-			seekStart(2000);
-		handler.removeCallbacks(seekRunnable);
-		handler.postDelayed(seekRunnable, 500);
-		super.onNext();
-	}
-
-	protected void onPrev() {
-		super.onPrev();
-		if (conn.service != null)
-			seekStart(-2000);
-		handler.removeCallbacks(seekRunnable);
-		handler.postDelayed(seekRunnable, 500);
-	}
-
-	OnClickListener prevOnClickListener = new OnClickListener() {
+	private OnClickListener prevOnClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			prevClick();
 		}
 	};
 
-	OnLongClickListener prevOnLongClickListener = new OnLongClickListener() {
+	private OnLongClickListener prevOnLongClickListener = new OnLongClickListener() {
 		@Override
 		public boolean onLongClick(View v) {
 			prevLongClick();
@@ -394,7 +448,8 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 		}
 	};
 
-	OnTouchListener prevOnTouchListener = new OnTouchListener() {
+	@SuppressLint("ClickableViewAccessibility")
+	private OnTouchListener prevOnTouchListener = new OnTouchListener() {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
 			touch(event);
@@ -402,14 +457,14 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 		}
 	};
 
-	OnClickListener nextOnClickListener = new OnClickListener() {
+	private OnClickListener nextOnClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			nextClick();
 		}
 	};
 
-	OnLongClickListener nextOnLongClickListener = new OnLongClickListener() {
+	private OnLongClickListener nextOnLongClickListener = new OnLongClickListener() {
 		@Override
 		public boolean onLongClick(View v) {
 			nextLongClick();
@@ -417,11 +472,13 @@ public class FilesSectionFragmentList extends FilesSectionFragment {
 		}
 	};
 
-	OnTouchListener nextOnTouchListener = new OnTouchListener() {
+	@SuppressLint("ClickableViewAccessibility")
+	private OnTouchListener nextOnTouchListener = new OnTouchListener() {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
 			touch(event);
 			return false;
 		}
 	};
+
 }
