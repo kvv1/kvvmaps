@@ -223,6 +223,8 @@ public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
 					}
 				});
 
+		updateExtButtons();
+
 	}
 
 	@Override
