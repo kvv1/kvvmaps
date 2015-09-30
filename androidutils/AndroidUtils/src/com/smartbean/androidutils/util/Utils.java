@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -147,6 +148,17 @@ public class Utils {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@SuppressLint("DefaultLocale")
+	public static String convertSecondsToHMmSs(long seconds) {
+		long s = seconds % 60;
+		long m = (seconds / 60) % 60;
+		long h = (seconds / (60 * 60)) % 24;
+
+		if (h != 0)
+			return String.format("%d:%02d:%02d", h, m, s);
+		return String.format("%02d:%02d", m, s);
 	}
 
 
