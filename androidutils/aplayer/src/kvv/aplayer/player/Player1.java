@@ -14,7 +14,7 @@ public abstract class Player1 extends Player implements IPlayer {
 
 	private final Eq eq;
 
-	private final Eq1 eq1;
+	// private final Eq1 eq1;
 
 	private int gain;
 	private float comprGain;
@@ -27,8 +27,8 @@ public abstract class Player1 extends Player implements IPlayer {
 	public Player1(List<Folder> folders) {
 		super(folders);
 
-		eq = new Eq(mp);
-		eq1 = new Eq1(mp, 6);
+		// eq = new Eq(mp);
+		eq = new EqEq(mp, -15);
 
 		compr = new Compressor(mp) {
 			@Override
@@ -96,11 +96,11 @@ public abstract class Player1 extends Player implements IPlayer {
 
 	private void setEq() {
 		float g = gain;
-//		g += speedKMH * dBPer100 / 100;
+		// g += speedKMH * dBPer100 / 100;
 		g += comprGain;
 		setEq(g);
-		
-//		eq1.setGain(speedKMH * dBPer100 / 100);
+
+		// eq1.setGain(speedKMH * dBPer100 / 100);
 	}
 
 	private void setEq(float level) {
@@ -123,48 +123,59 @@ public abstract class Player1 extends Player implements IPlayer {
 	}
 }
 
-class Eq {
+interface Eq {
+	void setGain(float gain);
+
+	void release();
+}
+
+class EqEq implements Eq {
 	private final Equalizer equalizer;
 	private short[] bandRange;
 	private short nBands;
+	private final float refDb;
 
-	public Eq(MediaPlayer mp) {
+	public EqEq(MediaPlayer mp, float refDb) {
 		equalizer = new Equalizer(10, mp.getAudioSessionId());
 		nBands = equalizer.getNumberOfBands();
 		bandRange = equalizer.getBandLevelRange();
+		this.refDb = refDb;
 
 		System.out.println("bands=" + nBands);
 		System.out.println("min=" + bandRange[0] + " max=" + bandRange[1]);
 		equalizer.setEnabled(true);
 	}
 
+	@Override
 	public void setGain(float gain) {
-		gain -= 15;
+		gain += refDb;
 		if (equalizer.getEnabled())
 			for (short i = 0; i < nBands; i++)
 				equalizer.setBandLevel(i, (short) (gain * 100));
 	}
 
+	@Override
 	public void release() {
 		equalizer.release();
 	}
 }
 
-class Eq1 {
+class EqVol implements Eq {
 	private final MediaPlayer mp;
+	private final float refDb;
 
-	private final float maxDb;
-	
-	public Eq1(MediaPlayer mp, float maxDb) {
+	public EqVol(MediaPlayer mp, float refDb) {
 		this.mp = mp;
-		this.maxDb = maxDb;
+		this.refDb = refDb;
 	}
 
+	@Override
 	public void setGain(float gain) {
-		float n = (float) Utils.db2n(gain - maxDb);
+		float n = (float) Utils.db2n(gain + refDb);
 		mp.setVolume(n, n);
 	}
 
+	@Override
 	public void release() {
 	}
 }

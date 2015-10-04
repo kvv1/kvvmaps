@@ -11,8 +11,7 @@ public abstract class Compressor {
 
 	private static final int RATE = 16;
 
-	//private static final double MEAN = 20;
-	private static final double MEAN = 200;
+	private static final double MEAN = 70;
 
 	private MediaPlayer mp;
 
@@ -24,6 +23,18 @@ public abstract class Compressor {
 
 	protected abstract void onLevel(float v);
 
+	interface Alg {
+		void setSR(int sr);
+
+		void onSample(int v);
+
+		float calcGain();
+
+		void reset();
+	}
+
+	private Alg alg = new Alg1();
+	
 	public Compressor(MediaPlayer mp) {
 		this.mp = mp;
 	}
@@ -43,6 +54,10 @@ public abstract class Compressor {
 
 	public void setComprLevel(int db) {
 		this.db = db;
+	}
+
+	public void resetGain() {
+		alg.reset();
 	}
 
 	public int getComprLevel() {
@@ -67,7 +82,6 @@ public abstract class Compressor {
 		setEnabled(mp.isPlaying() && (visible | db != 0));
 	}
 
-	private LPF lpf;
 	private int sr;
 
 	private LPF levelLPF;
@@ -82,48 +96,27 @@ public abstract class Compressor {
 
 			if (samplingRate != sr) {
 				System.out.println("sr=" + samplingRate);
-				lpf = new LPF(samplingRate / 1000, 0.1, 5);
-//				lpf = new LPF(samplingRate / 1000, 0.1, 0.1);
+				alg.setSR(samplingRate / 1000);
 				levelLPF = new LPF(samplingRate / 1000, 0.02, 0.5);
 				sr = samplingRate;
 			}
 
-			int max = 0;
-
 			for (byte b : waveform) {
 				int a = ((int) b & 0xFF) - 128;
+				alg.onSample(a);
 				int a1 = Math.abs(a);
-				a1 *= 3;
-				max = Math.max(max, a1);
-
-				lpf.add(a1);
 				levelLPF.add(a1);
 			}
 
 			if (visualizer.getEnabled())
 				onLevel((float) (levelLPF.get() / MEAN));
 
-			//float gain = calcGain
-			
-			double mean = lpf.get();
+			float gain = alg.calcGain();
 
-			float level = (float) Utils.n2db(mean / MEAN);
-			float gain = (float) Utils.n2db(MEAN / mean);
-			
-			if (gain > db)
-				gain = db;
-			if (gain < -db)
-				gain = -db;
-
-			// setGain(gain);
-
-			System.out.printf("m=%f g=%f\n", mean, gain);
-
-			if (db != 0 && visualizer.getEnabled()) {
+			if (db != 0 && visualizer.getEnabled())
 				setGain(gain);
-			} else {
+			else
 				setGain(0);
-			}
 		}
 
 		@Override
@@ -131,15 +124,46 @@ public abstract class Compressor {
 		}
 	}
 
-	public void resetGain() {
-		if (lpf != null)
-			lpf.set(MEAN / 3);
-	}
-
 	public void test() {
 	}
 
 	public void setSource(String path) {
+	}
+
+	private float bounds(float min, float val, float max) {
+		return Math.max(min, Math.min(val, max));
+	}
+
+	class Alg1 implements Alg {
+		private LPF lpf;
+		@Override
+		public void setSR(int sr) {
+			lpf = new LPF(sr, 0.1, 5);
+		}
+
+		@Override
+		public void onSample(int a) {
+			int a1 = Math.abs(a);
+			lpf.add(a1);
+		}
+
+		@Override
+		public float calcGain() {
+			double mean = lpf.get();
+			float gain = (float) Utils.n2db(MEAN / mean);
+
+			System.out.printf("m=%f g=%f\n", mean, gain);
+
+			gain = bounds(-db, gain, db);
+			return gain;
+		}
+
+		@Override
+		public void reset() {
+			if (lpf != null)
+				lpf.set(MEAN / 3);
+		}
+
 	}
 
 }
