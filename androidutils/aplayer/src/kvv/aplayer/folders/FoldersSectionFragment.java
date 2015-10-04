@@ -2,7 +2,7 @@ package kvv.aplayer.folders;
 
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
-import kvv.aplayer.player.Player.OnChangedHint;
+import kvv.aplayer.player.IPlayer.OnChangedHint;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.APServiceListenerAdapter;
@@ -15,9 +15,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.smartbean.androidutils.fragment.RLFragment;
+import com.smartbean.androidutils.fragment.FragmentX;
 
-public class FoldersSectionFragment extends RLFragment<APActivity, IAPService> {
+public class FoldersSectionFragment extends FragmentX<APActivity, IAPService> {
 	private boolean noSel;
 
 	private Handler handler = new Handler();

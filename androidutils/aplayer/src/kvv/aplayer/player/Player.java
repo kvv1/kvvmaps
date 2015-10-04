@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import kvv.aplayer.player.IPlayer.OnChangedHint;
 import kvv.aplayer.service.File1;
 import kvv.aplayer.service.Folder;
 import android.media.MediaPlayer;
@@ -15,10 +16,6 @@ import android.media.MediaPlayer.OnInfoListener;
 public abstract class Player {
 
 	protected abstract void onChanged(OnChangedHint hint);
-
-	public enum OnChangedHint {
-		FOLDER, FILE, POSITION
-	}
 
 	private void onChanged1(OnChangedHint hint) {
 		onChanged(hint);
@@ -41,7 +38,7 @@ public abstract class Player {
 
 		mp.setOnCompletionListener(new OnCompletionListener() {
 			@Override
-			public void onCompletion(MediaPlayer mp) {
+			public void onCompletion(MediaPlayer mp1) {
 				System.out.println("onCompletion");
 				if (Player.this.folders.size() == 0 || curFolder < 0)
 					return;
@@ -92,6 +89,7 @@ public abstract class Player {
 			curFile = idx;
 
 		reload();
+		resetGain();
 		mp.start();
 		mp.seekTo(pos);
 	}
@@ -243,38 +241,37 @@ public abstract class Player {
 		}
 	}
 
-	public void play_pause() {
-		resetGain();
-		if (mp.isPlaying())
-			mp.pause();
-		else
+	public void play() {
+		if (!mp.isPlaying()) {
+			resetGain();
 			mp.start();
-		onChanged1(OnChangedHint.POSITION);
+			onChanged1(OnChangedHint.POSITION);
+		}
 	}
 
 	public int getDuration() {
-		System.out.println("getDuration()");
+		// System.out.println("getDuration()");
 		if (!prepared)
 			return 1;
 		return mp.getDuration();
 	}
 
 	public int getCurrentPosition() {
-		System.out.println("getCurrentPosition()");
+		// System.out.println("getCurrentPosition()");
 		if (!prepared)
 			return 0;
 		return mp.getCurrentPosition();
 	}
 
 	public int getFile() {
-		System.out.println("getFile()");
+		// System.out.println("getFile()");
 		if (!prepared)
 			return 0;
 		return curFile;
 	}
 
 	public boolean isPlaying() {
-		System.out.println("isPlaying()");
+		// System.out.println("isPlaying()");
 		if (!prepared)
 			return false;
 		return mp.isPlaying();

@@ -3,16 +3,18 @@ package kvv.aplayer.player;
 import java.util.List;
 
 import kvv.aplayer.service.Folder;
+import android.media.MediaPlayer;
 import android.media.audiofx.Equalizer;
-import android.widget.Chronometer.OnChronometerTickListener;
 
-public abstract class Player1 extends Player {
+import com.smartbean.androidutils.util.Utils;
+
+public abstract class Player1 extends Player implements IPlayer {
 
 	private final Compressor compr;
-	private Equalizer eq;
 
-	private short[] bandRange;
-	private short nBands;
+	private final Eq eq;
+
+	private final Eq1 eq1;
 
 	private int gain;
 	private float comprGain;
@@ -24,6 +26,10 @@ public abstract class Player1 extends Player {
 
 	public Player1(List<Folder> folders) {
 		super(folders);
+
+		eq = new Eq(mp);
+		eq1 = new Eq1(mp, 6);
+
 		compr = new Compressor(mp) {
 			@Override
 			protected void setGain(float db) {
@@ -36,26 +42,22 @@ public abstract class Player1 extends Player {
 				level = v;
 			}
 		};
-		eq = new Equalizer(0, mp.getAudioSessionId());
 
-		nBands = eq.getNumberOfBands();
-		bandRange = eq.getBandLevelRange();
-
-		System.out.println("min=" + bandRange[0] + " max=" + bandRange[1]);
-		eq.setEnabled(true);
 		setEq(0);
 
 		compr.init();
-
-		eq.setEnabled(true);
 
 		setGain(0);
 	}
 
 	@Override
-	protected void onChanged(OnChangedHint hint) {
-		if (compr != null)
+	public void onChanged(OnChangedHint hint) {
+		if (compr != null) {
 			compr.enDis(visible);
+			if ((hint == OnChangedHint.FILE || hint == OnChangedHint.FOLDER)
+					&& getFolders().get(getCurrentFolder()).files.length > 0)
+				compr.setSource(getFolders().get(getCurrentFolder()).files[getFile()].path);
+		}
 	}
 
 	@Override
@@ -77,6 +79,7 @@ public abstract class Player1 extends Player {
 	public void setCompr(int db) {
 		compr.setComprLevel(db);
 		compr.enDis(visible);
+		compr.test();
 		setEq();
 	}
 
@@ -93,15 +96,16 @@ public abstract class Player1 extends Player {
 
 	private void setEq() {
 		float g = gain;
-		g += speedKMH * dBPer100 / 100;
+//		g += speedKMH * dBPer100 / 100;
 		g += comprGain;
-		setEq(g * 100);
+		setEq(g);
+		
+//		eq1.setGain(speedKMH * dBPer100 / 100);
 	}
 
 	private void setEq(float level) {
-		if (eq.getEnabled())
-			for (short i = 0; i < nBands; i++)
-				eq.setBandLevel(i, (short) level);
+		System.out.println("setEq " + level);
+		eq.setGain(level);
 	}
 
 	@Override
@@ -116,7 +120,51 @@ public abstract class Player1 extends Player {
 	public void setVisible(boolean vis) {
 		visible = vis;
 		compr.enDis(visible);
-		// TODO Auto-generated method stub
+	}
+}
 
+class Eq {
+	private final Equalizer equalizer;
+	private short[] bandRange;
+	private short nBands;
+
+	public Eq(MediaPlayer mp) {
+		equalizer = new Equalizer(10, mp.getAudioSessionId());
+		nBands = equalizer.getNumberOfBands();
+		bandRange = equalizer.getBandLevelRange();
+
+		System.out.println("bands=" + nBands);
+		System.out.println("min=" + bandRange[0] + " max=" + bandRange[1]);
+		equalizer.setEnabled(true);
+	}
+
+	public void setGain(float gain) {
+		gain -= 15;
+		if (equalizer.getEnabled())
+			for (short i = 0; i < nBands; i++)
+				equalizer.setBandLevel(i, (short) (gain * 100));
+	}
+
+	public void release() {
+		equalizer.release();
+	}
+}
+
+class Eq1 {
+	private final MediaPlayer mp;
+
+	private final float maxDb;
+	
+	public Eq1(MediaPlayer mp, float maxDb) {
+		this.mp = mp;
+		this.maxDb = maxDb;
+	}
+
+	public void setGain(float gain) {
+		float n = (float) Utils.db2n(gain - maxDb);
+		mp.setVolume(n, n);
+	}
+
+	public void release() {
 	}
 }

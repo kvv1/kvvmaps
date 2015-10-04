@@ -2,17 +2,15 @@ package kvv.aplayer.chart;
 
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
-import kvv.aplayer.R.id;
-import kvv.aplayer.R.layout;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.APServiceListenerAdapter;
 import kvv.aplayer.service.IAPService;
 
-import com.smartbean.androidutils.fragment.RLFragment;
+import com.smartbean.androidutils.fragment.FragmentX;
 
 public class ChartsFragment extends
-		RLFragment<APActivity, IAPService> {
+		FragmentX<APActivity, IAPService> {
 
 	public ChartsFragment() {
 		super(APService.class, R.layout.fragment_charts);

@@ -13,9 +13,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-import com.smartbean.androidutils.fragment.RLFragment;
+import com.smartbean.androidutils.fragment.FragmentX;
 
-public class FilesSectionFragment extends RLFragment<APActivity, IAPService> {
+public class FilesSectionFragment extends FragmentX<APActivity, IAPService> {
 
 	SharedPreferences settings;
 

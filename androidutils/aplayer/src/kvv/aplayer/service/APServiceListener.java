@@ -1,6 +1,7 @@
 package kvv.aplayer.service;
 
-import kvv.aplayer.player.Player.OnChangedHint;
+import kvv.aplayer.player.IPlayer.OnChangedHint;
+
 
 public interface APServiceListener {
 	void onChanged(OnChangedHint hint);

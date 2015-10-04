@@ -160,6 +160,9 @@ public class LevelView extends View {
 		max = Math.max(max, getLevel() * 1100);
 
 		float val = (float) (lpf.get() * 1000 * 100 / max); // 0..100
+		
+		val = (float) (lpf.get() * 100);
+		
 		// val = 0;
 		float r = w * 0.6f;
 

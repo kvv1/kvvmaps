@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.Set;
 
 import kvv.aplayer.APActivity;
-import kvv.aplayer.MemoryStorage;
 import kvv.aplayer.R;
 import kvv.aplayer.RemoteControlReceiver;
+import kvv.aplayer.player.IPlayer;
 import kvv.aplayer.player.Player1;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -26,30 +26,26 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.AudioManager;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 
 import com.smartbean.androidutils.service.BaseService;
-import com.smartbean.androidutils.util.StorageUtils;
-import com.smartbean.androidutils.util.StorageUtils.StorageInfo;
 
-public class APService extends BaseService {
+public class APService extends BaseService implements IAPService {
 	public final static File ROOT = new File(
 			Environment.getExternalStorageDirectory(), "/external_sd/aplayer/");
 
 	public static final float[] dBPer100kmh = { 0, 5f };
-	public static final int[] compr = { 0, 10 };
+	public static final int[] compr = { 0, 15 };
 
 	private Set<APServiceListener> listeners = new HashSet<APServiceListener>();
 
-	private Player1 player;
+	private IPlayer player;
 
 	private Handler handler = new Handler();
 
@@ -78,7 +74,10 @@ public class APService extends BaseService {
 				player.pause();
 			}
 			if ("kvv.aplayer.PLAY_PAUSE".equals(action)) {
-				player.play_pause();
+				if (player.isPlaying())
+					player.pause();
+				else
+					player.play();
 			}
 			if ("kvv.aplayer.PREV".equals(action)) {
 				player.prev();
@@ -106,38 +105,7 @@ public class APService extends BaseService {
 	public void onCreate() {
 		super.onCreate();
 
-		// //////////////////////////////////////
-
-		System.out.println("---");
-		for (StorageInfo info : StorageUtils.getStorageList())
-			System.out.println(info.path);
-		System.out.println("---");
-		for (String key : MemoryStorage.getAllStorageLocations().keySet())
-			System.out.println(key + " "
-					+ MemoryStorage.getAllStorageLocations().get(key));
-		System.out.println("---");
-		for (String s : StorageUtils.getStorageDirectories())
-			System.out.println(s);
-		System.out.println("---");
-
-		String[] ll = new File("/storage/sdcard1").list();
-		if (ll != null)
-			for (String f : ll)
-				System.out.println(f);
-		System.out.println("---");
-
-		// //////////////////////////////////////
-
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
-
-		/*
-		 * if (Build.VERSION.SDK_INT < 14) for (StorageInfo info :
-		 * StorageUtils.getStorageList()) read(new File(info.path), folders, 0);
-		 * else for (String s : StorageUtils.getStorageDirectories()) read(new
-		 * File(s), folders, 0);
-		 */
-
-		// readFolders(ROOT, 0, folders);
 
 		createPlayer();
 
@@ -147,7 +115,7 @@ public class APService extends BaseService {
 			public void onCallStateChanged(int state, String incomingNumber) {
 				if (state == TelephonyManager.CALL_STATE_RINGING) {
 					if (player.isPlaying())
-						player.play_pause();
+						player.pause();
 				}
 				super.onCallStateChanged(state, incomingNumber);
 			}
@@ -198,9 +166,11 @@ public class APService extends BaseService {
 		List<Folder> folders = read();
 		player = new Player1(folders) {
 			@Override
-			protected void onChanged(OnChangedHint hint) {
+			public void onChanged(OnChangedHint hint) {
 				super.onChanged(hint);
 				System.out.println("onChanged " + isPlaying());
+				
+				setMaxVolume();
 
 				if (!isPlaying()) {
 					handler.removeCallbacks(saver);
@@ -232,201 +202,206 @@ public class APService extends BaseService {
 		super.onDestroy();
 	}
 
+	// @Override
+	// public IBinder onBind(Intent arg0) {
+	// return new APServiceBinder() {
+	// };
+	// }
+	//
+	// public class APServiceBinder extends Binder implements IAPService {
 	@Override
-	public IBinder onBind(Intent arg0) {
-		return new APServiceBinder() {
-		};
+	public List<Folder> getFolders() {
+		return player.getFolders();
 	}
 
-	public class APServiceBinder extends Binder implements IAPService {
-		@Override
-		public List<Folder> getFolders() {
-			return player.getFolders();
-		}
-
-		@Override
-		public void addListener(APServiceListener listener) {
-			listeners.add(listener);
-		}
-
-		@Override
-		public void removeListener(APServiceListener listener) {
-			listeners.remove(listener);
-		}
-
-		@Override
-		public int getCurrentFolder() {
-			return player.getCurrentFolder();
-		}
-
-		@Override
-		public void toFolder(int position) {
-			if (position == player.getCurrentFolder())
-				return;
-
-			storeUndo();
-
-			save();
-
-			Folder folder = player.getFolders().get(position);
-			int curFile = settings.getInt(folder.path + "|file", 0);
-			int curPos = settings.getInt(folder.path + "|pos", 0);
-			if (curFile >= folder.files.length)
-				curFile = 0;
-
-			player.toFolder(position, curFile, curPos);
-		}
-
-		@Override
-		public void toRandom(int position) {
-			storeUndo();
-			save();
-			player.makeRandom(position);
-		}
-
-		@Override
-		public void toFile(int position) {
-			storeUndo();
-			player.toFile(position);
-		}
-
-		@Override
-		public void prev() {
-			storeUndo();
-			player.prev();
-		}
-
-		@Override
-		public void next() {
-			storeUndo();
-			player.next();
-		}
-
-		@Override
-		public void play_pause() {
-			player.play_pause();
-		}
-
-		@Override
-		public int getDuration() {
-			return player.getDuration();
-		}
-
-		@Override
-		public int getCurrentPosition() {
-			return player.getCurrentPosition();
-		}
-
-		@Override
-		public void seek(int seekStep) {
-			player.seek(seekStep);
-		}
-
-		@Override
-		public int getFile() {
-			return player.getFile();
-		}
-
-		@Override
-		public boolean isPlaying() {
-			return player.isPlaying();
-		}
-
-		@Override
-		public void setGain(int db) {
-			player.setGain(db);
-			setPrefInt("gain", db);
-		}
-
-		@Override
-		public void setComprIdx(int n) {
-			player.setCompr(compr[n]);
-			setPrefInt("comprIdx", n);
-		}
-
-		@Override
-		public int getComprIdx() {
-			return settings.getInt("comprIdx", 0);
-		}
-
-		@Override
-		public void setDBPer100Idx(int n) {
-			player.setDbPer100(dBPer100kmh[n]);
-			setPrefInt("dBPer100Idx", n);
-		}
-
-		@Override
-		public int getDBPer100Idx() {
-			return settings.getInt("dBPer100Idx", 0);
-		}
-
-		@Override
-		public int getGain() {
-			return player.getGain();
-		}
-
-		@Override
-		public float getLevel() {
-			return player.getLevel();
-		}
-
-		@Override
-		public int getFileCnt() {
-			int folder = getCurrentFolder();
-			if (folder >= 0) {
-				Folder fold = getFolders().get(folder);
-				return fold.files.length;
-			}
-			return 0;
-		}
-
-		@Override
-		public void reload() {
-			createPlayer();
-		}
-
-		@Override
-		public File1[] getFiles() {
-			int folder = getCurrentFolder();
-			if (folder < 0)
-				return new File1[0];
-			return getFolders().get(folder).files;
-		}
-
-		@Override
-		public void redo() {
-			System.out.println("redo");
-			if (redoList.isEmpty())
-				return;
-			// if(lastItem == null)
-			UndoItem lastItem = new UndoItem(player.getCurrentFolder(),
-					player.getFile(), player.getCurrentPosition());
-			UndoItem item = redoList.removeLast();
-			undoList.add(lastItem);
-			// lastItem = item;
-			player.toFolder(item.folder, item.file, item.pos);
-		}
-
-		@Override
-		public void undo() {
-			System.out.println("undo");
-			if (undoList.isEmpty())
-				return;
-			// if(lastItem == null)
-			UndoItem lastItem = new UndoItem(player.getCurrentFolder(),
-					player.getFile(), player.getCurrentPosition());
-			UndoItem item = undoList.removeLast();
-			redoList.add(lastItem);
-			// lastItem = item;
-			player.toFolder(item.folder, item.file, item.pos);
-		}
-
-		@Override
-		public void setVisible(boolean vis) {
-			player.setVisible(vis);
-		}
-
+	@Override
+	public void addListener(APServiceListener listener) {
+		listeners.add(listener);
 	}
+
+	@Override
+	public void removeListener(APServiceListener listener) {
+		listeners.remove(listener);
+	}
+
+	@Override
+	public int getCurrentFolder() {
+		return player.getCurrentFolder();
+	}
+
+	@Override
+	public void toFolder(int position) {
+		if (position == player.getCurrentFolder())
+			return;
+
+		storeUndo();
+
+		save();
+
+		Folder folder = player.getFolders().get(position);
+		int curFile = settings.getInt(folder.path + "|file", 0);
+		int curPos = settings.getInt(folder.path + "|pos", 0);
+		if (curFile >= folder.files.length)
+			curFile = 0;
+
+		player.toFolder(position, curFile, curPos);
+		
+		
+	}
+
+	@Override
+	public void toRandom(int position) {
+		storeUndo();
+		save();
+		player.makeRandom(position);
+	}
+
+	@Override
+	public void toFile(int position) {
+		storeUndo();
+		player.toFile(position);
+	}
+
+	@Override
+	public void prev() {
+		storeUndo();
+		player.prev();
+	}
+
+	@Override
+	public void next() {
+		storeUndo();
+		player.next();
+	}
+
+	@Override
+	public void play_pause() {
+		if (player.isPlaying())
+			player.pause();
+		else
+			player.play();
+	}
+
+	@Override
+	public int getDuration() {
+		return player.getDuration();
+	}
+
+	@Override
+	public int getCurrentPosition() {
+		return player.getCurrentPosition();
+	}
+
+	@Override
+	public void seek(int seekStep) {
+		player.seek(seekStep);
+	}
+
+	@Override
+	public int getFile() {
+		return player.getFile();
+	}
+
+	@Override
+	public boolean isPlaying() {
+		return player.isPlaying();
+	}
+
+	@Override
+	public void setGain(int db) {
+		player.setGain(db);
+		setPrefInt("gain", db);
+	}
+
+	@Override
+	public void setComprIdx(int n) {
+		player.setCompr(compr[n]);
+		setPrefInt("comprIdx", n);
+	}
+
+	@Override
+	public int getComprIdx() {
+		return settings.getInt("comprIdx", 0);
+	}
+
+	@Override
+	public void setDBPer100Idx(int n) {
+		player.setDbPer100(dBPer100kmh[n]);
+		setPrefInt("dBPer100Idx", n);
+	}
+
+	@Override
+	public int getDBPer100Idx() {
+		return settings.getInt("dBPer100Idx", 0);
+	}
+
+	@Override
+	public int getGain() {
+		return player.getGain();
+	}
+
+	@Override
+	public float getLevel() {
+		return player.getLevel();
+	}
+
+	@Override
+	public int getFileCnt() {
+		int folder = getCurrentFolder();
+		if (folder >= 0) {
+			Folder fold = getFolders().get(folder);
+			return fold.files.length;
+		}
+		return 0;
+	}
+
+	@Override
+	public void reload() {
+		createPlayer();
+	}
+
+	@Override
+	public File1[] getFiles() {
+		int folder = getCurrentFolder();
+		if (folder < 0)
+			return new File1[0];
+		return getFolders().get(folder).files;
+	}
+
+	@Override
+	public void redo() {
+		System.out.println("redo");
+		if (redoList.isEmpty())
+			return;
+		// if(lastItem == null)
+		UndoItem lastItem = new UndoItem(player.getCurrentFolder(),
+				player.getFile(), player.getCurrentPosition());
+		UndoItem item = redoList.removeLast();
+		undoList.add(lastItem);
+		// lastItem = item;
+		player.toFolder(item.folder, item.file, item.pos);
+	}
+
+	@Override
+	public void undo() {
+		System.out.println("undo");
+		if (undoList.isEmpty())
+			return;
+		// if(lastItem == null)
+		UndoItem lastItem = new UndoItem(player.getCurrentFolder(),
+				player.getFile(), player.getCurrentPosition());
+		UndoItem item = undoList.removeLast();
+		redoList.add(lastItem);
+		// lastItem = item;
+		player.toFolder(item.folder, item.file, item.pos);
+	}
+
+	@Override
+	public void setVisible(boolean vis) {
+		player.setVisible(vis);
+	}
+
+	// }
 
 	private void storeUndo() {
 		if (player.getCurrentFolder() < 0)
@@ -458,7 +433,8 @@ public class APService extends BaseService {
 
 		Folder folder = player.getFolders().get(player.getCurrentFolder());
 
-		System.out.println("SAVE " + folder.shortName + " " + player.getFile());
+		// System.out.println("SAVE " + folder.shortName + " " +
+		// player.getFile());
 
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putInt(folder.path + "|file", player.getFile());
@@ -568,7 +544,7 @@ public class APService extends BaseService {
 					.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
 			long dur = mCursor.getLong(mCursor
 					.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-			System.out.println(title + " " + path + " " + dur);
+			//System.out.println(title + " " + path + " " + dur);
 
 			String p = path.substring(path.indexOf('/', 1) + 1);
 			for (int i = 0; i < p.length(); i++)
@@ -586,6 +562,14 @@ public class APService extends BaseService {
 		mCursor.close();
 		System.out.println();
 
+		String fold = "000";
+		List<File1> files1 = new ArrayList<File1>();
+		files1.add(new File1("/sdcard0/000/audiocheck.net_sin_1000Hz_0dBFS_10s.wav", "audiocheck.net_sin_1000Hz_0dBFS_10s.wav", 100));
+		files1.add(new File1("/sdcard0/000/audiocheck.net_sin_1000Hz_-6dBFS_10s.wav", "audiocheck.net_sin_1000Hz_-6dBFS_10s.wav", 100));
+		files1.add(new File1("/sdcard0/000/audiocheck.net_sin_1000Hz_-20dBFS_10s.wav", "audiocheck.net_sin_1000Hz_-20dBFS_10s.wav", 100));
+		map.put(fold, files1);
+		
+		
 		List<String> folds = new ArrayList<String>(map.keySet());
 		Collections.sort(folds);
 
@@ -604,4 +588,10 @@ public class APService extends BaseService {
 		return folders;
 	}
 
+	void setMaxVolume() {
+		AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+		int maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+		System.out.println("maxVol " + maxVol);
+		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVol, 0);
+	}
 }

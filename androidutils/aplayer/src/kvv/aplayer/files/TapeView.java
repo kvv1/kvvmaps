@@ -200,12 +200,18 @@ public class TapeView extends View {
 		if (r != null)
 			return;
 
+		
 		r = new Runnable() {
+			private long time = System.currentTimeMillis();
+			
 			@Override
 			public void run() {
+				long t = System.currentTimeMillis();
+				int dt = (int) (t - time);
+				time = t;
 				if (seekStep == 0) {
-					bobbin1.step(STEP_MS);
-					bobbin2.step(STEP_MS);
+					bobbin1.step(dt);
+					bobbin2.step(dt);
 				} else {
 					int step = seekStep / 5;
 					if (step > 500)

@@ -3,7 +3,7 @@ package kvv.aplayer;
 import kvv.aplayer.chart.ChartsFragment;
 import kvv.aplayer.files.FilesSectionFragmentList;
 import kvv.aplayer.folders.FoldersSectionFragment;
-import kvv.aplayer.player.Player.OnChangedHint;
+import kvv.aplayer.player.IPlayer.OnChangedHint;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.APServiceListenerAdapter;
@@ -166,11 +166,6 @@ public class APActivity extends FragmentActivityX {
 		public void onServiceConnected(ComponentName name, IBinder binder) {
 			super.onServiceConnected(name, binder);
 			service.addListener(listener);
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			super.onServiceDisconnected(name);
 		}
 	};
 

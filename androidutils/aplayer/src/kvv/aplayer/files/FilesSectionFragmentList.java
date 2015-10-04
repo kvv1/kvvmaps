@@ -3,7 +3,7 @@ package kvv.aplayer.files;
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
 import kvv.aplayer.files.LevelView.LevelProvider;
-import kvv.aplayer.player.Player.OnChangedHint;
+import kvv.aplayer.player.IPlayer.OnChangedHint;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.File1;
 import kvv.aplayer.service.IAPService;
@@ -313,8 +313,8 @@ public class FilesSectionFragmentList extends FilesSectionFragment implements
 		super.onDestroy();
 	}
 
-	float touchX;
-	float touchY;
+	private float touchX;
+	private float touchY;
 
 	private void clearButtons() {
 		System.out.println("clearButtons()");

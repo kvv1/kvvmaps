@@ -34,7 +34,7 @@ public class FilesAdapter extends ArrayAdapter<File1> {
 		TextView tv = (TextView) v.findViewById(R.id.text);
 		tv.setText(getItem(position).name);
 
-		System.out.print("%");
+		//System.out.print("%");
 		
 		if (position == sel)
 			v.setBackgroundColor(0xFFFFFF80);
