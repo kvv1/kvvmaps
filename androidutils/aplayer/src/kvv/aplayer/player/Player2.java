@@ -304,7 +304,7 @@ public class Player2 implements IPlayer {
 	}
 
 	@Override
-	public float getLevel() {
+	public float getIndicatorLevel() {
 		// TODO Auto-generated method stub
 		return 0;
 	}

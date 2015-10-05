@@ -73,6 +73,8 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService> {
 		((Button) rootView.findViewById(R.id.volPlus2)).setTypeface(null,
 				conn.service.getGain() == 10 ? Typeface.BOLD : Typeface.NORMAL);
 
+		((Button) rootView.findViewById(R.id.volPlus3)).setTypeface(null,
+				conn.service.getGain() == 15 ? Typeface.BOLD : Typeface.NORMAL);
 		// System.out.println("level = " + conn.service.getLevel());
 
 	}
@@ -195,6 +197,16 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService> {
 						updateExtButtons();
 					}
 				});
+
+		((Button) rootView.findViewById(R.id.volPlus3))
+		.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				service.setGain(15);
+				restartButtonsTimer();
+				updateExtButtons();
+			}
+		});
 
 		((Button) rootView.findViewById(R.id.back10s))
 				.setOnClickListener(new OnClickListener() {

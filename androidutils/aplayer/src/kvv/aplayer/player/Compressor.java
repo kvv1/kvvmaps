@@ -11,7 +11,7 @@ public abstract class Compressor {
 
 	private static final int RATE = 16;
 
-	private static final double MEAN = 70;
+	private static final double MEAN = 40;
 
 	private MediaPlayer mp;
 
@@ -34,7 +34,7 @@ public abstract class Compressor {
 	}
 
 	private Alg alg = new Alg1();
-	
+
 	public Compressor(MediaPlayer mp) {
 		this.mp = mp;
 	}
@@ -136,9 +136,11 @@ public abstract class Compressor {
 
 	class Alg1 implements Alg {
 		private LPF lpf;
+
 		@Override
 		public void setSR(int sr) {
-			lpf = new LPF(sr, 0.1, 5);
+			lpf = new LPF(sr, 0.01, 5);
+			// lpf = new LPF(sr, 0.01, 1);
 		}
 
 		@Override
@@ -150,7 +152,14 @@ public abstract class Compressor {
 		@Override
 		public float calcGain() {
 			double mean = lpf.get();
-			float gain = (float) Utils.n2db(MEAN / mean);
+
+			double k = MEAN / mean;
+			double maxK = Utils.db2n(db);
+
+			if (k > maxK)
+				k = maxK;
+
+			float gain = (float) Utils.n2db(k);
 
 			System.out.printf("m=%f g=%f\n", mean, gain);
 
@@ -161,7 +170,49 @@ public abstract class Compressor {
 		@Override
 		public void reset() {
 			if (lpf != null)
+				lpf.set(MEAN / 2);
+		}
+
+	}
+
+	class Alg2 implements Alg {
+		private static final double MEAN = 20;
+
+		private LPF lpf;
+		private float gain;
+
+		@Override
+		public void setSR(int sr) {
+			lpf = new LPF(sr, 0.01, 1);
+		}
+
+		@Override
+		public void onSample(int a) {
+			int a1 = Math.abs(a);
+			lpf.add(a1);
+		}
+
+		@Override
+		public float calcGain() {
+			double mean = lpf.get();
+
+			if (mean < MEAN)
+				gain += 0.1;
+			else {
+				double k = MEAN / mean;
+				float g = (float) Utils.n2db(k);
+				gain += g;
+				lpf.set(MEAN);
+			}
+			System.out.printf("m=%f g=%f\n", mean, gain);
+			return gain;
+		}
+
+		@Override
+		public void reset() {
+			if (lpf != null)
 				lpf.set(MEAN / 3);
+			gain = 5;
 		}
 
 	}

@@ -8,13 +8,13 @@ import android.media.audiofx.Equalizer;
 
 import com.smartbean.androidutils.util.Utils;
 
-public abstract class Player1 extends Player implements IPlayer {
+public class Player1 extends Player0 implements IPlayer {
 
 	private final Compressor compr;
 
-	private final Eq eq;
+	private final Eq eqCompr;
 
-	// private final Eq1 eq1;
+	private final Eq eqSpeed;
 
 	private int gain;
 	private float comprGain;
@@ -22,15 +22,15 @@ public abstract class Player1 extends Player implements IPlayer {
 	private float speedKMH;
 	private boolean visible;
 
-	private volatile float level;
+	private volatile float indicatorLevel;
 
 	public Player1(List<Folder> folders) {
 		super(folders);
 
-		// eq = new Eq(mp);
-		eq = new EqEq(mp, -15);
+		eqCompr = new EqVol(getMP(), -15);
+		eqSpeed = new EqEq(getMP(), -7);
 
-		compr = new Compressor(mp) {
+		compr = new Compressor(getMP()) {
 			@Override
 			protected void setGain(float db) {
 				comprGain = db;
@@ -39,11 +39,11 @@ public abstract class Player1 extends Player implements IPlayer {
 
 			@Override
 			protected void onLevel(float v) {
-				level = v;
+				indicatorLevel = v;
 			}
 		};
 
-		setEq(0);
+		setEq();
 
 		compr.init();
 
@@ -62,7 +62,7 @@ public abstract class Player1 extends Player implements IPlayer {
 
 	@Override
 	public void close() {
-		eq.release();
+		eqCompr.release();
 		compr.release();
 		super.close();
 	}
@@ -98,14 +98,11 @@ public abstract class Player1 extends Player implements IPlayer {
 		float g = gain;
 		// g += speedKMH * dBPer100 / 100;
 		g += comprGain;
-		setEq(g);
+		
+		System.out.println("setEq " + g);
+		eqCompr.setGain(g);
 
-		// eq1.setGain(speedKMH * dBPer100 / 100);
-	}
-
-	private void setEq(float level) {
-		System.out.println("setEq " + level);
-		eq.setGain(level);
+		eqSpeed.setGain(speedKMH * dBPer100 / 100);
 	}
 
 	@Override
@@ -113,8 +110,8 @@ public abstract class Player1 extends Player implements IPlayer {
 		compr.resetGain();
 	}
 
-	public float getLevel() {
-		return level;
+	public float getIndicatorLevel() {
+		return indicatorLevel;
 	}
 
 	public void setVisible(boolean vis) {

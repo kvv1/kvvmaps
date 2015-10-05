@@ -169,8 +169,10 @@ public class APService extends BaseService implements IAPService {
 			public void onChanged(OnChangedHint hint) {
 				super.onChanged(hint);
 				System.out.println("onChanged " + isPlaying());
-				
-				setMaxVolume();
+
+				if (settings.getBoolean(getString(R.string.prefNavigatorMode),
+						false))
+					setMaxVolume();
 
 				if (!isPlaying()) {
 					handler.removeCallbacks(saver);
@@ -245,8 +247,7 @@ public class APService extends BaseService implements IAPService {
 			curFile = 0;
 
 		player.toFolder(position, curFile, curPos);
-		
-		
+
 	}
 
 	@Override
@@ -342,7 +343,7 @@ public class APService extends BaseService implements IAPService {
 
 	@Override
 	public float getLevel() {
-		return player.getLevel();
+		return player.getIndicatorLevel();
 	}
 
 	@Override
@@ -544,7 +545,7 @@ public class APService extends BaseService implements IAPService {
 					.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
 			long dur = mCursor.getLong(mCursor
 					.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-			//System.out.println(title + " " + path + " " + dur);
+			// System.out.println(title + " " + path + " " + dur);
 
 			String p = path.substring(path.indexOf('/', 1) + 1);
 			for (int i = 0; i < p.length(); i++)
@@ -562,14 +563,19 @@ public class APService extends BaseService implements IAPService {
 		mCursor.close();
 		System.out.println();
 
-		String fold = "000";
-		List<File1> files1 = new ArrayList<File1>();
-		files1.add(new File1("/sdcard0/000/audiocheck.net_sin_1000Hz_0dBFS_10s.wav", "audiocheck.net_sin_1000Hz_0dBFS_10s.wav", 100));
-		files1.add(new File1("/sdcard0/000/audiocheck.net_sin_1000Hz_-6dBFS_10s.wav", "audiocheck.net_sin_1000Hz_-6dBFS_10s.wav", 100));
-		files1.add(new File1("/sdcard0/000/audiocheck.net_sin_1000Hz_-20dBFS_10s.wav", "audiocheck.net_sin_1000Hz_-20dBFS_10s.wav", 100));
-		map.put(fold, files1);
-		
-		
+//		String fold = "000";
+//		List<File1> files1 = new ArrayList<File1>();
+//		files1.add(new File1(
+//				"/sdcard0/000/audiocheck.net_sin_1000Hz_0dBFS_10s.wav",
+//				"audiocheck.net_sin_1000Hz_0dBFS_10s.wav", 100));
+//		files1.add(new File1(
+//				"/sdcard0/000/audiocheck.net_sin_1000Hz_-6dBFS_10s.wav",
+//				"audiocheck.net_sin_1000Hz_-6dBFS_10s.wav", 100));
+//		files1.add(new File1(
+//				"/sdcard0/000/audiocheck.net_sin_1000Hz_-20dBFS_10s.wav",
+//				"audiocheck.net_sin_1000Hz_-20dBFS_10s.wav", 100));
+//		map.put(fold, files1);
+
 		List<String> folds = new ArrayList<String>(map.keySet());
 		Collections.sort(folds);
 
@@ -588,8 +594,8 @@ public class APService extends BaseService implements IAPService {
 		return folders;
 	}
 
-	void setMaxVolume() {
-		AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+	private void setMaxVolume() {
+		AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		int maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 		System.out.println("maxVol " + maxVol);
 		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVol, 0);

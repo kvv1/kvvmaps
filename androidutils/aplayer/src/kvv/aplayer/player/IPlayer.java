@@ -42,7 +42,7 @@ public interface IPlayer {
 
 	int getGain();
 
-	float getLevel();
+	float getIndicatorLevel();
 
 	void setVisible(boolean vis);
 

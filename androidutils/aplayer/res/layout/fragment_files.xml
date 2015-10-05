@@ -98,6 +98,14 @@
                 android:orientation="vertical" >
 
                 <Button
+                    android:id="@+id/volPlus3"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="+15db"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <Button
                     android:id="@+id/volPlus2"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
