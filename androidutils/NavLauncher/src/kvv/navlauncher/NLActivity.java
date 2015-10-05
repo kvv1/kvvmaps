@@ -184,7 +184,7 @@ public class NLActivity extends Activity {
 						System.out.println("BR " + br);
 
 						if (br > 250) {
-							localLayoutParams.screenBrightness = 0.2f;
+							localLayoutParams.screenBrightness = 0.1f;
 							Settings.System
 									.putInt(getContentResolver(),
 											"screen_brightness",
