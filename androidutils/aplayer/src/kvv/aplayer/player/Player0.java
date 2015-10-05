@@ -32,7 +32,7 @@ public abstract class Player0 extends Player {
 					Folder folder = folders.get(curFolder);
 					toFile(folder.files[curFile].path, 0, false);
 				} else {
-					next();
+					toFile(path, 0, true);
 				}
 			}
 		});
@@ -99,9 +99,6 @@ public abstract class Player0 extends Player {
 	}
 
 	public void prev() {
-		if (folders.size() == 0 || curFolder < 0)
-			return;
-
 		int cur = getCurrentPosition();
 		if (cur < 3000 && curFile > 0) {
 			toFile(curFile - 1);
