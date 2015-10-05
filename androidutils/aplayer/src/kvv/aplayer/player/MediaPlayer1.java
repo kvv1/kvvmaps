@@ -107,8 +107,9 @@ public class MediaPlayer1 {
 						break;
 					curPos += frameHeader.ms_per_frame();
 
-					SampleBuffer output = (SampleBuffer) decoder.decodeFrame(
-							frameHeader, bitstream);
+					decoder.decodeFrame(frameHeader, bitstream);
+
+					bitstream.closeFrame();
 
 					System.out.println(".");
 				}
