@@ -1,6 +1,5 @@
 package kvv.aplayer.player;
 
-import kvv.aplayer.player.IPlayer.OnChangedHint;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
@@ -8,6 +7,12 @@ import android.media.MediaPlayer.OnInfoListener;
 
 public abstract class Player {
 
+	public enum OnChangedHint {
+		FILE,
+		FOLDER,
+		POSITION
+	}
+	
 	protected abstract void onChanged(OnChangedHint hint);
 
 	private void onChanged1(OnChangedHint hint) {
@@ -38,7 +43,6 @@ public abstract class Player {
 			}
 		});
 
-		onChanged1(OnChangedHint.FOLDER);
 	}
 
 	protected MediaPlayer getMP() {

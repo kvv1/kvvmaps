@@ -2,7 +2,7 @@ package kvv.aplayer.folders;
 
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
-import kvv.aplayer.player.IPlayer.OnChangedHint;
+import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.APServiceListenerAdapter;

@@ -11,17 +11,17 @@ public abstract class Compressor {
 
 	private static final int RATE = 16;
 
-	private static final double MEAN = 40;
+	private static final double MEAN = 50;
 
 	private MediaPlayer mp;
 
 	private Visualizer visualizer;
+	private float indicatorLevel;
+
 
 	private int db;
 
 	protected abstract void setGain(float db);
-
-	protected abstract void onLevel(float v);
 
 	interface Alg {
 		void setSR(int sr);
@@ -45,6 +45,10 @@ public abstract class Compressor {
 		visualizer.setScalingMode(Visualizer.SCALING_MODE_AS_PLAYED);
 		visualizer.setDataCaptureListener(new OnDataCaptureListener2() {
 		}, RATE * 1000, true, false);
+	}
+
+	public float getIndicatorLevel() {
+		return indicatorLevel;
 	}
 
 	public void release() {
@@ -72,7 +76,7 @@ public abstract class Compressor {
 		if (!b) {
 			if (levelLPF != null)
 				levelLPF.set(0);
-			onLevel(0);
+			indicatorLevel = 0;
 			setGain(0);
 		}
 
@@ -109,7 +113,7 @@ public abstract class Compressor {
 			}
 
 			if (visualizer.getEnabled())
-				onLevel((float) (levelLPF.get() / MEAN));
+				indicatorLevel = (float) (levelLPF.get() / MEAN);
 
 			float gain = alg.calcGain();
 

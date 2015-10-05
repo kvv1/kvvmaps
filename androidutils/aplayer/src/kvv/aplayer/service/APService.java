@@ -13,7 +13,7 @@ import java.util.Set;
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
 import kvv.aplayer.RemoteControlReceiver;
-import kvv.aplayer.player.IPlayer;
+import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.player.Player1;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -45,7 +45,7 @@ public class APService extends BaseService implements IAPService {
 
 	private Set<APServiceListener> listeners = new HashSet<APServiceListener>();
 
-	private IPlayer player;
+	private Player1 player;
 
 	private Handler handler = new Handler();
 
@@ -190,6 +190,9 @@ public class APService extends BaseService implements IAPService {
 					l.onChanged(hint);
 			}
 		};
+		
+		player.onChanged(OnChangedHint.FOLDER);
+		
 		for (APServiceListener l : listeners)
 			l.onLoaded();
 	}

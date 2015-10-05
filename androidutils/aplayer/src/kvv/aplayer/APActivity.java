@@ -3,7 +3,7 @@ package kvv.aplayer;
 import kvv.aplayer.chart.ChartsFragment;
 import kvv.aplayer.files.FilesSectionFragmentList;
 import kvv.aplayer.folders.FoldersSectionFragment;
-import kvv.aplayer.player.IPlayer.OnChangedHint;
+import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.APServiceListenerAdapter;

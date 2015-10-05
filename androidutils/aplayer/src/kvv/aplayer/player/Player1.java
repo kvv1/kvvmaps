@@ -8,13 +8,13 @@ import android.media.audiofx.Equalizer;
 
 import com.smartbean.androidutils.util.Utils;
 
-public class Player1 extends Player0 implements IPlayer {
+public class Player1 extends Player0 {
 
 	private final Compressor compr;
 
-	private final Eq eqCompr;
+	private Eq eqCompr;
 
-	private final Eq eqSpeed;
+	private Eq eqSpeed;
 
 	private int gain;
 	private float comprGain;
@@ -22,24 +22,17 @@ public class Player1 extends Player0 implements IPlayer {
 	private float speedKMH;
 	private boolean visible;
 
-	private volatile float indicatorLevel;
-
 	public Player1(List<Folder> folders) {
 		super(folders);
 
-		eqCompr = new EqVol(getMP(), -15);
-		eqSpeed = new EqEq(getMP(), -7);
+		eqCompr = new EqVol(getMP(), 0);
+		eqSpeed = new EqEq(getMP(), 0);
 
 		compr = new Compressor(getMP()) {
 			@Override
 			protected void setGain(float db) {
 				comprGain = db;
 				setEq();
-			}
-
-			@Override
-			protected void onLevel(float v) {
-				indicatorLevel = v;
 			}
 		};
 
@@ -80,11 +73,17 @@ public class Player1 extends Player0 implements IPlayer {
 		compr.setComprLevel(db);
 		compr.enDis(visible);
 		compr.test();
+		if (eqCompr != null)
+			eqCompr.release();
+		eqCompr = new EqVol(getMP(), -db);
 		setEq();
 	}
 
 	public void setDbPer100(float dBPer100) {
 		this.dBPer100 = dBPer100;
+		if(eqSpeed != null)
+			eqSpeed.release();
+		eqSpeed = new EqEq(getMP(), -dBPer100 * 1.2f);
 		setEq();
 	}
 
@@ -98,7 +97,7 @@ public class Player1 extends Player0 implements IPlayer {
 		float g = gain;
 		// g += speedKMH * dBPer100 / 100;
 		g += comprGain;
-		
+
 		System.out.println("setEq " + g);
 		eqCompr.setGain(g);
 
@@ -111,7 +110,7 @@ public class Player1 extends Player0 implements IPlayer {
 	}
 
 	public float getIndicatorLevel() {
-		return indicatorLevel;
+		return compr.getIndicatorLevel();
 	}
 
 	public void setVisible(boolean vis) {

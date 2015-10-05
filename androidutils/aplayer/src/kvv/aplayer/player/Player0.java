@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import kvv.aplayer.player.IPlayer.OnChangedHint;
 import kvv.aplayer.service.File1;
 import kvv.aplayer.service.Folder;
 import android.media.MediaPlayer;

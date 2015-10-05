@@ -3,7 +3,7 @@ package kvv.aplayer.files;
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
 import kvv.aplayer.files.LevelView.LevelProvider;
-import kvv.aplayer.player.IPlayer.OnChangedHint;
+import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.File1;
 import kvv.aplayer.service.IAPService;
