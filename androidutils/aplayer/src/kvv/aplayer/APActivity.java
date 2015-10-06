@@ -17,28 +17,29 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
-import com.smartbean.androidutils.activity.FragmentActivityX;
+import com.smartbean.androidutils.activity.FragmentActivityTabsNoActionBar;
 import com.smartbean.androidutils.service.ServiceConnectionAdapter;
 
-public class APActivity extends FragmentActivityX {
+public class APActivity extends FragmentActivityTabsNoActionBar {
 
 	public static final int BUTTONS_DELAY = 3000;
 
 	private static final int RESULT_SETTINGS = 1;
 
 	@Override
+	protected ViewPager getPager() {
+		return (ViewPager) findViewById(R.id.pager);
+	}
+/*
+	@Override
 	protected int getLayoutId() {
 		return R.layout.activity_ap;
-	}
-
-	@Override
-	protected int getPagerId() {
-		return R.id.pager;
 	}
 
 	@Override
@@ -72,7 +73,7 @@ public class APActivity extends FragmentActivityX {
 		}
 		return null;
 	}
-
+*/
 	private APServiceListener listener = new APServiceListenerAdapter() {
 		@Override
 		public void onChanged(OnChangedHint hint) {
@@ -83,10 +84,15 @@ public class APActivity extends FragmentActivityX {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		setContentView(R.layout.activity_ap);
+		
 		startService(new Intent(this, APService.class));
 		bindService(new Intent(this, APService.class), conn,
 				Context.BIND_AUTO_CREATE);
+
+		add("Files", new FilesSectionFragmentList());
+		add("Folders", new FoldersSectionFragment());
+		add("Charts", new ChartsFragment());
 
 	}
 
@@ -169,15 +175,17 @@ public class APActivity extends FragmentActivityX {
 		}
 	};
 
-	protected void onFG() {
-		super.onFG();
+	@Override
+	protected void onResume() {
+		super.onResume();
 		_onFG();
 	}
 
 	@Override
-	protected void onBG() {
-		super.onBG();
+	protected void onPause() {
 		_onBG();
+		super.onPause();
+		System.gc();
 	}
 
 	private PowerManager.WakeLock wakeLock;
@@ -233,8 +241,7 @@ public class APActivity extends FragmentActivityX {
 	}
 
 	public void selectMainPage() {
-		ViewPager pager = (ViewPager) findViewById(getPagerId());
-		pager.setCurrentItem(0, true);
+		selectTab(0);
 	}
 
 }

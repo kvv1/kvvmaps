@@ -29,7 +29,8 @@ public abstract class Player0 extends Player {
 				if (path == null) {
 					curFile = 0;
 					Folder folder = folders.get(curFolder);
-					toFile(folder.files[curFile].path, 0, false);
+					if (folder.files.length > 0)
+						toFile(folder.files[curFile].path, 0, false);
 				} else {
 					toFile(path, 0, true);
 				}
