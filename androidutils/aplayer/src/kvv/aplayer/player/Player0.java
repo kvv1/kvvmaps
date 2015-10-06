@@ -24,9 +24,9 @@ public abstract class Player0 extends Player {
 			@Override
 			public void onCompletion(MediaPlayer mp1) {
 				System.out.println("onCompletion");
-				
+
 				String path = nextFile();
-				if(path == null) {
+				if (path == null) {
 					curFile = 0;
 					Folder folder = folders.get(curFolder);
 					toFile(folder.files[curFile].path, 0, false);
@@ -90,7 +90,8 @@ public abstract class Player0 extends Player {
 		else
 			curFile = idx;
 
-		toFile(folder.files[curFile].path, pos, true);
+		if (folder.files.length > curFile)
+			toFile(folder.files[curFile].path, pos, true);
 	}
 
 	public void toFile(int idx) {
@@ -130,8 +131,7 @@ public abstract class Player0 extends Player {
 			} else {
 				String path = prevFile();
 				if (path != null)
-					toFile(path, Math.max(0, getDuration() - seekStep),
-							true);
+					toFile(path, Math.max(0, getDuration() - seekStep), true);
 			}
 		} else {
 			if (cur + seekStep < getDuration()) {
@@ -143,7 +143,6 @@ public abstract class Player0 extends Player {
 			}
 		}
 	}
-
 
 	public int getFile() {
 		return curFile;
@@ -159,7 +158,7 @@ public abstract class Player0 extends Player {
 
 	private String nextFile() {
 		Folder folder = folders.get(curFolder);
-		if(curFile >= folder.files.length - 1)
+		if (curFile >= folder.files.length - 1)
 			return null;
 		curFile++;
 		return folder.files[curFile].path;
