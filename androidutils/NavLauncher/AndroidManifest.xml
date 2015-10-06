@@ -9,7 +9,8 @@
         android:targetSdkVersion="10" />
 
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
-
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    
     <application
         android:allowBackup="false"
         android:clearTaskOnLaunch="true"

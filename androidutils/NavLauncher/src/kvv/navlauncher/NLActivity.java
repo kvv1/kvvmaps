@@ -6,7 +6,11 @@ import java.util.Comparator;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.AlertDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -35,8 +39,9 @@ import com.smartbean.androidutils.util.AsyncCallback;
 
 public class NLActivity extends Activity {
 
-	private AppInfo[] appInfos = new AppInfo[6];
-	private int[] buttons = { R.id.app0, R.id.app1, R.id.app2, R.id.app3, R.id.app4 , R.id.app5  };
+	private int[] buttons = { R.id.app0, R.id.app1, R.id.app2, R.id.app3,
+			R.id.app4, R.id.app5 };
+	private AppInfo[] appInfos = new AppInfo[buttons.length];
 
 	private Handler handler = new Handler();
 
@@ -79,9 +84,39 @@ public class NLActivity extends Activity {
 			b.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View arg0) {
+					AppInfo appInfo = appInfos[button1];
+
+					if (appInfo == null)
+						return;
+
+					ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+					for (RunningTaskInfo t : am.getRunningTasks(10)) {
+						String packageName = t.topActivity.getPackageName();
+						String className = t.topActivity.getClassName();
+						System.out.println(packageName + " " + className);
+
+						try {
+							if (packageName.equals(appInfo.packageName)) {
+								Intent i = new Intent();
+								i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
+										| Intent.FLAG_ACTIVITY_CLEAR_TOP);
+								i.setComponent(new ComponentName(packageName,
+										className));
+								startActivity(i);
+								finish();
+								return;
+							}
+						} catch (Exception e) {
+						}
+					}
+
 					Intent i = getPackageManager().getLaunchIntentForPackage(
-							appInfos[button1].packageName);
-					i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+							appInfo.packageName);
+
+					System.out.println("*** " + appInfo.packageName);
+
+					i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP
+							| Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(i);
 					finish();
 				}
