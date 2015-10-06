@@ -15,19 +15,8 @@ import android.support.v7.app.ActionBarActivity;
 import com.smartbean.androidutils.util.Drawables;
 
 public abstract class FragmentActivityTabs extends ActionBarActivity {
-	// private ViewPager mViewPager;
-
-	// protected abstract int getLayoutId();
-
-	// protected abstract int getPagerId();
 
 	protected abstract ViewPager getPager();
-
-	// protected abstract Fragment getItem(int arg0);
-	//
-	// protected abstract int getCount();
-	//
-	// protected abstract CharSequence getPageTitle(int position);
 
 	private List<String> titles = new ArrayList<String>();
 	private List<Fragment> fragments = new ArrayList<Fragment>();
@@ -36,10 +25,6 @@ public abstract class FragmentActivityTabs extends ActionBarActivity {
 		titles.add(title);
 		fragments.add(fragment);
 		setPager();
-	}
-
-	public int getPageCount() {
-		return fragments.size();
 	}
 
 	public void selectTab(int tab) {
@@ -93,6 +78,7 @@ public abstract class FragmentActivityTabs extends ActionBarActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		// requestWindowFeature(Window.FEATURE_NO_TITLE);
 		// setContentView(getLayoutId());
 
 		// Set up the ViewPager with the sections adapter.

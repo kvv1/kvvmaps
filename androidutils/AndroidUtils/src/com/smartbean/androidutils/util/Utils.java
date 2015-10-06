@@ -16,13 +16,14 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Debug;
 import android.text.InputType;
-import android.util.Log;
 import android.widget.EditText;
 
 public class Utils {
 	public static void log(Object obj, String message) {
-		String className = obj == null ? "" : obj.getClass().getSimpleName();
-		Log.w(className, message);
+		String className = (obj == null ? "" : obj.getClass().getSimpleName())
+				+ " " + (obj == null ? "" : obj.hashCode()) + " ";
+		System.out.println(className + message);
+		// Log.w(className, message);
 	}
 
 	public static String md5(String s) {
@@ -67,7 +68,7 @@ public class Utils {
 			List<String> choices, final AsyncCallback<Integer> callback) {
 		select(context, title, choices.toArray(new String[0]), callback);
 	}
-	
+
 	public static void select(Context context, String title,
 			final String[] choices, final AsyncCallback<Integer> callback) {
 
@@ -161,5 +162,12 @@ public class Utils {
 		return String.format("%02d:%02d", m, s);
 	}
 
+	public static double n2db(double n) {
+		return 20 * Math.log10(n);
+	}
+
+	public static double db2n(double db) {
+		return Math.pow(10, db / 20);
+	}
 
 }

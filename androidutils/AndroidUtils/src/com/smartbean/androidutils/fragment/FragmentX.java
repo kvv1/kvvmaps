@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +37,7 @@ public abstract class FragmentX<A extends Activity, IService> extends Fragment {
 
 	protected abstract void createUI(IService service);
 
-	protected abstract int getLayout();
+	private final int layout;
 
 	private void createUiIfPossible() {
 		if (conn.service != null && rootView != null) {
@@ -47,21 +47,22 @@ public abstract class FragmentX<A extends Activity, IService> extends Fragment {
 		}
 	}
 
-	public FragmentX(Class<?> serviceClass) {
+	public FragmentX(Class<?> serviceClass, int layout) {
 		this.serviceClass = serviceClass;
+		this.layout = layout;
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		rootView = inflater.inflate(getLayout(), container, false);
+		rootView = inflater.inflate(layout, container, false);
 		createUiIfPossible();
 		return rootView;
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Utils.log(this, getClass().getSimpleName() + ".onCreate");
+		Utils.log(this, "onCreate");
 		super.onCreate(savedInstanceState);
 		getActivity().bindService(new Intent(getActivity(), serviceClass),
 				conn, Context.BIND_AUTO_CREATE);
@@ -72,7 +73,7 @@ public abstract class FragmentX<A extends Activity, IService> extends Fragment {
 
 	@Override
 	public void onDestroy() {
-		Utils.log(this, getClass().getSimpleName() + ".onDestroy");
+		Utils.log(this, "onDestroy");
 		getActivity().unbindService(conn);
 
 		Drawables.unbindDrawables(rootView);

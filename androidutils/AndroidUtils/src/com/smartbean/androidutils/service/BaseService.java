@@ -6,6 +6,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
 
 public abstract class BaseService extends Service {
 
@@ -123,4 +125,18 @@ public abstract class BaseService extends Service {
 		else
 			nm.notify(3333, online ? defaultNotif : grayNotif);
 	}
+
+	@Override
+	public final IBinder onBind(Intent arg0) {
+		return binder;
+	}
+	
+	public class BaseServiceBinder extends Binder {
+		BaseService getService() {
+			return BaseService.this;
+		}
+	}
+	
+	private Binder binder = new BaseServiceBinder();
+	
 }
