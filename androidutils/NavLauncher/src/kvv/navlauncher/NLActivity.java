@@ -35,7 +35,7 @@ import com.smartbean.androidutils.util.AsyncCallback;
 
 public class NLActivity extends Activity {
 
-	private AppInfo[] appInfos = new AppInfo[4];
+	private AppInfo[] appInfos = new AppInfo[6];
 	private int[] buttons = { R.id.app0, R.id.app1, R.id.app2, R.id.app3, R.id.app4 , R.id.app5  };
 
 	private Handler handler = new Handler();
