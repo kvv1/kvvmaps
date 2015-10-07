@@ -27,7 +27,7 @@ public interface IAPService {
 	int getComprIdx();
 	void setDBPer100Idx(int n);
 	int getDBPer100Idx();
-	float getLevel();
+//	float getLevel();
 	void reload();
 	void redo();
 	void undo();

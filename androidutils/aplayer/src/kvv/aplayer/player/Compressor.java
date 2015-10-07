@@ -5,23 +5,23 @@ import android.media.MediaPlayer;
 import android.media.audiofx.Visualizer;
 import android.media.audiofx.Visualizer.OnDataCaptureListener;
 
+import com.smartbean.androidutils.util.LPF;
 import com.smartbean.androidutils.util.Utils;
 
 public abstract class Compressor {
 
 	private static final int RATE = 16;
 
-	private static final double MEAN = 50;
+	private static final double MEAN = 40;
 
 	private MediaPlayer mp;
 
 	private Visualizer visualizer;
-	private float indicatorLevel;
-
 
 	private int db;
 
 	protected abstract void setGain(float db);
+	protected abstract void levelChanged(float indicatorLevel);
 
 	interface Alg {
 		void setSR(int sr);
@@ -45,10 +45,6 @@ public abstract class Compressor {
 		visualizer.setScalingMode(Visualizer.SCALING_MODE_AS_PLAYED);
 		visualizer.setDataCaptureListener(new OnDataCaptureListener2() {
 		}, RATE * 1000, true, false);
-	}
-
-	public float getIndicatorLevel() {
-		return indicatorLevel;
 	}
 
 	public void release() {
@@ -76,7 +72,7 @@ public abstract class Compressor {
 		if (!b) {
 			if (levelLPF != null)
 				levelLPF.set(0);
-			indicatorLevel = 0;
+			levelChanged(0);
 			setGain(0);
 		}
 
@@ -101,7 +97,7 @@ public abstract class Compressor {
 			if (samplingRate != sr) {
 				System.out.println("sr=" + samplingRate);
 				alg.setSR(samplingRate / 1000);
-				levelLPF = new LPF(samplingRate / 1000, 0.02, 0.5);
+				levelLPF = new LPF(samplingRate / 1000, 0.02, 0.2);
 				sr = samplingRate;
 			}
 
@@ -113,7 +109,7 @@ public abstract class Compressor {
 			}
 
 			if (visualizer.getEnabled())
-				indicatorLevel = (float) (levelLPF.get() / MEAN);
+				levelChanged((float) (levelLPF.get() / (MEAN)));
 
 			float gain = alg.calcGain();
 
@@ -129,9 +125,6 @@ public abstract class Compressor {
 	}
 
 	public void test() {
-	}
-
-	public void setSource(String path) {
 	}
 
 	private float bounds(float min, float val, float max) {

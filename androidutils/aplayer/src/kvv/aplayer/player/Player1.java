@@ -8,7 +8,7 @@ import android.media.audiofx.Equalizer;
 
 import com.smartbean.androidutils.util.Utils;
 
-public class Player1 extends Player0 {
+public abstract class Player1 extends Player0 {
 
 	private final Compressor compr;
 
@@ -22,6 +22,12 @@ public class Player1 extends Player0 {
 	private float speedKMH;
 	private boolean visible;
 
+	@Override
+	public void onChanged(OnChangedHint hint) {
+		if (compr != null)
+			compr.enDis(visible);
+	}
+
 	public Player1(List<Folder> folders) {
 		super(folders);
 
@@ -34,6 +40,11 @@ public class Player1 extends Player0 {
 				comprGain = db;
 				setEq();
 			}
+
+			@Override
+			protected void levelChanged(float indicatorLevel) {
+				Player1.this.levelChanged(indicatorLevel);
+			}
 		};
 
 		setEq();
@@ -43,15 +54,7 @@ public class Player1 extends Player0 {
 		setGain(0);
 	}
 
-	@Override
-	public void onChanged(OnChangedHint hint) {
-		if (compr != null) {
-			compr.enDis(visible);
-			if ((hint == OnChangedHint.FILE || hint == OnChangedHint.FOLDER)
-					&& getFolders().get(getCurrentFolder()).files.length > 0)
-				compr.setSource(getFolders().get(getCurrentFolder()).files[getFile()].path);
-		}
-	}
+	protected abstract void levelChanged(float indicatorLevel);
 
 	@Override
 	public void close() {
@@ -81,7 +84,7 @@ public class Player1 extends Player0 {
 
 	public void setDbPer100(float dBPer100) {
 		this.dBPer100 = dBPer100;
-		if(eqSpeed != null)
+		if (eqSpeed != null)
 			eqSpeed.release();
 		eqSpeed = new EqEq(getMP(), -dBPer100 * 1.2f);
 		setEq();
@@ -107,10 +110,6 @@ public class Player1 extends Player0 {
 	@Override
 	protected void resetGain() {
 		compr.resetGain();
-	}
-
-	public float getIndicatorLevel() {
-		return compr.getIndicatorLevel();
 	}
 
 	public void setVisible(boolean vis) {

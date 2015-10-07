@@ -18,4 +18,8 @@ public class APServiceListenerAdapter implements APServiceListener {
 	public void onLoaded() {
 	}
 
+	@Override
+	public void onLevelChanged(float level) {
+	}
+
 }

@@ -167,8 +167,8 @@ public class APService extends BaseService implements IAPService {
 		player = new Player1(folders) {
 			@Override
 			public void onChanged(OnChangedHint hint) {
-				super.onChanged(hint);
 				System.out.println("onChanged " + isPlaying());
+				super.onChanged(hint);
 
 				if (settings.getBoolean(getString(R.string.prefNavigatorMode),
 						false))
@@ -189,9 +189,15 @@ public class APService extends BaseService implements IAPService {
 				for (APServiceListener l : listeners)
 					l.onChanged(hint);
 			}
+
+			@Override
+			protected void levelChanged(float indicatorLevel) {
+				for (APServiceListener l : listeners)
+					l.onLevelChanged(indicatorLevel);
+			}
 		};
 		
-		player.onChanged(OnChangedHint.FOLDER);
+		this.player.onChanged(OnChangedHint.FOLDER);
 		
 		for (APServiceListener l : listeners)
 			l.onLoaded();
@@ -344,10 +350,10 @@ public class APService extends BaseService implements IAPService {
 		return player.getGain();
 	}
 
-	@Override
-	public float getLevel() {
-		return player.getIndicatorLevel();
-	}
+//	@Override
+//	public float getLevel() {
+//		return player.getIndicatorLevel();
+//	}
 
 	@Override
 	public int getFileCnt() {

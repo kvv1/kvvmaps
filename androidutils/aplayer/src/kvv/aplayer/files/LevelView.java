@@ -1,6 +1,7 @@
 package kvv.aplayer.files;
 
-import kvv.aplayer.player.LPF;
+import com.smartbean.androidutils.util.LPF;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -27,7 +28,7 @@ public class LevelView extends View {
 		float getLevel();
 	}
 
-	private LevelProvider levelProvider;
+	private float level;
 
 	public LevelView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -42,7 +43,7 @@ public class LevelView extends View {
 		super(context);
 	}
 
-	private LPF lpf = new LPF(1000 / STEP_MS, 0.1, 0.1);
+	private LPF lpf = new LPF(1000 / STEP_MS, 0.1, 0.2);
 	private double max;
 
 	Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
@@ -148,21 +149,21 @@ public class LevelView extends View {
 
 	@Override
 	public void draw(Canvas canvas) {
-	//	canvas.drawRGB(150, 150, 120);
-		
+		// canvas.drawRGB(150, 150, 120);
+
 		paint.setAntiAlias(true);
 
 		float w = getWidth();
 
 		canvas.drawBitmap(bmpScale, null, new RectF(0, 0, w, w), paint);
 
-		lpf.add(getLevel());
-		max = Math.max(max, getLevel() * 1100);
+		lpf.add(level);
+		max = Math.max(max, level * 1100);
 
 		float val = (float) (lpf.get() * 1000 * 100 / max); // 0..100
-		
+
 		val = (float) (lpf.get() * 100);
-		
+
 		// val = 0;
 		float r = w * 0.6f;
 
@@ -175,41 +176,32 @@ public class LevelView extends View {
 
 	}
 
-	public void setLevelProvider(LevelProvider levelProvider2) {
-		this.levelProvider = levelProvider2;
-	}
-
-	private float getLevel() {
-		if (levelProvider != null)
-			return levelProvider.getLevel();
-		return 0;
-	}
-
 	private Runnable r;
+	private int cnt;
 
-	
-	public void start() {
-		if (r != null)
-			return;
+	public void setLevel(float level) {
+		System.out.println("setLevel " + level);
+		
+		this.level = level;
 
-		System.out.println("LevelView.Start()");
+		cnt = 3000 / STEP_MS; // 3 sec
 
-		r = new Runnable() {
-			@Override
-			public void run() {
-				invalidate();
-				handler.postDelayed(r, STEP_MS);
-			}
-		};
+		if (r == null) {
+			r = new Runnable() {
+				@Override
+				public void run() {
+					invalidate();
+					if (cnt >= 0) {
+						handler.postDelayed(r, STEP_MS);
+						cnt--;
+					} else {
+						r = null;
+					}
+				}
+			};
+			handler.post(r);
+		}
 
-		handler.postDelayed(r, 100);
-	}
-
-	public void stop() {
-		System.out.println("LevelView.Stop()");
-		if (r != null)
-			handler.removeCallbacks(r);
-		r = null;
 	}
 
 }

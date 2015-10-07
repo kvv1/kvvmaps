@@ -36,44 +36,23 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 	protected ViewPager getPager() {
 		return (ViewPager) findViewById(R.id.pager);
 	}
-/*
-	@Override
-	protected int getLayoutId() {
-		return R.layout.activity_ap;
-	}
 
-	@Override
-	protected int getCount() {
-		return 2;
-	}
-
-	@Override
-	protected Fragment getItem(int position) {
-		switch (position) {
-		case 0:
-			return new FilesSectionFragmentList();
-		case 1:
-			return new FoldersSectionFragment();
-		case 2:
-			return new ChartsFragment();
-		}
-		return null;
-
-	}
-
-	@Override
-	protected CharSequence getPageTitle(int position) {
-		switch (position) {
-		case 0:
-			return "Files";
-		case 1:
-			return "Folders";
-		case 2:
-			return "Charts";
-		}
-		return null;
-	}
-*/
+	/*
+	 * @Override protected int getLayoutId() { return R.layout.activity_ap; }
+	 * 
+	 * @Override protected int getCount() { return 2; }
+	 * 
+	 * @Override protected Fragment getItem(int position) { switch (position) {
+	 * case 0: return new FilesSectionFragmentList(); case 1: return new
+	 * FoldersSectionFragment(); case 2: return new ChartsFragment(); } return
+	 * null;
+	 * 
+	 * }
+	 * 
+	 * @Override protected CharSequence getPageTitle(int position) { switch
+	 * (position) { case 0: return "Files"; case 1: return "Folders"; case 2:
+	 * return "Charts"; } return null; }
+	 */
 	private APServiceListener listener = new APServiceListenerAdapter() {
 		@Override
 		public void onChanged(OnChangedHint hint) {
@@ -85,7 +64,7 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_ap);
-		
+
 		startService(new Intent(this, APService.class));
 		bindService(new Intent(this, APService.class), conn,
 				Context.BIND_AUTO_CREATE);

@@ -13,7 +13,7 @@ public abstract class Player {
 		POSITION
 	}
 	
-	protected abstract void onChanged(OnChangedHint hint);
+	public abstract void onChanged(OnChangedHint hint);
 
 	private void onChanged1(OnChangedHint hint) {
 		onChanged(hint);

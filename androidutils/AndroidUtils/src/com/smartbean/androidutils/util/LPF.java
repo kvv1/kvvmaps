@@ -1,4 +1,4 @@
-package kvv.aplayer.player;
+package com.smartbean.androidutils.util;
 
 public class LPF {
 	private final double k1;

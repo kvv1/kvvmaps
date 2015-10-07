@@ -21,20 +21,8 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService> {
 
 	protected Handler handler = new Handler();
 
-	protected void positionChanged() {
-	}
-
 	protected void restartButtonsTimer() {
 	}
-
-	private Runnable progressRunnable = new Runnable() {
-		@Override
-		public void run() {
-			positionChanged();
-			handler.removeCallbacks(this);
-			handler.postDelayed(this, 1000);
-		}
-	};
 
 	private int seekStep = 0;
 
@@ -241,14 +229,12 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService> {
 
 	@Override
 	public void onPause() {
-		handler.removeCallbacks(progressRunnable);
 		handler.removeCallbacks(seekRunnable);
 		super.onPause();
 	}
 
 	@Override
 	public void onResume() {
-		progressRunnable.run();
 		super.onResume();
 	}
 
