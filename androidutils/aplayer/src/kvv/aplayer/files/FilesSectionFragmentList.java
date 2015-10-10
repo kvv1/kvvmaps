@@ -164,12 +164,40 @@ public class FilesSectionFragmentList extends FilesSectionFragment implements
 					}
 				});
 
+		OnTouchListener onTouchListener = new OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				touchX = event.getX();
+				touchY = event.getY();
+				return false;
+			}
+		};
+		
+		OnClickListener onClickListener = new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (conn.service != null) {
+					int dur = conn.service.getDuration();
+					int pos = (int) (dur * touchX / v.getWidth());
+					System.out.println("seek to " + pos);
+					conn.service.seekTo(pos);
+				}
+			}
+		};
+		
 		progressText = (TextView) rootView.findViewById(R.id.progressText);
+		progressText.setOnTouchListener(onTouchListener);
+		progressText.setOnClickListener(onClickListener);
+
+		fileProgressBar.setOnTouchListener(onTouchListener);
+		fileProgressBar.setOnClickListener(onClickListener);
+		
 		tapePanel = rootView.findViewById(R.id.tapePanel);
 		listPanel = rootView.findViewById(R.id.listPanel);
 		tapeView = (TapeView) rootView.findViewById(R.id.tape);
 		levelView = (LevelView) rootView.findViewById(R.id.level);
 		levelView.setOnClickListener(timingListener);
+		levelView.setScale(new int[] { -20, -10, -6, -3, 0, 3 });
 
 		((Button) rootView.findViewById(R.id.goto1))
 				.setOnClickListener(new OnClickListener() {
@@ -383,11 +411,18 @@ public class FilesSectionFragmentList extends FilesSectionFragment implements
 				}
 			}
 
-			if (tape && fg && conn.service.isPlaying()) {
-				tapeView.start();
-			} else {
-				tapeView.stop();
-			}
+			updateTapeViewState();
+		}
+	}
+
+	private void updateTapeViewState() {
+		if(tapeView == null)
+			return;
+		
+		if (tape && fg && conn.service != null && conn.service.isPlaying() ) {
+			tapeView.start();
+		} else {
+			tapeView.stop();
 		}
 	}
 
@@ -398,7 +433,6 @@ public class FilesSectionFragmentList extends FilesSectionFragment implements
 			progressText.setVisibility(View.VISIBLE);
 			rootView.findViewById(R.id.bottomButtons).setVisibility(View.GONE);
 		} else {
-			tapeView.stop();
 			tapePanel.setVisibility(View.GONE);
 			listPanel.setVisibility(View.VISIBLE);
 			progressText.setVisibility(View.GONE);
@@ -406,6 +440,8 @@ public class FilesSectionFragmentList extends FilesSectionFragment implements
 					View.VISIBLE);
 		}
 		
+		updateTapeViewState();
+
 		if (conn.service != null)
 			conn.service.setVisible(tape);
 	}
@@ -414,13 +450,11 @@ public class FilesSectionFragmentList extends FilesSectionFragment implements
 
 	@Override
 	public void onPause() {
-		if (tapeView != null) {
-			tapeView.stop();
-		}
 		fg = false;
 		if (conn.service != null)
 			conn.service.setVisible(false);
 		handler.removeCallbacks(progressRunnable);
+		updateTapeViewState();
 		super.onPause();
 	}
 
@@ -430,6 +464,7 @@ public class FilesSectionFragmentList extends FilesSectionFragment implements
 		fg = true;
 		if (conn.service != null)
 			conn.service.setVisible(tape);
+		updateTapeViewState();
 	}
 
 	private OnClickListener prevOnClickListener = new OnClickListener() {

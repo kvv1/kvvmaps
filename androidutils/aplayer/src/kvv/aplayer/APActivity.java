@@ -1,6 +1,5 @@
 package kvv.aplayer;
 
-import kvv.aplayer.chart.ChartsFragment;
 import kvv.aplayer.files.FilesSectionFragmentList;
 import kvv.aplayer.folders.FoldersSectionFragment;
 import kvv.aplayer.player.Player.OnChangedHint;
@@ -8,21 +7,22 @@ import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.APServiceListenerAdapter;
 import kvv.aplayer.service.IAPService;
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.WindowManager;
-
+import android.view.View;
 import com.smartbean.androidutils.activity.FragmentActivityTabsNoActionBar;
 import com.smartbean.androidutils.service.ServiceConnectionAdapter;
 
@@ -37,22 +37,6 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		return (ViewPager) findViewById(R.id.pager);
 	}
 
-	/*
-	 * @Override protected int getLayoutId() { return R.layout.activity_ap; }
-	 * 
-	 * @Override protected int getCount() { return 2; }
-	 * 
-	 * @Override protected Fragment getItem(int position) { switch (position) {
-	 * case 0: return new FilesSectionFragmentList(); case 1: return new
-	 * FoldersSectionFragment(); case 2: return new ChartsFragment(); } return
-	 * null;
-	 * 
-	 * }
-	 * 
-	 * @Override protected CharSequence getPageTitle(int position) { switch
-	 * (position) { case 0: return "Files"; case 1: return "Folders"; case 2:
-	 * return "Charts"; } return null; }
-	 */
 	private APServiceListener listener = new APServiceListenerAdapter() {
 		@Override
 		public void onChanged(OnChangedHint hint) {
@@ -60,6 +44,7 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		}
 	};
 
+	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -71,8 +56,15 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 
 		add("Files", new FilesSectionFragmentList());
 		add("Folders", new FoldersSectionFragment());
-		add("Charts", new ChartsFragment());
-
+		// add("Charts", new ChartsFragment());
+		
+		View decorView = getWindow().getDecorView();
+		int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+		decorView.setSystemUiVisibility(uiOptions);
+		// Remember that you should never show the action bar if the
+		// status bar is hidden, so hide that too if necessary.
+//		ActionBar actionBar = getActionBar();
+//		actionBar.hide();
 	}
 
 	@Override
@@ -127,8 +119,7 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 
 		switch (requestCode) {
 		case RESULT_SETTINGS:
-			_onBG();
-			_onFG();
+			updateWakeLock();
 			break;
 		}
 
@@ -194,6 +185,11 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 				.getDefaultSharedPreferences(this);
 		boolean navMode = settings.getBoolean(
 				getString(R.string.prefNavigatorMode), false);
+
+		if (navMode)
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		else
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 
 		boolean playing = conn.service != null && conn.service.isPlaying();
 

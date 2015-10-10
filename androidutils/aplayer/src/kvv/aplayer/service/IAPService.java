@@ -18,6 +18,7 @@ public interface IAPService {
 	void play_pause();
 	int getDuration();
 	int getCurrentPosition();
+	void seekTo(int f);
 	void seek(int seekStep);
 	boolean isPlaying();
 	void toRandom(int position);

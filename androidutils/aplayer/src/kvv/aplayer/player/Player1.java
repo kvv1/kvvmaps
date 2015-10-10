@@ -20,12 +20,11 @@ public abstract class Player1 extends Player0 {
 	private float comprGain;
 	private float dBPer100;
 	private float speedKMH;
-	private boolean visible;
 
 	@Override
 	public void onChanged(OnChangedHint hint) {
 		if (compr != null)
-			compr.enDis(visible);
+			compr.enDis();
 	}
 
 	public Player1(List<Folder> folders) {
@@ -74,7 +73,6 @@ public abstract class Player1 extends Player0 {
 
 	public void setCompr(int db) {
 		compr.setComprLevel(db);
-		compr.enDis(visible);
 		compr.test();
 		if (eqCompr != null)
 			eqCompr.release();
@@ -84,9 +82,6 @@ public abstract class Player1 extends Player0 {
 
 	public void setDbPer100(float dBPer100) {
 		this.dBPer100 = dBPer100;
-		if (eqSpeed != null)
-			eqSpeed.release();
-		eqSpeed = new EqEq(getMP(), -dBPer100 * 1.2f);
 		setEq();
 	}
 
@@ -104,7 +99,10 @@ public abstract class Player1 extends Player0 {
 		System.out.println("setEq " + g);
 		eqCompr.setGain(g);
 
-		eqSpeed.setGain(speedKMH * dBPer100 / 100);
+		if (eqSpeed == null)
+			eqSpeed = new EqEq(getMP(), 0);
+		
+		eqSpeed.setGain(speedKMH * dBPer100 / 100 - dBPer100 * 1.2f);
 	}
 
 	@Override
@@ -113,8 +111,7 @@ public abstract class Player1 extends Player0 {
 	}
 
 	public void setVisible(boolean vis) {
-		visible = vis;
-		compr.enDis(visible);
+		compr.setVisible(vis);
 	}
 }
 

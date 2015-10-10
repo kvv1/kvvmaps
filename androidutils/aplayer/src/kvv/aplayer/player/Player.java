@@ -8,16 +8,10 @@ import android.media.MediaPlayer.OnInfoListener;
 public abstract class Player {
 
 	public enum OnChangedHint {
-		FILE,
-		FOLDER,
-		POSITION
+		FILE, FOLDER, POSITION
 	}
-	
-	public abstract void onChanged(OnChangedHint hint);
 
-	private void onChanged1(OnChangedHint hint) {
-		onChanged(hint);
-	}
+	public abstract void onChanged(OnChangedHint hint);
 
 	private final MediaPlayer mp = new MediaPlayer();
 
@@ -29,7 +23,7 @@ public abstract class Player {
 		mp.setOnErrorListener(new OnErrorListener() {
 			@Override
 			public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
-				onChanged1(OnChangedHint.FOLDER);
+				onChanged(OnChangedHint.FOLDER);
 				prepared = false;
 				return false;
 			}
@@ -38,7 +32,7 @@ public abstract class Player {
 		mp.setOnInfoListener(new OnInfoListener() {
 			@Override
 			public boolean onInfo(MediaPlayer arg0, int arg1, int arg2) {
-				onChanged1(OnChangedHint.FOLDER);
+				onChanged(OnChangedHint.FOLDER);
 				return false;
 			}
 		});
@@ -70,7 +64,7 @@ public abstract class Player {
 			if (start)
 				mp.start();
 
-			onChanged1(OnChangedHint.FILE);
+			onChanged(OnChangedHint.FILE);
 
 			resetGain();
 		} catch (Exception e) {
@@ -78,23 +72,29 @@ public abstract class Player {
 		}
 	}
 
-	protected void seekTo(int pos) {
+	public void seekTo(int pos) {
+		if (!prepared)
+			return;
 		mp.seekTo(pos);
 		onChanged(OnChangedHint.POSITION);
 	}
 
 	public void pause() {
+		if (!prepared)
+			return;
 		if (mp.isPlaying()) {
 			mp.pause();
-			onChanged1(OnChangedHint.POSITION);
+			onChanged(OnChangedHint.POSITION);
 		}
 	}
 
 	public void play() {
+		if (!prepared)
+			return;
 		if (!mp.isPlaying()) {
 			resetGain();
 			mp.start();
-			onChanged1(OnChangedHint.POSITION);
+			onChanged(OnChangedHint.POSITION);
 		}
 	}
 

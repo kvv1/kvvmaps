@@ -19,8 +19,10 @@ public abstract class Compressor {
 	private Visualizer visualizer;
 
 	private int db;
+	private boolean visible;
 
 	protected abstract void setGain(float db);
+
 	protected abstract void levelChanged(float indicatorLevel);
 
 	interface Alg {
@@ -54,6 +56,7 @@ public abstract class Compressor {
 
 	public void setComprLevel(int db) {
 		this.db = db;
+		enDis();
 	}
 
 	public void resetGain() {
@@ -64,9 +67,7 @@ public abstract class Compressor {
 		return db;
 	}
 
-	byte[] wave;
-
-	public void setEnabled(boolean b) {
+	private void setEnabled(boolean b) {
 		System.out.println("setEnabled " + b);
 		visualizer.setEnabled(b);
 		if (!b) {
@@ -78,7 +79,12 @@ public abstract class Compressor {
 
 	}
 
-	public void enDis(boolean visible) {
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+		enDis();
+	}
+
+	public void enDis() {
 		setEnabled(mp.isPlaying() && (visible | db != 0));
 	}
 
@@ -91,8 +97,6 @@ public abstract class Compressor {
 		@Override
 		public void onWaveFormDataCapture(Visualizer visualizer,
 				byte[] waveform, int samplingRate) {
-
-			wave = waveform;
 
 			if (samplingRate != sr) {
 				System.out.println("sr=" + samplingRate);
@@ -108,12 +112,11 @@ public abstract class Compressor {
 				levelLPF.add(a1);
 			}
 
-			if (visualizer.getEnabled())
-				levelChanged((float) (levelLPF.get() / (MEAN)));
+			levelChanged((float) (levelLPF.get() / (MEAN)));
 
 			float gain = alg.calcGain();
 
-			if (db != 0 && visualizer.getEnabled())
+			if (db != 0)
 				setGain(gain);
 			else
 				setGain(0);

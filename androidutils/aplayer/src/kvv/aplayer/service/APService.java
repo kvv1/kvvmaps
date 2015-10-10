@@ -137,22 +137,6 @@ public class APService extends BaseService implements IAPService {
 		am.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
 				RemoteControlReceiver.class.getName()));
 
-		player.setGain(settings.getInt("gain", 0));
-
-		int comprIdx = settings.getInt("comprIdx", 0);
-		if (comprIdx >= compr.length) {
-			comprIdx = 0;
-			setPrefInt("comprIdx", comprIdx);
-		}
-		player.setCompr(compr[comprIdx]);
-
-		int dBPer100Idx = settings.getInt("dBPer100Idx", 0);
-		if (dBPer100Idx >= dBPer100kmh.length) {
-			dBPer100Idx = 0;
-			setPrefInt("dBPer100Idx", dBPer100Idx);
-		}
-		player.setDbPer100(dBPer100kmh[dBPer100Idx]);
-
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 	}
 
@@ -196,9 +180,25 @@ public class APService extends BaseService implements IAPService {
 					l.onLevelChanged(indicatorLevel);
 			}
 		};
-		
+
+		player.setGain(settings.getInt("gain", 0));
+
+		int comprIdx = settings.getInt("comprIdx", 0);
+		if (comprIdx >= compr.length) {
+			comprIdx = 0;
+			setPrefInt("comprIdx", comprIdx);
+		}
+		player.setCompr(compr[comprIdx]);
+
+		int dBPer100Idx = settings.getInt("dBPer100Idx", 0);
+		if (dBPer100Idx >= dBPer100kmh.length) {
+			dBPer100Idx = 0;
+			setPrefInt("dBPer100Idx", dBPer100Idx);
+		}
+		player.setDbPer100(dBPer100kmh[dBPer100Idx]);
+
 		this.player.onChanged(OnChangedHint.FOLDER);
-		
+
 		for (APServiceListener l : listeners)
 			l.onLoaded();
 	}
@@ -303,6 +303,12 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	@Override
+	public void seekTo(int f) {
+		storeUndo();
+		player.seekTo(f);
+	}
+
+	@Override
 	public void seek(int seekStep) {
 		player.seek(seekStep);
 	}
@@ -350,10 +356,10 @@ public class APService extends BaseService implements IAPService {
 		return player.getGain();
 	}
 
-//	@Override
-//	public float getLevel() {
-//		return player.getIndicatorLevel();
-//	}
+	// @Override
+	// public float getLevel() {
+	// return player.getIndicatorLevel();
+	// }
 
 	@Override
 	public int getFileCnt() {
@@ -572,18 +578,18 @@ public class APService extends BaseService implements IAPService {
 		mCursor.close();
 		System.out.println();
 
-//		String fold = "000";
-//		List<File1> files1 = new ArrayList<File1>();
-//		files1.add(new File1(
-//				"/sdcard0/000/audiocheck.net_sin_1000Hz_0dBFS_10s.wav",
-//				"audiocheck.net_sin_1000Hz_0dBFS_10s.wav", 100));
-//		files1.add(new File1(
-//				"/sdcard0/000/audiocheck.net_sin_1000Hz_-6dBFS_10s.wav",
-//				"audiocheck.net_sin_1000Hz_-6dBFS_10s.wav", 100));
-//		files1.add(new File1(
-//				"/sdcard0/000/audiocheck.net_sin_1000Hz_-20dBFS_10s.wav",
-//				"audiocheck.net_sin_1000Hz_-20dBFS_10s.wav", 100));
-//		map.put(fold, files1);
+		// String fold = "000";
+		// List<File1> files1 = new ArrayList<File1>();
+		// files1.add(new File1(
+		// "/sdcard0/000/audiocheck.net_sin_1000Hz_0dBFS_10s.wav",
+		// "audiocheck.net_sin_1000Hz_0dBFS_10s.wav", 100));
+		// files1.add(new File1(
+		// "/sdcard0/000/audiocheck.net_sin_1000Hz_-6dBFS_10s.wav",
+		// "audiocheck.net_sin_1000Hz_-6dBFS_10s.wav", 100));
+		// files1.add(new File1(
+		// "/sdcard0/000/audiocheck.net_sin_1000Hz_-20dBFS_10s.wav",
+		// "audiocheck.net_sin_1000Hz_-20dBFS_10s.wav", 100));
+		// map.put(fold, files1);
 
 		List<String> folds = new ArrayList<String>(map.keySet());
 		Collections.sort(folds);
@@ -609,4 +615,5 @@ public class APService extends BaseService implements IAPService {
 		System.out.println("maxVol " + maxVol);
 		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVol, 0);
 	}
+
 }

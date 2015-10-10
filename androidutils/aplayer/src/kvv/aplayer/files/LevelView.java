@@ -1,6 +1,7 @@
 package kvv.aplayer.files;
 
 import com.smartbean.androidutils.util.LPF;
+import com.smartbean.androidutils.util.Utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -30,6 +31,8 @@ public class LevelView extends View {
 
 	private float level;
 
+	private int[] scale;
+
 	public LevelView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 	}
@@ -41,6 +44,11 @@ public class LevelView extends View {
 
 	public LevelView(Context context) {
 		super(context);
+	}
+
+	public void setScale(int[] scale) {
+		this.scale = scale;
+		createBitmap();
 	}
 
 	private LPF lpf = new LPF(1000 / STEP_MS, 0.1, 0.2);
@@ -72,9 +80,14 @@ public class LevelView extends View {
 	}
 
 	{
-		int c0 = 0xFF606000;
+		createBitmap();
+	}
+
+	void createBitmap() {
+		int c0 = 0xFF404000;
+		// int c0 = 0xFF606000;
 		// int c1 = 0xFF556B2F;
-		int c1 = 0xFF404000;
+		int c1 = 0xFF505000;
 		int c2 = 0xFFFFA500;
 
 		float w = bmpBody.getWidth();
@@ -98,21 +111,24 @@ public class LevelView extends View {
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setColor(Color.BLACK);
 		paint.setStrokeWidth(4);
-		for (float db : new float[] { -20, -10, -6, -3, 0, 3 }) {
-			float val = (float) (Math.pow(10, db / 20) * 66);
 
-			float x1 = cx3(w, r1, val);
-			float y1 = cy3(w, r1, val);
-			float x2 = cx3(w, r2, val);
-			float y2 = cy3(w, r2, val);
+		if (scale != null)
+			for (int db : scale) {
+				float val = (float) (Utils.db2n(db) * 66);
+				// float val = (float) (Math.pow(10, db / 20f) * 66);
 
-			scaleCanvas.drawLine(x1, y1, x2, y2, paint);
+				float x1 = cx3(w, r1, val);
+				float y1 = cy3(w, r1, val);
+				float x2 = cx3(w, r2, val);
+				float y2 = cy3(w, r2, val);
 
-			paint.setTextSize(10);
-			scaleCanvas.drawText("" + (int) db, cx3(w, r2 * 1.1f, val) - 6,
-					cy3(w, r2 * 1.1f, val) + 6, paint);
+				scaleCanvas.drawLine(x1, y1, x2, y2, paint);
 
-		}
+				paint.setTextSize(10);
+				scaleCanvas.drawText("" + (int) db, cx3(w, r2 * 1.1f, val) - 6,
+						cy3(w, r2 * 1.1f, val) + 6, paint);
+
+			}
 
 		scaleCanvas.drawArc(new RectF(cx2(w) - r1, cy2(w) - r1, cx2(w) + r1,
 				cy2(w) + r1), -125, 70, false, paint);
@@ -131,7 +147,7 @@ public class LevelView extends View {
 
 		paint.setStrokeWidth(w / 15);
 		paint.setColor(c1);
-		bodyCanvas.drawCircle(cx1, cy1, w * 0.42f, paint);
+		bodyCanvas.drawCircle(cx1, cy1, w * 0.41f, paint);
 
 		paint.setStyle(Paint.Style.FILL);
 
@@ -182,6 +198,11 @@ public class LevelView extends View {
 	public void setLevel(float level) {
 		System.out.println("setLevel " + level);
 		
+		if(level < 0)
+			level = 0;
+		if(level > 1.3)
+			level = 1.3f;
+
 		this.level = level;
 
 		cnt = 3000 / STEP_MS; // 3 sec

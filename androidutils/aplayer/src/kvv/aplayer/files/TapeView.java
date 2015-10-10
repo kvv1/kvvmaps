@@ -68,6 +68,8 @@ public class TapeView extends View {
 		float hbGapY = hbTop + (hbBottom - hbTop) * 0.8f;
 
 		canvas.drawRoundRect(new RectF(hbLeft, hbTop, hbRight, hbBottom), 10,
+				10, headboxPaint2);
+		canvas.drawRoundRect(new RectF(hbLeft, hbTop+4, hbRight, hbBottom-4), 10,
 				10, headboxPaint);
 
 		canvas.drawLine(hbLeft, hbGapY, hbRight, hbGapY, headboxPaint1);
@@ -112,8 +114,13 @@ public class TapeView extends View {
 	}
 	Paint headboxPaint = new Paint();
 	{
-		headboxPaint.setColor(0xFF404000);
+		headboxPaint.setColor(0xFF505000);
 		headboxPaint.setAntiAlias(true);
+	}
+	Paint headboxPaint2 = new Paint();
+	{
+		headboxPaint2.setColor(0xFF404000);
+		headboxPaint2.setAntiAlias(true);
 	}
 	Paint headboxPaint1 = new Paint();
 	{
