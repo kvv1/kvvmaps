@@ -78,7 +78,6 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:drawableTop="@drawable/off"
-                android:text="OFF"
                 android:textSize="20sp" />
 
             <Button
@@ -87,7 +86,6 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:drawableTop="@drawable/day1"
-                android:text="Яркость"
                 android:textSize="20sp" />
         </TableRow>
     </TableLayout>

@@ -48,8 +48,42 @@ public class NLActivity extends Activity {
 	private Runnable finishTimer = new Runnable() {
 		@Override
 		public void run() {
-			finish();
+
+			System.out.println("******************************");
+			ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+			for (RunningTaskInfo t : am.getRunningTasks(10)) {
+				String packageName = t.topActivity.getPackageName();
+				String className = t.topActivity.getClassName();
+				System.out.println(className);
+			}
+			System.out.println("******************************");
+
+			List<RunningTaskInfo> runningTasks = am.getRunningTasks(10);
+			if (runningTasks.size() > 1) {
+				RunningTaskInfo info = runningTasks.get(1);
+				String packageName = info.topActivity.getPackageName();
+				String className = info.topActivity.getClassName();
+
+				try {
+					Intent i = new Intent();
+					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+							| Intent.FLAG_ACTIVITY_SINGLE_TOP
+					/* | Intent.FLAG_ACTIVITY_CLEAR_TOP */);
+					i.setComponent(new ComponentName(packageName, className));
+					startActivity(i);
+					// finish();
+					return;
+				} catch (Exception e) {
+					Intent i = getPackageManager().getLaunchIntentForPackage(
+							packageName);
+					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+							| Intent.FLAG_ACTIVITY_SINGLE_TOP
+							| Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					startActivity(i);
+				}
+			}
 		}
+		// finish();
 	};
 
 	private void startFinishTimer() {
@@ -104,7 +138,7 @@ public class NLActivity extends Activity {
 								i.setComponent(new ComponentName(packageName,
 										className));
 								startActivity(i);
-								finish();
+								// finish();
 								return;
 							}
 						} catch (Exception e) {
@@ -120,7 +154,7 @@ public class NLActivity extends Activity {
 							| Intent.FLAG_ACTIVITY_SINGLE_TOP
 							| Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(i);
-					finish();
+					// finish();
 				}
 			});
 
