@@ -161,7 +161,7 @@ public abstract class Compressor {
 
 			float gain = (float) Utils.n2db(k);
 
-			System.out.printf("m=%f g=%f\n", mean, gain);
+			//System.out.printf("m=%f g=%f\n", mean, gain);
 
 			gain = bounds(-db, gain, db);
 			return gain;

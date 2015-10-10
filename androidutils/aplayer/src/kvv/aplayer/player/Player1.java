@@ -96,12 +96,13 @@ public abstract class Player1 extends Player0 {
 		// g += speedKMH * dBPer100 / 100;
 		g += comprGain;
 
-		System.out.println("setEq " + g);
+		// System.out.println("setEq " + g);
+
 		eqCompr.setGain(g);
 
 		if (eqSpeed == null)
 			eqSpeed = new EqEq(getMP(), 0);
-		
+
 		eqSpeed.setGain(speedKMH * dBPer100 / 100 - dBPer100 * 1.2f);
 	}
 
@@ -153,7 +154,7 @@ class EqEq implements Eq {
 }
 
 class EqVol implements Eq {
-	private final MediaPlayer mp;
+	private MediaPlayer mp;
 	private final float refDb;
 
 	public EqVol(MediaPlayer mp, float refDb) {
@@ -164,10 +165,12 @@ class EqVol implements Eq {
 	@Override
 	public void setGain(float gain) {
 		float n = (float) Utils.db2n(gain + refDb);
-		mp.setVolume(n, n);
+		if (mp != null)
+			mp.setVolume(n, n);
 	}
 
 	@Override
 	public void release() {
+		mp = null;
 	}
 }

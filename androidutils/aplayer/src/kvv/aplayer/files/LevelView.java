@@ -196,7 +196,7 @@ public class LevelView extends View {
 	private int cnt;
 
 	public void setLevel(float level) {
-		System.out.println("setLevel " + level);
+		//System.out.println("setLevel " + level);
 		
 		if(level < 0)
 			level = 0;

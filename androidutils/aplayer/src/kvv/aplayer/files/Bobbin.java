@@ -3,125 +3,24 @@ package kvv.aplayer.files;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.SystemClock;
 
 public class Bobbin {
-
-	static final int tapeMinR = 30;
-	static final int tapeMaxR = 115;
 
 	private float max;
 	private float cur;
 	private float angle;
 
-	static final int bmSize = 256;
-
-	static final int bgColor = 0xFF808080;
-	// static final int bgColor = 0;
-	static final int color = 0xFFE0F0E0;
-	static final int color1 = 0xFFB0C0B0;
-
 	static final Paint bobbinPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
-	static final Paint tapePaint = new Paint();
-	static final Paint bgPaint = new Paint();
-	static final Paint axisPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
-	// private static final int TAPE_COLOR = 0xFF8b4513;
+	static final Paint tapePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
 	public static final int TAPE_COLOR = 0xFF401004;
 
-	static {
-		bobbinPaint.setAlpha(200);
-		bgPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
-		bgPaint.setColor(bgColor);
-		bgPaint.setAntiAlias(true);
+	{
 		tapePaint.setColor(TAPE_COLOR);
 		tapePaint.setAntiAlias(true);
-		axisPaint.setAntiAlias(true);
-	}
-
-	static final Bitmap.Config conf = Bitmap.Config.ARGB_8888;
-	static final Bitmap bmp = Bitmap.createBitmap(bmSize, bmSize, conf);
-	static final Bitmap bmpAxis = Bitmap.createBitmap(20, 20, conf);
-
-	static {
-		bmp.eraseColor(0);
-		Canvas canvas = new Canvas(bmp);
-		Paint paint = new Paint();
-		paint.setAntiAlias(true);
-
-		float cx = canvas.getWidth() / 2;
-		float cy = canvas.getHeight() / 2;
-
-		canvas.translate(cx, cy);
-
-		// ///////////////////
-
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setColor(color1);
-		paint.setStrokeWidth(22);
-		canvas.drawCircle(0, 0, 117, paint);
-
-		// ///////////////////
-
-		Bitmap bmp1 = Bitmap.createBitmap(bmSize, bmSize, conf);
-		bmp1.eraseColor(0);
-		Canvas canvas1 = new Canvas(bmp1);
-		canvas1.translate(cx, cy);
-
-		Path path = new Path();
-		path.moveTo(-20, 10);
-		path.lineTo(-10, 117);
-		path.lineTo(10, 117);
-		path.lineTo(20, 10);
-
-		Paint paint1 = new Paint();
-		paint1.setAntiAlias(true);
-
-		paint1.setStyle(Paint.Style.STROKE);
-		paint1.setColor(color1);
-		paint1.setStrokeWidth(4);
-		canvas1.drawPath(path, paint1);
-
-		paint1.setStyle(Paint.Style.FILL);
-		paint1.setColor(color);
-		canvas1.drawPath(path, paint1);
-
-		canvas.drawBitmap(bmp1, -cx, -cy, paint);
-		canvas.rotate(120);
-		canvas.drawBitmap(bmp1, -cx, -cy, paint);
-		canvas.rotate(120);
-		canvas.drawBitmap(bmp1, -cx, -cy, paint);
-
-		// ///////////////////
-
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setColor(color);
-		paint.setStrokeWidth(17);
-		canvas.drawCircle(0, 0, 117, paint);
-
-		paint.setStrokeWidth(1);
-		paint.setStyle(Paint.Style.FILL_AND_STROKE);
-		canvas.drawCircle(0, 0, 30, paint);
-
-		paint.setColor(0xFF404040);
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(2);
-		canvas.drawArc(new RectF(-5, -35, 5, -25), 0, 180, false, paint);
-
-		Canvas c = new Canvas(bmpAxis);
-		c.translate(bmpAxis.getWidth() / 2, bmpAxis.getHeight() / 2);
-		Paint p = new Paint();
-		p.setAntiAlias(true);
-		c.drawCircle(0, 0, bmpAxis.getWidth() / 3, p);
-		p.setStrokeWidth(4);
-		c.drawLine(0, 0, 0, bmpAxis.getHeight() / 2, p);
-		c.rotate(120);
-		c.drawLine(0, 0, 0, bmpAxis.getHeight() / 2, p);
-		c.rotate(120);
-		c.drawLine(0, 0, 0, bmpAxis.getHeight() / 2, p);
+		tapePaint.setStyle(Paint.Style.STROKE);
 	}
 
 	private float getTapeR(float r1, float r2, float max, float cur) {
@@ -131,47 +30,38 @@ public class Bobbin {
 
 	private void drawTapeCircle(Canvas canvas, float cx, float cy,
 			float drawSize) {
-		float r1 = getTapeR(tapeMinR, tapeMaxR, max, cur) * drawSize / bmSize;
-
-		float r0 = tapeMinR * drawSize / bmSize;
-
-		tapePaint.setStyle(Paint.Style.STROKE);
+		float r1 = getTapeR(BobbinBmp.tapeMinR, BobbinBmp.tapeMaxR, max, cur)
+				* drawSize / BobbinBmp.bmSize;
+		float r0 = BobbinBmp.tapeMinR * drawSize / BobbinBmp.bmSize;
 		tapePaint.setStrokeWidth(r1 - r0);
 		canvas.drawCircle(cx, cy, (r1 + r0) / 2, tapePaint);
-
-		// canvas.drawCircle(cx, cy, r1, tapePaint);
-		// canvas.drawCircle(cx, cy, tapeMinR * drawSize / bmSize, bgPaint);
 	}
 
 	private void drawBobbin(Canvas canvas, float cx, float cy, float drawSize) {
 		canvas.save();
 		canvas.translate(cx, cy);
 		canvas.rotate(angle);
-		canvas.drawBitmap(bmp, new Rect(0, 0, bmSize, bmSize), new RectF(
-				-drawSize / 2, -drawSize / 2, drawSize / 2, drawSize / 2),
-				bobbinPaint);
-		canvas.restore();
-	}
-
-	private void drawAxis(Canvas canvas, float cx, float cy, float drawSize) {
-		canvas.save();
-		canvas.translate(cx, cy);
-		canvas.rotate(angle);
-		float w = drawSize / 20;
-		canvas.drawBitmap(bmpAxis,
-				new Rect(0, 0, bmpAxis.getWidth(), bmpAxis.getHeight()),
-				new RectF(-w, -w, w, w), axisPaint);
+		Bitmap bitmap = BobbinBmp.getInstance();
+		canvas.drawBitmap(bitmap,
+				new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight()),
+				new RectF(-drawSize / 2, -drawSize / 2, drawSize / 2,
+						drawSize / 2), bobbinPaint);
 		canvas.restore();
 	}
 
 	public void draw(Canvas canvas, float x, float y, float drawSize) {
+		long t = SystemClock.uptimeMillis();
 		drawTapeCircle(canvas, x, y, drawSize);
+		long t1 = SystemClock.uptimeMillis();
 		drawBobbin(canvas, x, y, drawSize);
-		drawAxis(canvas, x, y, drawSize);
+		long t2 = SystemClock.uptimeMillis();
+
+		System.out.println((t2 - t1) + " " + (t1 - t));
 	}
 
 	public void step(int ms) {
-		float r1 = getTapeR(tapeMinR * 100 / tapeMaxR, 100, max, cur);
+		float r1 = getTapeR(BobbinBmp.tapeMinR * 100 / BobbinBmp.tapeMaxR, 100,
+				max, cur);
 		float da = 5 * ms / r1;
 
 		this.angle -= da;
@@ -187,7 +77,8 @@ public class Bobbin {
 	}
 
 	public float getTapeR(float drawSize) {
-		return getTapeR(tapeMinR, tapeMaxR, max, cur) * drawSize / bmSize;
+		return getTapeR(BobbinBmp.tapeMinR, BobbinBmp.tapeMaxR, max, cur)
+				* drawSize / BobbinBmp.bmSize;
 	}
 
 }

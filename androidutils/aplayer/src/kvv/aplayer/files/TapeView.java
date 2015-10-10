@@ -6,11 +6,12 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.View;
 
 public class TapeView extends View {
-	private final static int STEP_MS = 30;
+	private final static int STEP_MS = 40;
 
 	private Bitmap bmp;
 	private int w;
@@ -69,8 +70,9 @@ public class TapeView extends View {
 
 		canvas.drawRoundRect(new RectF(hbLeft, hbTop, hbRight, hbBottom), 10,
 				10, headboxPaint2);
-		canvas.drawRoundRect(new RectF(hbLeft, hbTop+4, hbRight, hbBottom-4), 10,
-				10, headboxPaint);
+		canvas.drawRoundRect(
+				new RectF(hbLeft, hbTop + 4, hbRight, hbBottom - 4), 10, 10,
+				headboxPaint);
 
 		canvas.drawLine(hbLeft, hbGapY, hbRight, hbGapY, headboxPaint1);
 
@@ -207,13 +209,12 @@ public class TapeView extends View {
 		if (r != null)
 			return;
 
-		
 		r = new Runnable() {
-			private long time = System.currentTimeMillis();
-			
+			private long time = SystemClock.uptimeMillis();
+
 			@Override
 			public void run() {
-				long t = System.currentTimeMillis();
+				long t = SystemClock.uptimeMillis();
 				int dt = (int) (t - time);
 				time = t;
 				if (seekStep == 0) {
