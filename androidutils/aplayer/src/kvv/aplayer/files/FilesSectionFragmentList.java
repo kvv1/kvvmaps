@@ -2,6 +2,9 @@ package kvv.aplayer.files;
 
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
+import kvv.aplayer.files.tape.LevelView;
+import kvv.aplayer.files.tape.TapePanel;
+import kvv.aplayer.files.tape.TapeView;
 import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.File1;

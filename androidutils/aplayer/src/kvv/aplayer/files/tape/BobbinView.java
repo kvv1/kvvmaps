@@ -1,4 +1,4 @@
-package kvv.aplayer.files;
+package kvv.aplayer.files.tape;
 
 import android.content.Context;
 import android.util.AttributeSet;

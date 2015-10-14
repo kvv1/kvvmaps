@@ -1,4 +1,4 @@
-package kvv.aplayer.files;
+package kvv.aplayer.files.tape;
 
 import kvv.aplayer.R;
 import android.annotation.SuppressLint;

@@ -1,4 +1,4 @@
-package kvv.aplayer.files;
+package kvv.aplayer.files.tape;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
