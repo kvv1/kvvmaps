@@ -55,7 +55,19 @@ public class TapePanel extends FrameLayout {
 		float w = getWidth();
 		float bx = bobbin < 0 ? bobbinX1 : bobbinX2;
 		float by = bobbinY;
-		return Math.sqrt(((x - bx) * (x - bx) + (y - by) * (y - by))) < bobbinSize * 0.2;
+		
+		if(y > bobbinSize * 3 / 4)
+			return false;
+		
+		if(bobbin == -1 && x < bx + bobbinSize/4)
+			return true;
+		
+		if(bobbin == 1 && x > bx - bobbinSize/4)
+			return true;
+
+		return false;
+		
+		//return Math.sqrt(((x - bx) * (x - bx) + (y - by) * (y - by))) < bobbinSize * 0.2;
 	}
 
 	public int hitTest(float x, float y) { // -1 - left, 1 = right

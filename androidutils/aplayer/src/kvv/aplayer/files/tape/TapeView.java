@@ -99,18 +99,6 @@ public class TapeView extends View {
 
 	@Override
 	public void draw(Canvas canvas) {
-		// if (b1 == null) {
-		// ViewGroup g = null;
-		// while (!(g instanceof TapePanel))
-		// g = (ViewGroup) g.getParentForAccessibility();
-		//
-		// b1 = (BobbinView) g.findViewById(R.id.leftBobbin);
-		// b2 = (BobbinView) g.findViewById(R.id.rightBobbin);
-		// }
-
-		// ViewGroup parent = (ViewGroup) ((ViewGroup) getParent()).getParent();
-		// BobbinView b1 = (BobbinView) parent.findViewById(R.id.leftBobbin);
-		// BobbinView b2 = (BobbinView) parent.findViewById(R.id.rightBobbin);
 
 		if (b1 != null) {
 			bobbinSize = b1.getWidth();

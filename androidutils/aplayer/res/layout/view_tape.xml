@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<kvv.aplayer.files.TapePanel xmlns:android="http://schemas.android.com/apk/res/android"
+<kvv.aplayer.files.tape.TapePanel xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#969678"
     tools:context=".APActivity" >
 
-    <kvv.aplayer.files.TapeView
+    <kvv.aplayer.files.tape.TapeView
         android:id="@+id/tape"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
-    </kvv.aplayer.files.TapeView>
+    </kvv.aplayer.files.tape.TapeView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
-        <kvv.aplayer.files.BobbinView
+        <kvv.aplayer.files.tape.BobbinView
             android:id="@+id/leftBobbin"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -27,17 +27,16 @@
             android:gravity="top"
             android:scaleType="centerCrop" />
 
-        <kvv.aplayer.files.LevelView
+        <kvv.aplayer.files.tape.LevelView
             android:id="@+id/level"
             android:layout_width="0dp"
-            android:layout_marginLeft="-10dp"
-            android:layout_marginRight="-10dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|top"
-            android:layout_weight="1" >
-        </kvv.aplayer.files.LevelView>
+            android:layout_marginLeft="-10dp"
+            android:layout_marginRight="-10dp"
+            android:layout_weight="1" />
 
-        <kvv.aplayer.files.BobbinView
+        <kvv.aplayer.files.tape.BobbinView
             android:id="@+id/rightBobbin"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -47,4 +46,4 @@
             android:scaleType="centerCrop" />
     </LinearLayout>
 
-</kvv.aplayer.files.TapePanel>
+</kvv.aplayer.files.tape.TapePanel>
