@@ -225,4 +225,9 @@ public class LevelView extends View {
 
 	}
 
+	public void onMeasure(int widthSpec, int heightSpec) {
+		super.onMeasure(widthSpec, heightSpec);
+		int size = Math.min(getMeasuredWidth(), getMeasuredHeight());
+		setMeasuredDimension(size, size);
+	}
 }

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<kvv.aplayer.files.TapePanel xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".APActivity"
-    android:background="#969678" >
+    android:background="#969678"
+    tools:context=".APActivity" >
 
     <kvv.aplayer.files.TapeView
         android:id="@+id/tape"
@@ -12,11 +12,39 @@
         android:layout_height="match_parent" >
     </kvv.aplayer.files.TapeView>
 
-    <kvv.aplayer.files.LevelView
-        android:id="@+id/level"
-        android:layout_width="90dp"
-        android:layout_height="90dp"
-        android:layout_gravity="center_horizontal|top" >
-    </kvv.aplayer.files.LevelView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
 
-</FrameLayout>
+        <kvv.aplayer.files.BobbinView
+            android:id="@+id/leftBobbin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_weight="3"
+            android:gravity="top"
+            android:scaleType="centerCrop" />
+
+        <kvv.aplayer.files.LevelView
+            android:id="@+id/level"
+            android:layout_width="0dp"
+            android:layout_marginLeft="-10dp"
+            android:layout_marginRight="-10dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|top"
+            android:layout_weight="1" >
+        </kvv.aplayer.files.LevelView>
+
+        <kvv.aplayer.files.BobbinView
+            android:id="@+id/rightBobbin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_weight="3"
+            android:scaleType="centerCrop" />
+    </LinearLayout>
+
+</kvv.aplayer.files.TapePanel>

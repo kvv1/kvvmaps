@@ -1,7 +1,7 @@
 package kvv.aplayer.files;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
@@ -10,10 +10,12 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.View;
 
+@SuppressLint("NewApi")
 public class TapeView extends View {
-	private final static int STEP_MS = 40;
+	private final static int STEP_MS = 20;
 
-	private Bitmap bmp;
+	private static final int TAPE_COLOR = 0xFF401004;
+
 	private int w;
 	private int h;
 
@@ -23,6 +25,9 @@ public class TapeView extends View {
 	private float bobbinY;
 	private float r1;
 	private float r2;
+
+	private BobbinView b1;
+	private BobbinView b2;
 
 	static class Params {
 
@@ -46,20 +51,81 @@ public class TapeView extends View {
 
 	}
 
-	private void createBmp() {
-		if (bmp == null)
-			return;
+	public TapeView(Context context, AttributeSet attrs, int defStyle) {
+		super(context, attrs, defStyle);
+		init(context);
+	}
 
-		bobbinSize = bobbinSize(w);
-		bobbinY = bobbinY(w);
-		bobbinX2 = bobbinX2(w);
-		bobbinX1 = bobbinX1(w);
-		r1 = bobbin1.getTapeR(bobbinSize);
-		r2 = bobbin2.getTapeR(bobbinSize);
+	public TapeView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init(context);
+	}
 
-		bmp.eraseColor(0);
+	public TapeView(Context context) {
+		super(context);
+		init(context);
+	}
 
-		Canvas canvas = new Canvas(bmp);
+	private void init(Context context) {
+	}
+
+	Paint tapePaint = new Paint();
+	{
+		tapePaint.setColor(TAPE_COLOR);
+		tapePaint.setAntiAlias(true);
+		tapePaint.setStyle(Paint.Style.STROKE);
+	}
+	Paint headboxPaint = new Paint();
+	{
+		headboxPaint.setColor(0xFF505000);
+		headboxPaint.setAntiAlias(true);
+	}
+	Paint headboxPaint2 = new Paint();
+	{
+		headboxPaint2.setColor(0xFF404000);
+		headboxPaint2.setAntiAlias(true);
+	}
+	Paint headboxPaint1 = new Paint();
+
+	private float max = 100;
+
+	private float cur = 40;
+
+	{
+		headboxPaint1.setColor(0xFF000000);
+		headboxPaint1.setAntiAlias(true);
+		headboxPaint1.setStrokeWidth(3);
+	}
+
+	@Override
+	public void draw(Canvas canvas) {
+		// if (b1 == null) {
+		// ViewGroup g = null;
+		// while (!(g instanceof TapePanel))
+		// g = (ViewGroup) g.getParentForAccessibility();
+		//
+		// b1 = (BobbinView) g.findViewById(R.id.leftBobbin);
+		// b2 = (BobbinView) g.findViewById(R.id.rightBobbin);
+		// }
+
+		// ViewGroup parent = (ViewGroup) ((ViewGroup) getParent()).getParent();
+		// BobbinView b1 = (BobbinView) parent.findViewById(R.id.leftBobbin);
+		// BobbinView b2 = (BobbinView) parent.findViewById(R.id.rightBobbin);
+
+		if (b1 != null) {
+			bobbinSize = b1.getWidth();
+			bobbinX1 = b1.getX() + bobbinSize / 2;
+			bobbinX2 = b2.getX() + bobbinSize / 2;
+			bobbinY = b1.getY() + bobbinSize / 2;
+		}
+
+		w = getWidth();
+		h = getHeight();
+		if (h > w * 0.55)
+			h = (int) (w * 0.55f);
+
+		r1 = getTapeR(max - cur);
+		r2 = getTapeR(cur);
 
 		float hbLeft = w * 0.5f - w * 0.1f;
 		float hbTop = h * 0.8f;
@@ -83,129 +149,55 @@ public class TapeView extends View {
 		float x2 = (float) (bobbinX2 + r2 * Math.sin(Math.toRadians(grad)));
 		float y2 = (float) (bobbinY + r2 * Math.cos(Math.toRadians(grad)));
 
+		tapePaint.setStrokeWidth(1);
 		canvas.drawLine(hbLeft, hbGapY, x1, y1, tapePaint);
 		canvas.drawLine(hbRight, hbGapY, x2, y2, tapePaint);
-	}
 
-	private Handler handler = new Handler();
-
-	public TapeView(Context context, AttributeSet attrs, int defStyle) {
-		super(context, attrs, defStyle);
-	}
-
-	public TapeView(Context context, AttributeSet attrs) {
-		super(context, attrs);
+		drawTapeCircle(canvas, bobbinX1, max - cur);
+		drawTapeCircle(canvas, bobbinX2, cur);
 
 	}
 
-	public TapeView(Context context) {
-		super(context);
+	private void drawTapeCircle(Canvas canvas, float bobbinX, float cur) {
+		float r1 = getTapeR(BobbinBmp.tapeMinR, BobbinBmp.tapeMaxR, max, cur)
+				* bobbinSize / BobbinBmp.bmSize;
+		float r0 = BobbinBmp.tapeMinR * bobbinSize / BobbinBmp.bmSize;
+		tapePaint.setStrokeWidth(r1 - r0);
+		canvas.drawCircle(bobbinX, bobbinY, (r1 + r0) / 2, tapePaint);
 	}
 
-	Bobbin bobbin1 = new Bobbin();
-	Bobbin bobbin2 = new Bobbin();
-	{
-		bobbin1.setPercent(100, 100);
-		bobbin2.setPercent(100, 0);
+	private float getTapeR(float r1, float r2, float max, float cur) {
+		return (float) Math.sqrt((cur - max) / max * (r2 * r2 - r1 * r1) + r2
+				* r2);
 	}
 
-	Paint tapePaint = new Paint();
-	{
-		tapePaint.setColor(Bobbin.TAPE_COLOR);
-		tapePaint.setAntiAlias(true);
-	}
-	Paint headboxPaint = new Paint();
-	{
-		headboxPaint.setColor(0xFF505000);
-		headboxPaint.setAntiAlias(true);
-	}
-	Paint headboxPaint2 = new Paint();
-	{
-		headboxPaint2.setColor(0xFF404000);
-		headboxPaint2.setAntiAlias(true);
-	}
-	Paint headboxPaint1 = new Paint();
-	{
-		headboxPaint1.setColor(0xFF000000);
-		headboxPaint1.setAntiAlias(true);
-		headboxPaint1.setStrokeWidth(3);
-	}
-
-	private static float bobbinSize(float w) {
-		return w * 0.42f;
-	}
-
-	private static float bobbinY(float w) {
-		return w * 0.22f;
-	}
-
-	private static float bobbinX2(float w) {
-		return w - w * 0.22f;
-	}
-
-	private static float bobbinX1(float w) {
-		return w * 0.22f;
-	}
-
-	@Override
-	public void draw(Canvas canvas) {
-		w = getWidth();
-		h = getHeight();
-		if (h > w * 0.55)
-			h = (int) (w * 0.55f);
-
-		if (bmp == null || bmp.getWidth() != w || bmp.getHeight() != h) {
-			if (bmp != null) {
-				bmp.recycle();
-				bmp = null;
-			}
-			bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-			createBmp();
-		}
-
-		canvas.drawBitmap(bmp, 0, 0, null);
-
-		bobbin1.draw(canvas, bobbinX1, bobbinY, bobbinSize);
-		bobbin2.draw(canvas, bobbinX2, bobbinY, bobbinSize);
-
-		// canvas.drawCircle(w / 10, h * 0.9f, w / 50, tapePaint);
-		// canvas.drawCircle(w- w / 10, h * 0.9f, w / 50, tapePaint);
-
-	}
-
-	private boolean hitTest(float x, float y, int bobbin) {
-		float w = getWidth();
-		float bx = bobbin < 0 ? bobbinX1(w) : bobbinX2(w);
-		float by = bobbinY(w);
-		return Math.sqrt(((x - bx) * (x - bx) + (y - by) * (y - by))) < bobbinSize(w) * 0.2;
-	}
-
-	public int hitTest(float x, float y) { // -1 - left, 1 = right
-		if (hitTest(x, y, -1))
-			return -1;
-		if (hitTest(x, y, 1))
-			return 1;
-
-		if (x < w / 5 && y < h / 5)
-			return -2;
-
-		if (x > w - w / 5 && y < h / 5)
-			return 2;
-
-		return 0;
+	public float getTapeR(float cur) {
+		return getTapeR(BobbinBmp.tapeMinR, BobbinBmp.tapeMaxR, max, cur)
+				* bobbinSize / BobbinBmp.bmSize;
 	}
 
 	public void setProgress(float max, float cur) {
-		bobbin1.setPercent(max, max - cur);
-		bobbin2.setPercent(max, cur);
-		createBmp();
+		this.max = max;
+		this.cur = cur;
+		invalidate();
 	}
 
 	private Runnable r;
+	private Handler handler = new Handler();
 
 	private int seekStep;
 
+	boolean started;
+
 	public void start() {
+		if (started || b1 == null)
+			return;
+
+		started = true;
+
+		b1.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+		b2.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
 		if (r != null)
 			return;
 
@@ -218,14 +210,16 @@ public class TapeView extends View {
 				int dt = (int) (t - time);
 				time = t;
 				if (seekStep == 0) {
-					bobbin1.step(dt);
-					bobbin2.step(dt);
+					int step = STEP_MS;
+					step = (dt + STEP_MS)/2;
+					step(b1, step);
+					step(b2, step);
 				} else {
 					int step = seekStep / 5;
 					if (step > 500)
 						step = 500;
-					bobbin1.step(step);
-					bobbin2.step(step);
+					step(b1, step);
+					step(b2, step);
 				}
 
 				invalidate();
@@ -236,13 +230,41 @@ public class TapeView extends View {
 		handler.postDelayed(r, 100);
 	}
 
+	void step(BobbinView bobbin, int ms) {
+		float r1 = getTapeR(BobbinBmp.tapeMinR * 100 / BobbinBmp.tapeMaxR, 100,
+				max, bobbin == b1 ? (max - cur) : cur);
+		float da = 5 * ms / r1;
+
+		float angle = bobbin.getRotation();
+		angle -= da;
+
+		if (angle < -360)
+			angle += 360;
+		if (angle > 360)
+			angle -= 360;
+
+		//bobbin.animate().rotation(angle).start();
+		
+		bobbin.setRotation(angle);
+	}
+
 	public void stop() {
+		if (!started || b1 == null)
+			return;
+		started = false;
+
 		if (r != null)
 			handler.removeCallbacks(r);
 		r = null;
+
 	}
 
 	public void setSeek(int step) {
 		seekStep = step;
+	}
+
+	public void setBobbinParams(BobbinView b1, BobbinView b2) {
+		this.b1 = b1;
+		this.b2 = b2;
 	}
 }
