@@ -251,7 +251,7 @@ public class TapeView extends View {
 		seekStep = step;
 	}
 
-	public void setBobbinParams(BobbinView b1, BobbinView b2) {
+	public void setBobbins(BobbinView b1, BobbinView b2) {
 		this.b1 = b1;
 		this.b2 = b2;
 	}

@@ -8,6 +8,7 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.FrameLayout;
 
+@SuppressLint("NewApi")
 public class TapePanel extends FrameLayout {
 
 	public TapePanel(Context context) {
@@ -36,12 +37,11 @@ public class TapePanel extends FrameLayout {
 				BobbinView b2 = (BobbinView) findViewById(R.id.rightBobbin);
 
 				TapeView tapeView = (TapeView) findViewById(R.id.tape);
-				tapeView.setBobbinParams(b1, b2);
+				tapeView.setBobbins(b1, b2);
 			}
 		});
 	}
 
-	@SuppressLint("NewApi")
 	private boolean hitTest(float x, float y, int bobbin) {
 		BobbinView b1 = (BobbinView) findViewById(R.id.leftBobbin);
 		BobbinView b2 = (BobbinView) findViewById(R.id.rightBobbin);

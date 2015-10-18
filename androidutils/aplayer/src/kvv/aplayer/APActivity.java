@@ -8,7 +8,6 @@ import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.APServiceListenerAdapter;
 import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -23,9 +22,11 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
 import com.smartbean.androidutils.activity.FragmentActivityTabsNoActionBar;
 import com.smartbean.androidutils.service.ServiceConnectionAdapter;
 
+@SuppressLint("NewApi")
 public class APActivity extends FragmentActivityTabsNoActionBar {
 
 	public static final int BUTTONS_DELAY = 3000;
@@ -44,7 +45,6 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		}
 	};
 
-	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -57,14 +57,7 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		add("Files", new FilesSectionFragmentList());
 		add("Folders", new FoldersSectionFragment());
 		// add("Charts", new ChartsFragment());
-		
-		View decorView = getWindow().getDecorView();
-		int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-		decorView.setSystemUiVisibility(uiOptions);
-		// Remember that you should never show the action bar if the
-		// status bar is hidden, so hide that too if necessary.
-//		ActionBar actionBar = getActionBar();
-//		actionBar.hide();
+
 	}
 
 	@Override
@@ -148,6 +141,15 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 	@Override
 	protected void onResume() {
 		super.onResume();
+
+		View decorView = getWindow().getDecorView();
+		int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+		decorView.setSystemUiVisibility(uiOptions);
+		// Remember that you should never show the action bar if the
+		// status bar is hidden, so hide that too if necessary.
+		// ActionBar actionBar = getActionBar();
+		// actionBar.hide();
+
 		_onFG();
 	}
 
