@@ -1,6 +1,7 @@
 package kvv.heliostat.client;
 
 import kvv.gwtutils.client.Callback;
+import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.HorPanel;
 import kvv.gwtutils.client.TextFieldView;
@@ -23,63 +24,63 @@ public class MotorRawView extends Composite implements View {
 	private Button1 m1000 = new Button1("-1000", WIDTH, new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.moveRaw(id, -1000, new Callback<Void>());
+			model.heliostatService.moveRaw(id, -1000, new CallbackAdapter<Void>());
 		}
 	});
 
 	private Button1 m100 = new Button1("-100", WIDTH, new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.moveRaw(id, -100, new Callback<Void>());
+			model.heliostatService.moveRaw(id, -100, new CallbackAdapter<Void>());
 		}
 	});
 
 	private Button1 m10 = new Button1("-10", WIDTH, new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.moveRaw(id, -10, new Callback<Void>());
+			model.heliostatService.moveRaw(id, -10, new CallbackAdapter<Void>());
 		}
 	});
 
 	private Button1 m1 = new Button1("-1", WIDTH, new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.moveRaw(id, -1, new Callback<Void>());
+			model.heliostatService.moveRaw(id, -1, new CallbackAdapter<Void>());
 		}
 	});
 
 	private Button1 p1000 = new Button1("+1000", WIDTH, new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.moveRaw(id, 1000, new Callback<Void>());
+			model.heliostatService.moveRaw(id, 1000, new CallbackAdapter<Void>());
 		}
 	});
 
 	private Button1 p100 = new Button1("+100", WIDTH, new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.moveRaw(id, 100, new Callback<Void>());
+			model.heliostatService.moveRaw(id, 100, new CallbackAdapter<Void>());
 		}
 	});
 
 	private Button1 p10 = new Button1("+10", WIDTH, new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.moveRaw(id, 10, new Callback<Void>());
+			model.heliostatService.moveRaw(id, 10, new CallbackAdapter<Void>());
 		}
 	});
 
 	private Button1 p1 = new Button1("+1", WIDTH, new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.moveRaw(id, 1, new Callback<Void>());
+			model.heliostatService.moveRaw(id, 1, new CallbackAdapter<Void>());
 		}
 	});
 
 	private Button stop = new Button("Stop", new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.stop(id, new Callback<Void>());
+			model.heliostatService.stop(id, new CallbackAdapter<Void>());
 		}
 	});
 
@@ -93,7 +94,7 @@ public class MotorRawView extends Composite implements View {
 	private Button home = new Button("Home", new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.home(id, new Callback<Void>());
+			model.heliostatService.home(id, new CallbackAdapter<Void>());
 		}
 	});
 
@@ -104,7 +105,7 @@ public class MotorRawView extends Composite implements View {
 		@Override
 		protected void onClick(ClickEvent event) {
 			model.heliostatService.move(id, Integer.parseInt(text.getText()),
-					new Callback<Void>());
+					new CallbackAdapter<Void>());
 		}
 	};
 

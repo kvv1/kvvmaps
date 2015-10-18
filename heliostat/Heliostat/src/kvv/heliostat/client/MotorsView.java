@@ -1,6 +1,6 @@
 package kvv.heliostat.client;
 
-import kvv.gwtutils.client.Callback;
+import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.VertPanel;
 import kvv.heliostat.shared.HeliostatState;
@@ -36,7 +36,7 @@ public class MotorsView extends Composite implements View {
 				public void onClick(ClickEvent event) {
 					if (Window.confirm("Clear history?"))
 						model.heliostatService
-								.clearHistory(new Callback<Void>());
+								.clearHistory(new CallbackAdapter<Void>());
 				}
 			});
 
@@ -67,9 +67,9 @@ public class MotorsView extends Composite implements View {
 						/ height);
 
 				model.heliostatService.move(MotorId.AZ, posX,
-						new Callback<Void>());
+						new CallbackAdapter<Void>());
 				model.heliostatService.move(MotorId.ALT, posY,
-						new Callback<Void>());
+						new CallbackAdapter<Void>());
 			}
 		});
 

@@ -1,6 +1,6 @@
 package kvv.heliostat.client;
 
-import kvv.gwtutils.client.Callback;
+import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.TextFieldView;
 import kvv.gwtutils.client.VertPanel;
 import kvv.heliostat.shared.HeliostatState;
@@ -51,7 +51,7 @@ public class WeatherView extends Composite implements View {
 			public void run() {
 				model.updates = true;
 				model.heliostatService.saveWeather(weather,
-						new Callback<Void>());
+						new CallbackAdapter<Void>());
 			}
 		};
 
@@ -115,10 +115,10 @@ public class WeatherView extends Composite implements View {
 
 					calendarView.draw();
 				} else {
-					model.heliostatService.setTime(t, new Callback<Void>());
+					model.heliostatService.setTime(t, new CallbackAdapter<Void>());
 					model.heliostatService.setDay(
 							(dayOffset + getFirstDay()) % 365,
-							new Callback<Void>());
+							new CallbackAdapter<Void>());
 				}
 
 			}
@@ -160,12 +160,12 @@ public class WeatherView extends Composite implements View {
 
 			@Override
 			protected void onTimeClicked(double time) {
-				model.heliostatService.setTime(time, new Callback<Void>());
+				model.heliostatService.setTime(time, new CallbackAdapter<Void>());
 			}
 
 			@Override
 			protected void onDayClicked(int day) {
-				model.heliostatService.setDay(day, new Callback<Void>());
+				model.heliostatService.setDay(day, new CallbackAdapter<Void>());
 			}
 		};
 

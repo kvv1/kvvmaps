@@ -1,6 +1,6 @@
 package kvv.heliostat.client.chart;
 
-import kvv.gwtutils.client.Callback;
+import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.chart.Chart;
 import kvv.heliostat.client.HeliostatService;
 import kvv.heliostat.client.HeliostatServiceAsync;
@@ -24,7 +24,7 @@ public class TimeChart extends Chart implements View {
 
 	@Override
 	protected void onClick(double arg) {
-		heliostatService.setTime(arg, new Callback<Void>());
+		heliostatService.setTime(arg, new CallbackAdapter<Void>());
 	}
 
 	@Override

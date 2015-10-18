@@ -1,6 +1,7 @@
 package kvv.heliostat.client;
 
 import kvv.gwtutils.client.Callback;
+import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.CaptPanel;
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.HorPanel;
@@ -42,7 +43,7 @@ public class MainView extends Composite implements View {
 		@Override
 		protected void onClick(ClickEvent event) {
 			model.heliostatService.setStepsPerDegree(MotorId.AZ,
-					Integer.parseInt(text.getText()), new Callback<Void>());
+					Integer.parseInt(text.getText()), new CallbackAdapter<Void>());
 		}
 	};
 
@@ -51,7 +52,7 @@ public class MainView extends Composite implements View {
 		@Override
 		protected void onClick(ClickEvent event) {
 			model.heliostatService.setStepsPerDegree(MotorId.ALT,
-					Integer.parseInt(text.getText()), new Callback<Void>());
+					Integer.parseInt(text.getText()), new CallbackAdapter<Void>());
 		}
 	};
 
@@ -60,7 +61,7 @@ public class MainView extends Composite implements View {
 		@Override
 		protected void onClick(ClickEvent event) {
 			model.heliostatService.setStepMS(Integer.parseInt(text.getText()),
-					new Callback<Void>());
+					new CallbackAdapter<Void>());
 		}
 	};
 
@@ -68,7 +69,7 @@ public class MainView extends Composite implements View {
 		@Override
 		protected void onClick(ClickEvent event) {
 			model.heliostatService.setRange(MotorId.AZ,
-					Integer.parseInt(text.getText()), new Callback<Void>());
+					Integer.parseInt(text.getText()), new CallbackAdapter<Void>());
 		}
 	};
 
@@ -77,7 +78,7 @@ public class MainView extends Composite implements View {
 		@Override
 		protected void onClick(ClickEvent event) {
 			model.heliostatService.setRange(MotorId.ALT,
-					Integer.parseInt(text.getText()), new Callback<Void>());
+					Integer.parseInt(text.getText()), new CallbackAdapter<Void>());
 		}
 	};
 
@@ -86,7 +87,7 @@ public class MainView extends Composite implements View {
 				@Override
 				public void onClick(ClickEvent event) {
 					model.heliostatService.calibrate(MotorId.AZ,
-							new Callback<Void>());
+							new CallbackAdapter<Void>());
 				}
 			});
 
@@ -95,7 +96,7 @@ public class MainView extends Composite implements View {
 				@Override
 				public void onClick(ClickEvent event) {
 					model.heliostatService.calibrate(MotorId.ALT,
-							new Callback<Void>());
+							new CallbackAdapter<Void>());
 				}
 			});
 
@@ -136,7 +137,7 @@ public class MainView extends Composite implements View {
 			@Override
 			public void onClick(ClickEvent event) {
 				model.heliostatService.setAuto(AutoMode.OFF,
-						new Callback<Void>());
+						new CallbackAdapter<Void>());
 			}
 		});
 
@@ -144,7 +145,7 @@ public class MainView extends Composite implements View {
 			@Override
 			public void onClick(ClickEvent event) {
 				model.heliostatService.setAuto(AutoMode.SUN_ONLY,
-						new Callback<Void>());
+						new CallbackAdapter<Void>());
 			}
 		});
 
@@ -152,7 +153,7 @@ public class MainView extends Composite implements View {
 			@Override
 			public void onClick(ClickEvent event) {
 				model.heliostatService.setAuto(AutoMode.FULL,
-						new Callback<Void>());
+						new CallbackAdapter<Void>());
 			}
 		});
 

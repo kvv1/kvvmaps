@@ -1,6 +1,7 @@
 package kvv.heliostat.client;
 
 import kvv.gwtutils.client.Callback;
+import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.HorPanel;
 import kvv.gwtutils.client.TextFieldView;
@@ -24,7 +25,7 @@ public class ControlView extends Composite implements View {
 		@Override
 		protected void onClick(ClickEvent event) {
 			model.heliostatService.setClockRate(
-					Integer.parseInt(text.getText()), new Callback<Void>());
+					Integer.parseInt(text.getText()), new CallbackAdapter<Void>());
 		}
 	};
 
@@ -40,7 +41,7 @@ public class ControlView extends Composite implements View {
 			@Override
 			public void onClick(ClickEvent event) {
 				model.heliostatService.clock(clock.getValue(),
-						new Callback<Void>());
+						new CallbackAdapter<Void>());
 			}
 		});
 
@@ -48,7 +49,7 @@ public class ControlView extends Composite implements View {
 			@Override
 			public void onClick(ClickEvent event) {
 				model.heliostatService.shortDay(shortDay.getValue(),
-						new Callback<Void>());
+						new CallbackAdapter<Void>());
 			}
 		});
 
