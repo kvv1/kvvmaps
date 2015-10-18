@@ -9,7 +9,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")
 public class LoginServlet extends RemoteServiceServlet {
-	public void checkUser() throws AuthException {
+	public void checkUser() throws AuthException{
 		HttpSession session = getSession();
 		UserData ud = (UserData) session.getAttribute("UserData");
 		if (ud == null)

@@ -33,8 +33,8 @@ public class LoginServiceImpl extends LoginServlet implements LoginService {
 	}
 
 	@Override
-	public boolean login(String name, String passwordEncoded)
-			throws AuthException {
+	
+	public boolean login(String name, String passwordEncoded) throws AuthException {
 		String pw = getUsers().get(name);
 		if (pw == null)
 			throw new AuthException("AuthException");
