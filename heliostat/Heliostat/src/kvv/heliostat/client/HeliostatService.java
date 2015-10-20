@@ -4,7 +4,6 @@ import kvv.gwtutils.client.login.AuthException;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.MotorId;
 import kvv.heliostat.shared.Params.AutoMode;
-import kvv.heliostat.shared.Weather;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
