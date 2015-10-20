@@ -6,9 +6,6 @@ import kvv.heliostat.shared.Params.AutoMode;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-/**
- * The async counterpart of <code>GreetingService</code>.
- */
 public interface HeliostatServiceAsync {
 
 	void getState(AsyncCallback<HeliostatState> callback);
