@@ -1,8 +1,8 @@
 package kvv.heliostat.client.sim;
 
 import kvv.gwtutils.client.CallbackAdapter;
-import kvv.heliostat.client.Model;
-import kvv.heliostat.client.View;
+import kvv.heliostat.client.model.Model;
+import kvv.heliostat.client.model.View;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.MotorId;
 import kvv.heliostat.shared.environment.Environment;

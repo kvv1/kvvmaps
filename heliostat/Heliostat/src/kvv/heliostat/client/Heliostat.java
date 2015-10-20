@@ -1,5 +1,9 @@
 package kvv.heliostat.client;
 
+import kvv.heliostat.client.model.Model;
+import kvv.heliostat.client.view.AnglesTest;
+import kvv.heliostat.client.view.MainView;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.ui.RootPanel;

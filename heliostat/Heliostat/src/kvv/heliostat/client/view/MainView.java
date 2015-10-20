@@ -1,4 +1,4 @@
-package kvv.heliostat.client;
+package kvv.heliostat.client.view;
 
 import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.CaptPanel;
@@ -8,7 +8,9 @@ import kvv.gwtutils.client.TextFieldView;
 import kvv.gwtutils.client.TextWithSaveButton;
 import kvv.gwtutils.client.VertPanel;
 import kvv.gwtutils.client.login.LoginPanel;
-import kvv.heliostat.client.chart.TimeChart;
+import kvv.heliostat.client.Heliostat;
+import kvv.heliostat.client.model.Model;
+import kvv.heliostat.client.model.View;
 import kvv.heliostat.client.sim.ControlView;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.MotorId;

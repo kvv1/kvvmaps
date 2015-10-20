@@ -1,4 +1,4 @@
-package kvv.heliostat.client;
+package kvv.heliostat.client.view;
 
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.VertPanel;

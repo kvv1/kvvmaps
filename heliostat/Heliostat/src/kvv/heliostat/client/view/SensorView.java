@@ -1,5 +1,7 @@
-package kvv.heliostat.client;
+package kvv.heliostat.client.view;
 
+import kvv.heliostat.client.model.Model;
+import kvv.heliostat.client.model.View;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.SensorState;
 

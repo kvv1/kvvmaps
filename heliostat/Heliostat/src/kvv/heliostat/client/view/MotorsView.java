@@ -1,8 +1,11 @@
-package kvv.heliostat.client;
+package kvv.heliostat.client.view;
 
 import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.VertPanel;
+import kvv.heliostat.client.Heliostat;
+import kvv.heliostat.client.model.Model;
+import kvv.heliostat.client.model.View;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.MotorId;
 import kvv.heliostat.shared.MotorState;

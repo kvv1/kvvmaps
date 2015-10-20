@@ -1,8 +1,11 @@
-package kvv.heliostat.client;
+package kvv.heliostat.client.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import kvv.heliostat.client.Heliostat;
+import kvv.heliostat.client.HeliostatService;
+import kvv.heliostat.client.HeliostatServiceAsync;
 import kvv.heliostat.shared.HeliostatState;
 
 import com.google.gwt.core.client.GWT;

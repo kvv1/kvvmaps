@@ -1,7 +1,8 @@
-package kvv.heliostat.client;
+package kvv.heliostat.client.view;
 
 import kvv.gwtutils.client.chart.ChartData;
-import kvv.heliostat.client.chart.TimeChart;
+import kvv.heliostat.client.Heliostat;
+import kvv.heliostat.client.model.Model;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.environment.Environment;
 import kvv.simpleutils.spline.Function;

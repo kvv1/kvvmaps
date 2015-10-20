@@ -1,4 +1,4 @@
-package kvv.heliostat.client;
+package kvv.heliostat.client.model;
 
 import kvv.heliostat.shared.HeliostatState;
 

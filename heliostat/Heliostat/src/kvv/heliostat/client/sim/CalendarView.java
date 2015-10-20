@@ -1,7 +1,7 @@
 package kvv.heliostat.client.sim;
 
-import kvv.heliostat.client.Model;
-import kvv.heliostat.client.View;
+import kvv.heliostat.client.model.Model;
+import kvv.heliostat.client.model.View;
 import kvv.heliostat.shared.HeliostatState;
 
 import com.google.gwt.canvas.client.Canvas;
