@@ -2,7 +2,7 @@ package kvv.heliostat.server.sensor;
 
 import kvv.heliostat.server.Heliostat;
 import kvv.heliostat.server.controller.Controller;
-import kvv.heliostatengine.SensorState;
+import kvv.heliostat.shared.SensorState;
 
 public class SensorImpl implements Sensor {
 
