@@ -2,7 +2,7 @@ package kvv.heliostat.shared;
 
 import java.io.Serializable;
 
-import kvv.heliostat.engine.SensorState;
+import kvv.heliostatengine.SensorState;
 
 @SuppressWarnings("serial")
 public class HeliostatState implements Serializable {

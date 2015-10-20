@@ -1,7 +1,7 @@
 package kvv.heliostat.server.sensor;
 
-import kvv.heliostat.engine.ISensor;
-import kvv.heliostat.engine.SensorState;
+import kvv.heliostatengine.ISensor;
+import kvv.heliostatengine.SensorState;
 
 public interface Sensor extends ISensor {
 
