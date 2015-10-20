@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import kvv.heliostat.server.Heliostat;
 import kvv.heliostat.server.controller.IController;
-import kvv.heliostat.shared.MotorState.MotorRawSimState;
 
 public class MotorRawT3 implements MotorRaw {
 
@@ -88,8 +87,8 @@ public class MotorRawT3 implements MotorRaw {
 	}
 
 	@Override
-	public MotorRawSimState getState() {
-		return new MotorRawSimState(getPosition());
+	public int getPosAbs() {
+		return getPosition();
 	}
 
 	@Override

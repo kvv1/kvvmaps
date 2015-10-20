@@ -1,6 +1,5 @@
 package kvv.heliostat.server.motor;
 
-import kvv.heliostat.shared.MotorState.MotorRawSimState;
 
 
 public interface MotorRaw {
@@ -25,7 +24,7 @@ public interface MotorRaw {
 
 	void stop();
 
-	MotorRawSimState getState();
+	int getPosAbs();
 	void setFast(boolean b);
 	
 	

@@ -25,7 +25,7 @@ public class Motor {
 		setState(State.IDLE);
 	}
 
-	public void setState(State state) {
+	private void setState(State state) {
 		this.state = state;
 		motorRaw.setFast(state.fast);
 	}
@@ -60,7 +60,7 @@ public class Motor {
 
 	public MotorState getState() {
 		return new MotorState(motorRaw.getPosition(), posValid,
-				motorRaw.getIn1(), motorRaw.getIn2(), motorRaw.getState());
+				motorRaw.getIn1(), motorRaw.getIn2(), motorRaw.getPosAbs());
 	}
 
 	public void simStep(int ms) {

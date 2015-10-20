@@ -67,18 +67,18 @@ public class SensorView extends Composite implements View {
 			context.setFillStyle("red");
 			context.fillRect(width / 2 - 2, height / 2 - 2, 4, 4);
 		} else {
-			if (ss.deflection != null) {
-				double x = ss.deflection.x * 20;
-				double y = ss.deflection.y * 20;
+//			if (ss.getDeflection() != null) {
+				double x = ss.getDeflectionX() * 20;
+				double y = ss.getDeflectionY() * 20;
 
-				context.setFillStyle(ss.valueValid ? "yellow" : "#C0C0C0");
+				context.setFillStyle(ss.isValid() ? "yellow" : "#C0C0C0");
 
 				context.beginPath();
 				context.arc(width / 2 + x, height / 2 - y, 20, 0,
 						Math.PI * 2.0, true);
 				context.closePath();
 				context.fill();
-			}
+//			}
 
 			context.setFillStyle("yellow");
 
@@ -91,14 +91,14 @@ public class SensorView extends Composite implements View {
 					- context.measureText(ss.br + "").getWidth() - 2,
 					height - 2);
 
-			if (ss.deflection != null) {
+//			if (ss.getDeflection() != null) {
 				NumberFormat decimalFormat = NumberFormat.getFormat("#.##");
 
-				String dx = decimalFormat.format(ss.deflection.x);
-				String dy = decimalFormat.format(ss.deflection.y);
+				String dx = decimalFormat.format(ss.getDeflectionX());
+				String dy = decimalFormat.format(ss.getDeflectionY());
 				context.fillText(dx, 40, 40);
 				context.fillText(dy, 40, 55);
-			}
+//			}
 		}
 
 		context.closePath();

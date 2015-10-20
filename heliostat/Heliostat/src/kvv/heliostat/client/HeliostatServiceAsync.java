@@ -26,7 +26,7 @@ public interface HeliostatServiceAsync {
 
 	void setStepsPerDegree(MotorId id, int value, AsyncCallback<Void> callback);
 
-	void setStepMS(int value, AsyncCallback<Void> callback);
+	void setAlgorithmStepMS(int value, AsyncCallback<Void> callback);
 
 	void setDay(int day, AsyncCallback<Void> callback);
 

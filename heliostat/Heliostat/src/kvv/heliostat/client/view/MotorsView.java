@@ -100,12 +100,12 @@ public class MotorsView extends Composite implements View {
 				context.lineTo(x, height);
 				context.stroke();
 				context.closePath();
-			} else if (state.motorState[0].motorRawSimState != null) {
+			} else if (state.motorState[0].posAbs != null) {
 				context.beginPath();
 				context.setLineWidth(2);
 				context.setStrokeStyle("#C0C0C0");
-				double x = (double) state.motorState[0].motorRawSimState.pos
-						* width / state.params.range[0];
+				double x = (double) state.motorState[0].posAbs * width
+						/ state.params.range[0];
 				context.moveTo(x, 0);
 				context.lineTo(x, height);
 				context.stroke();
@@ -124,12 +124,11 @@ public class MotorsView extends Composite implements View {
 				context.lineTo(width, y);
 				context.stroke();
 				context.closePath();
-			} else if (state.motorState[1].motorRawSimState != null) {
+			} else if (state.motorState[1].posAbs != null) {
 				context.beginPath();
 				context.setLineWidth(2);
 				context.setStrokeStyle("#C0C0C0");
-				double y = height
-						- (double) state.motorState[1].motorRawSimState.pos
+				double y = height - (double) state.motorState[1].posAbs
 						* height / state.params.range[1];
 				context.moveTo(0, y);
 				context.lineTo(width, y);

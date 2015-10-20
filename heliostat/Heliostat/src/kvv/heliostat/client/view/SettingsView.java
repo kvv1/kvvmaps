@@ -42,7 +42,8 @@ public class SettingsView extends Composite implements View {
 			120, 40) {
 		@Override
 		protected void onClick(ClickEvent event) {
-			model.heliostatService.setStepMS(Integer.parseInt(text.getText()),
+			model.heliostatService.setAlgorithmStepMS(
+					Integer.parseInt(text.getText()),
 					new CallbackAdapter<Void>());
 		}
 	};
@@ -119,7 +120,7 @@ public class SettingsView extends Composite implements View {
 	public void updateView(HeliostatState state) {
 		if (state == null)
 			return;
-		
+
 		if (!stepsPerDegreeAz.focused)
 			stepsPerDegreeAz.text.setText("" + state.params.stepsPerDegree[0]);
 

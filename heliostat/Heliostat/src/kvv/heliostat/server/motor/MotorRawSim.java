@@ -1,6 +1,5 @@
 package kvv.heliostat.server.motor;
 
-import kvv.heliostat.shared.MotorState.MotorRawSimState;
 import kvv.heliostat.shared.environment.Environment;
 
 public class MotorRawSim implements MotorRaw {
@@ -107,8 +106,8 @@ public class MotorRawSim implements MotorRaw {
 	}
 
 	@Override
-	public MotorRawSimState getState() {
-		return new MotorRawSimState(posAbs);
+	public int getPosAbs() {
+		return posAbs;
 	}
 
 	@Override

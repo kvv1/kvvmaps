@@ -92,11 +92,11 @@ public class MirrorView extends Composite implements View {
 			return;
 
 		double motorAz = FunctionFactory.solve(Environment.azDeg2Steps,
-				state.motorState[0].motorRawSimState.pos,
-				Environment.MIN_AZIMUTH, Environment.MAX_AZIMUTH, 0.01);
+				state.motorState[0].posAbs, Environment.MIN_AZIMUTH,
+				Environment.MAX_AZIMUTH, 0.01);
 		double motorAlt = FunctionFactory.solve(Environment.altDeg2Steps,
-				state.motorState[1].motorRawSimState.pos,
-				Environment.MIN_ALTITUDE, Environment.MAX_ALTITUDE, 0.01);
+				state.motorState[1].posAbs, Environment.MIN_ALTITUDE,
+				Environment.MAX_ALTITUDE, 0.01);
 
 		matrix = (Matrix3x3) Matrix3x3.rotZ(-motorAz * Math.PI / 180).mul(
 				Matrix3x3.rotX(-motorAlt * Math.PI / 180), null);

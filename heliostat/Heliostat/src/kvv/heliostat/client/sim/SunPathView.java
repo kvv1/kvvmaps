@@ -110,11 +110,11 @@ public class SunPathView extends Composite implements View {
 			context.setStrokeStyle("black");
 
 			double motorAz = FunctionFactory.solve(Environment.azDeg2Steps,
-					state.motorState[0].motorRawSimState.pos,
-					Environment.MIN_AZIMUTH, Environment.MAX_AZIMUTH, 0.01);
+					state.motorState[0].posAbs, Environment.MIN_AZIMUTH,
+					Environment.MAX_AZIMUTH, 0.01);
 			double motorAlt = FunctionFactory.solve(Environment.altDeg2Steps,
-					state.motorState[1].motorRawSimState.pos,
-					Environment.MIN_ALTITUDE, Environment.MAX_ALTITUDE, 0.01);
+					state.motorState[1].posAbs, Environment.MIN_ALTITUDE,
+					Environment.MAX_ALTITUDE, 0.01);
 
 			double x1 = az2x(motorAz);
 			double y1 = alt2y(motorAlt);

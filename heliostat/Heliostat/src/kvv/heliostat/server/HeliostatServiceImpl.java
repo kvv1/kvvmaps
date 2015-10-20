@@ -69,7 +69,7 @@ public class HeliostatServiceImpl extends LoginServlet implements
 	}
 
 	@Override
-	public void setStepMS(int value)  throws AuthException {
+	public void setAlgorithmStepMS(int value)  throws AuthException {
 		checkUser();
 		Heliostat.instance.setStepMS(value);
 	}

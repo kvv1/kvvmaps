@@ -21,6 +21,7 @@ import kvv.heliostat.shared.Params;
 import kvv.heliostat.shared.Params.AutoMode;
 import kvv.heliostat.shared.SensorState;
 import kvv.heliostat.shared.Weather;
+import kvv.simpleutils.src.PtD;
 import kvv.simpleutils.src.PtI;
 import kvv.stdutils.Utils;
 
@@ -83,21 +84,22 @@ public class Heliostat extends Looper {
 		motors[0].simStep(params.stepMS);
 		motors[1].simStep(params.stepMS);
 
-		MotorState[] motorStates = new MotorState[] {
-				motors[0].getState(), motors[1].getState() };
-		
-		heliostatState = new HeliostatState(motorStates,
-				sensor.getState(), params, controllerParamsText, Time.getDay(),
-				Time.getDayS(), Time.getTime(), Time.getTimeS(),
-				trajectory.getAzData(), trajectory.getAltData(), isSunny());
+		MotorState[] motorStates = new MotorState[] { motors[0].getState(),
+				motors[1].getState() };
+
+		heliostatState = new HeliostatState(motorStates, sensor.getState(),
+				params, controllerParamsText, Time.getDay(), Time.getDayS(),
+				Time.getTime(), Time.getTimeS(), trajectory.getAzData(),
+				trajectory.getAltData(), isSunny());
 
 		if (heliostatState.motorState[0].posValid
 				&& heliostatState.motorState[1].posValid) {
 			SensorState ss = heliostatState.sensorState;
 
 			PtI motorsPositions = trajectory.getMotorsPositions(params.auto,
-					(ss != null && ss.valueValid) ? ss.deflection : null,
-					new PtI(heliostatState.motorState[0].pos,
+					(ss != null && ss.isValid()) ? new PtD(ss.getDeflectionX(),
+							ss.getDeflectionY()) : null, new PtI(
+							heliostatState.motorState[0].pos,
 							heliostatState.motorState[1].pos),
 					params.stepMS / (3600000d));
 

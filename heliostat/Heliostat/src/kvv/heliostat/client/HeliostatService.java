@@ -33,7 +33,7 @@ public interface HeliostatService extends RemoteService {
 
 	void setStepsPerDegree(MotorId id, int value) throws AuthException;
 
-	void setStepMS(int value) throws AuthException;
+	void setAlgorithmStepMS(int value) throws AuthException;
 
 	void clearHistory() throws AuthException;
 

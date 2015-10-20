@@ -6,8 +6,6 @@ import kvv.simpleutils.src.PtD;
 
 @SuppressWarnings("serial")
 public class SensorState implements Serializable {
-	public boolean valueValid;
-	public PtD deflection;
 	public int tl;
 	public int tr;
 	public int bl;
@@ -16,32 +14,43 @@ public class SensorState implements Serializable {
 	public SensorState() {
 	}
 
-	public SensorState(boolean valueValid, PtD deflection, int tl, int tr,
-			int bl, int br) {
-		init(valueValid, deflection, tl, tr, bl, br);
-	}
-
 	public SensorState(int tl, int tr, int bl, int br) {
-		double sum = tr + tl + br + bl;
-		double x = tr - tl + br - bl;
-		double y = tl - bl + tr - br;
-
-		PtD deflection = null;
-
-		if (sum != 0)
-			deflection = new PtD(x / sum * 4, y / sum * 4);
-
-		init(sum > 100, deflection, (int) tl, (int) tr, (int) bl, (int) br);
-	}
-
-	private void init(boolean valueValid, PtD deflection, int tl, int tr,
-			int bl, int br) {
-		this.valueValid = valueValid;
-		this.deflection = deflection;
 		this.tl = tl;
 		this.tr = tr;
 		this.bl = bl;
 		this.br = br;
 	}
+
+	public boolean isValid() {
+		return tr + tl + br + bl > 100;
+	}
+
+	public double getDeflectionX() {
+		double sum = tr + tl + br + bl;
+		if (sum == 0)
+			return 0;
+
+		double x = tr - tl + br - bl;
+		return x / sum * 4;
+	}
+
+	public double getDeflectionY() {
+		double sum = tr + tl + br + bl;
+		if (sum == 0)
+			return 0;
+
+		double y = tl - bl + tr - br;
+		return y / sum * 4;
+	}
+//	public PtD getDeflection() {
+//		double sum = tr + tl + br + bl;
+//		if (sum == 0)
+//			return null;
+//
+//		double x = tr - tl + br - bl;
+//		double y = tl - bl + tr - br;
+//
+//		return new PtD(x / sum * 4, y / sum * 4);
+//	}
 
 }
