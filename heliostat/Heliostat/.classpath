@@ -8,6 +8,5 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/SimpleUtils"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/StdUtils"/>
 	<classpathentry kind="lib" path="D:/Tomcat 7.0/lib/RXTXcomm.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/HeliostatEngine"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
