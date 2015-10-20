@@ -1,9 +1,9 @@
 package kvv.heliostat.server.sensor;
 
+import kvv.heliostat.engine.SensorState;
 import kvv.heliostat.server.Heliostat;
 import kvv.heliostat.server.Time;
 import kvv.heliostat.server.motor.MotorRawSim;
-import kvv.heliostat.shared.SensorState;
 import kvv.heliostat.shared.environment.Environment;
 import kvv.simpleutils.spline.Function;
 import kvv.simpleutils.spline.FunctionFactory;

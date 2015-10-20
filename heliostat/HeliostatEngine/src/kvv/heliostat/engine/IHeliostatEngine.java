@@ -13,5 +13,5 @@ public interface IHeliostatEngine{
 	void start(int stepMS);
 	void stop();
 
-	void setSensor(ISensor);
+	void setPeriferial(ISensor );
 }

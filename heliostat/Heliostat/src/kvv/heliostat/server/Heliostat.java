@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 
+import kvv.heliostat.engine.SensorState;
 import kvv.heliostat.server.controller.Controller;
 import kvv.heliostat.server.controller.adu.ADUTransceiver;
 import kvv.heliostat.server.controller.adu.PacketTransceiver;
@@ -19,7 +20,6 @@ import kvv.heliostat.shared.MotorId;
 import kvv.heliostat.shared.MotorState;
 import kvv.heliostat.shared.Params;
 import kvv.heliostat.shared.Params.AutoMode;
-import kvv.heliostat.shared.SensorState;
 import kvv.heliostat.shared.Weather;
 import kvv.simpleutils.src.PtD;
 import kvv.simpleutils.src.PtI;
