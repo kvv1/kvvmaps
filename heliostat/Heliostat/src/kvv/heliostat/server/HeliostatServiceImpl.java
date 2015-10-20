@@ -73,12 +73,6 @@ public class HeliostatServiceImpl extends LoginServlet implements
 	}
 
 	@Override
-	public void calibrate(MotorId id)  throws AuthException {
-		checkUser();
-		Heliostat.instance.calibrate(id);
-	}
-
-	@Override
 	public void setStepsPerDegree(MotorId id, int value)  throws AuthException {
 		checkUser();
 		Heliostat.instance.setStepsPerDegree(id, value);
@@ -135,6 +129,12 @@ public class HeliostatServiceImpl extends LoginServlet implements
 	public void setRange(MotorId id, int max)  throws AuthException {
 		checkUser();
 		Heliostat.instance.setRange(id, max);
+	}
+
+	@Override
+	public void setControllerParams(String str) throws AuthException {
+		checkUser();
+		Heliostat.instance.setControllerParams(str);
 	}
 
 }

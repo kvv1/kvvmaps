@@ -7,6 +7,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/GwtUtils"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/SimpleUtils"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/StdUtils"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Controller"/>
+	<classpathentry kind="lib" path="D:/Tomcat 7.0/lib/RXTXcomm.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

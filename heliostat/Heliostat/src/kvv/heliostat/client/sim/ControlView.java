@@ -1,11 +1,12 @@
-package kvv.heliostat.client;
+package kvv.heliostat.client.sim;
 
-import kvv.gwtutils.client.Callback;
 import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.HorPanel;
 import kvv.gwtutils.client.TextFieldView;
 import kvv.gwtutils.client.VertPanel;
+import kvv.heliostat.client.Model;
+import kvv.heliostat.client.View;
 import kvv.heliostat.shared.HeliostatState;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -25,7 +26,8 @@ public class ControlView extends Composite implements View {
 		@Override
 		protected void onClick(ClickEvent event) {
 			model.heliostatService.setClockRate(
-					Integer.parseInt(text.getText()), new CallbackAdapter<Void>());
+					Integer.parseInt(text.getText()),
+					new CallbackAdapter<Void>());
 		}
 	};
 

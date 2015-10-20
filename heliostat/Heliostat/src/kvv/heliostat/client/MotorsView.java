@@ -102,7 +102,7 @@ public class MotorsView extends Composite implements View {
 				context.setLineWidth(2);
 				context.setStrokeStyle("#C0C0C0");
 				double x = (double) state.motorState[0].motorRawSimState.pos
-						* width / state.motorState[0].motorRawSimState.max;
+						* width / state.params.range[0];
 				context.moveTo(x, 0);
 				context.lineTo(x, height);
 				context.stroke();
@@ -127,7 +127,7 @@ public class MotorsView extends Composite implements View {
 				context.setStrokeStyle("#C0C0C0");
 				double y = height
 						- (double) state.motorState[1].motorRawSimState.pos
-						* height / state.motorState[1].motorRawSimState.max;
+						* height / state.params.range[1];
 				context.moveTo(0, y);
 				context.lineTo(width, y);
 				context.stroke();

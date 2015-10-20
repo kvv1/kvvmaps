@@ -19,7 +19,7 @@ public class Model {
 
 	public HeliostatState lastState;
 
-	protected boolean updates = true;
+	public boolean updates = true;
 
 	public void notifyViews() {
 

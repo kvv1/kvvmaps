@@ -32,8 +32,6 @@ public interface HeliostatServiceAsync {
 
 	void moveRaw(MotorId id, int steps, AsyncCallback<Void> callback);
 
-	void calibrate(MotorId id, AsyncCallback<Void> callback);
-
 	void setStepsPerDegree(MotorId id, int value, AsyncCallback<Void> callback);
 
 	void setClockRate(int value, AsyncCallback<Void> callback);
@@ -53,4 +51,6 @@ public interface HeliostatServiceAsync {
 	void shortDay(boolean value, AsyncCallback<Void> callback);
 
 	void setRange(MotorId id, int max, AsyncCallback<Void> callback);
+
+	void setControllerParams(String str, AsyncCallback<Void> callback);
 }

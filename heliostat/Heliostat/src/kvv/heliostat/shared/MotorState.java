@@ -6,14 +6,14 @@ import java.io.Serializable;
 public class MotorState implements Serializable {
 
 	public static class MotorRawSimState implements Serializable {
-		public int max;
+		//public int max;
 		public int pos;
 
 		public MotorRawSimState() {
 		}
 
-		public MotorRawSimState(int max, int pos) {
-			this.max = max;
+		public MotorRawSimState(/*int max,*/ int pos) {
+			//this.max = max;
 			this.pos = pos;
 		}
 

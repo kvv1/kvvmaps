@@ -17,4 +17,5 @@ public class Params implements Serializable {
 	public boolean shortDay;
 
 	public int[] range = { 1000, 1000 };
+	
 }

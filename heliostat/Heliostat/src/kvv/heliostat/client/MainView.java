@@ -1,14 +1,15 @@
 package kvv.heliostat.client;
 
-import kvv.gwtutils.client.Callback;
 import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.CaptPanel;
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.HorPanel;
 import kvv.gwtutils.client.TextFieldView;
+import kvv.gwtutils.client.TextWithSaveButton;
 import kvv.gwtutils.client.VertPanel;
 import kvv.gwtutils.client.login.LoginPanel;
 import kvv.heliostat.client.chart.TimeChart;
+import kvv.heliostat.client.sim.ControlView;
 import kvv.heliostat.shared.HeliostatState;
 import kvv.heliostat.shared.MotorId;
 import kvv.heliostat.shared.Params.AutoMode;
@@ -16,7 +17,7 @@ import kvv.heliostat.shared.Params.AutoMode;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -43,7 +44,8 @@ public class MainView extends Composite implements View {
 		@Override
 		protected void onClick(ClickEvent event) {
 			model.heliostatService.setStepsPerDegree(MotorId.AZ,
-					Integer.parseInt(text.getText()), new CallbackAdapter<Void>());
+					Integer.parseInt(text.getText()),
+					new CallbackAdapter<Void>());
 		}
 	};
 
@@ -52,7 +54,8 @@ public class MainView extends Composite implements View {
 		@Override
 		protected void onClick(ClickEvent event) {
 			model.heliostatService.setStepsPerDegree(MotorId.ALT,
-					Integer.parseInt(text.getText()), new CallbackAdapter<Void>());
+					Integer.parseInt(text.getText()),
+					new CallbackAdapter<Void>());
 		}
 	};
 
@@ -69,7 +72,8 @@ public class MainView extends Composite implements View {
 		@Override
 		protected void onClick(ClickEvent event) {
 			model.heliostatService.setRange(MotorId.AZ,
-					Integer.parseInt(text.getText()), new CallbackAdapter<Void>());
+					Integer.parseInt(text.getText()),
+					new CallbackAdapter<Void>());
 		}
 	};
 
@@ -78,41 +82,24 @@ public class MainView extends Composite implements View {
 		@Override
 		protected void onClick(ClickEvent event) {
 			model.heliostatService.setRange(MotorId.ALT,
-					Integer.parseInt(text.getText()), new CallbackAdapter<Void>());
+					Integer.parseInt(text.getText()),
+					new CallbackAdapter<Void>());
 		}
 	};
 
-	private Button azCalibr = new Button("Calibrate azimuth",
-			new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					model.heliostatService.calibrate(MotorId.AZ,
-							new CallbackAdapter<Void>());
-				}
-			});
+	private TextFieldView refreshPeriod = new TextFieldView("Refresh (ms):",
+			120, 40) {
 
-	private Button altCalibr = new Button("Calibrate altitude",
-			new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					model.heliostatService.calibrate(MotorId.ALT,
-							new CallbackAdapter<Void>());
-				}
-			});
-
-	
-	private TextFieldView refreshPeriod = new TextFieldView("Refresh (ms):", 120,
-			40) {
-		
 		String speriod = Cookies.getCookie(Heliostat.REFRESH_PERIOD);
 		{
 			text.setText(speriod);
 		}
+
 		@Override
 		protected void onClick(ClickEvent event) {
 			try {
 				int period = Integer.parseInt(text.getText());
-				if(period < 0 && period > 10000)
+				if (period < 0 && period > 10000)
 					return;
 				speriod = text.getText();
 				Cookies.setCookie(Heliostat.REFRESH_PERIOD, speriod);
@@ -121,13 +108,19 @@ public class MainView extends Composite implements View {
 			} finally {
 				text.setText(speriod);
 			}
-			
+
 			Cookies.setCookie(Heliostat.REFRESH_PERIOD, speriod);
 		}
 	};
 
-	
-	
+	private TextWithSaveButton controllerParamsPanel = new TextWithSaveButton(
+			"Controller settings", "100%", "100px") {
+		@Override
+		protected void save(String text, AsyncCallback<Void> callback) {
+			model.heliostatService.setControllerParams(text, callback);
+		}
+	};
+
 	public MainView(final Model model) {
 		this.model = model;
 
@@ -174,8 +167,8 @@ public class MainView extends Composite implements View {
 
 		Widget settingsPanel = new CaptPanel("Settings", new VertPanel(
 				HasHorizontalAlignment.ALIGN_RIGHT, stepsPerDegreeAz,
-				stepsPerDegreeAlt, stepRate, azRange, azCalibr, altRange,
-				altCalibr, refreshPeriod));
+				stepsPerDegreeAlt, stepRate, azRange, altRange, refreshPeriod,
+				controllerParamsPanel));
 
 		Widget dateTime = new HorPanel(false, 10, date, time);
 
@@ -194,17 +187,17 @@ public class MainView extends Composite implements View {
 				settingsPanel);
 
 		LoginPanel loginPanel = new LoginPanel();
-		
+
 		HorizontalPanel hp1 = new HorizontalPanel();
 		hp1.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		hp1.add(dateTime);
 		hp1.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 		hp1.add(loginPanel);
 		hp1.setWidth("100%");
-		
-		Panel p = new HorPanel(new VertPanel(hp1, centralPanel,
-				azMotPanel, altMotPanel, new Gap(6, 6), motorsChart, new Gap(6,
-						6), anglesChart), controlView);
+
+		Panel p = new HorPanel(new VertPanel(hp1, centralPanel, azMotPanel,
+				altMotPanel, new Gap(6, 6), motorsChart, new Gap(6, 6),
+				anglesChart), controlView);
 
 		// Panel p = new HorPanel(new VertPanel(dateTime, topPanel, azMotPanel,
 		// altMotPanel, new HorPanel(motorsPanel, sensorPanel), new Gap(6,
@@ -248,6 +241,9 @@ public class MainView extends Composite implements View {
 
 		date.setText(state.dayS);
 		time.setText(state.timeS);
+
+		if (!controllerParamsPanel.focused)
+			controllerParamsPanel.setText(state.controllerParams);
 	}
 
 }

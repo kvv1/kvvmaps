@@ -1,5 +1,6 @@
 package kvv.heliostat.server.motor;
 
+import kvv.heliostat.server.Heliostat;
 import kvv.heliostat.shared.MotorState.MotorRawSimState;
 import kvv.heliostat.shared.environment.Environment;
 
@@ -23,17 +24,16 @@ public class MotorRawSim implements MotorRaw {
 	private State state = State.STOPPED;
 
 	private int msteps;
-	
+
 	@Override
 	public void stepSim(int ms) {
 
 		msteps += ms * speed;
 		int steps = Math.min(msteps / 1000, stepCnt);
 		msteps %= 1000;
-		
-//		int steps = Math.min(ms * speed / 1000, stepCnt);
 
-		
+		// int steps = Math.min(ms * speed / 1000, stepCnt);
+
 		switch (state) {
 		case STOPPED:
 			break;
@@ -45,7 +45,8 @@ public class MotorRawSim implements MotorRaw {
 				if (state == State.MOVE_IN1 && posAbs <= 0) {
 					posAbs = 0;
 					stepCnt = 0;
-				} else if (state == State.MOVE_IN2 && posAbs >= Environment.MAX_STEPS) {
+				} else if (state == State.MOVE_IN2
+						&& posAbs >= Environment.MAX_STEPS) {
 					posAbs = Environment.MAX_STEPS;
 					stepCnt = 0;
 				}
@@ -120,7 +121,7 @@ public class MotorRawSim implements MotorRaw {
 
 	@Override
 	public MotorRawSimState getState() {
-		return new MotorRawSimState(Environment.MAX_STEPS, posAbs);
+		return new MotorRawSimState(posAbs);
 	}
 
 	@Override

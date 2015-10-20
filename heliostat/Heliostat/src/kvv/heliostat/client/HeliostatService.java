@@ -18,41 +18,41 @@ public interface HeliostatService extends RemoteService {
 
 	HeliostatState getState();
 
-	void move(MotorId id, int pos) throws AuthException ;
+	void move(MotorId id, int pos) throws AuthException;
 
-	void stop(MotorId id) throws AuthException ;
+	void stop(MotorId id) throws AuthException;
 
-	void home(MotorId id) throws AuthException ;
+	void home(MotorId id) throws AuthException;
 
-	void moveRaw(MotorId id, int steps) throws AuthException ;
+	void moveRaw(MotorId id, int steps) throws AuthException;
 
-	void calibrate(MotorId id) throws AuthException ;
+	void setAuto(AutoMode auto) throws AuthException;
 
-	void setAuto(AutoMode auto) throws AuthException ;
+	void home() throws AuthException;
 
-	void home() throws AuthException ;
+	void setTime(double time) throws AuthException;
 
-	void setTime(double time) throws AuthException ;
+	void clock(boolean value) throws AuthException;
 
-	void clock(boolean value) throws AuthException ;
+	void setStepsPerDegree(MotorId id, int value) throws AuthException;
 
-	void setStepsPerDegree(MotorId id, int value) throws AuthException ;
+	void setClockRate(int value) throws AuthException;
 
-	void setClockRate(int value) throws AuthException ;
+	void setStepMS(int value) throws AuthException;
 
-	void setStepMS(int value) throws AuthException ;
+	void setDay(int day) throws AuthException;
 
-	void setDay(int day) throws AuthException ;
-
-	void clearHistory() throws AuthException ;
+	void clearHistory() throws AuthException;
 
 	Weather getWeather();
-	
-	void saveWeather(Weather weather) throws AuthException ;
 
-	Weather resetSim(int firstDay) throws AuthException ;
+	void saveWeather(Weather weather) throws AuthException;
 
-	void shortDay(boolean value) throws AuthException ;
+	Weather resetSim(int firstDay) throws AuthException;
 
-	void setRange(MotorId id, int max) throws AuthException ;
+	void shortDay(boolean value) throws AuthException;
+
+	void setRange(MotorId id, int max) throws AuthException;
+
+	void setControllerParams(String str) throws AuthException;
 }

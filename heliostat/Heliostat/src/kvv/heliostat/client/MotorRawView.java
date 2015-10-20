@@ -1,6 +1,5 @@
 package kvv.heliostat.client;
 
-import kvv.gwtutils.client.Callback;
 import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.HorPanel;
@@ -16,7 +15,6 @@ import com.google.gwt.user.client.ui.Composite;
 
 public class MotorRawView extends Composite implements View {
 
-	
 	private static final int WIDTH = 42;
 
 	private HorPanel horPanel;
@@ -24,21 +22,24 @@ public class MotorRawView extends Composite implements View {
 	private Button1 m1000 = new Button1("-1000", WIDTH, new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.moveRaw(id, -1000, new CallbackAdapter<Void>());
+			model.heliostatService.moveRaw(id, -1000,
+					new CallbackAdapter<Void>());
 		}
 	});
 
 	private Button1 m100 = new Button1("-100", WIDTH, new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.moveRaw(id, -100, new CallbackAdapter<Void>());
+			model.heliostatService.moveRaw(id, -100,
+					new CallbackAdapter<Void>());
 		}
 	});
 
 	private Button1 m10 = new Button1("-10", WIDTH, new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.moveRaw(id, -10, new CallbackAdapter<Void>());
+			model.heliostatService
+					.moveRaw(id, -10, new CallbackAdapter<Void>());
 		}
 	});
 
@@ -52,14 +53,16 @@ public class MotorRawView extends Composite implements View {
 	private Button1 p1000 = new Button1("+1000", WIDTH, new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.moveRaw(id, 1000, new CallbackAdapter<Void>());
+			model.heliostatService.moveRaw(id, 1000,
+					new CallbackAdapter<Void>());
 		}
 	});
 
 	private Button1 p100 = new Button1("+100", WIDTH, new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			model.heliostatService.moveRaw(id, 100, new CallbackAdapter<Void>());
+			model.heliostatService
+					.moveRaw(id, 100, new CallbackAdapter<Void>());
 		}
 	});
 
@@ -84,12 +87,12 @@ public class MotorRawView extends Composite implements View {
 		}
 	});
 
-//	private Button calibr = new Button("Calibrate", new ClickHandler() {
-//		@Override
-//		public void onClick(ClickEvent event) {
-//			model.heliostatService.calibrate(id, new Callback<Void>());
-//		}
-//	});
+	// private Button calibr = new Button("Calibrate", new ClickHandler() {
+	// @Override
+	// public void onClick(ClickEvent event) {
+	// model.heliostatService.calibrate(id, new Callback<Void>());
+	// }
+	// });
 
 	private Button home = new Button("Home", new ClickHandler() {
 		@Override
@@ -102,6 +105,7 @@ public class MotorRawView extends Composite implements View {
 		{
 			button.setText("Go");
 		}
+
 		@Override
 		protected void onClick(ClickEvent event) {
 			model.heliostatService.move(id, Integer.parseInt(text.getText()),
@@ -115,8 +119,8 @@ public class MotorRawView extends Composite implements View {
 	public MotorRawView(Model model, MotorId id) {
 		this.model = model;
 		this.id = id;
-		horPanel = new HorPanel(true, 2, m1000, m100, m10, m1, pos, new Gap(4,4), p1, p10, p100, p1000,
-				new Gap(4,4), stop, home/*, calibr*/);
+		horPanel = new HorPanel(true, 2, m1000, m100, m10, m1, pos, new Gap(4,
+				4), p1, p10, p100, p1000, new Gap(4, 4), stop, home/* , calibr */);
 
 		model.add(this);
 		initWidget(horPanel);
@@ -132,4 +136,11 @@ public class MotorRawView extends Composite implements View {
 			pos.text.setText("" + motorState.pos);
 	}
 
+}
+
+class Button1 extends Button {
+	public Button1(String string, int width, ClickHandler clickHandler) {
+		super(string, clickHandler);
+		setWidth(width + "px");
+	}
 }
