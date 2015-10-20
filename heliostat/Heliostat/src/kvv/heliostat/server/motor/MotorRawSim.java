@@ -1,6 +1,5 @@
 package kvv.heliostat.server.motor;
 
-import kvv.heliostat.server.Heliostat;
 import kvv.heliostat.shared.MotorState.MotorRawSimState;
 import kvv.heliostat.shared.environment.Environment;
 

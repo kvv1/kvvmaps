@@ -75,7 +75,7 @@ public class WeatherView extends Composite implements View {
 									- (x2 - x1) / 2,
 									calendarView.calendarCanvas.d2y(d),
 									x2 - x1,
-									calendarView.calendarCanvas.dayHeight);
+									CalendarCanvas.dayHeight);
 						}
 					}
 				}

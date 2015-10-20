@@ -1,7 +1,5 @@
 package kvv.heliostat.server.controller;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -29,8 +27,8 @@ public class BusLogger {
 		msgs.add(msg);
 	}
 
-	private static final DateFormat df = new SimpleDateFormat(
-			"yyyy.MM.dd HH:mm:ss");
+//	private static final DateFormat df = new SimpleDateFormat(
+//			"yyyy.MM.dd HH:mm:ss");
 
 	public static void log(String txt) {
 //		PrintStream ps = null;

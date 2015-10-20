@@ -155,11 +155,11 @@ public class MirrorAngles {
 		return Math.sin(a);
 	}
 
-	private static final double lat = 12.0066228;
-	private static final double lon = -79.8104811;
-	private static final double timezone = -5.5;
 
 	public static void main(String[] args) {
+//		double lat = 12.0066228;
+//		double lon = -79.8104811;
+//		double timezone = -5.5;
 		
 //		double[] mirrorAngles = calcMirror(new double[] {10,45});
 //		System.out.printf("%f %f\n", mirrorAngles[0], mirrorAngles[1]);

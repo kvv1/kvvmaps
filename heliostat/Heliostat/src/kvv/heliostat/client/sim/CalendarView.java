@@ -56,13 +56,13 @@ public abstract class CalendarView extends Composite implements View {
 	public CalendarView(Model model) {
 		model.add(this);
 
-		canvas1.setPixelSize(2, calendarCanvas.dayHeight);
+		canvas1.setPixelSize(2, CalendarCanvas.dayHeight);
 		canvas1.setCoordinateSpaceWidth(2);
-		canvas1.setCoordinateSpaceHeight(calendarCanvas.dayHeight);
+		canvas1.setCoordinateSpaceHeight(CalendarCanvas.dayHeight);
 
 		context1.beginPath();
 		context1.setFillStyle("black");
-		context1.fillRect(0, 0, 2, calendarCanvas.dayHeight);
+		context1.fillRect(0, 0, 2, CalendarCanvas.dayHeight);
 		context1.closePath();
 
 		tcanvas.setPixelSize(calendarCanvas.width, bottomMargin);
@@ -158,7 +158,7 @@ public abstract class CalendarView extends Composite implements View {
 
 		for (int d = 0; d < calendarCanvas.days; d++) {
 			dcontext.fillText("" + (d + getFirstDay()) % 365, 4,
-					calendarCanvas.dayHeight * (d + 1));
+					CalendarCanvas.dayHeight * (d + 1));
 		}
 
 		dcontext.stroke();
