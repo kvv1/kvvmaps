@@ -1,4 +1,4 @@
-package kvv.heliostat.server.motor;
+package kvv.heliostat.engine;
 
 import kvv.heliostat.shared.MotorState;
 

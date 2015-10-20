@@ -1,4 +1,4 @@
-package kvv.heliostat.server.sensor;
+package kvv.heliostat.engine;
 
 import kvv.heliostat.shared.SensorState;
 

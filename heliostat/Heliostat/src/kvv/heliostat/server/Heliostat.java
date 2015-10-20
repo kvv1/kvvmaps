@@ -6,10 +6,10 @@ import java.io.StringReader;
 import java.util.Properties;
 
 import kvv.heliostat.engine.Looper;
+import kvv.heliostat.engine.Motor;
 import kvv.heliostat.server.controller.Controller;
 import kvv.heliostat.server.controller.adu.ADUTransceiver;
 import kvv.heliostat.server.controller.adu.PacketTransceiver;
-import kvv.heliostat.server.motor.Motor;
 import kvv.heliostat.server.motor.MotorRawSim;
 import kvv.heliostat.server.sensor.Sensor;
 import kvv.heliostat.server.sensor.SensorImpl;
