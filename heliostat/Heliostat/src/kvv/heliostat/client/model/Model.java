@@ -6,6 +6,8 @@ import java.util.Collection;
 import kvv.heliostat.client.Heliostat;
 import kvv.heliostat.client.HeliostatService;
 import kvv.heliostat.client.HeliostatServiceAsync;
+import kvv.heliostat.client.HeliostatServiceAux;
+import kvv.heliostat.client.HeliostatServiceAuxAsync;
 import kvv.heliostat.shared.HeliostatState;
 
 import com.google.gwt.core.client.GWT;
@@ -17,6 +19,9 @@ public class Model {
 
 	public final HeliostatServiceAsync heliostatService = GWT
 			.create(HeliostatService.class);
+	
+	public final HeliostatServiceAuxAsync heliostatServiceAux = GWT
+			.create(HeliostatServiceAux.class);
 
 	private Collection<View> views = new ArrayList<>();
 

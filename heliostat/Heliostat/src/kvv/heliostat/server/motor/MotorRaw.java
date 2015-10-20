@@ -8,14 +8,14 @@ public interface MotorRaw {
 	
 	void init();
 	
-	void setStepNumber(int cnt);
-	int getStepsCounter();
+//	void setStepNumber(int cnt);
+//	int getStepsCounter();
 	
-	void setDir(boolean dir);
-	boolean getDir();
+//	void setDir(boolean dir);
+//	boolean getDir();
 	
-	void moveIn1N();
-	void moveIn2N();
+	void moveIn1N(int cnt);
+	void moveIn2N(int cnt);
 
 	int getPosition();
 	void setPosition(int pos);
@@ -27,4 +27,7 @@ public interface MotorRaw {
 
 	MotorRawSimState getState();
 	void setFast(boolean b);
+	
+	
+	
 }

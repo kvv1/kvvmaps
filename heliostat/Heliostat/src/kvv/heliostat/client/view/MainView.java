@@ -4,11 +4,8 @@ import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.CaptPanel;
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.HorPanel;
-import kvv.gwtutils.client.TextFieldView;
-import kvv.gwtutils.client.TextWithSaveButton;
 import kvv.gwtutils.client.VertPanel;
 import kvv.gwtutils.client.login.LoginPanel;
-import kvv.heliostat.client.Heliostat;
 import kvv.heliostat.client.model.Model;
 import kvv.heliostat.client.model.View;
 import kvv.heliostat.client.sim.ControlView;
@@ -18,8 +15,6 @@ import kvv.heliostat.shared.Params.AutoMode;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -30,8 +25,6 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.Widget;
 
 public class MainView extends Composite implements View {
-	private final Model model;
-
 	private RadioButton trackingManual = new RadioButton("trackingMode",
 			"Manual");
 	private RadioButton trackingSun = new RadioButton("trackingMode",
@@ -41,91 +34,7 @@ public class MainView extends Composite implements View {
 	private Label date = new Label();
 	private Label time = new Label();
 
-	private TextFieldView stepsPerDegreeAz = new TextFieldView(
-			"Azimuth steps/deg:", 120, 40) {
-		@Override
-		protected void onClick(ClickEvent event) {
-			model.heliostatService.setStepsPerDegree(MotorId.AZ,
-					Integer.parseInt(text.getText()),
-					new CallbackAdapter<Void>());
-		}
-	};
-
-	private TextFieldView stepsPerDegreeAlt = new TextFieldView(
-			"Altitude steps/deg:", 120, 40) {
-		@Override
-		protected void onClick(ClickEvent event) {
-			model.heliostatService.setStepsPerDegree(MotorId.ALT,
-					Integer.parseInt(text.getText()),
-					new CallbackAdapter<Void>());
-		}
-	};
-
-	private TextFieldView stepRate = new TextFieldView("Algorithm step (ms):",
-			120, 40) {
-		@Override
-		protected void onClick(ClickEvent event) {
-			model.heliostatService.setStepMS(Integer.parseInt(text.getText()),
-					new CallbackAdapter<Void>());
-		}
-	};
-
-	private TextFieldView azRange = new TextFieldView("Azimith range:", 120, 40) {
-		@Override
-		protected void onClick(ClickEvent event) {
-			model.heliostatService.setRange(MotorId.AZ,
-					Integer.parseInt(text.getText()),
-					new CallbackAdapter<Void>());
-		}
-	};
-
-	private TextFieldView altRange = new TextFieldView("Altitude range:", 120,
-			40) {
-		@Override
-		protected void onClick(ClickEvent event) {
-			model.heliostatService.setRange(MotorId.ALT,
-					Integer.parseInt(text.getText()),
-					new CallbackAdapter<Void>());
-		}
-	};
-
-	private TextFieldView refreshPeriod = new TextFieldView("Refresh (ms):",
-			120, 40) {
-
-		String speriod = Cookies.getCookie(Heliostat.REFRESH_PERIOD);
-		{
-			text.setText(speriod);
-		}
-
-		@Override
-		protected void onClick(ClickEvent event) {
-			try {
-				int period = Integer.parseInt(text.getText());
-				if (period < 0 && period > 10000)
-					return;
-				speriod = text.getText();
-				Cookies.setCookie(Heliostat.REFRESH_PERIOD, speriod);
-				model.stop();
-				model.start();
-			} finally {
-				text.setText(speriod);
-			}
-
-			Cookies.setCookie(Heliostat.REFRESH_PERIOD, speriod);
-		}
-	};
-
-	private TextWithSaveButton controllerParamsPanel = new TextWithSaveButton(
-			"Controller settings", "100%", "100px") {
-		@Override
-		protected void save(String text, AsyncCallback<Void> callback) {
-			model.heliostatService.setControllerParams(text, callback);
-		}
-	};
-
 	public MainView(final Model model) {
-		this.model = model;
-
 		model.add(this);
 
 		trackingManual.addClickHandler(new ClickHandler() {
@@ -167,10 +76,7 @@ public class MainView extends Composite implements View {
 		Widget autoPanel = new CaptPanel("Tracking mode", new VertPanel(
 				trackingManual, trackingSun, trackingFull));
 
-		Widget settingsPanel = new CaptPanel("Settings", new VertPanel(
-				HasHorizontalAlignment.ALIGN_RIGHT, stepsPerDegreeAz,
-				stepsPerDegreeAlt, stepRate, azRange, altRange, refreshPeriod,
-				controllerParamsPanel));
+		Widget settingsPanel = new CaptPanel("Settings", new SettingsView(model));
 
 		Widget dateTime = new HorPanel(false, 10, date, time);
 
@@ -226,26 +132,9 @@ public class MainView extends Composite implements View {
 			break;
 		}
 
-		if (!stepsPerDegreeAz.focused)
-			stepsPerDegreeAz.text.setText("" + state.params.stepsPerDegree[0]);
-
-		if (!stepsPerDegreeAlt.focused)
-			stepsPerDegreeAlt.text.setText("" + state.params.stepsPerDegree[1]);
-
-		if (!stepRate.focused)
-			stepRate.text.setText("" + state.params.stepMS);
-
-		if (!azRange.focused)
-			azRange.text.setText("" + state.params.range[0]);
-
-		if (!altRange.focused)
-			altRange.text.setText("" + state.params.range[1]);
-
 		date.setText(state.dayS);
 		time.setText(state.timeS);
 
-		if (!controllerParamsPanel.focused)
-			controllerParamsPanel.setText(state.controllerParams);
 	}
 
 }

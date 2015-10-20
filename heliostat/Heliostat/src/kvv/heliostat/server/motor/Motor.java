@@ -47,13 +47,9 @@ public class Motor {
 		setState(State.IDLE);
 
 		if (steps > 0) {
-			motorRaw.setDir(false);
-			motorRaw.setStepNumber(steps);
-			motorRaw.moveIn2N();
+			motorRaw.moveIn2N(steps);
 		} else if (steps < 0) {
-			motorRaw.setDir(true);
-			motorRaw.setStepNumber(-steps);
-			motorRaw.moveIn1N();
+			motorRaw.moveIn1N(steps);
 		}
 	}
 
@@ -63,11 +59,8 @@ public class Motor {
 	}
 
 	public MotorState getState() {
-		int cnt = motorRaw.getStepsCounter();
-		boolean dir = motorRaw.getDir();
 		return new MotorState(motorRaw.getPosition(), posValid,
-				motorRaw.getIn1(), motorRaw.getIn2(), cnt == 0 ? 0 : dir ? -1
-						: 1, motorRaw.getState());
+				motorRaw.getIn1(), motorRaw.getIn2(), motorRaw.getState());
 	}
 
 	public void simStep(int ms) {
@@ -77,18 +70,14 @@ public class Motor {
 		case GOING_HOME:
 			motorRaw.stop();
 			if (motorRaw.getIn1()) {
-				motorRaw.setDir(false);
-				motorRaw.setStepNumber(1000000);
-				motorRaw.moveIn2N();
+				motorRaw.moveIn2N(1000000);
 			}
 			setState(State.GOING_HOME1);
 			break;
 		case GOING_HOME1:
 			if (!motorRaw.getIn1()) {
 				motorRaw.stop();
-				motorRaw.setDir(true);
-				motorRaw.setStepNumber(1000000);
-				motorRaw.moveIn1N();
+				motorRaw.moveIn1N(-1000000);
 				setState(State.GOING_HOME2);
 			}
 			break;

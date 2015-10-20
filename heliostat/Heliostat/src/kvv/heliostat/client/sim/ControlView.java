@@ -25,7 +25,7 @@ public class ControlView extends Composite implements View {
 	private TextFieldView clockRate = new TextFieldView("Clock rate:", 0, 40) {
 		@Override
 		protected void onClick(ClickEvent event) {
-			model.heliostatService.setClockRate(
+			model.heliostatServiceAux.setClockRate(
 					Integer.parseInt(text.getText()),
 					new CallbackAdapter<Void>());
 		}
@@ -50,7 +50,7 @@ public class ControlView extends Composite implements View {
 		shortDay.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				model.heliostatService.shortDay(shortDay.getValue(),
+				model.heliostatServiceAux.shortDay(shortDay.getValue(),
 						new CallbackAdapter<Void>());
 			}
 		});

@@ -43,7 +43,7 @@ public class WeatherView extends Composite implements View {
 		day = new TextFieldView("Day:", 0, 40) {
 			@Override
 			protected void onClick(ClickEvent event) {
-				model.heliostatService.resetSim(
+				model.heliostatServiceAux.resetSim(
 						Integer.parseInt(text.getText()), weatherCallback);
 			}
 		};
@@ -52,7 +52,7 @@ public class WeatherView extends Composite implements View {
 			@Override
 			public void run() {
 				model.updates = true;
-				model.heliostatService.saveWeather(weather,
+				model.heliostatServiceAux.saveWeather(weather,
 						new CallbackAdapter<Void>());
 			}
 		};
@@ -173,7 +173,7 @@ public class WeatherView extends Composite implements View {
 
 		model.add(this);
 
-		model.heliostatService.getWeather(weatherCallback);
+		model.heliostatServiceAux.getWeather(weatherCallback);
 
 		initWidget(new VertPanel(day, editMode, calendarView));
 	}

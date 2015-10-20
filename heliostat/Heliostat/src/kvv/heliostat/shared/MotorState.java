@@ -23,19 +23,17 @@ public class MotorState implements Serializable {
 	public boolean posValid;
 	public boolean home;
 	public boolean end;
-	public int dir;
 	public MotorRawSimState motorRawSimState;
 
 	public MotorState() {
 	}
 
 	public MotorState(int pos, boolean posValid, boolean home,
-			boolean end, int dir, MotorRawSimState motorRawSimState) {
+			boolean end, MotorRawSimState motorRawSimState) {
 		this.pos = pos;
 		this.posValid = posValid;
 		this.home = home;
 		this.end = end;
-		this.dir = dir;
 		this.motorRawSimState = motorRawSimState;
 	}
 }

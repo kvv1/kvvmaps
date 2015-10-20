@@ -14,8 +14,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 @RemoteServiceRelativePath("heliostat")
 public interface HeliostatService extends RemoteService {
-	String greetServer(String name) throws IllegalArgumentException;
-
 	HeliostatState getState();
 
 	void move(MotorId id, int pos) throws AuthException;
@@ -28,7 +26,7 @@ public interface HeliostatService extends RemoteService {
 
 	void setAuto(AutoMode auto) throws AuthException;
 
-	void home() throws AuthException;
+	void setDay(int day) throws AuthException;
 
 	void setTime(double time) throws AuthException;
 
@@ -36,23 +34,9 @@ public interface HeliostatService extends RemoteService {
 
 	void setStepsPerDegree(MotorId id, int value) throws AuthException;
 
-	void setClockRate(int value) throws AuthException;
-
 	void setStepMS(int value) throws AuthException;
 
-	void setDay(int day) throws AuthException;
-
 	void clearHistory() throws AuthException;
-
-	Weather getWeather();
-
-	void saveWeather(Weather weather) throws AuthException;
-
-	Weather resetSim(int firstDay) throws AuthException;
-
-	void shortDay(boolean value) throws AuthException;
-
-	void setRange(MotorId id, int max) throws AuthException;
 
 	void setControllerParams(String str) throws AuthException;
 }

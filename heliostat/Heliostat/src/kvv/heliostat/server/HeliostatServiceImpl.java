@@ -15,10 +15,6 @@ import kvv.heliostat.shared.Weather;
 public class HeliostatServiceImpl extends LoginServlet implements
 		HeliostatService {
 
-	public String greetServer(String input) throws IllegalArgumentException {
-		return input;
-	}
-
 	@Override
 	public HeliostatState getState() {
 		return Heliostat.instance.getState();
@@ -28,12 +24,6 @@ public class HeliostatServiceImpl extends LoginServlet implements
 	public void setAuto(AutoMode auto) throws AuthException {
 		checkUser();
 		Heliostat.instance.setAuto(auto);
-	}
-
-	@Override
-	public void home() throws AuthException {
-		checkUser();
-		Heliostat.instance.home();
 	}
 
 	@Override
@@ -79,12 +69,6 @@ public class HeliostatServiceImpl extends LoginServlet implements
 	}
 
 	@Override
-	public void setClockRate(int value)  throws AuthException {
-		checkUser();
-		Heliostat.instance.setClockRate(value);
-	}
-
-	@Override
 	public void setStepMS(int value)  throws AuthException {
 		checkUser();
 		Heliostat.instance.setStepMS(value);
@@ -100,35 +84,6 @@ public class HeliostatServiceImpl extends LoginServlet implements
 	public void clearHistory()  throws AuthException {
 		checkUser();
 		Heliostat.instance.clearHistory();
-	}
-
-	@Override
-	public Weather getWeather() {
-		return Heliostat.instance.getWeather();
-	}
-
-	@Override
-	public void saveWeather(Weather weather)  throws AuthException {
-		checkUser();
-		Heliostat.instance.saveWeather(weather);
-	}
-
-	@Override
-	public Weather resetSim(int firstDay)  throws AuthException {
-		checkUser();
-		return Heliostat.instance.resetSim(firstDay);
-	}
-
-	@Override
-	public void shortDay(boolean value)  throws AuthException {
-		checkUser();
-		Heliostat.instance.shortDay(value);
-	}
-
-	@Override
-	public void setRange(MotorId id, int max)  throws AuthException {
-		checkUser();
-		Heliostat.instance.setRange(id, max);
 	}
 
 	@Override

@@ -63,27 +63,20 @@ public class MotorRawSim implements MotorRaw {
 	}
 
 	@Override
-	public void setStepNumber(int cnt) {
+	public void moveIn1N(int cnt) {
+		dir = cnt < 0;
 		stepCnt = cnt;
-	}
-
-	@Override
-	public void setDir(boolean dir) {
-		this.dir = dir;
-	}
-
-	@Override
-	public boolean getDir() {
-		return dir;
-	}
-
-	@Override
-	public void moveIn1N() {
+		if(dir)
+			stepCnt = -stepCnt;
 		state = State.MOVE_IN1;
 	}
 
 	@Override
-	public void moveIn2N() {
+	public void moveIn2N(int cnt) {
+		dir = cnt < 0;
+		stepCnt = cnt;
+		if(dir)
+			stepCnt = -stepCnt;
 		state = State.MOVE_IN2;
 	}
 
@@ -95,11 +88,6 @@ public class MotorRawSim implements MotorRaw {
 	@Override
 	public void setPosition(int pos) {
 		dPos = pos - posAbs;
-	}
-
-	@Override
-	public int getStepsCounter() {
-		return stepCnt;
 	}
 
 	@Override

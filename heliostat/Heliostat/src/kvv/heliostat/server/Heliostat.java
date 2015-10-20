@@ -172,14 +172,6 @@ public class Heliostat extends Looper {
 		motors[1].stop();
 	}
 
-	public synchronized void home() {
-		scheduleStep(0);
-		params.auto = AutoMode.OFF;
-		writeParams();
-		motors[0].goHome();
-		motors[1].goHome();
-	}
-
 	public synchronized void move(MotorId id, int pos) {
 		scheduleStep(0);
 		params.auto = AutoMode.OFF;

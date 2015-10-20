@@ -9,24 +9,14 @@ import kvv.heliostat.shared.MotorState.MotorRawSimState;
 public class MotorRawT3 implements MotorRaw {
 
 	private static final int REG_STEPS_COUNTER = 0;
-
-	private static final int REG_STEPS_DIR = 0;
-
-	private static final int REG_STEPS_NUMBER = 0;
-
-	private static final int CMD_MOVE_IN1_N = 0;
-
+	private static final int REG_POSITION = 0;
+	private static final int REG_IN1 = 0;
+	private static final int REG_IN2 = 0;
 	private static final int REG_CMD = 0;
 
-	private static final int CMD_MOVE_IN2_N = 0;
-
-	private static final int REG_POSITION = 0;
-
-	private static final int REG_IN1 = 0;
-
-	private static final int REG_IN2 = 0;
-
 	private static final int CMD_STOP = 0;
+	private static final int CMD_MOVE_IN1_N = 1;
+	private static final int CMD_MOVE_IN2_N = 2;
 
 	private final IController controller;
 
@@ -58,44 +48,17 @@ public class MotorRawT3 implements MotorRaw {
 	}
 
 	@Override
-	public void stepSim(int ms) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void init() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
-	public void setStepNumber(int cnt) {
-		setReg(REG_STEPS_NUMBER, cnt);
-	}
-
-	@Override
-	public int getStepsCounter() {
-		return getReg(REG_STEPS_COUNTER);
-	}
-
-	@Override
-	public void setDir(boolean dir) {
-		setReg(REG_STEPS_DIR, dir ? 1 : 0);
-	}
-
-	@Override
-	public boolean getDir() {
-		return getReg(REG_STEPS_DIR) != 0;
-	}
-
-	@Override
-	public void moveIn1N() {
+	public void moveIn1N(int cnt) {
 		setReg(REG_CMD, CMD_MOVE_IN1_N);
 	}
 
 	@Override
-	public void moveIn2N() {
+	public void moveIn2N(int cnt) {
 		setReg(REG_CMD, CMD_MOVE_IN2_N);
 	}
 
@@ -111,12 +74,12 @@ public class MotorRawT3 implements MotorRaw {
 
 	@Override
 	public boolean getIn1() {
-		return getReg(REG_IN1)!=0 ;
+		return getReg(REG_IN1) != 0;
 	}
 
 	@Override
 	public boolean getIn2() {
-		return getReg(REG_IN2)!=0 ;
+		return getReg(REG_IN2) != 0;
 	}
 
 	@Override
@@ -124,17 +87,18 @@ public class MotorRawT3 implements MotorRaw {
 		setReg(REG_CMD, CMD_STOP);
 	}
 
-
 	@Override
 	public MotorRawSimState getState() {
-		// TODO Auto-generated method stub
-		return null;
+		return new MotorRawSimState(getPosition());
 	}
 
 	@Override
 	public void setFast(boolean b) {
 		// TODO Auto-generated method stub
+	}
 
+	@Override
+	public void stepSim(int ms) {
 	}
 
 }
