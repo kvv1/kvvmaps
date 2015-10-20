@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 
+import kvv.heliostat.engine.Looper;
 import kvv.heliostat.server.controller.Controller;
 import kvv.heliostat.server.controller.adu.ADUTransceiver;
 import kvv.heliostat.server.controller.adu.PacketTransceiver;

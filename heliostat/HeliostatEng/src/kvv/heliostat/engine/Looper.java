@@ -1,4 +1,4 @@
-package kvv.heliostat.server;
+package kvv.heliostat.engine;
 
 import java.util.ArrayList;
 import java.util.Collections;
