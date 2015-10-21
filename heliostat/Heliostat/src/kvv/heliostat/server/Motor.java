@@ -1,6 +1,6 @@
-package kvv.heliostat.engine;
+package kvv.heliostat.server;
 
-import kvv.heliostat.shared.MotorState;
+import kvv.heliostat.client.dto.MotorState;
 
 public class Motor {
 

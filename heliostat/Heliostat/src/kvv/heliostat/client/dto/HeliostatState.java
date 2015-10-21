@@ -1,4 +1,4 @@
-package kvv.heliostat.shared;
+package kvv.heliostat.client.dto;
 
 import java.io.Serializable;
 
@@ -11,29 +11,23 @@ public class HeliostatState implements Serializable {
 	public double time;
 	public String timeS;
 	public Params params;
-	public String controllerParams;
 	public double[][] azData;
 	public double[][] altData;
-
-	public boolean sun;
 
 	public HeliostatState() {
 	}
 
 	public HeliostatState(MotorState[] motorState, SensorState sensorState,
-			Params params, String controllerParams, int day, String dayS, double time, String timeS,
-			double[][] azData, double[][] altData,
-			boolean sun) {
+			Params params, int day, String dayS,
+			double time, String timeS, double[][] azData, double[][] altData) {
 		this.motorState = motorState;
 		this.sensorState = sensorState;
 		this.params = params;
-		this.controllerParams = controllerParams;
 		this.time = time;
 		this.timeS = timeS;
 		this.day = day;
 		this.dayS = dayS;
 		this.azData = azData;
 		this.altData = altData;
-		this.sun = sun;
 	}
 }

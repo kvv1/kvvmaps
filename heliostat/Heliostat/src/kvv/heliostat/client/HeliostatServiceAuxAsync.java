@@ -1,7 +1,7 @@
 package kvv.heliostat.client;
 
-import kvv.heliostat.shared.MotorId;
-import kvv.heliostat.shared.Weather;
+import kvv.heliostat.client.dto.MotorId;
+import kvv.heliostat.client.dto.Weather;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 

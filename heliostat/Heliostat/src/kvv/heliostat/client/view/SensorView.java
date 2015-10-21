@@ -1,9 +1,9 @@
 package kvv.heliostat.client.view;
 
+import kvv.heliostat.client.dto.HeliostatState;
+import kvv.heliostat.client.dto.SensorState;
 import kvv.heliostat.client.model.Model;
 import kvv.heliostat.client.model.View;
-import kvv.heliostat.shared.HeliostatState;
-import kvv.heliostat.shared.SensorState;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;

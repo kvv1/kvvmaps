@@ -1,20 +1,9 @@
 package kvv.heliostat.shared.environment;
 
-import kvv.heliostat.shared.math.MirrorAngles;
 import kvv.simpleutils.spline.Function;
 import kvv.simpleutils.spline.FunctionFactory;
 
 public class Environment {
-
-	public static double getMirrorAzimuth(int dateOfYear, double time) {
-		double az = MirrorAngles.get(dateOfYear, time).x;
-		return az;
-	}
-
-	public static double getMirrorAltitude(int dateOfYear, double time) {
-		double alt = MirrorAngles.get(dateOfYear, time).y;
-		return alt;
-	}
 
 	public static final int ANGLE_STEP = 4;
 

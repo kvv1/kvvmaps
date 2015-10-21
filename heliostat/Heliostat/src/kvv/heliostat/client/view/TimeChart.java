@@ -4,9 +4,9 @@ import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.chart.Chart;
 import kvv.heliostat.client.HeliostatService;
 import kvv.heliostat.client.HeliostatServiceAsync;
+import kvv.heliostat.client.dto.HeliostatState;
 import kvv.heliostat.client.model.Model;
 import kvv.heliostat.client.model.View;
-import kvv.heliostat.shared.HeliostatState;
 
 import com.google.gwt.core.client.GWT;
 

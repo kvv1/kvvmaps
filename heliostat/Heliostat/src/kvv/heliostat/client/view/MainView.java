@@ -6,12 +6,14 @@ import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.HorPanel;
 import kvv.gwtutils.client.VertPanel;
 import kvv.gwtutils.client.login.LoginPanel;
+import kvv.heliostat.client.dto.AutoMode;
+import kvv.heliostat.client.dto.HeliostatState;
+import kvv.heliostat.client.dto.MotorId;
 import kvv.heliostat.client.model.Model;
 import kvv.heliostat.client.model.View;
 import kvv.heliostat.client.sim.ControlView;
-import kvv.heliostat.shared.HeliostatState;
-import kvv.heliostat.shared.MotorId;
-import kvv.heliostat.shared.Params.AutoMode;
+import kvv.heliostat.shared.environment.Environment;
+import kvv.heliostat.shared.math.MirrorAngles;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -88,7 +90,9 @@ public class MainView extends Composite implements View {
 
 		TimeChart anglesChart = new AnglesChart(model);
 
-		MotorsChart motorsChart = new MotorsChart(model);
+		HorPanel motorsChart = new HorPanel(new MotorChartAz(model),  new Gap(6, 6),new MotorChartAlt(model));
+		
+//		MotorsChart motorsChart = new MotorsChart(model);
 
 		Widget centralPanel = new HorPanel(
 				new VertPanel(autoPanel, sensorPanel), motorsPanel,
@@ -137,4 +141,30 @@ public class MainView extends Composite implements View {
 
 	}
 
+	static class MotorChartAz extends MotorChart {
+		public MotorChartAz(Model model) {
+			super(model, Environment.MIN_AZIMUTH, Environment.MAX_AZIMUTH, 10);
+		}
+
+		@Override
+		public void updateView(HeliostatState state) {
+			if (state == null)
+				return;
+			upd(state.azData, MirrorAngles.get(state.day, state.time).x);
+		}
+	}
+	
+	static class MotorChartAlt extends MotorChart {
+		public MotorChartAlt(Model model) {
+			super(model, Environment.MIN_ALTITUDE, Environment.MAX_ALTITUDE, 10);
+		}
+
+		@Override
+		public void updateView(HeliostatState state) {
+			if (state == null)
+				return;
+			upd(state.altData, MirrorAngles.get(state.day, state.time).y);
+		}
+	}
+	
 }

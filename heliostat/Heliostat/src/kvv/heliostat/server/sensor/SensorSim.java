@@ -1,10 +1,11 @@
 package kvv.heliostat.server.sensor;
 
-import kvv.heliostat.server.Heliostat;
+import kvv.heliostat.client.dto.SensorState;
+import kvv.heliostat.server.SimEnvironment;
 import kvv.heliostat.server.Time;
 import kvv.heliostat.server.motor.MotorRawSim;
-import kvv.heliostat.shared.SensorState;
 import kvv.heliostat.shared.environment.Environment;
+import kvv.heliostat.shared.math.MirrorAngles;
 import kvv.simpleutils.spline.Function;
 import kvv.simpleutils.spline.FunctionFactory;
 import kvv.simpleutils.spline.SplineInterpolator;
@@ -34,15 +35,15 @@ public class SensorSim implements Sensor {
 		double time = Time.getTime();
 		int day = Time.getDay();
 
-		double sunAz = Environment.getMirrorAzimuth(day, time);
-		double sunAlt = Environment.getMirrorAltitude(day, time);
+		double sunAz = MirrorAngles.get(day, time).x;
+		double sunAlt = MirrorAngles.get(day, time).y;
 
 		double dAz = motorAz - sunAz/* + (Math.random() - 0.5)*/;
 		double dAlt = motorAlt - sunAlt/* + (Math.random() - 0.5)*/;
 
 		double brightness = 1000;// * Environment.getMirrorAltitude(day, time) /
 									// 45;
-		if (!Heliostat.instance.isSunny())
+		if (!SimEnvironment.instance.isSunny())
 			brightness /= 50;
 
 		double tl = sensorSensitivity.value(dist(-SENSOR_SEGMENT_SENTER_DIST,

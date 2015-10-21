@@ -8,7 +8,7 @@ import kvv.heliostat.client.HeliostatService;
 import kvv.heliostat.client.HeliostatServiceAsync;
 import kvv.heliostat.client.HeliostatServiceAux;
 import kvv.heliostat.client.HeliostatServiceAuxAsync;
-import kvv.heliostat.shared.HeliostatState;
+import kvv.heliostat.client.dto.HeliostatState;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Cookies;

@@ -1,13 +1,9 @@
-package kvv.heliostat.shared;
+package kvv.heliostat.client.dto;
 
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
 public class Params implements Serializable {
-	public enum AutoMode {
-		OFF, SUN_ONLY, FULL
-	}
-
 	public int[] stepsPerDegree = { 10, 10 };
 	public AutoMode auto = AutoMode.OFF;
 
@@ -17,5 +13,6 @@ public class Params implements Serializable {
 	public boolean shortDay;
 
 	public int[] range = { 1000, 1000 };
-	
+
+	public String controllerParams = "";
 }

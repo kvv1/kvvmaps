@@ -5,10 +5,10 @@ import kvv.gwtutils.client.TextFieldView;
 import kvv.gwtutils.client.TextWithSaveButton;
 import kvv.gwtutils.client.VertPanel;
 import kvv.heliostat.client.Heliostat;
+import kvv.heliostat.client.dto.HeliostatState;
+import kvv.heliostat.client.dto.MotorId;
 import kvv.heliostat.client.model.Model;
 import kvv.heliostat.client.model.View;
-import kvv.heliostat.shared.HeliostatState;
-import kvv.heliostat.shared.MotorId;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.Cookies;
@@ -137,6 +137,6 @@ public class SettingsView extends Composite implements View {
 			altRange.text.setText("" + state.params.range[1]);
 
 		if (!controllerParamsPanel.focused)
-			controllerParamsPanel.setText(state.controllerParams);
+			controllerParamsPanel.setText(state.params.controllerParams);
 	}
 }

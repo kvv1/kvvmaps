@@ -1,11 +1,12 @@
 package kvv.heliostat.client.sim;
 
 import kvv.gwtutils.client.CallbackAdapter;
+import kvv.heliostat.client.dto.HeliostatState;
+import kvv.heliostat.client.dto.MotorId;
 import kvv.heliostat.client.model.Model;
 import kvv.heliostat.client.model.View;
-import kvv.heliostat.shared.HeliostatState;
-import kvv.heliostat.shared.MotorId;
 import kvv.heliostat.shared.environment.Environment;
+import kvv.heliostat.shared.math.MirrorAngles;
 import kvv.simpleutils.spline.FunctionFactory;
 
 import com.google.gwt.canvas.client.Canvas;
@@ -77,21 +78,22 @@ public class SunPathView extends Composite implements View {
 
 		int rad = 5;
 
-		double az = Environment.getMirrorAzimuth(state.day, state.time);
-		double alt = Environment.getMirrorAltitude(state.day, state.time);
+		double az = MirrorAngles.get(state.day, state.time).x;
+		double alt = MirrorAngles.get(state.day, state.time).y;
 
 		double x = az2x(az);
 		double y = alt2y(alt);
 
 		context.beginPath();
-		context.setFillStyle(state.sun ? "yellow" : "light-gray");
+		context.setFillStyle(state.sensorState.isValid() ? "yellow"
+				: "light-gray");
 		context.arc(x, y, rad, 0, Math.PI * 2.0, true);
 		context.fill();
 
 		context.setStrokeStyle("yellow");
 		for (float t = 5; t <= 19; t += 0.1f) {
-			double az1 = Environment.getMirrorAzimuth(state.day, t);
-			double alt1 = Environment.getMirrorAltitude(state.day, t);
+			double az1 = MirrorAngles.get(state.day, (double) t).x;
+			double alt1 = MirrorAngles.get(state.day, (double) t).y;
 
 			double x1 = az2x(az1);
 			double y1 = alt2y(alt1);

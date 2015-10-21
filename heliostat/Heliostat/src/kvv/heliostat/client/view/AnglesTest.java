@@ -34,7 +34,7 @@ public class AnglesTest extends Composite {
 						MirrorAngles.LON, MirrorAngles.TIMEZONE)[0];
 				return az - 180;
 			}
-		}, "lightskyblue"));
+		}, "lightskyblue", null));
 
 		chart.set(1, new ChartData(new Function() {
 			@Override
@@ -42,7 +42,7 @@ public class AnglesTest extends Composite {
 				return MirrorAngles.calcSun(day, v, MirrorAngles.LAT,
 						MirrorAngles.LON, MirrorAngles.TIMEZONE)[1];
 			}
-		}, "lightgreen"));
+		}, "lightgreen", null));
 
 		chart.set(2, new ChartData(new Function() {
 			@Override
@@ -53,7 +53,7 @@ public class AnglesTest extends Composite {
 				double[] mirror = MirrorAngles.calcMirror(sun);
 				return mirror[0];
 			}
-		}, "deepskyblue"));
+		}, "deepskyblue", null));
 
 		chart.set(3, new ChartData(new Function() {
 			@Override
@@ -64,7 +64,7 @@ public class AnglesTest extends Composite {
 				double[] mirror = MirrorAngles.calcMirror(sun);
 				return mirror[1];
 			}
-		}, "limegreen"));
+		}, "limegreen", null));
 	}
 
 }

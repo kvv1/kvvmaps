@@ -3,8 +3,8 @@ package kvv.heliostat.server;
 import kvv.gwtutils.client.login.AuthException;
 import kvv.gwtutils.server.login.LoginServlet;
 import kvv.heliostat.client.HeliostatServiceAux;
-import kvv.heliostat.shared.MotorId;
-import kvv.heliostat.shared.Weather;
+import kvv.heliostat.client.dto.MotorId;
+import kvv.heliostat.client.dto.Weather;
 
 /**
  * The server-side implementation of the RPC service.
@@ -20,19 +20,24 @@ public class HeliostatServiceAuxImpl extends LoginServlet implements
 
 	@Override
 	public Weather getWeather() {
-		return Heliostat.instance.getWeather();
+		return SimEnvironment.instance.getWeather();
 	}
 
 	@Override
 	public void saveWeather(Weather weather)  throws AuthException {
 		checkUser();
-		Heliostat.instance.saveWeather(weather);
+		try {
+			SimEnvironment.instance.set(weather);
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage());
+		}
 	}
 
 	@Override
 	public Weather resetSim(int firstDay)  throws AuthException {
 		checkUser();
-		return Heliostat.instance.resetSim(firstDay);
+		SimEnvironment.instance.reset(firstDay);
+		return SimEnvironment.instance.getWeather();
 	}
 
 	@Override

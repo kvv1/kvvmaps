@@ -1,6 +1,6 @@
 package kvv.heliostat.client.model;
 
-import kvv.heliostat.shared.HeliostatState;
+import kvv.heliostat.client.dto.HeliostatState;
 
 public interface View {
 	void updateView(HeliostatState state);

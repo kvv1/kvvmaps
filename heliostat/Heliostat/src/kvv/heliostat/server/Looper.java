@@ -1,4 +1,4 @@
-package kvv.heliostat.engine;
+package kvv.heliostat.server;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,23 +37,22 @@ public class Looper {
 		}
 	}
 
-
 	public void stop() {
-		if(thread != null)
+		if (thread != null)
 			thread.close();
 		thread = null;
 	}
 
 	private Thread1 thread;
-	
+
 	class Thread1 extends Thread {
 		private volatile boolean stopped;
-		
+
 		void close() {
 			stopped = true;
 			interrupt();
 		}
-		
+
 		@Override
 		public void run() {
 			while (!stopped) {
@@ -76,13 +75,11 @@ public class Looper {
 						}
 					}
 
-					if (task != null) {
-						synchronized (Looper.this) {
-							if (stopped)
-								return;
-							task.runnable.run();
-						}
-					}
+					if (stopped)
+						return;
+					
+					if (task != null)
+						task.runnable.run();
 				} catch (Exception e) {
 				}
 			}

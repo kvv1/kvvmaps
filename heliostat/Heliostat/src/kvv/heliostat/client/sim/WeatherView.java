@@ -3,10 +3,10 @@ package kvv.heliostat.client.sim;
 import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.TextFieldView;
 import kvv.gwtutils.client.VertPanel;
+import kvv.heliostat.client.dto.HeliostatState;
+import kvv.heliostat.client.dto.Weather;
 import kvv.heliostat.client.model.Model;
 import kvv.heliostat.client.model.View;
-import kvv.heliostat.shared.HeliostatState;
-import kvv.heliostat.shared.Weather;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.Timer;

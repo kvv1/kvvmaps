@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 
-import kvv.heliostat.engine.Looper;
-import kvv.heliostat.engine.Motor;
+import kvv.heliostat.client.dto.AutoMode;
+import kvv.heliostat.client.dto.HeliostatState;
+import kvv.heliostat.client.dto.MotorId;
+import kvv.heliostat.client.dto.MotorState;
+import kvv.heliostat.client.dto.Params;
+import kvv.heliostat.client.dto.SensorState;
 import kvv.heliostat.server.controller.Controller;
 import kvv.heliostat.server.controller.adu.ADUTransceiver;
 import kvv.heliostat.server.controller.adu.PacketTransceiver;
@@ -14,16 +18,6 @@ import kvv.heliostat.server.motor.MotorRawSim;
 import kvv.heliostat.server.sensor.Sensor;
 import kvv.heliostat.server.sensor.SensorImpl;
 import kvv.heliostat.server.sensor.SensorSim;
-import kvv.heliostat.server.trajectory.TrajectoryImpl;
-import kvv.heliostat.shared.HeliostatState;
-import kvv.heliostat.shared.MotorId;
-import kvv.heliostat.shared.MotorState;
-import kvv.heliostat.shared.Params;
-import kvv.heliostat.shared.SensorState;
-import kvv.heliostat.shared.Params.AutoMode;
-import kvv.heliostat.shared.Weather;
-import kvv.simpleutils.src.PtD;
-import kvv.simpleutils.src.PtI;
 import kvv.stdutils.Utils;
 
 public class Heliostat extends Looper {
@@ -31,7 +25,6 @@ public class Heliostat extends Looper {
 	public static final Heliostat instance = new Heliostat();
 
 	private static final String PARAMS_PATH = "c:/heliostat/params.json";
-	private static final String CONTROLLER_PARAMS_PATH = "c:/heliostat/controllers.txt";
 
 	private final Controller controller = new Controller();
 
@@ -42,73 +35,49 @@ public class Heliostat extends Looper {
 	private Motor altMotor = new Motor(motorAltitudeRaw);
 
 	private final Motor[] motors = { azMotor, altMotor };
-	private final Sensor sensor1 = new SensorSim(motorAzimuthRaw,
+	private final Sensor sensor = new SensorSim(motorAzimuthRaw,
 			motorAltitudeRaw);
-	private final Sensor sensor = new SensorImpl(controller);
+	private final Sensor sensor1 = new SensorImpl(controller);
 
 	public Params params = new Params();
 	public Properties controllerParams = new Properties();
-	public String controllerParamsText = "";
 
-	private final TrajectoryImpl trajectory = new TrajectoryImpl();
+	public HeliostatState heliostatState;
+
+	private final Engine engine = new Engine(sensor, motors);
 
 	public synchronized HeliostatState getState() {
 		return heliostatState;
 	}
 
-	private HeliostatState heliostatState;
-
-	public SimEnvironment simEnvironment = new SimEnvironment();
-
 	public Heliostat() {
-
 		Runnable r = new Runnable() {
-			long t;
-
 			@Override
 			public void run() {
-				t = System.currentTimeMillis();
-				step();
-				post(this, params.stepMS / params.clockRate);
-				// post(this, t + params.stepMS / params.clockRate -
-				// System.currentTimeMillis());
+				synchronized (Heliostat.this) {
+					if (params.clock)
+						Time.step(params.stepMS, params.shortDay);
+
+					motors[0].simStep(params.stepMS);
+					motors[1].simStep(params.stepMS);
+
+					engine.step(params.auto, params.stepsPerDegree[0],
+							params.stepsPerDegree[1]);
+
+					SensorState sensorState = sensor.getState();
+					MotorState[] motorStates = new MotorState[] {
+							motors[0].getState(), motors[1].getState() };
+
+					heliostatState = new HeliostatState(motorStates,
+							sensorState, params, Time.getDay(), Time.getDayS(),
+							Time.getTime(), Time.getTimeS(),
+							engine.getAzData(), engine.getAltData());
+
+					post(this, params.stepMS / params.clockRate);
+				}
 			}
 		};
-
 		post(r, 100);
-	}
-
-	private void step() {
-		if (params.clock)
-			Time.step(params.stepMS, params.shortDay);
-
-		motors[0].simStep(params.stepMS);
-		motors[1].simStep(params.stepMS);
-
-		MotorState[] motorStates = new MotorState[] { motors[0].getState(),
-				motors[1].getState() };
-
-		heliostatState = new HeliostatState(motorStates, sensor.getState(),
-				params, controllerParamsText, Time.getDay(), Time.getDayS(),
-				Time.getTime(), Time.getTimeS(), trajectory.getAzData(),
-				trajectory.getAltData(), isSunny());
-
-		if (heliostatState.motorState[0].posValid
-				&& heliostatState.motorState[1].posValid) {
-			SensorState ss = heliostatState.sensorState;
-
-			PtI motorsPositions = trajectory.getMotorsPositions(params.auto,
-					(ss != null && ss.isValid()) ? new PtD(ss.getDeflectionX(),
-							ss.getDeflectionY()) : null, new PtI(
-							heliostatState.motorState[0].pos,
-							heliostatState.motorState[1].pos),
-					params.stepMS / (3600000d));
-
-			if (motorsPositions != null) {
-				motors[0].go(motorsPositions.x);
-				motors[1].go(motorsPositions.y);
-			}
-		}
 	}
 
 	public static void stopThread() {
@@ -124,7 +93,6 @@ public class Heliostat extends Looper {
 		new File(PARAMS_PATH).getParentFile().mkdirs();
 		try {
 			params = Utils.jsonRead(PARAMS_PATH, Params.class);
-			controllerParamsText = Utils.readFile(CONTROLLER_PARAMS_PATH);
 			controllerParamsChanged();
 		} catch (IOException e) {
 		}
@@ -134,7 +102,7 @@ public class Heliostat extends Looper {
 	}
 
 	private void controllerParamsChanged() throws IOException {
-		controllerParams.load(new StringReader(controllerParamsText));
+		controllerParams.load(new StringReader(params.controllerParams));
 		String com = Heliostat.instance.controllerParams.getProperty("COM", "");
 		controller.setModbusLine(new ADUTransceiver(new PacketTransceiver(com,
 				500)));
@@ -146,10 +114,6 @@ public class Heliostat extends Looper {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	public boolean isSunny() {
-		return simEnvironment.isSunny();
 	}
 
 	private void close() {
@@ -232,24 +196,7 @@ public class Heliostat extends Looper {
 	}
 
 	public synchronized void clearHistory() {
-		trajectory.clearHistory();
-	}
-
-	public synchronized Weather getWeather() {
-		return simEnvironment.weather;
-	}
-
-	public synchronized void saveWeather(Weather weather) {
-		try {
-			simEnvironment.set(weather);
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage());
-		}
-	}
-
-	public synchronized Weather resetSim(int firstDay) {
-		simEnvironment.reset(firstDay);
-		return simEnvironment.weather;
+		engine.clearHistory();
 	}
 
 	public synchronized void shortDay(boolean value) {
@@ -263,12 +210,13 @@ public class Heliostat extends Looper {
 	}
 
 	public synchronized void setControllerParams(String str) {
-		controllerParamsText = str;
+		params.controllerParams = str;
+		writeParams();
 		try {
-			Utils.writeFile(CONTROLLER_PARAMS_PATH, controllerParamsText);
 			controllerParamsChanged();
 		} catch (IOException e) {
-			throw new RuntimeException(e.getMessage());
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

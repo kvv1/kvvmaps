@@ -3,10 +3,10 @@ package kvv.heliostat.server;
 import kvv.gwtutils.client.login.AuthException;
 import kvv.gwtutils.server.login.LoginServlet;
 import kvv.heliostat.client.HeliostatService;
-import kvv.heliostat.shared.HeliostatState;
-import kvv.heliostat.shared.MotorId;
-import kvv.heliostat.shared.Params.AutoMode;
-import kvv.heliostat.shared.Weather;
+import kvv.heliostat.client.dto.AutoMode;
+import kvv.heliostat.client.dto.HeliostatState;
+import kvv.heliostat.client.dto.MotorId;
+import kvv.heliostat.client.dto.Weather;
 
 /**
  * The server-side implementation of the RPC service.

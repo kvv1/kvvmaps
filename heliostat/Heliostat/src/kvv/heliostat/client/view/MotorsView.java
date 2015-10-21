@@ -4,12 +4,13 @@ import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.VertPanel;
 import kvv.heliostat.client.Heliostat;
+import kvv.heliostat.client.dto.HeliostatState;
+import kvv.heliostat.client.dto.MotorId;
+import kvv.heliostat.client.dto.MotorState;
 import kvv.heliostat.client.model.Model;
 import kvv.heliostat.client.model.View;
-import kvv.heliostat.shared.HeliostatState;
-import kvv.heliostat.shared.MotorId;
-import kvv.heliostat.shared.MotorState;
 import kvv.heliostat.shared.environment.Environment;
+import kvv.heliostat.shared.math.MirrorAngles;
 import kvv.simpleutils.spline.Function;
 import kvv.simpleutils.spline.FunctionFactory;
 
@@ -154,9 +155,8 @@ public class MotorsView extends Composite implements View {
 					for (double t = 5; t <= 19; t += 0.1) {
 						String style = Heliostat.TRAJ_COLOR;
 
-						double az = Environment.getMirrorAzimuth(state.day, t);
-						double alt = Environment
-								.getMirrorAltitude(state.day, t);
+						double az = MirrorAngles.get(state.day, t).x;
+						double alt = MirrorAngles.get(state.day, t).y;
 
 						double azSteps = azFunc.value(az);
 						double altSteps = altFunc.value(alt);
@@ -204,10 +204,8 @@ public class MotorsView extends Composite implements View {
 					context.setStrokeStyle("yellow");
 					context.setFillStyle("yellow");
 					{
-						double az = Environment.getMirrorAzimuth(state.day,
-								state.time);
-						double alt = Environment.getMirrorAltitude(state.day,
-								state.time);
+						double az = MirrorAngles.get(state.day, state.time).x;
+						double alt = MirrorAngles.get(state.day, state.time).y;
 
 						double azSteps = azFunc.value(az);
 						double altSteps = altFunc.value(alt);
@@ -217,7 +215,7 @@ public class MotorsView extends Composite implements View {
 
 						int rad = 3;
 						context.arc(x, y, rad, 0, Math.PI * 2.0, true);
-						if (state.sun)
+						if (state.sensorState.isValid())
 							context.fill();
 						context.stroke();
 					}
