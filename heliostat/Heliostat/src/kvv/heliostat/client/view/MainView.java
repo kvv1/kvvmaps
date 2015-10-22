@@ -36,7 +36,15 @@ public class MainView extends Composite implements View {
 	private Label date = new Label();
 	private Label time = new Label();
 
+	private HorPanel motorsChart = new HorPanel();
+	private MotorChartAz motorChartAz;
+	private MotorChartAlt motorChartAlt;
+
+	private final Model model;
+
 	public MainView(final Model model) {
+		this.model = model;
+
 		model.add(this);
 
 		trackingManual.addClickHandler(new ClickHandler() {
@@ -78,7 +86,8 @@ public class MainView extends Composite implements View {
 		Widget autoPanel = new CaptPanel("Tracking mode", new VertPanel(
 				trackingManual, trackingSun, trackingFull));
 
-		Widget settingsPanel = new CaptPanel("Settings", new SettingsView(model));
+		Widget settingsPanel = new CaptPanel("Settings",
+				new SettingsView(model));
 
 		Widget dateTime = new HorPanel(false, 10, date, time);
 
@@ -90,9 +99,9 @@ public class MainView extends Composite implements View {
 
 		TimeChart anglesChart = new AnglesChart(model);
 
-		HorPanel motorsChart = new HorPanel(new MotorChartAz(model),  new Gap(6, 6),new MotorChartAlt(model));
-		
-//		MotorsChart motorsChart = new MotorsChart(model);
+		motorChartAz = new MotorChartAz(model, 1000);
+		motorChartAlt = new MotorChartAlt(model, 1000);
+		motorsChart.add(motorChartAz, new Gap(6, 6), motorChartAlt);
 
 		Widget centralPanel = new HorPanel(
 				new VertPanel(autoPanel, sensorPanel), motorsPanel,
@@ -139,32 +148,38 @@ public class MainView extends Composite implements View {
 		date.setText(state.dayTime.dayS);
 		time.setText(state.dayTime.timeS);
 
+		motorChartAz.setMaxY(state.params.range[0]);
+		motorChartAlt.setMaxY(state.params.range[1]);
 	}
 
 	static class MotorChartAz extends MotorChart {
-		public MotorChartAz(Model model) {
-			super(model, Environment.MIN_AZIMUTH, Environment.MAX_AZIMUTH, 10);
+		public MotorChartAz(Model model, int maxy) {
+			super(model, Environment.MIN_AZIMUTH, Environment.MAX_AZIMUTH, 10,
+					maxy);
 		}
 
 		@Override
 		public void updateView(HeliostatState state) {
 			if (state == null)
 				return;
-			upd(state.azData, MirrorAngles.get(state.dayTime.day, state.dayTime.time).x);
+			upd(state.azData,
+					MirrorAngles.get(state.dayTime.day, state.dayTime.time).x);
 		}
 	}
-	
+
 	static class MotorChartAlt extends MotorChart {
-		public MotorChartAlt(Model model) {
-			super(model, Environment.MIN_ALTITUDE, Environment.MAX_ALTITUDE, 10);
+		public MotorChartAlt(Model model, int maxy) {
+			super(model, Environment.MIN_ALTITUDE, Environment.MAX_ALTITUDE,
+					10, maxy);
 		}
 
 		@Override
 		public void updateView(HeliostatState state) {
 			if (state == null)
 				return;
-			upd(state.altData, MirrorAngles.get(state.dayTime.day, state.dayTime.time).y);
+			upd(state.altData,
+					MirrorAngles.get(state.dayTime.day, state.dayTime.time).y);
 		}
 	}
-	
+
 }

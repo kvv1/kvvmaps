@@ -38,7 +38,7 @@ public class SimEnvir extends Envir {
 
 	@Override
 	public void paramsChanged(Params params) {
-		this.shortDay = params.shortDay;
+		this.shortDay = params.simParams.shortDay;
 	}
 
 	@Override

@@ -54,7 +54,7 @@ public class Heliostat extends Looper {
 							sensorState, params, time, engine.getAzData(),
 							engine.getAltData());
 
-					post(this, params.stepMS / params.clockRate);
+					post(this, params.stepMS / params.simParams.clockRate);
 				}
 			}
 		};
@@ -142,7 +142,7 @@ public class Heliostat extends Looper {
 	}
 
 	public synchronized void setClock(boolean value) {
-		params.clock = value;
+		params.simParams.clock = value;
 		writeParams();
 	}
 
@@ -152,7 +152,7 @@ public class Heliostat extends Looper {
 	}
 
 	public synchronized void setClockRate(int value) {
-		params.clockRate = value;
+		params.simParams.clockRate = value;
 		writeParams();
 	}
 
@@ -166,7 +166,7 @@ public class Heliostat extends Looper {
 	}
 
 	public synchronized void shortDay(boolean value) {
-		params.shortDay = value;
+		params.simParams.shortDay = value;
 		writeParams();
 	}
 

@@ -2,6 +2,7 @@ package kvv.heliostat.client.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import kvv.heliostat.client.Heliostat;
 import kvv.heliostat.client.HeliostatService;
@@ -19,7 +20,7 @@ public class Model {
 
 	public final HeliostatServiceAsync heliostatService = GWT
 			.create(HeliostatService.class);
-	
+
 	public final HeliostatServiceAuxAsync heliostatServiceAux = GWT
 			.create(HeliostatServiceAux.class);
 
@@ -28,6 +29,9 @@ public class Model {
 	public HeliostatState lastState;
 
 	public boolean updates = true;
+
+	public List<View> added = new ArrayList<>();
+	public List<View> removed = new ArrayList<>();
 
 	public void notifyViews() {
 
@@ -44,33 +48,44 @@ public class Model {
 			@Override
 			public void onSuccess(HeliostatState result) {
 				lastState = result;
-				for (View view : views)
-					view.updateView(result);
+				updt(result);
 			}
 		});
 	}
 
+	private void updt(HeliostatState state) {
+		views.removeAll(removed);
+		views.addAll(added);
+		removed.clear();
+		added.clear();
+		for (View view : views)
+			view.updateView(state);
+	}
+
 	public void add(View view) {
-		views.add(view);
+		added.add(view);
+	}
+
+	public void remove(View view) {
+		removed.add(view);
 	}
 
 	private Timer timer;
 
 	public int getPeriod() {
 		String speriod = Cookies.getCookie(Heliostat.REFRESH_PERIOD);
-		if(speriod == null) {
+		if (speriod == null) {
 			speriod = "1000";
 			Cookies.setCookie(Heliostat.REFRESH_PERIOD, speriod);
 		}
 		int period = Integer.parseInt(speriod);
 		return period;
 	}
-	
+
 	public void start() {
 		if (timer != null)
 			return;
 
-		
 		timer = new Timer() {
 			@Override
 			public void run() {
@@ -80,8 +95,7 @@ public class Model {
 					public void onFailure(Throwable caught) {
 						lastState = null;
 						if (updates)
-							for (View view : views)
-								view.updateView(null);
+							updt(null);
 						schedule(getPeriod());
 					}
 
@@ -89,9 +103,7 @@ public class Model {
 					public void onSuccess(HeliostatState result) {
 						lastState = result;
 						if (updates)
-							for (View view : views)
-								view.updateView(result);
-
+							updt(result);
 						schedule(getPeriod());
 					}
 				});
@@ -102,7 +114,7 @@ public class Model {
 	}
 
 	public void stop() {
-		if(timer == null)
+		if (timer == null)
 			return;
 		timer.cancel();
 		timer = null;
