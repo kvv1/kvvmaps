@@ -1,8 +1,7 @@
 package kvv.heliostat.server.envir.sensor;
 
 import kvv.heliostat.client.dto.SensorState;
-import kvv.heliostat.server.envir.Envir;
-import kvv.heliostat.server.envir.RealEnvir;
+import kvv.heliostat.server.ParamsHolder;
 import kvv.heliostat.server.envir.controller.Controller;
 
 public class SensorImpl implements Sensor {
@@ -27,7 +26,7 @@ public class SensorImpl implements Sensor {
 			while (!stopped) {
 				try {
 					sleep(100);
-					int ADDR = Integer.parseInt(Envir.instance.getProps()
+					int ADDR = Integer.parseInt(ParamsHolder.controllerParams
 							.getProperty("SENSOR_ADDR", "0"));
 
 					controller.setReg(ADDR, 10, 0);

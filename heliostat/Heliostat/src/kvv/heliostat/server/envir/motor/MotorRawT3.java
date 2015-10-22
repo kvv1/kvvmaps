@@ -2,7 +2,7 @@ package kvv.heliostat.server.envir.motor;
 
 import java.io.IOException;
 
-import kvv.heliostat.server.envir.Envir;
+import kvv.heliostat.server.ParamsHolder;
 import kvv.heliostat.server.envir.controller.IController;
 
 public class MotorRawT3 implements MotorRaw {
@@ -24,9 +24,8 @@ public class MotorRawT3 implements MotorRaw {
 	}
 
 	private int getAddr() {
-		return Integer.parseInt(Envir.instance.getProps().getProperty(
+		return Integer.parseInt(ParamsHolder.controllerParams.getProperty(
 				"MOTORS_ADDR", "0"));
-
 	}
 
 	private void setReg(int reg, int val) {

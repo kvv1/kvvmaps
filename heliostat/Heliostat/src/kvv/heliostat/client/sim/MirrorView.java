@@ -3,8 +3,8 @@ package kvv.heliostat.client.sim;
 import kvv.heliostat.client.dto.HeliostatState;
 import kvv.heliostat.client.model.Model;
 import kvv.heliostat.client.model.View;
-import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.math.Matrix3x3;
+import kvv.simpleutils.spline.Function;
 import kvv.simpleutils.spline.FunctionFactory;
 
 import com.google.gwt.canvas.client.Canvas;
@@ -91,12 +91,20 @@ public class MirrorView extends Composite implements View {
 		if (state.motorState[0] == null || state.motorState[1] == null)
 			return;
 
-		double motorAz = FunctionFactory.solve(Environment.azDeg2Steps,
-				state.motorState[0].posAbs, Environment.MIN_AZIMUTH,
-				Environment.MAX_AZIMUTH, 0.01);
-		double motorAlt = FunctionFactory.solve(Environment.altDeg2Steps,
-				state.motorState[1].posAbs, Environment.MIN_ALTITUDE,
-				Environment.MAX_ALTITUDE, 0.01);
+		Function azDeg2Steps = FunctionFactory.getFunction(
+				state.params.simParams.azDeg2Steps[0],
+				state.params.simParams.azDeg2Steps[1]);
+		Function altDeg2Steps = FunctionFactory.getFunction(
+				state.params.simParams.altDeg2Steps[0],
+				state.params.simParams.altDeg2Steps[1]);
+
+		double motorAz = FunctionFactory.solve(azDeg2Steps,
+				state.motorState[0].posAbs, state.params.simParams.MIN_AZIMUTH,
+				state.params.simParams.MAX_AZIMUTH, 0.01);
+		double motorAlt = FunctionFactory.solve(altDeg2Steps,
+				state.motorState[1].posAbs,
+				state.params.simParams.MIN_ALTITUDE,
+				state.params.simParams.MAX_ALTITUDE, 0.01);
 
 		matrix = (Matrix3x3) Matrix3x3.rotZ(-motorAz * Math.PI / 180).mul(
 				Matrix3x3.rotX(-motorAlt * Math.PI / 180), null);

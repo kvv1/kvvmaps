@@ -7,12 +7,12 @@ public class ContextListener implements ServletContextListener {
 
 	public void contextInitialized(ServletContextEvent event) {
 		System.out.println("starting...");
-		Heliostat.startThread();
+		Heliostat.instance.init();
 		System.out.println("started");
 	}
 
 	public void contextDestroyed(ServletContextEvent event) {
-		Heliostat.stopThread();
+		Heliostat.instance.close();
 	}
 
 }

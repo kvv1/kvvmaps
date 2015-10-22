@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.util.Calendar;
 
 import kvv.heliostat.client.dto.DayTime;
+import kvv.heliostat.server.ParamsHolder;
 
 public class SimTime implements Time {
 	private Calendar calendar = Calendar.getInstance();
@@ -46,9 +47,10 @@ public class SimTime implements Time {
 		calendar.set(Calendar.DAY_OF_YEAR, day + 1);
 	}
 
-	public void step(int ms, boolean shortDay) {
+	public void step(int ms) {
 		calendar.add(Calendar.MILLISECOND, ms);
-		if (calendar.get(Calendar.HOUR_OF_DAY) >= 19) {
+		if (ParamsHolder.params.simParams.shortDay
+				&& calendar.get(Calendar.HOUR_OF_DAY) >= 19) {
 			calendar.add(Calendar.DAY_OF_MONTH, 1);
 			calendar.set(Calendar.HOUR_OF_DAY, 5);
 		}

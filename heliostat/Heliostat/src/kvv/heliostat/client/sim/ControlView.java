@@ -68,7 +68,7 @@ public class ControlView extends Composite implements View {
 	public void updateView(HeliostatState state) {
 		if (state == null)
 			return;
-		clock.setValue(state.params.simParams.clock);
+		clock.setValue(state.params.clock);
 		shortDay.setValue(state.params.simParams.shortDay);
 
 		if (!clockRate.focused)

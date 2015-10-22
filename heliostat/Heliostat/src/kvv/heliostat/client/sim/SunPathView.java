@@ -5,8 +5,8 @@ import kvv.heliostat.client.dto.HeliostatState;
 import kvv.heliostat.client.dto.MotorId;
 import kvv.heliostat.client.model.Model;
 import kvv.heliostat.client.model.View;
-import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.math.MirrorAngles;
+import kvv.simpleutils.spline.Function;
 import kvv.simpleutils.spline.FunctionFactory;
 
 import com.google.gwt.canvas.client.Canvas;
@@ -44,11 +44,14 @@ public class SunPathView extends Composite implements View {
 		canvas.addMouseDownHandler(new MouseDownHandler() {
 			@Override
 			public void onMouseDown(MouseDownEvent event) {
+				if (azDeg2Steps == null)
+					return;
+
 				double az = x2az(0.5 + event.getX());
 				double alt = y2alt(0.5 + event.getY());
 
-				int xPos = (int) Environment.azDeg2Steps.value(az);
-				int yPos = (int) Environment.altDeg2Steps.value(alt);
+				int xPos = (int) azDeg2Steps.value(az);
+				int yPos = (int) altDeg2Steps.value(alt);
 
 				model.heliostatService.move(MotorId.AZ, xPos,
 						new CallbackAdapter<Void>());
@@ -65,10 +68,24 @@ public class SunPathView extends Composite implements View {
 
 	}
 
+	HeliostatState state;
+	Function azDeg2Steps;
+	Function altDeg2Steps;
+
 	@Override
 	public void updateView(HeliostatState state) {
+		this.state = state;
+		azDeg2Steps = null;
+		altDeg2Steps = null;
 		if (state == null)
 			return;
+
+		azDeg2Steps = FunctionFactory.getFunction(
+				state.params.simParams.azDeg2Steps[0],
+				state.params.simParams.azDeg2Steps[1]);
+		altDeg2Steps = FunctionFactory.getFunction(
+				state.params.simParams.altDeg2Steps[0],
+				state.params.simParams.altDeg2Steps[1]);
 
 		context.beginPath();
 		context.setFillStyle("gray");
@@ -111,12 +128,14 @@ public class SunPathView extends Composite implements View {
 			context.beginPath();
 			context.setStrokeStyle("black");
 
-			double motorAz = FunctionFactory.solve(Environment.azDeg2Steps,
-					state.motorState[0].posAbs, Environment.MIN_AZIMUTH,
-					Environment.MAX_AZIMUTH, 0.01);
-			double motorAlt = FunctionFactory.solve(Environment.altDeg2Steps,
-					state.motorState[1].posAbs, Environment.MIN_ALTITUDE,
-					Environment.MAX_ALTITUDE, 0.01);
+			double motorAz = FunctionFactory.solve(azDeg2Steps,
+					state.motorState[0].posAbs,
+					state.params.simParams.MIN_AZIMUTH,
+					state.params.simParams.MAX_AZIMUTH, 0.01);
+			double motorAlt = FunctionFactory.solve(altDeg2Steps,
+					state.motorState[1].posAbs,
+					state.params.simParams.MIN_ALTITUDE,
+					state.params.simParams.MAX_ALTITUDE, 0.01);
 
 			double x1 = az2x(motorAz);
 			double y1 = alt2y(motorAlt);
@@ -133,24 +152,27 @@ public class SunPathView extends Composite implements View {
 	}
 
 	private double az2x(double az) {
-		return (az - Environment.MIN_AZIMUTH) * width
-				/ (Environment.MAX_AZIMUTH - Environment.MIN_AZIMUTH);
+		return (az - state.params.simParams.MIN_AZIMUTH)
+				* width
+				/ (state.params.simParams.MAX_AZIMUTH - state.params.simParams.MIN_AZIMUTH);
 	}
 
 	private double x2az(double x) {
-		return Environment.MIN_AZIMUTH
-				+ (Environment.MAX_AZIMUTH - Environment.MIN_AZIMUTH) * x
-				/ width;
+		return state.params.simParams.MIN_AZIMUTH
+				+ (state.params.simParams.MAX_AZIMUTH - state.params.simParams.MIN_AZIMUTH)
+				* x / width;
 	}
 
 	private double alt2y(double alt) {
-		return height - (alt - Environment.MIN_ALTITUDE) * height
-				/ (Environment.MAX_ALTITUDE - Environment.MIN_ALTITUDE);
+		return height
+				- (alt - state.params.simParams.MIN_ALTITUDE)
+				* height
+				/ (state.params.simParams.MAX_ALTITUDE - state.params.simParams.MIN_ALTITUDE);
 	}
 
 	private double y2alt(double y) {
-		return Environment.MIN_ALTITUDE
-				+ (Environment.MAX_ALTITUDE - Environment.MIN_ALTITUDE)
+		return state.params.simParams.MIN_ALTITUDE
+				+ (state.params.simParams.MAX_ALTITUDE - state.params.simParams.MIN_ALTITUDE)
 				* (height - y) / height;
 	}
 

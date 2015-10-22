@@ -2,7 +2,6 @@ package kvv.heliostat.server.envir;
 
 import java.util.Properties;
 
-import kvv.heliostat.client.dto.Params;
 import kvv.heliostat.client.dto.Weather;
 import kvv.heliostat.server.envir.motor.Motor;
 import kvv.heliostat.server.envir.sensor.Sensor;
@@ -24,16 +23,12 @@ public abstract class Envir {
 		this.time = time;
 	}
 
-	public abstract void paramsChanged(Params params);
-
 	public abstract void close();
 
 	public abstract void step(int ms);
 
 	public abstract void start();
 	
-	public abstract Properties getProps();
-
 	public abstract void saveWeather();
 
 }

@@ -2,9 +2,9 @@ package kvv.heliostat.server.envir.sensor;
 
 import kvv.heliostat.client.dto.DayTime;
 import kvv.heliostat.client.dto.SensorState;
+import kvv.heliostat.server.ParamsHolder;
 import kvv.heliostat.server.envir.Envir;
 import kvv.heliostat.server.envir.motor.MotorRawSim;
-import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.math.MirrorAngles;
 import kvv.simpleutils.spline.Function;
 import kvv.simpleutils.spline.FunctionFactory;
@@ -25,12 +25,20 @@ public class SensorSim implements Sensor {
 
 	@Override
 	public SensorState getState() {
-		double motorAz = FunctionFactory.solve(Environment.azDeg2Steps,
-				azMotor.posAbs, Environment.MIN_AZIMUTH,
-				Environment.MAX_AZIMUTH, 0.01);
-		double motorAlt = FunctionFactory.solve(Environment.altDeg2Steps,
-				altMotor.posAbs, Environment.MIN_ALTITUDE,
-				Environment.MAX_ALTITUDE, 0.01);
+
+		Function azDeg2Steps = FunctionFactory.getFunction(
+				ParamsHolder.params.simParams.azDeg2Steps[0],
+				ParamsHolder.params.simParams.azDeg2Steps[1]);
+		Function altDeg2Steps = FunctionFactory.getFunction(
+				ParamsHolder.params.simParams.altDeg2Steps[0],
+				ParamsHolder.params.simParams.altDeg2Steps[1]);
+
+		double motorAz = FunctionFactory.solve(azDeg2Steps, azMotor.posAbs,
+				ParamsHolder.params.simParams.MIN_AZIMUTH,
+				ParamsHolder.params.simParams.MAX_AZIMUTH, 0.01);
+		double motorAlt = FunctionFactory.solve(altDeg2Steps, altMotor.posAbs,
+				ParamsHolder.params.simParams.MIN_ALTITUDE,
+				ParamsHolder.params.simParams.MAX_ALTITUDE, 0.01);
 
 		DayTime time = Envir.instance.time.getTime();
 

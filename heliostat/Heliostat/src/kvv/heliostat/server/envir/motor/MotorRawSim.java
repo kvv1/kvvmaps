@@ -1,6 +1,6 @@
 package kvv.heliostat.server.envir.motor;
 
-import kvv.heliostat.shared.environment.Environment;
+import kvv.heliostat.server.ParamsHolder;
 
 public class MotorRawSim implements MotorRaw {
 
@@ -9,7 +9,7 @@ public class MotorRawSim implements MotorRaw {
 
 	private int speed = SPEED;
 
-	public int posAbs = (int) (Math.random() * Environment.MAX_STEPS);
+	public int posAbs = (int) (Math.random() * ParamsHolder.params.simParams.MAX_STEPS);
 	private int dPos;
 
 	private int stepCnt;
@@ -44,8 +44,8 @@ public class MotorRawSim implements MotorRaw {
 					posAbs = 0;
 					stepCnt = 0;
 				} else if (state == State.MOVE_IN2
-						&& posAbs >= Environment.MAX_STEPS) {
-					posAbs = Environment.MAX_STEPS;
+						&& posAbs >= ParamsHolder.params.simParams.MAX_STEPS) {
+					posAbs = ParamsHolder.params.simParams.MAX_STEPS;
 					stepCnt = 0;
 				}
 			}
@@ -65,7 +65,7 @@ public class MotorRawSim implements MotorRaw {
 	public void moveIn1N(int cnt) {
 		dir = cnt < 0;
 		stepCnt = cnt;
-		if(dir)
+		if (dir)
 			stepCnt = -stepCnt;
 		state = State.MOVE_IN1;
 	}
@@ -74,7 +74,7 @@ public class MotorRawSim implements MotorRaw {
 	public void moveIn2N(int cnt) {
 		dir = cnt < 0;
 		stepCnt = cnt;
-		if(dir)
+		if (dir)
 			stepCnt = -stepCnt;
 		state = State.MOVE_IN2;
 	}
@@ -96,7 +96,7 @@ public class MotorRawSim implements MotorRaw {
 
 	@Override
 	public boolean getIn2() {
-		return posAbs >= Environment.MAX_STEPS;
+		return posAbs >= ParamsHolder.params.simParams.MAX_STEPS;
 	}
 
 	@Override

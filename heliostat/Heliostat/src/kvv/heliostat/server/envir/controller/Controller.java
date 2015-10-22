@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Controller implements IController {
 
-	private ModbusLine modbusLine;
+	protected ModbusLine modbusLine;
 
 	public Controller() {
 	}
@@ -50,8 +50,9 @@ public class Controller implements IController {
 	}
 
 	public byte[] send(int addr, byte[] request) throws IOException {
-		if (modbusLine == null)
-			throw new IOException("controller line not set");
+		if(modbusLine == null)
+			throw new IOException("modbusLine not set");
+		
 		byte[] response = modbusLine.handle(addr, request);
 
 		if (response[0] != request[0]) {

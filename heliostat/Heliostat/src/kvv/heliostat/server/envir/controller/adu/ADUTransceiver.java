@@ -14,7 +14,7 @@ public class ADUTransceiver implements ModbusLine{
 	private Set<Integer> failedAddrs = new HashSet<Integer>();
 
 	public Statistics statistics = new Statistics();
-	private final IPacketTransceiver packetTransceiver;
+	protected final IPacketTransceiver packetTransceiver;
 
 	public ADUTransceiver(IPacketTransceiver packetTransceiver) {
 		this.packetTransceiver = packetTransceiver;

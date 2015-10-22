@@ -147,15 +147,11 @@ public class MainView extends Composite implements View {
 
 		date.setText(state.dayTime.dayS);
 		time.setText(state.dayTime.timeS);
-
-		motorChartAz.setMaxY(state.params.range[0]);
-		motorChartAlt.setMaxY(state.params.range[1]);
 	}
 
 	static class MotorChartAz extends MotorChart {
 		public MotorChartAz(Model model, int maxy) {
-			super(model, Environment.MIN_AZIMUTH, Environment.MAX_AZIMUTH, 10,
-					maxy);
+			super(model, -10, 10, 10, maxy);
 		}
 
 		@Override
@@ -164,13 +160,15 @@ public class MainView extends Composite implements View {
 				return;
 			upd(state.azData,
 					MirrorAngles.get(state.dayTime.day, state.dayTime.time).x);
+			setMaxY(state.params.range[0]);
+			setMinX(state.params.simParams.MIN_AZIMUTH);
+			setMaxX(state.params.simParams.MAX_AZIMUTH);
 		}
 	}
 
 	static class MotorChartAlt extends MotorChart {
 		public MotorChartAlt(Model model, int maxy) {
-			super(model, Environment.MIN_ALTITUDE, Environment.MAX_ALTITUDE,
-					10, maxy);
+			super(model, -10, 10, 10, maxy);
 		}
 
 		@Override
@@ -179,6 +177,9 @@ public class MainView extends Composite implements View {
 				return;
 			upd(state.altData,
 					MirrorAngles.get(state.dayTime.day, state.dayTime.time).y);
+			setMaxY(state.params.range[1]);
+			setMinX(state.params.simParams.MIN_ALTITUDE);
+			setMaxX(state.params.simParams.MAX_ALTITUDE);
 		}
 	}
 

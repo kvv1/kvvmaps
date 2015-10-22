@@ -3,7 +3,6 @@ package kvv.heliostat.server.envir;
 import java.io.IOException;
 import java.util.Properties;
 
-import kvv.heliostat.client.dto.Params;
 import kvv.heliostat.client.dto.Weather;
 import kvv.heliostat.server.envir.motor.Motor;
 import kvv.heliostat.server.envir.motor.MotorRawSim;
@@ -21,9 +20,7 @@ public class SimEnvir extends Envir {
 			motorAltitudeRaw);
 
 	private final SimTime simTime = new SimTime();
-	
-	private boolean shortDay;
-	
+
 	public SimEnvir() {
 
 		Weather weather;
@@ -37,11 +34,6 @@ public class SimEnvir extends Envir {
 	}
 
 	@Override
-	public void paramsChanged(Params params) {
-		this.shortDay = params.simParams.shortDay;
-	}
-
-	@Override
 	public void close() {
 	}
 
@@ -49,16 +41,11 @@ public class SimEnvir extends Envir {
 	public void step(int ms) {
 		motors[0].simStep(ms);
 		motors[1].simStep(ms);
-		simTime.step(ms, shortDay);
+		simTime.step(ms);
 	}
 
 	@Override
 	public void start() {
-	}
-
-	@Override
-	public Properties getProps() {
-		return new Properties();
 	}
 
 	@Override
