@@ -5,9 +5,9 @@ import java.util.Properties;
 
 import kvv.heliostat.client.dto.Params;
 import kvv.heliostat.client.dto.Weather;
-import kvv.heliostat.server.Motor;
-import kvv.heliostat.server.motor.MotorRawSim;
-import kvv.heliostat.server.sensor.SensorSim;
+import kvv.heliostat.server.envir.motor.Motor;
+import kvv.heliostat.server.envir.motor.MotorRawSim;
+import kvv.heliostat.server.envir.sensor.SensorSim;
 import kvv.stdutils.Utils;
 
 public class SimEnvir extends Envir {

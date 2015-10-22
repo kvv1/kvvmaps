@@ -1,8 +1,7 @@
-package kvv.heliostat.server.motor;
+package kvv.heliostat.server.envir.motor;
 
 import java.io.IOException;
 
-import kvv.heliostat.server.MotorRaw;
 import kvv.heliostat.server.controller.IController;
 import kvv.heliostat.server.envir.Envir;
 

@@ -1,9 +1,9 @@
-package kvv.heliostat.server.sensor;
+package kvv.heliostat.server.envir.sensor;
 
 import kvv.heliostat.client.dto.DayTime;
 import kvv.heliostat.client.dto.SensorState;
 import kvv.heliostat.server.envir.Envir;
-import kvv.heliostat.server.motor.MotorRawSim;
+import kvv.heliostat.server.envir.motor.MotorRawSim;
 import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.math.MirrorAngles;
 import kvv.simpleutils.spline.Function;

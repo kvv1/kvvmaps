@@ -1,4 +1,4 @@
-package kvv.heliostat.server.sensor;
+package kvv.heliostat.server.envir.sensor;
 
 import kvv.heliostat.client.dto.SensorState;
 import kvv.heliostat.server.controller.Controller;

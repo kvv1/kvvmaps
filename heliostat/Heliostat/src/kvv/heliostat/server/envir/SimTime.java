@@ -4,7 +4,6 @@ import java.text.DateFormat;
 import java.util.Calendar;
 
 import kvv.heliostat.client.dto.DayTime;
-import kvv.heliostat.server.Time;
 
 public class SimTime implements Time {
 	private Calendar calendar = Calendar.getInstance();

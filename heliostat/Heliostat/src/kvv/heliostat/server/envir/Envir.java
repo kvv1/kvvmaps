@@ -4,9 +4,8 @@ import java.util.Properties;
 
 import kvv.heliostat.client.dto.Params;
 import kvv.heliostat.client.dto.Weather;
-import kvv.heliostat.server.Motor;
-import kvv.heliostat.server.Time;
-import kvv.heliostat.server.sensor.Sensor;
+import kvv.heliostat.server.envir.motor.Motor;
+import kvv.heliostat.server.envir.sensor.Sensor;
 
 public abstract class Envir {
 

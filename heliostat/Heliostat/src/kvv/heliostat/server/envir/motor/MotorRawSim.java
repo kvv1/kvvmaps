@@ -1,6 +1,5 @@
-package kvv.heliostat.server.motor;
+package kvv.heliostat.server.envir.motor;
 
-import kvv.heliostat.server.MotorRaw;
 import kvv.heliostat.shared.environment.Environment;
 
 public class MotorRawSim implements MotorRaw {

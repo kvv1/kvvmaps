@@ -1,4 +1,4 @@
-package kvv.heliostat.server;
+package kvv.heliostat.server.envir.motor;
 
 
 
