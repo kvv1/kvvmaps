@@ -1,4 +1,4 @@
-package kvv.heliostat.server.controller.adu;
+package kvv.heliostat.server.envir.controller.adu;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;

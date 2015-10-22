@@ -1,4 +1,4 @@
-package kvv.heliostat.server.controller.adu;
+package kvv.heliostat.server.envir.controller.adu;
 
 public class PDU {
 	public byte[] data;

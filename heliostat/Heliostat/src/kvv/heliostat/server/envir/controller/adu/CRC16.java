@@ -1,4 +1,4 @@
-package kvv.heliostat.server.controller.adu;
+package kvv.heliostat.server.envir.controller.adu;
 
 public class CRC16 {
 	private final static short CRC16_INIT = -1;
