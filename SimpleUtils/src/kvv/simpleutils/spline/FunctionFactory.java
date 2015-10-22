@@ -60,4 +60,13 @@ public class FunctionFactory {
 			double y2, double x) {
 		return y1 + (x - x1) * (y2 - y1) / (x2 - x1);
 	}
+	
+	public static void main(String[] args) {
+		double p0 = 0;
+		double p1 = 100;
+		double p2 = 0;
+		double p3 = 100;
+
+		System.out.println(q(0.2, p0, p1, p2, p3));
+	}
 }

@@ -25,7 +25,7 @@ public class Chart extends Composite {
 
 	private final AbsolutePanel layersPanel = new AbsolutePanel();
 
-	private static final int leftMargin = 30;
+	private static final int leftMargin = 34;
 	private static final int bottomMargin = 12;
 
 	private final int width;
@@ -101,22 +101,22 @@ public class Chart extends Composite {
 	public void set(int idx, Widget w) {
 		if (layers[idx] != null)
 			layersPanel.remove(layers[idx]);
-		
+
 		layers[idx] = null;
-		
-		if(w != null) {
+
+		if (w != null) {
 			layers[idx] = w;
 			layersPanel.add(w);
 			layersPanel.setWidgetPosition(w, 0, 0);
 		}
 	}
-		
+
 	public void set(int idx, ChartData chartData) {
-		if(chartData == null) {
-			set(idx, (Widget)null);
+		if (chartData == null) {
+			set(idx, (Widget) null);
 			return;
 		}
-			
+
 		Canvas canvas = createCanvas();
 		Context2d context = canvas.getContext2d();
 		context.beginPath();
@@ -148,6 +148,22 @@ public class Chart extends Composite {
 
 		context.stroke();
 
+		if (chartData.mark != null) {
+//			context.setStrokeStyle(chartData.color);
+//			context.setLineWidth(1);
+//			
+//			double x = arg2x(chartData.mark);
+//			double val = chartData.function.value(chartData.mark);
+//			double y = val2y(val);
+//
+//			context.moveTo(x - 10, y);
+//			context.lineTo(x + 10, y);
+//
+//			context.moveTo(x, y - 10);
+//			context.lineTo(x, y + 10);
+//			context.stroke();
+		}
+
 		context.setFillStyle("#FFFFFF");
 
 		if (chartData.xx != null) {
@@ -157,6 +173,7 @@ public class Chart extends Composite {
 				context.fillRect(x - 2, y - 2, 4, 4);
 			}
 		}
+
 
 		context.closePath();
 
