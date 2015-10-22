@@ -19,4 +19,8 @@ public interface HeliostatServiceAuxAsync {
 
 	void setRange(MotorId id, int max, AsyncCallback<Void> callback);
 
+	void setDay(int day, AsyncCallback<Void> callback);
+
+	void setTime(double time, AsyncCallback<Void> callback);
+
 }

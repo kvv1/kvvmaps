@@ -27,12 +27,6 @@ public class HeliostatServiceImpl extends LoginServlet implements
 	}
 
 	@Override
-	public void setTime(double time)  throws AuthException {
-		checkUser();
-		Heliostat.instance.setTime(time);
-	}
-
-	@Override
 	public void clock(boolean value)  throws AuthException {
 		checkUser();
 		Heliostat.instance.setClock(value);
@@ -72,12 +66,6 @@ public class HeliostatServiceImpl extends LoginServlet implements
 	public void setAlgorithmStepMS(int value)  throws AuthException {
 		checkUser();
 		Heliostat.instance.setStepMS(value);
-	}
-
-	@Override
-	public void setDay(int day)  throws AuthException {
-		checkUser();
-		Heliostat.instance.setDay(day);
 	}
 
 	@Override

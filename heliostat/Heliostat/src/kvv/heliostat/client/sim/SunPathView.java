@@ -78,8 +78,8 @@ public class SunPathView extends Composite implements View {
 
 		int rad = 5;
 
-		double az = MirrorAngles.get(state.day, state.time).x;
-		double alt = MirrorAngles.get(state.day, state.time).y;
+		double az = MirrorAngles.get(state.dayTime.day, state.dayTime.time).x;
+		double alt = MirrorAngles.get(state.dayTime.day, state.dayTime.time).y;
 
 		double x = az2x(az);
 		double y = alt2y(alt);
@@ -92,8 +92,8 @@ public class SunPathView extends Composite implements View {
 
 		context.setStrokeStyle("yellow");
 		for (float t = 5; t <= 19; t += 0.1f) {
-			double az1 = MirrorAngles.get(state.day, (double) t).x;
-			double alt1 = MirrorAngles.get(state.day, (double) t).y;
+			double az1 = MirrorAngles.get(state.dayTime.day, (double) t).x;
+			double alt1 = MirrorAngles.get(state.dayTime.day, (double) t).y;
 
 			double x1 = az2x(az1);
 			double y1 = alt2y(alt1);

@@ -12,8 +12,6 @@ public interface HeliostatServiceAsync {
 
 	void setAuto(AutoMode auto, AsyncCallback<Void> callback);
 
-	void setTime(double time, AsyncCallback<Void> callback);
-
 	void clock(boolean value, AsyncCallback<Void> callback);
 
 	void move(MotorId id, int pos, AsyncCallback<Void> callback);
@@ -27,8 +25,6 @@ public interface HeliostatServiceAsync {
 	void setStepsPerDegree(MotorId id, int value, AsyncCallback<Void> callback);
 
 	void setAlgorithmStepMS(int value, AsyncCallback<Void> callback);
-
-	void setDay(int day, AsyncCallback<Void> callback);
 
 	void clearHistory(AsyncCallback<Void> callback);
 

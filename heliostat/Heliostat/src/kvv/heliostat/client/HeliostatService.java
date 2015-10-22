@@ -25,10 +25,6 @@ public interface HeliostatService extends RemoteService {
 
 	void setAuto(AutoMode auto) throws AuthException;
 
-	void setDay(int day) throws AuthException;
-
-	void setTime(double time) throws AuthException;
-
 	void clock(boolean value) throws AuthException;
 
 	void setStepsPerDegree(MotorId id, int value) throws AuthException;

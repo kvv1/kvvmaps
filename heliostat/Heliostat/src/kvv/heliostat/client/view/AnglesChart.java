@@ -54,8 +54,8 @@ public class AnglesChart extends TimeChart {
 		if (state == null)
 			return;
 
-		if (state.day != day) {
-			day = state.day;
+		if (state.dayTime.day != day) {
+			day = state.dayTime.day;
 
 			Function az1 = new Function() {
 				@Override

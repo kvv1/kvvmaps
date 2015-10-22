@@ -24,4 +24,9 @@ public interface HeliostatServiceAux extends RemoteService {
 
 	void setRange(MotorId id, int max) throws AuthException;
 
+	void setDay(int day) throws AuthException;
+
+	void setTime(double time) throws AuthException;
+
+
 }

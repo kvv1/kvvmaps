@@ -3,6 +3,7 @@ package kvv.heliostat.server;
 import kvv.heliostat.client.dto.AutoMode;
 import kvv.heliostat.client.dto.MotorState;
 import kvv.heliostat.client.dto.SensorState;
+import kvv.heliostat.server.envir.Envir;
 import kvv.heliostat.server.sensor.Sensor;
 import kvv.heliostat.server.trajectory.AngleStepTable;
 import kvv.heliostat.shared.environment.Environment;
@@ -12,7 +13,7 @@ import kvv.simpleutils.src.PtD;
 public class Engine {
 
 	private final Motor[] motors;
-	private final ISensor sensor;
+	private final Sensor sensor;
 
 	public Engine(Sensor sensor, Motor[] motors) {
 		this.sensor = sensor;
@@ -25,7 +26,7 @@ public class Engine {
 			Environment.ANGLE_STEP, "c:/heliostat/motorAlt.txt");
 
 	public void step(AutoMode autoMode, int stepsPerDegreeAz,
-			int stepsPerDegreeAlt) {
+			int stepsPerDegreeAlt, int day, double time) {
 		SensorState sensorState = sensor.getState();
 
 		MotorState azMotorState = motors[0].getState();
@@ -47,16 +48,14 @@ public class Engine {
 					* stepsPerDegreeAlt));
 
 			if (Math.sqrt(deflX * deflX + deflY * deflY) < 0.02) {
-				azTable.add(MirrorAngles.get(Time.getDay(), Time.getTime()).x,
-						azPos);
-				altTable.add(MirrorAngles.get(Time.getDay(), Time.getTime()).y,
-						altPos);
+				azTable.add(MirrorAngles.get(day, time).x, azPos);
+				altTable.add(MirrorAngles.get(day, time).y, altPos);
 			}
 
 			motors[0].go(azPos);
 			motors[1].go(altPos);
 		} else if (autoMode == AutoMode.FULL) {
-			PtD angles = MirrorAngles.get(Time.getDay(), Time.getTime());
+			PtD angles = MirrorAngles.get(day, time);
 			int azPos = (int) azTable.get(angles.x);
 			int altPos = (int) altTable.get(angles.y);
 			motors[0].go(azPos);

@@ -155,8 +155,8 @@ public class MotorsView extends Composite implements View {
 					for (double t = 5; t <= 19; t += 0.1) {
 						String style = Heliostat.TRAJ_COLOR;
 
-						double az = MirrorAngles.get(state.day, t).x;
-						double alt = MirrorAngles.get(state.day, t).y;
+						double az = MirrorAngles.get(state.dayTime.day, t).x;
+						double alt = MirrorAngles.get(state.dayTime.day, t).y;
 
 						double azSteps = azFunc.value(az);
 						double altSteps = altFunc.value(alt);
@@ -204,8 +204,10 @@ public class MotorsView extends Composite implements View {
 					context.setStrokeStyle("yellow");
 					context.setFillStyle("yellow");
 					{
-						double az = MirrorAngles.get(state.day, state.time).x;
-						double alt = MirrorAngles.get(state.day, state.time).y;
+						double az = MirrorAngles.get(state.dayTime.day,
+								state.dayTime.time).x;
+						double alt = MirrorAngles.get(state.dayTime.day,
+								state.dayTime.time).y;
 
 						double azSteps = azFunc.value(az);
 						double altSteps = altFunc.value(alt);

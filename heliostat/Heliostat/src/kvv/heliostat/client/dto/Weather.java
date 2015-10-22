@@ -32,11 +32,21 @@ public class Weather implements Serializable {
 	}
 
 	public double p2t(int p) {
-		return sunrize + (double)p / ptsPerHour;
+		return sunrize + (double) p / ptsPerHour;
 	}
-	
+
 	public int d2off(int d) {
 		return (d + 365 - firstDay) % 365;
 	}
 
+	public boolean isSunny(int day, double time) {
+		int dayOffset = d2off(day);
+
+		try {
+			return values[dayOffset][t2p(time)];
+		} catch (Exception e) {
+			return false;
+		}
+
+	}
 }

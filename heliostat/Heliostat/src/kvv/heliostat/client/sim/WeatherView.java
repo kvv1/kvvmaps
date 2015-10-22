@@ -74,8 +74,7 @@ public class WeatherView extends Composite implements View {
 							calendarView.calendarCanvas.context.fillRect(x1
 									- (x2 - x1) / 2,
 									calendarView.calendarCanvas.d2y(d),
-									x2 - x1,
-									CalendarCanvas.dayHeight);
+									x2 - x1, CalendarCanvas.dayHeight);
 						}
 					}
 				}
@@ -117,8 +116,9 @@ public class WeatherView extends Composite implements View {
 
 					calendarView.draw();
 				} else {
-					model.heliostatService.setTime(t, new CallbackAdapter<Void>());
-					model.heliostatService.setDay(
+					model.heliostatServiceAux.setTime(t,
+							new CallbackAdapter<Void>());
+					model.heliostatServiceAux.setDay(
 							(dayOffset + getFirstDay()) % 365,
 							new CallbackAdapter<Void>());
 				}
@@ -162,12 +162,14 @@ public class WeatherView extends Composite implements View {
 
 			@Override
 			protected void onTimeClicked(double time) {
-				model.heliostatService.setTime(time, new CallbackAdapter<Void>());
+				model.heliostatServiceAux.setTime(time,
+						new CallbackAdapter<Void>());
 			}
 
 			@Override
 			protected void onDayClicked(int day) {
-				model.heliostatService.setDay(day, new CallbackAdapter<Void>());
+				model.heliostatServiceAux.setDay(day,
+						new CallbackAdapter<Void>());
 			}
 		};
 

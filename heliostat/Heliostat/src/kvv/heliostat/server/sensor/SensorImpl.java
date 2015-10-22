@@ -1,8 +1,9 @@
 package kvv.heliostat.server.sensor;
 
 import kvv.heliostat.client.dto.SensorState;
-import kvv.heliostat.server.Heliostat;
 import kvv.heliostat.server.controller.Controller;
+import kvv.heliostat.server.envir.Envir;
+import kvv.heliostat.server.envir.RealEnvir;
 
 public class SensorImpl implements Sensor {
 
@@ -26,12 +27,11 @@ public class SensorImpl implements Sensor {
 			while (!stopped) {
 				try {
 					sleep(100);
-					int ADDR = Integer
-							.parseInt(Heliostat.instance.controllerParams
-									.getProperty("SENSOR_ADDR", "0"));
-					
+					int ADDR = Integer.parseInt(Envir.instance.getProps()
+							.getProperty("SENSOR_ADDR", "0"));
+
 					controller.setReg(ADDR, 10, 0);
-					
+
 					int[] resp = controller.getRegs(ADDR, 16, 4);
 					state = new SensorState(resp[0], resp[1], resp[2], resp[3]);
 				} catch (Exception e) {
@@ -41,12 +41,10 @@ public class SensorImpl implements Sensor {
 		}
 	};
 
-	@Override
 	public void close() {
 		stopped = true;
 	}
 
-	@Override
 	public void start() {
 		thread.start();
 	}

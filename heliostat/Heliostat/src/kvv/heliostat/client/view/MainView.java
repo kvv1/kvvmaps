@@ -136,8 +136,8 @@ public class MainView extends Composite implements View {
 			break;
 		}
 
-		date.setText(state.dayS);
-		time.setText(state.timeS);
+		date.setText(state.dayTime.dayS);
+		time.setText(state.dayTime.timeS);
 
 	}
 
@@ -150,7 +150,7 @@ public class MainView extends Composite implements View {
 		public void updateView(HeliostatState state) {
 			if (state == null)
 				return;
-			upd(state.azData, MirrorAngles.get(state.day, state.time).x);
+			upd(state.azData, MirrorAngles.get(state.dayTime.day, state.dayTime.time).x);
 		}
 	}
 	
@@ -163,7 +163,7 @@ public class MainView extends Composite implements View {
 		public void updateView(HeliostatState state) {
 			if (state == null)
 				return;
-			upd(state.altData, MirrorAngles.get(state.day, state.time).y);
+			upd(state.altData, MirrorAngles.get(state.dayTime.day, state.dayTime.time).y);
 		}
 	}
 	

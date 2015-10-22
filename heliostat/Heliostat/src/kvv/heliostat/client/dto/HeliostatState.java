@@ -6,10 +6,7 @@ import java.io.Serializable;
 public class HeliostatState implements Serializable {
 	public MotorState[] motorState;
 	public SensorState sensorState;
-	public int day;
-	public String dayS;
-	public double time;
-	public String timeS;
+	public DayTime dayTime;
 	public Params params;
 	public double[][] azData;
 	public double[][] altData;
@@ -18,15 +15,12 @@ public class HeliostatState implements Serializable {
 	}
 
 	public HeliostatState(MotorState[] motorState, SensorState sensorState,
-			Params params, int day, String dayS,
-			double time, String timeS, double[][] azData, double[][] altData) {
+			Params params, DayTime dayTime, double[][] azData,
+			double[][] altData) {
 		this.motorState = motorState;
 		this.sensorState = sensorState;
 		this.params = params;
-		this.time = time;
-		this.timeS = timeS;
-		this.day = day;
-		this.dayS = dayS;
+		this.dayTime = dayTime;
 		this.azData = azData;
 		this.altData = altData;
 	}

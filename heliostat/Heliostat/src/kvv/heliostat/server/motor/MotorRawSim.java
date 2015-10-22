@@ -86,8 +86,8 @@ public class MotorRawSim implements MotorRaw {
 	}
 
 	@Override
-	public void setPosition(int pos) {
-		dPos = pos - posAbs;
+	public void clearPosition() {
+		dPos = -posAbs;
 	}
 
 	@Override

@@ -84,7 +84,7 @@ public class Motor {
 		case GOING_HOME2:
 			if (motorRaw.getIn1()) {
 				motorRaw.stop();
-				motorRaw.setPosition(0);
+				motorRaw.clearPosition();
 				posValid = true;
 				setState(State.IDLE);
 			}

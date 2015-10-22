@@ -1,8 +1,8 @@
 package kvv.heliostat.server.sensor;
 
+import kvv.heliostat.client.dto.DayTime;
 import kvv.heliostat.client.dto.SensorState;
-import kvv.heliostat.server.SimEnvironment;
-import kvv.heliostat.server.Time;
+import kvv.heliostat.server.envir.Envir;
 import kvv.heliostat.server.motor.MotorRawSim;
 import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.math.MirrorAngles;
@@ -32,18 +32,17 @@ public class SensorSim implements Sensor {
 				altMotor.posAbs, Environment.MIN_ALTITUDE,
 				Environment.MAX_ALTITUDE, 0.01);
 
-		double time = Time.getTime();
-		int day = Time.getDay();
+		DayTime time = Envir.instance.time.getTime();
 
-		double sunAz = MirrorAngles.get(day, time).x;
-		double sunAlt = MirrorAngles.get(day, time).y;
+		double sunAz = MirrorAngles.get(time.day, time.time).x;
+		double sunAlt = MirrorAngles.get(time.day, time.time).y;
 
-		double dAz = motorAz - sunAz/* + (Math.random() - 0.5)*/;
-		double dAlt = motorAlt - sunAlt/* + (Math.random() - 0.5)*/;
+		double dAz = motorAz - sunAz/* + (Math.random() - 0.5) */;
+		double dAlt = motorAlt - sunAlt/* + (Math.random() - 0.5) */;
 
 		double brightness = 1000;// * Environment.getMirrorAltitude(day, time) /
 									// 45;
-		if (!SimEnvironment.instance.isSunny())
+		if (!Envir.instance.weather.isSunny(time.day, time.time))
 			brightness /= 50;
 
 		double tl = sensorSensitivity.value(dist(-SENSOR_SEGMENT_SENTER_DIST,
@@ -56,14 +55,6 @@ public class SensorSim implements Sensor {
 				-SENSOR_SEGMENT_SENTER_DIST, dAz, dAlt)) * brightness;
 
 		return new SensorState((int) tl, (int) tr, (int) bl, (int) br);
-	}
-
-	@Override
-	public void close() {
-	}
-
-	@Override
-	public void start() {
 	}
 
 	private static final double dist(double x1, double y1, double x2, double y2) {

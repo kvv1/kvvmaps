@@ -2,9 +2,9 @@ package kvv.heliostat.server.motor;
 
 import java.io.IOException;
 
-import kvv.heliostat.server.Heliostat;
 import kvv.heliostat.server.MotorRaw;
 import kvv.heliostat.server.controller.IController;
+import kvv.heliostat.server.envir.Envir;
 
 public class MotorRawT3 implements MotorRaw {
 
@@ -25,8 +25,8 @@ public class MotorRawT3 implements MotorRaw {
 	}
 
 	private int getAddr() {
-		return Integer.parseInt(Heliostat.instance.controllerParams
-				.getProperty("MOTORS_ADDR", "0"));
+		return Integer.parseInt(Envir.instance.getProps().getProperty(
+				"MOTORS_ADDR", "0"));
 
 	}
 
@@ -68,8 +68,8 @@ public class MotorRawT3 implements MotorRaw {
 	}
 
 	@Override
-	public void setPosition(int pos) {
-		setReg(REG_POSITION, pos);
+	public void clearPosition() {
+		setReg(REG_POSITION, 0);
 	}
 
 	@Override

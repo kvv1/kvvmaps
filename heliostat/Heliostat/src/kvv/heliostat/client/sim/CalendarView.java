@@ -169,9 +169,9 @@ public abstract class CalendarView extends Composite implements View {
 	public void updateView(HeliostatState state) {
 		if (state == null)
 			return;
-		double x = calendarCanvas.t2x(state.time) + leftMargin;
+		double x = calendarCanvas.t2x(state.dayTime.time) + leftMargin;
 		p.setWidgetPosition(canvas1, (int) (x + 0.5) - 1,
-				calendarCanvas.d2y((state.day + 365 - getFirstDay()) % 365));
+				calendarCanvas.d2y((state.dayTime.day + 365 - getFirstDay()) % 365));
 	}
 
 }
