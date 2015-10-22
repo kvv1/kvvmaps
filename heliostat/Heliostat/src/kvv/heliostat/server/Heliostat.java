@@ -10,6 +10,7 @@ import kvv.heliostat.client.dto.MotorId;
 import kvv.heliostat.client.dto.MotorState;
 import kvv.heliostat.client.dto.Params;
 import kvv.heliostat.client.dto.SensorState;
+import kvv.heliostat.server.engine.Engine;
 import kvv.heliostat.server.envir.Envir;
 import kvv.stdutils.Utils;
 

@@ -1,4 +1,4 @@
-package kvv.heliostat.server.trajectory;
+package kvv.heliostat.server.engine;
 
 import java.io.IOException;
 import java.util.ArrayList;

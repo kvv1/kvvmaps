@@ -1,4 +1,4 @@
-package kvv.heliostat.server;
+package kvv.heliostat.server.engine;
 
 import kvv.heliostat.client.dto.AutoMode;
 import kvv.heliostat.client.dto.MotorState;
@@ -6,7 +6,6 @@ import kvv.heliostat.client.dto.SensorState;
 import kvv.heliostat.server.envir.Envir;
 import kvv.heliostat.server.envir.motor.Motor;
 import kvv.heliostat.server.envir.sensor.Sensor;
-import kvv.heliostat.server.trajectory.AngleStepTable;
 import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.math.MirrorAngles;
 import kvv.simpleutils.src.PtD;
