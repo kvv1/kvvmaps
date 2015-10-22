@@ -3,10 +3,9 @@ package kvv.heliostat.server.engine;
 import kvv.heliostat.client.dto.AutoMode;
 import kvv.heliostat.client.dto.MotorState;
 import kvv.heliostat.client.dto.SensorState;
-import kvv.heliostat.server.envir.Envir;
+import kvv.heliostat.server.ParamsHolder;
 import kvv.heliostat.server.envir.motor.Motor;
 import kvv.heliostat.server.envir.sensor.Sensor;
-import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.math.MirrorAngles;
 import kvv.simpleutils.src.PtD;
 
@@ -21,9 +20,9 @@ public class Engine {
 	}
 
 	private AngleStepTable azTable = new AngleStepTable(-60, 60,
-			Environment.ANGLE_STEP, "c:/heliostat/motorAz.txt");
+			ParamsHolder.params.ANGLE_STEP, "c:/heliostat/motorAz.txt");
 	private AngleStepTable altTable = new AngleStepTable(-10, 60,
-			Environment.ANGLE_STEP, "c:/heliostat/motorAlt.txt");
+			ParamsHolder.params.ANGLE_STEP, "c:/heliostat/motorAlt.txt");
 
 	public void step(AutoMode autoMode, int stepsPerDegreeAz,
 			int stepsPerDegreeAlt, int day, double time) {

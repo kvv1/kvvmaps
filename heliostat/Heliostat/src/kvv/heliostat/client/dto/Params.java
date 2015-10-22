@@ -10,6 +10,7 @@ public class Params implements Serializable {
 	public int[] range = { 80000, 80000 };
 	public String controllerParams = "COM=COM4\nSENSOR_ADDR=25\nMOTORS_ADDR=25";
 	public boolean clock = true;
+	public int ANGLE_STEP = 4;
 
 	public SimParams simParams = new SimParams();
 }

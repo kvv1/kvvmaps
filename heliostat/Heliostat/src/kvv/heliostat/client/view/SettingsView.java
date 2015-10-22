@@ -79,7 +79,7 @@ public class SettingsView extends Composite implements View {
 		protected void onClick(ClickEvent event) {
 			try {
 				int period = Integer.parseInt(text.getText());
-				if (period < 0 && period > 10000)
+				if (period < 0 || period > 10000)
 					return;
 				speriod = text.getText();
 				Cookies.setCookie(Heliostat.REFRESH_PERIOD, speriod);

@@ -9,7 +9,6 @@ import kvv.heliostat.client.dto.MotorId;
 import kvv.heliostat.client.dto.MotorState;
 import kvv.heliostat.client.model.Model;
 import kvv.heliostat.client.model.View;
-import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.math.MirrorAngles;
 import kvv.simpleutils.spline.Function;
 import kvv.simpleutils.spline.FunctionFactory;
@@ -163,7 +162,7 @@ public class MotorsView extends Composite implements View {
 
 						boolean azFound = false;
 						for (double az1 : state.azData[0]) {
-							if (Math.abs(az - az1) < Environment.ANGLE_STEP) {
+							if (Math.abs(az - az1) < state.params.ANGLE_STEP) {
 								azFound = true;
 								break;
 							}
@@ -171,7 +170,7 @@ public class MotorsView extends Composite implements View {
 
 						boolean altFound = false;
 						for (double alt1 : state.altData[0]) {
-							if (Math.abs(alt - alt1) < Environment.ANGLE_STEP) {
+							if (Math.abs(alt - alt1) < state.params.ANGLE_STEP) {
 								altFound = true;
 								break;
 							}

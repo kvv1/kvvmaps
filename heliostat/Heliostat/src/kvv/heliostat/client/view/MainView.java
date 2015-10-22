@@ -12,7 +12,6 @@ import kvv.heliostat.client.dto.MotorId;
 import kvv.heliostat.client.model.Model;
 import kvv.heliostat.client.model.View;
 import kvv.heliostat.client.sim.ControlView;
-import kvv.heliostat.shared.environment.Environment;
 import kvv.heliostat.shared.math.MirrorAngles;
 
 import com.google.gwt.event.dom.client.ClickEvent;
