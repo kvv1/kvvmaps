@@ -16,6 +16,7 @@ public class Chart extends Composite {
 	private final AbsolutePanel panel = new AbsolutePanel();
 
 	private Widget[] layers = new Widget[10];
+	private ChartData[] layers1 = new ChartData[10];
 
 	private final Canvas timeCanvas = Canvas.createIfSupported();
 	private final Context2d timeContext = timeCanvas.getContext2d();
@@ -33,7 +34,7 @@ public class Chart extends Composite {
 	private final double minx;
 	private final double maxx;
 	private final double miny;
-	private final double maxy;
+	private double maxy;
 	private final double stepx;
 	private final double stepy;
 	private final double[] solidVals;
@@ -95,6 +96,17 @@ public class Chart extends Composite {
 		initWidget(panel);
 	}
 
+	public void setMaxY(double maxy) {
+		if(maxy == this.maxy)
+			return;
+		
+		this.maxy = maxy;
+		draw();
+		for (int i = 0; i < layers1.length; i++)
+			if (layers1[i] != null)
+				set(i, layers1[i]);
+	}
+
 	protected void onClick(double arg) {
 	}
 
@@ -149,19 +161,19 @@ public class Chart extends Composite {
 		context.stroke();
 
 		if (chartData.mark != null) {
-//			context.setStrokeStyle(chartData.color);
-//			context.setLineWidth(1);
-//			
-//			double x = arg2x(chartData.mark);
-//			double val = chartData.function.value(chartData.mark);
-//			double y = val2y(val);
-//
-//			context.moveTo(x - 10, y);
-//			context.lineTo(x + 10, y);
-//
-//			context.moveTo(x, y - 10);
-//			context.lineTo(x, y + 10);
-//			context.stroke();
+			// context.setStrokeStyle(chartData.color);
+			// context.setLineWidth(1);
+			//
+			// double x = arg2x(chartData.mark);
+			// double val = chartData.function.value(chartData.mark);
+			// double y = val2y(val);
+			//
+			// context.moveTo(x - 10, y);
+			// context.lineTo(x + 10, y);
+			//
+			// context.moveTo(x, y - 10);
+			// context.lineTo(x, y + 10);
+			// context.stroke();
 		}
 
 		context.setFillStyle("#FFFFFF");
@@ -174,9 +186,9 @@ public class Chart extends Composite {
 			}
 		}
 
-
 		context.closePath();
 
+		layers1[idx] = chartData;
 		set(idx, canvas);
 	}
 
