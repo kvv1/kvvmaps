@@ -1,4 +1,4 @@
-package kvv.heliostat.server.controller;
+package kvv.heliostat.server.envir.controller;
 
 public class Command {
 	public static final byte CMD_MODBUS_SETREGS = 16;

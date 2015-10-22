@@ -5,9 +5,9 @@ import java.io.StringReader;
 import java.util.Properties;
 
 import kvv.heliostat.client.dto.Params;
-import kvv.heliostat.server.controller.Controller;
 import kvv.heliostat.server.controller.adu.ADUTransceiver;
 import kvv.heliostat.server.controller.adu.PacketTransceiver;
+import kvv.heliostat.server.envir.controller.Controller;
 import kvv.heliostat.server.envir.motor.Motor;
 import kvv.heliostat.server.envir.motor.MotorRaw;
 import kvv.heliostat.server.envir.motor.MotorRawT3;

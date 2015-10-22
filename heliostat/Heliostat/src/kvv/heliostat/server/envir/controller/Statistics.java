@@ -1,4 +1,4 @@
-package kvv.heliostat.server.controller;
+package kvv.heliostat.server.envir.controller;
 
 import java.util.HashMap;
 import java.util.Map;

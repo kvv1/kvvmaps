@@ -13,7 +13,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import kvv.heliostat.server.controller.BusLogger;
+import kvv.heliostat.server.envir.controller.BusLogger;
 
 public class PacketTransceiver implements IPacketTransceiver {
 	private final static int BAUD = 9600;

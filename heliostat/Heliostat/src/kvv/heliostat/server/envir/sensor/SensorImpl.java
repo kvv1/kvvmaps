@@ -1,9 +1,9 @@
 package kvv.heliostat.server.envir.sensor;
 
 import kvv.heliostat.client.dto.SensorState;
-import kvv.heliostat.server.controller.Controller;
 import kvv.heliostat.server.envir.Envir;
 import kvv.heliostat.server.envir.RealEnvir;
+import kvv.heliostat.server.envir.controller.Controller;
 
 public class SensorImpl implements Sensor {
 
