@@ -3,6 +3,8 @@
 #include "hw.h"
 #include "io.h"
 #include "board.h"
+//#include "pin.h"
+#include "stepper.h"
 
 #if(F_CPU == 1000000)
 #define PRESCALER 3
@@ -180,14 +182,24 @@ char getClearTimerTicks() {
 	return tticks;
 }
 
+#include "pin.h"
+
 ISR(TIMER0_OVF_vect) {
 	static char n = TIME_UNIT / TIMER_PERIOD;
 	TCNT0 = 255 - MODULO;
-	ioMillis();
+
+	setDDR(PIN_STEPPER_0_HOME, 1);
+	setPort(PIN_STEPPER_0_HOME, 1);
+
 	if (!(--n)) {
 		n = TIME_UNIT / TIMER_PERIOD;
 		timerTicks++;
 	}
+
+	stepperMS_cli();
+
+	ioMillis_cli();
+	setPort(PIN_STEPPER_0_HOME, 0);
 }
 
 void timer0Init() {

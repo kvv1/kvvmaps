@@ -28,12 +28,10 @@ static volatile uint8_t rxBufReady;
 
 static char receiveTimer;
 
-void ioMillis() {
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-		if (receiveTimer != 0)
-			if (--receiveTimer == 0)
-				rxBufReady = 1;
-	}
+void ioMillis_cli() {
+	if (receiveTimer != 0)
+		if (--receiveTimer == 0)
+			rxBufReady = 1;
 }
 
 uint8_t* getPacket(uint8_t* len) {

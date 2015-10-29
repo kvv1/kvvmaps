@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-void ioMillis();
+void ioMillis_cli();
 uint8_t* getPacket(uint8_t* len);
 void startReceiving();
 void uartPutchar(uint8_t c);

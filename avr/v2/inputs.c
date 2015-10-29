@@ -8,6 +8,7 @@ static PORTPIN pins[] PROGMEM = { IN0, IN1, IN0, IN1, IN0, IN1, IN0, IN1 };
 #define PIN(n) ((PORTPIN)pgm_read_word(pins + (n)))
 
 int8_t getInput(uint8_t n) {
+	pgm_read_word(0);
 	return getPin(PIN(n));
 }
 

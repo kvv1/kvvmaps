@@ -6,6 +6,7 @@
 #include "inputs.h"
 #include "1w.h"
 #include "adc.h"
+#include "stepper.h"
 
 static char adcs[] PROGMEM = { ADC0, ADC1, ADC2, ADC3, ADC0, ADC1, ADC2, ADC3 };
 
@@ -50,6 +51,12 @@ char getReg(uint8_t reg, int* val) {
 				(uint16_t*) eepromRegisters + (reg - REG_EEPROM0));
 	} else if (reg >= REG_RAM0 && reg < REG_RAM0 + REG_RAM_CNT) {
 		*val = ramRegisters[reg];
+	} else if (reg >= REG_STEPPER0_START && reg < REG_STEPPER0_END) {
+		*val = stepperGetReg(0, reg - REG_STEPPER0_START);
+		//*val = 333;
+	} else if (reg >= REG_STEPPER1_START && reg < REG_STEPPER1_END) {
+		*val = stepperGetReg(1, reg - REG_STEPPER1_START);
+		//*val = 0;
 	} else {
 		return 0;
 	}
@@ -79,6 +86,10 @@ char setReg(uint8_t reg, int val) {
 		setresetByWd(val);
 	} else if (reg == REG_WD_ON_RECEIVE) {
 		setwdOnReceive(val);
+	} else if (reg >= REG_STEPPER0_START && reg < REG_STEPPER0_END) {
+		stepperSetReg(0, reg - REG_STEPPER0_START, val);
+	} else if (reg >= REG_STEPPER1_START && reg < REG_STEPPER1_END) {
+		stepperSetReg(1, reg - REG_STEPPER1_START, val);
 	} else {
 		return 0;
 	}

@@ -39,9 +39,9 @@ void W1_OFF(char n) {
 //***************************************************************************
 unsigned char oneWireInit(char n) {
 	char res;
+	W1_LOW(n);
+	_delay_us(485);
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-		W1_LOW(n);
-		_delay_us(485);
 		W1_HIGH(n);
 		_delay_us(70);
 		res = (W1_IN(n) == 0);
@@ -57,19 +57,37 @@ void oneWireWriteByte(char n, unsigned char data) {
 	unsigned char data_bit = data; //Переменная представляющая текущий бит для передачи.
 
 	for (i = 0; i < 8; i++) {
-		ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-			W1_LOW(n);
-			if (data_bit & 1) {
+
+		if (data_bit & 1) {
+			ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+				W1_LOW(n);
 				_delay_us(1); //1мкс состояния линии "в ноль".
 				W1_HIGH(n);
-				_delay_us(90);
-			} else {
-				_delay_us(90); //Для передачи 0, задержим линию "в низком уровне" некоторое время.
-				W1_HIGH(n);
-				_delay_us(1);
 			}
-			_delay_us(1); //Выдерживаем минимальную задержку между тайм-слотами (1мкс.(продолжит. либого тайм-слота = 60-120мкс)).
+			_delay_us(90);
+		} else {
+			W1_LOW(n);
+			_delay_us(90); //Для передачи 0, задержим линию "в низком уровне" некоторое время.
+			W1_HIGH(n);
+			_delay_us(1);
 		}
+		_delay_us(1); //Выдерживаем минимальную задержку между тайм-слотами (1мкс.(продолжит. либого тайм-слота = 60-120мкс)).
+
+		/*
+		 ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+		 W1_LOW(n);
+		 if (data_bit & 1) {
+		 _delay_us(1); //1мкс состояния линии "в ноль".
+		 W1_HIGH(n);
+		 _delay_us(90);
+		 } else {
+		 _delay_us(90); //Для передачи 0, задержим линию "в низком уровне" некоторое время.
+		 W1_HIGH(n);
+		 _delay_us(1);
+		 }
+		 _delay_us(1); //Выдерживаем минимальную задержку между тайм-слотами (1мкс.(продолжит. либого тайм-слота = 60-120мкс)).
+		 }
+		 */
 		data_bit >>= 1;
 	}
 }
@@ -95,8 +113,8 @@ unsigned char oneWireReadByte(char n) {
 			if (W1_IN(n)) //Если линия так и осталась при высоком уровне:
 				data |= 0x80;
 
-			_delay_us(55); //Заканчиваем текущий тайм-слот и переходим к началу следующего...
 		}
+		_delay_us(55); //Заканчиваем текущий тайм-слот и переходим к началу следующего...
 	}
 	return data; //Возвращаем принятый байт.
 }

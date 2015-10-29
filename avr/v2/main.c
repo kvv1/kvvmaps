@@ -15,10 +15,11 @@
 #include "commands.h"
 #include "rules.h"
 #include "regs.h"
+#include "stepper.h"
 
 #define INPUT_BUFFER_SIZE 64
 
-#define VERSION 12
+#define VERSION 13
 
 void packetReceived(uint8_t* buffer, uint8_t len);
 
@@ -44,6 +45,7 @@ int main() {
 	w1Init();
 	initPWM();
 	inputsInit();
+	stepperInit();
 
 	wdt_enable(WDTO_2S);
 

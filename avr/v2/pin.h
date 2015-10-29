@@ -3,25 +3,16 @@
 
 #include <stdint.h>
 
-
 typedef struct {
 }*PINDIR;
 
 #define PIN_OUT ((PINDIR)1)
-#define PIN_IN ((PINDIR)1)
-
-//#define ENUM_TYPE(type) typedef struct {}*type
-//#define ENUM_CONSTANT(type, value) type name = ((type)(value))
-//ENUM_TYPE(PORTBIT);
-//#define PB_1 ENUM_CONSTANT(PORTBIT, 1)
+#define PIN_IN ((PINDIR)0)
 
 typedef struct {
 }*PORTPIN;
 
 #define PORT_BIT(pin, bit) ((PORTPIN)((((int)(&pin) << 8) | (1<<bit))))
-
-//typedef unsigned int PORTPIN;
-//#define PORT_BIT(pin, bit) (((int)(&pin) << 8) | (1<<bit))
 
 #ifdef ATMEGA32
 #define P_A0 PORT_BIT(PINA, 0)
@@ -101,7 +92,7 @@ inline char getPortBit(PORTPIN portpin, char offset) {
 #define setDDR(portPin, val) setPortBit(portPin, 1, val)
 
 inline void confPin(PORTPIN portPin, PINDIR dir, char pullUp) {
-	setDDR(portPin,(int)dir);
+	setDDR(portPin, (int)dir);
 	setPort(portPin, pullUp);
 }
 
