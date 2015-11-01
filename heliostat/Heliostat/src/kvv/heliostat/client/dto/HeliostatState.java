@@ -3,7 +3,8 @@ package kvv.heliostat.client.dto;
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
-public class HeliostatState implements Serializable {
+public class HeliostatState implements Serializable{
+	public int reqNo;
 	public MotorState[] motorState;
 	public SensorState sensorState;
 	public DayTime dayTime;

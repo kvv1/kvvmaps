@@ -1,5 +1,6 @@
 package kvv.heliostat.server.envir.motor;
 
+import kvv.heliostat.client.dto.MotorState;
 import kvv.heliostat.server.ParamsHolder;
 
 public class MotorRawSim implements MotorRaw {
@@ -24,7 +25,7 @@ public class MotorRawSim implements MotorRaw {
 	private int msteps;
 
 	@Override
-	public void stepSim(int ms) {
+	public synchronized void stepSim(int ms) {
 
 		msteps += ms * speed;
 		int steps = Math.min(msteps / 1000, stepCnt);
@@ -62,7 +63,7 @@ public class MotorRawSim implements MotorRaw {
 	}
 
 	@Override
-	public void moveIn1N(int cnt) {
+	public synchronized void moveIn1N(int cnt) {
 		dir = cnt < 0;
 		stepCnt = cnt;
 		if (dir)
@@ -71,7 +72,7 @@ public class MotorRawSim implements MotorRaw {
 	}
 
 	@Override
-	public void moveIn2N(int cnt) {
+	public synchronized void moveIn2N(int cnt) {
 		dir = cnt < 0;
 		stepCnt = cnt;
 		if (dir)
@@ -80,39 +81,53 @@ public class MotorRawSim implements MotorRaw {
 	}
 
 	@Override
-	public int getPosition() {
+	public synchronized int getPosition() {
 		return posAbs + dPos;
 	}
 
 	@Override
-	public void clearPosition() {
+	public synchronized void clearPosition() {
 		dPos = -posAbs;
 	}
 
 	@Override
-	public boolean getIn1() {
+	public synchronized boolean getIn1() {
 		return posAbs <= 0;
 	}
 
 	@Override
-	public boolean getIn2() {
+	public synchronized boolean getIn2() {
 		return posAbs >= ParamsHolder.params.simParams.MAX_STEPS;
 	}
 
 	@Override
-	public void stop() {
+	public synchronized void stop() {
 		stepCnt = 0;
 		state = State.STOPPED;
 	}
 
 	@Override
-	public int getPosAbs() {
+	public synchronized Integer getPosAbs() {
 		return posAbs;
 	}
 
 	@Override
-	public void setFast(boolean b) {
+	public synchronized void setFast(boolean b) {
 		speed = b ? SPEED1 : SPEED;
 	}
 
+	@Override
+	public void close() {
+	}
+
+	@Override
+	public synchronized boolean isRunning() {
+		return stepCnt != 0;
+	}
+
+	@Override
+	public synchronized MotorState getState() {
+		return new MotorState(getPosition(), false, isRunning(), getIn1(),
+				getIn2(), getPosAbs());
+	}
 }

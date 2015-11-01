@@ -10,6 +10,7 @@ import kvv.heliostat.client.dto.AutoMode;
 import kvv.heliostat.client.dto.HeliostatState;
 import kvv.heliostat.client.dto.MotorId;
 import kvv.heliostat.client.model.Model;
+import kvv.heliostat.client.model.Model.Callback1;
 import kvv.heliostat.client.model.View;
 import kvv.heliostat.client.sim.ControlView;
 import kvv.heliostat.shared.math.MirrorAngles;
@@ -39,6 +40,8 @@ public class MainView extends Composite implements View {
 	private MotorChartAz motorChartAz;
 	private MotorChartAlt motorChartAlt;
 
+	private HorPanel controlPanel = new HorPanel();
+
 	private final Model model;
 
 	public MainView(final Model model) {
@@ -50,7 +53,7 @@ public class MainView extends Composite implements View {
 			@Override
 			public void onClick(ClickEvent event) {
 				model.heliostatService.setAuto(AutoMode.OFF,
-						new CallbackAdapter<Void>());
+						new Callback1<Void>(model));
 			}
 		});
 
@@ -58,7 +61,7 @@ public class MainView extends Composite implements View {
 			@Override
 			public void onClick(ClickEvent event) {
 				model.heliostatService.setAuto(AutoMode.SUN_ONLY,
-						new CallbackAdapter<Void>());
+						new Callback1<Void>(model));
 			}
 		});
 
@@ -66,7 +69,7 @@ public class MainView extends Composite implements View {
 			@Override
 			public void onClick(ClickEvent event) {
 				model.heliostatService.setAuto(AutoMode.FULL,
-						new CallbackAdapter<Void>());
+						new Callback1<Void>(model));
 			}
 		});
 
@@ -76,7 +79,7 @@ public class MainView extends Composite implements View {
 		SensorView sensorView = new SensorView(model);
 		model.add(sensorView);
 
-		ControlView controlView = new ControlView(model);
+		// ControlView controlView = new ControlView(model);
 
 		MotorRawView motorRawViewAz = new MotorRawView(model, MotorId.AZ);
 
@@ -117,7 +120,7 @@ public class MainView extends Composite implements View {
 
 		Panel p = new HorPanel(new VertPanel(hp1, centralPanel, azMotPanel,
 				altMotPanel, new Gap(6, 6), motorsChart, new Gap(6, 6),
-				anglesChart), controlView);
+				anglesChart), controlPanel);
 
 		// Panel p = new HorPanel(new VertPanel(dateTime, topPanel, azMotPanel,
 		// altMotPanel, new HorPanel(motorsPanel, sensorPanel), new Gap(6,
@@ -146,6 +149,9 @@ public class MainView extends Composite implements View {
 
 		date.setText(state.dayTime.dayS);
 		time.setText(state.dayTime.timeS);
+
+		if (state.params.SIM && controlPanel.getWidgetCount() == 0)
+			controlPanel.add(new ControlView(model));
 	}
 
 	static class MotorChartAz extends MotorChart {

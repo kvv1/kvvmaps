@@ -1,7 +1,6 @@
 package kvv.heliostat.client;
 
 import kvv.gwtutils.client.login.AuthException;
-import kvv.heliostat.client.dto.MotorId;
 import kvv.heliostat.client.dto.Weather;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -22,11 +21,11 @@ public interface HeliostatServiceAux extends RemoteService {
 
 	void shortDay(boolean value) throws AuthException;
 
-	void setRange(MotorId id, int max) throws AuthException;
-
 	void setDay(int day) throws AuthException;
 
 	void setTime(double time) throws AuthException;
+
+	void setSim(boolean value) throws AuthException;
 
 
 }

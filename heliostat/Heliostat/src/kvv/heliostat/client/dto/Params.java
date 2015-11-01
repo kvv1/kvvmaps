@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 @SuppressWarnings("serial")
 public class Params implements Serializable {
+	public boolean SIM;
 	public int[] stepsPerDegree = { 400, 1000 };
 	public AutoMode auto = AutoMode.OFF;
 	public int stepMS = 1000;

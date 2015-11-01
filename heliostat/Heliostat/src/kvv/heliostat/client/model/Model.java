@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import kvv.gwtutils.client.CallbackAdapter;
 import kvv.heliostat.client.Heliostat;
 import kvv.heliostat.client.HeliostatService;
 import kvv.heliostat.client.HeliostatServiceAsync;
@@ -33,24 +34,24 @@ public class Model {
 	public List<View> added = new ArrayList<>();
 	public List<View> removed = new ArrayList<>();
 
-	public void notifyViews() {
+	public static class Callback1<T> extends CallbackAdapter<T> {
+		private final Model model;
 
+		public Callback1(Model model) {
+			this.model = model;
+		}
+
+		@Override
+		public void onSuccess(T result) {
+			super.onSuccess(result);
+			model.notifyViews();
+		}
+	}
+
+	public void notifyViews() {
 		for (View view : views)
 			view.updateView(null);
-
-		heliostatService.getState(new AsyncCallback<HeliostatState>() {
-
-			@Override
-			public void onFailure(Throwable caught) {
-				lastState = null;
-			}
-
-			@Override
-			public void onSuccess(HeliostatState result) {
-				lastState = result;
-				updt(result);
-			}
-		});
+		start();
 	}
 
 	private void updt(HeliostatState state) {
@@ -70,8 +71,6 @@ public class Model {
 		removed.add(view);
 	}
 
-	private Timer timer;
-
 	public int getPeriod() {
 		String speriod = Cookies.getCookie(Heliostat.REFRESH_PERIOD);
 		if (speriod == null) {
@@ -82,42 +81,41 @@ public class Model {
 		return period;
 	}
 
+	private Timer timer = new Timer() {
+		private int reqNo;
+
+		@Override
+		public void run() {
+			heliostatService.getState(++reqNo,
+					new AsyncCallback<HeliostatState>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+							lastState = null;
+							if (updates)
+								updt(null);
+							schedule(getPeriod());
+						}
+
+						@Override
+						public void onSuccess(HeliostatState result) {
+							if (reqNo == result.reqNo) {
+								lastState = result;
+								if (updates)
+									updt(result);
+							}
+							schedule(getPeriod());
+						}
+					});
+		}
+	};
+
 	public void start() {
-		if (timer != null)
-			return;
-
-		timer = new Timer() {
-			@Override
-			public void run() {
-				heliostatService.getState(new AsyncCallback<HeliostatState>() {
-
-					@Override
-					public void onFailure(Throwable caught) {
-						lastState = null;
-						if (updates)
-							updt(null);
-						schedule(getPeriod());
-					}
-
-					@Override
-					public void onSuccess(HeliostatState result) {
-						lastState = result;
-						if (updates)
-							updt(result);
-						schedule(getPeriod());
-					}
-				});
-			}
-		};
-
-		timer.schedule(getPeriod());
+		timer.schedule(10);
 	}
 
 	public void stop() {
-		if (timer == null)
-			return;
 		timer.cancel();
-		timer = null;
 	}
 
 	public Model() {

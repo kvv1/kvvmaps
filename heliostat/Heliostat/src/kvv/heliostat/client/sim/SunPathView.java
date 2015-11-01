@@ -1,9 +1,9 @@
 package kvv.heliostat.client.sim;
 
-import kvv.gwtutils.client.CallbackAdapter;
 import kvv.heliostat.client.dto.HeliostatState;
 import kvv.heliostat.client.dto.MotorId;
 import kvv.heliostat.client.model.Model;
+import kvv.heliostat.client.model.Model.Callback1;
 import kvv.heliostat.client.model.View;
 import kvv.heliostat.shared.math.MirrorAngles;
 import kvv.simpleutils.spline.Function;
@@ -54,10 +54,10 @@ public class SunPathView extends Composite implements View {
 				int yPos = (int) altDeg2Steps.value(alt);
 
 				model.heliostatService.move(MotorId.AZ, xPos,
-						new CallbackAdapter<Void>());
+						new Callback1<Void>(model));
 
 				model.heliostatService.move(MotorId.ALT, yPos,
-						new CallbackAdapter<Void>());
+						new Callback1<Void>(model));
 			}
 		});
 

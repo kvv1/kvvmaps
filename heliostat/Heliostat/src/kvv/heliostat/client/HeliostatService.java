@@ -13,7 +13,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 @RemoteServiceRelativePath("heliostat")
 public interface HeliostatService extends RemoteService {
-	HeliostatState getState();
+	HeliostatState getState(int reqId);
 
 	void move(MotorId id, int pos) throws AuthException;
 
@@ -34,4 +34,7 @@ public interface HeliostatService extends RemoteService {
 	void clearHistory() throws AuthException;
 
 	void setControllerParams(String str) throws AuthException;
+	
+	void setRange(MotorId id, int max) throws AuthException;
+
 }

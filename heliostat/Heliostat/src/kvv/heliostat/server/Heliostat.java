@@ -1,6 +1,6 @@
 package kvv.heliostat.server;
 
-import kvv.heliostat.client.dto.DayTime;
+import kvv.heliostat.client.dto.AutoMode;
 import kvv.heliostat.client.dto.HeliostatState;
 import kvv.heliostat.client.dto.MotorState;
 import kvv.heliostat.client.dto.SensorState;
@@ -11,53 +11,67 @@ public class Heliostat extends Looper {
 
 	public static final Heliostat instance = new Heliostat();
 
-	public HeliostatState heliostatState;
-
-	private final Engine engine = new Engine(Envir.instance.sensor,
-			Envir.instance.motors);
-
-	Runnable r = new Runnable() {
-		@Override
-		public void run() {
-			synchronized (Heliostat.this) {
-				if (ParamsHolder.params.clock) {
-
-					Envir envir = Envir.instance;
-
-					DayTime time = envir.time.getTime();
-
-					envir.step(ParamsHolder.params.stepMS);
-
-					engine.step(ParamsHolder.params.auto,
-							ParamsHolder.params.stepsPerDegree[0],
-							ParamsHolder.params.stepsPerDegree[1], time.day,
-							time.time);
-
-					SensorState sensorState = envir.sensor.getState();
-					MotorState[] motorStates = new MotorState[] {
-							envir.motors[0].getState(),
-							envir.motors[1].getState() };
-
-					heliostatState = new HeliostatState(motorStates,
-							sensorState, ParamsHolder.params, time,
-							engine.getAzData(), engine.getAltData());
-				}
-
-				post(this, ParamsHolder.params.stepMS
-						/ ParamsHolder.params.simParams.clockRate);
-			}
-		}
-	};
-
-	public synchronized void init() {
-		start();
-		Envir.instance.start();
-		post(r, 100);
-	}
+	private Engine engine = new Engine();
 
 	public synchronized void close() {
 		stop();
-		Envir.instance.close();
+	}
+
+	public synchronized void init() {
+		start();
+
+		post(new Runnable() {
+			private long t = System.currentTimeMillis();
+
+			@Override
+			public void run() {
+				long t1 = System.currentTimeMillis();
+				int dt = (int) (t1 - t);
+				if (ParamsHolder.params.SIM)
+					dt *= ParamsHolder.params.simParams.clockRate;
+				t = t1;
+				Envir.instance.step(dt);
+				step();
+				post(this, 10);
+			}
+		}, 100);
+
+		post(new Runnable() {
+			@Override
+			public void run() {
+				if (ParamsHolder.params.clock
+						&& ParamsHolder.params.auto != AutoMode.OFF) {
+					engine.engineStep();
+				}
+
+				int stepMS = ParamsHolder.params.stepMS;
+				if (ParamsHolder.params.SIM)
+					stepMS /= ParamsHolder.params.simParams.clockRate;
+
+				post(this, stepMS);
+			}
+		}, 100);
+	}
+
+	private void step() {
+		Envir envir = Envir.instance;
+
+		envir.sensor.updateState();
+		envir.motors[0].updateState();
+		envir.motors[1].updateState();
+
+	}
+
+	public HeliostatState getState() {
+		Envir envir = Envir.instance;
+
+		SensorState sensorState = envir.sensor.getState();
+		MotorState[] motorStates = new MotorState[] {
+				envir.motors[0].getState(), envir.motors[1].getState() };
+
+		return new HeliostatState(motorStates, sensorState,
+				ParamsHolder.params, envir.time.getTime(), engine.getAzData(),
+				engine.getAltData());
 	}
 
 	public void clearHistory() {

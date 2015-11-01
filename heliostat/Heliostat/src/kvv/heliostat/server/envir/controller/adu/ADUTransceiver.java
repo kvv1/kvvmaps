@@ -26,7 +26,7 @@ public class ADUTransceiver implements ModbusLine{
 	}
 
 	@Override
-	public synchronized byte[] handle(int addr, byte[] body) {
+	public synchronized byte[] handle(int addr, byte[] body) throws IOException {
 		PDU pdu = new PDU(body);
 		ADU adu = new ADU(addr, pdu);
 
@@ -37,7 +37,7 @@ public class ADUTransceiver implements ModbusLine{
 			try {
 				res = packetTransceiver.sendPacket(adu.toBytes(), addr != 0);
 				if (res == null)
-					return null;
+					throw new IOException("no response");
 
 				ADU adu1 = ADU.fromBytes(res);
 				if (adu1 == null)
@@ -45,19 +45,10 @@ public class ADUTransceiver implements ModbusLine{
 				if (adu1.addr != addr)
 					throw new IOException("wrong response ADU addr");
 
-				byte[] request = adu.pdu.data;
-				byte[] response = adu1.pdu.data;
-				if (response[0] != request[0]) {
-					if ((response[0] & 0xFF) != (request[0] | 0x80)
-							|| response.length < 2)
-						throw new IOException("response PDU format error");
-					int code = response[1] & 0xFF;
-					throw new IOException("modbus code: " + code);
-				}
 				BusLogger.logSuccess(addr);
 				statistics.addSuccess(addr);
 				return adu1.pdu.toBytes();
-			} catch (Exception e) {
+			} catch (IOException e) {
 				try {
 					Thread.sleep(200);
 				} catch (InterruptedException ee) {
@@ -73,7 +64,7 @@ public class ADUTransceiver implements ModbusLine{
 
 				failedAddrs.add(addr);
 
-				return null;
+				throw e;
 			}
 		}
 		return null;
@@ -102,7 +93,7 @@ public class ADUTransceiver implements ModbusLine{
 	}
 
 	@Override
-	public Statistics getStatistics(boolean clear) {
+	public synchronized Statistics getStatistics(boolean clear) {
 		return statistics;
 	}
 

@@ -16,7 +16,7 @@ public class Looper {
 
 		@Override
 		public int compareTo(Task o) {
-			return time < o.time ? -1 : time > o.time ? 1 : 0;
+			return Long.compare(time, o.time);
 		}
 	}
 
@@ -77,10 +77,14 @@ public class Looper {
 
 					if (stopped)
 						return;
-					
-					if (task != null)
-						task.runnable.run();
+
+					if (task != null) {
+						synchronized (Looper.this) {
+							task.runnable.run();
+						}
+					}
 				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}

@@ -16,7 +16,7 @@ public class SimTime implements Time {
 	}
 
 	@Override
-	public DayTime getTime() {
+	public synchronized DayTime getTime() {
 		Calendar c = calendar;
 
 		int ms = c.get(Calendar.HOUR_OF_DAY) * 3600000 + c.get(Calendar.MINUTE)
@@ -32,7 +32,7 @@ public class SimTime implements Time {
 	}
 
 	@Override
-	public void setTime(double time) {
+	public synchronized void setTime(double time) {
 		Calendar c = Calendar.getInstance();
 		c.setTimeInMillis(calendar.getTimeInMillis());
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -43,11 +43,11 @@ public class SimTime implements Time {
 	}
 
 	@Override
-	public void setDay(int day) {
+	public synchronized void setDay(int day) {
 		calendar.set(Calendar.DAY_OF_YEAR, day + 1);
 	}
 
-	public void step(int ms) {
+	public synchronized void step(int ms) {
 		calendar.add(Calendar.MILLISECOND, ms);
 		if (ParamsHolder.params.simParams.shortDay
 				&& calendar.get(Calendar.HOUR_OF_DAY) >= 19) {

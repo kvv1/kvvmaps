@@ -9,25 +9,31 @@ import kvv.heliostat.server.envir.controller.adu.PacketTransceiver;
 import kvv.heliostat.server.envir.motor.Motor;
 import kvv.heliostat.server.envir.motor.MotorRaw;
 import kvv.heliostat.server.envir.motor.MotorRawT3;
+import kvv.heliostat.server.envir.motor.MotorSync;
 import kvv.heliostat.server.envir.sensor.SensorImpl;
 
 public class RealEnvir extends Envir {
 
-	private final Controller controller = new Controller(){
+	public final Controller controller = new Controller() {
 		private String com = "";
-		public synchronized byte[] send(int addr, byte[] request) throws IOException {
+
+		public synchronized byte[] send(int addr, byte[] request)
+				throws IOException {
 			String com = ParamsHolder.controllerParams.getProperty("COM", "");
 			if (modbusLine == null || !this.com.equals(com)) {
 				this.com = com;
-				setModbusLine(new ADUTransceiver(new PacketTransceiver(com, 500)));
+				setModbusLine(new ADUTransceiver(
+						new PacketTransceiver(com, 500)));
 			}
 			return super.send(addr, request);
 		}
 	};
-	private final MotorRaw motorAzimuthRaw = new MotorRawT3(controller);
-	private final MotorRaw motorAltitudeRaw = new MotorRawT3(controller);
-	private Motor azMotor = new Motor(motorAzimuthRaw);
-	private Motor altMotor = new Motor(motorAltitudeRaw);
+	private final MotorRaw motorAzimuthRaw = new MotorRawT3(controller, 0);
+	private final MotorRaw motorAltitudeRaw = new MotorRawT3(controller, 1);
+
+	private Motor azMotor = new MotorSync(motorAzimuthRaw, 0);
+	private Motor altMotor = new MotorSync(motorAltitudeRaw, 1);
+
 	private final SensorImpl sensor = new SensorImpl(controller);
 
 	private final RealTime realTime = new RealTime();
@@ -36,9 +42,18 @@ public class RealEnvir extends Envir {
 		init(azMotor, altMotor, sensor, null, realTime);
 	}
 
+//	private void checkInterrupted__() throws IntExc {
+//		if (azMotor != null)
+//			azMotor._checkInterrupted();
+//		if (altMotor != null)
+//			altMotor._checkInterrupted();
+//	}
+
 	@Override
 	public void close() {
 		sensor.close();
+		motors[0].close();
+		motors[1].close();
 		controller.close();
 	}
 

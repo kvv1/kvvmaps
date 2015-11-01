@@ -1,11 +1,5 @@
 package kvv.heliostat.server;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import kvv.gwtutils.client.login.AuthException;
 import kvv.gwtutils.server.login.LoginServlet;
 import kvv.heliostat.client.HeliostatService;
@@ -21,26 +15,31 @@ import kvv.heliostat.server.envir.Envir;
 public class HeliostatServiceImpl extends LoginServlet implements
 		HeliostatService {
 
-	@Override
-	protected void service(HttpServletRequest arg0, HttpServletResponse arg1)
-			throws ServletException, IOException {
-		synchronized (Heliostat.instance) {
-			super.service(arg0, arg1);
-		}
-	}
+	// @Override
+	// protected void service(HttpServletRequest arg0, HttpServletResponse arg1)
+	// throws ServletException, IOException {
+	// synchronized (Heliostat.instance) {
+	// super.service(arg0, arg1);
+	// }
+	// }
 
 	@Override
-	public HeliostatState getState() {
-		return Heliostat.instance.heliostatState;
+	public HeliostatState getState(int reqNo) {
+		HeliostatState heliostatState = Heliostat.instance.getState();
+		heliostatState.reqNo = reqNo;
+		return heliostatState;
 	}
 
 	@Override
 	public void setAuto(AutoMode auto) throws AuthException {
 		checkUser();
-		ParamsHolder.params.auto = auto;
-		ParamsHolder.writeParams();
-		Envir.instance.motors[0].stop();
-		Envir.instance.motors[1].stop();
+		synchronized (Heliostat.instance) {
+			ParamsHolder.params.auto = auto;
+			ParamsHolder.writeParams();
+
+			Envir.instance.motors[0].stop();
+			Envir.instance.motors[1].stop();
+		}
 	}
 
 	@Override
@@ -51,35 +50,50 @@ public class HeliostatServiceImpl extends LoginServlet implements
 	}
 
 	@Override
+	public void setRange(MotorId id, int max) throws AuthException {
+		checkUser();
+		ParamsHolder.params.range[id.ordinal()] = max;
+		ParamsHolder.writeParams();
+	}
+
+	@Override
 	public void move(MotorId id, int pos) throws AuthException {
 		checkUser();
-		ParamsHolder.params.auto = AutoMode.OFF;
-		ParamsHolder.writeParams();
-		Envir.instance.motors[id.ordinal()].go(pos);
+		synchronized (Heliostat.instance) {
+			ParamsHolder.params.auto = AutoMode.OFF;
+			ParamsHolder.writeParams();
+			Envir.instance.motors[id.ordinal()].go(pos);
+		}
 	}
 
 	@Override
 	public void stop(MotorId id) throws AuthException {
 		checkUser();
-		ParamsHolder.params.auto = AutoMode.OFF;
-		ParamsHolder.writeParams();
-		Envir.instance.motors[id.ordinal()].stop();
+		synchronized (Heliostat.instance) {
+			ParamsHolder.params.auto = AutoMode.OFF;
+			ParamsHolder.writeParams();
+			Envir.instance.motors[id.ordinal()].stop();
+		}
 	}
 
 	@Override
 	public void home(MotorId id) throws AuthException {
 		checkUser();
-		ParamsHolder.params.auto = AutoMode.OFF;
-		ParamsHolder.writeParams();
-		Envir.instance.motors[id.ordinal()].goHome();
+		synchronized (Heliostat.instance) {
+			ParamsHolder.params.auto = AutoMode.OFF;
+			ParamsHolder.writeParams();
+			Envir.instance.motors[id.ordinal()].goHome();
+		}
 	}
 
 	@Override
 	public void moveRaw(MotorId id, int steps) throws AuthException {
 		checkUser();
-		ParamsHolder.params.auto = AutoMode.OFF;
-		ParamsHolder.writeParams();
-		Envir.instance.motors[id.ordinal()].moveRaw(steps);
+		synchronized (Heliostat.instance) {
+			ParamsHolder.params.auto = AutoMode.OFF;
+			ParamsHolder.writeParams();
+			Envir.instance.motors[id.ordinal()].moveRaw(steps);
+		}
 	}
 
 	@Override
@@ -99,7 +113,9 @@ public class HeliostatServiceImpl extends LoginServlet implements
 	@Override
 	public void clearHistory() throws AuthException {
 		checkUser();
-		Heliostat.instance.clearHistory();
+		synchronized (Heliostat.instance) {
+			Heliostat.instance.clearHistory();
+		}
 	}
 
 	@Override

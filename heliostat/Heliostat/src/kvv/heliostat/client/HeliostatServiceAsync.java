@@ -8,7 +8,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface HeliostatServiceAsync {
 
-	void getState(AsyncCallback<HeliostatState> callback);
+	void getState(int reqId, AsyncCallback<HeliostatState> callback);
 
 	void setAuto(AutoMode auto, AsyncCallback<Void> callback);
 
@@ -29,4 +29,6 @@ public interface HeliostatServiceAsync {
 	void clearHistory(AsyncCallback<Void> callback);
 
 	void setControllerParams(String str, AsyncCallback<Void> callback);
+
+	void setRange(MotorId id, int max, AsyncCallback<Void> callback);
 }

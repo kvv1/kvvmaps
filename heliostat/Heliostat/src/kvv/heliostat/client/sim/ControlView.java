@@ -19,7 +19,6 @@ public class ControlView extends Composite implements View {
 
 	private final Model model;
 
-	private CheckBox clock = new CheckBox("Clock");
 	private CheckBox shortDay = new CheckBox("5..19");
 
 	private TextFieldView clockRate = new TextFieldView("Clock rate:", 0, 40) {
@@ -39,14 +38,6 @@ public class ControlView extends Composite implements View {
 
 		weatherTable = new WeatherView(model);
 
-		clock.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				model.heliostatService.clock(clock.getValue(),
-						new CallbackAdapter<Void>());
-			}
-		});
-
 		shortDay.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -57,7 +48,7 @@ public class ControlView extends Composite implements View {
 
 		SunPathView sunPathView = new SunPathView(model);
 
-		Panel panel = new VertPanel(new HorPanel(true, 10, clock, shortDay,
+		Panel panel = new VertPanel(new HorPanel(true, 10, shortDay,
 				clockRate), weatherTable, new Gap(10, 10), new HorPanel(false,
 				10, sunPathView, new MirrorView(model)));
 
@@ -68,7 +59,6 @@ public class ControlView extends Composite implements View {
 	public void updateView(HeliostatState state) {
 		if (state == null)
 			return;
-		clock.setValue(state.params.clock);
 		shortDay.setValue(state.params.simParams.shortDay);
 
 		if (!clockRate.focused)

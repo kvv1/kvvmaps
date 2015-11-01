@@ -1,11 +1,5 @@
 package kvv.heliostat.server;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import kvv.gwtutils.client.login.AuthException;
 import kvv.gwtutils.server.login.LoginServlet;
 import kvv.heliostat.client.HeliostatServiceAux;
@@ -19,17 +13,15 @@ import kvv.heliostat.server.envir.Envir;
 @SuppressWarnings("serial")
 public class HeliostatServiceAuxImpl extends LoginServlet implements
 		HeliostatServiceAux {
-	
-	@Override
-	protected void service(HttpServletRequest arg0, HttpServletResponse arg1)
-			throws ServletException, IOException {
-		synchronized (Heliostat.instance) {
-			super.service(arg0, arg1);
-		}
-	}
 
-	
-	
+//	@Override
+//	protected void service(HttpServletRequest arg0, HttpServletResponse arg1)
+//			throws ServletException, IOException {
+//		synchronized (Heliostat.instance) {
+//			super.service(arg0, arg1);
+//		}
+//	}
+
 	@Override
 	public void setClockRate(int value) throws AuthException {
 		checkUser();
@@ -65,22 +57,23 @@ public class HeliostatServiceAuxImpl extends LoginServlet implements
 	}
 
 	@Override
-	public void setRange(MotorId id, int max) throws AuthException {
-		checkUser();
-		ParamsHolder.params.range[id.ordinal()] = max;
-		ParamsHolder.writeParams();
-	}
-
-	@Override
-	public void setTime(double time)  throws AuthException {
+	public void setTime(double time) throws AuthException {
 		checkUser();
 		Envir.instance.time.setTime(time);
 	}
 
 	@Override
-	public void setDay(int day)  throws AuthException {
+	public void setDay(int day) throws AuthException {
 		checkUser();
 		Envir.instance.time.setDay(day);
+	}
+
+	@Override
+	public void setSim(boolean value) throws AuthException {
+		checkUser();
+		ParamsHolder.params.SIM = value;
+		ParamsHolder.writeParams();
+		Envir.recreate();
 	}
 
 }

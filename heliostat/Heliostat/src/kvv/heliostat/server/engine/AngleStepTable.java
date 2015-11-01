@@ -87,6 +87,8 @@ public class AngleStepTable {
 	public double get(double x) {
 		double[][] data = getData();
 		Function func = FunctionFactory.getFunction(data[0], data[1]);
+		if(func == null)
+			return Double.NaN;
 		return func.value(x);
 	}
 

@@ -1,6 +1,5 @@
 package kvv.heliostat.client.view;
 
-import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.VertPanel;
 import kvv.heliostat.client.Heliostat;
@@ -8,6 +7,7 @@ import kvv.heliostat.client.dto.HeliostatState;
 import kvv.heliostat.client.dto.MotorId;
 import kvv.heliostat.client.dto.MotorState;
 import kvv.heliostat.client.model.Model;
+import kvv.heliostat.client.model.Model.Callback1;
 import kvv.heliostat.client.model.View;
 import kvv.heliostat.shared.math.MirrorAngles;
 import kvv.simpleutils.spline.Function;
@@ -39,7 +39,7 @@ public class MotorsView extends Composite implements View {
 				public void onClick(ClickEvent event) {
 					if (Window.confirm("Clear history?"))
 						model.heliostatService
-								.clearHistory(new CallbackAdapter<Void>());
+								.clearHistory(new Callback1<Void>(model));
 				}
 			});
 
@@ -70,9 +70,9 @@ public class MotorsView extends Composite implements View {
 						/ height);
 
 				model.heliostatService.move(MotorId.AZ, posX,
-						new CallbackAdapter<Void>());
+						new Callback1<Void>(model));
 				model.heliostatService.move(MotorId.ALT, posY,
-						new CallbackAdapter<Void>());
+						new Callback1<Void>(model));
 			}
 		});
 

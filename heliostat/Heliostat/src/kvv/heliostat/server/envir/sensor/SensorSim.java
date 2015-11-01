@@ -17,6 +17,7 @@ public class SensorSim implements Sensor {
 
 	private final MotorRawSim azMotor;
 	private final MotorRawSim altMotor;
+	private SensorState state = _getState();
 
 	public SensorSim(MotorRawSim azMotor, MotorRawSim altMotor) {
 		this.altMotor = altMotor;
@@ -25,6 +26,10 @@ public class SensorSim implements Sensor {
 
 	@Override
 	public SensorState getState() {
+		return state;
+	}
+
+	private SensorState _getState() {
 
 		Function azDeg2Steps = FunctionFactory.getFunction(
 				ParamsHolder.params.simParams.azDeg2Steps[0],
@@ -62,7 +67,7 @@ public class SensorSim implements Sensor {
 		double br = sensorSensitivity.value(dist(SENSOR_SEGMENT_SENTER_DIST,
 				-SENSOR_SEGMENT_SENTER_DIST, dAz, dAlt)) * brightness;
 
-		return new SensorState((int) tl, (int) tr, (int) bl, (int) br);
+		return new SensorState((int) tl, (int) tr, (int) bl, (int) br, 0);
 	}
 
 	private static final double dist(double x1, double y1, double x2, double y2) {
@@ -82,5 +87,11 @@ public class SensorSim implements Sensor {
 			return 0;
 		}
 	};
+
+	@Override
+	public SensorState updateState() {
+		state = _getState();
+		return state;
+	}
 
 }

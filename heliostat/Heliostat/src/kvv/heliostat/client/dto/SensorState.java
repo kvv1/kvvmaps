@@ -8,15 +8,24 @@ public class SensorState implements Serializable {
 	public int tr;
 	public int bl;
 	public int br;
+	
+	public int temperature;
+	
+	public String error;
 
 	public SensorState() {
 	}
 
-	public SensorState(int tl, int tr, int bl, int br) {
+	public SensorState(String error) {
+		this.error = error;
+	}
+	
+	public SensorState(int tl, int tr, int bl, int br, int t) {
 		this.tl = tl;
 		this.tr = tr;
 		this.bl = bl;
 		this.br = br;
+		this.temperature = t;
 	}
 
 	public boolean isValid() {

@@ -1,6 +1,5 @@
 package kvv.heliostat.client;
 
-import kvv.heliostat.client.dto.MotorId;
 import kvv.heliostat.client.dto.Weather;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -17,10 +16,10 @@ public interface HeliostatServiceAuxAsync {
 
 	void shortDay(boolean value, AsyncCallback<Void> callback);
 
-	void setRange(MotorId id, int max, AsyncCallback<Void> callback);
-
 	void setDay(int day, AsyncCallback<Void> callback);
 
 	void setTime(double time, AsyncCallback<Void> callback);
+
+	void setSim(boolean value, AsyncCallback<Void> callback);
 
 }

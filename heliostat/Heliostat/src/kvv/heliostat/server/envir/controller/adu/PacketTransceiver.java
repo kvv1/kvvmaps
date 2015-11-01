@@ -6,14 +6,17 @@ import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
+import gnu.io.UnsupportedCommOperationException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import kvv.heliostat.server.envir.controller.BusLogger;
+import java.util.TooManyListenersException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class PacketTransceiver implements IPacketTransceiver {
 	private final static int BAUD = 9600;
@@ -24,38 +27,40 @@ public class PacketTransceiver implements IPacketTransceiver {
 	private SerialPort serPort;
 	private InputStream inStream;
 	private OutputStream outStream;
-	private List<Byte> inputBuffer = new ArrayList<Byte>();
-	private long lastReceiveTime;
-	private long sendTime;
 	private final int packetTimeout;
 
-	public PacketTransceiver(String comid, int packetTimeout) throws IOException {
+	public PacketTransceiver(String comid, int packetTimeout)
+			throws IOException {
 		try {
 			pID = CommPortIdentifier.getPortIdentifier(comid);
-			this.packetTimeout = packetTimeout;
-			init();
-		} catch (Exception e) {
+		} catch (NoSuchPortException e) {
 			throw new IOException(e);
 		}
+		this.packetTimeout = packetTimeout;
+		init();
 	}
 
-	private void init() throws Exception {
-
+	private void init() throws IOException {
 		if (serPort != null) {
 			serPort.close();
 			serPort = null;
 		}
 
-		serPort = (SerialPort) pID.open("PortReader", 2000);
-		inStream = serPort.getInputStream();
-		outStream = serPort.getOutputStream();
-		serPort.notifyOnDataAvailable(true);
-		serPort.notifyOnOutputEmpty(true);
-		serPort.addEventListener(new Listener());
-		serPort.setSerialPortParams(BAUD, SerialPort.DATABITS_8,
-				SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-		serPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
-		serPort.setRTS(true);
+		try {
+			serPort = (SerialPort) pID.open("PortReader", 2000);
+			inStream = serPort.getInputStream();
+			outStream = serPort.getOutputStream();
+			serPort.notifyOnDataAvailable(true);
+			serPort.notifyOnOutputEmpty(true);
+			serPort.addEventListener(new Listener());
+			serPort.setSerialPortParams(BAUD, SerialPort.DATABITS_8,
+					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+			serPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
+			serPort.setRTS(true);
+		} catch (PortInUseException | TooManyListenersException
+				| UnsupportedCommOperationException e) {
+			throw new IOException(e);
+		}
 	}
 
 	public static void main(String[] args) throws NoSuchPortException,
@@ -63,7 +68,6 @@ public class PacketTransceiver implements IPacketTransceiver {
 		CommPortIdentifier pID = CommPortIdentifier.getPortIdentifier("COM2");
 		SerialPort serPort = (SerialPort) pID.open("PortReader", 2000);
 		System.out.println(serPort.getInputBufferSize());
-
 	}
 
 	class PacketTimeoutException extends IOException {
@@ -92,60 +96,39 @@ public class PacketTransceiver implements IPacketTransceiver {
 		}
 	}
 
+	private final BlockingQueue<Byte> queue = new LinkedBlockingQueue<>();
+
 	private synchronized byte[] __sendPacket(byte[] data, boolean waitResponse,
 			int packetTimeout) throws IOException {
 
-		synchronized (inputBuffer) {
-			if (!inputBuffer.isEmpty()) {
-				String msg = "inputBuffer: ";
-				for (byte b : inputBuffer)
-					msg += Integer.toHexString((int) b & 0xFF) + " ";
-				BusLogger.log(msg);
-				System.err.println(msg);
-			}
-
-			inputBuffer.clear();
-		}
-
-		sendTime = System.currentTimeMillis();
 		outStream.write(data);
 		outStream.flush();
 
-		if (!waitResponse)
-			return null;
+		long timeout = packetTimeout;
 
-		while (true) {
-			synchronized (inputBuffer) {
-				if (!inputBuffer.isEmpty())
-					break;
-			}
-			if (System.currentTimeMillis() > sendTime + packetTimeout)
-				throw new PacketTimeoutException();
+		List<Byte> buffer = new ArrayList<>();
+
+		queue.clear();
+
+		for (;;) {
+			Byte b;
 			try {
-				Thread.sleep(2);
+				b = queue.poll(timeout, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException e) {
+				throw new IOException(e);
 			}
-		}
-
-		while (true) {
-			synchronized (inputBuffer) {
-				if (!inputBuffer.isEmpty()
-						&& System.currentTimeMillis() > lastReceiveTime
-								+ BYTE_TIMEOUT) {
-					byte[] response = new byte[inputBuffer.size()];
-					for (int i = 0; i < inputBuffer.size(); i++) {
-						response[i] = inputBuffer.get(i);
-						System.err.print(Integer.toHexString((int) response[i] & 0xFF) + " ");
-					}
-					System.err.println();
-					inputBuffer.clear();
-					return response;
+			timeout = BYTE_TIMEOUT;
+			if (b == null) {
+				if (buffer.isEmpty())
+					throw new PacketTimeoutException();
+				else {
+					byte[] res = new byte[buffer.size()];
+					for (int i = 0; i < buffer.size(); i++)
+						res[i] = buffer.get(i);
+					return res;
 				}
 			}
-			try {
-				Thread.sleep(2);
-			} catch (InterruptedException e) {
-			}
+			buffer.add(b);
 		}
 	}
 
@@ -156,12 +139,9 @@ public class PacketTransceiver implements IPacketTransceiver {
 				try {
 					while (inStream.available() > 0) {
 						int ch = inStream.read();
-						synchronized (inputBuffer) {
-							inputBuffer.add((byte) ch);
-							lastReceiveTime = System.currentTimeMillis();
-						}
+						queue.add((byte) ch);
 					}
-				} catch (IOException e) {
+				} catch (IOException | IllegalStateException e) {
 					e.printStackTrace();
 				}
 			} else if (event.getEventType() == SerialPortEvent.OUTPUT_BUFFER_EMPTY) {

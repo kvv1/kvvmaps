@@ -11,8 +11,8 @@ import kvv.stdutils.Utils;
 public class ParamsHolder {
 	private static final String PARAMS_PATH = "c:/heliostat/params.json";
 
-	public static Params params;
-	public static Properties controllerParams = new Properties();
+	public volatile static Params params;
+	public static volatile Properties controllerParams = new Properties();
 	
 	static {
 		new File(PARAMS_PATH).getParentFile().mkdirs();
@@ -29,7 +29,7 @@ public class ParamsHolder {
 		}
 	}
 
-	public static void writeParams() {
+	public synchronized static void writeParams() {
 		try {
 			Utils.jsonWrite(PARAMS_PATH, params);
 		} catch (Exception e) {

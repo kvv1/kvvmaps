@@ -1,11 +1,11 @@
 package kvv.heliostat.server.envir;
 
 import java.io.IOException;
-import java.util.Properties;
 
 import kvv.heliostat.client.dto.Weather;
 import kvv.heliostat.server.envir.motor.Motor;
 import kvv.heliostat.server.envir.motor.MotorRawSim;
+import kvv.heliostat.server.envir.motor.MotorSync;
 import kvv.heliostat.server.envir.sensor.SensorSim;
 import kvv.stdutils.Utils;
 
@@ -14,8 +14,8 @@ public class SimEnvir extends Envir {
 	private static final String WEATHER_FILE = "c:/heliostat/weather.json";
 	private final MotorRawSim motorAzimuthRaw = new MotorRawSim();
 	private final MotorRawSim motorAltitudeRaw = new MotorRawSim();
-	private Motor azMotor = new Motor(motorAzimuthRaw);
-	private Motor altMotor = new Motor(motorAltitudeRaw);
+	private Motor azMotor = new MotorSync(motorAzimuthRaw, 0);
+	private Motor altMotor = new MotorSync(motorAltitudeRaw, 1);
 	private final SensorSim sensor = new SensorSim(motorAzimuthRaw,
 			motorAltitudeRaw);
 
@@ -35,6 +35,8 @@ public class SimEnvir extends Envir {
 
 	@Override
 	public void close() {
+		motors[0].close();
+		motors[1].close();
 	}
 
 	@Override
