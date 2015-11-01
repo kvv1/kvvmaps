@@ -20,8 +20,6 @@ import java.util.List;
 
 import kvv.controller.register.AllRegs;
 import kvv.controller.register.Operation;
-import kvv.controller.register.RegType;
-import kvv.controller.register.RegisterUI;
 import kvv.controller.register.Rule;
 import kvv.simpleutils.src.CRC16;
 
@@ -48,7 +46,7 @@ public class Controller implements IController {
 		byte[] req = new byte[] { Command.CMD_MODBUS_GETREGS,
 				(byte) (reg >> 8), (byte) reg, 0, 1 };
 		byte[] resp = send(addr, req);
-		return resp[1] * 256 + (resp[2] & 0xFF);
+		return resp[2] * 256 + (resp[3] & 0xFF);
 	}
 
 	@Override
@@ -68,20 +66,9 @@ public class Controller implements IController {
 	public AllRegs getAllRegs(int addr) throws IOException {
 		byte[] resp = send(addr, new byte[] { Command.CMD_GETALLREGS });
 
-		ArrayList<RegisterUI> ui = new ArrayList<RegisterUI>();
-
 		int i = 1;
 		int nUI = resp[i++];
-		while (nUI-- > 0) {
-			int reg = resp[i++] & 0xFF;
-			RegType type = RegType.values()[resp[i++]];
-			int nameLen = resp[i++] & 0xFF;
-
-			byte[] buf = Arrays.copyOfRange(resp, i, i + nameLen);
-			i += nameLen;
-
-			ui.add(new RegisterUI(reg, type, new String(buf, "Windows-1251")));
-		}
+		/// ui removed
 
 		HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
 		for (; i < resp.length - 2; i += 3) {
@@ -90,7 +77,7 @@ public class Controller implements IController {
 			map.put(reg, val);
 		}
 
-		return new AllRegs(addr, ui, map);
+		return new AllRegs(addr, map);
 	}
 
 	@Override
