@@ -14,11 +14,11 @@ public class ADU {
 	}
 
 	public byte[] toBytes() {
-		byte[] rtuBytes = pdu.toBytes();
-		byte[] res = new byte[rtuBytes.length + 3];
+		byte[] pduBytes = pdu.toBytes();
+		byte[] res = new byte[pduBytes.length + 3];
 		res[0] = (byte) addr;
-		System.arraycopy(rtuBytes, 0, res, 1, rtuBytes.length);
-		short sum = CRC16.crc16(res, 0, rtuBytes.length + 1);
+		System.arraycopy(pduBytes, 0, res, 1, pduBytes.length);
+		short sum = CRC16.crc16(res, 0, pduBytes.length + 1);
 		res[res.length - 2] = (byte) sum;
 		res[res.length - 1] = (byte) (sum >> 8);
 		return res;
