@@ -63,11 +63,15 @@ public abstract class TextWithSaveButton extends Composite {
 		save.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				save(text.getText(), new CallbackAdapter<Void>() {
+				save(text.getText(), new AsyncCallback<Void>() {
 					@Override
 					public void onSuccess(Void result) {
 						dirty = false;
 						save.setEnabled(dirty);
+					}
+
+					@Override
+					public void onFailure(Throwable caught) {
 					}
 				});
 			}

@@ -31,8 +31,8 @@ public class Chart extends Composite {
 
 	private final int width;
 	private final int height;
-	private final double minx;
-	private final double maxx;
+	private double minx;
+	private double maxx;
 	private final double miny;
 	private double maxy;
 	private final double stepx;
@@ -96,15 +96,25 @@ public class Chart extends Composite {
 		initWidget(panel);
 	}
 
-	public void setMaxY(double maxy) {
-		if(maxy == this.maxy)
+	public void setMaxY(double v) {
+		if (v == this.maxy)
 			return;
-		
-		this.maxy = maxy;
+		this.maxy = v;
 		draw();
-		for (int i = 0; i < layers1.length; i++)
-			if (layers1[i] != null)
-				set(i, layers1[i]);
+	}
+
+	public void setMaxX(double v) {
+		if (v == this.maxx)
+			return;
+		this.maxx = v;
+		draw();
+	}
+
+	public void setMinX(double v) {
+		if (v == this.minx)
+			return;
+		this.minx = v;
+		draw();
 	}
 
 	protected void onClick(double arg) {
@@ -258,6 +268,10 @@ public class Chart extends Composite {
 		}
 
 		context.closePath();
+
+		for (int i = 0; i < layers1.length; i++)
+			if (layers1[i] != null)
+				set(i, layers1[i]);
 	}
 
 	public void setCursor(double arg) {

@@ -8,9 +8,8 @@ import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class UploadForm extends FormPanel {
-	public UploadForm(String buttonText, String uploadURL) {
-		setAction(uploadURL);
+public abstract class UploadForm extends FormPanel {
+	public UploadForm(String buttonText) {
 		setEncoding(FormPanel.ENCODING_MULTIPART);
 		setMethod(FormPanel.METHOD_POST);
 
@@ -25,6 +24,7 @@ public class UploadForm extends FormPanel {
 		Button button = new Button(buttonText, new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				setAction(getUrl());
 				submit();
 			}
 		});
@@ -44,4 +44,6 @@ public class UploadForm extends FormPanel {
 		button.setStyleName("");
 		panel.add(button);
 	}
+	
+	public abstract String getUrl();
 }
