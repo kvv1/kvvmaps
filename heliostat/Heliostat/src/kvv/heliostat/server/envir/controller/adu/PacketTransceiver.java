@@ -70,14 +70,6 @@ public class PacketTransceiver implements IPacketTransceiver {
 		System.out.println(serPort.getInputBufferSize());
 	}
 
-	class PacketTimeoutException extends IOException {
-		private static final long serialVersionUID = 1L;
-
-		public PacketTimeoutException() {
-			super("PACKET_TIMEOUT");
-		}
-	}
-
 	@Override
 	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse)
 			throws IOException {

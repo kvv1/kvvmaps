@@ -34,7 +34,7 @@ public class Heliostat extends Looper {
 				step();
 				post(this, 10);
 			}
-		}, 100);
+		}, 2000);
 
 		post(new Runnable() {
 			@Override
@@ -50,7 +50,7 @@ public class Heliostat extends Looper {
 
 				post(this, stepMS);
 			}
-		}, 100);
+		}, 2000);
 	}
 
 	private void step() {
