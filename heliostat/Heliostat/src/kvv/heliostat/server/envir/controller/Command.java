@@ -10,10 +10,6 @@ public class Command {
 	public static final byte MODBUS_ENABLE_APP = 92;
 
 	public static final byte CMD_GETALLREGS = 103;
-	public static final byte CMD_UPLOAD = 104;
-	public static final byte CMD_UPLOAD_END = 105;
-	public static final byte CMD_GETUI = 106;
-	public static final byte CMD_VMINIT = 107;
 	public static final byte MODBUS_GETRULES = 108;
 	public static final byte MODBUS_SETRULE = 109;
 }

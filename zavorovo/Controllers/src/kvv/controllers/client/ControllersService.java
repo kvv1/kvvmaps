@@ -2,7 +2,7 @@ package kvv.controllers.client;
 
 import kvv.controller.register.AllRegs;
 import kvv.controller.register.Rule;
-import kvv.controllers.shared.Statistics;
+import kvv.controller.register.Statistics;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;

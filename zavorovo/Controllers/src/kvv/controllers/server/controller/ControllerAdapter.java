@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import kvv.controller.register.Rule;
+import kvv.controller.register.Statistics;
 import kvv.controllers.controller.IController;
+import kvv.controllers.controller.ModbusLine;
 import kvv.controllers.server.Controllers;
 
 public abstract class ControllerAdapter implements IController {
@@ -20,29 +22,29 @@ public abstract class ControllerAdapter implements IController {
 	}
 
 	@Override
-	public void upload(int addr, byte[] data) throws IOException {
-		wrapped.upload(addr, data);
-	}
-
-	@Override
 	public void close() {
 		stopped = true;
 		wrapped.close();
 	}
 
 	@Override
-	public void vmInit(int addr) throws IOException {
-		wrapped.vmInit(addr);
+	public void setRegs(int addr, int reg, int... val) throws IOException {
+		wrapped.setRegs(addr, reg, val);
 	}
 
 	@Override
-	public String getStatistics(boolean clear) throws IOException {
+	public void setModbusLine(ModbusLine modbusLine) {
+		wrapped.setModbusLine(modbusLine);
+	}
+	
+	@Override
+	public Statistics getStatistics(boolean clear) throws IOException {
 		return wrapped.getStatistics(clear);
 	}
 
 	@Override
-	public void uploadAppHex(int addr, InputStream is) throws IOException {
-		wrapped.uploadAppHex(addr, is);
+	public void uploadApp(int addr, byte[] data) throws IOException {
+		wrapped.uploadApp(addr, data);
 	}
 
 	@Override

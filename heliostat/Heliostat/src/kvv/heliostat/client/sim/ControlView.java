@@ -57,8 +57,6 @@ public class ControlView extends Composite implements View {
 
 	@Override
 	public void updateView(HeliostatState state) {
-		if (state == null)
-			return;
 		shortDay.setValue(state.params.simParams.shortDay);
 
 		if (!clockRate.focused)

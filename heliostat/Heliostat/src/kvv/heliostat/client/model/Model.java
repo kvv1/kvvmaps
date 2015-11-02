@@ -63,6 +63,16 @@ public class Model {
 			view.updateView(state);
 	}
 
+	private void err(Throwable caught) {
+		views.removeAll(removed);
+		views.addAll(added);
+		removed.clear();
+		added.clear();
+		for (View view : views)
+			if (view instanceof ErrHandler)
+				((ErrHandler) view).onError(caught);
+	}
+
 	public void add(View view) {
 		added.add(view);
 	}
@@ -92,8 +102,7 @@ public class Model {
 						@Override
 						public void onFailure(Throwable caught) {
 							lastState = null;
-							if (updates)
-								updt(null);
+							err(caught);
 							schedule(getPeriod());
 						}
 

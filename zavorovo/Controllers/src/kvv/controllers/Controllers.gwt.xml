@@ -12,7 +12,6 @@
 
   <!-- Other module inherits                                      -->
   <inherits name='kvv.controller.ControllerRegisters'/>
-  <inherits name='kvv.controllers.History'/>
   <inherits name='kvv.gwtutils.GwtUtils'/>
   
   <!-- Specify the app entry point class.                         -->

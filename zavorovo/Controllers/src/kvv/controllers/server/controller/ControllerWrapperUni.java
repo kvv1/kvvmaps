@@ -1,16 +1,14 @@
 package kvv.controllers.server.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import kvv.controller.register.AllRegs;
-import kvv.controller.register.ControllerDef.RegisterDef;
-import kvv.controller.register.RegisterUI;
 import kvv.controllers.controller.IController;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerType;
+import kvv.controllers.shared.ControllerDef.RegisterDef;
 
 public class ControllerWrapperUni extends ControllerAdapter {
 	public ControllerWrapperUni(Controllers controllers, IController controller) {
@@ -36,7 +34,7 @@ public class ControllerWrapperUni extends ControllerAdapter {
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
-		//System.out.println("-" + addr + "(" + reg + ")=" + val);
+		// System.out.println("-" + addr + "(" + reg + ")=" + val);
 
 		RegisterDef registerDef = getRegDef(addr, reg);
 
@@ -83,7 +81,7 @@ public class ControllerWrapperUni extends ControllerAdapter {
 					controllerType.def.allRegs[1]);
 			for (int i = 0; i < controllerType.def.allRegs[1]; i++)
 				map.put(controllerType.def.allRegs[0] + i, vals[i]);
-			allRegs = new AllRegs(addr, new ArrayList<RegisterUI>(), map);
+			allRegs = new AllRegs(addr, map);
 		} else {
 			allRegs = wrapped.getAllRegs(addr);
 		}
@@ -105,9 +103,9 @@ public class ControllerWrapperUni extends ControllerAdapter {
 
 		allRegs.values.putAll(values1);
 
-//		for (int key : allRegs.values.keySet())
-//			System.out.print(key + ":" + allRegs.values.get(key) + " ");
-//		System.out.println();
+		// for (int key : allRegs.values.keySet())
+		// System.out.print(key + ":" + allRegs.values.get(key) + " ");
+		// System.out.println();
 
 		for (int reg : allRegs.values.keySet()) {
 			try {

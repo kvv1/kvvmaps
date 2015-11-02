@@ -1,6 +1,5 @@
 package kvv.heliostat.client.view;
 
-import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.CaptPanel;
 import kvv.gwtutils.client.Gap;
 import kvv.gwtutils.client.HorPanel;
@@ -9,6 +8,7 @@ import kvv.gwtutils.client.login.LoginPanel;
 import kvv.heliostat.client.dto.AutoMode;
 import kvv.heliostat.client.dto.HeliostatState;
 import kvv.heliostat.client.dto.MotorId;
+import kvv.heliostat.client.model.ErrHandler;
 import kvv.heliostat.client.model.Model;
 import kvv.heliostat.client.model.Model.Callback1;
 import kvv.heliostat.client.model.View;
@@ -26,7 +26,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.Widget;
 
-public class MainView extends Composite implements View {
+public class MainView extends Composite implements View, ErrHandler {
+	private Label error = new Label();
 	private RadioButton trackingManual = new RadioButton("trackingMode",
 			"Manual");
 	private RadioButton trackingSun = new RadioButton("trackingMode",
@@ -118,9 +119,9 @@ public class MainView extends Composite implements View {
 		hp1.add(loginPanel);
 		hp1.setWidth("100%");
 
-		Panel p = new HorPanel(new VertPanel(hp1, centralPanel, azMotPanel,
-				altMotPanel, new Gap(6, 6), motorsChart, new Gap(6, 6),
-				anglesChart), controlPanel);
+		Panel p = new HorPanel(new VertPanel(error, hp1, centralPanel,
+				azMotPanel, altMotPanel, new Gap(6, 6), motorsChart, new Gap(6,
+						6), anglesChart), controlPanel);
 
 		// Panel p = new HorPanel(new VertPanel(dateTime, topPanel, azMotPanel,
 		// altMotPanel, new HorPanel(motorsPanel, sensorPanel), new Gap(6,
@@ -131,8 +132,8 @@ public class MainView extends Composite implements View {
 
 	@Override
 	public void updateView(HeliostatState state) {
-		if (state == null)
-			return;
+		error.setVisible(false);
+		
 		switch (state.params.auto) {
 		case OFF:
 			trackingManual.setValue(true);
@@ -154,6 +155,12 @@ public class MainView extends Composite implements View {
 			controlPanel.add(new ControlView(model));
 	}
 
+	@Override
+	public void onError(Throwable caught) {
+		error.setVisible(true);
+		error.setText(caught.getClass().getSimpleName() + " " + caught.getMessage());
+	}
+
 	static class MotorChartAz extends MotorChart {
 		public MotorChartAz(Model model, int maxy) {
 			super(model, -10, 10, 10, maxy);
@@ -161,8 +168,6 @@ public class MainView extends Composite implements View {
 
 		@Override
 		public void updateView(HeliostatState state) {
-			if (state == null)
-				return;
 			upd(state.azData,
 					MirrorAngles.get(state.dayTime.day, state.dayTime.time).x);
 			setMaxY(state.params.range[0]);
@@ -178,8 +183,6 @@ public class MainView extends Composite implements View {
 
 		@Override
 		public void updateView(HeliostatState state) {
-			if (state == null)
-				return;
 			upd(state.altData,
 					MirrorAngles.get(state.dayTime.day, state.dayTime.time).y);
 			setMaxY(state.params.range[1]);

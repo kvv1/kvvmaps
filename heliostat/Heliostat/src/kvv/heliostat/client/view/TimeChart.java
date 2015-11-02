@@ -25,9 +25,6 @@ public class TimeChart extends Chart implements View {
 
 	@Override
 	public void updateView(HeliostatState state) {
-		if (state == null)
-			return;
-
 		setCursor(state.dayTime.time);
 	}
 

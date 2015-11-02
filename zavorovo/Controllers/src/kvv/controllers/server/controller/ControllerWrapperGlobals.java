@@ -1,11 +1,9 @@
 package kvv.controllers.server.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import kvv.controller.register.AllRegs;
-import kvv.controller.register.RegisterUI;
 import kvv.controllers.controller.IController;
 import kvv.controllers.server.Controllers;
 
@@ -15,7 +13,7 @@ public class ControllerWrapperGlobals extends ControllerAdapter {
 		super(controllers, wrapped);
 	}
 
-	private final AllRegs globals = new AllRegs(0, new ArrayList<RegisterUI>(),
+	private final AllRegs globals = new AllRegs(0,
 			new HashMap<Integer, Integer>());
 	{
 		for (int i = 0; i < 256; i++)
@@ -64,8 +62,7 @@ public class ControllerWrapperGlobals extends ControllerAdapter {
 			return wrapped.getAllRegs(addr);
 		} else {
 			synchronized (globals) {
-				AllRegs ar = new AllRegs(0, new ArrayList<RegisterUI>(),
-						new HashMap<Integer, Integer>());
+				AllRegs ar = new AllRegs(0, new HashMap<Integer, Integer>());
 				for (int r : globals.values.keySet())
 					ar.values.put(r, globals.values.get(r));
 				return ar;

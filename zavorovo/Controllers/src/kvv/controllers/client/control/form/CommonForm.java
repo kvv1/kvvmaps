@@ -135,11 +135,15 @@ public class CommonForm extends ControlComposite {
 			return helloButton;
 		case RULES:
 			RuleControl rc = new RuleControl(addr, controllerType.def);
-			//add(rc);
+			// add(rc);
 			return rc;
 		case UPLOAD:
-			return new UploadForm("Загрузить", GWT.getModuleBaseURL()
-					+ "upload?addr=" + addr);
+			return new UploadForm("Загрузить") {
+				@Override
+				public String getUrl() {
+					return GWT.getModuleBaseURL() + "upload?addr=" + addr;
+				}
+			};
 		case DETAILS:
 			return new DetPanel<Widget, Widget>(ui.label,
 					createWidget(ui.children[0]));

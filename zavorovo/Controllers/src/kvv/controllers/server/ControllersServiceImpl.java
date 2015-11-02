@@ -7,10 +7,9 @@ import java.util.List;
 
 import kvv.controller.register.AllRegs;
 import kvv.controller.register.Rule;
+import kvv.controller.register.Statistics;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.server.context.Context;
-import kvv.controllers.shared.Statistics;
-import kvv.stdutils.Utils;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -82,8 +81,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public Statistics getStatistics(boolean clear) {
 		try {
-			String s = Context.getInstance().controller.getStatistics(clear);
-			return Utils.fromJson(s, Statistics.class);
+			return Context.getInstance().controller.getStatistics(clear);
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage());
 		}

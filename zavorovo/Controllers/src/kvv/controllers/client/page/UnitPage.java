@@ -5,16 +5,13 @@ import java.util.Date;
 import kvv.controllers.client.Controllers;
 import kvv.controllers.client.control.ControlCompositeWithDiagrams;
 import kvv.controllers.client.control.simple.AutoRelayControl;
-import kvv.controllers.client.control.simple.ControllerUIForm;
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.ControllerType;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.UnitDescr;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -45,32 +42,6 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 
 		VerticalPanel panel = new VerticalPanel();
 		panel.add(refreshButton);
-
-		if (unit.controllers != null) {
-			HorizontalPanel controllersPanel1 = new HorizontalPanel();
-			controllersPanel1.setSpacing(4);
-			controllersPanel1.setBorderWidth(1);
-			for (String controllerName : unit.controllers) {
-				ControllerDescr descr = null;
-				for (ControllerDescr d : Controllers.systemDescr.controllers)
-					if (d.name.equals(controllerName))
-						descr = d;
-				ControllerType controllerType = null;
-				if (descr != null)
-					controllerType = Controllers.systemDescr.controllerTypes
-							.get(descr.type);
-				if (controllerType != null) {
-					ControllerUIForm form = new ControllerUIForm(descr.addr, controllerName,
-							controllerType.def, false);
-					controllersPanel1.add(form);
-					add(form);
-				} else {
-					Window.alert("Неизвестное имя контроллера '"
-							+ controllerName + "'");
-				}
-			}
-			panel.add(controllersPanel1);
-		}
 
 		if (unit.registers != null && unit.registers.length > 0) {
 			ClickHandler historyClickHandler = new ClickHandler() {

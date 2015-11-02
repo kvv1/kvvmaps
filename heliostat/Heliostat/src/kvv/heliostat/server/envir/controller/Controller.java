@@ -1,7 +1,14 @@
 package kvv.heliostat.server.envir.controller;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class Controller implements IController {
 
@@ -56,6 +63,77 @@ public class Controller implements IController {
 		}
 		return res;
 	}
+	
+	@Override
+	public Rule[] getRules(int addr) throws IOException {
+		byte[] resp = send(addr, new byte[] { Command.MODBUS_GETRULES });
+
+		List<Rule> rules = new ArrayList<Rule>();
+		DataInputStream dis = new DataInputStream(
+				new ByteArrayInputStream(resp));
+
+		dis.readByte(); // cmd
+
+		try {
+			while (true) {
+				Rule rule = new Rule();
+				rule.en = dis.readByte() == 1;
+				rule.srcReg = dis.readByte() & 0xFF;
+				int op1 = dis.readByte();
+				if (op1 < 0 || op1 >= Operation.values().length)
+					op1 = 0;
+				rule.op = Operation.values()[op1];
+				rule.srcVal = dis.readShort();
+				rule.dstReg = dis.readByte() & 0xFF;
+				rule.dstVal = dis.readShort();
+				rules.add(rule);
+			}
+		} catch (Exception e) {
+		}
+
+		return rules.toArray(new Rule[0]);
+	}
+
+	@Override
+	public void setRules(int addr, Rule[] rules) throws IOException {
+		int i = 0;
+		for (Rule rule : rules) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			DataOutputStream dos = new DataOutputStream(baos);
+			dos.writeByte(Command.MODBUS_SETRULE);
+
+			dos.writeByte(i++);
+
+			dos.writeByte(rule.en ? 1 : 0);
+			dos.writeByte(rule.srcReg);
+			dos.writeByte(rule.op.ordinal());
+			dos.writeShort(rule.srcVal);
+			dos.writeByte(rule.dstReg);
+			dos.writeShort(rule.dstVal);
+
+			send(addr, baos.toByteArray());
+
+		}
+	}
+
+	@Override
+	public AllRegs getAllRegs(int addr) throws IOException {
+		byte[] resp = send(addr, new byte[] { Command.CMD_GETALLREGS });
+
+		int i = 1;
+		int nUI = resp[i++];
+		/// ui removed
+
+		HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
+		for (; i < resp.length - 2; i += 3) {
+			int reg = resp[i];
+			int val = resp[i + 1] * 256 + (resp[i + 2] & 0xFF);
+			map.put(reg, val);
+		}
+
+		return new AllRegs(addr, map);
+	}
+
 
 	@Override
 	public void close() {

@@ -164,9 +164,6 @@ public class SettingsView extends Composite implements View {
 
 	@Override
 	public void updateView(HeliostatState state) {
-		if (state == null)
-			return;
-
 		if (!stepsPerDegreeAz.focused)
 			stepsPerDegreeAz.text.setText("" + state.params.stepsPerDegree[0]);
 

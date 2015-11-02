@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kvv.controller.register.AllRegs;
-import kvv.controller.register.ControllerDef;
 import kvv.controller.register.Operation;
 import kvv.controller.register.Rule;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.page.ModePage;
+import kvv.controllers.shared.ControllerDef;
 import kvv.gwtutils.client.CallbackAdapter;
 
 import com.google.gwt.core.client.GWT;

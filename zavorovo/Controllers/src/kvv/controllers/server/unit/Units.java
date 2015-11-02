@@ -3,10 +3,10 @@ package kvv.controllers.server.unit;
 import java.io.IOException;
 
 import kvv.controllers.controller.IController;
+import kvv.controllers.server.Constants;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.server.context.Context;
 import kvv.controllers.shared.UnitDescr;
-import kvv.controllers.utils.Constants;
 import kvv.stdutils.Utils;
 
 public class Units {

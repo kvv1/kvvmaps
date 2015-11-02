@@ -9,7 +9,6 @@ import kvv.controllers.server.unit.Units;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.SystemDescr;
 import kvv.controllers.shared.UnitDescr;
-import kvv.controllers.utils.Constants;
 import kvv.stdutils.Utils;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;

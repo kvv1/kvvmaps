@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import kvv.controller.register.Statistics;
+import kvv.controller.register.Statistics.AddrStaistics;
 import kvv.controllers.client.Controllers;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.Statistics;
-import kvv.controllers.shared.Statistics.AddrStaistics;
 import kvv.gwtutils.client.CallbackAdapter;
 
 import com.google.gwt.canvas.client.Canvas;
@@ -59,7 +59,7 @@ public class StatisticsPage extends Composite {
 				new CallbackAdapter<Statistics>() {
 					@Override
 					public void onSuccess(Statistics statistics) {
-						if(statistics == null)
+						if (statistics == null)
 							return;
 						ControllerDescr[] controllerDescrs = Controllers.systemDescr.controllers;
 						for (ControllerDescr descr : controllerDescrs)

@@ -5,8 +5,6 @@
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Controller"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/ControllerUtils"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/History"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/StdUtils"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/GwtUtils"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ExprCalc"/>

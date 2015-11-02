@@ -1,6 +1,9 @@
 package kvv.controllers.server.context;
 
+import kvv.controllers.controller.Controller;
 import kvv.controllers.controller.IController;
+import kvv.controllers.controller.adu.ADUTransceiver;
+import kvv.controllers.controller.adu.PacketTransceiver;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.server.controller.ControllerWrapperCached;
 import kvv.controllers.server.controller.ControllerWrapperGlobals;
@@ -8,7 +11,6 @@ import kvv.controllers.server.controller.ControllerWrapperLogger;
 import kvv.controllers.server.controller.ControllerWrapperUni;
 import kvv.controllers.server.controller.Scheduler;
 import kvv.controllers.server.unit.Units;
-import kvv.controllers.utils.Constants;
 import kvv.stdutils.Utils;
 
 public class Context {
@@ -48,19 +50,19 @@ public class Context {
 	public Context() {
 		controllers = new Controllers();
 
-		String busURL = Utils.getProp(Constants.propsFile, "busURL");
-		if (busURL == null)
-			busURL = "http://localhost/rs485";
-		controller = new ControllerWrapperCached(
-				controllers,
-				new ControllerWrapperLogger(
-						controllers,
-						new ControllerWrapperGlobals(
-								controllers,
-								new ControllerWrapperUni(
-										controllers,
-										new kvv.controllers.controller.Controller(
-												busURL)))));
+//		String busURL = Utils.getProp(Constants.propsFile, "busURL");
+//		if (busURL == null)
+//			busURL = "http://localhost/rs485";
+
+		Controller c = new Controller();
+		String com = Utils.getProp("c:/zavorovo/controller.properties",
+				"COM");
+		c.setModbusLine(new ADUTransceiver(new PacketTransceiver(com, 400)));
+
+		controller = new ControllerWrapperCached(controllers,
+				new ControllerWrapperLogger(controllers,
+						new ControllerWrapperGlobals(controllers,
+								new ControllerWrapperUni(controllers, c))));
 
 		units = new Units(controllers, controller);
 		scheduler = new Scheduler(controllers, units, controller);

@@ -13,9 +13,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import kvv.controllers.controller.IController;
 import kvv.heliostat.server.envir.Envir;
 import kvv.heliostat.server.envir.RealEnvir;
-import kvv.heliostat.server.envir.controller.IController;
 
 @SuppressWarnings("serial")
 public class UploadServlet extends HttpServlet {

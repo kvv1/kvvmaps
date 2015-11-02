@@ -3,11 +3,11 @@ package kvv.controllers.client.control.simple;
 import java.util.ArrayList;
 
 import kvv.controllers.client.page.ModePage;
-import kvv.controllers.history.shared.HistoryItem;
+import kvv.controllers.shared.HistoryItem;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.RegisterSchedule;
-import kvv.controllers.shared.ScheduleItem;
 import kvv.controllers.shared.RegisterSchedule.State;
+import kvv.controllers.shared.ScheduleItem;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;

@@ -2,10 +2,10 @@ package kvv.heliostat.server.envir;
 
 import java.io.IOException;
 
+import kvv.controllers.controller.Controller;
+import kvv.controllers.controller.adu.ADUTransceiver;
+import kvv.controllers.controller.adu.PacketTransceiver;
 import kvv.heliostat.server.ParamsHolder;
-import kvv.heliostat.server.envir.controller.Controller;
-import kvv.heliostat.server.envir.controller.adu.ADUTransceiver;
-import kvv.heliostat.server.envir.controller.adu.TCPPacketTransceiver1;
 import kvv.heliostat.server.envir.motor.Motor;
 import kvv.heliostat.server.envir.motor.MotorRaw;
 import kvv.heliostat.server.envir.motor.MotorRawT3;
@@ -22,10 +22,10 @@ public class RealEnvir extends Envir {
 			String com = ParamsHolder.controllerParams.getProperty("COM", "");
 			if (modbusLine == null || !this.com.equals(com)) {
 				this.com = com;
-//				setModbusLine(new ADUTransceiver(
-//						new PacketTransceiver(com, 500)));
 				setModbusLine(new ADUTransceiver(
-						new TCPPacketTransceiver1("192.168.1.17", 8899, 1000)));
+						new PacketTransceiver(com, 500)));
+//				setModbusLine(new ADUTransceiver(
+//						new TCPPacketTransceiver1("192.168.1.17", 8899, 1000)));
 			}
 			return super.send(addr, request);
 		}

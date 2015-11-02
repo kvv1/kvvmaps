@@ -3,7 +3,6 @@ package kvv.controllers.server;
 import java.io.IOException;
 
 import kvv.controllers.client.LogService;
-import kvv.controllers.utils.Constants;
 import kvv.stdutils.Utils;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;

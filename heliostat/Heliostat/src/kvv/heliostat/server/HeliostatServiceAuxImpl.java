@@ -3,7 +3,6 @@ package kvv.heliostat.server;
 import kvv.gwtutils.client.login.AuthException;
 import kvv.gwtutils.server.login.LoginServlet;
 import kvv.heliostat.client.HeliostatServiceAux;
-import kvv.heliostat.client.dto.MotorId;
 import kvv.heliostat.client.dto.Weather;
 import kvv.heliostat.server.envir.Envir;
 
@@ -14,13 +13,13 @@ import kvv.heliostat.server.envir.Envir;
 public class HeliostatServiceAuxImpl extends LoginServlet implements
 		HeliostatServiceAux {
 
-//	@Override
-//	protected void service(HttpServletRequest arg0, HttpServletResponse arg1)
-//			throws ServletException, IOException {
-//		synchronized (Heliostat.instance) {
-//			super.service(arg0, arg1);
-//		}
-//	}
+	// @Override
+	// protected void service(HttpServletRequest arg0, HttpServletResponse arg1)
+	// throws ServletException, IOException {
+	// synchronized (Heliostat.instance) {
+	// super.service(arg0, arg1);
+	// }
+	// }
 
 	@Override
 	public void setClockRate(int value) throws AuthException {

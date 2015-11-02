@@ -143,8 +143,6 @@ public class MotorRawView extends Composite implements View {
 	@Override
 	public void updateView(HeliostatState state) {
 		running.setText("");
-		if (state == null)
-			return;
 
 		MotorState motorState = state.motorState[id.ordinal()];
 		if (!pos.focused)

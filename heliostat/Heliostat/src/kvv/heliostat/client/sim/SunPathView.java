@@ -77,8 +77,6 @@ public class SunPathView extends Composite implements View {
 		this.state = state;
 		azDeg2Steps = null;
 		altDeg2Steps = null;
-		if (state == null)
-			return;
 
 		azDeg2Steps = FunctionFactory.getFunction(
 				state.params.simParams.azDeg2Steps[0],

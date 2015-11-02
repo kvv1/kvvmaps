@@ -81,9 +81,6 @@ public class MotorsView extends Composite implements View {
 
 	@Override
 	public void updateView(HeliostatState state) {
-		if (state == null)
-			return;
-
 		context.setFillStyle("gray");
 		context.fillRect(0, 0, width, height);
 

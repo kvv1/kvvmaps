@@ -2,9 +2,9 @@ package kvv.heliostat.server.envir.motor;
 
 import java.io.IOException;
 
+import kvv.controllers.controller.IController;
 import kvv.heliostat.client.dto.MotorState;
 import kvv.heliostat.server.ParamsHolder;
-import kvv.heliostat.server.envir.controller.IController;
 
 public class MotorRawT3 implements MotorRaw {
 

@@ -7,7 +7,7 @@ import kvv.controllers.client.Controllers;
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.control.simple.AutoRelayControl;
-import kvv.controllers.history.shared.HistoryItem;
+import kvv.controllers.shared.HistoryItem;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.ScheduleAndHistory;
 import kvv.gwtutils.client.CallbackAdapter;

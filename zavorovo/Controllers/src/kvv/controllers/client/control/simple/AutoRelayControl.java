@@ -7,7 +7,7 @@ import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.control.ControlComposite;
-import kvv.controllers.history.shared.HistoryItem;
+import kvv.controllers.shared.HistoryItem;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.RegisterSchedule;

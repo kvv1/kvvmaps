@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import kvv.controllers.controller.IController;
+import kvv.controllers.server.Constants;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.server.unit.Units;
 import kvv.controllers.shared.ControllerDescr;
@@ -16,7 +17,6 @@ import kvv.controllers.shared.RegisterSchedule.Expr;
 import kvv.controllers.shared.RegisterSchedule.State;
 import kvv.controllers.shared.Schedule;
 import kvv.controllers.shared.UnitDescr;
-import kvv.controllers.utils.Constants;
 import kvv.stdutils.Utils;
 
 public class Scheduler {

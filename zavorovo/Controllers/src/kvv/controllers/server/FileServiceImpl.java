@@ -1,7 +1,6 @@
 package kvv.controllers.server;
 
 import kvv.controllers.client.FileService;
-import kvv.controllers.utils.Constants;
 import kvv.stdutils.Utils;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;

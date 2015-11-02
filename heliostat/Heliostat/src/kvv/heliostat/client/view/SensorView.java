@@ -30,9 +30,6 @@ public class SensorView extends Composite implements View {
 
 	@Override
 	public void updateView(HeliostatState state) {
-		if (state == null)
-			return;
-
 		context.beginPath();
 
 		context.setFillStyle("#808080");

@@ -171,6 +171,7 @@ public class WeatherView extends Composite implements View {
 				model.heliostatServiceAux.setDay(day,
 						new CallbackAdapter<Void>());
 			}
+
 		};
 
 		model.add(this);
@@ -188,7 +189,5 @@ public class WeatherView extends Composite implements View {
 
 	@Override
 	public void updateView(HeliostatState state) {
-		if (state == null)
-			return;
 	}
 }

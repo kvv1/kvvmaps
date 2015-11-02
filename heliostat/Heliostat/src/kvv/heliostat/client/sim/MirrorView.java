@@ -85,8 +85,6 @@ public class MirrorView extends Composite implements View {
 
 	@Override
 	public void updateView(HeliostatState state) {
-		if (state == null)
-			return;
 
 		if (state.motorState[0] == null || state.motorState[1] == null)
 			return;
