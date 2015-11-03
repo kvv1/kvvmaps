@@ -25,9 +25,9 @@ public class UploadServlet extends HttpServlet {
 			InputStream is = request.getInputStream();
 			Context.getInstance().controller.uploadApp(addr, getImageHex(is));
 			is.close();
-			wr.print("Загрузка завершена");
+			wr.print("Uploaded");
 		} catch (Exception e) {
-			wr.print("Ошибка при загрузке: " + e.getClass().getName() + " " + e.getMessage());
+			wr.print("Upload error: " + e.getClass().getName() + " " + e.getMessage());
 		}
 		wr.close();
 	}
