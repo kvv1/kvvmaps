@@ -9,11 +9,12 @@ import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.UnitDescr;
+import kvv.gwtutils.client.HorPanel;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -25,6 +26,13 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 			+ hashCode(), "Сегодня");
 	private final RadioButton historyYesterday = new RadioButton("history"
 			+ hashCode(), "Вчера");
+
+	private final RadioButton history2 = new RadioButton(
+			"history" + hashCode(), "2");
+	private final RadioButton history3 = new RadioButton(
+			"history" + hashCode(), "3");
+	private final RadioButton history4 = new RadioButton(
+			"history" + hashCode(), "4");
 
 	private final UnitDescr unit;
 
@@ -55,13 +63,9 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 			historyToday.addClickHandler(historyClickHandler);
 			historyYesterday.addClickHandler(historyClickHandler);
 
-			HorizontalPanel historyRadioPanel = new HorizontalPanel();
-			historyRadioPanel.add(historyOff);
-			historyRadioPanel.add(historyToday);
-			historyRadioPanel.add(historyYesterday);
-
 			panel.add(new Label("Показывать историю:"));
-			panel.add(historyRadioPanel);
+			panel.add(new HorPanel(true, 8, historyOff, historyToday,
+					historyYesterday, history2, history3, history4));
 
 			historyOff.setValue(true);
 
@@ -91,15 +95,42 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 		refreshDiagrams();
 	}
 
+	private static final DateTimeFormat df = DateTimeFormat.getFormat("dd.MM");
+
 	@SuppressWarnings("deprecation")
 	@Override
 	protected Date getDateForHistory(Date now) {
 		if (historyToday.getValue())
 			return now;
-		if (historyYesterday.getValue()) {
-			Date d = new Date(now.getYear(), now.getMonth(), now.getDate());
-			return new Date(d.getTime() - 60000); // any time yesterday
-		}
+
+		Date d1 = new Date(new Date(now.getYear(), now.getMonth(),
+				now.getDate()).getTime() - 60000);
+		Date d2 = new Date(new Date(now.getYear(), now.getMonth(),
+				now.getDate()).getTime()
+				- 1 * (60000 * 60 * 24) - 60000);
+		Date d3 = new Date(new Date(now.getYear(), now.getMonth(),
+				now.getDate()).getTime()
+				- 2 * (60000 * 60 * 24) - 60000);
+		Date d4 = new Date(new Date(now.getYear(), now.getMonth(),
+				now.getDate()).getTime()
+				- 3 * (60000 * 60 * 24) - 60000);
+
+		history2.setText(df.format(d2));
+		history3.setText(df.format(d3));
+		history4.setText(df.format(d4));
+
+		if (historyYesterday.getValue())
+			return d1;
+
+		if (history2.getValue())
+			return d2;
+
+		if (history3.getValue())
+			return d3;
+
+		if (history4.getValue())
+			return d4;
+
 		return null;
 	}
 

@@ -17,7 +17,7 @@ public class SensorSim implements Sensor {
 
 	private final MotorRawSim azMotor;
 	private final MotorRawSim altMotor;
-	private SensorState state = _getState();
+	private SensorState state = new SensorState("not initialized");
 
 	public SensorSim(MotorRawSim azMotor, MotorRawSim altMotor) {
 		this.altMotor = altMotor;

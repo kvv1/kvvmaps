@@ -13,6 +13,7 @@ import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.RegisterSchedule.State;
 import kvv.gwtutils.client.CallbackAdapter;
+import kvv.gwtutils.client.HorPanel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
@@ -105,14 +106,8 @@ public class AutoRelayControl extends ControlComposite {
 		labelPanel.setWidth("200px");
 		labelPanel.add(new Label(reg.name));
 		panel.add(labelPanel);
-		HorizontalPanel panel1 = new HorizontalPanel();
-		// panel1.setBorderWidth(1);
-		// panel1.setWidth("200px");
-		panel1.add(relayControl);
-		panel1.add(autoButton);
-		panel1.add(exprButton);
-
-		panel1.setCellWidth(relayControl, "40px");
+		HorPanel panel1 = new HorPanel(false, 8, relayControl, autoButton, exprButton);
+//		panel1.setCellWidth(relayControl, "40px");
 		panel.add(panel1);
 		horizontalPanel.add(panel);
 

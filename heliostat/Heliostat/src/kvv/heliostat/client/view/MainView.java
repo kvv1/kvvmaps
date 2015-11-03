@@ -133,7 +133,7 @@ public class MainView extends Composite implements View, ErrHandler {
 	@Override
 	public void updateView(HeliostatState state) {
 		error.setVisible(false);
-		
+
 		switch (state.params.auto) {
 		case OFF:
 			trackingManual.setValue(true);
@@ -157,8 +157,10 @@ public class MainView extends Composite implements View, ErrHandler {
 
 	@Override
 	public void onError(Throwable caught) {
+		error.getElement().getStyle().setColor("red");
 		error.setVisible(true);
-		error.setText(caught.getClass().getSimpleName() + " " + caught.getMessage());
+		error.setText(caught.getClass().getSimpleName() + " "
+				+ caught.getMessage());
 	}
 
 	static class MotorChartAz extends MotorChart {

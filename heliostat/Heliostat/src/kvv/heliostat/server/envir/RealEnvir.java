@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import kvv.controllers.controller.Controller;
 import kvv.controllers.controller.adu.ADUTransceiver;
-import kvv.controllers.controller.adu.PacketTransceiver;
+import kvv.controllers.controller.adu.TCPTransceiver;
 import kvv.heliostat.server.ParamsHolder;
 import kvv.heliostat.server.envir.motor.Motor;
 import kvv.heliostat.server.envir.motor.MotorRaw;
@@ -22,10 +22,10 @@ public class RealEnvir extends Envir {
 			String com = ParamsHolder.controllerParams.getProperty("COM", "");
 			if (modbusLine == null || !this.com.equals(com)) {
 				this.com = com;
-				setModbusLine(new ADUTransceiver(
-						new PacketTransceiver(com, 500)));
 //				setModbusLine(new ADUTransceiver(
-//						new TCPPacketTransceiver1("192.168.1.17", 8899, 1000)));
+//						new COMTransceiver(com, 500)));
+				setModbusLine(new ADUTransceiver(
+						new TCPTransceiver("192.168.1.17", 8899, 1000)));
 			}
 			return super.send(addr, request);
 		}

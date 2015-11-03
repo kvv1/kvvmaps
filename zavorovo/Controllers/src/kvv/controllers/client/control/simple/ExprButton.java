@@ -5,6 +5,7 @@ import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.RegisterSchedule.Expr;
 import kvv.controllers.shared.RegisterSchedule.State;
 import kvv.gwtutils.client.DetPanel;
+import kvv.gwtutils.client.HorPanel;
 import kvv.gwtutils.client.form.EditablePanel;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -17,7 +18,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public abstract class ExprButton extends Composite {
-	private final HorizontalPanel panel = new HorizontalPanel();
+//	private final HorizontalPanel panel = new HorizontalPanel();
 	private final VerticalPanel vp = new VerticalPanel();
 	private final VerticalPanel details = new VerticalPanel();
 	private final CheckBox cb = new CheckBox();
@@ -81,7 +82,7 @@ public abstract class ExprButton extends Composite {
 			}
 		});
 
-		panel.add(cb);
+		//anel.add(cb);
 
 		details.add(expressions);
 		if (ModePage.controlMode) {
@@ -93,8 +94,10 @@ public abstract class ExprButton extends Composite {
 
 		vp.add(detailsPanel);
 
-		panel.add(vp);
+		//panel.add(vp);
 
+		HorPanel panel = new HorPanel(cb, detailsPanel);
+		
 		initWidget(panel);
 	}
 

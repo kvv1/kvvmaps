@@ -77,26 +77,32 @@ public class SensorView extends Composite implements View {
 			context.fill();
 			// }
 
-			context.setFillStyle("yellow");
+			if (ss.error == null) {
+				context.setFillStyle("yellow");
 
-			context.fillText(ss.tl + "", 2, 10);
-			context.fillText(ss.bl + "", 2, height - 2);
+				context.fillText(ss.tl + "", 2, 10);
+				context.fillText(ss.bl + "", 2, height - 2);
 
-			context.fillText(ss.tr + "", width
-					- context.measureText(ss.tr + "").getWidth() - 2, 10);
-			context.fillText(ss.br + "", width
-					- context.measureText(ss.br + "").getWidth() - 2,
-					height - 2);
+				context.fillText(ss.tr + "",
+						width - context.measureText(ss.tr + "").getWidth() - 2,
+						10);
+				context.fillText(ss.br + "",
+						width - context.measureText(ss.br + "").getWidth() - 2,
+						height - 2);
 
-			// if (ss.getDeflection() != null) {
-			NumberFormat decimalFormat = NumberFormat.getFormat("#.##");
+				// if (ss.getDeflection() != null) {
+				NumberFormat decimalFormat = NumberFormat.getFormat("#.##");
 
-			String dx = decimalFormat.format(ss.getDeflectionX());
-			String dy = decimalFormat.format(ss.getDeflectionY());
-			context.fillText(dx, 40, 40);
-			context.fillText(dy, 40, 55);
-			context.fillText("t=" + ss.temperature, 40, 70);
-			// }
+				String dx = decimalFormat.format(ss.getDeflectionX());
+				String dy = decimalFormat.format(ss.getDeflectionY());
+				context.fillText(dx, 40, 40);
+				context.fillText(dy, 40, 55);
+				context.fillText("t=" + ss.temperature, 40, 70);
+				// }
+			} else {
+				context.setFillStyle("red");
+				context.fillText(ss.error, 10, 40);
+			}
 		}
 
 		context.closePath();

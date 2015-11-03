@@ -29,6 +29,8 @@ public class SensorState implements Serializable {
 	}
 
 	public boolean isValid() {
+		if(error != null)
+			return false;
 		return tr + tl + br + bl > 100;
 	}
 
@@ -49,15 +51,4 @@ public class SensorState implements Serializable {
 		double y = tl - bl + tr - br;
 		return y / sum * 4;
 	}
-//	public PtD getDeflection() {
-//		double sum = tr + tl + br + bl;
-//		if (sum == 0)
-//			return null;
-//
-//		double x = tr - tl + br - bl;
-//		double y = tl - bl + tr - br;
-//
-//		return new PtD(x / sum * 4, y / sum * 4);
-//	}
-
 }

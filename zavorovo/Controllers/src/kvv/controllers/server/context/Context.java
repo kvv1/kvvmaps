@@ -3,7 +3,7 @@ package kvv.controllers.server.context;
 import kvv.controllers.controller.Controller;
 import kvv.controllers.controller.IController;
 import kvv.controllers.controller.adu.ADUTransceiver;
-import kvv.controllers.controller.adu.PacketTransceiver;
+import kvv.controllers.controller.adu.COMTransceiver;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.server.controller.ControllerWrapperCached;
 import kvv.controllers.server.controller.ControllerWrapperGlobals;
@@ -57,7 +57,7 @@ public class Context {
 		Controller c = new Controller();
 		String com = Utils.getProp("c:/zavorovo/controller.properties",
 				"COM");
-		c.setModbusLine(new ADUTransceiver(new PacketTransceiver(com, 400)));
+		c.setModbusLine(new ADUTransceiver(new COMTransceiver(com, 400)));
 
 		controller = new ControllerWrapperCached(controllers,
 				new ControllerWrapperLogger(controllers,
