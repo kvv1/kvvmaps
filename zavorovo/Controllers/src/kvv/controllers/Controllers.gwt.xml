@@ -13,6 +13,7 @@
   <!-- Other module inherits                                      -->
   <inherits name='kvv.controller.ControllerRegisters'/>
   <inherits name='kvv.gwtutils.GwtUtils'/>
+  <inherits name='kvv.simpleutils.SimpleUtils'/>
   
   <!-- Specify the app entry point class.                         -->
   <entry-point class='kvv.controllers.client.Controllers'/>

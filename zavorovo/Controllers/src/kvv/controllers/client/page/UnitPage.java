@@ -62,6 +62,9 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 			historyOff.addClickHandler(historyClickHandler);
 			historyToday.addClickHandler(historyClickHandler);
 			historyYesterday.addClickHandler(historyClickHandler);
+			history2.addClickHandler(historyClickHandler);
+			history3.addClickHandler(historyClickHandler);
+			history4.addClickHandler(historyClickHandler);
 
 			panel.add(new Label("Показывать историю:"));
 			panel.add(new HorPanel(true, 8, historyOff, historyToday,
