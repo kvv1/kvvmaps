@@ -87,10 +87,16 @@
 #define REG_INPULLUP6 254
 #define REG_INPULLUP7 255
 
+
+#define REG_RULES_SIZE 256
+#define REG_RULES_STATE 257
+#define REG_RULES 258
+#define REG_RULES_CNT 128
+
 //void initCommands();
 
-char getReg(uint8_t reg, int* val);
-char setReg(uint8_t reg, int val);
+char getReg(uint16_t reg, int* val);
+char setReg(uint16_t reg, int val);
 
 ee_8_decl(resetByWd);
 ee_8_decl(wdOnReceive);

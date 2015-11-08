@@ -24,7 +24,7 @@ static void W1_LOW(char n) {
 	setPort(pins[n], 0);
 }
 
-void W1_OFF(char n) {
+void W1_OFF(uint8_t n) {
 	setDDR(pins[n], 0);
 	setPort(pins[n], 0);
 }

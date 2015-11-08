@@ -4,12 +4,14 @@
 #include "packet.h"
 #include "bl.h"
 #include "rules.h"
+#include "rules1.h"
 
 static uint8_t regs[] PROGMEM
-= { REG_RELAYS, REG_INPUTS, REG_TEMP, REG_ADC_CONF, REG_RESET_BY_WD, REG_WD_ON_RECEIVE, /*REG_VMONOFF, REG_VMSTATE,*/
-REG_ADC0, REG_ADC1, REG_ADC2, REG_ADC3, REG_RAM0, REG_RAM1, REG_RAM2, REG_RAM3,
-		REG_PWM0, REG_PWM1, REG_PWM2, REG_PWM3, REG_EEPROM0, REG_EEPROM1,
-		REG_EEPROM2, REG_EEPROM3 };
+= { REG_RELAYS, REG_INPUTS, REG_TEMP, REG_ADC_CONF, REG_RESET_BY_WD,
+		REG_WD_ON_RECEIVE, /*REG_VMONOFF, REG_VMSTATE,*/
+		REG_ADC0, REG_ADC1, REG_ADC2, REG_ADC3, REG_RAM0, REG_RAM1, REG_RAM2,
+		REG_RAM3, REG_PWM0, REG_PWM1, REG_PWM2, REG_PWM3, REG_EEPROM0,
+		REG_EEPROM1, REG_EEPROM2, REG_EEPROM3 };
 
 typedef struct {
 	uint8_t cmd;
@@ -40,27 +42,35 @@ uint8_t handleStdCmd(PDU* pdu, uint8_t cmdlen) {
 	switch (command) {
 	case CMD_MODBUS_SETREGS: {
 		SetRegCmd* cmd1 = (SetRegCmd*) pdu;
-		uint8_t reg = cmd1->reg;
+		uint16_t reg = GET_BIGENDIAN(&cmd1->_regHi);
 		uint8_t n = cmd1->q;
 		int16_t* data = cmd1->data;
 		char res = 1;
-		while (n--) {
-			res &= setReg(reg++, BSWAP_16(*data));
-			data++;
-		}
-		uint16_t S = sendPacketStart();
-		if (res) {
-			S = sendPacketBodyPart(pdu, 5, S);
+
+		if (reg == REG_RULES) {
+			for(int i = 0; i < n; i++) {
+				setRules1Word(i, BSWAP_16(data[i]));
+			}
+//			setRules1(data, n);
 		} else {
-			S = sendByte(command | 0x80, S);
-			S = sendByte(2, S);
+			while (n--) {
+				res &= setReg(reg++, BSWAP_16(*data));
+				data++;
+			}
 		}
-		sendPacketEnd(S);
+
+		if (res) {
+			uint16_t S = sendPacketStart();
+			S = sendPacketBodyPart(pdu, 5, S);
+			sendPacketEnd(S);
+		} else {
+			sendError(command, ERR_INVALID_PORT_NUM);
+		}
 		return 1;
 	}
 	case CMD_MODBUS_GETREGS: {
 		GetRegCmd* cmd1 = (GetRegCmd*) pdu;
-		uint8_t reg = cmd1->reg;
+		uint16_t reg = GET_BIGENDIAN(&cmd1->_regHi);
 		uint8_t n = cmd1->n;
 		uint16_t S = sendPacketStart();
 		S = sendByte(command, S);

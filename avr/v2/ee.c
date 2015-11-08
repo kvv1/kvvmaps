@@ -50,7 +50,7 @@ uint8_t EEPROM_read(uint16_t src) {
 }
 
 uint16_t EEPROM_readWord(uint16_t src) {
-	return (EEPROM_read(src) << 8) | EEPROM_read(src + 1);
+	return (((uint16_t)EEPROM_read(src)) << 8) | (EEPROM_read(src + 1) & 0xFF);
 }
 
 void EEPROM_readBlock(uint16_t src, int sz, uint8_t* dest) {

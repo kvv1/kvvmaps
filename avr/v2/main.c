@@ -16,6 +16,7 @@
 #include "rules.h"
 #include "regs.h"
 #include "stepper.h"
+#include "rules1.h"
 
 #define INPUT_BUFFER_SIZE 64
 
@@ -95,6 +96,8 @@ int main() {
 			if (getwdOnReceive() && checkHW())
 				wdt_reset();
 		}
+
+		rules1Step();
 	}
 }
 
