@@ -1,0 +1,304 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.17+ wizard for JavaCC 1.5.0+
+ */
+options
+{
+  JDK_VERSION = "1.5";
+//  LOOKAHEAD=2;
+
+  static = false;
+}
+
+PARSER_BEGIN(EXPR1)
+package kvv.exprcalc;
+import java.io.*;
+import kvv.stdutils.Utils;
+
+@SuppressWarnings("unused")
+public abstract class EXPR1 extends EXPR1_Base
+{
+  public EXPR1(String text)
+  {
+  	this(new StringReader(Utils.utf2win(text)));
+    //this (new JavaCCReader(fileName));
+  }
+
+  public void throwExc(String msg) throws ParseException
+  {
+	throw new ParseException(token, msg);
+  }
+
+  public Expr parse() throws ParseException, IOException
+  {
+    return expr();
+  }
+}
+
+PARSER_END(EXPR1)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+| < "//" (~[ "\n", "\r" ])*
+    (
+      "\n"
+    | "\r"
+    | "\r\n"
+    ) >
+| < "/*" (~[ "*" ])* "*"
+    (
+      "*"
+    | ~[ "*", "/" ] (~[ "*" ])* "*"
+    )*
+    "/" >
+}
+
+TOKEN : /* OPERATORS */
+{
+  < AND : "&&" >
+| < OR : "||" >
+| < EQ : "==" >
+| < NEQ : "!=" >
+| < LT : "<" >
+| < LE : "<=" >
+| < GT : ">" >
+| < GE : ">=" >
+| < NOT : "!" >
+| < PLUS : "+" >
+| < MINUS : "-" >
+| < MULTIPLY : "*" >
+| < DIVIDE : "/" >
+| < NULL  : "null" >
+| < MULDIV : "muldiv" >
+}
+
+TOKEN :
+{
+  < ID : [ "a"-"z", "A"-"Z", "_", "\u00A0"-"\u00FF" ] ([ "a"-"z", "A"-"Z", "_", "0"-"9", "\u00A0"-"\u00FF" ])* >
+| < STRING : "\"" (~[ "\"", "\n", "\r" ])* "\"" >
+| < NUMBER : (< DIGIT >)+ >
+| < #DIGIT : [ "0"-"9" ] >
+}
+
+Expr expr() :
+{
+  Expr res;}{
+  res = condExpr()
+  {
+    return res;  }
+}
+
+Expr condExpr() :
+{
+  Expr cond;  Expr left;
+  Expr right;
+}
+{
+  cond = logOrExpr()
+  [
+    "?"  left=expr() ":" right=condExpr()    {
+      return new CondExpr(cond, left, right);    }  ]
+  {
+    return cond;  }}
+  
+  
+Expr logOrExpr() :
+{
+  Expr res;
+  Expr temp;
+}
+{
+  res = logAndExpr()
+  (
+    < OR > temp = logAndExpr()
+    {
+		res = new ORExpr(res, temp);
+    }
+  )*
+  {
+    return res;
+  }
+}
+
+Expr logAndExpr() :
+{
+  Expr res;
+  Expr temp;
+}
+{
+  res = boolExpr()
+  (
+    < AND > temp = boolExpr()
+    {
+		res = new ANDExpr(res, temp);
+    }
+  )*
+  {
+    return res;
+  }
+}
+
+Expr boolExpr() :
+{
+  Expr res;
+  Expr temp;
+}
+{
+  res = intExpr()
+  (
+    (
+      < EQ > temp = intExpr()
+      {
+      	res = new BinExpr(res, temp, OP.EQ);
+      }
+    | < NEQ > temp = intExpr()
+      {
+      	res = new BinExpr(res, temp, OP.NEQ);
+      }
+    | < LT > temp = intExpr()
+      {
+      	res = new BinExpr(res, temp, OP.LT);
+      }
+    | < LE > temp = intExpr()
+      {
+      	res = new BinExpr(res, temp, OP.LE);
+      }
+    | < GT > temp = intExpr()
+      {
+      	res = new BinExpr(res, temp, OP.GT);
+      }
+    | < GE > temp = intExpr()
+      {
+      	res = new BinExpr(res, temp, OP.GE);
+      }
+    )
+  )*
+  {
+    return res;
+  }
+}
+
+Expr intExpr() :
+{
+  Expr res;
+  Expr temp;
+}
+{
+  res = term()
+  (
+    (
+      < PLUS > temp = term()
+      {
+      	res = new BinExpr(res, temp, OP.PLUS);
+      }
+    | < MINUS > temp = term()
+      {
+      	res = new BinExpr(res, temp, OP.MINUS);
+      }
+    )
+  )*
+  {
+    return res;
+  }
+}
+
+Expr term() :
+{
+  Expr res;
+  Expr temp;
+}
+{
+  res = unary()
+  (
+    (
+      < MULTIPLY > temp = unary()
+      {
+      	res = new BinExpr(res, temp, OP.MUL);
+      }
+    | < DIVIDE > temp = unary()
+      {
+      	res = new BinExpr(res, temp, OP.DIV);
+      }
+    )
+  )*
+  {
+    return res;
+  }
+}
+
+Expr unary() :
+{
+  Expr res;
+}
+{
+  < NOT > res = simpleElement()
+  {
+    return res = new BinExpr(res, OP.NOT);
+  }
+| < MINUS > res = simpleElement()
+  {
+    return res = new BinExpr(res, OP.NEG);
+  }
+| res = simpleElement()
+  {
+    return res;
+  }
+}
+
+Expr simpleElement() :
+{
+  Expr res;
+}
+{
+  res = id()
+  {
+    return res;
+  }
+|  res = number()
+  {
+    return res;
+  }
+/*| res = muldiv(sim)  {    return res;  }
+*/  
+| "(" res = expr() ")"
+  {
+    return new ParExpr(res);
+  }
+}
+/*
+short muldiv(boolean sim):{  short res;
+  short temp;
+  short temp1;
+}{  < MULDIV > "(" res = expr(sim) "," temp = expr(sim) "," temp1 = expr(sim) ")"
+  {
+  	if(sim)
+  		return 0;
+    return (short)(res * temp / temp1);
+  }
+}
+*/
+Expr id() :
+{
+  Token t;
+}
+{
+  t = < ID >
+  {
+    return new RegExpr(Utils.win2utf(t.image));
+  }
+}
+
+Expr number() :
+{
+  Token t;
+}
+{
+  t = < NUMBER >
+  {
+    return new LitExpr(Short.parseShort(t.image));
+  }
+}
+

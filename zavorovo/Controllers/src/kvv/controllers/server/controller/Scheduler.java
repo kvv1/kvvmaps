@@ -148,8 +148,7 @@ public class Scheduler {
 			for (Expr expr : registerSchedule.expressions) {
 				int value1 = 0;
 				try {
-					value1 = new ExprCalculator(Utils.utf2win(expr.expr))
-							.parse();
+					value1 = new ExprCalculator(expr.expr).parse();
 				} catch (Exception e) {
 					expr.errMsg = e.getMessage();
 					continue;

@@ -11,7 +11,6 @@ import kvv.controllers.shared.History;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
 import kvv.controllers.shared.ScheduleAndHistory;
-import kvv.stdutils.Utils;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -62,9 +61,9 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public short eval(String expr)  throws Exception {
+	public short eval(String expr) throws Exception {
 		try {
-			return new ExprCalculator(Utils.utf2win(expr)).parse();
+			return new ExprCalculator(expr).parse();
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		}

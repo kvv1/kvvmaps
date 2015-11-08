@@ -4,12 +4,16 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -20,7 +24,7 @@ public class Utils {
 	public static <T> T fromJson(String str, Class<T> clazz) {
 		return new Gson().fromJson(str, clazz);
 	}
-	
+
 	public static String toJson(Object o) {
 		return new Gson().toJson(o);
 	}
@@ -107,7 +111,8 @@ public class Utils {
 		return props.getProperty(prop);
 	}
 
-	public static synchronized String getProp(String file, String prop, String defaultValue) {
+	public static synchronized String getProp(String file, String prop,
+			String defaultValue) {
 		Properties props = getProps(file);
 		if (props == null)
 			return null;
@@ -159,8 +164,8 @@ public class Utils {
 		try {
 			bytes = str.getBytes("Windows-1251");
 			StringBuilder sb = new StringBuilder();
-			for(byte b : bytes)
-				sb.append((char)b);
+			for (byte b : bytes)
+				sb.append((char) b);
 			return sb.toString();
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -168,4 +173,53 @@ public class Utils {
 		return "xaxa";
 	}
 
+	public static byte[] getImageHex(InputStream is) throws IOException {
+		List<Byte> bytes = new ArrayList<Byte>();
+
+		int addr = 0;
+
+		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+		String line;
+		while ((line = rd.readLine()) != null) {
+			if (line.length() == 0 || line.charAt(0) != ':')
+				continue;
+			int idx = 1;
+			int byteCnt = Integer.parseInt(line.substring(idx, idx + 2), 16);
+			idx += 2;
+			int a = Integer.parseInt(line.substring(idx, idx + 4), 16);
+			idx += 4;
+			int cmd = Integer.parseInt(line.substring(idx, idx + 2), 16);
+			idx += 2;
+
+			if (cmd == 0) {
+				if (a != addr)
+					throw new IllegalArgumentException();
+
+				for (int i = 0; i < byteCnt; i++) {
+					int b = Integer.parseInt(line.substring(idx, idx + 2), 16);
+					idx += 2;
+					bytes.add((byte) b);
+				}
+
+				addr += byteCnt;
+			}
+		}
+		System.out.println();
+		rd.close();
+
+		byte[] res = new byte[bytes.size()];
+		int i = 0;
+		for (Byte b : bytes)
+			res[i++] = b;
+
+		return res;
+	}
+
+	public static byte[] asByteArray(Collection<Byte> list) {
+		byte[] res = new byte[list.size()];
+		int i = 0;
+		for (Byte b : list)
+			res[i++] = b;
+		return res;
+	}
 }

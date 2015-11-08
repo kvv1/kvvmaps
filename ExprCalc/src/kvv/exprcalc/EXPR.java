@@ -8,7 +8,7 @@ import kvv.stdutils.Utils;
 public abstract class EXPR implements EXPRConstants {
   public EXPR(String text)
   {
-        this(new StringReader(text));
+        this(new StringReader(Utils.utf2win(text)));
     //this (new JavaCCReader(fileName));
   }
 
