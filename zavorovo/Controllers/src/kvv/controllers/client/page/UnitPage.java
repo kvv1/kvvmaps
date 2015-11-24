@@ -34,10 +34,10 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 	private final RadioButton history4 = new RadioButton(
 			"history" + hashCode(), "4");
 
-	private final UnitDescr unit;
+//	private final UnitDescr unit;
 
 	public UnitPage(final UnitDescr unit) {
-		this.unit = unit;
+//		this.unit = unit;
 
 		Button refreshButton = new Button("Обновить");
 		refreshButton.setWidth("100%");

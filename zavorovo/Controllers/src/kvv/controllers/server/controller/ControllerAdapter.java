@@ -1,7 +1,6 @@
 package kvv.controllers.server.controller;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import kvv.controller.register.Rule;
 import kvv.controller.register.Statistics;
@@ -10,8 +9,6 @@ import kvv.controllers.controller.ModbusLine;
 import kvv.controllers.server.Controllers;
 
 public abstract class ControllerAdapter implements IController {
-
-	//protected volatile boolean stopped;
 
 	protected final IController wrapped;
 	protected final Controllers controllers;
@@ -23,7 +20,6 @@ public abstract class ControllerAdapter implements IController {
 
 	@Override
 	public void close() {
-		//stopped = true;
 		wrapped.close();
 	}
 
@@ -36,7 +32,7 @@ public abstract class ControllerAdapter implements IController {
 	public void setModbusLine(ModbusLine modbusLine) {
 		wrapped.setModbusLine(modbusLine);
 	}
-	
+
 	@Override
 	public Statistics getStatistics(boolean clear) throws IOException {
 		return wrapped.getStatistics(clear);

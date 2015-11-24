@@ -4,6 +4,7 @@ import kvv.controllers.controller.Controller;
 import kvv.controllers.controller.IController;
 import kvv.controllers.controller.adu.ADUTransceiver;
 import kvv.controllers.controller.adu.COMTransceiver;
+import kvv.controllers.server.Constants;
 import kvv.controllers.server.Controllers;
 import kvv.controllers.server.controller.ControllerWrapperCached;
 import kvv.controllers.server.controller.ControllerWrapperGlobals;
@@ -66,7 +67,7 @@ public class Context {
 		// busURL = "http://localhost/rs485";
 
 		Controller c = new Controller();
-		String com = Utils.getProp("c:/zavorovo/controller.properties", "COM");
+		String com = Utils.getProp(Constants.controllerPropsFile, "COM");
 		c.setModbusLine(new ADUTransceiver(new COMTransceiver(com, 600)));
 
 		controller = new ControllerWrapperCached(controllers,

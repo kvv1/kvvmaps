@@ -45,6 +45,12 @@ public class Looper {
 		}
 	}
 
+	public synchronized void start() {
+		stop();
+		thread = new Thread1();
+		thread.start();
+	}
+
 	public synchronized void stop() {
 		if (thread != null)
 			thread.close();
@@ -56,13 +62,13 @@ public class Looper {
 	class Thread1 extends Thread {
 		private volatile boolean stopped;
 
-		{
+		public Thread1() {
+			super("LOOPER");
 			setPriority(MIN_PRIORITY);
 		}
 
 		void close() {
 			stopped = true;
-			interrupt();
 		}
 
 		@Override
@@ -79,10 +85,10 @@ public class Looper {
 								tasks.remove(0);
 								task1.runnable.run();
 							} else {
-								Looper.this.wait(dt);
+								Looper.this.wait(Math.min(dt, 1000));
 							}
 						} else {
-							Looper.this.wait();
+							Looper.this.wait(1000);
 						}
 					}
 					yield();
@@ -90,13 +96,8 @@ public class Looper {
 					e.printStackTrace();
 				}
 			}
+			System.out.println("-stopped");
 		}
 	};
-
-	public synchronized void start() {
-		stop();
-		thread = new Thread1();
-		thread.start();
-	}
 
 }

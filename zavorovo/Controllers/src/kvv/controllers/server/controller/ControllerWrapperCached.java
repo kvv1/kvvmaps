@@ -18,9 +18,10 @@ public class ControllerWrapperCached extends ControllerAdapter {
 	private Map<Integer, AllRegs> map = new HashMap<Integer, AllRegs>();
 
 	private final Runnable r = new Runnable() {
+		private List<ControllerDescr> controllersList;
+		
 		@Override
 		public void run() {
-//			System.out.print("+");
 			if (controllersList == null || controllersList.isEmpty())
 				controllersList = new LinkedList<ControllerDescr>(
 						Arrays.asList(controllers.getControllers()));
@@ -40,14 +41,12 @@ public class ControllerWrapperCached extends ControllerAdapter {
 				}
 			}
 			Context.looper.post(this, 100);
-//			System.out.print("-");
 		}
 	};
 
 	public ControllerWrapperCached(Controllers controllers,
 			IController controller) {
 		super(controllers, controller);
-		// thread.start();
 		Context.looper.post(r, 100);
 	}
 
@@ -59,7 +58,6 @@ public class ControllerWrapperCached extends ControllerAdapter {
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
-		// System.out.println("+" + addr + "(" + reg + ")=" + val);
 		AllRegs allRegs = map.get(addr);
 		try {
 			wrapped.setReg(addr, reg, val);
@@ -107,31 +105,4 @@ public class ControllerWrapperCached extends ControllerAdapter {
 			throw new IOException();
 		return allRegs;
 	}
-
-	private List<ControllerDescr> controllersList;
-
-	// private void step() {
-	//
-	// }
-
-	// private Thread thread = new Thread(
-	// ControllerWrapperCached.class.getSimpleName() + "Thread") {
-	// {
-	// setDaemon(true);
-	// setPriority(Thread.MIN_PRIORITY);
-	// }
-	//
-	// @Override
-	// public void run() {
-	// while (!stopped) {
-	// try {
-	// Thread.sleep(100);
-	// step();
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// }
-	// }
-	// }
-	// };
-
 }

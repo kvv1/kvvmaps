@@ -32,12 +32,12 @@ public class CommonForm extends ControlComposite {
 			.create(ControllersService.class);
 
 	private final int addr;
-	private final String name;
+//	private final String name;
 	private final ControllerType controllerType;
 
 	public CommonForm(String type, int addr, String name) {
 		this.addr = addr;
-		this.name = name;
+//		this.name = name;
 		controllerType = Controllers.systemDescr.controllerTypes.get(type);
 
 		if (controllerType != null)

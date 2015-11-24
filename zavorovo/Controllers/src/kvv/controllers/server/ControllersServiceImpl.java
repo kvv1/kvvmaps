@@ -1,9 +1,6 @@
 package kvv.controllers.server;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -41,15 +38,6 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}
-	}
-
-	public static void print(AllRegs allRegs) {
-		List<Integer> keys = new ArrayList<Integer>(allRegs.values.keySet());
-		Collections.sort(keys);
-		for (Integer reg : keys) {
-			System.out.print(reg + ":" + allRegs.values.get(reg) + " ");
-		}
-		System.out.println();
 	}
 
 	@Override
