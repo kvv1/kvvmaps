@@ -27,18 +27,15 @@ public class Context {
 		return instance;
 	}
 
-	public static synchronized void start() {
+	public static void start() {
 		looper.start();
 	}
 
-	public static synchronized void stop() {
+	public static void stop() {
 		looper.stop();
-		synchronized (looper) {
-			closedAll = true;
-			if (instance != null)
-				instance.close();
-			instance = null;
-		}
+		Context context = getInstance();
+		closedAll = true;
+		context.close();
 	}
 
 	public static void reload() {
@@ -52,11 +49,12 @@ public class Context {
 	public final Units units;
 	public final IController controller;
 	public final Scheduler scheduler;
-	//public final Ruler ruler; 
+
+	// public final Ruler ruler;
 
 	private void close() {
 		scheduler.close();
-		//ruler.close();
+		// ruler.close();
 		controller.close();
 	}
 
@@ -69,7 +67,7 @@ public class Context {
 
 		Controller c = new Controller();
 		String com = Utils.getProp("c:/zavorovo/controller.properties", "COM");
-		c.setModbusLine(new ADUTransceiver(new COMTransceiver(com, 400)));
+		c.setModbusLine(new ADUTransceiver(new COMTransceiver(com, 600)));
 
 		controller = new ControllerWrapperCached(controllers,
 				new ControllerWrapperLogger(controllers,
@@ -78,7 +76,7 @@ public class Context {
 
 		units = new Units(controllers, controller);
 		scheduler = new Scheduler(controllers, units, controller);
-		//ruler = new Ruler(controllers, units, controller);
+		// ruler = new Ruler(controllers, units, controller);
 	}
 
 }

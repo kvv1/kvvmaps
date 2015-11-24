@@ -14,6 +14,7 @@ public class ControllerDef implements Serializable {
 		public Integer n;
 		public String name;
 		public int[] validRanges;
+		public int[] bitMapping;
 	}
 
 	public RegisterDef getReg(int n) {

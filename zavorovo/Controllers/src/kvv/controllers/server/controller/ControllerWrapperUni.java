@@ -80,7 +80,7 @@ public class ControllerWrapperUni extends ControllerAdapter {
 		}
 
 		HashMap<Integer, Integer> values1 = new HashMap<Integer, Integer>();
-/*
+
 		for (int reg : allRegs.values.keySet()) {
 			try {
 				RegisterDef registerDef = getRegDef(addr, reg);
@@ -93,7 +93,7 @@ public class ControllerWrapperUni extends ControllerAdapter {
 			} catch (IOException e) {
 			}
 		}
-*/
+
 		allRegs.values.putAll(values1);
 
 		// for (int key : allRegs.values.keySet())
