@@ -27,6 +27,7 @@
 
 #define BOOTLOADER_START (FLASHEND + 1 - (BOOTSIZE * 2))
 
+#define GET_BIGENDIAN(p) ((*(uint8_t*)p << 8) | *((uint8_t*)p + 1))
 #define BSWAP_16(x) ( (uint8_t)((x) >> 8) | ((uint8_t)(x)) << 8 )
 
 typedef struct {

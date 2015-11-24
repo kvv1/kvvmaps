@@ -31,9 +31,17 @@
 #define PIN_1W_2 P_C4
 #define PIN_1W_3 P_C3
 
+#define PIN_STEPPER_0_HOME P_C0
+#define PIN_STEPPER_1_HOME P_C5
+
+#define PIN_STEPPER_0_CLK P_B2
+#define PIN_STEPPER_0_DIR P_B1
+//#define PIN_STEPPER_0_EN P_B2
+#define PIN_STEPPER_1_CLK P_D7
+#define PIN_STEPPER_1_DIR P_B0
+//#define PIN_STEPPER_1_EN P_B0
+
 #define INT_VREF_TYPE 0xC0 // INTERNAL
 #define AVCC_VREF_TYPE 0x40 // AVCC
-
-
 
 #endif /* BOARD_H_ */
