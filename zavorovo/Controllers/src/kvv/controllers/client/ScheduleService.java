@@ -14,7 +14,7 @@ public interface ScheduleService extends RemoteService {
 			throws Exception;
 	ScheduleAndHistory getScheduleAndHistory(Date date);
 
-	short eval(String expr) throws Exception;
+	short eval(Integer addr, String expr) throws Exception;
 	
 /*
 	RegisterSchedule enable(String regName, boolean b) throws Exception;

@@ -6,7 +6,7 @@ import java.io.Serializable;
 public class RegisterDescr implements Serializable {
 	public String name;
 	public String controller;
-	public Integer addr;
+	public Integer controllerAddr;
 	public int register;
 	
 	@Override

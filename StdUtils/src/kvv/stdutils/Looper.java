@@ -1,7 +1,8 @@
-package kvv.heliostat.server;
+package kvv.stdutils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 
 public class Looper {
 
@@ -25,19 +26,26 @@ public class Looper {
 	public Looper() {
 	}
 
-	public void post(Runnable r) {
+	public synchronized void post(Runnable r) {
 		post(r, 0);
 	}
 
-	public void post(Runnable r, long delay) {
-		synchronized (tasks) {
-			tasks.add(new Task(r, System.currentTimeMillis() + delay));
-			Collections.sort(tasks);
-			tasks.notifyAll();
+	public synchronized void post(Runnable r, long delay) {
+		tasks.add(new Task(r, System.currentTimeMillis() + delay));
+		Collections.sort(tasks);
+		notifyAll();
+	}
+
+	public synchronized void remove(Runnable r) {
+		Iterator<Task> it = tasks.listIterator();
+		while (it.hasNext()) {
+			Task t = it.next();
+			if (t.runnable == r)
+				it.remove();
 		}
 	}
 
-	public void stop() {
+	public synchronized void stop() {
 		if (thread != null)
 			thread.close();
 		thread = null;
@@ -48,6 +56,10 @@ public class Looper {
 	class Thread1 extends Thread {
 		private volatile boolean stopped;
 
+		{
+			setPriority(MIN_PRIORITY);
+		}
+
 		void close() {
 			stopped = true;
 			interrupt();
@@ -57,8 +69,7 @@ public class Looper {
 		public void run() {
 			while (!stopped) {
 				try {
-					Task task = null;
-					synchronized (tasks) {
+					synchronized (Looper.this) {
 						if (stopped)
 							return;
 						if (tasks.size() > 0) {
@@ -66,23 +77,15 @@ public class Looper {
 							long dt = task1.time - System.currentTimeMillis();
 							if (dt <= 0) {
 								tasks.remove(0);
-								task = task1;
+								task1.runnable.run();
 							} else {
-								tasks.wait(dt);
+								Looper.this.wait(dt);
 							}
 						} else {
-							tasks.wait();
+							Looper.this.wait();
 						}
 					}
-
-					if (stopped)
-						return;
-
-					if (task != null) {
-						synchronized (Looper.this) {
-							task.runnable.run();
-						}
-					}
+					yield();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -90,9 +93,10 @@ public class Looper {
 		}
 	};
 
-	public void start() {
+	public synchronized void start() {
 		stop();
 		thread = new Thread1();
 		thread.start();
 	}
+
 }

@@ -1,6 +1,11 @@
 package kvv.controllers.server;
 
+import java.io.IOException;
 import java.util.Date;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.history.HistoryFile;
@@ -19,6 +24,14 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 		ScheduleService {
 
 	@Override
+	protected void service(HttpServletRequest arg0, HttpServletResponse arg1)
+			throws ServletException, IOException {
+		synchronized (Context.looper) {
+			super.service(arg0, arg1);
+		}
+	}
+
+	@Override
 	public synchronized RegisterSchedule update(String regName,
 			RegisterSchedule registerSchedule) throws Exception {
 		try {
@@ -29,22 +42,6 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 			throw new Exception(e.getMessage());
 		}
 	}
-
-	/*
-	 * @Override public synchronized RegisterSchedule enable(String regName,
-	 * boolean b) throws Exception { try { Schedule schedule = getSchedule();
-	 * RegisterSchedule registerSchedule = schedule.map.get(regName); if
-	 * (registerSchedule != null) { registerSchedule.enabled = b;
-	 * setSchedule(schedule); } return registerSchedule; } catch (Exception e) {
-	 * throw new Exception(e.getMessage()); } }
-	 * 
-	 * @Override public synchronized RegisterSchedule enableExpr(String regName,
-	 * boolean b) throws Exception { try { Schedule schedule = getSchedule();
-	 * RegisterSchedule registerSchedule = schedule.map.get(regName); if
-	 * (registerSchedule != null) { registerSchedule.exprEnabled = b;
-	 * setSchedule(schedule); } return registerSchedule; } catch (Exception e) {
-	 * throw new Exception(e.getMessage()); } }
-	 */
 
 	@Override
 	public synchronized ScheduleAndHistory getScheduleAndHistory(Date date) {
@@ -61,9 +58,12 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public short eval(String expr) throws Exception {
+	public short eval(Integer addr, String expr) throws Exception {
 		try {
-			return new ExprCalculator(expr).parse();
+			// ExprCalculator calculator = new ExprCalculator(addr, expr);
+			// List<Byte> bytes = calculator.parse().getBytes();
+			// return (short) calculator.eval(bytes);
+			return (short) new ExprCalculator(addr, expr).parse().getValue();
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		}

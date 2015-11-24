@@ -7,6 +7,7 @@ import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.control.ControlComposite;
+import kvv.controllers.client.page.ModePage;
 import kvv.controllers.shared.HistoryItem;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
@@ -16,7 +17,10 @@ import kvv.gwtutils.client.CallbackAdapter;
 import kvv.gwtutils.client.HorPanel;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -31,9 +35,13 @@ public class AutoRelayControl extends ControlComposite {
 	private final HorizontalPanel schedulePanel = new HorizontalPanel();
 	private final ScheduleCanvas scheduleCanvas;
 
-	private final AutoButton autoButton;
+	private final CheckBox autoCB = new CheckBox("Расп.");
+	private final CheckBox exprCB = new CheckBox();
+
 	private final ExprButton exprButton;
 	private final ChildComposite relayControl;
+
+	private RegisterSchedule registerSchedule;
 
 	public final RegisterDescr reg;
 
@@ -65,38 +73,58 @@ public class AutoRelayControl extends ControlComposite {
 		// framePanel.setBorderWidth(1);
 		framePanel.add(horizontalPanel);
 
-		//horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		// horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		horizontalPanel.add(schedulePanel);
 		enableSchedule(true);
 
 		if (presentation.isBool()) {
-			relayControl = new SimpleRelayControl(reg.addr, reg.register, "");
+			relayControl = new SimpleRelayControl(reg.controllerAddr, reg.register, "");
 		} else {
-			relayControl = new GetRegControl(reg.addr, reg.register, 1, null);
+			relayControl = new GetRegControl(reg.controllerAddr, reg.register, 1, null);
 		}
 		add(relayControl);
 
-		autoButton = new AutoButton() {
+		autoCB.setValue(false);
+		autoCB.setEnabled(false);
+		autoCB.addClickHandler(new ClickHandler() {
 			@Override
-			public void save(RegisterSchedule registerSchedule) {
-				scheduleService.update(reg.name, registerSchedule,
-						new CallbackAdapter<RegisterSchedule>() {
-							public void onSuccess(RegisterSchedule result) {
-								refreshButtons(result);
-							};
-						});
-			}
-		};
+			public void onClick(ClickEvent event) {
+				if (registerSchedule == null)
+					return;
 
-		exprButton = new ExprButton() {
+				if (!ModePage.check()) {
+					autoCB.setValue(!autoCB.getValue());
+					return;
+				}
+
+				registerSchedule.state = autoCB.getValue() ? State.SCHEDULE
+						: State.MANUAL;
+				saveSched(registerSchedule);
+			}
+		});
+
+		exprCB.setValue(false);
+		exprCB.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				if (registerSchedule == null)
+					return;
+
+				if (!ModePage.check()) {
+					exprCB.setValue(!exprCB.getValue());
+					return;
+				}
+
+				registerSchedule.state = exprCB.getValue() ? State.EXPRESSION
+						: State.MANUAL;
+				saveSched(registerSchedule);
+			}
+		});
+
+		exprButton = new ExprButton(reg) {
 			@Override
 			public void save(RegisterSchedule registerSchedule) {
-				scheduleService.update(reg.name, registerSchedule,
-						new CallbackAdapter<RegisterSchedule>() {
-							public void onSuccess(RegisterSchedule result) {
-								refreshButtons(result);
-							};
-						});
+				saveSched(registerSchedule);
 			}
 		};
 
@@ -106,16 +134,40 @@ public class AutoRelayControl extends ControlComposite {
 		labelPanel.setWidth("200px");
 		labelPanel.add(new Label(reg.name));
 		panel.add(labelPanel);
-		HorPanel panel1 = new HorPanel(false, 8, relayControl, autoButton, exprButton);
-//		panel1.setCellWidth(relayControl, "40px");
+		HorPanel panel1 = new HorPanel(false, 8, relayControl, autoCB, exprCB,
+				exprButton);
+		// panel1.setCellWidth(relayControl, "40px");
 		panel.add(panel1);
 		horizontalPanel.add(panel);
 
 		initWidget(framePanel);
 	}
 
+	private void saveSched(RegisterSchedule registerSchedule) {
+		if (!ModePage.check()) {
+			return;
+		}
+		scheduleService.update(reg.name, registerSchedule,
+				new CallbackAdapter<RegisterSchedule>() {
+					public void onSuccess(RegisterSchedule result) {
+						refreshButtons(result);
+					};
+				});
+	}
+
 	private void refreshButtons(RegisterSchedule registerSchedule) {
-		autoButton.updateUI(registerSchedule);
+		this.registerSchedule = registerSchedule;
+
+		if (registerSchedule != null && registerSchedule.items.size() != 0) {
+			autoCB.setEnabled(true);
+			autoCB.setValue(registerSchedule.state == State.SCHEDULE);
+		} else {
+			autoCB.setEnabled(false);
+			autoCB.setValue(false);
+		}
+
+		exprCB.setValue(registerSchedule.state == State.EXPRESSION);
+
 		exprButton.updateUI(registerSchedule);
 		relayControl.setEnabled(registerSchedule.state == State.MANUAL);
 	}

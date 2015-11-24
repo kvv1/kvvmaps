@@ -7,10 +7,14 @@ import java.util.ArrayList;
 public class RegisterSchedule implements Serializable {
 
 	public enum State {
-		MANUAL, SCHEDULE, EXPRESSION
+		MANUAL, SCHEDULE, EXPRESSION, LOCAL_EXPRESSION
 	}
 
 	public ArrayList<ScheduleItem> items = new ArrayList<>();
+	public boolean localExpr;
+	public ArrayList<Expr> expressions = new ArrayList<>();
+	public State state = State.MANUAL;
+
 
 	public static class Expr implements Serializable {
 		public String expr;
@@ -23,10 +27,6 @@ public class RegisterSchedule implements Serializable {
 			this.expr = expr;
 		}
 	}
-
-	public ArrayList<Expr> expressions = new ArrayList<>();
-	public boolean enabled;
-	public State state = State.MANUAL;
 
 	public int getValue(int minutes) {
 		if (items.size() == 0)

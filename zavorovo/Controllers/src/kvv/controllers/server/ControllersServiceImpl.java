@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import kvv.controller.register.AllRegs;
 import kvv.controller.register.Rule;
 import kvv.controller.register.Statistics;
@@ -16,6 +20,14 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class ControllersServiceImpl extends RemoteServiceServlet implements
 		ControllersService {
+
+	@Override
+	protected void service(HttpServletRequest arg0, HttpServletResponse arg1)
+			throws ServletException, IOException {
+		synchronized (Context.looper) {
+			super.service(arg0, arg1);
+		}
+	}
 
 	@Override
 	public int getReg(int addr, int reg) throws Exception {

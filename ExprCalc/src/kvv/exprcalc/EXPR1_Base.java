@@ -6,6 +6,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import kvv.simpleutils.src.CRC16;
 import kvv.stdutils.Utils;
 
 public abstract class EXPR1_Base {
@@ -334,7 +335,7 @@ public abstract class EXPR1_Base {
 		}
 	}
 
-	int eval(List<Byte> _bytes) {
+	public int eval(List<Byte> _bytes) {
 		Deque<Integer> stack = new LinkedList<>();
 
 		byte[] bytes = Utils.asByteArray(_bytes);
@@ -345,7 +346,7 @@ public abstract class EXPR1_Base {
 
 			byte c = bytes[i++];
 
-			int bcGroup =  c & (~(MAX_QUICK - 1)) & 0xFF;
+			int bcGroup = c & (~(MAX_QUICK - 1)) & 0xFF;
 
 			if (bcGroup == LIT_MASK) {
 				int n = c & (MAX_QUICK - 1);
@@ -435,7 +436,7 @@ public abstract class EXPR1_Base {
 		return n;
 	}
 
-	Expr decomp(List<Byte> bytes) {
+	public Expr decomp(List<Byte> bytes) {
 
 		Deque<Expr> stack = new LinkedList<>();
 
@@ -444,8 +445,8 @@ public abstract class EXPR1_Base {
 		while (i < bytes.size()) {
 			byte c = bytes.get(i++);
 
-			int bcGroup =  c & (~(MAX_QUICK - 1)) & 0xFF;
-			
+			int bcGroup = c & (~(MAX_QUICK - 1)) & 0xFF;
+
 			if (bcGroup == LIT_MASK) {
 				int n = c & (MAX_QUICK - 1);
 				stack.push(new LitExpr(n - MAX_QUICK / 2));
@@ -537,4 +538,63 @@ public abstract class EXPR1_Base {
 		return e;
 	}
 
+	public static int[] toIntArr(short... arr) {
+		int[] res = new int[arr.length];
+		for (int i = 0; i < arr.length; i++) {
+			res[i] = arr[i];
+		}
+		return res;
+	}
+
+	public static short[] packToShortArr(List<Byte> bytes) {
+		short[] res = new short[(bytes.size() + 1) / 2];
+
+		for (int i = 0; i < res.length; i++) {
+			res[i] = (short) (bytes.get(i * 2) << 8);
+			if (i * 2 + 1 < bytes.size())
+				res[i] |= (bytes.get(i * 2 + 1) & 0xFF);
+		}
+
+		return res;
+	}
+
+	public static class RulePart {
+		public final List<Byte> bytes;
+		public RulePart(List<Byte> bytes) {
+			this.bytes = bytes;
+		}
+	}
+	
+	public static class Rule {
+		public final List<Byte> bytes = new ArrayList<>();
+		public Rule(int r, List<RulePart> parts) {
+			bytes.add((byte) 0);
+			bytes.add((byte) 0);
+			bytes.add((byte) 1);
+			bytes.add((byte) r);
+
+			for (RulePart p : parts) {
+				int idx = bytes.size();
+				bytes.add((byte) 0);
+				bytes.addAll(p.bytes);
+				bytes.set(idx, (byte) (bytes.size() - idx));
+			}
+
+			bytes.set(0, (byte) bytes.size());
+		}
+	}
+	
+	public static List<Byte> packRules(Rule... rules) {
+		List<Byte> res = new ArrayList<>();
+
+		for (Rule r : rules)
+			res.addAll(r.bytes);
+		res.add((byte) 0);
+
+		short crc = CRC16.crc16(res, 0, res.size());
+		res.add((byte) (crc >> 8));
+		res.add((byte) crc);
+
+		return res;
+	}
 }

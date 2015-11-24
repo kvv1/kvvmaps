@@ -27,7 +27,7 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 	}
 
 	@Override
-	public synchronized void setReg(int addr, int reg, int val)
+	public  void setReg(int addr, int reg, int val)
 			throws IOException {
 		try {
 			wrapped.setReg(addr, reg, val);
@@ -39,7 +39,7 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 	}
 
 	@Override
-	public synchronized int getReg(int addr, int reg) throws IOException {
+	public  int getReg(int addr, int reg) throws IOException {
 		try {
 			int val = wrapped.getReg(addr, reg);
 			log(addr, reg, val);
@@ -51,7 +51,7 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 	}
 
 	@Override
-	public synchronized AllRegs getAllRegs(int addr) throws IOException {
+	public  AllRegs getAllRegs(int addr) throws IOException {
 		try {
 			AllRegs allRegs = wrapped.getAllRegs(addr);
 			log(addr, allRegs.values);
@@ -63,7 +63,7 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 	}
 
 	@Override
-	public synchronized int[] getRegs(int addr, int reg, int n)
+	public  int[] getRegs(int addr, int reg, int n)
 			throws IOException {
 		try {
 			int[] res = wrapped.getRegs(addr, reg, n);

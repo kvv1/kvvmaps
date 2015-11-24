@@ -1,6 +1,5 @@
 package kvv.controllers.controller.adu;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class CRC16 {

@@ -11,7 +11,7 @@ import kvv.controllers.server.Controllers;
 
 public abstract class ControllerAdapter implements IController {
 
-	protected volatile boolean stopped;
+	//protected volatile boolean stopped;
 
 	protected final IController wrapped;
 	protected final Controllers controllers;
@@ -23,7 +23,7 @@ public abstract class ControllerAdapter implements IController {
 
 	@Override
 	public void close() {
-		stopped = true;
+		//stopped = true;
 		wrapped.close();
 	}
 

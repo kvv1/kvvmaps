@@ -5,6 +5,7 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class ControllerDef implements Serializable {
 
+	public boolean hasRules;
 	public int[] allRegs;
 
 	public RegisterDef[] registers;
@@ -12,9 +13,7 @@ public class ControllerDef implements Serializable {
 	public static class RegisterDef implements Serializable {
 		public Integer n;
 		public String name;
-		public Integer mul;
 		public int[] validRanges;
-		public int[] bitMapping;
 	}
 
 	public RegisterDef getReg(int n) {

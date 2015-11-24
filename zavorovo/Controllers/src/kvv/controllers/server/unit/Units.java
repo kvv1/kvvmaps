@@ -18,8 +18,8 @@ public class Units {
 		Context.reload();
 	}
 
-	private final Controllers controllers;
-	private final IController controller;
+	// private final Controllers controllers;
+	// private final IController controller;
 
 	public Units(Controllers controllers, IController controller) {
 		try {
@@ -28,8 +28,8 @@ public class Units {
 			this.units = new UnitDescr[0];
 		}
 
-		this.controllers = controllers;
-		this.controller = controller;
+//		this.controllers = controllers;
+//		this.controller = controller;
 	}
 
 }

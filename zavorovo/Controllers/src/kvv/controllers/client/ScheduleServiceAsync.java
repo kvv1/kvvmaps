@@ -13,12 +13,6 @@ public interface ScheduleServiceAsync {
 
 	void getScheduleAndHistory(Date date,
 			AsyncCallback<ScheduleAndHistory> callback);
-/*
-	void enable(String regName, boolean b, AsyncCallback<RegisterSchedule> callback);
 
-	void enableExpr(String regName, boolean b,
-			AsyncCallback<RegisterSchedule> callback);
-*/
-
-	void eval(String expr, AsyncCallback<Short> callback);			
+	void eval(Integer addr, String expr, AsyncCallback<Short> callback);			
 }

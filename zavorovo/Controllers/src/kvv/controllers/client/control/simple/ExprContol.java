@@ -1,14 +1,9 @@
 package kvv.controllers.client.control.simple;
 
-import kvv.controllers.client.ScheduleService;
-import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.page.ModePage;
-import kvv.gwtutils.client.CallbackAdapter;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -16,15 +11,15 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class ExprContol extends Composite {
-	private final ScheduleServiceAsync scheduleService = GWT
-			.create(ScheduleService.class);
+public abstract class ExprContol extends Composite {
 	private final VerticalPanel verticalPanel = new VerticalPanel();
 	public HorizontalPanel buttonsPanel = new HorizontalPanel();
 
 	Label errMsg = new Label("err");
 	TextArea expr = new TextArea();
 	Button testButton = new Button("Test");
+
+	protected abstract void testExpr(String e);
 
 	public ExprContol(String expr2, String errMsg2) {
 		//verticalPanel.setBorderWidth(1);
@@ -49,12 +44,7 @@ public class ExprContol extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				String e = expr.getText();
-				scheduleService.eval(e, new CallbackAdapter<Short>() {
-					@Override
-					public void onSuccess(Short result) {
-						Window.alert("" + result);
-					}
-				});
+				testExpr(e);
 			}
 		});
 

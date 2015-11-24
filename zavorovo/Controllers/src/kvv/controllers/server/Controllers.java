@@ -61,10 +61,10 @@ public class Controllers {
 						for (RegisterDescr reg : regs) {
 							if (reg != null) {
 								reg.controller = c.name;
-								reg.addr = c.addr;
+								reg.controllerAddr = c.addr;
 								registers.put(reg.name, reg);
 								ar2register.put(
-										(reg.addr << 16) + reg.register, reg);
+										(reg.controllerAddr << 16) + reg.register, reg);
 							}
 						}
 						// c.registers = null;
@@ -114,7 +114,7 @@ public class Controllers {
 	public Collection<RegisterDescr> getRegisters(int addr) {
 		Collection<RegisterDescr> regs = new ArrayList<RegisterDescr>();
 		for (RegisterDescr reg : registers.values())
-			if (reg.addr == addr)
+			if (reg.controllerAddr == addr)
 				regs.add(reg);
 		return regs;
 	}

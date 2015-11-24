@@ -1,7 +1,12 @@
 package kvv.controllers.server;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import kvv.controllers.client.ConfigurationService;
 import kvv.controllers.server.context.Context;
@@ -16,6 +21,15 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class ConfigurationServiceImpl extends RemoteServiceServlet implements
 		ConfigurationService {
+
+	@Override
+	protected void service(HttpServletRequest arg0, HttpServletResponse arg1)
+			throws ServletException, IOException {
+		synchronized (Context.looper) {
+			super.service(arg0, arg1);
+		}
+	}
+
 	@SuppressWarnings("deprecation")
 	@Override
 	public SystemDescr getSystemDescr() throws Exception {

@@ -34,13 +34,6 @@ public class ControllerWrapperUni extends ControllerAdapter {
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
-		// System.out.println("-" + addr + "(" + reg + ")=" + val);
-
-		RegisterDef registerDef = getRegDef(addr, reg);
-
-		if (registerDef.mul != null)
-			val = val * registerDef.mul;
-
 		wrapped.setReg(addr, reg, val);
 	}
 
@@ -87,7 +80,7 @@ public class ControllerWrapperUni extends ControllerAdapter {
 		}
 
 		HashMap<Integer, Integer> values1 = new HashMap<Integer, Integer>();
-
+/*
 		for (int reg : allRegs.values.keySet()) {
 			try {
 				RegisterDef registerDef = getRegDef(addr, reg);
@@ -100,7 +93,7 @@ public class ControllerWrapperUni extends ControllerAdapter {
 			} catch (IOException e) {
 			}
 		}
-
+*/
 		allRegs.values.putAll(values1);
 
 		// for (int key : allRegs.values.keySet())
@@ -122,9 +115,6 @@ public class ControllerWrapperUni extends ControllerAdapter {
 	private Integer adjustValue(int addr, int reg, Integer value)
 			throws IOException {
 		RegisterDef registerDef = getRegDef(addr, reg);
-
-		if (registerDef.mul != null)
-			value = value / registerDef.mul;
 
 		if (registerDef.validRanges != null) {
 			boolean ok = false;

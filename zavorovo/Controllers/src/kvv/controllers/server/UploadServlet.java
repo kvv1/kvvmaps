@@ -16,17 +16,21 @@ import kvv.stdutils.Utils;
 public class UploadServlet extends HttpServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		PrintWriter wr = new PrintWriter(response.getOutputStream());
-		try {
-			int addr = Integer.parseInt(request.getParameter("addr"));
-			InputStream is = request.getInputStream();
-			Context.getInstance().controller.uploadApp(addr, Utils.getImageHex(is));
-			is.close();
-			wr.print("Uploaded");
-		} catch (Exception e) {
-			wr.print("Upload error: " + e.getClass().getName() + " " + e.getMessage());
+		synchronized (Context.looper) {
+			PrintWriter wr = new PrintWriter(response.getOutputStream());
+			try {
+				int addr = Integer.parseInt(request.getParameter("addr"));
+				InputStream is = request.getInputStream();
+				Context.getInstance().controller.uploadApp(addr,
+						Utils.getImageHex(is));
+				is.close();
+				wr.print("Uploaded");
+			} catch (Exception e) {
+				wr.print("Upload error: " + e.getClass().getName() + " "
+						+ e.getMessage());
+			}
+			wr.close();
 		}
-		wr.close();
 	}
 
 }
