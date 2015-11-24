@@ -11,7 +11,7 @@
 #define CMD_MODBUS_GETREGS 3
 #define CMD_MODBUS_SETREGS 16
 #define CMD_MODBUS_BOOTLOADER 100
-#define CMD_GETALLREGS 103 // cmd -> ERR_OK (reg valHi valLo)*
+//#define CMD_GETALLREGS 103 // cmd -> ERR_OK (reg valHi valLo)*
 #define CMD_GETRULES1 104
 #define CMD_SETRULES1 105
 #define CMD_GETRULES 108 // -> N rules

@@ -29,22 +29,23 @@ char getReg(uint16_t reg, int* val) {
 		*val = getInputs();
 	} else if (reg == REG_TEMP) {
 		*val = w1_temp(0);
+		if(*val == TEMPERATURE_INVALID)
+			return 0;
 	} else if (reg == REG_ADC_CONF) {
 		*val = getadcconf();
 	} else if (reg == REG_RESET_BY_WD) {
 		*val = getresetByWd();
 	} else if (reg == REG_WD_ON_RECEIVE) {
 		*val = getwdOnReceive();
-//	} else if (reg == REG_VMONOFF) {
-//		*val = getvmonoff();
-//	} else if (reg == REG_VMSTATE) {
-//		*val = vmGetStatus();
 	} else if (reg >= REG_ADC0 && reg < REG_ADC0 + REG_ADC_CNT) {
-		if (getadcconf() & (1 << (reg - REG_ADC0)))
+		if (getadcconf() & (1 << (reg - REG_ADC0))) {
 			*val = w1_temp(reg - REG_ADC0 + 1);
-		else
+			if(*val == TEMPERATURE_INVALID)
+				return 0;
+		} else {
 			*val = read_adc(pgm_read_byte(&(adcs[reg - REG_ADC0])),
 					AVCC_VREF_TYPE);
+		}
 	} else if (reg >= REG_IN0 && reg < REG_IN0 + REG_IN_CNT) {
 		*val = getInput(reg - REG_IN0);
 	} else if (reg >= REG_EEPROM0 && reg < REG_EEPROM0 + REG_EEPROM_CNT) {
@@ -75,14 +76,9 @@ char setReg(uint16_t reg, int val) {
 		setPWM(reg - REG_PWM0, val);
 	} else if (reg == REG_RELAYS) {
 		setRelays(val);
-//	} else if (reg == REG_VMONOFF) {
-//		setvmonoff(val);
-//		startVM(val);
 	} else if (reg >= REG_EEPROM0 && reg < REG_EEPROM0 + REG_EEPROM_CNT) {
 		EEPROM_writeWord((uint16_t) (eepromRegisters + (reg - REG_EEPROM0)),
 				val);
-//		eeprom_update_word((uint16_t*) eepromRegisters + (reg - REG_EEPROM0),
-//				val);
 	} else if (reg >= REG_INPULLUP0 && reg < REG_INPULLUP0 + REG_IN_CNT) {
 		setPullup(reg - REG_INPULLUP0, val);
 	} else if (reg >= REG_RAM0 && reg < REG_RAM0 + REG_RAM_CNT) {

@@ -86,6 +86,8 @@ static char pop1() {
 #define PAR 20
 
 static int eval1(uint8_t a, uint8_t len) {
+	err = ERR_OK;
+
 	int tos = 0;
 
 	sp = stack + STACK_SIZE;
@@ -105,7 +107,7 @@ static int eval1(uint8_t a, uint8_t len) {
 			int n = c & (MAX_QUICK - 1);
 			int val = 0;
 			char b = getReg(n, &val);
-			if(!b)
+			if (!b)
 				err = ERR_WRONG_REGISTER;
 			push1(tos);
 			tos = val;
@@ -123,7 +125,7 @@ static int eval1(uint8_t a, uint8_t len) {
 				a += 2;
 				int val = 0;
 				char b = getReg(s, &val);
-				if(!b)
+				if (!b)
 					err = ERR_WRONG_REGISTER;
 				push1(tos);
 				tos = val;
@@ -274,14 +276,23 @@ int8_t rules1Step() {
 		if (!len)
 			break;
 
+		uint8_t a1 = a + len;
+
 		if (on) {
-			int val = eval1(a + 4, len - 4);
-			if (err != ERR_OK)
-				return 0;
-			setReg(reg, val);
+			a += 4;
+
+			while (a < a1) {
+				uint8_t l = get(a);
+				int val = eval1(a + 1, l - 1);
+				if (err == ERR_OK) {
+					setReg(reg, val);
+					break;
+				}
+				a += l;
+			}
 		}
 
-		a += len;
+		a = a1;
 	}
 
 	return 1;

@@ -6,13 +6,6 @@
 #include "rules.h"
 #include "rules1.h"
 
-static uint8_t regs[] PROGMEM
-= { REG_RELAYS, REG_INPUTS, REG_TEMP, REG_ADC_CONF, REG_RESET_BY_WD,
-		REG_WD_ON_RECEIVE, /*REG_VMONOFF, REG_VMSTATE,*/
-		REG_ADC0, REG_ADC1, REG_ADC2, REG_ADC3, REG_RAM0, REG_RAM1, REG_RAM2,
-		REG_RAM3, REG_PWM0, REG_PWM1, REG_PWM2, REG_PWM3, REG_EEPROM0,
-		REG_EEPROM1, REG_EEPROM2, REG_EEPROM3 };
-
 typedef struct {
 	uint8_t cmd;
 	uint8_t _regHi;
@@ -80,28 +73,6 @@ uint8_t handleStdCmd(PDU* pdu, uint8_t cmdlen) {
 			getReg(reg++, &val);
 			S = sendWord(val, S);
 		}
-		sendPacketEnd(S);
-		return 1;
-	}
-	case CMD_GETALLREGS: {
-		if (cmdlen != 1) {
-			sendError(command, ERR_WRONG_CMD_FORMAT);
-			return 1;
-		}
-
-		uint16_t S = sendPacketStart();
-		S = sendByte(command, S);
-
-		S = sendByte(0, S); // UI
-
-		for (uint8_t i = 0; i < sizeof(regs) / sizeof(regs[0]); i++) {
-			uint8_t reg = pgm_read_byte(regs + i);
-			int16_t val = 0;
-			getReg(reg, &val);
-			S = sendByte(reg, S);
-			S = sendWord(val, S);
-		}
-
 		sendPacketEnd(S);
 		return 1;
 	}
