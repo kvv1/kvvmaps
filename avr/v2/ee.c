@@ -6,15 +6,13 @@ volatile uint16_t ee_magic;
 
 #define MAGIC8 0x67
 
-
 #if defined(__AVR_ATmega48__) || defined(__AVR_ATmega168__)
 #define EEWE EEPE
 #define EEMWE EEMPE
 #define SPMCR SPMCSR
 #endif
 
-
-void _EEPROM_write(uint16_t dest, uint8_t ucData, uint8_t magic) {
+static void _EEPROM_write(uint16_t dest, uint8_t ucData, uint8_t magic) {
 
 	while ((EECR & (1 << EEWE)) || (SPMCR & (1 << RWWSB)))
 		; //ждем установки бита EEWE
@@ -26,8 +24,7 @@ void _EEPROM_write(uint16_t dest, uint8_t ucData, uint8_t magic) {
 
 	EEDR = ucData; //записываем байт данных
 
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-	{
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
 		if (ee_magic == MAGIC16) {
 			EECR |= (1 << EEMWE); //устанавливаем EEMWE
 			if (magic == MAGIC8)
@@ -37,9 +34,9 @@ void _EEPROM_write(uint16_t dest, uint8_t ucData, uint8_t magic) {
 }
 
 void EEPROM_write(uint16_t dest, uint8_t ucData) {
-	_EEPROM_write(dest, ucData, MAGIC8);
+	if (EEPROM_read(dest) != ucData)
+		_EEPROM_write(dest, ucData, MAGIC8);
 }
-
 
 uint8_t EEPROM_read(uint16_t src) {
 	while (EECR & (1 << EEWE))
@@ -50,7 +47,7 @@ uint8_t EEPROM_read(uint16_t src) {
 }
 
 uint16_t EEPROM_readWord(uint16_t src) {
-	return (((uint16_t)EEPROM_read(src)) << 8) | (EEPROM_read(src + 1) & 0xFF);
+	return (((uint16_t) EEPROM_read(src)) << 8) | (EEPROM_read(src + 1) & 0xFF);
 }
 
 void EEPROM_readBlock(uint16_t src, int sz, uint8_t* dest) {

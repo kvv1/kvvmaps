@@ -9,7 +9,7 @@
 #include "stepper.h"
 #include "rules1.h"
 
-static char adcs[] PROGMEM = { ADC0, ADC1, ADC2, ADC3, ADC0, ADC1, ADC2, ADC3 };
+static char adcs[REG_ADC_CNT] PROGMEM = { ADC0, ADC1, ADC2, ADC3};
 
 static EEMEM int16_t eepromRegisters[REG_EEPROM_CNT];
 static int16_t ramRegisters[REG_RAM_CNT];
@@ -23,8 +23,6 @@ char getReg(uint16_t reg, int* val) {
 		*val = getOutput(reg - REG_RELAY0) ? 1 : 0;
 	} else if (reg >= REG_PWM0 && reg < REG_PWM0 + REG_RELAY_CNT) {
 		*val = getPWM(reg - REG_PWM0);
-	} else if (reg == REG_RELAYS) {
-		*val = getRelays();
 	} else if (reg == REG_INPUTS) {
 		*val = getInputs();
 	} else if (reg == REG_TEMP) {
@@ -74,8 +72,6 @@ char setReg(uint16_t reg, int val) {
 		setOutput(reg - REG_RELAY0, val);
 	} else if (reg >= REG_PWM0 && reg < REG_PWM0 + REG_RELAY_CNT) {
 		setPWM(reg - REG_PWM0, val);
-	} else if (reg == REG_RELAYS) {
-		setRelays(val);
 	} else if (reg >= REG_EEPROM0 && reg < REG_EEPROM0 + REG_EEPROM_CNT) {
 		EEPROM_writeWord((uint16_t) (eepromRegisters + (reg - REG_EEPROM0)),
 				val);

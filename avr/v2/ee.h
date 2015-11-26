@@ -16,6 +16,12 @@ void EEPROM_readBlock(uint16_t src, int sz, uint8_t* dest);
 void EEPROM_writeWord(uint16_t dest, uint16_t ucData);
 void EEPROM_writeBlock(uint16_t dest, int sz, uint8_t* src);
 
+typedef {
+
+} EEData;
+
+extern EEMEM EEData eeData;
+
 #define ee_8_decl(name) uint8_t get##name(); void set##name(uint8_t t)
 #define ee_16_decl(name) uint16_t get##name(); void set##name(uint16_t t)
 

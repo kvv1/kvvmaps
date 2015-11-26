@@ -4,7 +4,7 @@
 #include "board.h"
 #include "inputs.h"
 
-static PORTPIN pins[] PROGMEM = { IN0, IN1, IN0, IN1, IN0, IN1, IN0, IN1 };
+static PORTPIN pins[REG_IN_CNT] PROGMEM = { IN0, IN1, IN0, IN1};
 #define PIN(n) ((PORTPIN)pgm_read_word(pins + (n)))
 
 int8_t getInput(uint8_t n) {

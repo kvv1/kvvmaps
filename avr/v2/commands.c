@@ -3,7 +3,6 @@
 #include "commands.h"
 #include "packet.h"
 #include "bl.h"
-#include "rules.h"
 #include "rules1.h"
 
 typedef struct {
@@ -23,12 +22,6 @@ typedef struct {
 	uint8_t _nHi;
 	uint8_t n;
 } GetRegCmd;
-
-typedef struct {
-	uint8_t cmd;
-	uint8_t n;
-	Rule rule;
-} SetRuleCmd;
 
 uint8_t handleStdCmd(PDU* pdu, uint8_t cmdlen) {
 	uint8_t command = pdu->func;
@@ -74,31 +67,6 @@ uint8_t handleStdCmd(PDU* pdu, uint8_t cmdlen) {
 			S = sendWord(val, S);
 		}
 		sendPacketEnd(S);
-		return 1;
-	}
-	case CMD_GETRULES: {
-		uint16_t S = sendPacketStart();
-		S = sendByte(command, S);
-		int i;
-		for (i = 0; i < NRULES; i++) {
-			Rule rule;
-			getRule(&rule, i);
-			rule.srcValue = BSWAP_16(rule.srcValue);
-			rule.dstValue = BSWAP_16(rule.dstValue);
-			S = sendPacketBodyPart(&rule, sizeof(rule), S);
-		}
-
-		sendPacketEnd(S);
-		return 1;
-	}
-	case CMD_SETRULE: {
-		SetRuleCmd* cmd1 = (SetRuleCmd*) pdu;
-		cmd1->rule.srcValue = BSWAP_16(cmd1->rule.srcValue);
-		cmd1->rule.dstValue = BSWAP_16(cmd1->rule.dstValue);
-		if (setRule(&cmd1->rule, cmd1->n))
-			sendOk(command);
-		else
-			sendError(command, ERR_INVALID_PORT_NUM);
 		return 1;
 	}
 	default: {

@@ -13,14 +13,13 @@
 #include "inputs.h"
 #include "packet.h"
 #include "commands.h"
-#include "rules.h"
 #include "regs.h"
 #include "stepper.h"
 #include "rules1.h"
 
 #define INPUT_BUFFER_SIZE 64
 
-#define VERSION 14
+#define VERSION 16
 
 void packetReceived(uint8_t* buffer, uint8_t len);
 
@@ -78,7 +77,6 @@ int main() {
 			}
 			//vmStep(TIME_UNIT);
 			handlePWM(TIME_UNIT);
-			stepRules();
 		}
 
 		if (!getwdOnReceive() && !transmitting() && checkHW())

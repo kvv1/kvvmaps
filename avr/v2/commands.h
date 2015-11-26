@@ -11,11 +11,6 @@
 #define CMD_MODBUS_GETREGS 3
 #define CMD_MODBUS_SETREGS 16
 #define CMD_MODBUS_BOOTLOADER 100
-//#define CMD_GETALLREGS 103 // cmd -> ERR_OK (reg valHi valLo)*
-#define CMD_GETRULES1 104
-#define CMD_SETRULES1 105
-#define CMD_GETRULES 108 // -> N rules
-#define CMD_SETRULE 109 // N rule ->
 
 uint8_t handleStdCmd(PDU* pdu, uint8_t cmdlen);
 
