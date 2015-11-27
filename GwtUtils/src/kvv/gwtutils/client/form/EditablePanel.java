@@ -7,6 +7,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -47,6 +48,7 @@ public abstract class EditablePanel<T extends IsWidget> extends Composite {
 
 	public void add(T widget) {
 		itemPanel = new HorizontalPanel();
+		itemPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		itemPanel.add(widget);
 		if (!readonly)
 			addNavPanel(widget, new NavPanel(itemPanel));

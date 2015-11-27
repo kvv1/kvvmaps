@@ -18,34 +18,25 @@ public class ControllersTree extends
 
 	@Override
 	protected DetPanel<ControllerForm, EditablePanel<RegisterForm>> createItem() {
-		DetPanel<ControllerForm, EditablePanel<RegisterForm>> item = new DetPanel<ControllerForm, EditablePanel<RegisterForm>>(
-				new ControllerForm(null), new EditablePanel<RegisterForm>(
-						!ModePage.controlMode, "Новый регистр") {
-					@Override
-					protected RegisterForm createItem() {
-						return new RegisterForm(null);
-					}
-				});
-		return item;
+		
+		RegsForm regsForm = new RegsForm();
+		ControllerForm controllerForm = new ControllerForm(null, regsForm);
+		return new DetPanel<ControllerForm, EditablePanel<RegisterForm>>(controllerForm, regsForm);
 	}
 
 	public void set(ControllerDescr[] controllers) {
-		for (ControllerDescr controllerDescr : controllers) {
-			EditablePanel<RegisterForm> registers = new EditablePanel<RegisterForm>(
-					!ModePage.controlMode, "Новый регистр") {
-				@Override
-				protected RegisterForm createItem() {
-					return new RegisterForm(null);
-				}
-			};
-
+		for (final ControllerDescr controllerDescr : controllers) {
+			RegsForm regsForm = new RegsForm();
+			regsForm.setControllerType(controllerDescr.type);
+			
 			for (RegisterDescr reg : controllerDescr.registers) {
-				registers.add(new RegisterForm(reg));
-
+				regsForm.add(new RegisterForm(reg));
 			}
 
+			ControllerForm controllerForm = new ControllerForm(controllerDescr, regsForm);
+			
 			add(new DetPanel<ControllerForm, EditablePanel<RegisterForm>>(
-					new ControllerForm(controllerDescr), registers));
+					controllerForm, regsForm));
 		}
 
 	}
@@ -59,4 +50,35 @@ public class ControllersTree extends
 		return res;
 	}
 
+	static class RegsForm extends EditablePanel<RegisterForm> {
+
+		public RegsForm() {
+			super(!ModePage.controlMode, "Новый регистр");
+		}
+
+
+		private String type;
+		
+		public void setControllerType(String type) {
+			this.type = type;
+			for(RegisterForm rf : getItems())
+				rf.setControllerType(type);
+		}
+
+		@Override
+		protected RegisterForm createItem() {
+			RegisterForm rf = new RegisterForm(null);
+			rf.setControllerType(type);
+			return rf;
+		}
+		
+		@Override
+		public void add(RegisterForm widget) {
+			super.add(widget);
+			widget.setControllerType(type);
+		}
+		
+}
+	
+	
 }

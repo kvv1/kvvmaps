@@ -1,8 +1,9 @@
 package kvv.controllers.client;
 
-import kvv.controller.register.AllRegs;
-import kvv.controller.register.Rule;
+import java.util.HashMap;
+
 import kvv.controller.register.Statistics;
+import kvv.controllers.client.control.AllRegs;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -13,13 +14,9 @@ public interface ControllersService extends RemoteService {
 
 	void setReg(int addr, int reg, int val) throws Exception;
 
-	AllRegs getRegs(int addr) throws Exception;
+	HashMap<Integer, Integer> getRegs(int addr) throws Exception;
 
 	Integer hello(int addr) throws Exception;
 
-	Rule[] getRules(int addr) throws Exception;
-
-	void setRules(int addr, Rule[] array) throws Exception;
-	
 	Statistics getStatistics(boolean clear);
 }

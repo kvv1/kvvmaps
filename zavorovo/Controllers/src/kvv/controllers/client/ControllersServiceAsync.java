@@ -1,7 +1,7 @@
 package kvv.controllers.client;
 
-import kvv.controller.register.AllRegs;
-import kvv.controller.register.Rule;
+import java.util.HashMap;
+
 import kvv.controller.register.Statistics;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -12,13 +12,9 @@ public interface ControllersServiceAsync {
 
 	void setReg(int addr, int reg, int val, AsyncCallback<Void> callback);
 
-	void getRegs(int addr, AsyncCallback<AllRegs> callback);
+	void getRegs(int addr, AsyncCallback<HashMap<Integer, Integer>> callback);
 
 	void hello(int addr, AsyncCallback<Integer> callback);
-
-	void getRules(int addr, AsyncCallback<Rule[]> callback);
-
-	void setRules(int addr, Rule[] array, AsyncCallback<Void> callback);
 
 	void getStatistics(boolean clear, AsyncCallback<Statistics> callback);
 }

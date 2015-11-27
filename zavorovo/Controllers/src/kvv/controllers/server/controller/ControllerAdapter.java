@@ -2,7 +2,6 @@ package kvv.controllers.server.controller;
 
 import java.io.IOException;
 
-import kvv.controller.register.Rule;
 import kvv.controller.register.Statistics;
 import kvv.controllers.controller.IController;
 import kvv.controllers.controller.ModbusLine;
@@ -46,15 +45,5 @@ public abstract class ControllerAdapter implements IController {
 	@Override
 	public Integer hello(int addr) throws IOException {
 		return wrapped.hello(addr);
-	}
-
-	@Override
-	public Rule[] getRules(int addr) throws IOException {
-		return wrapped.getRules(addr);
-	}
-
-	@Override
-	public void setRules(int addr, Rule[] rules) throws IOException {
-		wrapped.setRules(addr, rules);
 	}
 }

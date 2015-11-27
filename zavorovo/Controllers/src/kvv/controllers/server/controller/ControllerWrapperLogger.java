@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import kvv.controller.register.AllRegs;
+import kvv.controllers.client.control.AllRegs;
 import kvv.controllers.controller.IController;
 import kvv.controllers.history.HistoryFile;
 import kvv.controllers.server.Controllers;
@@ -46,18 +46,6 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 			return val;
 		} catch (IOException e) {
 			log(addr, reg, null);
-			throw e;
-		}
-	}
-
-	@Override
-	public  AllRegs getAllRegs(int addr) throws IOException {
-		try {
-			AllRegs allRegs = wrapped.getAllRegs(addr);
-			log(addr, allRegs.values);
-			return allRegs;
-		} catch (IOException e) {
-			log(addr, null);
 			throw e;
 		}
 	}

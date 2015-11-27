@@ -7,6 +7,7 @@ public class ControllerUI implements Serializable {
 	public ControlType type;
 	public Align align;
 	public int reg;
+	public String regName;
 	public String label;
 	public ControllerUI[] children;
 

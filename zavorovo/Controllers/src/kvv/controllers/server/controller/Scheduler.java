@@ -145,7 +145,7 @@ public class Scheduler {
 				List<RulePart> parts = new ArrayList<>();
 
 				for (Expr expr : registerSchedule.expressions) {
-					System.out.println(expr.expr);
+					//System.out.println(expr.expr);
 					try {
 						parts.add(new RulePart(new Parser(cd.registers,
 								expr.expr).parse().getBytes()));
@@ -292,4 +292,12 @@ public class Scheduler {
 		}
 	};
 
+	public static void main(String[] args) {
+		long F_CPU = 8000000;
+		long UART_SPEED = 9600;
+		
+		long speed = (F_CPU / (16) / UART_SPEED) - 1;
+		
+		System.out.println(speed);
+	}
 }

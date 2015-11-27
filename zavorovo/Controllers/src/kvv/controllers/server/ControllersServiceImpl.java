@@ -1,15 +1,15 @@
 package kvv.controllers.server;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import kvv.controller.register.AllRegs;
-import kvv.controller.register.Rule;
 import kvv.controller.register.Statistics;
 import kvv.controllers.client.ControllersService;
+import kvv.controllers.client.control.AllRegs;
 import kvv.controllers.server.context.Context;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -41,38 +41,16 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public AllRegs getRegs(int addr) throws Exception {
-		try {
-			AllRegs allRegs = Context.getInstance().controller.getAllRegs(addr);
-			// print(allRegs);
-			return allRegs;
-		} catch (IOException e) {
-			throw new Exception(e.getMessage());
-		}
+	public HashMap<Integer, Integer> getRegs(int addr) throws Exception {
+		HashMap<Integer, Integer> allRegs = Context.getInstance().controller
+				.getAllRegs(addr);
+		return allRegs;
 	}
 
 	@Override
 	public Integer hello(int addr) throws Exception {
 		try {
 			return Context.getInstance().controller.hello(addr);
-		} catch (IOException e) {
-			throw new Exception(e.getMessage());
-		}
-	}
-
-	@Override
-	public Rule[] getRules(int addr) throws Exception {
-		try {
-			return Context.getInstance().controller.getRules(addr);
-		} catch (IOException e) {
-			throw new Exception(e.getMessage());
-		}
-	}
-
-	@Override
-	public void setRules(int addr, Rule[] rules) throws Exception {
-		try {
-			Context.getInstance().controller.setRules(addr, rules);
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}

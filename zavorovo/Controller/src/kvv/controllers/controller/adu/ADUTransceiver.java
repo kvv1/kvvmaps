@@ -3,7 +3,9 @@ package kvv.controllers.controller.adu;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import kvv.controller.register.Statistics;
@@ -16,6 +18,12 @@ public class ADUTransceiver implements ModbusLine{
 	public Statistics statistics = new Statistics();
 	protected final IPacketTransceiver packetTransceiver;
 
+	private final Map<Integer, Integer> timeouts = new HashMap<>();
+	@Override
+	public void setTimeout(int addr, int timeout) {
+		timeouts.put(addr, timeout);
+	}
+	
 	public ADUTransceiver(IPacketTransceiver packetTransceiver) {
 		this.packetTransceiver = packetTransceiver;
 	}
@@ -35,7 +43,10 @@ public class ADUTransceiver implements ModbusLine{
 		for (int i = 0; i < attempts; i++) {
 			byte[] res = null;
 			try {
-				res = packetTransceiver.sendPacket(adu.toBytes(), addr != 0);
+				Integer timeout = timeouts.get(addr);
+				if(timeout == null)
+					timeout = 100;
+				res = packetTransceiver.sendPacket(adu.toBytes(), addr != 0, timeout);
 				if (res == null)
 					throw new IOException("no response");
 
@@ -94,6 +105,9 @@ public class ADUTransceiver implements ModbusLine{
 
 	@Override
 	public synchronized Statistics getStatistics(boolean clear) {
+		Statistics statistics = this.statistics;
+		if(clear)
+			this.statistics = new Statistics();
 		return statistics;
 	}
 

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 @SuppressWarnings("serial")
 public class RegisterDescr implements Serializable {
-	public String name;
+	public String name = "";
 	public String controller;
 	public Integer controllerAddr;
 	public int register;

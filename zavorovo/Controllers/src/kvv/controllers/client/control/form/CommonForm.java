@@ -8,7 +8,6 @@ import kvv.controllers.client.control.simple.GetRegControl;
 import kvv.controllers.client.control.simple.GetSetRegControl;
 import kvv.controllers.client.control.simple.GetSetRegControl2;
 import kvv.controllers.client.control.simple.SimpleRelayControl;
-import kvv.controllers.client.control.vm.RuleControl;
 import kvv.controllers.shared.ControllerType;
 import kvv.controllers.shared.ControllerUI;
 import kvv.gwtutils.client.DetPanel;
@@ -134,9 +133,7 @@ public class CommonForm extends ControlComposite {
 
 			return helloButton;
 		case RULES:
-			RuleControl rc = new RuleControl(addr, controllerType.def);
-			// add(rc);
-			return rc;
+			return new Label("Здесь были правила");
 		case UPLOAD:
 			return new UploadForm("Загрузить") {
 				@Override

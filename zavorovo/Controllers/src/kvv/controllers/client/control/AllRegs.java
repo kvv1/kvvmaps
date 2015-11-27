@@ -1,4 +1,4 @@
-package kvv.controller.register;
+package kvv.controllers.client.control;
 
 import java.io.Serializable;
 import java.util.HashMap;

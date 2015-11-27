@@ -8,8 +8,4 @@ public class Command {
 	public static final byte MODBUS_HELLO = 90;
 	public static final byte MODBUS_UPLOAD_APP = 91;
 	public static final byte MODBUS_ENABLE_APP = 92;
-
-	public static final byte CMD_GETALLREGS = 103;
-	public static final byte MODBUS_GETRULES = 108;
-	public static final byte MODBUS_SETRULE = 109;
 }

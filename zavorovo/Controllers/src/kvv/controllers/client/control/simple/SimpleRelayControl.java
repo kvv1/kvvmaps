@@ -1,8 +1,8 @@
 package kvv.controllers.client.control.simple;
 
-import kvv.controller.register.AllRegs;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
+import kvv.controllers.client.control.AllRegs;
 import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.page.ModePage;
 

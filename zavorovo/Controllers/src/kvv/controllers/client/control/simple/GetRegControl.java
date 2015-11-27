@@ -1,6 +1,6 @@
 package kvv.controllers.client.control.simple;
 
-import kvv.controller.register.AllRegs;
+import kvv.controllers.client.control.AllRegs;
 import kvv.controllers.client.control.ChildComposite;
 
 import com.google.gwt.user.client.ui.HasVerticalAlignment;

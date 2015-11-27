@@ -2,9 +2,9 @@ package kvv.controllers.client.control.simple;
 
 import java.util.ArrayList;
 
-import kvv.controller.register.AllRegs;
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
+import kvv.controllers.client.control.AllRegs;
 import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.page.ModePage;

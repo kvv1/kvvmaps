@@ -11,19 +11,17 @@ public class COMTransceiver extends ModbusPacketTransceiver implements
 		IPacketTransceiver {
 	private final static int BAUD = 9600;
 	private final String com;
-	private final int packetTimeout;
 	private InputStream inStream;
 	private OutputStream outStream;
 	private SerialPort serPort;
 	private boolean closed;
 
-	public COMTransceiver(String com, int packetTimeout) {
+	public COMTransceiver(String com) {
 		this.com = com;
-		this.packetTimeout = packetTimeout;
 	}
 
 	@Override
-	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse)
+	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse, int packetTimeout)
 			throws IOException {
 		
 		if (closed)

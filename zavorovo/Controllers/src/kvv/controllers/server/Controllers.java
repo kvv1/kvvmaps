@@ -11,6 +11,7 @@ import java.util.Map;
 import kvv.controllers.server.context.Context;
 import kvv.controllers.server.controller.ControllerNotFoundException;
 import kvv.controllers.shared.ControllerDef;
+import kvv.controllers.shared.ControllerDef.RegisterDef;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerType;
 import kvv.controllers.shared.ControllerUI;
@@ -45,6 +46,7 @@ public class Controllers {
 							"def.json").getAbsolutePath(), ControllerDef.class);
 					controllerType.ui = Utils.jsonRead(new File(dir,
 							"form.json").getAbsolutePath(), ControllerUI.class);
+					resolveNames(controllerType.ui, controllerType.def);
 					controllerTypes.put(name, controllerType);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -63,8 +65,8 @@ public class Controllers {
 								reg.controller = c.name;
 								reg.controllerAddr = c.addr;
 								registers.put(reg.name, reg);
-								ar2register.put(
-										(reg.controllerAddr << 16) + reg.register, reg);
+								ar2register.put((reg.controllerAddr << 16)
+										+ reg.register, reg);
 							}
 						}
 						// c.registers = null;
@@ -80,6 +82,19 @@ public class Controllers {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void resolveNames(ControllerUI ui, ControllerDef def) {
+		if (ui.regName != null) {
+			for (RegisterDef reg : def.registers) {
+				if (ui.regName.equals(reg.name))
+					ui.reg = reg.n;
+			}
+		}
+
+		if (ui.children != null)
+			for (ControllerUI ui2 : ui.children)
+				resolveNames(ui2, def);
 	}
 
 	public ControllerDescr get(String name) throws ControllerNotFoundException {

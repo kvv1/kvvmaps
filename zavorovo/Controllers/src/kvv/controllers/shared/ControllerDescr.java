@@ -14,4 +14,5 @@ public class ControllerDescr implements Serializable {
 	public RegisterDescr[] registers;
 	
 	public boolean enabled = true;
+	public int timeout = 100;
 }

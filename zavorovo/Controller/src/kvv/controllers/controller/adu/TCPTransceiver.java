@@ -7,8 +7,6 @@ import java.net.Socket;
 
 public class TCPTransceiver extends ModbusPacketTransceiver implements
 		IPacketTransceiver {
-	private final int packetTimeout;
-
 	private final int port;
 	private final String host;
 
@@ -17,15 +15,14 @@ public class TCPTransceiver extends ModbusPacketTransceiver implements
 	private OutputStream outputStream;
 	private volatile boolean closed;
 
-	public TCPTransceiver(String host, int port, int packetTimeout) {
-		this.packetTimeout = packetTimeout;
+	public TCPTransceiver(String host, int port) {
 		this.host = host;
 		this.port = port;
 		thread.start();
 	}
 
 	@Override
-	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse)
+	public synchronized byte[] sendPacket(byte[] data, boolean waitResponse, int packetTimeout)
 			throws IOException {
 
 		if (closed)

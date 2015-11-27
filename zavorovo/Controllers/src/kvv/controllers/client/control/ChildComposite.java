@@ -1,9 +1,10 @@
 package kvv.controllers.client.control;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import kvv.controller.register.AllRegs;
+import kvv.controllers.client.Controllers;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 
@@ -28,18 +29,19 @@ public abstract class ChildComposite extends Composite implements ControlChild {
 
 	public void refresh() {
 		refresh(null);
-		for (Integer addr : addrs)
-			controllersService.getRegs(addr, new AsyncCallback<AllRegs>() {
+		for (final Integer addr : addrs)
+			controllersService.getRegs(addr,
+					new AsyncCallback<HashMap<Integer, Integer>>() {
+						@Override
+						public void onSuccess(HashMap<Integer, Integer> result) {
+							Controllers.adjust(addr, result);
+							refresh(new AllRegs(addr, result));
+						}
 
-				@Override
-				public void onSuccess(AllRegs result) {
-					refresh(result);
-				}
-
-				@Override
-				public void onFailure(Throwable caught) {
-				}
-			});
+						@Override
+						public void onFailure(Throwable caught) {
+						}
+					});
 	}
 
 	public void setEnabled(boolean b) {

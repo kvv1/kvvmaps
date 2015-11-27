@@ -2,6 +2,7 @@ package kvv.controllers.server.context;
 
 import kvv.controllers.controller.Controller;
 import kvv.controllers.controller.IController;
+import kvv.controllers.controller.ModbusLine;
 import kvv.controllers.controller.adu.ADUTransceiver;
 import kvv.controllers.controller.adu.COMTransceiver;
 import kvv.controllers.server.Constants;
@@ -12,6 +13,7 @@ import kvv.controllers.server.controller.ControllerWrapperLogger;
 import kvv.controllers.server.controller.ControllerWrapperUni;
 import kvv.controllers.server.controller.Scheduler;
 import kvv.controllers.server.unit.Units;
+import kvv.controllers.shared.ControllerDescr;
 import kvv.stdutils.Looper;
 import kvv.stdutils.Utils;
 
@@ -48,36 +50,32 @@ public class Context {
 
 	public final Controllers controllers;
 	public final Units units;
-	public final IController controller;
+	public final ControllerWrapperCached controller;
 	public final Scheduler scheduler;
-
-	// public final Ruler ruler;
 
 	private void close() {
 		scheduler.close();
-		// ruler.close();
 		controller.close();
 	}
 
 	public Context() {
 		controllers = new Controllers();
 
-		// String busURL = Utils.getProp(Constants.propsFile, "busURL");
-		// if (busURL == null)
-		// busURL = "http://localhost/rs485";
+		String com = Utils.getProp(Constants.controllerPropsFile, "COM");
+		ModbusLine modbusLine = new ADUTransceiver(new COMTransceiver(com));
+
+		for (ControllerDescr cd : controllers.getControllers())
+			modbusLine.setTimeout(cd.addr, cd.timeout);
 
 		Controller c = new Controller();
-		String com = Utils.getProp(Constants.controllerPropsFile, "COM");
-		c.setModbusLine(new ADUTransceiver(new COMTransceiver(com, 600)));
+		c.setModbusLine(modbusLine);
 
 		controller = new ControllerWrapperCached(controllers,
 				new ControllerWrapperLogger(controllers,
-						new ControllerWrapperGlobals(controllers,
-								new ControllerWrapperUni(controllers, c))));
+						new ControllerWrapperGlobals(controllers, c)));
 
 		units = new Units(controllers, controller);
 		scheduler = new Scheduler(controllers, units, controller);
-		// ruler = new Ruler(controllers, units, controller);
 	}
 
 }
