@@ -16,14 +16,11 @@ public interface IController {
 
 	int[] getRegs(int addr, int reg, int n) throws IOException;
 
-//	AllRegs getAllRegs(int addr) throws IOException;
-	
 	Statistics getStatistics(boolean clear) throws IOException;
 
 	void uploadApp(int addr, byte[] image) throws IOException;
 
 	Integer hello(int addr) throws IOException;
-	
 
 	void close();
 }
