@@ -67,18 +67,18 @@ public class Controller implements IController {
 	public synchronized byte[] send(int addr, byte[] request) throws IOException {
 		if(uploading)
 			throw new IOException("UPLOADING");
-		return send1(addr, request);
+		return send1(addr, request, null);
 	}
 	
-	private synchronized byte[] send1(int addr, byte[] request) throws IOException {
+	private synchronized byte[] send1(int addr, byte[] request, Integer timeout) throws IOException {
 		if(true)
-			return _send(addr, request);
+			return _send(addr, request, timeout);
 			
 		try {
 			for (byte b : request)
 				System.out.print(Integer.toHexString((int) b & 0xFF) + " ");
 			System.out.print(" -> ");
-			byte[] res = _send(addr, request);
+			byte[] res = _send(addr, request, timeout);
 			for (byte b : res)
 				System.out.print(Integer.toHexString((int) b & 0xFF) + " ");
 			return res;
@@ -92,11 +92,11 @@ public class Controller implements IController {
 
 	}
 
-	private byte[] _send(int addr, byte[] request) throws IOException {
+	private byte[] _send(int addr, byte[] request, Integer timeout) throws IOException {
 		if (modbusLine == null)
 			throw new IOException("modbusLine not set");
 
-		byte[] response = modbusLine.handle(addr, request);
+		byte[] response = modbusLine.handle(addr, request, timeout);
 
 		if (response[0] != request[0]) {
 			if ((response[0] & 0xFF) != (request[0] | 0x80)
@@ -116,7 +116,7 @@ public class Controller implements IController {
 	}
 
 	private void s(int addr, byte[] bytes, Integer timeout) throws IOException {
-		byte[] resp = send1(addr, bytes);
+		byte[] resp = send1(addr, bytes, timeout);
 		for (byte b : resp)
 			System.out.print(b + " ");
 	}
@@ -161,7 +161,7 @@ public class Controller implements IController {
 
 	@Override
 	public Integer hello(int addr) throws IOException {
-		byte[] resp = send1(addr, new byte[] { Command.MODBUS_HELLO });
+		byte[] resp = send1(addr, new byte[] { Command.MODBUS_HELLO }, null);
 		if (resp.length > 1)
 			return (int) resp[1];
 		return null;

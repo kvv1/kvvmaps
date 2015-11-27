@@ -12,18 +12,19 @@ import kvv.controller.register.Statistics;
 import kvv.controllers.controller.BusLogger;
 import kvv.controllers.controller.ModbusLine;
 
-public class ADUTransceiver implements ModbusLine{
+public class ADUTransceiver implements ModbusLine {
 	private Set<Integer> failedAddrs = new HashSet<Integer>();
 
 	public Statistics statistics = new Statistics();
 	protected final IPacketTransceiver packetTransceiver;
 
 	private final Map<Integer, Integer> timeouts = new HashMap<>();
+
 	@Override
 	public void setTimeout(int addr, int timeout) {
 		timeouts.put(addr, timeout);
 	}
-	
+
 	public ADUTransceiver(IPacketTransceiver packetTransceiver) {
 		this.packetTransceiver = packetTransceiver;
 	}
@@ -34,7 +35,8 @@ public class ADUTransceiver implements ModbusLine{
 	}
 
 	@Override
-	public synchronized byte[] handle(int addr, byte[] body) throws IOException {
+	public synchronized byte[] handle(int addr, byte[] body, Integer timeout)
+			throws IOException {
 		PDU pdu = new PDU(body);
 		ADU adu = new ADU(addr, pdu);
 
@@ -43,10 +45,12 @@ public class ADUTransceiver implements ModbusLine{
 		for (int i = 0; i < attempts; i++) {
 			byte[] res = null;
 			try {
-				Integer timeout = timeouts.get(addr);
-				if(timeout == null)
+				if (timeout == null)
+					timeout = timeouts.get(addr);
+				if (timeout == null)
 					timeout = 100;
-				res = packetTransceiver.sendPacket(adu.toBytes(), addr != 0, timeout);
+				res = packetTransceiver.sendPacket(adu.toBytes(), addr != 0,
+						timeout);
 				if (res == null)
 					throw new IOException("no response");
 
@@ -106,7 +110,7 @@ public class ADUTransceiver implements ModbusLine{
 	@Override
 	public synchronized Statistics getStatistics(boolean clear) {
 		Statistics statistics = this.statistics;
-		if(clear)
+		if (clear)
 			this.statistics = new Statistics();
 		return statistics;
 	}
