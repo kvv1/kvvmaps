@@ -19,7 +19,7 @@ public class ControllerWrapperCached extends ControllerAdapter {
 
 	private final Runnable r = new Runnable() {
 		private List<ControllerDescr> controllersList;
-		
+
 		@Override
 		public void run() {
 			if (controllersList == null || controllersList.isEmpty())
@@ -28,20 +28,19 @@ public class ControllerWrapperCached extends ControllerAdapter {
 
 			while (!controllersList.isEmpty()) {
 				ControllerDescr controllerDescr = controllersList.remove(0);
-				int addr = controllerDescr.addr;
 				if (!controllerDescr.enabled)
 					continue;
 
-				try {
-					
-					ControllerType controllerType = getType(addr);
+				int addr = controllerDescr.addr;
 
-					if (controllerType.def.allRegs != null) {
+				try {
+					int[] regRange = getRegRange(addr);
+					if (regRange != null) {
 						HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
-						int[] vals = wrapped.getRegs(addr, controllerType.def.allRegs[0],
-								controllerType.def.allRegs[1]);
-						for (int i = 0; i < controllerType.def.allRegs[1]; i++)
-							map.put(controllerType.def.allRegs[0] + i, vals[i]);
+						int[] vals = wrapped.getRegs(addr, regRange[0],
+								regRange[1]);
+						for (int i = 0; i < regRange[1]; i++)
+							map.put(regRange[0] + i, vals[i]);
 						ControllerWrapperCached.this.map.put(addr, map);
 					}
 					break;
@@ -107,13 +106,17 @@ public class ControllerWrapperCached extends ControllerAdapter {
 		return res;
 	}
 
-	private ControllerType getType(int addr) throws IOException {
+	private final static int[] globalsRegRange = { 0, 256 };
+	
+	private int[] getRegRange(int addr) throws IOException {
+		if (addr == 0)
+			return globalsRegRange;
 		ControllerDescr controllerDescr = controllers.get(addr);
 		ControllerType controllerType = controllers.getControllerTypes().get(
 				controllerDescr.type);
 		if (controllerType == null)
 			throw new ControllerTypeNotFoundException(controllerDescr.type);
-		return controllerType;
+		return controllerType.def.allRegs;
 	}
 
 	public HashMap<Integer, Integer> getAllRegs(int addr) {

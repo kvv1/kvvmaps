@@ -3,7 +3,6 @@ package kvv.controllers.client;
 import java.util.HashMap;
 
 import kvv.controller.register.Statistics;
-import kvv.controllers.client.control.AllRegs;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;

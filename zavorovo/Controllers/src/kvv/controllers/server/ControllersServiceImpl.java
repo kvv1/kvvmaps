@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import kvv.controller.register.Statistics;
 import kvv.controllers.client.ControllersService;
-import kvv.controllers.client.control.AllRegs;
 import kvv.controllers.server.context.Context;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;

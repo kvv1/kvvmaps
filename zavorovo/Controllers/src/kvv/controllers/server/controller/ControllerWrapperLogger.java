@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import kvv.controllers.client.control.AllRegs;
 import kvv.controllers.controller.IController;
 import kvv.controllers.history.HistoryFile;
 import kvv.controllers.server.Controllers;
@@ -27,8 +26,7 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 	}
 
 	@Override
-	public  void setReg(int addr, int reg, int val)
-			throws IOException {
+	public void setReg(int addr, int reg, int val) throws IOException {
 		try {
 			wrapped.setReg(addr, reg, val);
 			log(addr, reg, val);
@@ -39,7 +37,7 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 	}
 
 	@Override
-	public  int getReg(int addr, int reg) throws IOException {
+	public int getReg(int addr, int reg) throws IOException {
 		try {
 			int val = wrapped.getReg(addr, reg);
 			log(addr, reg, val);
@@ -51,8 +49,7 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 	}
 
 	@Override
-	public  int[] getRegs(int addr, int reg, int n)
-			throws IOException {
+	public int[] getRegs(int addr, int reg, int n) throws IOException {
 		try {
 			int[] res = wrapped.getRegs(addr, reg, n);
 			for (int i = 0; i < res.length; i++)
