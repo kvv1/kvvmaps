@@ -42,7 +42,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public HashMap<Integer, Integer> getRegs(int addr) throws Exception {
 		HashMap<Integer, Integer> allRegs = Context.getInstance().controller
-				.getAllRegs(addr);
+				.getCachedRegs(addr);
 		return allRegs;
 	}
 

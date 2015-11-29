@@ -5,15 +5,15 @@ import java.io.IOException;
 import kvv.controller.register.Statistics;
 import kvv.controllers.controller.IController;
 import kvv.controllers.controller.ModbusLine;
-import kvv.controllers.server.Controllers;
+import kvv.controllers.shared.SystemDescr;
 
 public abstract class ControllerAdapter implements IController {
 
 	protected final IController wrapped;
-	protected final Controllers controllers;
+	protected final SystemDescr system;
 
-	public ControllerAdapter(Controllers controllers, IController wrapped) {
-		this.controllers = controllers;
+	public ControllerAdapter(SystemDescr system, IController wrapped) {
+		this.system = system;
 		this.wrapped = wrapped;
 	}
 

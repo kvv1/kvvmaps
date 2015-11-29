@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import kvv.controllers.client.Controllers;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 
@@ -40,7 +39,6 @@ public class ControlComposite extends Composite implements ControlChild {
 
 						@Override
 						public void onSuccess(HashMap<Integer, Integer> result) {
-							Controllers.adjust(addr, result);
 							for (ControlChild controlComposite : children) {
 								if (controlComposite.getAddrs().contains(addr))
 									controlComposite.refresh(new AllRegs(addr,

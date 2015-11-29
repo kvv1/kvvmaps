@@ -1,4 +1,4 @@
-package kvv.controllers.server.controller;
+package kvv.controllers.server.scheduler;
 
 import java.io.IOException;
 
@@ -18,28 +18,30 @@ public class ExprCalculator extends EXPR1 {
 	}
 
 	private RegisterDescr getRegDescr(String name) throws ParseException {
-		RegisterDescr reg;
-		try {
-			reg = Context.getInstance().controllers.getRegister(name);
-		} catch (Exception e) {
-			throw new ParseException(e.getMessage());
+		RegisterDescr reg = Context.getInstance().system.getRegister(name);
+
+		if (addr != null) {
+			if (reg == null || reg.controllerAddr != addr)
+				throw new ParseException("Регистр " + name
+						+ " не определен на данном контроллере");
+		} else {
+			if (reg == null)
+				throw new ParseException("Регистр " + name + " не определен");
 		}
-		
-		if(addr != null && reg.controllerAddr != addr)
-			throw new ParseException("Регистр " + name + " не определен на данном контроллере");
-		
 		return reg;
 	}
-	
+
 	@Override
 	public short getRegValue(String name) throws ParseException {
 		RegisterDescr reg = getRegDescr(name);
 		try {
-			return (short) Context.getInstance().controller.getReg(reg.controllerAddr,
-					reg.register);
+			Integer val = Context.getInstance().controller.getReg(
+					reg.controllerAddr, reg.register);
+			if (val == null)
+				throw new Exception();
+			return (short) (int) val;
 		} catch (Exception e) {
-			throw new ParseException("Не удается прочитать регистр " + name
-					+ " (" + e.getMessage() + ")");
+			throw new ParseException("Не удается прочитать регистр " + name);
 		}
 	}
 

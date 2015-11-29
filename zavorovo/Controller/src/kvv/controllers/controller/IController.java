@@ -12,9 +12,9 @@ public interface IController {
 
 	void setRegs(int addr, int reg, int... val) throws IOException;
 
-	int getReg(int addr, int reg) throws IOException;
+	Integer getReg(int addr, int reg) throws IOException;
 
-	int[] getRegs(int addr, int reg, int n) throws IOException;
+	Integer[] getRegs(int addr, int reg, int n) throws IOException;
 
 	Statistics getStatistics(boolean clear) throws IOException;
 

@@ -38,7 +38,7 @@ public class Controller implements IController {
 	}
 
 	@Override
-	public int getReg(int addr, int reg) throws IOException {
+	public Integer getReg(int addr, int reg) throws IOException {
 		byte[] req = new byte[] { Command.CMD_MODBUS_GETREGS,
 				(byte) (reg >> 8), (byte) reg, 0, 1 };
 		byte[] resp = send(addr, req);
@@ -46,12 +46,12 @@ public class Controller implements IController {
 	}
 
 	@Override
-	public int[] getRegs(int addr, int reg, int n) throws IOException {
+	public Integer[] getRegs(int addr, int reg, int n) throws IOException {
 		byte[] req = new byte[] { Command.CMD_MODBUS_GETREGS,
 				(byte) (reg >> 8), (byte) reg, 0, (byte) n };
 		byte[] resp = send(addr, req); 
 
-		int[] res = new int[n];
+		Integer[] res = new Integer[n];
 		for (int i = 0; i < resp[1] / 2; i++) {
 			res[i] = resp[i * 2 + 2] * 256 + (resp[i * 2 + 3] & 0xFF);
 		}

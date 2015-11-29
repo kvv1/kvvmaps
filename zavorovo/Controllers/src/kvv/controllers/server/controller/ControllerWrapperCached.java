@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 import kvv.controllers.controller.IController;
-import kvv.controllers.server.Controllers;
 import kvv.controllers.server.context.Context;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerType;
+import kvv.controllers.shared.SystemDescr;
 
 public class ControllerWrapperCached extends ControllerAdapter {
 
@@ -24,7 +24,7 @@ public class ControllerWrapperCached extends ControllerAdapter {
 		public void run() {
 			if (controllersList == null || controllersList.isEmpty())
 				controllersList = new LinkedList<ControllerDescr>(
-						Arrays.asList(controllers.getControllers()));
+						Arrays.asList(system.controllers));
 
 			while (!controllersList.isEmpty()) {
 				ControllerDescr controllerDescr = controllersList.remove(0);
@@ -34,10 +34,10 @@ public class ControllerWrapperCached extends ControllerAdapter {
 				int addr = controllerDescr.addr;
 
 				try {
-					int[] regRange = getRegRange(addr);
+					int[] regRange = getRegsRange(controllerDescr);
 					if (regRange != null) {
 						HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
-						int[] vals = wrapped.getRegs(addr, regRange[0],
+						Integer[] vals = wrapped.getRegs(addr, regRange[0],
 								regRange[1]);
 						for (int i = 0; i < regRange[1]; i++)
 							map.put(regRange[0] + i, vals[i]);
@@ -52,9 +52,8 @@ public class ControllerWrapperCached extends ControllerAdapter {
 		}
 	};
 
-	public ControllerWrapperCached(Controllers controllers,
-			IController controller) {
-		super(controllers, controller);
+	public ControllerWrapperCached(SystemDescr system, IController controller) {
+		super(system, controller);
 		Context.looper.post(r, 100);
 	}
 
@@ -79,47 +78,41 @@ public class ControllerWrapperCached extends ControllerAdapter {
 	}
 
 	@Override
-	public int getReg(int addr, int reg) throws IOException {
+	public Integer getReg(int addr, int reg) throws IOException {
 		HashMap<Integer, Integer> allRegs = map.get(addr);
 		if (allRegs == null)
 			throw new IOException("Не найден контроллер с адресом " + addr);
 		Integer val = allRegs.get(reg);
-		if (val == null)
-			throw new IOException("Не найдено значение регистра " + reg
-					+ "контроллера " + addr);
 		return val;
 	}
 
 	@Override
-	public int[] getRegs(int addr, int reg, int n) throws IOException {
+	public Integer[] getRegs(int addr, int reg, int n) throws IOException {
 		HashMap<Integer, Integer> allRegs = map.get(addr);
 		if (allRegs == null)
 			throw new IOException();
 
-		int[] res = new int[n];
+		Integer[] res = new Integer[n];
 		for (int i = 0; i < n; i++) {
 			Integer val = allRegs.get(reg + i);
-			if (val == null)
-				val = 0;
 			res[i] = val;
 		}
 		return res;
 	}
 
 	private final static int[] globalsRegRange = { 0, 256 };
-	
-	private int[] getRegRange(int addr) throws IOException {
-		if (addr == 0)
+
+	private int[] getRegsRange(ControllerDescr controllerDescr) {
+		if (controllerDescr.addr == 0)
 			return globalsRegRange;
-		ControllerDescr controllerDescr = controllers.get(addr);
-		ControllerType controllerType = controllers.getControllerTypes().get(
-				controllerDescr.type);
+		ControllerType controllerType = system.controllerTypes
+				.get(controllerDescr.type);
 		if (controllerType == null)
-			throw new ControllerTypeNotFoundException(controllerDescr.type);
+			return null;
 		return controllerType.def.allRegs;
 	}
 
-	public HashMap<Integer, Integer> getAllRegs(int addr) {
+	public HashMap<Integer, Integer> getCachedRegs(int addr) {
 		return map.get(addr);
 	}
 }

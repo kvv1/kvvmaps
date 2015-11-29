@@ -1,15 +1,10 @@
 package kvv.controllers.client;
 
-import java.util.HashMap;
-
 import kvv.controllers.client.page.ConfigurationTabPage;
 import kvv.controllers.client.page.ControllersPage;
 import kvv.controllers.client.page.ModePage;
 import kvv.controllers.client.page.StatisticsPage;
 import kvv.controllers.client.page.UnitPage;
-import kvv.controllers.shared.ControllerDef.RegisterDef;
-import kvv.controllers.shared.ControllerDescr;
-import kvv.controllers.shared.ControllerType;
 import kvv.controllers.shared.SystemDescr;
 import kvv.controllers.shared.UnitDescr;
 
@@ -27,30 +22,6 @@ public class Controllers implements EntryPoint {
 			.create(ConfigurationService.class);
 
 	public static SystemDescr systemDescr;
-
-	public static void adjust(Integer addr, HashMap<Integer, Integer> result) {
-		for (ControllerDescr cd : systemDescr.controllers) {
-			if (cd.addr == addr) {
-				ControllerType ct = systemDescr.controllerTypes.get(cd.type);
-				if (ct != null) {
-					for (Integer reg : result.keySet()) {
-						Integer value = result.get(reg);
-						RegisterDef registerDef = ct.def.getReg(reg);
-						if (value != null && registerDef != null
-								&& registerDef.validRanges != null) {
-							boolean ok = false;
-							for (int i = 0; i < registerDef.validRanges.length; i += 2)
-								if (value >= registerDef.validRanges[i]
-										&& value < registerDef.validRanges[i + 1])
-									ok = true;
-							if (!ok)
-								result.put(reg, null);
-						}
-					}
-				}
-			}
-		}
-	}
 
 	public void onModuleLoad() {
 

@@ -8,9 +8,9 @@ public class ControllerDescr implements Serializable {
 	public ControllerDescr() {
 	}
 
-	public String name;
+	public String name = "";
 	public int addr;
-	public String type;
+	public String type = "";
 	public RegisterDescr[] registers;
 	
 	public boolean enabled = true;

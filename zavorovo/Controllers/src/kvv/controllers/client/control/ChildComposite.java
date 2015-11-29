@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import kvv.controllers.client.Controllers;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 
@@ -34,7 +33,6 @@ public abstract class ChildComposite extends Composite implements ControlChild {
 					new AsyncCallback<HashMap<Integer, Integer>>() {
 						@Override
 						public void onSuccess(HashMap<Integer, Integer> result) {
-							Controllers.adjust(addr, result);
 							refresh(new AllRegs(addr, result));
 						}
 

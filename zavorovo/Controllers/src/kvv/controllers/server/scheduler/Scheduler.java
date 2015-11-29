@@ -1,4 +1,4 @@
-package kvv.controllers.server.controller;
+package kvv.controllers.server.scheduler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,9 +10,7 @@ import java.util.Set;
 
 import kvv.controllers.controller.IController;
 import kvv.controllers.server.Constants;
-import kvv.controllers.server.Controllers;
 import kvv.controllers.server.context.Context;
-import kvv.controllers.server.unit.Units;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerType;
 import kvv.controllers.shared.RegisterDescr;
@@ -21,6 +19,7 @@ import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.RegisterSchedule.Expr;
 import kvv.controllers.shared.RegisterSchedule.State;
 import kvv.controllers.shared.Schedule;
+import kvv.controllers.shared.SystemDescr;
 import kvv.controllers.shared.UnitDescr;
 import kvv.exprcalc.EXPR1;
 import kvv.exprcalc.EXPR1_Base;
@@ -32,24 +31,20 @@ import kvv.stdutils.Utils;
 
 public class Scheduler {
 	private final IController controller;
-	private final Controllers controllers;
+	private final SystemDescr system;
 	private Schedule schedule;
 	private final Set<String> regNames = new HashSet<String>();
 
-	public Scheduler(Controllers controllers, Units units,
-			IController controller) {
+	public Scheduler(SystemDescr system, IController controller) {
 		this.controller = controller;
-		this.controllers = controllers;
+		this.system = system;
 
 		System.out.println("scheduler regs loading");
 
 		try {
-			if (units.units != null)
-				for (UnitDescr ud : units.units)
-					if (ud != null && ud.registers != null)
-						for (RegisterPresentation r : ud.registers)
-							if (r != null && r.name != null)
-								regNames.add(r.name);
+			for (UnitDescr ud : system.units)
+				for (RegisterPresentation r : ud.registers)
+					regNames.add(r.name);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -61,10 +56,9 @@ public class Scheduler {
 
 			boolean removed = schedule.map.keySet().retainAll(regNames);
 
-			for (RegisterSchedule registerSchedule : schedule.map.values()) {
+			for (RegisterSchedule registerSchedule : schedule.map.values())
 				if (registerSchedule.state == null)
 					registerSchedule.state = State.MANUAL;
-			}
 
 			if (removed)
 				Utils.jsonWrite(Constants.scheduleFile, schedule);
@@ -109,26 +103,21 @@ public class Scheduler {
 		public void run() {
 			// System.out.print(".");
 			try {
-				ControllerDescr[] cds = controllers.getControllers();
+				ControllerDescr[] cds = system.controllers;
 				for (ControllerDescr cd : cds)
 					reloadRules(cd);
 
 			} catch (Exception e) {
 			}
+
 			Context.looper.post(this, 10000);
 			// System.out.print(":");
 		}
 	};
 
 	private void reloadRules(ControllerDescr cd) {
-		HashMap<String, ControllerType> controllerTypes = controllers
-				.getControllerTypes();
-
-		ControllerType controllerType = controllerTypes.get(cd.type);
-		if (controllerType == null)
-			return;
-
-		if (!controllerType.def.hasRules)
+		ControllerType controllerType = system.controllerTypes.get(cd.type);
+		if (controllerType == null || !controllerType.def.hasRules)
 			return;
 
 		List<Rule> rules = new ArrayList<>();
@@ -145,7 +134,7 @@ public class Scheduler {
 				List<RulePart> parts = new ArrayList<>();
 
 				for (Expr expr : registerSchedule.expressions) {
-					//System.out.println(expr.expr);
+					// System.out.println(expr.expr);
 					try {
 						parts.add(new RulePart(new Parser(cd.registers,
 								expr.expr).parse().getBytes()));
@@ -184,8 +173,13 @@ public class Scheduler {
 		map.clear();
 		Utils.jsonWrite(Constants.scheduleFile, schedule);
 
-		RegisterDescr register = controllers.getRegister(regName);
-		ControllerDescr cd = controllers.get(register.controllerAddr);
+		RegisterDescr register = system.getRegister(regName);
+		if (register == null) {
+			System.out.println("Scheduler.processReg reg " + regName
+					+ " not found");
+			return;
+		}
+		ControllerDescr cd = system.getController(register.controllerAddr);
 		reloadRules(cd);
 	}
 
@@ -195,12 +189,19 @@ public class Scheduler {
 
 	@SuppressWarnings("deprecation")
 	private boolean processReg(String regName, RegisterSchedule registerSchedule)
-			throws Exception {
+			throws IOException {
 		if (!regNames.contains(regName))
 			return false;
-		RegisterDescr reg = controllers.getRegister(regName);
-		ControllerDescr controllerDescr = controllers.get(reg.controller);
-		if (!controllerDescr.enabled)
+		RegisterDescr reg = system.getRegister(regName);
+		if (reg == null) {
+			System.out.println("Scheduler.processReg reg " + regName
+					+ " not found");
+			return false;
+		}
+
+		ControllerDescr controllerDescr = system
+				.getController(reg.controllerAddr);
+		if (controllerDescr == null || !controllerDescr.enabled)
 			return false;
 
 		switch (registerSchedule.state) {
@@ -255,10 +256,9 @@ public class Scheduler {
 
 		@Override
 		public short getRegNum(String name) throws ParseException {
-			for (RegisterDescr rd : registers) {
+			for (RegisterDescr rd : registers)
 				if (rd.name.equals(name))
 					return (short) rd.register;
-			}
 
 			if (name.startsWith("R")) {
 				try {
@@ -274,7 +274,6 @@ public class Scheduler {
 		@Override
 		public String getRegName(int n) {
 			throw new IllegalArgumentException("not supported");
-			// return "R" + n;
 		}
 
 		@Override
@@ -291,13 +290,4 @@ public class Scheduler {
 			}
 		}
 	};
-
-	public static void main(String[] args) {
-		long F_CPU = 8000000;
-		long UART_SPEED = 9600;
-		
-		long speed = (F_CPU / (16) / UART_SPEED) - 1;
-		
-		System.out.println(speed);
-	}
 }

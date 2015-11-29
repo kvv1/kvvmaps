@@ -4,46 +4,40 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import kvv.controllers.controller.IController;
-import kvv.controllers.server.Controllers;
+import kvv.controllers.shared.SystemDescr;
 
 public class ControllerWrapperGlobals extends ControllerAdapter {
 
-	public ControllerWrapperGlobals(Controllers controllers, IController wrapped) {
-		super(controllers, wrapped);
+	public ControllerWrapperGlobals(SystemDescr system, IController wrapped) {
+		super(system, wrapped);
 	}
 
 	private final HashMap<Integer, Integer> globals = new HashMap<>();
-	{
-		for (int i = 0; i < 256; i++)
-			globals.put(i, 0);
-	}
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
-		if (addr != 0) {
+		if (addr != 0)
 			wrapped.setReg(addr, reg, val);
-		} else {
+		else
 			globals.put(reg, val);
-		}
 	}
 
 	@Override
-	public int getReg(int addr, int reg) throws IOException {
-		if (addr != 0) {
+	public Integer getReg(int addr, int reg) throws IOException {
+		if (addr != 0)
 			return wrapped.getReg(addr, reg);
-		} else {
+		else
 			return globals.get(reg);
-		}
 	}
 
 	@Override
-	public int[] getRegs(int addr, int reg, int n) throws IOException {
+	public Integer[] getRegs(int addr, int reg, int n) throws IOException {
 		if (addr != 0) {
 			return wrapped.getRegs(addr, reg, n);
 		} else {
-			int[] res = new int[n];
+			Integer[] res = new Integer[n];
 			for (int i = 0; i < n; i++)
-				res[i] = globals.get(reg + i);
+				res[i] = globals.get(reg);
 			return res;
 		}
 	}

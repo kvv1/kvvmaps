@@ -1,17 +1,31 @@
 package kvv.controllers.server.context;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
 import kvv.controllers.controller.Controller;
 import kvv.controllers.controller.ModbusLine;
 import kvv.controllers.controller.adu.ADUTransceiver;
 import kvv.controllers.controller.adu.COMTransceiver;
 import kvv.controllers.server.Constants;
-import kvv.controllers.server.Controllers;
+import kvv.controllers.server.controller.ControllerWrapperAdj;
 import kvv.controllers.server.controller.ControllerWrapperCached;
 import kvv.controllers.server.controller.ControllerWrapperGlobals;
 import kvv.controllers.server.controller.ControllerWrapperLogger;
-import kvv.controllers.server.controller.Scheduler;
-import kvv.controllers.server.unit.Units;
+import kvv.controllers.server.scheduler.Scheduler;
+import kvv.controllers.shared.ControllerDef;
+import kvv.controllers.shared.ControllerDef.RegisterDef;
 import kvv.controllers.shared.ControllerDescr;
+import kvv.controllers.shared.ControllerType;
+import kvv.controllers.shared.ControllerUI;
+import kvv.controllers.shared.RegisterDescr;
+import kvv.controllers.shared.SystemDescr;
+import kvv.controllers.shared.UnitDescr;
 import kvv.stdutils.Looper;
 import kvv.stdutils.Utils;
 
@@ -30,25 +44,35 @@ public class Context {
 
 	public static void start() {
 		looper.start();
+		looper.post(new Runnable() {
+			@Override
+			public void run() {
+				Context.getInstance();
+			}
+		});
 	}
 
 	public static void stop() {
-		looper.stop();
-		Context context = getInstance();
-		closedAll = true;
-		context.close();
+		looper.post(new Runnable() {
+			@Override
+			public void run() {
+				looper.stop();
+				Context context = getInstance();
+				closedAll = true;
+				context.close();
+			}
+		});
 	}
 
 	public static void reload() {
 		if (instance != null)
 			instance.close();
 		instance = null;
-		getInstance(); // to restart VMs
+		getInstance();
 	}
 
-	public final Controllers controllers;
-	public final Units units;
-	public final ControllerWrapperCached controller;
+	public final SystemDescr system = new SystemDescr();
+	public ControllerWrapperCached controller;
 	public final Scheduler scheduler;
 
 	private void close() {
@@ -57,23 +81,111 @@ public class Context {
 	}
 
 	public Context() {
-		controllers = new Controllers();
+		loadUnits();
+		loadControllers();
+		loadTZ();
+		createController();
+		scheduler = new Scheduler(system, controller);
+	}
 
+	private void createController() {
 		String com = Utils.getProp(Constants.controllerPropsFile, "COM");
 		ModbusLine modbusLine = new ADUTransceiver(new COMTransceiver(com));
 
-		for (ControllerDescr cd : controllers.getControllers())
+		for (ControllerDescr cd : system.controllers)
 			modbusLine.setTimeout(cd.addr, cd.timeout);
 
 		Controller c = new Controller();
 		c.setModbusLine(modbusLine);
 
-		controller = new ControllerWrapperCached(controllers,
-				new ControllerWrapperLogger(controllers,
-						new ControllerWrapperGlobals(controllers, c)));
-
-		units = new Units(controllers, controller);
-		scheduler = new Scheduler(controllers, units, controller);
+		controller = new ControllerWrapperCached(system,
+				new ControllerWrapperLogger(system,
+						new ControllerWrapperGlobals(system,
+								new ControllerWrapperAdj(system, c))));
 	}
 
+	@SuppressWarnings("deprecation")
+	private void loadTZ() {
+		String tzo = Utils.getProp(Constants.propsFile, "timezoneOffset");
+		if (tzo != null)
+			system.timeZoneOffset = Integer.parseInt(tzo);
+		else
+			system.timeZoneOffset = new Date().getTimezoneOffset();
+	}
+
+	private void loadUnits() {
+		try {
+			system.units = Utils.jsonRead(Constants.unitsFile,
+					UnitDescr[].class);
+		} catch (IOException e) {
+			system.units = new UnitDescr[0];
+		}
+	}
+
+	private void loadControllers() {
+		try {
+			system.controllerTypes = new HashMap<>();
+
+			FileFilter ff = new FileFilter() {
+				@Override
+				public boolean accept(File pathname) {
+					return pathname.isDirectory();
+				}
+			};
+
+			new File(Constants.controllerTypesDir).mkdirs();
+
+			File[] dirs = new File(Constants.controllerTypesDir).listFiles(ff);
+			for (File dir : dirs) {
+				String name = dir.getName();
+				try {
+					ControllerType controllerType = new ControllerType();
+					controllerType.def = Utils.jsonRead(new File(dir,
+							"def.json").getAbsolutePath(), ControllerDef.class);
+					controllerType.ui = Utils.jsonRead(new File(dir,
+							"form.json").getAbsolutePath(), ControllerUI.class);
+					resolveNames(controllerType.ui, controllerType.def);
+					system.controllerTypes.put(name, controllerType);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			system.controllers = Utils.jsonRead(Constants.controllersFile,
+					ControllerDescr[].class);
+
+			List<ControllerDescr> controllers = new ArrayList<ControllerDescr>();
+
+			for (ControllerDescr cd : system.controllers) {
+				if (cd.registers == null)
+					cd.registers = new RegisterDescr[0];
+				for (RegisterDescr reg : cd.registers) {
+					reg.controller = cd.name;
+					reg.controllerAddr = cd.addr;
+				}
+				controllers.add(cd);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void resolveNames(ControllerUI ui, ControllerDef def) {
+		if (ui.regName != null)
+			for (RegisterDef reg : def.registers)
+				if (ui.regName.equals(reg.name))
+					ui.reg = reg.n;
+
+		if (ui.children != null)
+			for (ControllerUI ui2 : ui.children)
+				resolveNames(ui2, def);
+	}
+
+	public static void save(ControllerDescr[] controllers, UnitDescr[] units)
+			throws IOException {
+		Utils.jsonWrite(Constants.controllersFile, controllers);
+		Utils.jsonWrite(Constants.unitsFile, units);
+		reload();
+	}
 }

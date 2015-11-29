@@ -1,21 +1,20 @@
 package kvv.controllers.server.controller;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import kvv.controllers.controller.IController;
 import kvv.controllers.history.HistoryFile;
-import kvv.controllers.server.Controllers;
+import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.RegisterDescr;
+import kvv.controllers.shared.SystemDescr;
 
 public class ControllerWrapperLogger extends ControllerAdapter {
 
-	public ControllerWrapperLogger(Controllers controllers,
-			IController controller) {
-		super(controllers, controller);
+	public ControllerWrapperLogger(SystemDescr system, IController controller) {
+		super(system, controller);
 		HistoryFile.logValue(new Date(), null, null);
 	}
 
@@ -37,9 +36,9 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 	}
 
 	@Override
-	public int getReg(int addr, int reg) throws IOException {
+	public Integer getReg(int addr, int reg) throws IOException {
 		try {
-			int val = wrapped.getReg(addr, reg);
+			Integer val = wrapped.getReg(addr, reg);
 			log(addr, reg, val);
 			return val;
 		} catch (IOException e) {
@@ -49,9 +48,9 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 	}
 
 	@Override
-	public int[] getRegs(int addr, int reg, int n) throws IOException {
+	public Integer[] getRegs(int addr, int reg, int n) throws IOException {
 		try {
-			int[] res = wrapped.getRegs(addr, reg, n);
+			Integer[] res = wrapped.getRegs(addr, reg, n);
 			for (int i = 0; i < res.length; i++)
 				log(addr, reg + i, res[i]);
 			return res;
@@ -62,7 +61,7 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 	}
 
 	private void log(int addr, int reg, Integer val) {
-		RegisterDescr register = controllers.getRegister(addr, reg);
+		RegisterDescr register = system.getRegister(addr, reg);
 		if (register == null)
 			return;
 		logValue(register.name, val);
@@ -70,7 +69,10 @@ public class ControllerWrapperLogger extends ControllerAdapter {
 
 	private void log(int addr, Map<Integer, Integer> values) {
 		if (values == null) {
-			Collection<RegisterDescr> regs = controllers.getRegisters(addr);
+			ControllerDescr cd = system.getController(addr);
+			if(cd == null)
+				return;
+			RegisterDescr[] regs = cd.registers;
 			for (RegisterDescr reg : regs)
 				logValue(reg.name, null);
 			return;

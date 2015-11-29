@@ -2,7 +2,6 @@ package kvv.controllers.server;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -10,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import kvv.controllers.client.ConfigurationService;
 import kvv.controllers.server.context.Context;
-import kvv.controllers.server.unit.Units;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.SystemDescr;
 import kvv.controllers.shared.UnitDescr;
@@ -30,36 +28,16 @@ public class ConfigurationServiceImpl extends RemoteServiceServlet implements
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public SystemDescr getSystemDescr() throws Exception {
-		SystemDescr systemDescr = new SystemDescr();
-		systemDescr.controllers = Context.getInstance().controllers
-				.getControllers();
-		systemDescr.units = Context.getInstance().units.units;
-		// systemDescr.timeZoneOffset = new Date().getTimezoneOffset();
-
-		String tzo = Utils.getProp(Constants.propsFile, "timezoneOffset");
-
-		if (tzo != null)
-			systemDescr.timeZoneOffset = Integer.parseInt(tzo);
-		else
-			systemDescr.timeZoneOffset = new Date().getTimezoneOffset();
-
-		systemDescr.controllerTypes = Context.getInstance().controllers
-				.getControllerTypes();
-
-		new Date();
-
-		return systemDescr;
+		return Context.getInstance().system;
 	}
 
 	@Override
 	public void setSystemDescr(ControllerDescr[] controllerDescrs,
 			UnitDescr[] unitDescrs) throws Exception {
 		try {
-			Controllers.save(controllerDescrs);
-			Units.save(unitDescrs);
+			Context.save(controllerDescrs, unitDescrs);
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		}

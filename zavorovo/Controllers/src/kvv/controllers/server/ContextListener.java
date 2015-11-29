@@ -11,7 +11,6 @@ public class ContextListener implements ServletContextListener {
 		//ControllerFactory.create();
 		
 		System.out.println("starting...");
-		Context.getInstance();
 		Context.start();
 		
 		System.out.println("The Simple Web App. Is Ready");

@@ -5,7 +5,6 @@ import java.util.Date;
 import kvv.controllers.client.Controllers;
 import kvv.controllers.client.control.ControlCompositeWithDiagrams;
 import kvv.controllers.client.control.simple.AutoRelayControl;
-import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.UnitDescr;
@@ -34,10 +33,10 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 	private final RadioButton history4 = new RadioButton(
 			"history" + hashCode(), "4");
 
-//	private final UnitDescr unit;
+	// private final UnitDescr unit;
 
 	public UnitPage(final UnitDescr unit) {
-//		this.unit = unit;
+		// this.unit = unit;
 
 		Button refreshButton = new Button("Обновить");
 		refreshButton.setWidth("100%");
@@ -73,18 +72,15 @@ public class UnitPage extends ControlCompositeWithDiagrams {
 			historyOff.setValue(true);
 
 			for (RegisterPresentation regPres : unit.registers) {
-				l1: for (ControllerDescr descr : Controllers.systemDescr.controllers)
-					if (descr != null && descr.registers != null)
-						for (RegisterDescr register : descr.registers)
-							if (register != null
-									&& register.name.equals(regPres.name)) {
-								AutoRelayControl autoRelayControl = new AutoRelayControl(
-										register, regPres, mouseMoveHandler);
-								panel.add(autoRelayControl);
-								add(autoRelayControl);
-								diagrams.add(autoRelayControl);
-								break l1;
-							}
+				RegisterDescr register = Controllers.systemDescr
+						.getRegister(regPres.name);
+				if(register != null) {
+					AutoRelayControl autoRelayControl = new AutoRelayControl(
+							register, regPres, mouseMoveHandler);
+					panel.add(autoRelayControl);
+					add(autoRelayControl);
+					diagrams.add(autoRelayControl);
+				}
 			}
 		}
 
