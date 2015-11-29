@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import kvv.controllers.controller.IController;
-import kvv.controllers.history.HistoryFile;
+import kvv.controllers.server.history.HistoryFile;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.SystemDescr;
