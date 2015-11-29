@@ -30,23 +30,21 @@ public class ControllerWrapperCached extends ControllerAdapter {
 				ControllerDescr controllerDescr = controllersList.remove(0);
 				if (!controllerDescr.enabled)
 					continue;
-
-				int addr = controllerDescr.addr;
-
 				try {
 					int[] regRange = getRegsRange(controllerDescr);
 					if (regRange != null) {
 						HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
-						Integer[] vals = wrapped.getRegs(addr, regRange[0],
-								regRange[1]);
+						Integer[] vals = wrapped.getRegs(controllerDescr.addr,
+								regRange[0], regRange[1]);
 						for (int i = 0; i < regRange[1]; i++)
 							map.put(regRange[0] + i, vals[i]);
-						ControllerWrapperCached.this.map.put(addr, map);
+						ControllerWrapperCached.this.map.put(
+								controllerDescr.addr, map);
 					}
-					break;
 				} catch (IOException e) {
-					map.remove(addr);
+					map.remove(controllerDescr.addr);
 				}
+				break;
 			}
 			Context.looper.post(this, 100);
 		}
@@ -81,9 +79,13 @@ public class ControllerWrapperCached extends ControllerAdapter {
 	public Integer getReg(int addr, int reg) throws IOException {
 		HashMap<Integer, Integer> allRegs = map.get(addr);
 		if (allRegs == null)
-			throw new IOException("Не найден контроллер с адресом " + addr);
-		Integer val = allRegs.get(reg);
-		return val;
+			throw new IOException("Контроллер с адресом " + addr
+					+ " недоступен");
+
+		if (allRegs.containsKey(reg))
+			return allRegs.get(reg);
+		else
+			return wrapped.getReg(addr, reg);
 	}
 
 	@Override

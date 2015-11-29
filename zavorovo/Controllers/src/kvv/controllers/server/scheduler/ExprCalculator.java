@@ -38,7 +38,7 @@ public class ExprCalculator extends EXPR1 {
 			Integer val = Context.getInstance().controller.getReg(
 					reg.controllerAddr, reg.register);
 			if (val == null)
-				throw new Exception();
+				throw new Exception("Значение вне диапазона");
 			return (short) (int) val;
 		} catch (Exception e) {
 			throw new ParseException("Не удается прочитать регистр " + name);
