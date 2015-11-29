@@ -48,7 +48,7 @@ public class MotorRawT3 implements MotorRaw {
 	}
 
 	public int getReg32(int reg) throws IOException {
-		int[] vals = controller.getRegs(getAddr(), reg, 2);
+		Integer[] vals = controller.getRegs(getAddr(), reg, 2);
 		return (vals[0] << 16) + (vals[1] & 0xFFFF);
 	}
 
@@ -125,7 +125,7 @@ public class MotorRawT3 implements MotorRaw {
 
 	@Override
 	public MotorState getState() throws IOException {
-		int[] vals = controller.getRegs(getAddr(), regBase, REG_MAX_OFF);
+		Integer[] vals = controller.getRegs(getAddr(), regBase, REG_MAX_OFF);
 
 		return new MotorState((vals[REG_POSITION_OFF] << 16)
 				+ (vals[REG_POSITION_OFF + 1] & 0xFFFF), false,

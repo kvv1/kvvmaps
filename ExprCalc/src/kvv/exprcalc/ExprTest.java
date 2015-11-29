@@ -9,20 +9,9 @@ public class ExprTest {
 	public static void main(String[] args) throws ParseException, IOException {
 
 //		String e = "1 ? (0 ? 4 : привет) : 7 ";
-		String e = "(2+2)*r2";
+		String e = "(4 - (2 + 3))*r2";
 //		String e = "2";
 		
-		EXPR expr = new EXPR(e) {
-			@Override
-			public short getValue(String name) {
-				System.out.println("*");
-				return 10;
-			}
-		};
-		short s = expr.parse();
-		
-		System.out.println(s);
-
 		EXPR1 expr1 = new EXPR1(e) {
 			@Override
 			public short getRegValue(String name) {

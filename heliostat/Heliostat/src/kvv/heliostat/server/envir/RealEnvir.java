@@ -25,7 +25,7 @@ public class RealEnvir extends Envir {
 //				setModbusLine(new ADUTransceiver(
 //						new COMTransceiver(com, 500)));
 				setModbusLine(new ADUTransceiver(
-						new TCPTransceiver("192.168.1.17", 8899, 1000)));
+						new TCPTransceiver("192.168.1.17", 8899)));
 			}
 			return super.send(addr, request);
 		}

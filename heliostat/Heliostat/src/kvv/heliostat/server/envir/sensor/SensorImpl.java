@@ -34,7 +34,7 @@ public class SensorImpl implements Sensor {
 				t = controller.getReg(ADDR, 9);
 			}
 
-			int[] resp = controller.getRegs(ADDR, 16, 4);
+			Integer[] resp = controller.getRegs(ADDR, 16, 4);
 			return new SensorState(resp[0], resp[1], resp[2], resp[3], t);
 		} catch (Exception e) {
 			return state0;
