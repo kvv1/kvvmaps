@@ -70,7 +70,6 @@ public class Scheduler {
 
 		Context.looper.post(r, 100);
 		Context.looper.post(r1, 100);
-		// thread.start();
 	}
 
 	private final Runnable r = new Runnable() {

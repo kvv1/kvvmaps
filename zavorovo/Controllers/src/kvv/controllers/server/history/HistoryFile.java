@@ -10,6 +10,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import kvv.controllers.server.Constants;
 import kvv.controllers.shared.History;
@@ -91,17 +94,63 @@ public class HistoryFile {
 
 	private static DateFormat timeDF = new SimpleDateFormat("HH:mm:ss");
 
-	public static void logValue(Date date, String register, Integer value) {
-		PrintStream ps = getLogStream(date);
-		if (register == null)
-			ps.println(timeDF.format(date));
-		else if (value == null)
-			ps.println(timeDF.format(date) + " " + register);
-		else {
-			ps.println(timeDF.format(date) + " " + register + "=" + value);
-		}
-		ps.close();
+	static class LogItem {
+		Date date;
+		String register;
+		Integer value;
 
+		public LogItem(Date date, String register, Integer value) {
+			this.date = date;
+			this.register = register;
+			this.value = value;
+		}
+	}
+
+	private static final BlockingQueue<LogItem> queue = new LinkedBlockingQueue<>();
+	public static volatile boolean stopped;
+	private static Thread thread = new Thread() {
+		{
+			setPriority(MIN_PRIORITY);
+			start();
+		}
+
+		public void run() {
+			System.out.println("HistoryFile started");
+			while (!stopped) {
+				try {
+					LogItem logItem = queue.poll(1000, TimeUnit.MILLISECONDS);
+					if (logItem != null) {
+						//System.out.println(logItem.date);
+						PrintStream ps = getLogStream(logItem.date);
+						if (logItem.register == null)
+							ps.println(timeDF.format(logItem.date));
+						else if (logItem.value == null)
+							ps.println(timeDF.format(logItem.date) + " "
+									+ logItem.register);
+						else
+							ps.println(timeDF.format(logItem.date) + " "
+									+ logItem.register + "=" + logItem.value);
+						ps.close();
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			System.out.println("HistoryFile stopped");
+		}
+	};
+
+	public static void logValue(Date date, String register, Integer value) {
+		queue.add(new LogItem(date, register, value));
+		// PrintStream ps = getLogStream(date);
+		// if (register == null)
+		// ps.println(timeDF.format(date));
+		// else if (value == null)
+		// ps.println(timeDF.format(date) + " " + register);
+		// else {
+		// ps.println(timeDF.format(date) + " " + register + "=" + value);
+		// }
+		// ps.close();
 	}
 
 }

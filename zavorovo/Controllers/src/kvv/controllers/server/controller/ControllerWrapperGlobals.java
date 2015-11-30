@@ -37,7 +37,7 @@ public class ControllerWrapperGlobals extends ControllerAdapter {
 		} else {
 			Integer[] res = new Integer[n];
 			for (int i = 0; i < n; i++)
-				res[i] = globals.get(reg);
+				res[i] = globals.get(reg + i);
 			return res;
 		}
 	}

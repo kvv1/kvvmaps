@@ -14,10 +14,6 @@ public class ControllerWrapperAdj extends ControllerAdapter {
 		super(system, wrapped);
 	}
 
-	public void close() {
-		wrapped.close();
-	}
-
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
 		wrapped.setReg(addr, reg, val);

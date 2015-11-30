@@ -46,7 +46,7 @@ public class ControllerWrapperCached extends ControllerAdapter {
 				}
 				break;
 			}
-			Context.looper.post(this, 100);
+			Context.looper.post(this, 10);
 		}
 	};
 
