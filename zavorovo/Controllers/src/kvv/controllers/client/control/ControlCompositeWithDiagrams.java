@@ -47,7 +47,7 @@ public abstract class ControlCompositeWithDiagrams extends ControlComposite {
 					public void onSuccess(ScheduleAndHistory result) {
 						for (AutoRelayControl c : diagrams) {
 							ArrayList<HistoryItem> logItems = result.history == null ? null
-									: result.history.items.get(c.reg.name);
+									: result.history.items;
 							int markerSeconds = now.getHours() * 3600
 									+ now.getMinutes() * 60 + now.getSeconds();
 							int historyEndSeconds = now.equals(dateForHistory) ? markerSeconds

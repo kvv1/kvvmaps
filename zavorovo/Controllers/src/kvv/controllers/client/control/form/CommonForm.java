@@ -5,6 +5,7 @@ import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.ControlComposite;
 import kvv.controllers.client.control.simple.GetRegControl;
+import kvv.controllers.client.control.simple.GetRegControlTime;
 import kvv.controllers.client.control.simple.GetSetRegControl;
 import kvv.controllers.client.control.simple.GetSetRegControl2;
 import kvv.controllers.client.control.simple.SimpleRelayControl;
@@ -95,9 +96,13 @@ public class CommonForm extends ControlComposite {
 					vp.add(createWidget(child));
 			return vp;
 		case TEXT_RO:
-			GetRegControl grc = new GetRegControl(addr, ui.reg, 1, ui.label);
+			GetRegControl grc = new GetRegControl(addr, ui.reg, ui.label);
 			add(grc);
 			return grc;
+		case TEXT_RO_TIME:
+			GetRegControlTime grct = new GetRegControlTime(addr, ui.reg, ui.label);
+			add(grct);
+			return grct;
 		case TEXT_RW:
 			GetSetRegControl gsrc = new GetSetRegControl(addr, ui.reg, false,
 					ui.label);

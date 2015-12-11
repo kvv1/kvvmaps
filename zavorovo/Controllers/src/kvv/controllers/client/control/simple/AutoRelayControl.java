@@ -80,7 +80,7 @@ public class AutoRelayControl extends ControlComposite {
 		if (presentation.isBool()) {
 			relayControl = new SimpleRelayControl(reg.controllerAddr, reg.register, "");
 		} else {
-			relayControl = new GetRegControl(reg.controllerAddr, reg.register, 1, null);
+			relayControl = new GetRegControl(reg.controllerAddr, reg.register, null);
 		}
 		add(relayControl);
 

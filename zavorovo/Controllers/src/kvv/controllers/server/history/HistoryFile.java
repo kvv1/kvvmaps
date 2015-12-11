@@ -7,20 +7,23 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.text.DateFormat;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import kvv.controllers.server.Constants;
+import kvv.controllers.server.Logger;
+import kvv.controllers.server.context.Context;
 import kvv.controllers.shared.History;
 import kvv.controllers.shared.HistoryItem;
 
 public class HistoryFile {
 
 	private static final DateFormat fileDF = new SimpleDateFormat("yyyy_MM_dd");
+	private static final DateFormat timeDF = new SimpleDateFormat("HH:mm:ss");
 
 	public static File getLogFile(Date date) {
 		new File(Constants.historyDir).mkdir();
@@ -38,40 +41,31 @@ public class HistoryFile {
 
 			String line = null;
 			while ((line = reader.readLine()) != null) {
-				String[] parts = line.trim().split(" ");
-				if (parts == null || parts.length == 0)
-					continue;
+				try {
+					String[] parts = line.trim().split(" ");
+					if (parts == null || parts.length == 0)
+						continue;
 
-				DateFormat df = new SimpleDateFormat("HH:mm:ss");
-				Date date1 = df.parse(parts[0]);
-				int seconds = date1.getHours() * 3600 + date1.getMinutes() * 60
-						+ date1.getSeconds();
+					ParsePosition parsePosition = new ParsePosition(0);
+					Date date1 = timeDF.parse(parts[0], parsePosition);
 
-				if (parts.length == 1) {
-					for (ArrayList<HistoryItem> logItems : history.items
-							.values())
-						logItems.add(new HistoryItem(seconds, null));
-				} else {
-					String[] reg_value = parts[1].split("=");
+					if (parsePosition.getErrorIndex() == -1) {
+						int seconds = date1.getHours() * 3600
+								+ date1.getMinutes() * 60 + date1.getSeconds();
 
-					try {
-						String reg = reg_value[0];
-
-						Integer value = reg_value.length > 1 ? Integer
-								.parseInt(reg_value[1]) : null;
-
-						ArrayList<HistoryItem> logItems = history.items
-								.get(reg);
-
-						if (logItems == null) {
-							logItems = new ArrayList<HistoryItem>();
-							history.items.put(reg, logItems);
+						if (parts.length == 1) {
+							history.items.add(new HistoryItem(seconds));
+						} else {
+							String[] reg_value = parts[1].split("=");
+							String reg = reg_value[0];
+							Integer value = reg_value.length > 1 ? parseInt(reg_value[1])
+									: null;
+							history.items.add(new HistoryItem(seconds, reg,
+									value));
 						}
-
-						logItems.add(new HistoryItem(seconds, value));
-
-					} catch (Exception e) {
 					}
+				} catch (Exception e) {
+					e.printStackTrace(Logger.out);
 				}
 			}
 			reader.close();
@@ -80,6 +74,14 @@ public class HistoryFile {
 		}
 
 		return history;
+	}
+
+	private static Integer parseInt(String s) {
+		try {
+			return Integer.parseInt(s);
+		} catch (NumberFormatException e) {
+			return null;
+		}
 	}
 
 	private static PrintStream getLogStream(Date date) {
@@ -92,17 +94,13 @@ public class HistoryFile {
 		}
 	}
 
-	private static DateFormat timeDF = new SimpleDateFormat("HH:mm:ss");
-
 	static class LogItem {
 		Date date;
-		String register;
-		Integer value;
+		String text;
 
-		public LogItem(Date date, String register, Integer value) {
+		public LogItem(Date date, String text) {
 			this.date = date;
-			this.register = register;
-			this.value = value;
+			this.text = text;
 		}
 	}
 
@@ -115,42 +113,46 @@ public class HistoryFile {
 		}
 
 		public void run() {
-			System.out.println("HistoryFile started");
+			Logger.out.println("HistoryFile started");
+			log(new Date(), null);
+			long ms = 0;
 			while (!stopped) {
 				try {
+					ms += 1000;
 					LogItem logItem = queue.poll(1000, TimeUnit.MILLISECONDS);
 					if (logItem != null) {
-						//System.out.println(logItem.date);
-						PrintStream ps = getLogStream(logItem.date);
-						if (logItem.register == null)
-							ps.println(timeDF.format(logItem.date));
-						else if (logItem.value == null)
-							ps.println(timeDF.format(logItem.date) + " "
-									+ logItem.register);
-						else
-							ps.println(timeDF.format(logItem.date) + " "
-									+ logItem.register + "=" + logItem.value);
-						ps.close();
+						log(logItem.date, logItem.text);
+						ms = 0;
+					} else if (ms > 60000) {
+						Context.looper.post(new Runnable() {
+							@Override
+							public void run() {
+								logValue("_alive_", null);
+							}
+						});
+						ms = 0;
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					e.printStackTrace(Logger.out);
 				}
 			}
-			System.out.println("HistoryFile stopped");
+			log(new Date(), null);
+			Logger.out.println("HistoryFile stopped");
+		}
+
+		private void log(Date date, String text) {
+			PrintStream ps = getLogStream(date);
+			ps.println(timeDF.format(date) + (text == null ? "" : " " + text));
+			ps.close();
 		}
 	};
 
-	public static void logValue(Date date, String register, Integer value) {
-		queue.add(new LogItem(date, register, value));
-		// PrintStream ps = getLogStream(date);
-		// if (register == null)
-		// ps.println(timeDF.format(date));
-		// else if (value == null)
-		// ps.println(timeDF.format(date) + " " + register);
-		// else {
-		// ps.println(timeDF.format(date) + " " + register + "=" + value);
-		// }
-		// ps.close();
+	public static void logValue(String register, Integer value) {
+		Date date = new Date();
+		if (value == null)
+			queue.add(new LogItem(date, register));
+		else
+			queue.add(new LogItem(date, register + "=" + value));
 	}
 
 }

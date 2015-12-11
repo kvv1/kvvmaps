@@ -171,9 +171,10 @@ public abstract class EXPR1_Base {
 		}
 
 		public List<Byte> getBytes() throws ParseException {
-			List<Byte> res = new ArrayList<>(left.getBytes());
-			if (right != null)
-				res.addAll(right.getBytes());
+			List<Byte> res = new ArrayList<>();
+			if (left != null)
+				res.addAll(left.getBytes());
+			res.addAll(right.getBytes());
 			res.add(op.code);
 			return res;
 		}
@@ -201,7 +202,7 @@ public abstract class EXPR1_Base {
 			case GE:
 				return left.getValue() >= right.getValue() ? 1 : 0;
 			case NOT:
-				return right.getValue() != 0 ? 1 : 0;
+				return right.getValue() == 0 ? 1 : 0;
 			case NEG:
 				return -right.getValue();
 			default:
@@ -512,9 +513,8 @@ public abstract class EXPR1_Base {
 				Expr op1 = stack.pop();
 				stack.push(new BinExpr(op1, OP.NOT));
 			} else if (c == OP.NEG.code) {
-				Expr op2 = stack.pop();
 				Expr op1 = stack.pop();
-				stack.push(new BinExpr(op1, op2, OP.NEG));
+				stack.push(new BinExpr(op1, OP.NEG));
 			} else if (c == OP.OR.code) {
 				int n = bytes.get(i++);
 				Expr right = decomp(bytes.subList(i, i + n - 1));
@@ -560,13 +560,15 @@ public abstract class EXPR1_Base {
 
 	public static class RulePart {
 		public final List<Byte> bytes;
+
 		public RulePart(List<Byte> bytes) {
 			this.bytes = bytes;
 		}
 	}
-	
+
 	public static class Rule {
 		public final List<Byte> bytes = new ArrayList<>();
+
 		public Rule(int r, List<RulePart> parts) {
 			bytes.add((byte) 0);
 			bytes.add((byte) 0);
@@ -583,7 +585,7 @@ public abstract class EXPR1_Base {
 			bytes.set(0, (byte) bytes.size());
 		}
 	}
-	
+
 	public static List<Byte> packRules(Rule... rules) {
 		List<Byte> res = new ArrayList<>();
 

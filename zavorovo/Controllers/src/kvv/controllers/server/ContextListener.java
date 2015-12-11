@@ -9,14 +9,14 @@ import kvv.controllers.server.history.HistoryFile;
 public class ContextListener implements ServletContextListener {
 
 	public void contextInitialized(ServletContextEvent event) {
-		System.out.println("starting...");
+
+		Logger.out.println("starting...");
 		Context.start();
-		System.out.println("started");
+		Logger.out.println("started");
 	}
 
 	public void contextDestroyed(ServletContextEvent event) {
 		Context.stop();
 		HistoryFile.stopped = true;
 	}
-
 }

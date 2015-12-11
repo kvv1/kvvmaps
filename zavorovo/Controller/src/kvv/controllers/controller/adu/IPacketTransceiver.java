@@ -1,6 +1,7 @@
 package kvv.controllers.controller.adu;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface IPacketTransceiver {
 	byte[] sendPacket(byte[] data, boolean waitResponse, int packetTimeout) throws IOException;
@@ -13,4 +14,7 @@ public interface IPacketTransceiver {
 			super("PACKET_TIMEOUT");
 		}
 	}
+	
+	
+	
 }

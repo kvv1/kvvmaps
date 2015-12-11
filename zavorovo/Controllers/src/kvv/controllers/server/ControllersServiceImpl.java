@@ -67,4 +67,12 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		}
 	}
 
+	@Override
+	public String getModbusLog() {
+		String res = "";
+		for(String s : Context.getInstance().getModbusLog())
+			res += s + "\n";
+		return res;
+	}
+	
 }

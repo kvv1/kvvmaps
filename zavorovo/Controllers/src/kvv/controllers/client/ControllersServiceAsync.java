@@ -1,6 +1,7 @@
 package kvv.controllers.client;
 
 import java.util.HashMap;
+import java.util.List;
 
 import kvv.controller.register.Statistics;
 
@@ -17,4 +18,6 @@ public interface ControllersServiceAsync {
 	void hello(int addr, AsyncCallback<Integer> callback);
 
 	void getStatistics(boolean clear, AsyncCallback<Statistics> callback);
+
+	void getModbusLog(AsyncCallback<String> callback);
 }

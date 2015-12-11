@@ -1,6 +1,7 @@
 package kvv.controllers.client;
 
 import java.util.HashMap;
+import java.util.List;
 
 import kvv.controller.register.Statistics;
 
@@ -18,4 +19,7 @@ public interface ControllersService extends RemoteService {
 	Integer hello(int addr) throws Exception;
 
 	Statistics getStatistics(boolean clear);
+	
+	public String getModbusLog();
+
 }

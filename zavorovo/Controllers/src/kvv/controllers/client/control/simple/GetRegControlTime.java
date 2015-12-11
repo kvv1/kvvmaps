@@ -3,11 +3,12 @@ package kvv.controllers.client.control.simple;
 import kvv.controllers.client.control.AllRegs;
 import kvv.controllers.client.control.ChildComposite;
 
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 
-public class GetRegControl extends ChildComposite {
+public class GetRegControlTime extends ChildComposite {
 
 	private final HorizontalPanel panel = new HorizontalPanel();
 
@@ -15,7 +16,7 @@ public class GetRegControl extends ChildComposite {
 	private final Label edit;
 	private final int reg;
 
-	public GetRegControl(final int addr, final int reg, final String text) {
+	public GetRegControlTime(final int addr, final int reg, final String text) {
 		super(addr);
 		this.reg = reg;
 
@@ -29,7 +30,7 @@ public class GetRegControl extends ChildComposite {
 		}
 
 		this.edit = new Label();
-		edit.setWidth("40px");
+		edit.setWidth("60px");
 		edit.setText("???");
 		panel.add(edit);
 
@@ -43,11 +44,26 @@ public class GetRegControl extends ChildComposite {
 		if (regs == null)
 			return;
 
-		Integer _val = regs.values.get(reg);
+		Integer _valHi = regs.values.get(reg);
+		Integer _valLo = regs.values.get(reg + 1);
 
-		if (_val == null)
+		if (_valHi == null || _valLo == null)
 			return;
 
-		edit.setText(Integer.toString(_val));
+		int t = (_valHi << 16) + (_valLo & 0xFFFF);
+
+		String s = convertSecondsToHMmSs(t / 1000);
+
+		edit.setText(s);
+	}
+
+	public static String convertSecondsToHMmSs(long seconds) {
+		long s = seconds % 60;
+		long m = (seconds / 60) % 60;
+		long h = (seconds / (60 * 60)) % 24;
+
+		return NumberFormat.getFormat("00").format(h) + ":"
+				+ NumberFormat.getFormat("00").format(m) + ":"
+				+ NumberFormat.getFormat("00").format(s);
 	}
 }

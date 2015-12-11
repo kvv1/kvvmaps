@@ -18,8 +18,13 @@ public class ModbusPacketTransceiver {
 		outputStream.write(data);
 		outputStream.flush();
 
-		if (!waitResponse)
+		if (!waitResponse) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+			}
 			return null;
+		}
 
 		long timeout = packetTimeout;
 

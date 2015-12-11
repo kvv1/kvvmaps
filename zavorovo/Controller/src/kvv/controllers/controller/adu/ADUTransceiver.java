@@ -3,8 +3,11 @@ package kvv.controllers.controller.adu;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,6 +20,8 @@ public class ADUTransceiver implements ModbusLine {
 
 	public Statistics statistics = new Statistics();
 	protected final IPacketTransceiver packetTransceiver;
+
+	private final LinkedList<String> log = new LinkedList<>();
 
 	private final Map<Integer, Integer> timeouts = new HashMap<>();
 
@@ -51,6 +56,11 @@ public class ADUTransceiver implements ModbusLine {
 					timeout = 100;
 				res = packetTransceiver.sendPacket(adu.toBytes(), addr != 0,
 						timeout);
+				if (addr == 0)
+					return null;
+
+				addLog(adu.toBytes(), res);
+
 				if (res == null)
 					throw new IOException("no response");
 
@@ -59,11 +69,12 @@ public class ADUTransceiver implements ModbusLine {
 					throw new IOException("wrong response ADU checksum");
 				if (adu1.addr != addr)
 					throw new IOException("wrong response ADU addr");
-
 				BusLogger.logSuccess(addr);
 				statistics.addSuccess(addr);
 				return adu1.pdu.toBytes();
 			} catch (IOException e) {
+				addLog(e.getClass().getSimpleName() + " " + e.getMessage());
+
 				try {
 					Thread.sleep(200);
 				} catch (InterruptedException ee) {
@@ -113,6 +124,31 @@ public class ADUTransceiver implements ModbusLine {
 		if (clear)
 			this.statistics = new Statistics();
 		return statistics;
+	}
+
+	@Override
+	public synchronized List<String> getLog() {
+		return new ArrayList<String>(log);
+	}
+
+	private void addLog(byte[] req, byte[] resp) {
+		StringBuilder sb = new StringBuilder();
+		for (byte b : req)
+			sb.append(b + " ");
+		sb.append("\n ");
+		if (resp != null)
+			for (byte b : resp)
+				sb.append(b + " ");
+		else
+			sb.append("null");
+
+		addLog(sb.toString());
+	}
+
+	private void addLog(String string) {
+		if (log.size() > 100)
+			log.removeFirst();
+		log.add(string);
 	}
 
 }

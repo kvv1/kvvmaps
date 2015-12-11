@@ -50,6 +50,7 @@ public class Controllers implements EntryPoint {
 						// tabs.add(new ConfigurationPage(), "Конф.");
 						// tabs.add(new ConfigurationPageG(), "Конфигурация");
 						tabs.add(new ConfigurationTabPage(), "Конфигурация");
+						tabs.add(new LogTabPage(), "log");
 					}
 					// throw new Exception();
 				} catch (Exception e) {

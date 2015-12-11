@@ -9,14 +9,15 @@ import java.util.HashMap;
 import java.util.List;
 
 import kvv.controllers.controller.Controller;
+import kvv.controllers.controller.IController;
 import kvv.controllers.controller.ModbusLine;
 import kvv.controllers.controller.adu.ADUTransceiver;
 import kvv.controllers.controller.adu.COMTransceiver;
 import kvv.controllers.server.Constants;
+import kvv.controllers.server.Logger;
 import kvv.controllers.server.controller.ControllerWrapperAdj;
 import kvv.controllers.server.controller.ControllerWrapperCached;
 import kvv.controllers.server.controller.ControllerWrapperGlobals;
-import kvv.controllers.server.controller.ControllerWrapperLogger;
 import kvv.controllers.server.scheduler.Scheduler;
 import kvv.controllers.shared.ControllerDef;
 import kvv.controllers.shared.ControllerDef.RegisterDef;
@@ -35,6 +36,8 @@ public class Context {
 
 	private static Context instance;
 	private static boolean closedAll;
+	
+	private ModbusLine modbusLine;
 
 	public static synchronized Context getInstance() {
 		if (instance == null && !closedAll)
@@ -72,6 +75,7 @@ public class Context {
 	}
 
 	public final SystemDescr system = new SystemDescr();
+	public IController controllerRaw;
 	public ControllerWrapperCached controller;
 	public final Scheduler scheduler;
 
@@ -85,23 +89,22 @@ public class Context {
 		loadControllers();
 		loadTZ();
 		createController();
-		scheduler = new Scheduler(system, controller);
+		scheduler = new Scheduler(system, controller, controllerRaw);
 	}
 
 	private void createController() {
-		String com = Utils.getProp(Constants.controllerPropsFile, "COM");
-		ModbusLine modbusLine = new ADUTransceiver(new COMTransceiver(com));
+		String com = Utils.getProp(Constants.propsFile, "COM");
+		modbusLine = new ADUTransceiver(new COMTransceiver(com));
 
 		for (ControllerDescr cd : system.controllers)
 			modbusLine.setTimeout(cd.addr, cd.timeout);
 
-		Controller c = new Controller();
-		c.setModbusLine(modbusLine);
+		controllerRaw = new Controller();
+		controllerRaw.setModbusLine(modbusLine);
 
 		controller = new ControllerWrapperCached(system,
-				new ControllerWrapperLogger(system,
 						new ControllerWrapperGlobals(system,
-								new ControllerWrapperAdj(system, c))));
+								new ControllerWrapperAdj(system, controllerRaw)));
 	}
 
 	@SuppressWarnings("deprecation")
@@ -147,7 +150,7 @@ public class Context {
 					resolveNames(controllerType.ui, controllerType.def);
 					system.controllerTypes.put(name, controllerType);
 				} catch (Exception e) {
-					e.printStackTrace();
+					e.printStackTrace(Logger.out);
 				}
 			}
 
@@ -167,7 +170,7 @@ public class Context {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(Logger.out);
 		}
 	}
 
@@ -187,5 +190,9 @@ public class Context {
 		Utils.jsonWrite(Constants.controllersFile, controllers);
 		Utils.jsonWrite(Constants.unitsFile, units);
 		reload();
+	}
+
+	public List<String> getModbusLog() {
+		return modbusLine.getLog();
 	}
 }

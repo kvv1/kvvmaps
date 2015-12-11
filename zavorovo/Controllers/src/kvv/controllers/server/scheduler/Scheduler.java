@@ -2,6 +2,7 @@ package kvv.controllers.server.scheduler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,6 +11,7 @@ import java.util.Set;
 
 import kvv.controllers.controller.IController;
 import kvv.controllers.server.Constants;
+import kvv.controllers.server.Logger;
 import kvv.controllers.server.context.Context;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.ControllerType;
@@ -31,25 +33,28 @@ import kvv.stdutils.Utils;
 
 public class Scheduler {
 	private final IController controller;
+	private final IController controllerRaw;
 	private final SystemDescr system;
 	private Schedule schedule;
 	private final Set<String> regNames = new HashSet<String>();
 
-	public Scheduler(SystemDescr system, IController controller) {
+	public Scheduler(SystemDescr system, IController controller,
+			IController controllerRaw) {
 		this.controller = controller;
 		this.system = system;
+		this.controllerRaw = controllerRaw;
 
-		System.out.println("scheduler regs loading");
+		Logger.out.println("scheduler regs loading");
 
 		try {
 			for (UnitDescr ud : system.units)
 				for (RegisterPresentation r : ud.registers)
 					regNames.add(r.name);
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(Logger.out);
 		}
 
-		System.out.println("scheduler regs loaded " + regNames.size());
+		Logger.out.println("scheduler regs loaded " + regNames.size());
 
 		try {
 			schedule = Utils.jsonRead(Constants.scheduleFile, Schedule.class);
@@ -65,7 +70,7 @@ public class Scheduler {
 
 		} catch (Exception e) {
 			schedule = new Schedule();
-			e.printStackTrace();
+			e.printStackTrace(Logger.out);
 		}
 
 		Context.looper.post(r, 100);
@@ -90,6 +95,7 @@ public class Scheduler {
 						break;
 				}
 			} catch (Exception e) {
+				e.printStackTrace(Logger.out);
 			}
 
 			Context.looper.post(this, 100);
@@ -102,19 +108,30 @@ public class Scheduler {
 		public void run() {
 			// System.out.print(".");
 			try {
+				Calendar cal = Calendar.getInstance();
+				int ms = cal.get(Calendar.HOUR_OF_DAY);
+				ms = ms * 60 + cal.get(Calendar.MINUTE);
+				ms = ms * 60 + cal.get(Calendar.SECOND);
+				ms = ms * 1000 + cal.get(Calendar.MILLISECOND);
+				controllerRaw.setRegs(0, 14, ms >> 16, ms);
+
 				ControllerDescr[] cds = system.controllers;
 				for (ControllerDescr cd : cds)
 					reloadRules(cd);
-
 			} catch (Exception e) {
+				e.printStackTrace(Logger.out);
 			}
 
-			Context.looper.post(this, 10000);
+			Context.looper.post(this, 5000);
 			// System.out.print(":");
 		}
 	};
 
 	private void reloadRules(ControllerDescr cd) {
+
+		if (!cd.enabled)
+			return;
+
 		ControllerType controllerType = system.controllerTypes.get(cd.type);
 		if (controllerType == null || !controllerType.def.hasRules)
 			return;
@@ -124,6 +141,7 @@ public class Scheduler {
 		l1: for (RegisterDescr rd : cd.registers) {
 			RegisterSchedule registerSchedule = schedule.map.get(rd.name);
 			if (registerSchedule != null
+					&& registerSchedule.state == State.EXPRESSION
 					&& registerSchedule.expressions != null
 					&& registerSchedule.localExpr) {
 
@@ -151,8 +169,13 @@ public class Scheduler {
 		int[] vals = EXPR1_Base.toIntArr(EXPR1_Base.packToShortArr(rulePack));
 
 		try {
+			// Thread.sleep(1000);
+			// long t = System.currentTimeMillis();
 			controller.setRegs(cd.addr, 258, vals);
-		} catch (IOException e) {
+			// System.out.println(System.currentTimeMillis() - t);
+			// Thread.sleep(1000);
+		} catch (Exception e) {
+			e.printStackTrace(Logger.out);
 		}
 	}
 
@@ -174,7 +197,7 @@ public class Scheduler {
 
 		RegisterDescr register = system.getRegister(regName);
 		if (register == null) {
-			System.out.println("Scheduler.processReg reg " + regName
+			Logger.out.println("Scheduler.processReg reg " + regName
 					+ " not found");
 			return;
 		}
@@ -193,7 +216,7 @@ public class Scheduler {
 			return false;
 		RegisterDescr reg = system.getRegister(regName);
 		if (reg == null) {
-			System.out.println("Scheduler.processReg reg " + regName
+			Logger.out.println("Scheduler.processReg reg " + regName
 					+ " not found");
 			return false;
 		}
@@ -289,4 +312,37 @@ public class Scheduler {
 			}
 		}
 	};
+/*
+	public static void main(String[] args) {
+		System.out.println(dist(10, 20));
+		System.out.println(dist(20, 10));
+		System.out.println(dist(10, 990));
+		System.out.println(dist(990, 10));
+		System.out.println(dist(980, 990));
+		System.out.println(dist(990, 980));
+	}
+
+	static int MS_IN_DAY = 1000;
+
+	static int dist(int n1, int n2) {
+		int d = n1 - n2;
+
+		if (d >= 0) {
+			if (d < MS_IN_DAY / 2)
+				return d;
+			else
+				return d - MS_IN_DAY;
+		} else {
+			if (d >= -MS_IN_DAY / 2)
+				return d;
+			else
+				return MS_IN_DAY + d;
+		}
+
+		// if ((d >= 0 && d < MS_IN_DAY / 2) || (d < 0 && d >= -MS_IN_DAY / 2))
+		// return d;
+		// else
+		// return -(d + MS_IN_DAY / 2);
+	}
+*/
 }

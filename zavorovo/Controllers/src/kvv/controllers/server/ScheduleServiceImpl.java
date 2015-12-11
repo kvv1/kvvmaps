@@ -53,8 +53,8 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 	private synchronized History getHistory(Date date) {
 		if (date == null)
 			return null;
-		History log = HistoryFile.load(date);
-		return log;
+		History history = HistoryFile.load(date);
+		return history;
 	}
 
 	@Override

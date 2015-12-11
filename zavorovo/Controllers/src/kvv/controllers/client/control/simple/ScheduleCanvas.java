@@ -48,10 +48,14 @@ public abstract class ScheduleCanvas extends Composite {
 
 	private boolean isBool;
 
+	private String regName;
+
 	protected abstract void save(RegisterSchedule registerSchedule);
 
 	public ScheduleCanvas(final RegisterPresentation _presentation,
 			final MouseMoveHandler mouseMoveHandler) {
+
+		this.regName = _presentation.name;
 
 		isBool = _presentation.isBool();
 		if (isBool) {
@@ -109,15 +113,15 @@ public abstract class ScheduleCanvas extends Composite {
 				int minute = (m + 5) / 10 * 10;
 				double y0 = getY(minVal) + getRegY();
 				double y1 = getY(maxVal) + getRegY();
-				
-				double y = event.getY();
-				
-				int val = (int) (minVal + (y - y0) * (maxVal - minVal) / (y1 - y0) + 0.5);
 
-				System.out.println(val);
+				double y = event.getY();
+
+				int val = (int) (minVal + (y - y0) * (maxVal - minVal)
+						/ (y1 - y0) + 0.5);
 
 				registerSchedule.add(minute, val);
-				if(registerSchedule.items.size() == 0 && registerSchedule.state == State.SCHEDULE)
+				if (registerSchedule.items.size() == 0
+						&& registerSchedule.state == State.SCHEDULE)
 					registerSchedule.state = State.MANUAL;
 				save(registerSchedule);
 				// setDirty(true);
@@ -266,13 +270,47 @@ public abstract class ScheduleCanvas extends Composite {
 			context.setStrokeStyle("#00FFFF");
 			context.setLineWidth(2);
 
-			HistoryItem lastValue = null;
+			Integer last = null;
 
 			for (HistoryItem logItem : logItems) {
-				drawLogItem(logItem.seconds, logItem, lastValue);
-				lastValue = logItem;
+				int x = sec2x(logItem.seconds);
+				Integer current = logItem.value;
+
+				if (logItem.name == null) {
+					last = null;
+				} else {
+					if (regName.equals(logItem.name)) {
+						if (current != null) {
+							if (last != null) {
+								context.lineTo(x, getY(last));
+								context.lineTo(x, getY(current));
+							} else {
+								context.moveTo(x, getY(current));
+							}
+						}
+						last = current;
+					} else {
+						if(last != null)
+							context.lineTo(x, getY(last));
+					}
+				}
+
+//				if (logItem.name == null || regName.equals(logItem.name)) {
+//
+//					if (last == null && current != null) {
+//						context.moveTo(x, getY(current));
+//					} else if (last != null && current != null) {
+//						context.lineTo(x, getY(last));
+//						context.lineTo(x, getY(current));
+//					} else if (last != null && current == null) {
+//						// context.lineTo(x, getY(last));
+//					}
+//
+//					drawLogItem(logItem.seconds, logItem, lastValue);
+//					lastValue = logItem;
+//				}
 			}
-			drawLogItem(historyEndSeconds, lastValue, lastValue);
+//			drawLogItem(historyEndSeconds, lastValue, lastValue);
 
 			context.stroke();
 			context.closePath();
@@ -291,29 +329,6 @@ public abstract class ScheduleCanvas extends Composite {
 		context.restore();
 
 		return true;
-	}
-
-	private void drawLogItem(int seconds, HistoryItem logItem,
-			HistoryItem lastValue) {
-		Integer last = lastValue == null ? null : lastValue.value;
-		Integer current = logItem.value;
-
-		int x = sec2x(seconds);
-
-		if (last == null && current != null) {
-			context.moveTo(x, getY(current));
-		} else if (last != null && current != null) {
-			context.lineTo(x, getY(last));
-			context.lineTo(x, getY(current));
-		} else if (last != null && current == null) {
-			context.lineTo(x, getY(last));
-		}
-		/*
-		 * if (last != null) context.lineTo(x, getY(last));
-		 * 
-		 * if (current != null) { if (last == null) context.moveTo(x,
-		 * getY(current)); else context.lineTo(x, getY(current)); }
-		 */
 	}
 
 	private void createBG() {

@@ -8,9 +8,9 @@ import kvv.controller.register.Statistics;
 public class Controller implements IController {
 
 	protected volatile ModbusLine modbusLine;
-	
+
 	private boolean uploading;
-	
+
 	public Controller() {
 	}
 
@@ -26,7 +26,8 @@ public class Controller implements IController {
 	public void setRegs(int addr, int reg, int... val) throws IOException {
 
 		byte[] head = new byte[] { Command.CMD_MODBUS_SETREGS,
-				(byte) (reg >> 8), (byte) reg, 0, (byte) val.length, (byte) (val.length * 2) };
+				(byte) (reg >> 8), (byte) reg, 0, (byte) val.length,
+				(byte) (val.length * 2) };
 
 		byte[] req = Arrays.copyOf(head, 6 + val.length * 2);
 		for (int i = 0; i < val.length; i++) {
@@ -49,7 +50,7 @@ public class Controller implements IController {
 	public Integer[] getRegs(int addr, int reg, int n) throws IOException {
 		byte[] req = new byte[] { Command.CMD_MODBUS_GETREGS,
 				(byte) (reg >> 8), (byte) reg, 0, (byte) n };
-		byte[] resp = send(addr, req); 
+		byte[] resp = send(addr, req);
 
 		Integer[] res = new Integer[n];
 		for (int i = 0; i < resp[1] / 2; i++) {
@@ -57,23 +58,25 @@ public class Controller implements IController {
 		}
 		return res;
 	}
-	
+
 	@Override
 	public void close() {
 		if (modbusLine != null)
 			modbusLine.close();
 	}
 
-	public synchronized byte[] send(int addr, byte[] request) throws IOException {
-		if(uploading)
+	public synchronized byte[] send(int addr, byte[] request)
+			throws IOException {
+		if (uploading)
 			throw new IOException("UPLOADING");
 		return send1(addr, request, null);
 	}
-	
-	private synchronized byte[] send1(int addr, byte[] request, Integer timeout) throws IOException {
-		if(true)
+
+	private synchronized byte[] send1(int addr, byte[] request, Integer timeout)
+			throws IOException {
+		if (true)
 			return _send(addr, request, timeout);
-			
+
 		try {
 			for (byte b : request)
 				System.out.print(Integer.toHexString((int) b & 0xFF) + " ");
@@ -92,13 +95,14 @@ public class Controller implements IController {
 
 	}
 
-	private byte[] _send(int addr, byte[] request, Integer timeout) throws IOException {
+	private byte[] _send(int addr, byte[] request, Integer timeout)
+			throws IOException {
 		if (modbusLine == null)
 			throw new IOException("modbusLine not set");
 
 		byte[] response = modbusLine.handle(addr, request, timeout);
 
-		if (response[0] != request[0]) {
+		if (response != null && response[0] != request[0]) {
 			if ((response[0] & 0xFF) != (request[0] | 0x80)
 					|| response.length < 2)
 				throw new IOException("response PDU format error");
@@ -116,44 +120,49 @@ public class Controller implements IController {
 	}
 
 	private void s(int addr, byte[] bytes, Integer timeout) throws IOException {
-		byte[] resp = send1(addr, bytes, timeout);
-		for (byte b : resp)
-			System.out.print(b + " ");
+//		try {
+			byte[] resp = send1(addr, bytes, timeout);
+			for (byte b : resp)
+				System.out.print(b + " ");
+//		} catch (IOException e) {
+//			System.out.println(e.getMessage());
+//		}
 	}
 
 	private static final int BLOCK_SIZE = 256;
 
 	@Override
-	public synchronized void uploadApp(int addr, byte[] image) throws IOException {
+	public synchronized void uploadApp(int addr, byte[] image)
+			throws IOException {
 		System.out.println("uploading");
-		
+
 		uploading = true;
 		try {
 
-		Integer ver = hello(addr);
-		if (ver != null && ver > 0)
-			s(addr, new byte[] { Command.MODBUS_BOOTLOADER }, null);
+			Integer ver = hello(addr);
+			if (ver != null)
+				s(addr, new byte[] { Command.MODBUS_BOOTLOADER }, null);
 
-		s(addr, new byte[] { Command.MODBUS_ENABLE_APP, 0 }, null);
-		int a = 0;
-		while (a < image.length) {
-			int l = image.length - a;
-			if (l > BLOCK_SIZE)
-				l = BLOCK_SIZE;
+			s(addr, new byte[] { Command.MODBUS_ENABLE_APP, 0 }, null);
+			int a = 0;
+			while (a < image.length) {
+				int l = image.length - a;
+				if (l > BLOCK_SIZE)
+					l = BLOCK_SIZE;
 
-			byte[] bytes = new byte[l + 3];
-			bytes[0] = Command.MODBUS_UPLOAD_APP;
-			bytes[1] = (byte) (a >> 8);
-			bytes[2] = (byte) a;
-			System.arraycopy(image, a, bytes, 3, l);
+				byte[] bytes = new byte[l + 3];
+				bytes[0] = Command.MODBUS_UPLOAD_APP;
+				bytes[1] = (byte) (a >> 8);
+				bytes[2] = (byte) a;
+				System.arraycopy(image, a, bytes, 3, l);
 
-			System.out.print("u" + a + " ");
+				System.out.print("u" + a + " ");
 
-			s(addr, bytes, 800);
-			a += BLOCK_SIZE;
-		}
-		System.out.println("e");
-		s(addr, new byte[] { Command.MODBUS_ENABLE_APP, 1 }, null);
+				s(addr, bytes, 800);
+				a += BLOCK_SIZE;
+			}
+			System.out.println("e");
+			s(addr, new byte[] { Command.MODBUS_ENABLE_APP, 1 }, null);
 		} finally {
 			uploading = false;
 		}
