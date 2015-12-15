@@ -176,8 +176,8 @@ public abstract class ScheduleCanvas extends Composite {
 		return x * 10 * 60 / tenMinutesWidth;
 	}
 
-	private int sec2x(int sec) {
-		return sec * tenMinutesWidth / 10 / 60;
+	private double sec2x(int sec) {
+		return sec * tenMinutesWidth / 10f / 60;
 	}
 
 	private static int getRegY() {
@@ -241,7 +241,7 @@ public abstract class ScheduleCanvas extends Composite {
 
 			context.moveTo(0, getY(val));
 			for (ScheduleItem item : registerSchedule.items) {
-				int x = sec2x(item.minutes * 60);
+				double x = sec2x(item.minutes * 60);
 				double y = getY(val);
 				context.lineTo(x, y);
 				y = getY(item.value);
@@ -273,7 +273,7 @@ public abstract class ScheduleCanvas extends Composite {
 			Integer last = null;
 
 			for (HistoryItem logItem : logItems) {
-				int x = sec2x(logItem.seconds);
+				double x = sec2x(logItem.seconds);
 				Integer current = logItem.value;
 
 				if (logItem.name == null) {
@@ -294,23 +294,7 @@ public abstract class ScheduleCanvas extends Composite {
 							context.lineTo(x, getY(last));
 					}
 				}
-
-//				if (logItem.name == null || regName.equals(logItem.name)) {
-//
-//					if (last == null && current != null) {
-//						context.moveTo(x, getY(current));
-//					} else if (last != null && current != null) {
-//						context.lineTo(x, getY(last));
-//						context.lineTo(x, getY(current));
-//					} else if (last != null && current == null) {
-//						// context.lineTo(x, getY(last));
-//					}
-//
-//					drawLogItem(logItem.seconds, logItem, lastValue);
-//					lastValue = logItem;
-//				}
 			}
-//			drawLogItem(historyEndSeconds, lastValue, lastValue);
 
 			context.stroke();
 			context.closePath();

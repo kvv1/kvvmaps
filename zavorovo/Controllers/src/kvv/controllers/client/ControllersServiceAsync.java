@@ -1,15 +1,12 @@
 package kvv.controllers.client;
 
 import java.util.HashMap;
-import java.util.List;
 
 import kvv.controller.register.Statistics;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ControllersServiceAsync {
-
-	void getReg(int addr, int reg, AsyncCallback<Integer> callback);
 
 	void setReg(int addr, int reg, int val, AsyncCallback<Void> callback);
 

@@ -45,17 +45,7 @@ public class ControllerWrapperCached extends ControllerAdapter {
 					ControllerDescr controllerDescr = controllersList.remove(0);
 					if (!controllerDescr.enabled)
 						continue;
-					try {
-						int[] regRange = getRegsRange(controllerDescr);
-						if (regRange != null) {
-							Integer[] vals = wrapped.getRegs(
-									controllerDescr.addr, regRange[0],
-									regRange[1]);
-							cache.put(controllerDescr.addr, regRange[0], vals);
-						}
-					} catch (IOException e) {
-						cache.remove(controllerDescr.addr);
-					}
+					updateCache(controllerDescr);
 					break;
 				}
 
@@ -66,6 +56,19 @@ public class ControllerWrapperCached extends ControllerAdapter {
 		}
 
 	};
+
+	private void updateCache(ControllerDescr cd) {
+		try {
+			int[] regRange = getRegsRange(cd);
+			if (regRange != null) {
+				Integer[] vals = wrapped.getRegs(cd.addr, regRange[0],
+						regRange[1]);
+				cache.put(cd.addr, regRange[0], vals);
+			}
+		} catch (IOException e) {
+			cache.remove(cd.addr);
+		}
+	}
 
 	public ControllerWrapperCached(SystemDescr system, IController controller) {
 		super(system, controller);
@@ -130,6 +133,12 @@ public class ControllerWrapperCached extends ControllerAdapter {
 	}
 
 	public HashMap<Integer, Integer> getCachedRegs(int addr) {
+		ControllerDescr cd = system.getController(addr);
+		if (cd == null)
+			return null;
+		if(!cd.enabled)
+			return null;
+		updateCache(cd);
 		return cache.get(addr);
 	}
 

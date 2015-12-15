@@ -26,14 +26,6 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public int getReg(int addr, int reg) throws Exception {
-		Integer res = Context.getInstance().controller.getReg(addr, reg);
-		if (res == null)
-			throw new Exception("Значение вне диапазона");
-		return res;
-	}
-
-	@Override
 	public void setReg(int addr, int reg, int val) throws Exception {
 		try {
 			Context.getInstance().controller.setReg(addr, reg, val);
