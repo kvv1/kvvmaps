@@ -12,7 +12,6 @@ import java.util.Set;
 
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
-import kvv.aplayer.RemoteControlReceiver;
 import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.player.Player1;
 import android.content.BroadcastReceiver;
@@ -42,6 +41,8 @@ public class APService extends BaseService implements IAPService {
 
 	public static final float[] dBPer100kmh = { 0, 5f };
 	public static final int[] compr = { 0, 15 };
+
+	public static APService staticInstance;
 
 	private Set<APServiceListener> listeners = new HashSet<APServiceListener>();
 
@@ -96,6 +97,7 @@ public class APService extends BaseService implements IAPService {
 		}
 	};
 
+
 	public APService() {
 		super(R.drawable.ap, R.drawable.ap, APActivity.class,
 				R.string.app_name, R.string.app_name, false, false);
@@ -138,6 +140,8 @@ public class APService extends BaseService implements IAPService {
 				RemoteControlReceiver.class.getName()));
 
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		
+		staticInstance = this;
 	}
 
 	private void createPlayer() {
@@ -205,6 +209,7 @@ public class APService extends BaseService implements IAPService {
 
 	@Override
 	public void onDestroy() {
+		staticInstance = null;
 		unregisterReceiver(broadcastReceiver);
 		player.close();
 		telephonyManager.listen(phoneStateListener,

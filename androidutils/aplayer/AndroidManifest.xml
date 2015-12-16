@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="kvv.aplayer"
-    android:versionCode="10"
-    android:versionName="1.10" >
+    android:versionCode="12"
+    android:versionName="2.03" >
 
     <uses-sdk android:minSdkVersion="10" />
 
@@ -15,7 +15,8 @@
     <uses-permission android:name="android.permission.STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.PERSISTENT_ACTIVITY" />
-
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    
     <application
         android:allowBackup="false"
         android:icon="@drawable/ap"
@@ -38,7 +39,7 @@
             android:label="@string/title_activity_preferences" >
         </activity>
 
-        <receiver android:name=".RemoteControlReceiver" >
+        <receiver android:name="kvv.aplayer.service.RemoteControlReceiver" >
             <intent-filter android:priority="1000" >
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
                 <action android:name="android.media.VOLUME_CHANGED_ACTION" />
