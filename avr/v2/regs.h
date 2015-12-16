@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 
-#include "ee.h"
 
 #define REG_RELAY0 0
 #define REG_RELAY1 1
@@ -15,12 +14,16 @@
 #define REG_PWM3 7
 #define REG_RELAY_CNT 4
 
+#define REG_TIME_CORR_EN 8
 #define REG_TEMP 9
 #define REG_ADC_CONF 10
 #define REG_RESET_BY_WD 11
 #define REG_WD_ON_RECEIVE 12
 
-#define REG_INPUTS 15
+#define REG_TIME_CORR 13
+
+#define REG_TIME_HI 14
+#define REG_TIME_LO 15
 
 #define REG_ADC0 16
 #define REG_ADC1 17
@@ -62,14 +65,10 @@
 #define REG_RULES 258
 #define REG_RULES_CNT 128
 
-//void initCommands();
-
 char getReg(uint16_t reg, int* val);
 char setReg(uint16_t reg, int val);
 
-ee_8_decl(resetByWd);
-ee_8_decl(wdOnReceive);
-ee_8_decl(adcconf);
+
 
 
 #endif /* REGS_H_ */

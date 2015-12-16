@@ -5,42 +5,35 @@
 #include <stdint.h>
 #include <avr/eeprom.h>
 
+#include "regs.h"
+
 #define MAGIC16 0xE6C9
 
 extern volatile uint16_t ee_magic;
 
-void EEPROM_write(uint16_t dest, uint8_t ucData);
-uint8_t EEPROM_read(uint16_t src);
-uint16_t EEPROM_readWord(uint16_t src);
-void EEPROM_readBlock(uint16_t src, int sz, uint8_t* dest);
-void EEPROM_writeWord(uint16_t dest, uint16_t ucData);
-void EEPROM_writeBlock(uint16_t dest, int sz, uint8_t* src);
+void EEPROM_writeByte(void* dest, uint8_t ucData);
+uint8_t EEPROM_readByte(void* src);
+uint16_t EEPROM_readWord(void* src);
+void EEPROM_writeWord(void* dest, uint16_t ucData);
 
-typedef {
-
+#define RULES_LEN 256
+typedef struct {
+	uint8_t resetByWd;
+	uint8_t wdOnReceive;
+	uint8_t adcconf;
+	uint8_t respDelay;
+	uint16_t _foo2;
+	uint16_t _foo3;
+	uint16_t _foo4;
+	uint16_t _foo5;
+	uint16_t _foo6;
+	uint16_t _foo7;
+	int16_t eepromRegisters[REG_EEPROM_CNT];
+	uint16_t pwm[REG_RELAY_CNT];
+	char rules[RULES_LEN];
+	uint8_t timeCorrEn;
 } EEData;
 
 extern EEMEM EEData eeData;
-
-#define ee_8_decl(name) uint8_t get##name(); void set##name(uint8_t t)
-#define ee_16_decl(name) uint16_t get##name(); void set##name(uint16_t t)
-
-#define ee_8(name)\
-static EEMEM uint8_t ee_##name;\
-uint8_t get##name() {\
-	return EEPROM_read((uint16_t)&ee_##name);\
-}\
-void set##name(uint8_t t) {\
-	EEPROM_write((uint16_t)&ee_##name, t);\
-}
-
-#define ee_16(name)\
-static EEMEM uint16_t ee_##name;\
-uint16_t get##name() {\
-	return EEPROM_readWord((uint16_t)&ee_##name);\
-}\
-void set##name(uint16_t t) {\
-	EEPROM_writeWord((uint16_t)&ee_##name, t);\
-}
 
 #endif /* EE_H_ */

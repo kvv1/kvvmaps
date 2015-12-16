@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+extern volatile char outputDisabled;
+
+
 uint16_t sendByte(uint8_t b, uint16_t S);
 uint16_t sendWord(uint16_t w, uint16_t S);
 uint16_t sendPacketStart();

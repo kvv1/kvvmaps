@@ -10,7 +10,6 @@ static PORTPIN ports[REG_RELAY_CNT] PROGMEM = { OUT0, OUT1, OUT2, OUT3};
 #define PORT(n) ((PORTPIN)pgm_read_word(ports + (n)))
 #define PIN(n) ((PORTPIN)pgm_read_word(pins + (n)))
 
-static EEMEM uint16_t pwm[REG_RELAY_CNT];
 static uint8_t outState;
 static uint16_t outCnt[REG_RELAY_CNT];
 
@@ -23,11 +22,11 @@ void initPWM() {
 }
 
 void setPWM(uint8_t port, uint16_t value) {
-	EEPROM_writeWord((uint16_t) (pwm + port), value);
+	EEPROM_writeWord(eeData.pwm + port, value);
 }
 
 uint16_t getPWM(uint8_t port) {
-	return EEPROM_readWord((uint16_t) (pwm + port));
+	return EEPROM_readWord(eeData.pwm + port);
 }
 
 void setOutput(uint8_t port, uint8_t state) {

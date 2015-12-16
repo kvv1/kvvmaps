@@ -3,9 +3,11 @@
 
 #include "packet.h"
 
+volatile char outputDisabled;
 
 uint16_t sendByte(uint8_t b, uint16_t S) {
-	uartPutchar(b);
+	if (!outputDisabled)
+		uartPutchar(b);
 	return bl_crc16_step(b, S);
 }
 
@@ -26,6 +28,8 @@ uint16_t sendPacketBodyPart(void* data, uint16_t len, uint16_t S) {
 }
 
 void sendPacketEnd(uint16_t S) {
+	if (outputDisabled)
+		return;
 	uartPutchar(S);
 	uartPutchar(S >> 8);
 }
@@ -49,5 +53,4 @@ void sendError(uint8_t cmd, uint8_t err) {
 	S = sendByte(err, S);
 	sendPacketEnd(S);
 }
-
 

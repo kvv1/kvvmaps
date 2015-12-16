@@ -33,4 +33,9 @@ void timer0Init();
 
 int8_t checkHW();
 
+void setTime(uint32_t ms);
+uint32_t getTime();
+
+int getCorr1();
+
 #endif /* HW_H_ */

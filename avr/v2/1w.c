@@ -190,19 +190,11 @@ static DS1820STATE states[5];
 
 int w1_temp(uint8_t n) {
 	int t = states[n].temperature;
-	if (t < -50 || t > 120 || t == 85)
+	if (t < -50 || t > 120 /*|| t == 85*/)
 		t = TEMPERATURE_INVALID;
 	return t;
 }
 
-//uint8_t w1_tempX(uint8_t n, int* res) {
-//	int t = states[n].temperature;
-//	if (t < -50 || t > 120 || t == 85 || t == TEMPERATURE_INVALID)
-//		return 0;
-//	*res = t;
-//	return 1;
-//}
-//
 void w1Init() {
 	uint8_t i;
 	for (i = 0; i < sizeof(states) / sizeof(states[0]); i++)
@@ -256,11 +248,29 @@ void ds18b20_step(uint8_t n, int ms) {
 	case 7:
 		state->buffer[state->idx++] = oneWireReadByte(n);
 		if (state->idx == 9) {
-			if (checkCRC8(state->buffer, 9))
-				state->temperature =
-						((state->buffer[1] << 8) + state->buffer[0]) >> 4;
-			else
+			if (checkCRC8(state->buffer, 9)) {
+//				state->temperature =
+//										((state->buffer[1] << 8) + state->buffer[0]) >> 4;
+
+
+				int t = ((state->buffer[1] << 8) + state->buffer[0]) >> 3;
+				int t0 = state->temperature << 1;
+
+				if (t - t0 >= 2)
+					t = t >> 1;
+				else if (t - t0 <= -2)
+					t = (t + 1) >> 1;
+				else
+					t = state->temperature;
+
+				if (t == 85
+						&& (state->temperature < 84 || state->temperature > 86))
+					state->temperature = TEMPERATURE_INVALID;
+				else
+					state->temperature = t;
+			} else {
 				state->temperature = TEMPERATURE_INVALID;
+			}
 			state->state = 0;
 		}
 		break;

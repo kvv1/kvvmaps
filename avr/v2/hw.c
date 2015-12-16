@@ -1,10 +1,12 @@
 #include <avr/io.h>
 #include <util/atomic.h>
+#include <stdlib.h>
 #include "hw.h"
 #include "io.h"
 #include "board.h"
 //#include "pin.h"
 #include "stepper.h"
+#include "ee.h"
 
 #if(F_CPU == 1000000)
 #define PRESCALER 3
@@ -184,9 +186,118 @@ char getClearTimerTicks() {
 
 #include "pin.h"
 
+#define MS_IN_DAY (24L * 60 * 60 * 1000)
+#define MS_IN_HOUR (60L * 60 * 1000)
+//#define MS_IN_HOUR (30L * 1000)
+#define MS_IN_MINUTE (60U * 1000)
+#define MS_IN_SECOND 1000
+
+static int correction;
+
+int corr2;
+int corr1;
+int corrAcc;
+int8_t timeInc;
+
+static int16_t tickCnt;
+
+static volatile uint32_t time;
+
+static int32_t dist(int32_t ms1, int32_t ms2) {
+	int32_t d = ms1 - ms2;
+
+	if (d >= 0) {
+		if (d < MS_IN_DAY / 2)
+			return d;
+		else
+			return d - MS_IN_DAY;
+	} else {
+		if (d >= -MS_IN_DAY / 2)
+			return d;
+		else
+			return MS_IN_DAY + d;
+	}
+}
+
+void setTime(uint32_t ms) {
+	static int16_t lastMS;
+
+	return;
+
+	if (!EEPROM_readByte(&eeData.timeCorrEn))
+		return;
+
+	cli();
+	int32_t t = time;
+	sei();
+
+	int32_t dt = dist(ms, t);
+
+	int ms16 = (int16_t) ms;
+
+	cli();
+	int16_t _tickCnt = tickCnt;
+	sei();
+
+	int dms = ms16 - lastMS;
+
+	if (_tickCnt < MS_IN_SECOND * 10 && dms > 0
+			&& abs(dt) < MS_IN_SECOND * 10) {
+		int _corr1 = dms - _tickCnt;
+		cli();
+		corr2 = _tickCnt;
+		if (_corr1 >= 0) {
+			corr1 = _corr1;
+			timeInc = 1;
+		} else {
+			corr1 = -_corr1;
+			timeInc = -1;
+		}
+		correction = ms16 - (int16_t) time;
+		sei();
+	} else {
+		cli();
+		time = ms;
+		sei();
+	}
+
+	lastMS = ms16;
+	cli();
+	tickCnt = 0;
+	sei();
+}
+
 ISR(TIMER0_OVF_vect) {
-	static char n = TIME_UNIT / TIMER_PERIOD;
 	TCNT0 = 255 - MODULO;
+
+	if (0) {
+
+		if (tickCnt < MS_IN_SECOND * 10)
+			tickCnt++;
+
+		int8_t _timeInc = 1;
+
+		corrAcc -= corr1;
+		if (corrAcc < 0) {
+			corrAcc += corr2;
+			_timeInc += timeInc;
+		} else {
+			if (correction > 0) {
+				_timeInc++;
+				correction--;
+			} else if (correction < 0) {
+				_timeInc--;
+				correction++;
+			}
+		}
+
+		time += _timeInc;
+
+		if (time >= MS_IN_DAY)
+			time -= MS_IN_DAY;
+	}
+
+	static char n = TIME_UNIT / TIMER_PERIOD;
 
 	setDDR(PIN_STEPPER_0_HOME, 1);
 	setPort(PIN_STEPPER_0_HOME, 1);
@@ -200,6 +311,22 @@ ISR(TIMER0_OVF_vect) {
 
 	ioMillis_cli();
 	setPort(PIN_STEPPER_0_HOME, 0);
+}
+
+int getCorr1() {
+	int t;
+	cli();
+	t = corr1 * timeInc;
+	sei();
+	return t;
+}
+
+uint32_t getTime() {
+	uint32_t t;
+	cli();
+	t = time;
+	sei();
+	return t;
 }
 
 void timer0Init() {

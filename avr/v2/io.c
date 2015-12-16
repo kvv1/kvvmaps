@@ -19,11 +19,11 @@
 #define DATA_REGISTER_EMPTY (1<<UDRE)
 #define RX_COMPLETE (1<<RXC)
 
-#define RXBUFSIZE 64
+#define RXBUFSIZE 256
 #define TX_BUFFER_SIZE 64
 
 static uint8_t rxBuf[RXBUFSIZE];
-static volatile uint8_t rxIdx;
+static volatile uint16_t rxIdx;
 static volatile uint8_t rxBufReady;
 
 static char receiveTimer;
@@ -60,14 +60,13 @@ ISR (USART_RXC_vect) {
 	if (!rxBufReady
 			&& (status & (FRAMING_ERROR | PARITY_ERROR | DATA_OVERRUN)) == 0) {
 		rxBuf[rxIdx] = data;
-		if (rxIdx < RXBUFSIZE - 1)
+		if (rxIdx < RXBUFSIZE -1)
 			rxIdx++;
 		receiveTimer = 3;
 	}
 }
 
 static uint8_t volatile tx_buffer[TX_BUFFER_SIZE];
-
 static uint8_t volatile tx_wr_index, tx_rd_index, tx_counter;
 
 int8_t transmitting() {

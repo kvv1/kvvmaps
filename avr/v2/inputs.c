@@ -15,16 +15,6 @@ void setPullup(uint8_t n, uint8_t b) {
 	setPort(PIN(n), b);
 }
 
-int getInputs() {
-	char resp = 0;
-	uint8_t n = REG_IN_CNT;
-	while (n--) {
-		resp <<= 1;
-		resp |= getInput(n);
-	}
-	return resp;
-}
-
 void inputsInit() {
 	uint8_t n = REG_IN_CNT;
 	while (n--) {

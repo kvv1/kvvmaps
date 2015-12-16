@@ -24,6 +24,7 @@ typedef struct {
 } GetRegCmd;
 
 uint8_t handleStdCmd(PDU* pdu, uint8_t cmdlen) {
+
 	uint8_t command = pdu->func;
 	switch (command) {
 	case CMD_MODBUS_SETREGS: {
@@ -37,7 +38,6 @@ uint8_t handleStdCmd(PDU* pdu, uint8_t cmdlen) {
 			for(int i = 0; i < n; i++) {
 				setRules1Word(i, BSWAP_16(data[i]));
 			}
-//			setRules1(data, n);
 		} else {
 			while (n--) {
 				res &= setReg(reg++, BSWAP_16(*data));

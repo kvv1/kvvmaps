@@ -4,25 +4,21 @@
 #include "bl.h"
 #include "regs.h"
 
-static EEMEM char rules[RULES_LEN];
-
-//#define get(off) EEPROM_read((uint16_t) (rules + (off)))
-
 static __attribute__ ((noinline)) uint8_t get(uint8_t off) {
-	return EEPROM_read((uint16_t) (rules + off));
+	return EEPROM_readByte(eeData.rules + off);
 }
 
 static __attribute__ ((noinline)) uint16_t get16(uint8_t off) {
-	return EEPROM_readWord((uint16_t) (rules + off));
+	return EEPROM_readWord(eeData.rules + off);
 }
 
-#define set(off, b) EEPROM_write((uint16_t) (rules + (off)), b)
-#define set16(off, w) EEPROM_writeWord((uint16_t) (rules + (off)), w)
+#define set(off, b) EEPROM_write(eeData.rules + (off), b)
+#define set16(off, w) EEPROM_writeWord(eeData.rules + (off), w)
 
-#define getCRC() EEPROM_readWord((uint16_t)(rules + RULES_LEN - 2))
-#define setCRC(crc) EEPROM_writeWord((uint16_t)(rules + RULES_LEN - 2), crc)
+#define getCRC() EEPROM_readWord(eeData.rules + RULES_LEN - 2)
+#define setCRC(crc) EEPROM_writeWord(eeData.rules + RULES_LEN - 2, crc)
 
-#define STACK_SIZE 10
+#define STACK_SIZE 20
 static int stack[STACK_SIZE];
 static int* sp;
 static int err;
@@ -45,7 +41,7 @@ static void push1(int n) {
 	*(--sp) = n;
 }
 
-static char pop1() {
+static int pop1() {
 	if (err != ERR_OK)
 		return 1;
 	if (sp >= stack + STACK_SIZE) {
@@ -298,11 +294,6 @@ int8_t rules1Step() {
 	return 1;
 }
 
-void setRules1(int16_t* data, int n) {
-	for (int a = 0; a < n; a++)
-		set16(a * 2, data[a]);
-}
-
 int getRules1Size() {
 	return getSize();
 }
@@ -316,6 +307,6 @@ int getRules1Word(int a) {
 }
 
 int getRulesState() {
-	getSize();
+	//getSize();
 	return err;
 }
