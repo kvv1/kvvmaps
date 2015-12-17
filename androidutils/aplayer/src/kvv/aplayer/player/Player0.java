@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import kvv.aplayer.service.File1;
+import kvv.aplayer.service.FileDescriptor;
 import kvv.aplayer.service.Folder;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -18,7 +18,7 @@ public abstract class Player0 extends Player {
 
 	public Player0(final List<Folder> folders) {
 		this.folders = folders;
-		folders.add(new Folder("RANDOM", 0, new File1[0]));
+		folders.add(new Folder("RANDOM", 0, new FileDescriptor[0]));
 
 		setOnCompletionListener(new OnCompletionListener() {
 			@Override
@@ -61,7 +61,7 @@ public abstract class Player0 extends Player {
 
 		Folder folder = folders.get(folderIdx);
 
-		List<File1> files = new ArrayList<File1>();
+		List<FileDescriptor> files = new ArrayList<FileDescriptor>();
 		files.addAll(Arrays.asList(folder.files));
 		for (int i = folderIdx + 1; i < folders.size(); i++) {
 			Folder f = folders.get(i);
@@ -74,7 +74,7 @@ public abstract class Player0 extends Player {
 
 		Folder randFolder = folders.get(folders.size() - 1);
 
-		randFolder.files = files.toArray(new File1[0]);
+		randFolder.files = files.toArray(new FileDescriptor[0]);
 		randFolder.displayName = folder.displayName + " RND";
 
 		onChanged(OnChangedHint.FOLDER);

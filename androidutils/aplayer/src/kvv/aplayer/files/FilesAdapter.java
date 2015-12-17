@@ -1,7 +1,7 @@
 package kvv.aplayer.files;
 
 import kvv.aplayer.R;
-import kvv.aplayer.service.File1;
+import kvv.aplayer.service.FileDescriptor;
 import kvv.aplayer.service.IAPService;
 import android.app.Activity;
 import android.view.LayoutInflater;
@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class FilesAdapter extends ArrayAdapter<File1> {
+public class FilesAdapter extends ArrayAdapter<FileDescriptor> {
 
 	private Activity activity;
 	private IAPService service;

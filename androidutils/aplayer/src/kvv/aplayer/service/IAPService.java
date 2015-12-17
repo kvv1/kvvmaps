@@ -10,7 +10,7 @@ public interface IAPService {
 	int getCurrentFolder();
 	int getFile();
 	int getFileCnt();
-	File1[] getFiles();
+	FileDescriptor[] getFiles();
 	void toFolder(int position);
 	void toFile(int position);
 	void prev();

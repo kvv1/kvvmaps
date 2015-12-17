@@ -7,9 +7,9 @@ public class Folder {
 	public final int indent;
 	public String displayName;
 	
-	public File1[] files;
+	public FileDescriptor[] files;
 
-	public Folder(String pathName, int indent, File1[] files) {
+	public Folder(String pathName, int indent, FileDescriptor[] files) {
 		this.path = pathName;
 		this.indent = indent;
 		this.files = files;

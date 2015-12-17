@@ -382,10 +382,10 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	@Override
-	public File1[] getFiles() {
+	public FileDescriptor[] getFiles() {
 		int folder = getCurrentFolder();
 		if (folder < 0)
-			return new File1[0];
+			return new FileDescriptor[0];
 		return getFolders().get(folder).files;
 	}
 
@@ -555,7 +555,7 @@ public class APService extends BaseService implements IAPService {
 
 		System.out.println("total no of songs are=" + mCursor.getCount());
 
-		Map<String, List<File1>> map = new HashMap<String, List<File1>>();
+		Map<String, List<FileDescriptor>> map = new HashMap<String, List<FileDescriptor>>();
 
 		while (mCursor.moveToNext()) {
 			String title = mCursor
@@ -572,13 +572,13 @@ public class APService extends BaseService implements IAPService {
 				if (p.charAt(i) == '/') {
 					String fold = p.substring(0, i);
 					if (!map.containsKey(fold))
-						map.put(fold, new ArrayList<File1>());
+						map.put(fold, new ArrayList<FileDescriptor>());
 				}
 
 			String folder = p.substring(0, p.lastIndexOf('/'));
 
-			List<File1> files = map.get(folder);
-			files.add(new File1(path, title, dur));
+			List<FileDescriptor> files = map.get(folder);
+			files.add(new FileDescriptor(path, title, dur));
 		}
 		mCursor.close();
 		System.out.println();
@@ -605,10 +605,10 @@ public class APService extends BaseService implements IAPService {
 				if (folder.charAt(i) == '/')
 					ind++;
 
-			List<File1> files = map.get(folder);
+			List<FileDescriptor> files = map.get(folder);
 			Collections.sort(files);
 
-			folders.add(new Folder(folder, ind, files.toArray(new File1[0])));
+			folders.add(new Folder(folder, ind, files.toArray(new FileDescriptor[0])));
 		}
 
 		return folders;

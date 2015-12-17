@@ -7,7 +7,7 @@ import kvv.aplayer.files.tape.TapePanel;
 import kvv.aplayer.files.tape.TapeView;
 import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APServiceListener;
-import kvv.aplayer.service.File1;
+import kvv.aplayer.service.FileDescriptor;
 import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
 import android.view.MotionEvent;
@@ -356,12 +356,12 @@ public class FilesSectionFragmentList extends FilesSectionFragment implements
 		folderTextView.setText(conn.service.getFolders().get(
 				conn.service.getCurrentFolder()).displayName);
 
-		File1[] files = conn.service.getFiles();
+		FileDescriptor[] files = conn.service.getFiles();
 
 		folderMax = 0;
 		folderFilesStartPos = new long[files.length];
 		for (int i = 0; i < files.length; i++) {
-			File1 file = files[i];
+			FileDescriptor file = files[i];
 			folderFilesStartPos[i] = folderMax;
 			folderMax += file.duration;
 		}
@@ -374,7 +374,7 @@ public class FilesSectionFragmentList extends FilesSectionFragment implements
 		list.invalidateViews();
 		list.setSelection(conn.service.getFile() - 2);
 		int file = conn.service.getFile();
-		File1[] files = conn.service.getFiles();
+		FileDescriptor[] files = conn.service.getFiles();
 		if (files.length > 0)
 			progressText.setText(files[file].name);
 	}
@@ -392,7 +392,7 @@ public class FilesSectionFragmentList extends FilesSectionFragment implements
 					+ Utils.convertSecondsToHMmSs(dur / 1000) + ")");
 
 			int file = conn.service.getFile();
-			File1[] files = conn.service.getFiles();
+			FileDescriptor[] files = conn.service.getFiles();
 			if (files.length > 0 && folderFilesStartPos != null
 					&& folderFilesStartPos.length > file) {
 				int max = (int) (folderMax / 1000);
