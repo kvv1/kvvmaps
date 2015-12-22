@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Iterator;
 
 public class Looper {
-
 	static class Task implements Comparable<Task> {
 		final Runnable runnable;
 		final long time;
