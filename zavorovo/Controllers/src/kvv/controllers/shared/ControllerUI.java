@@ -16,6 +16,6 @@ public class ControllerUI implements Serializable {
 	}
 
 	public enum ControlType {
-		CHECKBOX, TEXT_RO, TEXT_RO_TIME, TEXT_RW, TEXT2_RW, HP, VP, HELLO, UPLOAD, RULES, DETAILS, VM
+		CHECKBOX, TEXT_RO, TEXT_RO_TIME, TEXT_RW, TEXT2_RW, HP, VP, HELLO, UPLOAD, RULES, DETAILS, VM, RESET,
 	}
 }

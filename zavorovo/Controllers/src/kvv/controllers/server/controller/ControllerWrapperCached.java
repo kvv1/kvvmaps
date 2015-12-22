@@ -132,13 +132,15 @@ public class ControllerWrapperCached extends ControllerAdapter {
 		return controllerType.def.allRegs;
 	}
 
-	public HashMap<Integer, Integer> getCachedRegs(int addr) {
-		ControllerDescr cd = system.getController(addr);
-		if (cd == null)
-			return null;
-		if(!cd.enabled)
-			return null;
-		updateCache(cd);
+	public HashMap<Integer, Integer> getCachedRegs(int addr, boolean updateCache) {
+		if (updateCache) {
+			ControllerDescr cd = system.getController(addr);
+			if (cd == null)
+				return null;
+			if (!cd.enabled)
+				return null;
+			updateCache(cd);
+		}
 		return cache.get(addr);
 	}
 
@@ -150,10 +152,9 @@ public class ControllerWrapperCached extends ControllerAdapter {
 		}
 
 		public void logAll() {
-			for (int addr : map.keySet()) {
+			for (int addr : map.keySet())
 				for (int reg : map.get(addr).keySet())
 					log(addr, reg, map.get(addr).get(reg));
-			}
 		}
 
 		public void put(int addr, int reg, Integer[] vals) {

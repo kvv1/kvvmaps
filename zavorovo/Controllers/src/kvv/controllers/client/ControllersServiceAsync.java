@@ -17,4 +17,6 @@ public interface ControllersServiceAsync {
 	void getStatistics(boolean clear, AsyncCallback<Statistics> callback);
 
 	void getModbusLog(AsyncCallback<String> callback);
+
+	void reset(int addr, AsyncCallback<Void> asyncCallback);
 }

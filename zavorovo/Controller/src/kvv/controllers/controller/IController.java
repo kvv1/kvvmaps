@@ -21,6 +21,8 @@ public interface IController {
 	void uploadApp(int addr, byte[] image) throws IOException;
 
 	Integer hello(int addr) throws IOException;
+	
+	void reset(int addr) throws IOException;
 
 	void close();
 }

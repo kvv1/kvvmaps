@@ -46,4 +46,9 @@ public abstract class ControllerAdapter implements IController {
 	public Integer hello(int addr) throws IOException {
 		return wrapped.hello(addr);
 	}
+
+	public void reset(int addr) throws IOException {
+		wrapped.reset(addr);
+	}
+
 }

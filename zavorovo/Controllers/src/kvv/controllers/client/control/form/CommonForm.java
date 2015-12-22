@@ -139,6 +139,8 @@ public class CommonForm extends ControlComposite {
 			return helloButton;
 		case RULES:
 			return new Label("Здесь были правила");
+		case RESET:
+			return new ResetButton(addr);
 		case UPLOAD:
 			return new UploadForm("Загрузить") {
 				@Override

@@ -120,13 +120,13 @@ public class Controller implements IController {
 	}
 
 	private void s(int addr, byte[] bytes, Integer timeout) throws IOException {
-//		try {
-			byte[] resp = send1(addr, bytes, timeout);
-			for (byte b : resp)
-				System.out.print(b + " ");
-//		} catch (IOException e) {
-//			System.out.println(e.getMessage());
-//		}
+		// try {
+		byte[] resp = send1(addr, bytes, timeout);
+		for (byte b : resp)
+			System.out.print(b + " ");
+		// } catch (IOException e) {
+		// System.out.println(e.getMessage());
+		// }
 	}
 
 	private static final int BLOCK_SIZE = 256;
@@ -181,6 +181,11 @@ public class Controller implements IController {
 		if (this.modbusLine != null)
 			this.modbusLine.close();
 		this.modbusLine = modbusLine;
+	}
+
+	@Override
+	public void reset(int addr) throws IOException {
+		send1(addr, new byte[] { Command.MODBUS_BOOTLOADER }, null);
 	}
 
 }

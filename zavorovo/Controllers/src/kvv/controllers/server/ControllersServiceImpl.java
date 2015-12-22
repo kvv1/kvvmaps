@@ -37,7 +37,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public HashMap<Integer, Integer> getRegs(int addr) throws Exception {
 		HashMap<Integer, Integer> allRegs = Context.getInstance().controller
-				.getCachedRegs(addr);
+				.getCachedRegs(addr, false);
 		return allRegs;
 	}
 
@@ -65,6 +65,15 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 		for(String s : Context.getInstance().getModbusLog())
 			res += s + "\n";
 		return res;
+	}
+
+	@Override
+	public void reset(int addr) {
+		try {
+		Context.getInstance().controller.reset(addr);
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage());
+		}
 	}
 	
 }

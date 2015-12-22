@@ -19,4 +19,6 @@ public interface ControllersService extends RemoteService {
 
 	public String getModbusLog();
 
+	void reset(int addr);
+
 }

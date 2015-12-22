@@ -73,6 +73,7 @@ public class ADUTransceiver implements ModbusLine {
 				statistics.addSuccess(addr);
 				return adu1.pdu.toBytes();
 			} catch (IOException e) {
+				addLog(adu.toBytes(), null);
 				addLog(e.getClass().getSimpleName() + " " + e.getMessage());
 
 				try {

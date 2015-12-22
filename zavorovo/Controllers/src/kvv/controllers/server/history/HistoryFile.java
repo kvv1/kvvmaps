@@ -3,16 +3,12 @@ package kvv.controllers.server.history;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import kvv.controllers.server.Constants;
 import kvv.controllers.server.Logger;
@@ -84,75 +80,50 @@ public class HistoryFile {
 		}
 	}
 
-	private static PrintStream getLogStream(Date date) {
-		try {
-			PrintStream ps = new PrintStream(new FileOutputStream(
-					getLogFile(date), true), true, "Windows-1251");
-			return ps;
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
-	static class LogItem {
-		Date date;
-		String text;
-
-		public LogItem(Date date, String text) {
-			this.date = date;
-			this.text = text;
-		}
-	}
-
-	private static final BlockingQueue<LogItem> queue = new LinkedBlockingQueue<>();
-	public static volatile boolean stopped;
-	private static Thread thread = new Thread() {
-		{
-			setPriority(MIN_PRIORITY);
-			start();
-		}
-
+	private static Runnable aliveRunnable = new Runnable() {
+		@Override
 		public void run() {
-			Logger.out.println("HistoryFile started");
-			log(new Date(), null);
-			long ms = 0;
-			while (!stopped) {
-				try {
-					ms += 1000;
-					LogItem logItem = queue.poll(1000, TimeUnit.MILLISECONDS);
-					if (logItem != null) {
-						log(logItem.date, logItem.text);
-						ms = 0;
-					} else if (ms > 60000) {
-						Context.looper.post(new Runnable() {
-							@Override
-							public void run() {
-								logValue("_alive_", null);
-							}
-						});
-						ms = 0;
-					}
-				} catch (Exception e) {
-					e.printStackTrace(Logger.out);
-				}
+			try {
+				logFile.println("_alive_");
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			log(new Date(), null);
-			Logger.out.println("HistoryFile stopped");
-		}
-
-		private void log(Date date, String text) {
-			PrintStream ps = getLogStream(date);
-			ps.println(timeDF.format(date) + (text == null ? "" : " " + text));
-			ps.close();
+			Context.looper.post(this, 60000);
 		}
 	};
 
+	private static LogFile logFile = new LogFile(Constants.historyDir);
+	static {
+		try {
+			logFile.println(null);
+			Context.looper.post(aliveRunnable, 60000);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void stop() {
+		synchronized (logFile) {
+			try {
+				logFile.println(null);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			logFile.stop();
+		}
+	}
+
 	public static void logValue(String register, Integer value) {
-		Date date = new Date();
-		if (value == null)
-			queue.add(new LogItem(date, register));
-		else
-			queue.add(new LogItem(date, register + "=" + value));
+		try {
+			if (value == null)
+				logFile.println(register);
+			else
+				logFile.println(register + "=" + value);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Context.looper.remove(aliveRunnable);
+		Context.looper.post(aliveRunnable, 60000);
 	}
 
 }
