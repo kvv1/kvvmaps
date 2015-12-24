@@ -83,7 +83,6 @@ public class ControllerWrapperCached extends ControllerAdapter {
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
-		// HashMap<Integer, Integer> allRegs = cache.get(addr);
 		try {
 			wrapped.setReg(addr, reg, val);
 			cache.put(addr, reg, val);

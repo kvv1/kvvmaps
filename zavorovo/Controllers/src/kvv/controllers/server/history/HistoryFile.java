@@ -92,6 +92,8 @@ public class HistoryFile {
 		}
 	};
 
+	private static LogFile userActionsLogFile = new LogFile(Constants.userLogDir);
+
 	private static LogFile logFile = new LogFile(Constants.historyDir);
 	static {
 		try {
@@ -111,8 +113,23 @@ public class HistoryFile {
 			}
 			logFile.stop();
 		}
+		userActionsLogFile.stop();
 	}
 
+	public static void logUserAction(String user, String text) {
+		if(user == null)
+			user = "";
+		
+		while(user.length() < 16)
+			user += ' ';
+
+		try {
+			userActionsLogFile.println(user + " " + text);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void logValue(String register, Integer value) {
 		try {
 			if (value == null)

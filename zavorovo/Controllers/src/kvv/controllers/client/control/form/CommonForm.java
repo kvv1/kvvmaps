@@ -32,12 +32,12 @@ public class CommonForm extends ControlComposite {
 			.create(ControllersService.class);
 
 	private final int addr;
-//	private final String name;
+	// private final String name;
 	private final ControllerType controllerType;
 
 	public CommonForm(String type, int addr, String name) {
 		this.addr = addr;
-//		this.name = name;
+		// this.name = name;
 		controllerType = Controllers.systemDescr.controllerTypes.get(type);
 
 		if (controllerType != null)
@@ -100,12 +100,12 @@ public class CommonForm extends ControlComposite {
 			add(grc);
 			return grc;
 		case TEXT_RO_TIME:
-			GetRegControlTime grct = new GetRegControlTime(addr, ui.reg, ui.label);
+			GetRegControlTime grct = new GetRegControlTime(addr, ui.reg,
+					ui.label);
 			add(grct);
 			return grct;
 		case TEXT_RW:
-			GetSetRegControl gsrc = new GetSetRegControl(addr, ui.reg, false,
-					ui.label);
+			GetSetRegControl gsrc = new GetSetRegControl(addr, ui.reg, ui.label);
 			add(gsrc);
 			return gsrc;
 		case TEXT2_RW:

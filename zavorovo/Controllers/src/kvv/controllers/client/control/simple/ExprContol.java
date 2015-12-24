@@ -1,7 +1,5 @@
 package kvv.controllers.client.control.simple;
 
-import kvv.controllers.client.page.ModePage;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -36,9 +34,6 @@ public abstract class ExprContol extends Composite {
 
 		verticalPanel.add(errMsg);
 		verticalPanel.add(buttonsPanel);
-
-		if (!ModePage.controlMode)
-			expr.setReadOnly(true);
 
 		testButton.addClickHandler(new ClickHandler() {
 			@Override

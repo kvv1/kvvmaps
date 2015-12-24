@@ -1,13 +1,12 @@
 package kvv.controllers.server;
 
 import kvv.controllers.client.FileService;
+import kvv.controllers.server.history.HistoryFile;
+import kvv.gwtutils.server.login.LoginServlet;
 import kvv.stdutils.Utils;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
 @SuppressWarnings("serial")
-public class FileServiceImpl extends RemoteServiceServlet implements
-		FileService {
+public class FileServiceImpl extends LoginServlet implements FileService {
 
 	@Override
 	public String get(String path) throws Exception {
@@ -25,6 +24,8 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		if (path.contains(".."))
 			throw new Exception("wrong file path");
 		try {
+			HistoryFile.logUserAction(LoginServlet.getUserName(),
+					"Сохранение файла " + path);
 			Utils.writeFile(Constants.ROOT + path, text);
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());

@@ -185,13 +185,6 @@ public class Context {
 				resolveNames(ui2, def);
 	}
 
-	public static void save(ControllerDescr[] controllers, UnitDescr[] units)
-			throws IOException {
-		Utils.jsonWrite(Constants.controllersFile, controllers);
-		Utils.jsonWrite(Constants.unitsFile, units);
-		reload();
-	}
-
 	public List<String> getModbusLog() {
 		return modbusLine.getLog();
 	}

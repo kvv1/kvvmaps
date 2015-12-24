@@ -4,11 +4,12 @@ import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.AllRegs;
 import kvv.controllers.client.control.ChildComposite;
-import kvv.controllers.client.page.ModePage;
+import kvv.gwtutils.client.login.AuthException;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 
@@ -31,18 +32,15 @@ public class SimpleRelayControl extends ChildComposite {
 		cb.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				if (!enabled) {
-					cb.setValue(!cb.getValue());
-					return;
-				}
-
-				if (!ModePage.check()) {
-					cb.setValue(!((CheckBox) event.getSource()).getValue());
-					return;
-				}
 				final boolean checked = ((CheckBox) event.getSource())
 						.getValue();
+				cb.setValue(!checked);
+
+				if (!enabled)
+					return;
+
 				cb.setEnabled(false);
+
 				controllersService.setReg(addr, reg, checked ? 1 : 0,
 						new AsyncCallback<Void>() {
 							@Override
@@ -53,6 +51,10 @@ public class SimpleRelayControl extends ChildComposite {
 
 							@Override
 							public void onFailure(Throwable caught) {
+								if (caught instanceof AuthException) {
+									Window.alert(caught.getMessage());
+									cb.setEnabled(true);
+								}
 							}
 						});
 			}

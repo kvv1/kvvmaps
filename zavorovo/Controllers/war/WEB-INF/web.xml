@@ -67,10 +67,21 @@
 		<url-pattern>/controllers/upload</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>loginServlet</servlet-name>
+		<servlet-class>kvv.gwtutils.server.login.LoginServiceImpl</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>loginServlet</servlet-name>
+		<url-pattern>/controllers/login</url-pattern>
+	</servlet-mapping>
+
+
 	<listener>
 		<listener-class>
 			kvv.controllers.server.ContextListener
-    </listener-class>
+		</listener-class>
 	</listener>
 
 	<!-- Default page to serve -->

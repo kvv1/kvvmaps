@@ -16,11 +16,10 @@ import kvv.controllers.shared.History;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
 import kvv.controllers.shared.ScheduleAndHistory;
-
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import kvv.gwtutils.server.login.LoginServlet;
 
 @SuppressWarnings("serial")
-public class ScheduleServiceImpl extends RemoteServiceServlet implements
+public class ScheduleServiceImpl extends LoginServlet implements
 		ScheduleService {
 
 	@Override
@@ -32,12 +31,15 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public synchronized RegisterSchedule update(String regName,
-			RegisterSchedule registerSchedule) throws Exception {
+	public synchronized void saveSchedule(String regName,
+			RegisterSchedule registerSchedule, String comment) throws Exception {
+		checkUser();
 		try {
+			HistoryFile.logUserAction(LoginServlet.getUserName(),
+					"Сохранение расписания регистра " + regName + " ("
+							+ comment + ")");
 			Scheduler scheduler = Context.getInstance().scheduler;
 			scheduler.put(regName, registerSchedule);
-			return registerSchedule;
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		}
@@ -60,9 +62,6 @@ public class ScheduleServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public short eval(Integer addr, String expr) throws Exception {
 		try {
-			// ExprCalculator calculator = new ExprCalculator(addr, expr);
-			// List<Byte> bytes = calculator.parse().getBytes();
-			// return (short) calculator.eval(bytes);
 			return (short) new ExprCalculator(addr, expr).parse().getValue();
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());

@@ -7,7 +7,6 @@ import kvv.controllers.client.ScheduleServiceAsync;
 import kvv.controllers.client.control.AllRegs;
 import kvv.controllers.client.control.ChildComposite;
 import kvv.controllers.client.control.ControlComposite;
-import kvv.controllers.client.page.ModePage;
 import kvv.controllers.shared.HistoryItem;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterPresentation;
@@ -60,13 +59,8 @@ public class AutoRelayControl extends ControlComposite {
 		this.reg = reg;
 
 		scheduleCanvas = new ScheduleCanvas(presentation, mouseMoveHandler) {
-			public void save(final RegisterSchedule registerSchedule) {
-				scheduleService.update(reg.name, registerSchedule,
-						new CallbackAdapter<RegisterSchedule>() {
-							public void onSuccess(RegisterSchedule result) {
-								refreshButtons(result);
-							};
-						});
+			public void save(final RegisterSchedule registerSchedule, String comment) {
+				saveSched(registerSchedule, comment);
 			}
 		};
 
@@ -78,9 +72,11 @@ public class AutoRelayControl extends ControlComposite {
 		enableSchedule(true);
 
 		if (presentation.isBool()) {
-			relayControl = new SimpleRelayControl(reg.controllerAddr, reg.register, "");
+			relayControl = new SimpleRelayControl(reg.controllerAddr,
+					reg.register, "");
 		} else {
-			relayControl = new GetRegControl(reg.controllerAddr, reg.register, null);
+			relayControl = new GetRegControl(reg.controllerAddr, reg.register,
+					null);
 		}
 		add(relayControl);
 
@@ -92,14 +88,10 @@ public class AutoRelayControl extends ControlComposite {
 				if (registerSchedule == null)
 					return;
 
-				if (!ModePage.check()) {
-					autoCB.setValue(!autoCB.getValue());
-					return;
-				}
+				RegisterSchedule rs = new RegisterSchedule(registerSchedule);
 
-				registerSchedule.state = autoCB.getValue() ? State.SCHEDULE
-						: State.MANUAL;
-				saveSched(registerSchedule);
+				rs.state = autoCB.getValue() ? State.SCHEDULE : State.MANUAL;
+				saveSched(rs, "state := " + rs.state);
 			}
 		});
 
@@ -110,21 +102,17 @@ public class AutoRelayControl extends ControlComposite {
 				if (registerSchedule == null)
 					return;
 
-				if (!ModePage.check()) {
-					exprCB.setValue(!exprCB.getValue());
-					return;
-				}
+				RegisterSchedule rs = new RegisterSchedule(registerSchedule);
 
-				registerSchedule.state = exprCB.getValue() ? State.EXPRESSION
-						: State.MANUAL;
-				saveSched(registerSchedule);
+				rs.state = exprCB.getValue() ? State.EXPRESSION : State.MANUAL;
+				saveSched(rs, "state := " + rs.state);
 			}
 		});
 
 		exprButton = new ExprButton(reg) {
 			@Override
 			public void save(RegisterSchedule registerSchedule) {
-				saveSched(registerSchedule);
+				saveSched(registerSchedule, "выражения");
 			}
 		};
 
@@ -143,21 +131,27 @@ public class AutoRelayControl extends ControlComposite {
 		initWidget(framePanel);
 	}
 
-	private void saveSched(RegisterSchedule registerSchedule) {
-		if (!ModePage.check()) {
-			return;
-		}
-		scheduleService.update(reg.name, registerSchedule,
-				new CallbackAdapter<RegisterSchedule>() {
-					public void onSuccess(RegisterSchedule result) {
-						refreshButtons(result);
+	private void saveSched(final RegisterSchedule registerSchedule,
+			String comment) {
+		scheduleService.saveSchedule(reg.name, registerSchedule, comment,
+				new CallbackAdapter<Void>() {
+					public void onSuccess(Void result) {
+						AutoRelayControl.this.registerSchedule = registerSchedule;
+						refreshButtons();
+						scheduleCanvas
+								.refresh(AutoRelayControl.this.registerSchedule);
 					};
+
+					@Override
+					public void onFailure(Throwable caught) {
+						refreshButtons();
+						scheduleCanvas
+								.refresh(AutoRelayControl.this.registerSchedule);
+					}
 				});
 	}
 
-	private void refreshButtons(RegisterSchedule registerSchedule) {
-		this.registerSchedule = registerSchedule;
-
+	private void refreshButtons() {
 		if (registerSchedule != null && registerSchedule.items.size() != 0) {
 			autoCB.setEnabled(true);
 			autoCB.setValue(registerSchedule.state == State.SCHEDULE);
@@ -173,11 +167,11 @@ public class AutoRelayControl extends ControlComposite {
 	}
 
 	public void refreshSchedule(RegisterSchedule registerSchedule,
-			ArrayList<HistoryItem> logItems, int markerSeconds,
-			int historyEndSeconds) {
-		refreshButtons(registerSchedule);
-		scheduleCanvas.refresh(registerSchedule, logItems, markerSeconds,
-				historyEndSeconds);
+			ArrayList<HistoryItem> logItems, int markerSeconds) {
+
+		this.registerSchedule = registerSchedule;
+		refreshButtons();
+		scheduleCanvas.refresh(registerSchedule, logItems, markerSeconds);
 	}
 
 	public void enableSchedule(boolean value) {

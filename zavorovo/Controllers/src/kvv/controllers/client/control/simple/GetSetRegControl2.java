@@ -4,11 +4,12 @@ import kvv.controllers.client.ControllersService;
 import kvv.controllers.client.ControllersServiceAsync;
 import kvv.controllers.client.control.AllRegs;
 import kvv.controllers.client.control.ChildComposite;
-import kvv.controllers.client.page.ModePage;
+import kvv.gwtutils.client.login.AuthException;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -52,14 +53,12 @@ public class GetSetRegControl2 extends ChildComposite {
 		setButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				if (!ModePage.check())
-					return;
-
 				editHi.setEnabled(false);
 				editLo.setEnabled(false);
-				
+
 				try {
-					int val = Integer.valueOf(editHi.getText()) * 256 + Integer.valueOf(editLo.getText());
+					int val = Integer.valueOf(editHi.getText()) * 256
+							+ Integer.valueOf(editLo.getText());
 					controllersService.setReg(addr, reg, val,
 							new AsyncCallback<Void>() {
 								@Override
@@ -70,6 +69,8 @@ public class GetSetRegControl2 extends ChildComposite {
 
 								@Override
 								public void onFailure(Throwable caught) {
+									if (caught instanceof AuthException)
+										Window.alert(caught.getMessage());
 								}
 							});
 				} catch (NumberFormatException e) {

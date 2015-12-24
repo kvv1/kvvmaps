@@ -2,11 +2,12 @@ package kvv.controllers.client;
 
 import kvv.controllers.client.page.ConfigurationTabPage;
 import kvv.controllers.client.page.ControllersPage;
-import kvv.controllers.client.page.ModePage;
 import kvv.controllers.client.page.StatisticsPage;
 import kvv.controllers.client.page.UnitPage;
 import kvv.controllers.shared.SystemDescr;
 import kvv.controllers.shared.UnitDescr;
+import kvv.gwtutils.client.VertPanel;
+import kvv.gwtutils.client.login.LoginPanel;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -30,58 +31,27 @@ public class Controllers implements EntryPoint {
 		final TabPanel tabs = new TabPanel();
 		tabs.setHeight("200px");
 
-		root.add(tabs);
+		VertPanel vertPanel = new VertPanel(new LoginPanel(), tabs);
+		root.add(vertPanel);
 
 		configurationService.getSystemDescr(new AsyncCallback<SystemDescr>() {
 			@Override
 			public void onSuccess(SystemDescr result) {
 				systemDescr = result;
-				// Window.alert("x1");
-				try {
-					if (systemDescr.units != null)
-						for (UnitDescr page : systemDescr.units)
-							tabs.add(new UnitPage(page), page.name);
+				if (systemDescr.units != null)
+					for (UnitDescr page : systemDescr.units)
+						tabs.add(new UnitPage(page), page.name);
 
-					tabs.add(new ControllersPage(), "Контроллеры");
-					tabs.add(new ModePage(), "Режимы работы");
+				tabs.add(new ControllersPage(), "Контроллеры");
 
-					if (ModePage.controlMode) {
-						tabs.add(new StatisticsPage(), "Статистика");
-						// tabs.add(new ConfigurationPage(), "Конф.");
-						// tabs.add(new ConfigurationPageG(), "Конфигурация");
-						tabs.add(new ConfigurationTabPage(), "Конфигурация");
-						tabs.add(new LogTabPage(), "log");
-					}
-					// throw new Exception();
-				} catch (Exception e) {
-					e.printStackTrace();
-					tabs.add(new ModePage(), "Режимы работы");
-					if (ModePage.controlMode) {
-						// tabs.add(new ConfigurationPage(), "Конф.");
-						// tabs.add(new ConfigurationPageG(), "Конфигурация");
-						tabs.add(new ConfigurationTabPage(), "Конфигурация");
-					}
-					tabs.selectTab(0);
-					// Window.alert("zzz");
-					// String st = e.getClass().getName() + ": " +
-					// e.getMessage();
-					// for (StackTraceElement ste : e.getStackTrace())
-					// st += "\n" + ste.toString();
-					// Window.alert(st);
-				}
+				tabs.add(new StatisticsPage(), "Статистика");
+				tabs.add(new ConfigurationTabPage(), "Конфигурация");
+				tabs.add(new LogTabPage(), "log");
 				tabs.selectTab(0);
 			}
 
 			@Override
 			public void onFailure(Throwable caught) {
-				// Window.alert("x2");
-				tabs.add(new ModePage(), "Режимы работы");
-				if (ModePage.controlMode) {
-					// tabs.add(new ConfigurationPage(), "Конф.");
-					// tabs.add(new ConfigurationPageG(), "Конфигурация");
-					tabs.add(new ConfigurationTabPage(), "Конфигурация");
-				}
-				tabs.selectTab(0);
 			}
 		});
 

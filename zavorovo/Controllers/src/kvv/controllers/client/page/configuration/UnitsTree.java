@@ -3,7 +3,6 @@ package kvv.controllers.client.page.configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import kvv.controllers.client.page.ModePage;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.UnitDescr;
 import kvv.gwtutils.client.DetPanel;
@@ -14,15 +13,15 @@ public class UnitsTree
 		EditablePanel<DetPanel<UnitForm, EditablePanel<RegisterPresentationForm>>> {
 
 	public UnitsTree() {
-		super(!ModePage.controlMode, "Новая страница");
+		super(false, "Новая страница");
 	}
 
 	@Override
 	protected DetPanel<UnitForm, EditablePanel<RegisterPresentationForm>> createItem() {
 		DetPanel<UnitForm, EditablePanel<RegisterPresentationForm>> item = new DetPanel<UnitForm, EditablePanel<RegisterPresentationForm>>(
 				new UnitForm(null),
-				new EditablePanel<RegisterPresentationForm>(
-						!ModePage.controlMode, "Новый регистр") {
+				new EditablePanel<RegisterPresentationForm>(false,
+						"Новый регистр") {
 					@Override
 					protected RegisterPresentationForm createItem() {
 						return new RegisterPresentationForm(null);
@@ -34,7 +33,7 @@ public class UnitsTree
 	public void set(UnitDescr[] controllers) {
 		for (UnitDescr controllerDescr : controllers) {
 			EditablePanel<RegisterPresentationForm> registers = new EditablePanel<RegisterPresentationForm>(
-					!ModePage.controlMode, "Новый регистр") {
+					false, "Новый регистр") {
 				@Override
 				protected RegisterPresentationForm createItem() {
 					return new RegisterPresentationForm(null);

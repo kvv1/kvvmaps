@@ -3,7 +3,6 @@ package kvv.controllers.client.page.configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import kvv.controllers.client.page.ModePage;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.gwtutils.client.DetPanel;
@@ -13,28 +12,30 @@ public class ControllersTree extends
 		EditablePanel<DetPanel<ControllerForm, EditablePanel<RegisterForm>>> {
 
 	public ControllersTree() {
-		super(!ModePage.controlMode, "Новый контроллер");
+		super(false, "Новый контроллер");
 	}
 
 	@Override
 	protected DetPanel<ControllerForm, EditablePanel<RegisterForm>> createItem() {
-		
+
 		RegsForm regsForm = new RegsForm();
 		ControllerForm controllerForm = new ControllerForm(null, regsForm);
-		return new DetPanel<ControllerForm, EditablePanel<RegisterForm>>(controllerForm, regsForm);
+		return new DetPanel<ControllerForm, EditablePanel<RegisterForm>>(
+				controllerForm, regsForm);
 	}
 
 	public void set(ControllerDescr[] controllers) {
 		for (final ControllerDescr controllerDescr : controllers) {
 			RegsForm regsForm = new RegsForm();
 			regsForm.setControllerType(controllerDescr.type);
-			
+
 			for (RegisterDescr reg : controllerDescr.registers) {
 				regsForm.add(new RegisterForm(reg));
 			}
 
-			ControllerForm controllerForm = new ControllerForm(controllerDescr, regsForm);
-			
+			ControllerForm controllerForm = new ControllerForm(controllerDescr,
+					regsForm);
+
 			add(new DetPanel<ControllerForm, EditablePanel<RegisterForm>>(
 					controllerForm, regsForm));
 		}
@@ -53,15 +54,14 @@ public class ControllersTree extends
 	static class RegsForm extends EditablePanel<RegisterForm> {
 
 		public RegsForm() {
-			super(!ModePage.controlMode, "Новый регистр");
+			super(false, "Новый регистр");
 		}
 
-
 		private String type;
-		
+
 		public void setControllerType(String type) {
 			this.type = type;
-			for(RegisterForm rf : getItems())
+			for (RegisterForm rf : getItems())
 				rf.setControllerType(type);
 		}
 
@@ -71,14 +71,13 @@ public class ControllersTree extends
 			rf.setControllerType(type);
 			return rf;
 		}
-		
+
 		@Override
 		public void add(RegisterForm widget) {
 			super.add(widget);
 			widget.setControllerType(type);
 		}
-		
-}
-	
-	
+
+	}
+
 }

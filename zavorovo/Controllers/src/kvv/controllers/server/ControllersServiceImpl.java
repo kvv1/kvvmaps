@@ -10,11 +10,12 @@ import javax.servlet.http.HttpServletResponse;
 import kvv.controller.register.Statistics;
 import kvv.controllers.client.ControllersService;
 import kvv.controllers.server.context.Context;
-
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import kvv.controllers.server.history.HistoryFile;
+import kvv.controllers.shared.RegisterDescr;
+import kvv.gwtutils.server.login.LoginServlet;
 
 @SuppressWarnings("serial")
-public class ControllersServiceImpl extends RemoteServiceServlet implements
+public class ControllersServiceImpl extends LoginServlet implements
 		ControllersService {
 
 	@Override
@@ -27,7 +28,15 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws Exception {
+		checkUser();
 		try {
+			RegisterDescr rd = Context.getInstance().system.getRegister(addr,
+					reg);
+			String regName = rd == null ? ("addr " + addr + " reg " + reg)
+					: rd.name;
+			HistoryFile.logUserAction(LoginServlet.getUserName(), regName
+					+ " := " + val);
+
 			Context.getInstance().controller.setReg(addr, reg, val);
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
@@ -62,7 +71,7 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public String getModbusLog() {
 		String res = "";
-		for(String s : Context.getInstance().getModbusLog())
+		for (String s : Context.getInstance().getModbusLog())
 			res += s + "\n";
 		return res;
 	}
@@ -70,10 +79,12 @@ public class ControllersServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public void reset(int addr) {
 		try {
-		Context.getInstance().controller.reset(addr);
+			HistoryFile.logUserAction(LoginServlet.getUserName(),
+					"Ресет контроллера addr=" + addr);
+			Context.getInstance().controller.reset(addr);
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
-	
+
 }

@@ -8,8 +8,8 @@ import kvv.controllers.shared.ScheduleAndHistory;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ScheduleServiceAsync {
-	void update(String regName, RegisterSchedule registerSchedule,
-			AsyncCallback<RegisterSchedule> callback);
+	void saveSchedule(String regName, RegisterSchedule registerSchedule,
+			String comment, AsyncCallback<Void> callback);
 
 	void getScheduleAndHistory(Date date,
 			AsyncCallback<ScheduleAndHistory> callback);

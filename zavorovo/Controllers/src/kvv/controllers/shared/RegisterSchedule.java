@@ -15,6 +15,15 @@ public class RegisterSchedule implements Serializable {
 	public ArrayList<Expr> expressions = new ArrayList<>();
 	public State state = State.MANUAL;
 
+	public RegisterSchedule() {
+	}
+
+	public RegisterSchedule(RegisterSchedule rs) {
+		this.localExpr = rs.localExpr;
+		this.state = rs.state;
+		this.items = new ArrayList<>(rs.items);
+		this.expressions = new ArrayList<>(rs.expressions);
+	}
 
 	public static class Expr implements Serializable {
 		public String expr;

@@ -10,7 +10,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("schedule")
 public interface ScheduleService extends RemoteService {
-	RegisterSchedule update(String regName, RegisterSchedule registerSchedule)
+	void saveSchedule(String regName, RegisterSchedule registerSchedule, String comment)
 			throws Exception;
 	ScheduleAndHistory getScheduleAndHistory(Date date);
 

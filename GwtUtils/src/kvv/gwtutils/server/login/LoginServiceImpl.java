@@ -1,7 +1,7 @@
 package kvv.gwtutils.server.login;
 
-import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpSession;
 
@@ -12,6 +12,8 @@ import kvv.simpleutils.src.MD5;
 @SuppressWarnings("serial")
 public class LoginServiceImpl extends LoginServlet implements LoginService {
 
+	public static Map<String, String> users = new  ConcurrentHashMap<>();
+
 	@Override
 	public String getSessionId() {
 		HttpSession session = getSession();
@@ -20,7 +22,7 @@ public class LoginServiceImpl extends LoginServlet implements LoginService {
 	}
 
 	protected Map<String, String> getUsers() {
-		return Collections.emptyMap();
+		return users;
 	}
 
 	@Override

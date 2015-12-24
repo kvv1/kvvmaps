@@ -2,7 +2,6 @@ package kvv.controllers.client.control.simple;
 
 import kvv.controllers.client.ScheduleService;
 import kvv.controllers.client.ScheduleServiceAsync;
-import kvv.controllers.client.page.ModePage;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.RegisterSchedule.Expr;
@@ -34,7 +33,7 @@ public abstract class ExprButton extends Composite {
 	private final DetPanel<Label, VerticalPanel> detailsPanel;
 
 	private final EditablePanel<ExprContol> expressions = new EditablePanel<ExprContol>(
-			!ModePage.controlMode, "Добавить выражение") {
+			false, "Добавить выражение") {
 		@Override
 		protected ExprContol createItem() {
 			return new ExprContol1("", null);
@@ -73,22 +72,10 @@ public abstract class ExprButton extends Composite {
 			}
 		});
 
-		localCB.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				if (!ModePage.check()) {
-					localCB.setValue(!localCB.getValue());
-					return;
-				}
-			}
-		});
-
 		details.add(localCB);
 		details.add(expressions);
-		if (ModePage.controlMode) {
-			savePanel.add(save);
-			details.add(savePanel);
-		}
+		savePanel.add(save);
+		details.add(savePanel);
 
 		detailsPanel = new DetPanel<Label, VerticalPanel>("Формула", details);
 

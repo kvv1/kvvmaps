@@ -2,7 +2,6 @@ package kvv.controllers.client.control.simple;
 
 import java.util.ArrayList;
 
-import kvv.controllers.client.page.ModePage;
 import kvv.controllers.shared.HistoryItem;
 import kvv.controllers.shared.RegisterPresentation;
 import kvv.controllers.shared.RegisterSchedule;
@@ -14,12 +13,9 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
-import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 
@@ -50,7 +46,7 @@ public abstract class ScheduleCanvas extends Composite {
 
 	private String regName;
 
-	protected abstract void save(RegisterSchedule registerSchedule);
+	protected abstract void save(RegisterSchedule registerSchedule, String comment);
 
 	public ScheduleCanvas(final RegisterPresentation _presentation,
 			final MouseMoveHandler mouseMoveHandler) {
@@ -99,9 +95,6 @@ public abstract class ScheduleCanvas extends Composite {
 
 			@Override
 			public void onMouseDown(MouseDownEvent event) {
-				if (!ModePage.check())
-					return;
-
 				if (registerSchedule == null)
 					return;
 
@@ -119,57 +112,22 @@ public abstract class ScheduleCanvas extends Composite {
 				int val = (int) (minVal + (y - y0) * (maxVal - minVal)
 						/ (y1 - y0) + 0.5);
 
+				String comment = minute / 60 + ":" + minute % 60;
+				
 				registerSchedule.add(minute, val);
 				if (registerSchedule.items.size() == 0
-						&& registerSchedule.state == State.SCHEDULE)
+						&& registerSchedule.state == State.SCHEDULE) {
 					registerSchedule.state = State.MANUAL;
-				save(registerSchedule);
+					comment += ", state := State.MANUAL";
+				}
+				
+				save(registerSchedule, comment);
 				// setDirty(true);
 				refresh();
 
 			}
 		});
 
-		canvas.addMouseUpHandler(new MouseUpHandler() {
-
-			@Override
-			public void onMouseUp(MouseUpEvent event) {
-				// final DialogBox dialog = new DialogBox();
-				// final Button ok = new Button("OK");
-				// ok.addClickHandler(new ClickHandler() {
-				// public void onClick(ClickEvent event) {
-				// dialog.hide();
-				// }
-				// });
-				//
-				// final VerticalPanel panel = new VerticalPanel();
-				// panel.setSpacing(10);
-				// panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-				//
-				// final Range sel1 = sel;
-				//
-				// panel.add(new Chart(sel1, logItems));
-				// panel.add(ok);
-				//
-				// dialog.setWidget(panel);
-				//
-				// dialog.show();
-				//
-				// sel = null;
-				// refresh();
-			}
-		});
-
-		canvas.addMouseMoveHandler(new MouseMoveHandler() {
-
-			@Override
-			public void onMouseMove(MouseMoveEvent event) {
-				// if (sel != null) {
-				// sel.to = Math.max(sel.from, x2sec(event.getX()));
-				// refresh();
-				// }
-			}
-		});
 	}
 
 	private int x2sec(int x) {
@@ -212,16 +170,18 @@ public abstract class ScheduleCanvas extends Composite {
 
 	private RegisterSchedule registerSchedule;
 	private int curSeconds;
-	private int historyEndSeconds;
 	private ArrayList<HistoryItem> logItems;
 
 	public void refresh(RegisterSchedule registerSchedule,
-			ArrayList<HistoryItem> logItems, int curSeconds,
-			int historyEndSeconds) {
-		this.registerSchedule = registerSchedule;
+			ArrayList<HistoryItem> logItems, int curSeconds) {
+		this.registerSchedule = new RegisterSchedule(registerSchedule);
 		this.logItems = logItems;
 		this.curSeconds = curSeconds;
-		this.historyEndSeconds = historyEndSeconds;
+		refresh();
+	}
+
+	public void refresh(RegisterSchedule registerSchedule) {
+		this.registerSchedule = new RegisterSchedule(registerSchedule);
 		refresh();
 	}
 
@@ -290,7 +250,7 @@ public abstract class ScheduleCanvas extends Composite {
 						}
 						last = current;
 					} else {
-						if(last != null)
+						if (last != null)
 							context.lineTo(x, getY(last));
 					}
 				}

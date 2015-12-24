@@ -9,15 +9,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import kvv.controllers.client.ConfigurationService;
 import kvv.controllers.server.context.Context;
+import kvv.controllers.server.history.HistoryFile;
 import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.SystemDescr;
 import kvv.controllers.shared.UnitDescr;
+import kvv.gwtutils.server.login.LoginServlet;
 import kvv.stdutils.Utils;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
 @SuppressWarnings("serial")
-public class ConfigurationServiceImpl extends RemoteServiceServlet implements
+public class ConfigurationServiceImpl extends LoginServlet implements
 		ConfigurationService {
 
 	@Override
@@ -36,8 +36,13 @@ public class ConfigurationServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public void setSystemDescr(ControllerDescr[] controllerDescrs,
 			UnitDescr[] unitDescrs) throws Exception {
+		checkUser();
 		try {
-			Context.save(controllerDescrs, unitDescrs);
+			HistoryFile.logUserAction(LoginServlet.getUserName(), "Сохранение конфигурации контроллеров и страниц (форма)");
+			
+			Utils.jsonWrite(Constants.controllersFile, controllerDescrs);
+			Utils.jsonWrite(Constants.unitsFile, unitDescrs);
+			Context.reload();
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		}
@@ -45,7 +50,10 @@ public class ConfigurationServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void saveControllersText(String text) throws Exception {
+		checkUser();
 		try {
+			HistoryFile.logUserAction(LoginServlet.getUserName(), "Сохранение конфигурации контроллеров (текст)");
+			
 			Utils.writeFile(Constants.controllersFile, text);
 			Context.reload();
 		} catch (Exception e) {
@@ -73,7 +81,9 @@ public class ConfigurationServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void savePagesText(String text) throws Exception {
+		checkUser();
 		try {
+			HistoryFile.logUserAction(LoginServlet.getUserName(), "Сохранение конфигурации страниц (текст)");
 			Utils.writeFile(Constants.unitsFile, text);
 			Context.reload();
 		} catch (Exception e) {
@@ -94,7 +104,9 @@ public class ConfigurationServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public void saveControllerDefText(String type, String text)
 			throws Exception {
+		checkUser();
 		try {
+			HistoryFile.logUserAction(LoginServlet.getUserName(), "Сохранение типа " + type + " контроллеров");
 			new File(Constants.controllerTypesDir + type).mkdirs();
 			Utils.writeFile(Constants.controllerTypesDir + type + "/def.json",
 					text);
@@ -116,7 +128,9 @@ public class ConfigurationServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void saveControllerUIText(String type, String text) throws Exception {
+		checkUser();
 		try {
+			HistoryFile.logUserAction(LoginServlet.getUserName(), "Сохранение интерфейса контроллеров типа " + type);
 			new File(Constants.controllerTypesDir + type).mkdirs();
 			Utils.writeFile(Constants.controllerTypesDir + type + "/form.json",
 					text);
@@ -128,7 +142,9 @@ public class ConfigurationServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void delControllerType(String type) throws Exception {
+		checkUser();
 		try {
+			HistoryFile.logUserAction(LoginServlet.getUserName(), "Удаление типа контроллеров " + type);
 			new File(Constants.controllerTypesDir + type).delete();
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
