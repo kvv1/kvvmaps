@@ -25,14 +25,16 @@ public class LoginPanel extends Composite {
 
 	private final LoginServiceAsync loginService = GWT
 			.create(LoginService.class);
+	
+	private final Constants constants = GWT.create(Constants.class);
 
 	private final HorizontalPanel hp = new HorizontalPanel();
-	private final Button loginButton = new Button("login");
-	private final Button logoutButton = new Button("logout");
+	private final Button loginButton = new Button(constants.login());
+	private final Button logoutButton = new Button(constants.logout());
 	private final TextBox nameBox = new TextBox();
 	private final TextBox passwordBox = new PasswordTextBox();
 
-	private final CheckBox storePwd = new CheckBox("Save password");
+	private final CheckBox storePwd = new CheckBox(constants.savePassword());
 
 	private final HorizontalPanel loginPanel = new HorizontalPanel();
 	private final HorizontalPanel logoutPanel = new HorizontalPanel();
@@ -46,9 +48,9 @@ public class LoginPanel extends Composite {
 
 		loginPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		loginPanel.setSpacing(4);
-		loginPanel.add(new Label("User name:"));
+		loginPanel.add(new Label(constants.userName()));
 		loginPanel.add(nameBox);
-		loginPanel.add(new Label("Password:"));
+		loginPanel.add(new Label(constants.password()));
 		loginPanel.add(passwordBox);
 		loginPanel.add(loginButton);
 		loginPanel.add(storePwd);
@@ -169,7 +171,7 @@ public class LoginPanel extends Composite {
 				} else {
 					loginPanel.setVisible(false);
 					logoutPanel.setVisible(true);
-					logoutButton.setText("logout " + result);
+					logoutButton.setText(constants.logout() + " " + result);
 				}
 			}
 		});
