@@ -11,6 +11,8 @@ import kvv.gwtutils.client.login.LoginPanel;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
@@ -28,6 +30,16 @@ public class Controllers implements EntryPoint {
 
 		RootPanel root = RootPanel.get();
 
+		root.addDomHandler(new ContextMenuHandler() {
+			@Override
+			public void onContextMenu(ContextMenuEvent event) {
+				event.preventDefault();
+				event.stopPropagation();
+			}
+		}, ContextMenuEvent.getType());
+
+
+		
 		final TabPanel tabs = new TabPanel();
 		tabs.setHeight("200px");
 

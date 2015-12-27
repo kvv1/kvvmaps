@@ -58,8 +58,10 @@ public class AutoRelayControl extends ControlComposite {
 			RegisterPresentation presentation, MouseMoveHandler mouseMoveHandler) {
 		this.reg = reg;
 
-		scheduleCanvas = new ScheduleCanvas(presentation, mouseMoveHandler) {
-			public void save(final RegisterSchedule registerSchedule, String comment) {
+		scheduleCanvas = new ScheduleCanvas(presentation, mouseMoveHandler,
+				60 * 24 * 6 / 10, 0, 60 * 24, 10, false) {
+			public void save(final RegisterSchedule registerSchedule,
+					String comment) {
 				saveSched(registerSchedule, comment);
 			}
 		};
