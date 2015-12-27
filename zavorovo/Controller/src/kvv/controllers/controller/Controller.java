@@ -11,6 +11,9 @@ public class Controller implements IController {
 
 	private boolean uploading;
 
+	public boolean log;
+	
+
 	public Controller() {
 	}
 
@@ -74,7 +77,7 @@ public class Controller implements IController {
 
 	private synchronized byte[] send1(int addr, byte[] request, Integer timeout)
 			throws IOException {
-		if (true)
+		if (!log)
 			return _send(addr, request, timeout);
 
 		try {
