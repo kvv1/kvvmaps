@@ -39,8 +39,8 @@ public class APService extends BaseService implements IAPService {
 	public final static File ROOT = new File(
 			Environment.getExternalStorageDirectory(), "/external_sd/aplayer/");
 
-	public static final float[] dBPer100kmh = { 0, 5f };
-	public static final int[] compr = { 0, 15 };
+	// public static final float[] dBPer100kmh = { 0, 5f };
+	// public static final int[] compr = { 0, 15 };
 
 	public static APService staticInstance;
 
@@ -88,15 +88,11 @@ public class APService extends BaseService implements IAPService {
 			}
 
 			if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-				SharedPreferences settings = PreferenceManager
-						.getDefaultSharedPreferences(APService.this);
-				if (settings.getBoolean(getString(R.string.prefNavigatorMode),
-						false))
+				if (isCarMode())
 					player.pause();
 			}
 		}
 	};
-
 
 	public APService() {
 		super(R.drawable.ap, R.drawable.ap, APActivity.class,
@@ -140,7 +136,7 @@ public class APService extends BaseService implements IAPService {
 				RemoteControlReceiver.class.getName()));
 
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		
+
 		staticInstance = this;
 	}
 
@@ -158,8 +154,7 @@ public class APService extends BaseService implements IAPService {
 				System.out.println("onChanged " + isPlaying());
 				super.onChanged(hint);
 
-				if (settings.getBoolean(getString(R.string.prefNavigatorMode),
-						false))
+				if (isCarMode())
 					setMaxVolume();
 
 				if (!isPlaying()) {
@@ -185,21 +180,7 @@ public class APService extends BaseService implements IAPService {
 			}
 		};
 
-		player.setGain(settings.getInt("gain", 0));
-
-		int comprIdx = settings.getInt("comprIdx", 0);
-		if (comprIdx >= compr.length) {
-			comprIdx = 0;
-			setPrefInt("comprIdx", comprIdx);
-		}
-		player.setCompr(compr[comprIdx]);
-
-		int dBPer100Idx = settings.getInt("dBPer100Idx", 0);
-		if (dBPer100Idx >= dBPer100kmh.length) {
-			dBPer100Idx = 0;
-			setPrefInt("dBPer100Idx", dBPer100Idx);
-		}
-		player.setDbPer100(dBPer100kmh[dBPer100Idx]);
+		modeChanged();
 
 		this.player.onChanged(OnChangedHint.FOLDER);
 
@@ -329,42 +310,11 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	@Override
-	public void setGain(int db) {
-		player.setGain(db);
-		setPrefInt("gain", db);
+	public void modeChanged() {
+		player.setCompr(isCarMode() ? 15 : 0);
+		player.setDbPer100(isCarMode() ? 5 : 0);
 	}
-
-	@Override
-	public void setComprIdx(int n) {
-		player.setCompr(compr[n]);
-		setPrefInt("comprIdx", n);
-	}
-
-	@Override
-	public int getComprIdx() {
-		return settings.getInt("comprIdx", 0);
-	}
-
-	@Override
-	public void setDBPer100Idx(int n) {
-		player.setDbPer100(dBPer100kmh[n]);
-		setPrefInt("dBPer100Idx", n);
-	}
-
-	@Override
-	public int getDBPer100Idx() {
-		return settings.getInt("dBPer100Idx", 0);
-	}
-
-	@Override
-	public int getGain() {
-		return player.getGain();
-	}
-
-	// @Override
-	// public float getLevel() {
-	// return player.getIndicatorLevel();
-	// }
+	
 
 	@Override
 	public int getFileCnt() {
@@ -494,10 +444,12 @@ public class APService extends BaseService implements IAPService {
 		}
 	};
 
+	private boolean isCarMode() {
+		return settings.getBoolean(getString(R.string.prefCarMode), false);
+	}
+
 	private void startGps() {
-		if (settings.getBoolean(getString(R.string.prefTestMode), false))
-			return;
-		if (!settings.getBoolean(getString(R.string.prefNavigatorMode), false))
+		if (!isCarMode())
 			return;
 
 		handler.removeCallbacks(stopGpsRunnable);
@@ -608,7 +560,8 @@ public class APService extends BaseService implements IAPService {
 			List<FileDescriptor> files = map.get(folder);
 			Collections.sort(files);
 
-			folders.add(new Folder(folder, ind, files.toArray(new FileDescriptor[0])));
+			folders.add(new Folder(folder, ind, files
+					.toArray(new FileDescriptor[0])));
 		}
 
 		return folders;

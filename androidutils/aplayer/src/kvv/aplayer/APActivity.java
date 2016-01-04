@@ -33,6 +33,8 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 
 	private static final int RESULT_SETTINGS = 1;
 
+	private FilesSectionFragmentList filesSectionFragmentList;
+
 	@Override
 	protected ViewPager getPager() {
 		return (ViewPager) findViewById(R.id.pager);
@@ -47,6 +49,8 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		System.out.println(getClass().getSimpleName() + ".onCreate()");
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_ap);
 
@@ -54,10 +58,10 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		bindService(new Intent(this, APService.class), conn,
 				Context.BIND_AUTO_CREATE);
 
-		add("Files", new FilesSectionFragmentList());
-		add("Folders", new FoldersSectionFragment());
-		// add("Charts", new ChartsFragment());
+		filesSectionFragmentList = new FilesSectionFragmentList();
 
+		add("Files", filesSectionFragmentList);
+		add("Folders", new FoldersSectionFragment());
 	}
 
 	@Override
@@ -110,12 +114,25 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
+		System.out.println("onActivityResult()");
+
 		switch (requestCode) {
 		case RESULT_SETTINGS:
 			updateWakeLock();
+
+			if (conn.service != null)
+				conn.service.modeChanged();
+
+			// new Handler().postDelayed(new Runnable() {
+			//
+			// @Override
+			// public void run() {
+			// filesSectionFragmentList.setMagicEye();
+			// }
+			// }, 1000);
+
 			break;
 		}
-
 	}
 
 	private void exit() {
@@ -143,8 +160,12 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		super.onResume();
 
 		View decorView = getWindow().getDecorView();
-		int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-		decorView.setSystemUiVisibility(uiOptions);
+		
+//		if(isCarMode() ) {
+			int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+			decorView.setSystemUiVisibility(uiOptions);
+//		}
+		
 		// Remember that you should never show the action bar if the
 		// status bar is hidden, so hide that too if necessary.
 		// ActionBar actionBar = getActionBar();
@@ -182,22 +203,26 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		}
 	}
 
-	void updateWakeLock() {
+	private boolean isCarMode() {
 		SharedPreferences settings = PreferenceManager
 				.getDefaultSharedPreferences(this);
-		boolean navMode = settings.getBoolean(
-				getString(R.string.prefNavigatorMode), false);
+		return settings.getBoolean(getString(R.string.prefCarMode), false);
+	}
 
-		if (navMode)
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-		else
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+	void updateWakeLock() {
+
+		boolean carMode = isCarMode();
+
+		// if (navMode)
+		// setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		// else
+		// setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 
 		boolean playing = conn.service != null && conn.service.isPlaying();
 
 		System.out.println("updateWakeLock playing=" + playing + " fg=" + fg);
 
-		if (navMode) {
+		if (carMode) {
 			if (fg && playing)
 				lock();
 			else

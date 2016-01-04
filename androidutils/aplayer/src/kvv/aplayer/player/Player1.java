@@ -16,7 +16,6 @@ public abstract class Player1 extends Player0 {
 
 	private Eq eqSpeed;
 
-	private int gain;
 	private float comprGain;
 	private float dBPer100;
 	private float speedKMH;
@@ -49,8 +48,6 @@ public abstract class Player1 extends Player0 {
 		setEq();
 
 		compr.init();
-
-		setGain(0);
 	}
 
 	protected abstract void levelChanged(float indicatorLevel);
@@ -60,15 +57,6 @@ public abstract class Player1 extends Player0 {
 		eqCompr.release();
 		compr.release();
 		super.close();
-	}
-
-	public void setGain(int db) {
-		gain = db;
-		setEq();
-	}
-
-	public int getGain() {
-		return gain;
 	}
 
 	public void setCompr(int db) {
@@ -92,9 +80,7 @@ public abstract class Player1 extends Player0 {
 	}
 
 	private void setEq() {
-		float g = gain;
-		// g += speedKMH * dBPer100 / 100;
-		g += comprGain;
+		float g = comprGain;
 
 		// System.out.println("setEq " + g);
 

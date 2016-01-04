@@ -108,7 +108,7 @@ public abstract class Compressor {
 			for (byte b : waveform) {
 				int a = ((int) b & 0xFF) - 128;
 				alg.onSample(a);
-				int a1 = Math.abs(a);
+				int a1 = Math.max(Math.abs(a) - 1, 0);
 				levelLPF.add(a1);
 			}
 

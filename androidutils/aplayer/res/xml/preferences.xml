@@ -2,10 +2,10 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
         <CheckBoxPreference
-            android:key="@string/prefNavigatorMode"
-            android:title="Режим навигатора" />
+            android:key="@string/prefCarMode"
+            android:title="Car mode" />
         <CheckBoxPreference
-            android:key="@string/prefTestMode"
-            android:title="Тестовый режим" />
+            android:key="@string/prefMagicEye"
+            android:title="Magic Eye" />
 
 </PreferenceScreen>

@@ -22,13 +22,7 @@ public interface IAPService {
 	void seek(int seekStep);
 	boolean isPlaying();
 	void toRandom(int position);
-	void setGain(int db);
-	void setComprIdx(int n);
-	int getGain();
-	int getComprIdx();
-	void setDBPer100Idx(int n);
-	int getDBPer100Idx();
-//	float getLevel();
+	void modeChanged();
 	void reload();
 	void redo();
 	void undo();
