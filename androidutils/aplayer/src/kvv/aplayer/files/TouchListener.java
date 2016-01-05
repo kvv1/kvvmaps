@@ -40,7 +40,7 @@ public class TouchListener {
 				handler.postDelayed(seekRunnable, 200);
 				longClick = true;
 				TouchListener.this.onLongClick(touchX, touchY);
-				return false;
+				return true;
 			}
 		});
 

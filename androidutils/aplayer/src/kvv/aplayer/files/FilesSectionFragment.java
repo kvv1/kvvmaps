@@ -14,11 +14,9 @@ import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
-import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -54,25 +52,7 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 	private SharedPreferences settings;
 	protected Handler handler = new Handler();
 
-	private float touchX;
-	private float touchY;
-
 	private int seekStep = 0;
-
-	private Runnable seekRunnable = new Runnable() {
-		@Override
-		public void run() {
-			if (conn.service != null) {
-				conn.service.seek(seekStep);
-				seekStep = seekStep + seekStep / 3;
-				if (seekStep > 20000)
-					seekStep = 20000;
-				if (seekStep < -20000)
-					seekStep = -20000;
-			}
-			handler.postDelayed(this, 200);
-		}
-	};
 
 	private Runnable progressRunnable = new Runnable() {
 		@Override
@@ -190,18 +170,18 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 				});
 
 		progressText = (TextView) rootView.findViewById(R.id.progressText);
-		progressText.setOnTouchListener(onTouchListener);
-		progressText.setOnClickListener(new OnClickListener() {
+
+		new TouchListener(progressText) {
 			@Override
-			public void onClick(View v) {
+			protected void onClick(float touchX, float touchY) {
 				if (conn.service != null) {
 					int dur = conn.service.getDuration();
-					int pos = (int) (dur * touchX / v.getWidth());
+					int pos = (int) (dur * touchX / progressText.getWidth());
 					System.out.println("seek to " + pos);
 					conn.service.seekTo(pos);
 				}
 			}
-		});
+		};
 
 		tapePanel = (TapePanel) rootView.findViewById(R.id.tapePanel);
 		listPanel = rootView.findViewById(R.id.listPanel);
@@ -234,81 +214,91 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 			}
 		});
 
-		tapeView.setOnClickListener(new OnClickListener() {
-
+		new TouchListener(tapeView) {
 			@Override
-			public void onClick(View v) {
+			protected void onClick(float touchX, float touchY) {
 				if (conn.service == null)
 					return;
 				int ht = tapeView.hitTest(touchX, touchY);
-				switch (ht) {
-				case -1:
+				if (ht == -1) {
 					tapeView.setSeek(-2000, true);
-					prevClick();
-					break;
-				case 1:
+					if (conn.service != null)
+						conn.service.prev();
+				} else if (ht == 1) {
 					if (conn.service.getFile() < conn.service.getFileCnt() - 1)
 						tapeView.setSeek(2000, true);
-					nextClick();
-					break;
-				default:
+					if (conn.service != null)
+						conn.service.next();
+				} else {
 					conn.service.play_pause();
-					break;
 				}
 			}
 
-		});
-
-		tapeView.setOnLongClickListener(new OnLongClickListener() {
 			@Override
-			public boolean onLongClick(View v) {
+			protected void onLongClick(float touchX, float touchY) {
 				int ht = tapeView.hitTest(touchX, touchY);
-				if (ht == 1) {
-					tapeView.setSeek(2000, false);
-					nextLongClick();
-				} else if (ht == -1) {
+				if (ht == -1) {
 					tapeView.setSeek(-2000, false);
-					prevLongClick();
+					seekStep = -1000;
+				} else if (ht == 1) {
+					tapeView.setSeek(2000, false);
+					seekStep = 1000;
 				} else
 					rootView.findViewById(R.id.undoPanel).setVisibility(
 							View.VISIBLE);
-				return true;
 			}
-		});
 
-		tapeView.setOnTouchListener(onTouchListener);
+			@Override
+			protected void onHold(float touchX, float touchY) {
+				FilesSectionFragment.this.onHold();
+			}
+
+			@Override
+			protected void onReleased(float touchX, float touchY) {
+				if (tapeView != null)
+					tapeView.setSeek(0, false);
+			}
+		};
 
 		Button prev = (Button) rootView.findViewById(R.id.prev);
-		prev.setOnClickListener(new OnClickListener() {
+
+		new TouchListener(prev) {
 			@Override
-			public void onClick(View v) {
-				prevClick();
+			protected void onClick(float touchX, float touchY) {
+				if (conn.service != null)
+					conn.service.prev();
 			}
-		});
-		prev.setOnLongClickListener(new OnLongClickListener() {
+
 			@Override
-			public boolean onLongClick(View v) {
-				prevLongClick();
-				return true;
+			protected void onLongClick(float touchX, float touchY) {
+				seekStep = -1000;
 			}
-		});
-		prev.setOnTouchListener(onTouchListener);
+
+			@Override
+			protected void onHold(float touchX, float touchY) {
+				FilesSectionFragment.this.onHold();
+			}
+		};
 
 		Button next = (Button) rootView.findViewById(R.id.next);
-		next.setOnClickListener(new OnClickListener() {
+
+		new TouchListener(next) {
 			@Override
-			public void onClick(View v) {
-				nextClick();
+			protected void onClick(float touchX, float touchY) {
+				if (conn.service != null)
+					conn.service.next();
 			}
-		});
-		next.setOnLongClickListener(new OnLongClickListener() {
+
 			@Override
-			public boolean onLongClick(View v) {
-				nextLongClick();
-				return true;
+			protected void onLongClick(float touchX, float touchY) {
+				seekStep = 1000;
 			}
-		});
-		next.setOnTouchListener(onTouchListener);
+
+			@Override
+			protected void onHold(float touchX, float touchY) {
+				FilesSectionFragment.this.onHold();
+			}
+		};
 
 		setCurrentSkin();
 
@@ -316,6 +306,17 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 		onChanged(OnChangedHint.FOLDER);
 
 		setMagicEye();
+	}
+
+	private void onHold() {
+		if (conn.service != null) {
+			conn.service.seek(seekStep);
+			seekStep = seekStep + seekStep / 3;
+			if (seekStep > 20000)
+				seekStep = 20000;
+			if (seekStep < -20000)
+				seekStep = -20000;
+		}
 	}
 
 	public void onDestroy() {
@@ -441,7 +442,6 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 			conn.service.setVisible(false);
 		handler.removeCallbacks(progressRunnable);
 		updateTapeViewState();
-		handler.removeCallbacks(seekRunnable);
 		super.onPause();
 	}
 
@@ -480,51 +480,4 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 
 	}
 
-	private long lastKeyUp;
-	private boolean longClick;
-
-	protected void prevClick() {
-		if (System.currentTimeMillis() - lastKeyUp > 500)
-			if (conn.service != null)
-				conn.service.prev();
-	}
-
-	protected void prevLongClick() {
-		seekStep = -1000;
-		handler.postDelayed(seekRunnable, 200);
-		longClick = true;
-	}
-
-	protected void nextClick() {
-		if (System.currentTimeMillis() - lastKeyUp > 500)
-			if (conn.service != null)
-				conn.service.next();
-	}
-
-	protected void nextLongClick() {
-		seekStep = 1000;
-		handler.postDelayed(seekRunnable, 200);
-		longClick = true;
-	}
-
-	@SuppressLint("ClickableViewAccessibility")
-	private OnTouchListener onTouchListener = new OnTouchListener() {
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			touchX = event.getX();
-			touchY = event.getY();
-
-			if (event.getAction() == MotionEvent.ACTION_UP) {
-				if (tapeView != null)
-					tapeView.setSeek(0, false);
-
-				handler.removeCallbacks(seekRunnable);
-
-				if (longClick)
-					lastKeyUp = System.currentTimeMillis();
-				longClick = false;
-			}
-			return false;
-		}
-	};
 }
