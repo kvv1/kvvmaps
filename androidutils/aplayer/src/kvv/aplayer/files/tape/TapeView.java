@@ -1,10 +1,13 @@
 package kvv.aplayer.files.tape;
 
+import kvv.aplayer.R;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -51,6 +54,20 @@ public class TapeView extends View {
 
 	}
 
+	private SoundPool soundPool;
+	private int clickId;
+
+	private void playClick() {
+		soundPool.play(clickId, 1, 1, 1, 0, 1);
+	}
+
+	final Runnable seekRunnable = new Runnable() {
+		@Override
+		public void run() {
+			setSeek(0, false);
+		}
+	};
+
 	public TapeView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		init(context);
@@ -67,25 +84,29 @@ public class TapeView extends View {
 	}
 
 	private void init(Context context) {
+		if (!isInEditMode()) {
+			soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
+			clickId = soundPool.load(context, R.raw.sw, 1);
+		}
 	}
 
-	Paint tapePaint = new Paint();
+	private Paint tapePaint = new Paint();
 	{
 		tapePaint.setColor(TAPE_COLOR);
 		tapePaint.setAntiAlias(true);
 		tapePaint.setStyle(Paint.Style.STROKE);
 	}
-	Paint headboxPaint = new Paint();
+	private Paint headboxPaint = new Paint();
 	{
 		headboxPaint.setColor(0xFF505000);
 		headboxPaint.setAntiAlias(true);
 	}
-	Paint headboxPaint2 = new Paint();
+	private Paint headboxPaint2 = new Paint();
 	{
 		headboxPaint2.setColor(0xFF404000);
 		headboxPaint2.setAntiAlias(true);
 	}
-	Paint headboxPaint1 = new Paint();
+	private Paint headboxPaint1 = new Paint();
 
 	private float max = 100;
 
@@ -175,11 +196,13 @@ public class TapeView extends View {
 
 	private int seekStep;
 
-	boolean started;
+	private boolean started;
 
 	public void start() {
 		if (started || b1 == null)
 			return;
+
+		playClick();
 
 		started = true;
 
@@ -199,7 +222,7 @@ public class TapeView extends View {
 				time = t;
 				if (seekStep == 0) {
 					int step = STEP_MS;
-					step = (dt + STEP_MS)/2;
+					step = (dt + STEP_MS) / 2;
 					step(b1, step);
 					step(b2, step);
 				} else {
@@ -218,7 +241,33 @@ public class TapeView extends View {
 		handler.postDelayed(r, 100);
 	}
 
-	void step(BobbinView bobbin, int ms) {
+	public void stop() {
+		if (!started || b1 == null)
+			return;
+
+		playClick();
+
+		started = false;
+
+		if (r != null)
+			handler.removeCallbacks(r);
+		r = null;
+
+	}
+
+	public void setSeek(int step, boolean scheduleOff) {
+		if (seekStep != step)
+			playClick();
+
+		handler.removeCallbacks(seekRunnable);
+
+		if (scheduleOff)
+			handler.postDelayed(seekRunnable, 500);
+
+		seekStep = step;
+	}
+
+	private void step(BobbinView bobbin, int ms) {
 		float r1 = getTapeR(BobbinBmp.tapeMinR * 100 / BobbinBmp.tapeMaxR, 100,
 				max, bobbin == b1 ? (max - cur) : cur);
 		float da = 5 * ms / r1;
@@ -231,28 +280,39 @@ public class TapeView extends View {
 		if (angle > 360)
 			angle -= 360;
 
-		//bobbin.animate().rotation(angle).start();
-		
 		bobbin.setRotation(angle);
-	}
-
-	public void stop() {
-		if (!started || b1 == null)
-			return;
-		started = false;
-
-		if (r != null)
-			handler.removeCallbacks(r);
-		r = null;
-
-	}
-
-	public void setSeek(int step) {
-		seekStep = step;
 	}
 
 	public void setBobbins(BobbinView b1, BobbinView b2) {
 		this.b1 = b1;
 		this.b2 = b2;
 	}
+	
+	private boolean hitTest(float x, float y, int bobbin) {
+		float bobbinSize = b1.getWidth();
+		float bobbinX1 = b1.getX() + bobbinSize / 2;
+		float bobbinX2 = b2.getX() + bobbinSize / 2;
+		
+		float bx = bobbin < 0 ? bobbinX1 : bobbinX2;
+		
+		if(y > bobbinSize * 3 / 4)
+			return false;
+		
+		if(bobbin == -1 && x < bx + bobbinSize/4)
+			return true;
+		
+		if(bobbin == 1 && x > bx - bobbinSize/4)
+			return true;
+
+		return false;
+	}
+
+	public int hitTest(float x, float y) { // -1 - left, 1 = right
+		if (hitTest(x, y, -1))
+			return -1;
+		if (hitTest(x, y, 1))
+			return 1;
+		return 0;
+	}
+
 }

@@ -35,17 +35,16 @@
             android:layout_marginRight="-10dp"
             android:layout_weight="1" >
 
-            <kvv.aplayer.files.tape.MagicEyeLevelView
-                android:id="@+id/level1"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-            
             <kvv.aplayer.files.tape.ArrowLevelView
-                android:id="@+id/level"
-                android:visibility="gone"
+                android:id="@+id/arrowLevel"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
-            </FrameLayout>
+
+            <kvv.aplayer.files.tape.MagicEyeLevelView
+                android:id="@+id/magicEyeLevel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
 
         <kvv.aplayer.files.tape.BobbinView
             android:id="@+id/rightBobbin"

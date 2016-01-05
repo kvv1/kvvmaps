@@ -1,6 +1,6 @@
 package kvv.aplayer;
 
-import kvv.aplayer.files.FilesSectionFragmentList;
+import kvv.aplayer.files.FilesSectionFragment;
 import kvv.aplayer.folders.FoldersSectionFragment;
 import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APService;
@@ -12,7 +12,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -33,7 +32,7 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 
 	private static final int RESULT_SETTINGS = 1;
 
-	private FilesSectionFragmentList filesSectionFragmentList;
+	private FilesSectionFragment filesSectionFragment;
 
 	@Override
 	protected ViewPager getPager() {
@@ -58,9 +57,9 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		bindService(new Intent(this, APService.class), conn,
 				Context.BIND_AUTO_CREATE);
 
-		filesSectionFragmentList = new FilesSectionFragmentList();
+		filesSectionFragment = new FilesSectionFragment();
 
-		add("Files", filesSectionFragmentList);
+		add("Files", filesSectionFragment);
 		add("Folders", new FoldersSectionFragment());
 	}
 
@@ -160,12 +159,12 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		super.onResume();
 
 		View decorView = getWindow().getDecorView();
-		
-//		if(isCarMode() ) {
-			int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-			decorView.setSystemUiVisibility(uiOptions);
-//		}
-		
+
+		// if(isCarMode() ) {
+		int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+		decorView.setSystemUiVisibility(uiOptions);
+		// }
+
 		// Remember that you should never show the action bar if the
 		// status bar is hidden, so hide that too if necessary.
 		// ActionBar actionBar = getActionBar();
@@ -183,8 +182,9 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 
 	private PowerManager.WakeLock wakeLock;
 
-	boolean fg;
+	private boolean fg;
 
+	@SuppressWarnings("deprecation")
 	private void lock() {
 		if (wakeLock == null) {
 			System.out.println("LOCK");

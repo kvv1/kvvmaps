@@ -407,10 +407,13 @@ public class APService extends BaseService implements IAPService {
 		// System.out.println("SAVE " + folder.shortName + " " +
 		// player.getFile());
 
-		SharedPreferences.Editor editor = settings.edit();
-		editor.putInt(folder.path + "|file", player.getFile());
-		editor.putInt(folder.path + "|pos", player.getCurrentPosition());
-		editor.apply();
+		setPrefInt(folder.path + "|file", player.getFile());
+		setPrefInt(folder.path + "|pos", player.getCurrentPosition());
+		
+//		SharedPreferences.Editor editor = settings.edit();
+//		editor.putInt(folder.path + "|file", player.getFile());
+//		editor.putInt(folder.path + "|pos", player.getCurrentPosition());
+//		editor.apply();
 	}
 
 	private void setPref(String name, String val) {

@@ -3,7 +3,6 @@ package kvv.aplayer.files.tape;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
@@ -26,11 +25,11 @@ public class MagicEyeLevelView extends LevelView {
 		super(context);
 	}
 
-	int bgEdge = 30;
-	int edge = 25;
+	private static final int bgEdge = 20;
+	private static final int edge = 15;
 
-	int W = 50;
-	int H = 75;
+	private static final int W = 50;
+	private static final int H = 75;
 
 	private Bitmap bmBg = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888);
 

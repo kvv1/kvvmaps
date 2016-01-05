@@ -61,31 +61,24 @@
                 android:text="Button"
                 android:textSize="20sp"
                 android:textStyle="bold" />
-        </FrameLayout>
-
-        <include
-            android:id="@+id/tapePanel"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            layout="@layout/view_tape" />
-
-        <FrameLayout
-            android:id="@+id/buttons"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:background="#FFFFFF"
-            android:visibility="gone" >
 
             <Button
                 android:id="@+id/goto1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="Play"
+                android:layout_gravity="right"
                 android:textColor="@color/greendark"
                 android:textSize="30sp"
                 android:textStyle="bold" />
         </FrameLayout>
+
+        <include
+            android:id="@+id/tapePanel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            layout="@layout/view_tape" />
 
         <FrameLayout
             android:id="@+id/undoPanel"
@@ -155,7 +148,6 @@
                 android:ellipsize="start"
                 android:gravity="center_horizontal"
                 android:singleLine="true"
-                android:text="asdf"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textStyle="bold" />
         </FrameLayout>

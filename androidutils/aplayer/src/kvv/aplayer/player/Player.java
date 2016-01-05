@@ -8,7 +8,7 @@ import android.media.MediaPlayer.OnInfoListener;
 public abstract class Player {
 
 	public enum OnChangedHint {
-		FILE, FOLDER, POSITION
+		FILE, FOLDER, STATE
 	}
 
 	public abstract void onChanged(OnChangedHint hint);
@@ -76,7 +76,7 @@ public abstract class Player {
 		if (!prepared)
 			return;
 		mp.seekTo(pos);
-		onChanged(OnChangedHint.POSITION);
+		onChanged(OnChangedHint.STATE);
 	}
 
 	public void pause() {
@@ -84,7 +84,7 @@ public abstract class Player {
 			return;
 		if (mp.isPlaying()) {
 			mp.pause();
-			onChanged(OnChangedHint.POSITION);
+			onChanged(OnChangedHint.STATE);
 		}
 	}
 
@@ -94,7 +94,7 @@ public abstract class Player {
 		if (!mp.isPlaying()) {
 			resetGain();
 			mp.start();
-			onChanged(OnChangedHint.POSITION);
+			onChanged(OnChangedHint.STATE);
 		}
 	}
 
