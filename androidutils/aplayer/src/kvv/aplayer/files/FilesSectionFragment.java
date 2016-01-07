@@ -100,8 +100,6 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 		settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		rootView.findViewById(R.id.goto1).setVisibility(View.GONE);
 
-		settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
 		folderTextView = (TextView) rootView.findViewById(R.id.folder);
 		fileProgressBar = (ProgressBar) rootView.findViewById(R.id.progress);
 		folderProgressBar = (ProgressBar) rootView
@@ -222,13 +220,11 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 				int ht = tapeView.hitTest(touchX, touchY);
 				if (ht == -1) {
 					tapeView.setSeek(-2000, true);
-					if (conn.service != null)
-						conn.service.prev();
+					conn.service.prev();
 				} else if (ht == 1) {
 					if (conn.service.getFile() < conn.service.getFileCnt() - 1)
 						tapeView.setSeek(2000, true);
-					if (conn.service != null)
-						conn.service.next();
+					conn.service.next();
 				} else {
 					conn.service.play_pause();
 				}
@@ -475,6 +471,10 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 						: View.VISIBLE);
 				magicEyeLevelView.setVisibility(magicEye ? View.VISIBLE
 						: View.GONE);
+				
+				if(tapeView != null)
+					tapeView.click = settings.getBoolean(
+							getString(R.string.prefClick), false);
 			}
 		}, 500);
 

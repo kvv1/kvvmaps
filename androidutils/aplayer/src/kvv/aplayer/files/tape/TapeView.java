@@ -56,9 +56,11 @@ public class TapeView extends View {
 
 	private SoundPool soundPool;
 	private int clickId;
+	public boolean click;
 
 	private void playClick() {
-		soundPool.play(clickId, 1, 1, 1, 0, 1);
+		if (click)
+			soundPool.play(clickId, 0.3f, 0.3f, 1, 0, 1);
 	}
 
 	final Runnable seekRunnable = new Runnable() {
@@ -287,21 +289,21 @@ public class TapeView extends View {
 		this.b1 = b1;
 		this.b2 = b2;
 	}
-	
+
 	private boolean hitTest(float x, float y, int bobbin) {
 		float bobbinSize = b1.getWidth();
 		float bobbinX1 = b1.getX() + bobbinSize / 2;
 		float bobbinX2 = b2.getX() + bobbinSize / 2;
-		
+
 		float bx = bobbin < 0 ? bobbinX1 : bobbinX2;
-		
-		if(y > bobbinSize * 3 / 4)
+
+		if (y > bobbinSize * 3 / 4)
 			return false;
-		
-		if(bobbin == -1 && x < bx + bobbinSize/4)
+
+		if (bobbin == -1 && x < bx + bobbinSize / 4)
 			return true;
-		
-		if(bobbin == 1 && x > bx - bobbinSize/4)
+
+		if (bobbin == 1 && x > bx - bobbinSize / 4)
 			return true;
 
 		return false;

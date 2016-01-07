@@ -7,5 +7,8 @@
         <CheckBoxPreference
             android:key="@string/prefMagicEye"
             android:title="Magic Eye" />
-
+        <CheckBoxPreference
+            android:key="@string/prefClick"
+            android:title="Sounds" />
+        
 </PreferenceScreen>
