@@ -7,4 +7,5 @@ public interface APServiceListener {
 	void onChanged(OnChangedHint hint);
 	void onLevelChanged(float level);
 	void onLoaded();
+	void onUndoAdded();
 }

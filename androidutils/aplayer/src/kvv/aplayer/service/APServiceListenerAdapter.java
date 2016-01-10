@@ -17,4 +17,7 @@ public class APServiceListenerAdapter implements APServiceListener {
 	public void onLevelChanged(float level) {
 	}
 
+	@Override
+	public void onUndoAdded() {
+	}
 }

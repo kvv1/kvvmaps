@@ -69,12 +69,31 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 			clearButtons();
 		}
 	};
+	
 
+	private Runnable undoRunnable = new Runnable() {
+		@Override
+		public void run() {
+			rootView.findViewById(R.id.undoPanel).setVisibility(
+					View.GONE);
+		}
+	};
+	
 	private void restartButtonsTimer() {
+		rootView.findViewById(R.id.goto1).setVisibility(View.VISIBLE);
 		handler.removeCallbacks(buttonsRunnable);
 		handler.postDelayed(buttonsRunnable, APActivity.BUTTONS_DELAY);
 	}
 
+	@Override
+	public void onUndoAdded() {
+		if(rootView == null)
+			return;
+		rootView.findViewById(R.id.undoPanel).setVisibility(View.VISIBLE);
+		handler.removeCallbacks(undoRunnable);
+		handler.postDelayed(undoRunnable, 5000);
+	}
+	
 	@Override
 	public void onChanged(OnChangedHint hint) {
 		if (conn.service == null)
@@ -112,7 +131,6 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view,
 					int position, long id) {
-				rootView.findViewById(R.id.goto1).setVisibility(View.VISIBLE);
 				restartButtonsTimer();
 				FilesAdapter adapter = (FilesAdapter) listView.getAdapter();
 				if (adapter != null) {
@@ -121,6 +139,8 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 				}
 			}
 		});
+		
+		undoRunnable.run();
 
 		pause = (Button) rootView.findViewById(R.id.pause);
 		pause.setOnClickListener(new OnClickListener() {
@@ -134,20 +154,10 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 		pause.setOnLongClickListener(new OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
-				rootView.findViewById(R.id.undoPanel).setVisibility(
-						View.VISIBLE);
+				onUndoAdded();
 				return true;
 			}
 		});
-
-		rootView.findViewById(R.id.closeUndo).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						rootView.findViewById(R.id.undoPanel).setVisibility(
-								View.GONE);
-					}
-				});
 
 		rootView.findViewById(R.id.undo).setOnClickListener(
 				new OnClickListener() {
@@ -240,8 +250,7 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 					tapeView.setSeek(2000, false);
 					seekStep = 1000;
 				} else
-					rootView.findViewById(R.id.undoPanel).setVisibility(
-							View.VISIBLE);
+					onUndoAdded();
 			}
 
 			@Override

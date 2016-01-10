@@ -108,14 +108,20 @@ public abstract class Player0 extends Player {
 		}
 	}
 
-	public void next() {
+	public boolean hasNext() {
 		if (folders.size() == 0 || curFolder < 0)
-			return;
+			return false;
 
 		Folder folder = folders.get(curFolder);
-		if (curFile >= folder.files.length - 1) {
+		if (curFile >= folder.files.length - 1)
+			return false;
+
+		return true;
+	}
+
+	public void next() {
+		if (!hasNext())
 			return;
-		}
 		toFile(curFile + 1);
 	}
 

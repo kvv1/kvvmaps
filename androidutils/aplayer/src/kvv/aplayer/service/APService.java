@@ -199,13 +199,6 @@ public class APService extends BaseService implements IAPService {
 		super.onDestroy();
 	}
 
-	// @Override
-	// public IBinder onBind(Intent arg0) {
-	// return new APServiceBinder() {
-	// };
-	// }
-	//
-	// public class APServiceBinder extends Binder implements IAPService {
 	@Override
 	public List<Folder> getFolders() {
 		return player.getFolders();
@@ -266,8 +259,10 @@ public class APService extends BaseService implements IAPService {
 
 	@Override
 	public void next() {
-		storeUndo();
-		player.next();
+		if (player.hasNext()) {
+			storeUndo();
+			player.next();
+		}
 	}
 
 	@Override
@@ -314,7 +309,6 @@ public class APService extends BaseService implements IAPService {
 		player.setCompr(isCarMode() ? 15 : 0);
 		player.setDbPer100(isCarMode() ? 5 : 0);
 	}
-	
 
 	@Override
 	public int getFileCnt() {
@@ -351,6 +345,9 @@ public class APService extends BaseService implements IAPService {
 		undoList.add(lastItem);
 		// lastItem = item;
 		player.toFolder(item.folder, item.file, item.pos);
+
+		for (APServiceListener listener : listeners)
+			listener.onUndoAdded();
 	}
 
 	@Override
@@ -365,6 +362,9 @@ public class APService extends BaseService implements IAPService {
 		redoList.add(lastItem);
 		// lastItem = item;
 		player.toFolder(item.folder, item.file, item.pos);
+
+		for (APServiceListener listener : listeners)
+			listener.onUndoAdded();
 	}
 
 	@Override
@@ -372,14 +372,15 @@ public class APService extends BaseService implements IAPService {
 		player.setVisible(vis);
 	}
 
-	// }
-
 	private void storeUndo() {
 		if (player.getCurrentFolder() < 0)
 			return;
 		undoList.add(new UndoItem(player.getCurrentFolder(), player.getFile(),
 				player.getCurrentPosition()));
 		redoList.clear();
+
+		for (APServiceListener listener : listeners)
+			listener.onUndoAdded();
 	}
 
 	static class UndoItem {
@@ -409,11 +410,11 @@ public class APService extends BaseService implements IAPService {
 
 		setPrefInt(folder.path + "|file", player.getFile());
 		setPrefInt(folder.path + "|pos", player.getCurrentPosition());
-		
-//		SharedPreferences.Editor editor = settings.edit();
-//		editor.putInt(folder.path + "|file", player.getFile());
-//		editor.putInt(folder.path + "|pos", player.getCurrentPosition());
-//		editor.apply();
+
+		// SharedPreferences.Editor editor = settings.edit();
+		// editor.putInt(folder.path + "|file", player.getFile());
+		// editor.putInt(folder.path + "|pos", player.getCurrentPosition());
+		// editor.apply();
 	}
 
 	private void setPref(String name, String val) {
@@ -537,19 +538,6 @@ public class APService extends BaseService implements IAPService {
 		}
 		mCursor.close();
 		System.out.println();
-
-		// String fold = "000";
-		// List<File1> files1 = new ArrayList<File1>();
-		// files1.add(new File1(
-		// "/sdcard0/000/audiocheck.net_sin_1000Hz_0dBFS_10s.wav",
-		// "audiocheck.net_sin_1000Hz_0dBFS_10s.wav", 100));
-		// files1.add(new File1(
-		// "/sdcard0/000/audiocheck.net_sin_1000Hz_-6dBFS_10s.wav",
-		// "audiocheck.net_sin_1000Hz_-6dBFS_10s.wav", 100));
-		// files1.add(new File1(
-		// "/sdcard0/000/audiocheck.net_sin_1000Hz_-20dBFS_10s.wav",
-		// "audiocheck.net_sin_1000Hz_-20dBFS_10s.wav", 100));
-		// map.put(fold, files1);
 
 		List<String> folds = new ArrayList<String>(map.keySet());
 		Collections.sort(folds);
