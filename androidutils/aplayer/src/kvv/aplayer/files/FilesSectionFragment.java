@@ -44,7 +44,6 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 	private LevelView magicEyeLevelView;
 	private TextView progressText;
 	private Button pause;
-	private Button timing;
 	private ProgressBar fileProgressBar;
 	protected TextView folderTextView;
 	private ProgressBar folderProgressBar;
@@ -69,16 +68,14 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 			clearButtons();
 		}
 	};
-	
 
 	private Runnable undoRunnable = new Runnable() {
 		@Override
 		public void run() {
-			rootView.findViewById(R.id.undoPanel).setVisibility(
-					View.GONE);
+			rootView.findViewById(R.id.undoPanel).setVisibility(View.GONE);
 		}
 	};
-	
+
 	private void restartButtonsTimer() {
 		rootView.findViewById(R.id.goto1).setVisibility(View.VISIBLE);
 		handler.removeCallbacks(buttonsRunnable);
@@ -87,13 +84,13 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 
 	@Override
 	public void onUndoAdded() {
-		if(rootView == null)
+		if (rootView == null)
 			return;
 		rootView.findViewById(R.id.undoPanel).setVisibility(View.VISIBLE);
 		handler.removeCallbacks(undoRunnable);
 		handler.postDelayed(undoRunnable, 5000);
 	}
-	
+
 	@Override
 	public void onChanged(OnChangedHint hint) {
 		if (conn.service == null)
@@ -123,7 +120,6 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 		fileProgressBar = (ProgressBar) rootView.findViewById(R.id.progress);
 		folderProgressBar = (ProgressBar) rootView
 				.findViewById(R.id.folderProgress);
-		timing = (Button) rootView.findViewById(R.id.timing);
 
 		listView = (ListView) rootView.findViewById(R.id.list);
 
@@ -139,7 +135,7 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 				}
 			}
 		});
-		
+
 		undoRunnable.run();
 
 		pause = (Button) rootView.findViewById(R.id.pause);
@@ -377,8 +373,8 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 	}
 
 	private void stateChanged() {
-		if (conn.service != null)
-			pause.setText(conn.service.isPlaying() ? "Pause" : "Play");
+		// if (conn.service != null)
+		// pause.setText(conn.service.isPlaying() ? "Pause" : "Play");
 
 		updateTapeViewState();
 		positionChanged();
@@ -392,9 +388,14 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 
 			fileProgressBar.setMax(dur);
 			fileProgressBar.setProgress(pos);
-			if (!tape)
-				timing.setText(Utils.convertSecondsToHMmSs(pos / 1000) + "("
-						+ Utils.convertSecondsToHMmSs(dur / 1000) + ")");
+			if (!tape) {
+				String time = Utils.convertSecondsToHMmSs(pos / 1000) + "("
+						+ Utils.convertSecondsToHMmSs(dur / 1000) + ")";
+				pause.setText((conn.service.isPlaying() ? "Pause" : "Play")
+						+ time);
+				// timing.setText(Utils.convertSecondsToHMmSs(pos / 1000) + "("
+				// + Utils.convertSecondsToHMmSs(dur / 1000) + ")");
+			}
 
 			int file = conn.service.getFile();
 			FileDescriptor[] files = conn.service.getFiles();
@@ -480,8 +481,8 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 						: View.VISIBLE);
 				magicEyeLevelView.setVisibility(magicEye ? View.VISIBLE
 						: View.GONE);
-				
-				if(tapeView != null)
+
+				if (tapeView != null)
 					tapeView.click = settings.getBoolean(
 							getString(R.string.prefClick), false);
 			}

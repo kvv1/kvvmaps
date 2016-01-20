@@ -54,15 +54,6 @@
             </ListView>
 
             <Button
-                android:id="@+id/timing"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right|bottom"
-                android:text="Button"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <Button
                 android:id="@+id/goto1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -94,8 +85,8 @@
 
                 <Button
                     android:id="@+id/undo"
-                    android:layout_width="100sp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="60sp"
+                    android:layout_height="60sp"
                     android:layout_weight="1"
                     android:text="&lt;-"
                     android:textSize="20sp"
@@ -103,8 +94,8 @@
 
                 <Button
                     android:id="@+id/redo"
-                    android:layout_width="100sp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="60sp"
+                    android:layout_height="60sp"
                     android:layout_weight="1"
                     android:text="->"
                     android:textSize="20sp"
