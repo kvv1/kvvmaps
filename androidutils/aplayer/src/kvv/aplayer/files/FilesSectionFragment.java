@@ -392,7 +392,7 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 				String time = Utils.convertSecondsToHMmSs(pos / 1000) + "("
 						+ Utils.convertSecondsToHMmSs(dur / 1000) + ")";
 				pause.setText((conn.service.isPlaying() ? "Pause" : "Play")
-						+ time);
+						+ "  " + time);
 				// timing.setText(Utils.convertSecondsToHMmSs(pos / 1000) + "("
 				// + Utils.convertSecondsToHMmSs(dur / 1000) + ")");
 			}
