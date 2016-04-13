@@ -25,7 +25,7 @@ public class LoginPanel extends Composite {
 
 	private final LoginServiceAsync loginService = GWT
 			.create(LoginService.class);
-	
+
 	private final Constants constants = GWT.create(Constants.class);
 
 	private final HorizontalPanel hp = new HorizontalPanel();
@@ -105,7 +105,7 @@ public class LoginPanel extends Composite {
 					@Override
 					public void onSuccess(String sessionId) {
 						loginService.login(name,
-								MD5.calcMD5(pwdHash + sessionId + "salt"),
+								MD5.calcMD5(pwdHash + sessionId),
 								new Callback<Boolean>() {
 									@Override
 									public void onSuccess(Boolean result) {

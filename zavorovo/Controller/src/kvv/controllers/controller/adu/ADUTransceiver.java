@@ -25,6 +25,8 @@ public class ADUTransceiver implements ModbusLine {
 
 	private final Map<Integer, Integer> timeouts = new HashMap<>();
 
+	public volatile boolean _log;
+
 	@Override
 	public void setTimeout(int addr, int timeout) {
 		timeouts.put(addr, timeout);
@@ -44,6 +46,12 @@ public class ADUTransceiver implements ModbusLine {
 			throws IOException {
 		PDU pdu = new PDU(body);
 		ADU adu = new ADU(addr, pdu);
+
+		if (_log) {
+			byte[] bytes = adu.toBytes();
+			for (byte b : bytes)
+				System.out.print(b + " ");
+		}
 
 		int attempts = failedAddrs.contains(addr) ? 1 : 3;
 		failedAddrs.remove(addr);
@@ -92,6 +100,17 @@ public class ADUTransceiver implements ModbusLine {
 				failedAddrs.add(addr);
 
 				throw e;
+			} finally {
+				if (i == 0 && _log) {
+					System.out.print(" -> ");
+					if (res == null) {
+						System.out.print("timeout");
+					} else {
+						for (byte b : res)
+							System.out.print(b + " ");
+					}
+					System.out.println();
+				}
 			}
 		}
 		return null;

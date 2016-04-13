@@ -2,6 +2,7 @@ package kvv.heliostat.server;
 
 import kvv.gwtutils.client.login.AuthException;
 import kvv.gwtutils.server.login.LoginServlet;
+import kvv.gwtutils.server.login.UserService;
 import kvv.heliostat.client.HeliostatServiceAux;
 import kvv.heliostat.client.dto.Weather;
 import kvv.heliostat.server.envir.Envir;
@@ -73,6 +74,11 @@ public class HeliostatServiceAuxImpl extends LoginServlet implements
 		ParamsHolder.params.SIM = value;
 		ParamsHolder.writeParams();
 		Envir.recreate();
+	}
+
+	@Override
+	protected UserService getUserService() {
+		return ContextListener.userService;
 	}
 
 }

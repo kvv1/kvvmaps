@@ -12,12 +12,12 @@ import kvv.gwtutils.client.login.AuthException;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")
-public class LoginServlet extends RemoteServiceServlet {
+public abstract class LoginServlet extends RemoteServiceServlet {
+	
+	protected abstract UserService getUserService();
+	
 	public void checkUser() throws AuthException {
-		// HttpSession session = getSession();
-		// UserData ud = (UserData) session.getAttribute("UserData");
-
-		UserData ud = user.get();
+		UserData ud = getUserService().find(user.get());
 		if (ud == null)
 			throw new AuthException("Not authenticated");
 	}
@@ -32,17 +32,14 @@ public class LoginServlet extends RemoteServiceServlet {
 	protected void service(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		HttpSession session = request.getSession();
-		UserData ud = (UserData) session.getAttribute("UserData");
-		user.set(ud);
+		String userName = (String) session.getAttribute("UserName");
+		user.set(userName);
 		super.service(request, response);
 	}
 
-	public static ThreadLocal<UserData> user = new ThreadLocal<>();
+	private static ThreadLocal<String> user = new ThreadLocal<>();
 	
 	public static String getUserName() {
-		UserData ud = user.get();
-		if(ud == null)
-			return null;
-		return ud.name;
+		return user.get();
 	}
 }

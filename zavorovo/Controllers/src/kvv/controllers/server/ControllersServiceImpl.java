@@ -13,6 +13,7 @@ import kvv.controllers.server.context.Context;
 import kvv.controllers.server.history.HistoryFile;
 import kvv.controllers.shared.RegisterDescr;
 import kvv.gwtutils.server.login.LoginServlet;
+import kvv.gwtutils.server.login.UserService;
 
 @SuppressWarnings("serial")
 public class ControllersServiceImpl extends LoginServlet implements
@@ -85,6 +86,11 @@ public class ControllersServiceImpl extends LoginServlet implements
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage());
 		}
+	}
+
+	@Override
+	protected UserService getUserService() {
+		return ContextListener.userService;
 	}
 
 }

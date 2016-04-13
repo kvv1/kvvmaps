@@ -3,6 +3,7 @@ package kvv.controllers.server;
 import kvv.controllers.client.FileService;
 import kvv.controllers.server.history.HistoryFile;
 import kvv.gwtutils.server.login.LoginServlet;
+import kvv.gwtutils.server.login.UserService;
 import kvv.stdutils.Utils;
 
 @SuppressWarnings("serial")
@@ -30,6 +31,11 @@ public class FileServiceImpl extends LoginServlet implements FileService {
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		}
+	}
+
+	@Override
+	protected UserService getUserService() {
+		return ContextListener.userService;
 	}
 
 }

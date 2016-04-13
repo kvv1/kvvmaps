@@ -14,6 +14,7 @@ import kvv.controllers.shared.ControllerDescr;
 import kvv.controllers.shared.SystemDescr;
 import kvv.controllers.shared.UnitDescr;
 import kvv.gwtutils.server.login.LoginServlet;
+import kvv.gwtutils.server.login.UserService;
 import kvv.stdutils.Utils;
 
 @SuppressWarnings("serial")
@@ -150,4 +151,10 @@ public class ConfigurationServiceImpl extends LoginServlet implements
 			throw new Exception(e.getMessage());
 		}
 	}
+	
+	@Override
+	protected UserService getUserService() {
+		return ContextListener.userService;
+	}
+
 }

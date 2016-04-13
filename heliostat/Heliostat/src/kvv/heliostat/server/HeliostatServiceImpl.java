@@ -2,6 +2,7 @@ package kvv.heliostat.server;
 
 import kvv.gwtutils.client.login.AuthException;
 import kvv.gwtutils.server.login.LoginServlet;
+import kvv.gwtutils.server.login.UserService;
 import kvv.heliostat.client.HeliostatService;
 import kvv.heliostat.client.dto.AutoMode;
 import kvv.heliostat.client.dto.HeliostatState;
@@ -123,6 +124,11 @@ public class HeliostatServiceImpl extends LoginServlet implements
 		checkUser();
 		ParamsHolder.params.controllerParams = str;
 		ParamsHolder.writeParams();
+	}
+
+	@Override
+	protected UserService getUserService() {
+		return ContextListener.userService;
 	}
 
 }

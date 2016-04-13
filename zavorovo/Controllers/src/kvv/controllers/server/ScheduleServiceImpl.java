@@ -17,6 +17,7 @@ import kvv.controllers.shared.RegisterSchedule;
 import kvv.controllers.shared.Schedule;
 import kvv.controllers.shared.ScheduleAndHistory;
 import kvv.gwtutils.server.login.LoginServlet;
+import kvv.gwtutils.server.login.UserService;
 
 @SuppressWarnings("serial")
 public class ScheduleServiceImpl extends LoginServlet implements
@@ -66,6 +67,11 @@ public class ScheduleServiceImpl extends LoginServlet implements
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		}
+	}
+	
+	@Override
+	protected UserService getUserService() {
+		return ContextListener.userService;
 	}
 
 }

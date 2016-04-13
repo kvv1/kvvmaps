@@ -16,6 +16,12 @@ public class ControllerWrapperAdj extends ControllerAdapter {
 
 	@Override
 	public void setReg(int addr, int reg, int val) throws IOException {
+		
+		RegisterDef registerDef = getRegDef(addr, reg);
+
+		if (registerDef != null && registerDef.mul != null)
+			val *= registerDef.mul;
+		
 		wrapped.setReg(addr, reg, val);
 	}
 
@@ -38,14 +44,11 @@ public class ControllerWrapperAdj extends ControllerAdapter {
 	private Integer adjust(int addr, int reg, Integer value) {
 		if (value == null)
 			return null;
-		ControllerDescr cd = system.getController(addr);
-		if (cd == null)
-			return value;
-		ControllerType ct = system.controllerTypes.get(cd.type);
-		if (ct != null) {
-			RegisterDef registerDef = ct.def.getReg(reg);
-			if (value != null && registerDef != null
-					&& registerDef.validRanges != null) {
+		RegisterDef registerDef = getRegDef(addr, reg);
+		if (registerDef != null) {
+//			if(registerDef.mul != null)
+//				value /= registerDef.mul;
+			if (registerDef.validRanges != null) {
 				boolean ok = false;
 				for (int i = 0; i < registerDef.validRanges.length; i += 2)
 					if (value >= registerDef.validRanges[i]
@@ -56,6 +59,18 @@ public class ControllerWrapperAdj extends ControllerAdapter {
 			}
 		}
 		return value;
+	}
+
+	private RegisterDef getRegDef(int addr, int reg) {
+		ControllerDescr cd = system.getController(addr);
+		if (cd == null)
+			return null;
+		
+		ControllerType ct = system.controllerTypes.get(cd.type);
+		if (ct == null)
+			return null;
+		
+		return ct.def.getReg(reg);
 	}
 
 }
