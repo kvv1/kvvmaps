@@ -10,5 +10,8 @@
         <CheckBoxPreference
             android:key="@string/prefClick"
             android:title="Sounds" />
+        <CheckBoxPreference
+            android:key="@string/prefTest"
+            android:title="Test" />
         
 </PreferenceScreen>

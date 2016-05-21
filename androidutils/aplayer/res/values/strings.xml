@@ -6,6 +6,7 @@
     <string name="prefCarMode">prefCarMode</string>
     <string name="prefMagicEye">prefMagicEye</string>
     <string name="prefClick">prefClick</string>
+    <string name="prefTest">prefTest</string>
     <string name="title_activity_preferences">Настройки</string>
 
 </resources>

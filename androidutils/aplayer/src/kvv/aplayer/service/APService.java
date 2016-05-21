@@ -509,19 +509,24 @@ public class APService extends BaseService implements IAPService {
 		if (mCursor == null)
 			return folders;
 
-		System.out.println("total no of songs are=" + mCursor.getCount());
-
 		Map<String, List<FileDescriptor>> map = new HashMap<String, List<FileDescriptor>>();
 
 		while (mCursor.moveToNext()) {
 			String title = mCursor
 					.getString(mCursor
 							.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
+
 			String path = mCursor.getString(mCursor
 					.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+
 			long dur = mCursor.getLong(mCursor
 					.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
 			// System.out.println(title + " " + path + " " + dur);
+
+			if (path.contains("/_/")
+					&& !settings
+							.getBoolean(getString(R.string.prefTest), false))
+				continue;
 
 			String p = path.substring(path.indexOf('/', 1) + 1);
 			for (int i = 0; i < p.length(); i++)
