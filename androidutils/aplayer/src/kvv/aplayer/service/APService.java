@@ -1,6 +1,5 @@
 package kvv.aplayer.service;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,6 +11,8 @@ import java.util.Set;
 
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
+import kvv.aplayer.player.Files;
+import kvv.aplayer.player.Folders;
 import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.player.Player1;
 import android.content.BroadcastReceiver;
@@ -26,7 +27,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
@@ -36,11 +36,7 @@ import android.telephony.TelephonyManager;
 import com.smartbean.androidutils.service.BaseService;
 
 public class APService extends BaseService implements IAPService {
-	public final static File ROOT = new File(
-			Environment.getExternalStorageDirectory(), "/external_sd/aplayer/");
-
-	// public static final float[] dBPer100kmh = { 0, 5f };
-	// public static final int[] compr = { 0, 15 };
+	public final static int mruSize = 6;
 
 	public static APService staticInstance;
 
@@ -57,6 +53,8 @@ public class APService extends BaseService implements IAPService {
 			handler.postDelayed(this, 60000);
 		}
 	}
+
+	private BadSongs badSongs;
 
 	private Saver saver;
 
@@ -138,6 +136,23 @@ public class APService extends BaseService implements IAPService {
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 		staticInstance = this;
+		
+		badSongs = new BadSongs(this);
+	}
+
+	@Override
+	public void addBadSong(String path) {
+		badSongs.addBadSong(path);
+	}
+
+	@Override
+	public void delBadSong(String path) {
+		badSongs.delBadSong(path);
+	}
+
+	@Override
+	public List<String> getBadSongs() {
+		return badSongs.getBadSongs();
 	}
 
 	private void createPlayer() {
@@ -178,6 +193,11 @@ public class APService extends BaseService implements IAPService {
 				for (APServiceListener l : listeners)
 					l.onLevelChanged(indicatorLevel);
 			}
+
+			@Override
+			protected List<String> getBadSongs() {
+				return badSongs.getBadSongs();
+			}
 		};
 
 		modeChanged();
@@ -200,7 +220,7 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	@Override
-	public List<Folder> getFolders() {
+	public Folders getFolders() {
 		return player.getFolders();
 	}
 
@@ -215,34 +235,59 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	@Override
-	public int getCurrentFolder() {
-		return player.getCurrentFolder();
-	}
+	public void toFolder(int folderIdx) {
+		Folders folders = player.getFolders();
 
-	@Override
-	public void toFolder(int position) {
-		if (position == player.getCurrentFolder())
+		if (folderIdx == folders.curFolder)
 			return;
 
-		storeUndo();
-
+		undoList.clear();
+		redoList.clear();
 		save();
 
-		Folder folder = player.getFolders().get(position);
+		Folder folder = folders.folders.get(folderIdx);
 		int curFile = settings.getInt(folder.path + "|file", 0);
 		int curPos = settings.getInt(folder.path + "|pos", 0);
-		if (curFile >= folder.files.length)
-			curFile = 0;
 
-		player.toFolder(position, curFile, curPos);
+		List<String> mruFolders = getMRU();
 
+		mruFolders.remove(folder.path);
+		mruFolders.add(0, folder.path);
+
+		if (mruFolders.size() > mruSize)
+			mruFolders = new ArrayList<String>(mruFolders.subList(0, mruSize));
+
+		setMRU(mruFolders);
+
+		player.toFolder(folderIdx, curFile, curPos);
 	}
 
 	@Override
-	public void toRandom(int position) {
-		storeUndo();
+	public List<String> getMRU() {
+		List<String> mruFolders = new ArrayList<String>();
+		for (int i = 0; i < mruSize; i++) {
+			String path = settings.getString("mru" + i, null);
+			if (path != null)
+				mruFolders.add(path);
+		}
+		return mruFolders;
+	}
+
+	private void setMRU(List<String> mruFolders) {
+		for (int i = 0; i < mruSize; i++) {
+			if (i < mruFolders.size())
+				setPref("mru" + i, mruFolders.get(i));
+			else
+				delPref("mru" + i);
+		}
+	}
+
+	@Override
+	public void setRandom(boolean random) {
+		undoList.clear();
+		redoList.clear();
 		save();
-		player.makeRandom(position);
+		player.setRandom(random);
 	}
 
 	@Override
@@ -295,11 +340,6 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	@Override
-	public int getFile() {
-		return player.getFile();
-	}
-
-	@Override
 	public boolean isPlaying() {
 		return player.isPlaying();
 	}
@@ -311,26 +351,13 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	@Override
-	public int getFileCnt() {
-		int folder = getCurrentFolder();
-		if (folder >= 0) {
-			Folder fold = getFolders().get(folder);
-			return fold.files.length;
-		}
-		return 0;
-	}
-
-	@Override
 	public void reload() {
 		createPlayer();
 	}
 
 	@Override
-	public FileDescriptor[] getFiles() {
-		int folder = getCurrentFolder();
-		if (folder < 0)
-			return new FileDescriptor[0];
-		return getFolders().get(folder).files;
+	public Files getFiles() {
+		return player.getFiles();
 	}
 
 	@Override
@@ -339,15 +366,12 @@ public class APService extends BaseService implements IAPService {
 		if (redoList.isEmpty())
 			return;
 		// if(lastItem == null)
-		UndoItem lastItem = new UndoItem(player.getCurrentFolder(),
-				player.getFile(), player.getCurrentPosition());
+		UndoItem lastItem = new UndoItem(player.getFolders().curFolder,
+				player.getFiles().curFile, player.getCurrentPosition());
 		UndoItem item = redoList.removeLast();
 		undoList.add(lastItem);
 		// lastItem = item;
 		player.toFolder(item.folder, item.file, item.pos);
-
-		for (APServiceListener listener : listeners)
-			listener.onUndoAdded();
 	}
 
 	@Override
@@ -356,15 +380,12 @@ public class APService extends BaseService implements IAPService {
 		if (undoList.isEmpty())
 			return;
 		// if(lastItem == null)
-		UndoItem lastItem = new UndoItem(player.getCurrentFolder(),
-				player.getFile(), player.getCurrentPosition());
+		UndoItem lastItem = new UndoItem(player.getFolders().curFolder,
+				player.getFiles().curFile, player.getCurrentPosition());
 		UndoItem item = undoList.removeLast();
 		redoList.add(lastItem);
 		// lastItem = item;
 		player.toFolder(item.folder, item.file, item.pos);
-
-		for (APServiceListener listener : listeners)
-			listener.onUndoAdded();
 	}
 
 	@Override
@@ -373,14 +394,11 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	private void storeUndo() {
-		if (player.getCurrentFolder() < 0)
+		if (player.getFolders().curFolder < 0)
 			return;
-		undoList.add(new UndoItem(player.getCurrentFolder(), player.getFile(),
-				player.getCurrentPosition()));
+		undoList.add(new UndoItem(player.getFolders().curFolder, player
+				.getFiles().curFile, player.getCurrentPosition()));
 		redoList.clear();
-
-		for (APServiceListener listener : listeners)
-			listener.onUndoAdded();
 	}
 
 	static class UndoItem {
@@ -400,21 +418,27 @@ public class APService extends BaseService implements IAPService {
 	private LinkedList<UndoItem> redoList = new LinkedList<APService.UndoItem>();
 
 	private void save() {
-		if (player.getCurrentFolder() < 0)
-			return;
+		Folder folder = getFolders().getFolder();
 
-		Folder folder = player.getFolders().get(player.getCurrentFolder());
+		if (folder == null)
+			return;
 
 		// System.out.println("SAVE " + folder.shortName + " " +
 		// player.getFile());
 
-		setPrefInt(folder.path + "|file", player.getFile());
+		setPrefInt(folder.path + "|file", player.getFiles().curFile);
 		setPrefInt(folder.path + "|pos", player.getCurrentPosition());
 
 		// SharedPreferences.Editor editor = settings.edit();
 		// editor.putInt(folder.path + "|file", player.getFile());
 		// editor.putInt(folder.path + "|pos", player.getCurrentPosition());
 		// editor.apply();
+	}
+
+	private void delPref(String name) {
+		SharedPreferences.Editor editor = settings.edit();
+		editor.remove(name);
+		editor.apply();
 	}
 
 	private void setPref(String name, String val) {
@@ -429,6 +453,7 @@ public class APService extends BaseService implements IAPService {
 		editor.apply();
 	}
 
+	@SuppressWarnings("unused")
 	private void setPrefBool(String name, boolean val) {
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(name, val);
@@ -556,8 +581,7 @@ public class APService extends BaseService implements IAPService {
 			List<FileDescriptor> files = map.get(folder);
 			Collections.sort(files);
 
-			folders.add(new Folder(folder, ind, files
-					.toArray(new FileDescriptor[0])));
+			folders.add(new Folder(folder, ind, files));
 		}
 
 		return folders;

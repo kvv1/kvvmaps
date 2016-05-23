@@ -23,7 +23,7 @@ public class ChartsFragment extends
 	protected void createUI(IAPService service) {
 		service.addListener(listener);
 		
-		ChartView chart = (ChartView) rootView.findViewById(R.id.chart);
+		//ChartView chart = (ChartView) rootView.findViewById(R.id.chart);
 		
 		ChartData chartData = new ChartData(100);
 		chartData.add(100, 200);

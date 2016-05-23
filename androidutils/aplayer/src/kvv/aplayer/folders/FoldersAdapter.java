@@ -3,6 +3,7 @@ package kvv.aplayer.folders;
 import kvv.aplayer.R;
 import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,11 +18,12 @@ public class FoldersAdapter extends ArrayAdapter<Folder> {
 	public int sel;
 
 	public FoldersAdapter(Activity activity, IAPService service) {
-		super(activity, R.layout.folder_item, service.getFolders());
+		super(activity, R.layout.folder_item, service.getFolders().folders);
 		this.activity = activity;
 		this.service = service;
 	}
 
+	@SuppressLint({ "ViewHolder", "InflateParams" })
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View v = convertView;
@@ -39,7 +41,7 @@ public class FoldersAdapter extends ArrayAdapter<Folder> {
 
 		if (position == sel)
 			v.setBackgroundColor(0xFFFFFF80);
-		else if (sel < 0 && position == service.getCurrentFolder())
+		else if (sel < 0 && position == service.getFolders().curFolder)
 			v.setBackgroundColor(0xFFFFFF80);
 		else
 			v.setBackgroundColor(0xFFFFFFFF);

@@ -47,7 +47,7 @@ public abstract class Player {
 		mp.setOnCompletionListener(listener);
 	}
 
-	protected void toFile(String path, int pos, boolean start) {
+	protected void playFile(String path, int pos, boolean start) {
 		try {
 			if (mp.isPlaying())
 				mp.stop();

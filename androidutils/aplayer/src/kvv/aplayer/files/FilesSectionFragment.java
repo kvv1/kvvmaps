@@ -1,25 +1,35 @@
 package kvv.aplayer.files;
 
+import java.util.List;
+
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
 import kvv.aplayer.files.tape.LevelView;
 import kvv.aplayer.files.tape.TapePanel;
 import kvv.aplayer.files.tape.TapeView;
+import kvv.aplayer.player.Files;
+import kvv.aplayer.player.Folders;
 import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.FileDescriptor;
+import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.text.TextUtils.TruncateAt;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -72,7 +82,12 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 	private Runnable undoRunnable = new Runnable() {
 		@Override
 		public void run() {
-			rootView.findViewById(R.id.undoPanel).setVisibility(View.GONE);
+			handler.removeCallbacks(this);
+			
+			FrameLayout l = (FrameLayout) rootView.findViewById(R.id.undoPanel);
+			l.removeAllViews();
+			
+//			rootView.findViewById(R.id.undoPanel).setVisibility(View.GONE);
 		}
 	};
 
@@ -82,11 +97,117 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 		handler.postDelayed(buttonsRunnable, APActivity.BUTTONS_DELAY);
 	}
 
-	@Override
-	public void onUndoAdded() {
+	private void showUndoRedoPanel() {
 		if (rootView == null)
 			return;
-		rootView.findViewById(R.id.undoPanel).setVisibility(View.VISIBLE);
+		
+		FrameLayout l = (FrameLayout) rootView.findViewById(R.id.undoPanel);
+		l.removeAllViews();
+		LayoutInflater vi = getActivity().getLayoutInflater();
+		View up = vi.inflate(R.layout.popup_panel, null);
+		l.addView(up);
+		
+//		rootView.findViewById(R.id.undoPanel).setVisibility(View.VISIBLE);
+
+		rootView.findViewById(R.id.undo).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if (conn.service != null)
+							conn.service.undo();
+						showUndoRedoPanel();
+					}
+				});
+
+		rootView.findViewById(R.id.redo).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if (conn.service != null)
+							conn.service.redo();
+						showUndoRedoPanel();
+					}
+				});
+
+		rootView.findViewById(R.id.random).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if (conn.service != null) {
+							Folder folder = conn.service.getFolders()
+									.getFolder();
+							conn.service.setRandom(!folder.random);
+						}
+						undoRunnable.run();
+					}
+				});
+		
+		final FileDescriptor file = conn.service.getFiles().getFile();
+
+		if (file != null) {
+			Button dontlike = (Button) rootView.findViewById(R.id.badsong);
+			final List<String> allBadSongs = conn.service.getBadSongs();
+			
+			if (allBadSongs.contains(file.path))
+				dontlike.setText("Like");
+			else
+				dontlike.setText("Don't like");
+
+			dontlike.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if (allBadSongs.contains(file.path))
+						conn.service.delBadSong(file.path);
+					else
+						conn.service.addBadSong(file.path);
+					undoRunnable.run();
+					FilesAdapter adapter = (FilesAdapter) listView.getAdapter();
+					adapter.badSongs = conn.service.getBadSongs();
+					listView.invalidateViews();
+				}
+			});
+		}
+		
+		LinearLayout linearLayout = (LinearLayout) rootView
+				.findViewById(R.id.mru);
+		linearLayout.removeAllViews();
+
+		if (conn.service != null) {
+
+
+			Folder folder = conn.service.getFolders().getFolder();
+
+			List<String> mru = conn.service.getMRU();
+			for (final String s : mru) {
+				if (folder != null && folder.path.equals(s))
+					continue;
+
+				Button b = new Button(getActivity());
+				b.setText(s);
+				b.setSingleLine();
+				b.setEllipsize(TruncateAt.START);
+				b.setTextAppearance(getActivity(),
+						android.R.style.TextAppearance_Medium);
+				b.setTypeface(Typeface.DEFAULT_BOLD);
+				b.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if (conn.service != null) {
+							Folders folders = conn.service.getFolders();
+							int index = folders.getIndex(s);
+							if (index >= 0) {
+								conn.service.toFolder(index);
+								undoRunnable.run();
+							}
+						}
+					}
+				});
+
+				linearLayout.addView(b);
+			}
+			
+		}
+
 		handler.removeCallbacks(undoRunnable);
 		handler.postDelayed(undoRunnable, 5000);
 	}
@@ -136,8 +257,6 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 			}
 		});
 
-		undoRunnable.run();
-
 		pause = (Button) rootView.findViewById(R.id.pause);
 		pause.setOnClickListener(new OnClickListener() {
 			@Override
@@ -150,28 +269,10 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 		pause.setOnLongClickListener(new OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
-				onUndoAdded();
+				showUndoRedoPanel();
 				return true;
 			}
 		});
-
-		rootView.findViewById(R.id.undo).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						if (conn.service != null)
-							conn.service.undo();
-					}
-				});
-
-		rootView.findViewById(R.id.redo).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						if (conn.service != null)
-							conn.service.redo();
-					}
-				});
 
 		progressText = (TextView) rootView.findViewById(R.id.progressText);
 
@@ -228,7 +329,8 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 					tapeView.setSeek(-2000, true);
 					conn.service.prev();
 				} else if (ht == 1) {
-					if (conn.service.getFile() < conn.service.getFileCnt() - 1)
+					Files files = conn.service.getFiles();
+					if (files.curFile < files.files.size() - 1)
 						tapeView.setSeek(2000, true);
 					conn.service.next();
 				} else {
@@ -246,7 +348,7 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 					tapeView.setSeek(2000, false);
 					seekStep = 1000;
 				} else
-					onUndoAdded();
+					showUndoRedoPanel();
 			}
 
 			@Override
@@ -307,6 +409,8 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 		onChanged(OnChangedHint.FOLDER);
 
 		setMagicEye();
+		
+		undoRunnable.run();
 	}
 
 	private void onHold() {
@@ -346,15 +450,18 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 		System.out.println("folderChanged()");
 		FilesAdapter adapter = new FilesAdapter(getActivity(), conn.service);
 		listView.setAdapter(adapter);
-		folderTextView.setText(conn.service.getFolders().get(
-				conn.service.getCurrentFolder()).displayName);
+		Folder folder = conn.service.getFolders().getFolder();
+		if (folder != null)
+			folderTextView.setText(folder.getDisplayName());
+		else
+			folderTextView.setText("<empty>");
 
-		FileDescriptor[] files = conn.service.getFiles();
+		Files files = conn.service.getFiles();
 
 		folderMax = 0;
-		folderFilesStartPos = new long[files.length];
-		for (int i = 0; i < files.length; i++) {
-			FileDescriptor file = files[i];
+		folderFilesStartPos = new long[files.files.size()];
+		for (int i = 0; i < folderFilesStartPos.length; i++) {
+			FileDescriptor file = files.files.get(i);
 			folderFilesStartPos[i] = folderMax;
 			folderMax += file.duration;
 		}
@@ -364,12 +471,16 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 	private void trackChanged() {
 		System.out.println("trackChanged()");
 		clearButtons();
+		Files files = conn.service.getFiles();
+
 		listView.invalidateViews();
-		listView.setSelection(conn.service.getFile() - 2);
-		int file = conn.service.getFile();
-		FileDescriptor[] files = conn.service.getFiles();
-		if (files.length > 0)
-			progressText.setText(files[file].name);
+		listView.setSelection(files.curFile - 2);
+		// int file = conn.service.getCurrentFile();
+		// FileDescriptor[] files = conn.service.getFiles();
+
+		FileDescriptor file = files.getFile();
+		if (file != null)
+			progressText.setText(file.name);
 	}
 
 	private void stateChanged() {
@@ -397,12 +508,11 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 				// + Utils.convertSecondsToHMmSs(dur / 1000) + ")");
 			}
 
-			int file = conn.service.getFile();
-			FileDescriptor[] files = conn.service.getFiles();
-			if (files.length > 0 && folderFilesStartPos != null
-					&& folderFilesStartPos.length > file) {
+			Files files = conn.service.getFiles();
+			if (files.files.size() > 0 && folderFilesStartPos != null
+					&& folderFilesStartPos.length > files.curFile) {
 				int max = (int) (folderMax / 1000);
-				int cur = (int) (folderFilesStartPos[file] + pos) / 1000;
+				int cur = (int) (folderFilesStartPos[files.curFile] + pos) / 1000;
 
 				if (tape)
 					tapeView.setProgress(max, cur);

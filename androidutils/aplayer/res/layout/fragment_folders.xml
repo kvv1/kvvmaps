@@ -34,15 +34,6 @@
             android:textSize="30sp"
             android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/random"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="3"
-            android:text="RND"
-            android:textColor="@color/bluedark"
-            android:textSize="30sp"
-            android:textStyle="bold" />
     </LinearLayout>
 
 </RelativeLayout>

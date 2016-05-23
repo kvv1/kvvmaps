@@ -31,7 +31,7 @@ public class FoldersSectionFragment extends FragmentX<APActivity, IAPService> {
 			clearGoto();
 
 			if (hint == OnChangedHint.FOLDER) {
-				int curFolder = conn.service.getCurrentFolder();
+				int curFolder = conn.service.getFolders().curFolder;
 				if (curFolder < list.getCount()) {
 					list.invalidateViews();
 					if (!noSel && conn.service.isPlaying())
@@ -117,20 +117,20 @@ public class FoldersSectionFragment extends FragmentX<APActivity, IAPService> {
 					}
 				});
 
-		((Button) rootView.findViewById(R.id.random))
-				.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View arg0) {
-						FoldersAdapter adapter = (FoldersAdapter) list
-								.getAdapter();
-						if (adapter != null && adapter.sel >= 0
-								&& conn.service != null) {
-							conn.service.toRandom(adapter.sel);
-							APActivity activity = getActivity1();
-							activity.selectMainPage();
-						}
-					}
-				});
+		// ((Button) rootView.findViewById(R.id.random))
+		// .setOnClickListener(new OnClickListener() {
+		// @Override
+		// public void onClick(View arg0) {
+		// FoldersAdapter adapter = (FoldersAdapter) list
+		// .getAdapter();
+		// if (adapter != null && adapter.sel >= 0
+		// && conn.service != null) {
+		// conn.service.toRandom(adapter.sel);
+		// APActivity activity = getActivity1();
+		// activity.selectMainPage();
+		// }
+		// }
+		// });
 	}
 
 	@Override

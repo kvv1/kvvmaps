@@ -12,87 +12,103 @@ import android.media.MediaPlayer.OnCompletionListener;
 
 public abstract class Player0 extends Player {
 
-	private List<Folder> folders;
-	private int curFolder = 0;
+	protected abstract List<String> getBadSongs();
+
+	private Folders folders;
 	private int curFile = 0;
 
-	public Player0(final List<Folder> folders) {
-		this.folders = folders;
-		folders.add(new Folder("RANDOM", 0, new FileDescriptor[0]));
-
+	public Player0(final List<Folder> _folders) {
+		this.folders = new Folders(_folders, -1);
 		setOnCompletionListener(new OnCompletionListener() {
 			@Override
 			public void onCompletion(MediaPlayer mp1) {
 				System.out.println("onCompletion");
 
-				String path = nextFile();
-				if (path == null) {
+				Integer next = getNext();
+				if (next == null) {
 					curFile = 0;
-					Folder folder = folders.get(curFolder);
-					if (folder.files.length > 0)
-						toFile(folder.files[curFile].path, 0, false);
+					playFile(folders.getFolder().filesToPlay.get(curFile).path,
+							0, false);
 				} else {
-					toFile(path, 0, true);
+					toFile(next);
 				}
 			}
 		});
 	}
 
-	public List<Folder> getFolders() {
+	public Folders getFolders() {
 		return folders;
 	}
 
-	public int getCurrentFolder() {
-		return curFolder;
+	public Files getFiles() {
+		Folder folder = folders.getFolder();
+		if (folder == null)
+			return new Files(Collections.<FileDescriptor> emptyList(), -1);
+
+		return new Files(folder.filesToPlay, curFile);
 	}
 
-	public void toFolder(int folder, int file, int curPos) {
-		if (folders.size() == 0)
+	public void toFolder(int folderIdx, int file, int curPos) {
+		if (folders.curFolder == folderIdx)
 			return;
-
-		curFolder = folder;
-		toFile(file, curPos);
-		onChanged(OnChangedHint.FOLDER);
+		_toFolder(folderIdx, file, curPos);
 	}
 
-	public void makeRandom(int folderIdx) {
-		if (folders.size() == 0)
-			return;
+	private void _toFolder(int folderIdx, int file, int curPos) {
+		Folder folder = folders.getFolder();
+		if (folder != null)
+			folder.filesToPlay = null;
 
-		Folder folder = folders.get(folderIdx);
+		folders.curFolder = folderIdx;
 
-		List<FileDescriptor> files = new ArrayList<FileDescriptor>();
-		files.addAll(Arrays.asList(folder.files));
-		for (int i = folderIdx + 1; i < folders.size(); i++) {
-			Folder f = folders.get(i);
-			if (f.indent <= folder.indent)
-				break;
-			files.addAll(Arrays.asList(f.files));
+		folder = folders.getFolder();
+
+		folder.filesToPlay = getAllFiles(folder);
+		if (folder.random) {
+			Collections.shuffle(folder.filesToPlay);
+			curPos = 0;
 		}
 
-		Collections.shuffle(files);
-
-		Folder randFolder = folders.get(folders.size() - 1);
-
-		randFolder.files = files.toArray(new FileDescriptor[0]);
-		randFolder.displayName = folder.displayName + " RND";
+		toFile(file, curPos);
 
 		onChanged(OnChangedHint.FOLDER);
-		toFolder(folders.size() - 1, 0, 0);
+	}
+
+	public void setRandom(boolean random) {
+		Folder folder = folders.getFolder();
+		if (folder == null)
+			return;
+
+		folder.random = random;
+
+		onChanged(OnChangedHint.FOLDER);
+		_toFolder(folders.curFolder, 0, 0);
+	}
+
+	private List<FileDescriptor> getAllFiles(Folder folder) {
+		List<FileDescriptor> files = new ArrayList<FileDescriptor>();
+		files.addAll(folder._files);
+		for (int i = folders.curFolder + 1; i < folders.folders.size(); i++) {
+			Folder f = folders.folders.get(i);
+			if (f.indent <= folder.indent)
+				break;
+			files.addAll(f._files);
+		}
+		return files;
 	}
 
 	private void toFile(int idx, int pos) {
-		if (folders.size() == 0 || curFolder < 0)
+		Folder folder = folders.getFolder();
+		if (folder == null)
 			return;
 
-		Folder folder = folders.get(curFolder);
-		if (idx >= folder.files.length)
+		if (idx >= folder.filesToPlay.size())
 			curFile = 0;
 		else
 			curFile = idx;
 
-		if (folder.files.length > curFile)
-			toFile(folder.files[curFile].path, pos, true);
+		if (folder.filesToPlay.size() > curFile)
+			playFile(folder.filesToPlay.get(curFile).path, pos, true);
 	}
 
 	public void toFile(int idx) {
@@ -101,28 +117,37 @@ public abstract class Player0 extends Player {
 
 	public void prev() {
 		int cur = getCurrentPosition();
-		if (cur < 3000 && curFile > 0) {
-			toFile(curFile - 1);
-		} else {
+		Integer prev = getPrev();
+
+		if (cur < 3000 && prev != null)
+			toFile(prev);
+		else
 			seekTo(0);
-		}
+	}
+
+	private Integer getPrev() {
+		Folder folder = folders.getFolder();
+		if (folder == null)
+			return null;
+		return Files.skipBw(folder.filesToPlay, curFile - 1, getBadSongs());
+	}
+
+	private Integer getNext() {
+		Folder folder = folders.getFolder();
+		if (folder == null)
+			return null;
+		return Files.skipFw(folder.filesToPlay, curFile + 1, getBadSongs());
 	}
 
 	public boolean hasNext() {
-		if (folders.size() == 0 || curFolder < 0)
-			return false;
-
-		Folder folder = folders.get(curFolder);
-		if (curFile >= folder.files.length - 1)
-			return false;
-
-		return true;
+		return getNext() != null;
 	}
 
 	public void next() {
-		if (!hasNext())
+		Integer next = getNext();
+		if (next == null)
 			return;
-		toFile(curFile + 1);
+		toFile(next);
 	}
 
 	public void seek(int seekStep) {
@@ -136,39 +161,18 @@ public abstract class Player0 extends Player {
 			if (cur > seekStep) {
 				seekTo(Math.max(0, cur - seekStep));
 			} else {
-				String path = prevFile();
-				if (path != null)
-					toFile(path, Math.max(0, getDuration() - seekStep), true);
+				Integer prev = getPrev();
+				if (prev != null)
+					toFile(prev, Math.max(0, getDuration() - seekStep));
 			}
 		} else {
 			if (cur + seekStep < getDuration()) {
 				seekTo(cur + seekStep);
 			} else {
-				String path = nextFile();
-				if (path != null)
-					toFile(path, 0, true);
+				Integer next = getNext();
+				if (next != null)
+					toFile(next);
 			}
 		}
 	}
-
-	public int getFile() {
-		return curFile;
-	}
-
-	private String prevFile() {
-		if (curFile <= 0)
-			return null;
-		curFile--;
-		Folder folder = folders.get(curFolder);
-		return folder.files[curFile].path;
-	}
-
-	private String nextFile() {
-		Folder folder = folders.get(curFolder);
-		if (curFile >= folder.files.length - 1)
-			return null;
-		curFile++;
-		return folder.files[curFile].path;
-	}
-
 }
