@@ -78,7 +78,6 @@ public abstract class FragmentX<A extends Activity, IService> extends Fragment {
 
 		Drawables.unbindDrawables(rootView);
 
-		rootView = null;
 		super.onDestroy();
 	}
 
