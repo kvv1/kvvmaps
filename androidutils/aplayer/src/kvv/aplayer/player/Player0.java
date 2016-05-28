@@ -11,11 +11,15 @@ import android.media.MediaPlayer.OnCompletionListener;
 
 public abstract class Player0 extends Player {
 
-	protected abstract List<String> getBadSongs();
-
 	private Folders folders;
 	private int curFile = 0;
 
+	private List<String> badSongs = Collections.emptyList();
+	
+	public void setBadSongs(List<String> badSongs) {
+		this.badSongs = badSongs;
+	}
+	
 	public Player0(final List<Folder> _folders) {
 		this.folders = new Folders(_folders, -1);
 		setOnCompletionListener(new OnCompletionListener() {
@@ -131,14 +135,14 @@ public abstract class Player0 extends Player {
 		Folder folder = folders.getFolder();
 		if (folder == null)
 			return null;
-		return Files.skipBw(folder.filesToPlay, curFile - 1, getBadSongs());
+		return Files.skipBw(folder.filesToPlay, curFile - 1, badSongs);
 	}
 
 	private Integer getNext() {
 		Folder folder = folders.getFolder();
 		if (folder == null)
 			return null;
-		return Files.skipFw(folder.filesToPlay, curFile + 1, getBadSongs());
+		return Files.skipFw(folder.filesToPlay, curFile + 1, badSongs);
 	}
 
 	public boolean hasNext() {

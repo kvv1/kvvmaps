@@ -14,7 +14,7 @@ import kvv.aplayer.R;
 import kvv.aplayer.player.Files;
 import kvv.aplayer.player.Folders;
 import kvv.aplayer.player.Player.OnChangedHint;
-import kvv.aplayer.player.Player1;
+import kvv.aplayer.player.PlayerBadSongs;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -42,21 +42,9 @@ public class APService extends BaseService implements IAPService {
 
 	private Set<APServiceListener> listeners = new HashSet<APServiceListener>();
 
-	private Player1 player;
+	private PlayerBadSongs player;
 
 	private Handler handler = new Handler();
-
-	class Saver implements Runnable {
-		@Override
-		public void run() {
-			save();
-			handler.postDelayed(this, 60000);
-		}
-	}
-
-	private BadSongs badSongs;
-
-	private Saver saver;
 
 	private SharedPreferences settings;
 
@@ -136,23 +124,22 @@ public class APService extends BaseService implements IAPService {
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 		staticInstance = this;
-		
-		badSongs = new BadSongs(this);
+
 	}
 
 	@Override
 	public void addBadSong(String path) {
-		badSongs.addBadSong(path);
+		player.addBadSong(path);
 	}
 
 	@Override
 	public void delBadSong(String path) {
-		badSongs.delBadSong(path);
+		player.delBadSong(path);
 	}
 
 	@Override
 	public List<String> getBadSongs() {
-		return badSongs.getBadSongs();
+		return player.getBadSongs();
 	}
 
 	private void createPlayer() {
@@ -163,7 +150,7 @@ public class APService extends BaseService implements IAPService {
 		redoList.clear();
 
 		List<Folder> folders = read();
-		player = new Player1(folders) {
+		player = new PlayerBadSongs(this, folders) {
 			@Override
 			public void onChanged(OnChangedHint hint) {
 				System.out.println("onChanged " + isPlaying());
@@ -172,17 +159,10 @@ public class APService extends BaseService implements IAPService {
 				if (isCarMode())
 					setMaxVolume();
 
-				if (!isPlaying()) {
-					handler.removeCallbacks(saver);
-					saver = null;
+				if (!isPlaying())
 					stopGpsDelayed();
-				} else {
-					if (saver == null) {
-						saver = new Saver();
-						handler.post(saver);
-					}
+				else
 					startGps();
-				}
 
 				for (APServiceListener l : listeners)
 					l.onChanged(hint);
@@ -192,11 +172,6 @@ public class APService extends BaseService implements IAPService {
 			protected void levelChanged(float indicatorLevel) {
 				for (APServiceListener l : listeners)
 					l.onLevelChanged(indicatorLevel);
-			}
-
-			@Override
-			protected List<String> getBadSongs() {
-				return badSongs.getBadSongs();
 			}
 		};
 
@@ -237,29 +212,23 @@ public class APService extends BaseService implements IAPService {
 	@Override
 	public void toFolder(int folderIdx) {
 		Folders folders = player.getFolders();
-
 		if (folderIdx == folders.curFolder)
 			return;
 
 		undoList.clear();
 		redoList.clear();
-		save();
 
-		Folder folder = folders.folders.get(folderIdx);
-		int curFile = settings.getInt(folder.path + "|file", 0);
-		int curPos = settings.getInt(folder.path + "|pos", 0);
+		player.toFolder(folderIdx);
 
 		List<String> mruFolders = getMRU();
 
-		mruFolders.remove(folder.path);
-		mruFolders.add(0, folder.path);
+		mruFolders.remove(folders.getFolder().path);
+		mruFolders.add(0, folders.getFolder().path);
 
 		if (mruFolders.size() > mruSize)
 			mruFolders = new ArrayList<String>(mruFolders.subList(0, mruSize));
 
 		setMRU(mruFolders);
-
-		player.toFolder(folderIdx, curFile, curPos);
 	}
 
 	@Override
@@ -286,7 +255,6 @@ public class APService extends BaseService implements IAPService {
 	public void setRandom(boolean random) {
 		undoList.clear();
 		redoList.clear();
-		save();
 		player.setRandom(random);
 	}
 
@@ -417,24 +385,6 @@ public class APService extends BaseService implements IAPService {
 	private LinkedList<UndoItem> undoList = new LinkedList<APService.UndoItem>();
 	private LinkedList<UndoItem> redoList = new LinkedList<APService.UndoItem>();
 
-	private void save() {
-		Folder folder = getFolders().getFolder();
-
-		if (folder == null)
-			return;
-
-		// System.out.println("SAVE " + folder.shortName + " " +
-		// player.getFile());
-
-		setPrefInt(folder.path + "|file", player.getFiles().curFile);
-		setPrefInt(folder.path + "|pos", player.getCurrentPosition());
-
-		// SharedPreferences.Editor editor = settings.edit();
-		// editor.putInt(folder.path + "|file", player.getFile());
-		// editor.putInt(folder.path + "|pos", player.getCurrentPosition());
-		// editor.apply();
-	}
-
 	private void delPref(String name) {
 		SharedPreferences.Editor editor = settings.edit();
 		editor.remove(name);
@@ -447,18 +397,18 @@ public class APService extends BaseService implements IAPService {
 		editor.apply();
 	}
 
-	private void setPrefInt(String name, int val) {
-		SharedPreferences.Editor editor = settings.edit();
-		editor.putInt(name, val);
-		editor.apply();
-	}
-
-	@SuppressWarnings("unused")
-	private void setPrefBool(String name, boolean val) {
-		SharedPreferences.Editor editor = settings.edit();
-		editor.putBoolean(name, val);
-		editor.apply();
-	}
+	// private void setPrefInt(String name, int val) {
+	// SharedPreferences.Editor editor = settings.edit();
+	// editor.putInt(name, val);
+	// editor.apply();
+	// }
+	//
+	// @SuppressWarnings("unused")
+	// private void setPrefBool(String name, boolean val) {
+	// SharedPreferences.Editor editor = settings.edit();
+	// editor.putBoolean(name, val);
+	// editor.apply();
+	// }
 
 	private LocationManager locationManager;
 	private LocationListener locationListener;
