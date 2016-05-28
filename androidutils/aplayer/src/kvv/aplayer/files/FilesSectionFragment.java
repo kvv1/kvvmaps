@@ -1,14 +1,12 @@
 package kvv.aplayer.files;
 
-import java.util.List;
-
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
 import kvv.aplayer.files.tape.LevelView;
 import kvv.aplayer.files.tape.TapePanel;
 import kvv.aplayer.files.tape.TapeView;
 import kvv.aplayer.player.Files;
-import kvv.aplayer.player.Folders;
+import kvv.aplayer.player.MRUDialog;
 import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
@@ -17,19 +15,14 @@ import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.text.TextUtils.TruncateAt;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -79,18 +72,6 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 		}
 	};
 
-	private Runnable undoRunnable = new Runnable() {
-		@Override
-		public void run() {
-			handler.removeCallbacks(this);
-			
-			FrameLayout l = (FrameLayout) rootView.findViewById(R.id.undoPanel);
-			l.removeAllViews();
-			
-//			rootView.findViewById(R.id.undoPanel).setVisibility(View.GONE);
-		}
-	};
-
 	private void restartButtonsTimer() {
 		rootView.findViewById(R.id.goto1).setVisibility(View.VISIBLE);
 		handler.removeCallbacks(buttonsRunnable);
@@ -98,118 +79,12 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 	}
 
 	private void showUndoRedoPanel() {
-		if (rootView == null)
+		if (conn.service == null)
 			return;
-		
-		FrameLayout l = (FrameLayout) rootView.findViewById(R.id.undoPanel);
-		l.removeAllViews();
-		LayoutInflater vi = getActivity().getLayoutInflater();
-		View up = vi.inflate(R.layout.popup_panel, null);
-		l.addView(up);
-		
-//		rootView.findViewById(R.id.undoPanel).setVisibility(View.VISIBLE);
 
-		rootView.findViewById(R.id.undo).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						if (conn.service != null)
-							conn.service.undo();
-						showUndoRedoPanel();
-					}
-				});
-
-		rootView.findViewById(R.id.redo).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						if (conn.service != null)
-							conn.service.redo();
-						showUndoRedoPanel();
-					}
-				});
-
-		rootView.findViewById(R.id.random).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						if (conn.service != null) {
-							Folder folder = conn.service.getFolders()
-									.getFolder();
-							conn.service.setRandom(!folder.random);
-						}
-						undoRunnable.run();
-					}
-				});
-		
-		final FileDescriptor file = conn.service.getFiles().getFile();
-
-		if (file != null) {
-			Button dontlike = (Button) rootView.findViewById(R.id.badsong);
-			final List<String> allBadSongs = conn.service.getBadSongs();
-			
-			if (allBadSongs.contains(file.path))
-				dontlike.setText("Like");
-			else
-				dontlike.setText("Don't like");
-
-			dontlike.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if (allBadSongs.contains(file.path))
-						conn.service.delBadSong(file.path);
-					else
-						conn.service.addBadSong(file.path);
-					undoRunnable.run();
-					FilesAdapter adapter = (FilesAdapter) listView.getAdapter();
-					adapter.badSongs = conn.service.getBadSongs();
-					listView.invalidateViews();
-				}
-			});
-		}
-		
-		LinearLayout linearLayout = (LinearLayout) rootView
-				.findViewById(R.id.mru);
-		linearLayout.removeAllViews();
-
-		if (conn.service != null) {
-
-
-			Folder folder = conn.service.getFolders().getFolder();
-
-			List<String> mru = conn.service.getMRU();
-			for (final String s : mru) {
-				if (folder != null && folder.path.equals(s))
-					continue;
-
-				Button b = new Button(getActivity());
-				b.setText(s);
-				b.setSingleLine();
-				b.setEllipsize(TruncateAt.START);
-				b.setTextAppearance(getActivity(),
-						android.R.style.TextAppearance_Medium);
-				b.setTypeface(Typeface.DEFAULT_BOLD);
-				b.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						if (conn.service != null) {
-							Folders folders = conn.service.getFolders();
-							int index = folders.getIndex(s);
-							if (index >= 0) {
-								conn.service.toFolder(index);
-								undoRunnable.run();
-							}
-						}
-					}
-				});
-
-				linearLayout.addView(b);
-			}
-			
-		}
-
-		handler.removeCallbacks(undoRunnable);
-		handler.postDelayed(undoRunnable, 5000);
+		MRUDialog mruDialog = new MRUDialog(getActivity(), conn.service,
+				listView);
+		mruDialog.show();
 	}
 
 	@Override
@@ -409,8 +284,6 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 		onChanged(OnChangedHint.FOLDER);
 
 		setMagicEye();
-		
-		undoRunnable.run();
 	}
 
 	private void onHold() {

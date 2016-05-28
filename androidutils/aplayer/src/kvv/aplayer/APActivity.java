@@ -21,6 +21,7 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 
 import com.smartbean.androidutils.activity.FragmentActivityTabsNoActionBar;
 import com.smartbean.androidutils.service.ServiceConnectionAdapter;
@@ -61,6 +62,17 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 
 		add("Files", filesSectionFragment);
 		add("Folders", new FoldersSectionFragment());
+		
+		getWindow().findViewById(android.R.id.content).getRootView().setOnFocusChangeListener(new OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				if(hasFocus) {
+	
+				}
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	}
 
 	@Override
@@ -158,17 +170,15 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 	protected void onResume() {
 		super.onResume();
 
-		View decorView = getWindow().getDecorView();
-
-		// if(isCarMode() ) {
-		int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-		decorView.setSystemUiVisibility(uiOptions);
-		// }
+//		View decorView = getWindow().getDecorView();
+//		int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+//		decorView.setSystemUiVisibility(uiOptions);
 
 		// Remember that you should never show the action bar if the
 		// status bar is hidden, so hide that too if necessary.
 		// ActionBar actionBar = getActionBar();
 		// actionBar.hide();
+
 
 		_onFG();
 	}

@@ -26,8 +26,6 @@ public class Folder {
 			txt += path[idx];
 		}
 		shortName = path[path.length - 1];
-		
-		filesToPlay = _files;
 	}
 
 	public String getDisplayName() {

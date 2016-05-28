@@ -1,7 +1,6 @@
 package kvv.aplayer.player;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,41 +50,44 @@ public abstract class Player0 extends Player {
 	public void toFolder(int folderIdx, int file, int curPos) {
 		if (folders.curFolder == folderIdx)
 			return;
-		_toFolder(folderIdx, file, curPos);
-	}
 
-	private void _toFolder(int folderIdx, int file, int curPos) {
 		Folder folder = folders.getFolder();
-		if (folder != null)
+		if (folder != null && !folder.random)
 			folder.filesToPlay = null;
 
 		folders.curFolder = folderIdx;
 
 		folder = folders.getFolder();
 
-		folder.filesToPlay = getAllFiles(folder);
-		if (folder.random) {
-			Collections.shuffle(folder.filesToPlay);
-			curPos = 0;
+		if (folder.filesToPlay == null) {
+			folder.filesToPlay = getAllFiles();
+			if (folder.random) {
+				Collections.shuffle(folder.filesToPlay);
+				file = 0;
+				curPos = 0;
+			}
 		}
 
-		toFile(file, curPos);
-
 		onChanged(OnChangedHint.FOLDER);
+		toFile(file, curPos);
 	}
 
 	public void setRandom(boolean random) {
 		Folder folder = folders.getFolder();
 		if (folder == null)
 			return;
-
 		folder.random = random;
 
+		folder.filesToPlay = getAllFiles();
+		if (folder.random)
+			Collections.shuffle(folder.filesToPlay);
+
 		onChanged(OnChangedHint.FOLDER);
-		_toFolder(folders.curFolder, 0, 0);
+		toFile(0, 0);
 	}
 
-	private List<FileDescriptor> getAllFiles(Folder folder) {
+	private List<FileDescriptor> getAllFiles() {
+		Folder folder = folders.getFolder();
 		List<FileDescriptor> files = new ArrayList<FileDescriptor>();
 		files.addAll(folder._files);
 		for (int i = folders.curFolder + 1; i < folders.folders.size(); i++) {
