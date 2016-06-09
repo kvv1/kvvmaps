@@ -1,19 +1,23 @@
 package kvv.aplayer.player;
 
+import com.smartbean.androidutils.util.Utils;
+
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
+import android.media.audiofx.Equalizer;
 
 public abstract class Player {
 
 	public enum OnChangedHint {
-		FILE, FOLDER, STATE
+		FILE, FOLDER, STATE, FOLDER_LIST
 	}
 
 	public abstract void onChanged(OnChangedHint hint);
 
 	private final MediaPlayer mp = new MediaPlayer();
+	private final Equalizer equalizer;
 
 	private boolean prepared;
 
@@ -36,6 +40,9 @@ public abstract class Player {
 				return false;
 			}
 		});
+
+		equalizer = new Equalizer(10, mp.getAudioSessionId());
+		equalizer.setEnabled(true);
 
 	}
 
@@ -121,9 +128,21 @@ public abstract class Player {
 
 	public void close() {
 		prepared = false;
+		equalizer.release();
 		mp.release();
 	}
 
 	protected void resetGain() {
+	}
+
+	public void setVolume(float db) {
+		float n = (float) Utils.db2n(db);
+		mp.setVolume(n, n);
+	}
+
+	public void setEq(float gain) {
+		if (equalizer.getEnabled())
+			for (short i = 0; i < equalizer.getNumberOfBands(); i++)
+				equalizer.setBandLevel(i, (short) (gain * 100));
 	}
 }

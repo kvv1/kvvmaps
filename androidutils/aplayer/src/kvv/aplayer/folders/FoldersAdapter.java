@@ -1,26 +1,45 @@
 package kvv.aplayer.folders;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import kvv.aplayer.R;
 import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.Typeface;
+import android.text.TextUtils.TruncateAt;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class FoldersAdapter extends ArrayAdapter<Folder> {
+public class FoldersAdapter extends ArrayAdapter<Object> {
 
 	private Activity activity;
 	private IAPService service;
 	public int sel;
 
 	public FoldersAdapter(Activity activity, IAPService service) {
-		super(activity, R.layout.folder_item, service.getFolders().folders);
+		super(activity, R.layout.folder_item, createItems(service));
 		this.activity = activity;
 		this.service = service;
+	}
+
+	private static List<Object> createItems(IAPService service) {
+		List<Object> res = new ArrayList<Object>();
+		List<String> mru = service.getMRU();
+		res.addAll(mru);
+
+//		if (service.getFolders().getFolder() != null)
+//			res.remove(service.getFolders().getFolder().path);
+
+		for (Folder folder : service.getFolders().folders)
+			res.add(folder);
+
+		return res;
 	}
 
 	@SuppressLint({ "ViewHolder", "InflateParams" })
@@ -33,11 +52,20 @@ public class FoldersAdapter extends ArrayAdapter<Folder> {
 
 		v = vi.inflate(R.layout.folder_item, null);
 
-		Folder folder = getItem(position);
-
 		TextView tv = (TextView) v.findViewById(R.id.text);
-		tv.setText(folder.shortName);
-		tv.setPadding(folder.indent * 20, 0, 0, 0);
+
+		Object item = getItem(position);
+
+		if (item instanceof Folder) {
+			Folder folder = (Folder) item;
+			tv.setText(folder.shortName);
+			tv.setPadding(folder.indent * 20, 0, 0, 0);
+		} else if (item instanceof String) {
+			tv.setText((String) item);
+			tv.setEllipsize(TruncateAt.START);
+			tv.setTypeface(null, Typeface.BOLD);
+			//tv.setTextAppearance(activity, android.R.style.TextAppearance_Medium);
+		}
 
 		if (position == sel)
 			v.setBackgroundColor(0xFFFFFF80);

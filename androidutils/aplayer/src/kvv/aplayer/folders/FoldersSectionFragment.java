@@ -6,6 +6,7 @@ import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.APServiceListenerAdapter;
+import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
 import android.os.Handler;
 import android.view.View;
@@ -30,21 +31,21 @@ public class FoldersSectionFragment extends FragmentX<APActivity, IAPService> {
 
 			clearGoto();
 
-			if (hint == OnChangedHint.FOLDER) {
-				int curFolder = conn.service.getFolders().curFolder;
-				if (curFolder < list.getCount()) {
-					list.invalidateViews();
-					if (!noSel && conn.service.isPlaying())
-						list.setSelection(curFolder - 2);
-				}
+			if (hint == OnChangedHint.FOLDER_LIST) {
+				list.setAdapter(new FoldersAdapter(getActivity(), conn.service));
+//				int curFolder = conn.service.getFolders().curFolder;
+//				if (curFolder < list.getCount()) {
+//					list.invalidateViews();
+//					if (!noSel && conn.service.isPlaying())
+//						list.setSelection(curFolder - 2);
+//				}
 			}
 		}
 
 		public void onLoaded() {
 			if (conn.service == null)
 				return;
-			adapter = new FoldersAdapter(getActivity(), conn.service);
-			list.setAdapter(adapter);
+			list.setAdapter(new FoldersAdapter(getActivity(), conn.service));
 		}
 	};
 
@@ -53,8 +54,6 @@ public class FoldersSectionFragment extends FragmentX<APActivity, IAPService> {
 	public FoldersSectionFragment() {
 		super(APService.class, R.layout.fragment_folders);
 	}
-
-	private FoldersAdapter adapter;
 
 	private Runnable gotoRunnable = new Runnable() {
 		@Override
@@ -107,30 +106,24 @@ public class FoldersSectionFragment extends FragmentX<APActivity, IAPService> {
 								&& conn.service != null) {
 							try {
 								noSel = true;
-								conn.service.toFolder(adapter.sel);
-								APActivity activity = getActivity1();
-								activity.selectMainPage();
+								Object item = adapter.getItem(adapter.sel);
+
+								String path;
+								if(item instanceof Folder) 
+									path = ((Folder)item).path;
+								else
+									path = (String) item;
+								
+								int idx = conn.service.getFolders().getIndex(path);
+								conn.service.toFolder(idx);
+								
+								getActivity1().selectMainPage();
 							} finally {
 								noSel = false;
 							}
 						}
 					}
 				});
-
-		// ((Button) rootView.findViewById(R.id.random))
-		// .setOnClickListener(new OnClickListener() {
-		// @Override
-		// public void onClick(View arg0) {
-		// FoldersAdapter adapter = (FoldersAdapter) list
-		// .getAdapter();
-		// if (adapter != null && adapter.sel >= 0
-		// && conn.service != null) {
-		// conn.service.toRandom(adapter.sel);
-		// APActivity activity = getActivity1();
-		// activity.selectMainPage();
-		// }
-		// }
-		// });
 	}
 
 	@Override

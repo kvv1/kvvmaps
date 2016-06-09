@@ -6,7 +6,6 @@ import kvv.aplayer.files.tape.LevelView;
 import kvv.aplayer.files.tape.TapePanel;
 import kvv.aplayer.files.tape.TapeView;
 import kvv.aplayer.player.Files;
-import kvv.aplayer.player.MRUDialog;
 import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.APServiceListener;
@@ -56,18 +55,18 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 
 	private int seekStep = 0;
 
-	private Runnable progressRunnable = new Runnable() {
+	private Runnable progressRunnable = new Runnable1() {
 		@Override
-		public void run() {
+		public void run1() {
 			positionChanged();
 			handler.removeCallbacks(this);
 			handler.postDelayed(this, 1000);
 		}
 	};
 
-	private Runnable buttonsRunnable = new Runnable() {
+	private Runnable buttonsRunnable = new Runnable1() {
 		@Override
-		public void run() {
+		public void run1() {
 			clearButtons();
 		}
 	};
@@ -429,6 +428,7 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 	public void onPause() {
 		if (conn.service != null)
 			conn.service.setVisible(false);
+		handler.removeCallbacksAndMessages(null);
 		handler.removeCallbacks(progressRunnable);
 		updateTapeViewState();
 		super.onPause();
@@ -452,9 +452,9 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 	}
 
 	public void setMagicEye() {
-		handler.postDelayed(new Runnable() {
+		handler.postDelayed(new Runnable1() {
 			@Override
-			public void run() {
+			public void run1() {
 				if (settings == null)
 					return;
 				boolean magicEye = settings.getBoolean(
@@ -473,4 +473,17 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 
 	}
 
+	static abstract class Runnable1 implements Runnable {
+		@Override
+		public final void run() {
+			try {
+				run1();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public abstract void run1();
+	}
+	
 }

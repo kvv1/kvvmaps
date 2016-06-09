@@ -14,12 +14,11 @@ public abstract class Compressor {
 
 	private static final double MEAN = 40;
 
-	private MediaPlayer mp;
-
 	private Visualizer visualizer;
 
 	private int db;
 	private boolean visible;
+	private boolean playing;
 
 	protected abstract void setGain(float db);
 
@@ -37,12 +36,8 @@ public abstract class Compressor {
 
 	private Alg alg = new Alg1();
 
+	@SuppressLint({ "InlinedApi", "NewApi" })
 	public Compressor(MediaPlayer mp) {
-		this.mp = mp;
-	}
-
-	@SuppressLint("NewApi")
-	public void init() {
 		visualizer = new Visualizer(mp.getAudioSessionId());
 		visualizer.setScalingMode(Visualizer.SCALING_MODE_AS_PLAYED);
 		visualizer.setDataCaptureListener(new OnDataCaptureListener2() {
@@ -50,13 +45,34 @@ public abstract class Compressor {
 	}
 
 	public void release() {
-		mp = null;
 		visualizer.release();
 	}
 
 	public void setComprLevel(int db) {
 		this.db = db;
 		enDis();
+	}
+
+	public void setPlaying(boolean playing) {
+		this.playing = playing;
+		enDis();
+	}
+	
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+		enDis();
+	}
+
+	private void enDis() {
+		boolean b = playing && (visible | db != 0);
+		System.out.println("setEnabled " + b);
+		visualizer.setEnabled(b);
+		if (!b) {
+			if (levelLPF != null)
+				levelLPF.set(0);
+			levelChanged(0);
+			setGain(0);
+		}
 	}
 
 	public void resetGain() {
@@ -67,26 +83,6 @@ public abstract class Compressor {
 		return db;
 	}
 
-	private void setEnabled(boolean b) {
-		System.out.println("setEnabled " + b);
-		visualizer.setEnabled(b);
-		if (!b) {
-			if (levelLPF != null)
-				levelLPF.set(0);
-			levelChanged(0);
-			setGain(0);
-		}
-
-	}
-
-	public void setVisible(boolean visible) {
-		this.visible = visible;
-		enDis();
-	}
-
-	public void enDis() {
-		setEnabled(mp.isPlaying() && (visible | db != 0));
-	}
 
 	private int sr;
 
@@ -125,9 +121,6 @@ public abstract class Compressor {
 		@Override
 		public void onFftDataCapture(Visualizer arg0, byte[] arg1, int arg2) {
 		}
-	}
-
-	public void test() {
 	}
 
 	private float bounds(float min, float val, float max) {

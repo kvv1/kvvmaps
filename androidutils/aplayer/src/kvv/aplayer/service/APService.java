@@ -36,8 +36,6 @@ import android.telephony.TelephonyManager;
 import com.smartbean.androidutils.service.BaseService;
 
 public class APService extends BaseService implements IAPService {
-	public final static int mruSize = 6;
-
 	public static APService staticInstance;
 
 	private Set<APServiceListener> listeners = new HashSet<APServiceListener>();
@@ -50,6 +48,7 @@ public class APService extends BaseService implements IAPService {
 
 	private TelephonyManager telephonyManager;
 	private PhoneStateListener phoneStateListener;
+	private MRU mru;
 
 	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
@@ -90,6 +89,8 @@ public class APService extends BaseService implements IAPService {
 		super.onCreate();
 
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
+
+		mru = new MRU(this);
 
 		createPlayer();
 
@@ -220,35 +221,13 @@ public class APService extends BaseService implements IAPService {
 
 		player.toFolder(folderIdx);
 
-		List<String> mruFolders = getMRU();
-
-		mruFolders.remove(folders.getFolder().path);
-		mruFolders.add(0, folders.getFolder().path);
-
-		if (mruFolders.size() > mruSize)
-			mruFolders = new ArrayList<String>(mruFolders.subList(0, mruSize));
-
-		setMRU(mruFolders);
+		mru.addMRU(folders.folders.get(folderIdx).path);
+		player.onChanged(OnChangedHint.FOLDER_LIST);
 	}
 
 	@Override
 	public List<String> getMRU() {
-		List<String> mruFolders = new ArrayList<String>();
-		for (int i = 0; i < mruSize; i++) {
-			String path = settings.getString("mru" + i, null);
-			if (path != null)
-				mruFolders.add(path);
-		}
-		return mruFolders;
-	}
-
-	private void setMRU(List<String> mruFolders) {
-		for (int i = 0; i < mruSize; i++) {
-			if (i < mruFolders.size())
-				setPref("mru" + i, mruFolders.get(i));
-			else
-				delPref("mru" + i);
-		}
+		return mru.getMRU();
 	}
 
 	@Override
