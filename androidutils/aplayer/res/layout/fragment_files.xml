@@ -9,31 +9,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <FrameLayout
+    <include
         android:id="@+id/top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" >
-
-        <ProgressBar
-            android:id="@+id/folderProgress"
-            style="@android:style/Widget.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="bottom" />
-
-        <TextView
-            android:id="@+id/folder"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#80C0FFC0"
-            android:ellipsize="start"
-            android:gravity="center_horizontal"
-            android:singleLine="true"
-            android:text="&lt;not selected>"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textStyle="bold" />
-    </FrameLayout>
+        android:layout_alignParentTop="true"
+        layout="@layout/top_panel" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -72,72 +53,11 @@
             android:visibility="gone" />
     </RelativeLayout>
 
-    <LinearLayout
+    <include
         android:id="@+id/bottom"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:orientation="vertical" >
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-            <ProgressBar
-                android:id="@+id/progress"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="bottom" />
-
-            <TextView
-                android:id="@+id/progressText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#80C0FFC0"
-                android:ellipsize="start"
-                android:gravity="center_horizontal"
-                android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textStyle="bold" />
-        </FrameLayout>
-
-        <LinearLayout
-            android:id="@+id/bottomButtons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#808080" >
-
-            <Button
-                android:id="@+id/prev"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="&lt;"
-                android:textColor="@color/bluedark"
-                android:textSize="30sp"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/pause"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:text="Play/Pause"
-                android:textColor="@color/greendark"
-                android:textSize="30sp"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/next"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text=">"
-                android:textColor="@color/bluedark"
-                android:textSize="30sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </LinearLayout>
+        layout="@layout/bottom_panel" />
 
 </RelativeLayout>

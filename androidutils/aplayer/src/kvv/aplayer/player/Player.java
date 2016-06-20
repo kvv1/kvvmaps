@@ -11,7 +11,7 @@ import android.media.audiofx.Equalizer;
 public abstract class Player {
 
 	public enum OnChangedHint {
-		FILE, FOLDER, STATE, FOLDER_LIST
+		FILE, STATE, FOLDER_LIST, FOLDER
 	}
 
 	public abstract void onChanged(OnChangedHint hint);
@@ -27,7 +27,6 @@ public abstract class Player {
 		mp.setOnErrorListener(new OnErrorListener() {
 			@Override
 			public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
-				onChanged(OnChangedHint.FOLDER);
 				prepared = false;
 				return false;
 			}
@@ -36,7 +35,6 @@ public abstract class Player {
 		mp.setOnInfoListener(new OnInfoListener() {
 			@Override
 			public boolean onInfo(MediaPlayer arg0, int arg1, int arg2) {
-				onChanged(OnChangedHint.FOLDER);
 				return false;
 			}
 		});

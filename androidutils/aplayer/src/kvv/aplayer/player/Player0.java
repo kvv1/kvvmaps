@@ -14,12 +14,6 @@ public abstract class Player0 extends Player {
 	private Folders folders;
 	private int curFile = 0;
 
-	private List<String> badSongs = Collections.emptyList();
-	
-	public void setBadSongs(List<String> badSongs) {
-		this.badSongs = badSongs;
-	}
-	
 	public Player0(final List<Folder> _folders) {
 		this.folders = new Folders(_folders, -1);
 		setOnCompletionListener(new OnCompletionListener() {
@@ -51,40 +45,38 @@ public abstract class Player0 extends Player {
 		return new Files(folder.filesToPlay, curFile);
 	}
 
-	public void toFolder(int folderIdx, int file, int curPos) {
-		if (folders.curFolder == folderIdx)
-			return;
-
+	public void toFolder(int folderIdx, int file, int curPos, Long seed) {
 		Folder folder = folders.getFolder();
-		if (folder != null && !folder.random)
+		if (folder != null)
 			folder.filesToPlay = null;
 
 		folders.curFolder = folderIdx;
 
 		folder = folders.getFolder();
 
-		if (folder.filesToPlay == null) {
-			folder.filesToPlay = getAllFiles();
-			if (folder.random) {
-				Collections.shuffle(folder.filesToPlay);
-				file = 0;
-				curPos = 0;
-			}
+		folder.filesToPlay = getAllFiles();
+		folder.seed = seed;
+		if (folder.seed != null) {
+			Shuffle.shuffle(folder.filesToPlay, folder.seed);
 		}
 
+		curFile = 0;
 		onChanged(OnChangedHint.FOLDER);
+
 		toFile(file, curPos);
 	}
 
-	public void setRandom(boolean random) {
+	public void setRandom() {
 		Folder folder = folders.getFolder();
 		if (folder == null)
 			return;
-		folder.random = random;
 
 		folder.filesToPlay = getAllFiles();
-		if (folder.random)
-			Collections.shuffle(folder.filesToPlay);
+		if (folder.seed == null) {
+			folder.seed = Shuffle.shuffle(folder.filesToPlay);
+		} else {
+			folder.seed = null;
+		}
 
 		onChanged(OnChangedHint.FOLDER);
 		toFile(0, 0);
@@ -135,14 +127,14 @@ public abstract class Player0 extends Player {
 		Folder folder = folders.getFolder();
 		if (folder == null)
 			return null;
-		return Files.skipBw(folder.filesToPlay, curFile - 1, badSongs);
+		return skipBw(folder.filesToPlay, curFile - 1);
 	}
 
 	private Integer getNext() {
 		Folder folder = folders.getFolder();
 		if (folder == null)
 			return null;
-		return Files.skipFw(folder.filesToPlay, curFile + 1, badSongs);
+		return skipFw(folder.filesToPlay, curFile + 1);
 	}
 
 	public boolean hasNext() {
@@ -181,4 +173,23 @@ public abstract class Player0 extends Player {
 			}
 		}
 	}
+
+	public Integer skipFw(List<FileDescriptor> files, int pos) {
+		for (int i = pos; i < files.size(); i++)
+			if (!isBadSong(files.get(i).path))
+				return i;
+		return null;
+	}
+
+	public Integer skipBw(List<FileDescriptor> files, int pos) {
+		for (int i = pos; i >= 0; i--)
+			if (!isBadSong(files.get(i).path))
+				return i;
+		return null;
+	}
+
+	protected boolean isBadSong(String path) {
+		return false;
+	}
+
 }

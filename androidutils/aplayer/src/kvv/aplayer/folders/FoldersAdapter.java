@@ -33,8 +33,8 @@ public class FoldersAdapter extends ArrayAdapter<Object> {
 		List<String> mru = service.getMRU();
 		res.addAll(mru);
 
-//		if (service.getFolders().getFolder() != null)
-//			res.remove(service.getFolders().getFolder().path);
+		// if (service.getFolders().getFolder() != null)
+		// res.remove(service.getFolders().getFolder().path);
 
 		for (Folder folder : service.getFolders().folders)
 			res.add(folder);
@@ -58,13 +58,14 @@ public class FoldersAdapter extends ArrayAdapter<Object> {
 
 		if (item instanceof Folder) {
 			Folder folder = (Folder) item;
-			tv.setText(folder.shortName);
+			tv.setText(folder.path.substring(folder.path.lastIndexOf("/") + 1));
 			tv.setPadding(folder.indent * 20, 0, 0, 0);
 		} else if (item instanceof String) {
 			tv.setText((String) item);
 			tv.setEllipsize(TruncateAt.START);
 			tv.setTypeface(null, Typeface.BOLD);
-			//tv.setTextAppearance(activity, android.R.style.TextAppearance_Medium);
+			// tv.setTextAppearance(activity,
+			// android.R.style.TextAppearance_Medium);
 		}
 
 		if (position == sel)

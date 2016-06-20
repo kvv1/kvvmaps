@@ -19,8 +19,6 @@ import android.widget.ListView;
 import com.smartbean.androidutils.fragment.FragmentX;
 
 public class FoldersSectionFragment extends FragmentX<APActivity, IAPService> {
-	private boolean noSel;
-
 	private Handler handler = new Handler();
 
 	private final APServiceListener listener = new APServiceListenerAdapter() {
@@ -33,12 +31,6 @@ public class FoldersSectionFragment extends FragmentX<APActivity, IAPService> {
 
 			if (hint == OnChangedHint.FOLDER_LIST) {
 				list.setAdapter(new FoldersAdapter(getActivity(), conn.service));
-//				int curFolder = conn.service.getFolders().curFolder;
-//				if (curFolder < list.getCount()) {
-//					list.invalidateViews();
-//					if (!noSel && conn.service.isPlaying())
-//						list.setSelection(curFolder - 2);
-//				}
 			}
 		}
 
@@ -79,7 +71,7 @@ public class FoldersSectionFragment extends FragmentX<APActivity, IAPService> {
 		list = (ListView) rootView.findViewById(R.id.list);
 		service.addListener(listener);
 		listener.onLoaded();
-		listener.onChanged(OnChangedHint.FOLDER);
+		listener.onChanged(OnChangedHint.FILE);
 
 		list.setOnItemClickListener(new OnItemClickListener() {
 			@Override
@@ -104,23 +96,18 @@ public class FoldersSectionFragment extends FragmentX<APActivity, IAPService> {
 								.getAdapter();
 						if (adapter != null && adapter.sel >= 0
 								&& conn.service != null) {
-							try {
-								noSel = true;
-								Object item = adapter.getItem(adapter.sel);
+							Object item = adapter.getItem(adapter.sel);
 
-								String path;
-								if(item instanceof Folder) 
-									path = ((Folder)item).path;
-								else
-									path = (String) item;
-								
-								int idx = conn.service.getFolders().getIndex(path);
-								conn.service.toFolder(idx);
-								
-								getActivity1().selectMainPage();
-							} finally {
-								noSel = false;
-							}
+							String path;
+							if (item instanceof Folder)
+								path = ((Folder) item).path;
+							else
+								path = (String) item;
+
+							int idx = conn.service.getFolders().getIndex(path);
+							conn.service.toFolder(idx);
+
+							getActivity1().selectMainPage();
 						}
 					}
 				});

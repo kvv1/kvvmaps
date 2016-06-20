@@ -1,6 +1,7 @@
 package kvv.aplayer;
 
 import kvv.aplayer.files.FilesSectionFragment;
+import kvv.aplayer.files.TextSectionFragment;
 import kvv.aplayer.folders.FoldersSectionFragment;
 import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APService;
@@ -33,8 +34,6 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 
 	private static final int RESULT_SETTINGS = 1;
 
-	private FilesSectionFragment filesSectionFragment;
-
 	@Override
 	protected ViewPager getPager() {
 		return (ViewPager) findViewById(R.id.pager);
@@ -47,6 +46,10 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		}
 	};
 
+	public void selectMainPage() {
+		selectTab(1);
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		System.out.println(getClass().getSimpleName() + ".onCreate()");
@@ -58,21 +61,23 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		bindService(new Intent(this, APService.class), conn,
 				Context.BIND_AUTO_CREATE);
 
-		filesSectionFragment = new FilesSectionFragment();
-
-		add("Files", filesSectionFragment);
+		add("Text", new TextSectionFragment());
+		add("Files", new FilesSectionFragment());
 		add("Folders", new FoldersSectionFragment());
+
+		getWindow().findViewById(android.R.id.content).getRootView()
+				.setOnFocusChangeListener(new OnFocusChangeListener() {
+					@Override
+					public void onFocusChange(View v, boolean hasFocus) {
+						if (hasFocus) {
+
+						}
+						// TODO Auto-generated method stub
+
+					}
+				});
 		
-		getWindow().findViewById(android.R.id.content).getRootView().setOnFocusChangeListener(new OnFocusChangeListener() {
-			@Override
-			public void onFocusChange(View v, boolean hasFocus) {
-				if(hasFocus) {
-	
-				}
-				// TODO Auto-generated method stub
-				
-			}
-		});
+		selectMainPage();
 	}
 
 	@Override
@@ -170,15 +175,14 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 	protected void onResume() {
 		super.onResume();
 
-//		View decorView = getWindow().getDecorView();
-//		int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-//		decorView.setSystemUiVisibility(uiOptions);
+		// View decorView = getWindow().getDecorView();
+		// int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+		// decorView.setSystemUiVisibility(uiOptions);
 
 		// Remember that you should never show the action bar if the
 		// status bar is hidden, so hide that too if necessary.
 		// ActionBar actionBar = getActionBar();
 		// actionBar.hide();
-
 
 		_onFG();
 	}
@@ -250,10 +254,6 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 	public void _onBG() {
 		fg = false;
 		updateWakeLock();
-	}
-
-	public void selectMainPage() {
-		selectTab(0);
 	}
 
 }

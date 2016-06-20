@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,8 +12,7 @@ import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
 import kvv.aplayer.player.Files;
 import kvv.aplayer.player.Folders;
-import kvv.aplayer.player.Player.OnChangedHint;
-import kvv.aplayer.player.PlayerBadSongs;
+import kvv.aplayer.player.PlayerUndoRedo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -40,7 +38,7 @@ public class APService extends BaseService implements IAPService {
 
 	private Set<APServiceListener> listeners = new HashSet<APServiceListener>();
 
-	private PlayerBadSongs player;
+	private PlayerUndoRedo player;
 
 	private Handler handler = new Handler();
 
@@ -48,7 +46,6 @@ public class APService extends BaseService implements IAPService {
 
 	private TelephonyManager telephonyManager;
 	private PhoneStateListener phoneStateListener;
-	private MRU mru;
 
 	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
@@ -90,7 +87,6 @@ public class APService extends BaseService implements IAPService {
 
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
 
-		mru = new MRU(this);
 
 		createPlayer();
 
@@ -126,32 +122,15 @@ public class APService extends BaseService implements IAPService {
 
 		staticInstance = this;
 
-	}
-
-	@Override
-	public void addBadSong(String path) {
-		player.addBadSong(path);
-	}
-
-	@Override
-	public void delBadSong(String path) {
-		player.delBadSong(path);
-	}
-
-	@Override
-	public List<String> getBadSongs() {
-		return player.getBadSongs();
+		player.init();
 	}
 
 	private void createPlayer() {
 		if (player != null)
 			player.close();
 
-		undoList.clear();
-		redoList.clear();
-
 		List<Folder> folders = read();
-		player = new PlayerBadSongs(this, folders) {
+		player = new PlayerUndoRedo(this, folders) {
 			@Override
 			public void onChanged(OnChangedHint hint) {
 				System.out.println("onChanged " + isPlaying());
@@ -178,8 +157,6 @@ public class APService extends BaseService implements IAPService {
 
 		modeChanged();
 
-		this.player.onChanged(OnChangedHint.FOLDER);
-
 		for (APServiceListener l : listeners)
 			l.onLoaded();
 	}
@@ -193,6 +170,21 @@ public class APService extends BaseService implements IAPService {
 				PhoneStateListener.LISTEN_NONE);
 		stopGpsRunnable.run();
 		super.onDestroy();
+	}
+
+	@Override
+	public void addBadSong(String path) {
+		player.addBadSong(path);
+	}
+
+	@Override
+	public void delBadSong(String path) {
+		player.delBadSong(path);
+	}
+
+	@Override
+	public List<String> getBadSongs() {
+		return player.getBadSongs();
 	}
 
 	@Override
@@ -215,44 +207,32 @@ public class APService extends BaseService implements IAPService {
 		Folders folders = player.getFolders();
 		if (folderIdx == folders.curFolder)
 			return;
-
-		undoList.clear();
-		redoList.clear();
-
 		player.toFolder(folderIdx);
-
-		mru.addMRU(folders.folders.get(folderIdx).path);
-		player.onChanged(OnChangedHint.FOLDER_LIST);
 	}
 
 	@Override
 	public List<String> getMRU() {
-		return mru.getMRU();
+		return player.getMRU();
 	}
 
 	@Override
-	public void setRandom(boolean random) {
-		undoList.clear();
-		redoList.clear();
-		player.setRandom(random);
+	public void setRandom() {
+		player.setRandom();
 	}
 
 	@Override
 	public void toFile(int position) {
-		storeUndo();
 		player.toFile(position);
 	}
 
 	@Override
 	public void prev() {
-		storeUndo();
 		player.prev();
 	}
 
 	@Override
 	public void next() {
 		if (player.hasNext()) {
-			storeUndo();
 			player.next();
 		}
 	}
@@ -277,7 +257,6 @@ public class APService extends BaseService implements IAPService {
 
 	@Override
 	public void seekTo(int f) {
-		storeUndo();
 		player.seekTo(f);
 	}
 
@@ -308,86 +287,21 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	@Override
-	public void redo() {
-		System.out.println("redo");
-		if (redoList.isEmpty())
-			return;
-		// if(lastItem == null)
-		UndoItem lastItem = new UndoItem(player.getFolders().curFolder,
-				player.getFiles().curFile, player.getCurrentPosition());
-		UndoItem item = redoList.removeLast();
-		undoList.add(lastItem);
-		// lastItem = item;
-		player.toFolder(item.folder, item.file, item.pos);
+	public void setVisible(boolean vis) {
+		player.setVisible(vis);
 	}
 
 	@Override
 	public void undo() {
 		System.out.println("undo");
-		if (undoList.isEmpty())
-			return;
-		// if(lastItem == null)
-		UndoItem lastItem = new UndoItem(player.getFolders().curFolder,
-				player.getFiles().curFile, player.getCurrentPosition());
-		UndoItem item = undoList.removeLast();
-		redoList.add(lastItem);
-		// lastItem = item;
-		player.toFolder(item.folder, item.file, item.pos);
+		player.undo();
 	}
-
+		
 	@Override
-	public void setVisible(boolean vis) {
-		player.setVisible(vis);
+	public void redo() {
+		System.out.println("redo");
+		player.redo();
 	}
-
-	private void storeUndo() {
-		if (player.getFolders().curFolder < 0)
-			return;
-		undoList.add(new UndoItem(player.getFolders().curFolder, player
-				.getFiles().curFile, player.getCurrentPosition()));
-		redoList.clear();
-	}
-
-	static class UndoItem {
-		int folder;
-		int file;
-		int pos;
-
-		public UndoItem(int folder, int file, int pos) {
-			super();
-			this.folder = folder;
-			this.file = file;
-			this.pos = pos;
-		}
-	}
-
-	private LinkedList<UndoItem> undoList = new LinkedList<APService.UndoItem>();
-	private LinkedList<UndoItem> redoList = new LinkedList<APService.UndoItem>();
-
-	private void delPref(String name) {
-		SharedPreferences.Editor editor = settings.edit();
-		editor.remove(name);
-		editor.apply();
-	}
-
-	private void setPref(String name, String val) {
-		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(name, val);
-		editor.apply();
-	}
-
-	// private void setPrefInt(String name, int val) {
-	// SharedPreferences.Editor editor = settings.edit();
-	// editor.putInt(name, val);
-	// editor.apply();
-	// }
-	//
-	// @SuppressWarnings("unused")
-	// private void setPrefBool(String name, boolean val) {
-	// SharedPreferences.Editor editor = settings.edit();
-	// editor.putBoolean(name, val);
-	// editor.apply();
-	// }
 
 	private LocationManager locationManager;
 	private LocationListener locationListener;

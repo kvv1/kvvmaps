@@ -34,7 +34,7 @@ public interface IAPService {
 
 	void seek(int seekStep);
 
-	void setRandom(boolean random);
+	void setRandom();
 
 	List<String> getMRU();
 

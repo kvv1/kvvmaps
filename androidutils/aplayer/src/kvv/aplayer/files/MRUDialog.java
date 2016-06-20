@@ -4,20 +4,18 @@ import java.util.List;
 
 import kvv.aplayer.R;
 import kvv.aplayer.service.FileDescriptor;
-import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
 
 public class MRUDialog extends Dialog {
 
 	private Handler handler = new Handler();
 
-	public MRUDialog(Context context, final IAPService service, final ListView listView) {
+	public MRUDialog(Context context, final IAPService service) {
 		super(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
 
 		setContentView(R.layout.popup_panel);
@@ -45,8 +43,7 @@ public class MRUDialog extends Dialog {
 				new android.view.View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						Folder folder = service.getFolders().getFolder();
-						service.setRandom(!folder.random);
+						service.setRandom();
 						dismiss();
 					}
 				});
@@ -80,7 +77,6 @@ public class MRUDialog extends Dialog {
 						service.addBadSong(file.path);
 						service.next();
 					}
-					listView.invalidateViews();
 					dismiss();
 				}
 			});
@@ -97,5 +93,11 @@ public class MRUDialog extends Dialog {
 				dismiss();
 			}
 		}, 5000);
+	}
+	
+	@Override
+	public void dismiss() {
+		handler.removeCallbacksAndMessages(null);
+		super.dismiss();
 	}
 }

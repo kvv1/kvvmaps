@@ -2,33 +2,22 @@ package kvv.aplayer.service;
 
 import java.util.List;
 
-public class Folder {
+public final class Folder {
 	public final String path;
-	public final String shortName;
 	public final int indent;
 
 	public List<FileDescriptor> _files;
 	public List<FileDescriptor> filesToPlay;
 
-	public boolean random;
+	public Long seed;
 
 	public Folder(String pathName, int indent, List<FileDescriptor> files) {
 		this.path = pathName;
 		this.indent = indent;
 		this._files = files;
-
-		String[] path = pathName.split("/");
-		String txt = "";
-		for (int i = 0; i < indent + 1; i++) {
-			int idx = path.length - indent - 1 + i;
-			if (txt.length() != 0)
-				txt += "/";
-			txt += path[idx];
-		}
-		shortName = path[path.length - 1];
 	}
 
 	public String getDisplayName() {
-		return path + (random ? " RND" : "");
+		return path + (seed != null ? " RND" : "");
 	}
 }

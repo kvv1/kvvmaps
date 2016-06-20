@@ -26,20 +26,4 @@ public class Files {
 		return files.get(curFile);
 	}
 
-	public static Integer skipFw(List<FileDescriptor> files, int pos,
-			List<String> toSkip) {
-		for (int i = pos; i < files.size(); i++)
-			if (!toSkip.contains(files.get(i).path))
-				return i;
-		return null;
-	}
-
-	public static Integer skipBw(List<FileDescriptor> files, int pos,
-			List<String> toSkip) {
-		for (int i = pos; i >= 0; i--)
-			if (!toSkip.contains(files.get(i).path))
-				return i;
-		return null;
-	}
-
 }

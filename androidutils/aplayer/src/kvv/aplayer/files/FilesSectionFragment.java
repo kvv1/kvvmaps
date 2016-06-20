@@ -8,33 +8,17 @@ import kvv.aplayer.files.tape.TapeView;
 import kvv.aplayer.player.Files;
 import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APService;
-import kvv.aplayer.service.APServiceListener;
-import kvv.aplayer.service.FileDescriptor;
-import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
-import android.content.SharedPreferences;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
-import com.smartbean.androidutils.fragment.FragmentX;
-import com.smartbean.androidutils.util.Utils;
-
-public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
-		implements APServiceListener {
-
-	public FilesSectionFragment() {
-		super(APService.class, R.layout.fragment_files);
-	}
+public class FilesSectionFragment extends FilesSectionFragmentBase {
 
 	private static boolean tape;
 
@@ -44,25 +28,8 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 	private TapeView tapeView;
 	private LevelView arrowLevelView;
 	private LevelView magicEyeLevelView;
-	private TextView progressText;
-	private Button pause;
-	private ProgressBar fileProgressBar;
-	protected TextView folderTextView;
-	private ProgressBar folderProgressBar;
 
-	private SharedPreferences settings;
-	protected Handler handler = new Handler();
-
-	private int seekStep = 0;
-
-	private Runnable progressRunnable = new Runnable1() {
-		@Override
-		public void run1() {
-			positionChanged();
-			handler.removeCallbacks(this);
-			handler.postDelayed(this, 1000);
-		}
-	};
+	private Handler handler = new Handler();
 
 	private Runnable buttonsRunnable = new Runnable1() {
 		@Override
@@ -71,34 +38,14 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 		}
 	};
 
+	public FilesSectionFragment() {
+		super(APService.class, R.layout.fragment_files);
+	}
+
 	private void restartButtonsTimer() {
 		rootView.findViewById(R.id.goto1).setVisibility(View.VISIBLE);
 		handler.removeCallbacks(buttonsRunnable);
 		handler.postDelayed(buttonsRunnable, APActivity.BUTTONS_DELAY);
-	}
-
-	private void showUndoRedoPanel() {
-		if (conn.service == null)
-			return;
-
-		MRUDialog mruDialog = new MRUDialog(getActivity(), conn.service,
-				listView);
-		mruDialog.show();
-	}
-
-	@Override
-	public void onChanged(OnChangedHint hint) {
-		if (conn.service == null)
-			return;
-
-		switch (hint) {
-		case FOLDER:
-			folderChanged();
-		case FILE:
-			trackChanged();
-		case STATE:
-			stateChanged();
-		}
 	}
 
 	@Override
@@ -108,13 +55,9 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	protected void createUI(final IAPService service) {
-		settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		rootView.findViewById(R.id.goto1).setVisibility(View.GONE);
+		super.createUI(service);
 
-		folderTextView = (TextView) rootView.findViewById(R.id.folder);
-		fileProgressBar = (ProgressBar) rootView.findViewById(R.id.progress);
-		folderProgressBar = (ProgressBar) rootView
-				.findViewById(R.id.folderProgress);
+		rootView.findViewById(R.id.goto1).setVisibility(View.GONE);
 
 		listView = (ListView) rootView.findViewById(R.id.list);
 
@@ -130,37 +73,6 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 				}
 			}
 		});
-
-		pause = (Button) rootView.findViewById(R.id.pause);
-		pause.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (conn.service != null)
-					conn.service.play_pause();
-			}
-		});
-
-		pause.setOnLongClickListener(new OnLongClickListener() {
-			@Override
-			public boolean onLongClick(View v) {
-				showUndoRedoPanel();
-				return true;
-			}
-		});
-
-		progressText = (TextView) rootView.findViewById(R.id.progressText);
-
-		new TouchListener(progressText) {
-			@Override
-			protected void onClick(float touchX, float touchY) {
-				if (conn.service != null) {
-					int dur = conn.service.getDuration();
-					int pos = (int) (dur * touchX / progressText.getWidth());
-					System.out.println("seek to " + pos);
-					conn.service.seekTo(pos);
-				}
-			}
-		};
 
 		tapePanel = (TapePanel) rootView.findViewById(R.id.tapePanel);
 		listPanel = rootView.findViewById(R.id.listPanel);
@@ -215,19 +127,8 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 			@Override
 			protected void onLongClick(float touchX, float touchY) {
 				int ht = tapeView.hitTest(touchX, touchY);
-				if (ht == -1) {
-					tapeView.setSeek(-2000, false);
-					seekStep = -1000;
-				} else if (ht == 1) {
-					tapeView.setSeek(2000, false);
-					seekStep = 1000;
-				} else
+				if (ht == 0)
 					showUndoRedoPanel();
-			}
-
-			@Override
-			protected void onHold(float touchX, float touchY) {
-				FilesSectionFragment.this.onHold();
 			}
 
 			@Override
@@ -237,69 +138,12 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 			}
 		};
 
-		Button prev = (Button) rootView.findViewById(R.id.prev);
-
-		new TouchListener(prev) {
-			@Override
-			protected void onClick(float touchX, float touchY) {
-				if (conn.service != null)
-					conn.service.prev();
-			}
-
-			@Override
-			protected void onLongClick(float touchX, float touchY) {
-				seekStep = -1000;
-			}
-
-			@Override
-			protected void onHold(float touchX, float touchY) {
-				FilesSectionFragment.this.onHold();
-			}
-		};
-
-		Button next = (Button) rootView.findViewById(R.id.next);
-
-		new TouchListener(next) {
-			@Override
-			protected void onClick(float touchX, float touchY) {
-				if (conn.service != null)
-					conn.service.next();
-			}
-
-			@Override
-			protected void onLongClick(float touchX, float touchY) {
-				seekStep = 1000;
-			}
-
-			@Override
-			protected void onHold(float touchX, float touchY) {
-				FilesSectionFragment.this.onHold();
-			}
-		};
-
 		setCurrentSkin();
 
-		service.addListener(this);
 		onChanged(OnChangedHint.FOLDER);
+		onChanged(OnChangedHint.FILE);
 
 		setMagicEye();
-	}
-
-	private void onHold() {
-		if (conn.service != null) {
-			conn.service.seek(seekStep);
-			seekStep = seekStep + seekStep / 3;
-			if (seekStep > 20000)
-				seekStep = 20000;
-			if (seekStep < -20000)
-				seekStep = -20000;
-		}
-	}
-
-	public void onDestroy() {
-		if (conn.service != null)
-			conn.service.removeListener(this);
-		super.onDestroy();
 	}
 
 	private void clearButtons() {
@@ -315,83 +159,29 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 		}
 	}
 
-	private long[] folderFilesStartPos;
-	private long folderMax;
-
-	private void folderChanged() {
-		System.out.println("folderChanged()");
+	protected void folderChanged() {
+		super.folderChanged();
 		FilesAdapter adapter = new FilesAdapter(getActivity(), conn.service);
 		listView.setAdapter(adapter);
-		Folder folder = conn.service.getFolders().getFolder();
-		if (folder != null)
-			folderTextView.setText(folder.getDisplayName());
-		else
-			folderTextView.setText("<empty>");
-
-		Files files = conn.service.getFiles();
-
-		folderMax = 0;
-		folderFilesStartPos = new long[files.files.size()];
-		for (int i = 0; i < folderFilesStartPos.length; i++) {
-			FileDescriptor file = files.files.get(i);
-			folderFilesStartPos[i] = folderMax;
-			folderMax += file.duration;
-		}
-
 	}
 
-	private void trackChanged() {
-		System.out.println("trackChanged()");
+	protected void trackChanged() {
+		super.trackChanged();
 		clearButtons();
 		Files files = conn.service.getFiles();
-
 		listView.invalidateViews();
 		listView.setSelection(files.curFile - 2);
-		// int file = conn.service.getCurrentFile();
-		// FileDescriptor[] files = conn.service.getFiles();
-
-		FileDescriptor file = files.getFile();
-		if (file != null)
-			progressText.setText(file.name);
 	}
 
-	private void stateChanged() {
-		// if (conn.service != null)
-		// pause.setText(conn.service.isPlaying() ? "Pause" : "Play");
-
+	protected void stateChanged() {
+		super.stateChanged();
 		updateTapeViewState();
-		positionChanged();
 	}
 
-	private void positionChanged() {
-		if (conn.service != null) {
-
-			int dur = conn.service.getDuration();
-			int pos = conn.service.getCurrentPosition();
-
-			fileProgressBar.setMax(dur);
-			fileProgressBar.setProgress(pos);
-			if (!tape) {
-				String time = Utils.convertSecondsToHMmSs(pos / 1000) + "("
-						+ Utils.convertSecondsToHMmSs(dur / 1000) + ")";
-				pause.setText((conn.service.isPlaying() ? "Pause" : "Play")
-						+ "  " + time);
-				// timing.setText(Utils.convertSecondsToHMmSs(pos / 1000) + "("
-				// + Utils.convertSecondsToHMmSs(dur / 1000) + ")");
-			}
-
-			Files files = conn.service.getFiles();
-			if (files.files.size() > 0 && folderFilesStartPos != null
-					&& folderFilesStartPos.length > files.curFile) {
-				int max = (int) (folderMax / 1000);
-				int cur = (int) (folderFilesStartPos[files.curFile] + pos) / 1000;
-
-				if (tape)
-					tapeView.setProgress(max, cur);
-				folderProgressBar.setMax(max);
-				folderProgressBar.setProgress(cur);
-			}
-		}
+	protected void setFolderProgress(int max, int cur) {
+		super.setFolderProgress(max, cur);
+		if (tape)
+			tapeView.setProgress(max, cur);
 	}
 
 	private void updateTapeViewState() {
@@ -426,19 +216,14 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 
 	@Override
 	public void onPause() {
-		if (conn.service != null)
-			conn.service.setVisible(false);
-		handler.removeCallbacksAndMessages(null);
-		handler.removeCallbacks(progressRunnable);
 		updateTapeViewState();
+		handler.removeCallbacksAndMessages(null);
 		super.onPause();
 	}
 
+	@Override
 	public void onResume() {
 		super.onResume();
-		progressRunnable.run();
-		if (conn.service != null)
-			conn.service.setVisible(tape);
 		updateTapeViewState();
 		setMagicEye();
 	}
@@ -473,17 +258,9 @@ public class FilesSectionFragment extends FragmentX<APActivity, IAPService>
 
 	}
 
-	static abstract class Runnable1 implements Runnable {
-		@Override
-		public final void run() {
-			try {
-				run1();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		
-		public abstract void run1();
+	@Override
+	protected boolean isLevelNeeded() {
+		return tape;
 	}
-	
+
 }
