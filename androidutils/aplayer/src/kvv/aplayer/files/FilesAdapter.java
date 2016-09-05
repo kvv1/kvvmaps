@@ -30,7 +30,6 @@ public class FilesAdapter extends ArrayAdapter<FileDescriptor> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		List<String> badSongs = service.getBadSongs();
 
-		
 		View v = convertView;
 		if (v == null) {
 			LayoutInflater vi = activity.getLayoutInflater();
@@ -44,10 +43,15 @@ public class FilesAdapter extends ArrayAdapter<FileDescriptor> {
 			v.setBackgroundColor(0xFFFFFF80);
 		else if (sel < 0 && position == service.getFiles().curFile)
 			v.setBackgroundColor(0xFFFFFF80);
-		else if(badSongs.contains(getItem(position).path))
-			v.setBackgroundColor(0xFFFFE0E0);
+		// else if(badSongs.contains(getItem(position).path))
+		// v.setBackgroundColor(0xFFFFE0E0);
 		else
 			v.setBackgroundColor(0xFFFFFFFF);
+
+		if (badSongs.contains(getItem(position).path))
+			tv.setTextColor(0xFFFF4040);
+		else
+			tv.setTextColor(0xFF000000);
 
 		return v;
 	}

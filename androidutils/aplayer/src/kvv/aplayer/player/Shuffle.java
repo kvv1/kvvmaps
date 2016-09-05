@@ -1,5 +1,6 @@
 package kvv.aplayer.player;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
@@ -22,6 +23,19 @@ public class Shuffle {
 			ar.set(index, ar.get(i));
 			ar.set(i, a);
 		}
+	}
+
+	public static Random getTodayRandom(int salt) {
+		Calendar calendar = Calendar.getInstance();
+		int n = (calendar.get(Calendar.YEAR) << 16)
+				+ (calendar.get(Calendar.MONTH) << 8)
+				+ calendar.get(Calendar.DATE);
+		Random rnd = new Random(n + salt);
+		return rnd;
+	}
+
+	public static int getRandom(Random rnd, int min, int max) {
+		return (rnd.nextInt() & 0xffffff) % (max - min) + min;
 	}
 
 }

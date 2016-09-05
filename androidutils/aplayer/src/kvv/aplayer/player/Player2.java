@@ -33,6 +33,9 @@ public abstract class Player2 extends Player1 {
 			if (isPlaying())
 				handler.post(saver);
 		}
+		if (hint == OnChangedHint.FOLDER) {
+			save();
+		}
 	}
 
 	public void toFolder(int folderIdx) {
@@ -55,12 +58,6 @@ public abstract class Player2 extends Player1 {
 			save();
 		super.toFolder(folderIdx, file, curPos, seed);
 	}
-
-	// @Override
-	// public void setRandom() {
-	// save();
-	// super.setRandom();
-	// }
 
 	private void save() {
 		Folder folder = getFolders().getFolder();

@@ -1,14 +1,19 @@
 package kvv.aplayer.files;
 
+import java.util.Random;
+
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
 import kvv.aplayer.player.Files;
+import kvv.aplayer.player.Shuffle;
 import kvv.aplayer.player.Player.OnChangedHint;
 import kvv.aplayer.service.APServiceListener;
 import kvv.aplayer.service.FileDescriptor;
 import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -58,6 +63,7 @@ public abstract class FilesSectionFragmentBase extends
 			trackChanged();
 		case STATE:
 			stateChanged();
+			setProgressColor();
 		default:
 			break;
 		}
@@ -71,6 +77,18 @@ public abstract class FilesSectionFragmentBase extends
 	public void onLoaded() {
 	}
 
+	private void setProgressColor() {
+		Random rnd = Shuffle.getTodayRandom(1);
+		// Random rnd = new Random();
+		int color = Color.HSVToColor(new float[] { rnd.nextInt(360), 0.5f, 1 });
+
+		folderProgressBar.getProgressDrawable().setColorFilter(color,
+				PorterDuff.Mode.MULTIPLY);
+
+		fileProgressBar.getProgressDrawable().setColorFilter(color,
+				PorterDuff.Mode.MULTIPLY);
+	}
+
 	@Override
 	protected void createUI(IAPService service) {
 		settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -80,6 +98,13 @@ public abstract class FilesSectionFragmentBase extends
 		folderProgressBar = (ProgressBar) rootView
 				.findViewById(R.id.folderProgress);
 		progressText = (TextView) rootView.findViewById(R.id.progressText);
+
+		// folderProgressBar.getIndeterminateDrawable().setColorFilter(Color.RED,
+		// PorterDuff.Mode.SRC_IN);
+		// folderProgressBar.getProgressDrawable().setColorFilter(Color.RED,
+		// PorterDuff.Mode.MULTIPLY);
+		// fileProgressBar.getProgressDrawable().setColorFilter(Color.RED,
+		// PorterDuff.Mode.MULTIPLY);
 
 		pause = (Button) rootView.findViewById(R.id.pause);
 		pause.setOnClickListener(new OnClickListener() {

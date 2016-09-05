@@ -261,11 +261,6 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	@Override
-	public void seek(int seekStep) {
-		player.seek(seekStep);
-	}
-
-	@Override
 	public boolean isPlaying() {
 		return player.isPlaying();
 	}

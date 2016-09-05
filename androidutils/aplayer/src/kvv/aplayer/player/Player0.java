@@ -24,8 +24,11 @@ public abstract class Player0 extends Player {
 				Integer next = getNext();
 				if (next == null) {
 					curFile = 0;
-					playFile(folders.getFolder().filesToPlay.get(curFile).path,
-							0, false);
+					Folder folder = folders.getFolder();
+					if (folder.seed != null)
+						folder.seed = Shuffle.shuffle(folder.filesToPlay);
+					onChanged(OnChangedHint.FOLDER);
+					playFile(folder.filesToPlay.get(curFile).path, 0, false);
 				} else {
 					toFile(next);
 				}
@@ -56,9 +59,8 @@ public abstract class Player0 extends Player {
 
 		folder.filesToPlay = getAllFiles();
 		folder.seed = seed;
-		if (folder.seed != null) {
+		if (folder.seed != null)
 			Shuffle.shuffle(folder.filesToPlay, folder.seed);
-		}
 
 		curFile = 0;
 		onChanged(OnChangedHint.FOLDER);
@@ -148,40 +150,14 @@ public abstract class Player0 extends Player {
 		toFile(next);
 	}
 
-	public void seek(int seekStep) {
-		if (!isPlaying())
-			return;
-
-		int cur = getCurrentPosition();
-
-		if (seekStep < 0) {
-			seekStep = -seekStep;
-			if (cur > seekStep) {
-				seekTo(Math.max(0, cur - seekStep));
-			} else {
-				Integer prev = getPrev();
-				if (prev != null)
-					toFile(prev, Math.max(0, getDuration() - seekStep));
-			}
-		} else {
-			if (cur + seekStep < getDuration()) {
-				seekTo(cur + seekStep);
-			} else {
-				Integer next = getNext();
-				if (next != null)
-					toFile(next);
-			}
-		}
-	}
-
-	public Integer skipFw(List<FileDescriptor> files, int pos) {
+	private Integer skipFw(List<FileDescriptor> files, int pos) {
 		for (int i = pos; i < files.size(); i++)
 			if (!isBadSong(files.get(i).path))
 				return i;
 		return null;
 	}
 
-	public Integer skipBw(List<FileDescriptor> files, int pos) {
+	private Integer skipBw(List<FileDescriptor> files, int pos) {
 		for (int i = pos; i >= 0; i--)
 			if (!isBadSong(files.get(i).path))
 				return i;

@@ -21,8 +21,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnFocusChangeListener;
 
 import com.smartbean.androidutils.activity.FragmentActivityTabsNoActionBar;
 import com.smartbean.androidutils.service.ServiceConnectionAdapter;
@@ -65,18 +63,6 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		add("Files", new FilesSectionFragment());
 		add("Folders", new FoldersSectionFragment());
 
-		getWindow().findViewById(android.R.id.content).getRootView()
-				.setOnFocusChangeListener(new OnFocusChangeListener() {
-					@Override
-					public void onFocusChange(View v, boolean hasFocus) {
-						if (hasFocus) {
-
-						}
-						// TODO Auto-generated method stub
-
-					}
-				});
-		
 		selectMainPage();
 	}
 
@@ -168,6 +154,7 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		public void onServiceConnected(ComponentName name, IBinder binder) {
 			super.onServiceConnected(name, binder);
 			service.addListener(listener);
+			updateWakeLock();
 		}
 	};
 
@@ -184,12 +171,14 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		// ActionBar actionBar = getActionBar();
 		// actionBar.hide();
 
-		_onFG();
+		fg = true;
+		updateWakeLock();
 	}
 
 	@Override
 	protected void onPause() {
-		_onBG();
+		fg = false;
+		updateWakeLock();
 		super.onPause();
 		System.gc();
 	}
@@ -223,37 +212,16 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		return settings.getBoolean(getString(R.string.prefCarMode), false);
 	}
 
-	void updateWakeLock() {
-
+	private void updateWakeLock() {
 		boolean carMode = isCarMode();
-
-		// if (navMode)
-		// setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-		// else
-		// setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-
 		boolean playing = conn.service != null && conn.service.isPlaying();
 
 		System.out.println("updateWakeLock playing=" + playing + " fg=" + fg);
 
-		if (carMode) {
-			if (fg && playing)
-				lock();
-			else
-				unlock();
-		} else {
+		if (carMode && fg && playing)
+			lock();
+		else
 			unlock();
-		}
-	}
-
-	public void _onFG() {
-		fg = true;
-		updateWakeLock();
-	}
-
-	public void _onBG() {
-		fg = false;
-		updateWakeLock();
 	}
 
 }

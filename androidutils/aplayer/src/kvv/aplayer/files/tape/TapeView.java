@@ -1,9 +1,13 @@
 package kvv.aplayer.files.tape;
 
+import java.util.Random;
+
 import kvv.aplayer.R;
+import kvv.aplayer.player.Shuffle;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.media.AudioManager;
@@ -31,6 +35,7 @@ public class TapeView extends View {
 
 	private BobbinView b1;
 	private BobbinView b2;
+	private TapePanel parent;
 
 	static class Params {
 
@@ -204,6 +209,29 @@ public class TapeView extends View {
 		if (started || b1 == null)
 			return;
 
+		Random rnd = Shuffle.getTodayRandom(2);
+//		rnd = new Random();
+
+		int hue = rnd.nextInt(360);
+
+		int color = Color.HSVToColor(new float[] { hue, 0.3f, 1 });
+
+		b1.setColor(color);
+		b2.setColor(color);
+
+		// Random rnd = new Random();
+
+		hue = (hue + 90 + rnd.nextInt(180)) % 360;
+
+		if (parent != null)
+			parent.setBackgroundColor(Color.HSVToColor(new float[] { hue, 0.2f,
+					0.5f }));
+
+		// parent.setBackgroundColor(Color1.make(
+		// Shuffle.getRandom(rnd, 100, 110),
+		// Shuffle.getRandom(rnd, 110, 120),
+		// Shuffle.getRandom(rnd, 110, 120)));
+
 		playClick();
 
 		started = true;
@@ -315,6 +343,10 @@ public class TapeView extends View {
 		if (hitTest(x, y, 1))
 			return 1;
 		return 0;
+	}
+
+	public void setParent(TapePanel parent) {
+		this.parent = parent;
 	}
 
 }

@@ -22,22 +22,19 @@ public class BobbinView extends ImageView {
 	}
 
 	private void init() {
-		 setImageBitmap(BobbinBmp.getInstance());
+		setColor(0xFFFFFFFF);
+		// setImageBitmap(BobbinBmp.createBmp(color));
 	}
-	
-//	Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
-//
-//	@Override
-//	protected void onDraw(Canvas canvas) {
-//
-//		canvas.drawBitmap(BobbinBmp.getInstance(), null, new RectF(0, 0,
-//				getWidth(), getWidth()), paint);
-//	}
 
 	public void onMeasure(int widthSpec, int heightSpec) {
 		super.onMeasure(widthSpec, heightSpec);
-		//int size = Math.min(getMeasuredWidth(), getMeasuredHeight());
+		// int size = Math.min(getMeasuredWidth(), getMeasuredHeight());
 		int size = getMeasuredWidth();
 		setMeasuredDimension(size, size);
 	}
+
+	public void setColor(int color) {
+		setImageBitmap(BobbinBmp.createBmp(color));
+	}
+
 }

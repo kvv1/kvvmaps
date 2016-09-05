@@ -9,16 +9,21 @@ import android.graphics.RectF;
 public class BobbinBmp {
 	static public final int bmSize = 256;
 
-	static final int color = 0xFFE0F0E0;
 	static final int color1 = 0xFFB0C0B0;
 
 	static public final int tapeMinR = 30;
 	static public final int tapeMaxR = 115;
 
 	static final Bitmap.Config conf = Bitmap.Config.ARGB_8888;
-	static final Bitmap bobbinBmp = Bitmap.createBitmap(bmSize, bmSize, conf);
 
-	static {
+	// static final Bitmap bobbinBmp = Bitmap.createBitmap(bmSize, bmSize,
+	// conf);
+
+	static Bitmap createBmp(int color) {
+		int color1 = Color1.mul(color, 0.8);
+
+		Bitmap bobbinBmp = Bitmap.createBitmap(bmSize, bmSize, conf);
+
 		Bitmap bmp = Bitmap.createBitmap(bmSize, bmSize, conf);
 		bmp.eraseColor(0);
 		Canvas canvas = new Canvas(bmp);
@@ -100,10 +105,6 @@ public class BobbinBmp {
 		canvas2.rotate(120);
 		canvas2.drawLine(0, 0, 0, 9, paint);
 
-	}
-	
-	public static Bitmap getInstance() {
 		return bobbinBmp;
 	}
-
 }

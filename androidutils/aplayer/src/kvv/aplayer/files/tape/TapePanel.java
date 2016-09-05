@@ -38,39 +38,10 @@ public class TapePanel extends FrameLayout {
 				BobbinView b2 = (BobbinView) findViewById(R.id.rightBobbin);
 
 				TapeView tapeView = (TapeView) findViewById(R.id.tape);
+				tapeView.setParent(TapePanel.this);
 				tapeView.setBobbins(b1, b2);
 			}
 		});
 	}
-
-//	private boolean hitTest(float x, float y, int bobbin) {
-//		BobbinView b1 = (BobbinView) findViewById(R.id.leftBobbin);
-//		BobbinView b2 = (BobbinView) findViewById(R.id.rightBobbin);
-//		
-//		float bobbinSize = b1.getWidth();
-//		float bobbinX1 = b1.getX() + bobbinSize / 2;
-//		float bobbinX2 = b2.getX() + bobbinSize / 2;
-//		
-//		float bx = bobbin < 0 ? bobbinX1 : bobbinX2;
-//		
-//		if(y > bobbinSize * 3 / 4)
-//			return false;
-//		
-//		if(bobbin == -1 && x < bx + bobbinSize/4)
-//			return true;
-//		
-//		if(bobbin == 1 && x > bx - bobbinSize/4)
-//			return true;
-//
-//		return false;
-//	}
-//
-//	public int hitTest(float x, float y) { // -1 - left, 1 = right
-//		if (hitTest(x, y, -1))
-//			return -1;
-//		if (hitTest(x, y, 1))
-//			return 1;
-//		return 0;
-//	}
 
 }
