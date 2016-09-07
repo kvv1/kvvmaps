@@ -34,7 +34,7 @@ public class PlayerUndoRedo extends PlayerMRU {
 			return;
 		UndoItem item = redoList.removeLast();
 		undoList.add(createUndoItem());
-		toFolder(item.folder, item.file, item.pos, item.seed);
+		toFolder(item.folder, item.file, item.pos, item.seed, true);
 	}
 
 	public void undo() {
@@ -42,7 +42,7 @@ public class PlayerUndoRedo extends PlayerMRU {
 			return;
 		UndoItem item = undoList.removeLast();
 		redoList.add(createUndoItem());
-		toFolder(item.folder, item.file, item.pos, item.seed);
+		toFolder(item.folder, item.file, item.pos, item.seed, true);
 	}
 
 	private UndoItem createUndoItem() {

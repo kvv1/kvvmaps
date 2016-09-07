@@ -37,6 +37,10 @@ public abstract class Player2 extends Player1 {
 	}
 
 	public void toFolder(int folderIdx) {
+		toFolder(folderIdx, true);
+	}
+
+	private void toFolder(int folderIdx, boolean play) {
 		if (getFolders().curFolder == folderIdx)
 			return;
 
@@ -47,14 +51,14 @@ public abstract class Player2 extends Player1 {
 		if (settings.contains(folder.path + "|seed"))
 			seed = settings.getLong(folder.path + "|seed", 0);
 
-		toFolder(folderIdx, curFile, curPos, seed);
+		toFolder(folderIdx, curFile, curPos, seed, play);
 	}
 
 	@Override
-	public void toFolder(int folderIdx, int file, int curPos, Long seed) {
+	public void toFolder(int folderIdx, int file, int curPos, Long seed, boolean play) {
 		if (getFolders().curFolder != folderIdx)
 			save();
-		super.toFolder(folderIdx, file, curPos, seed);
+		super.toFolder(folderIdx, file, curPos, seed, play);
 	}
 
 	private void save() {
@@ -85,16 +89,9 @@ public abstract class Player2 extends Player1 {
 		boolean state = settings.getBoolean("lastState", false);
 		if (path != null) {
 			int folderIdx = getFolders().getIndex(path);
-			if (folderIdx >= 0) {
-				toFolder(folderIdx);
-				if(state)
-					play();
-				else
-					pause();
-			}
-			
+			if (folderIdx >= 0)
+				toFolder(folderIdx, state);
 		}
-
 	}
 
 }

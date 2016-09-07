@@ -20,7 +20,7 @@ public class FoldersAdapter extends ArrayAdapter<Object> {
 
 	private Activity activity;
 	private IAPService service;
-	public int sel;
+	public int sel = -1;
 
 	public FoldersAdapter(Activity activity, IAPService service) {
 		super(activity, R.layout.folder_item, createItems(service));
@@ -70,7 +70,7 @@ public class FoldersAdapter extends ArrayAdapter<Object> {
 
 		if (position == sel)
 			v.setBackgroundColor(0xFFFFFF80);
-		else if (sel < 0 && position == service.getFolders().curFolder)
+		else if (sel < 0 && position == service.getFolders().curFolder + service.getMRU().size())
 			v.setBackgroundColor(0xFFFFFF80);
 		else
 			v.setBackgroundColor(0xFFFFFFFF);

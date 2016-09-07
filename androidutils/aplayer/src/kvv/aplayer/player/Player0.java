@@ -50,7 +50,7 @@ public abstract class Player0 extends Player {
 		return new Files(folder.filesToPlay, curFile);
 	}
 
-	public void toFolder(int folderIdx, int file, int curPos, Long seed) {
+	public void toFolder(int folderIdx, int file, int curPos, Long seed, boolean play) {
 		Folder folder = folders.getFolder();
 		if (folder != null)
 			folder.filesToPlay = null;
@@ -68,7 +68,7 @@ public abstract class Player0 extends Player {
 		for(PlayerListener listener : listeners)
 			listener.folderChanged();
 
-		toFile(file, curPos);
+		toFile(file, curPos, play);
 	}
 
 	public void setRandom() {
@@ -85,7 +85,7 @@ public abstract class Player0 extends Player {
 
 		for(PlayerListener listener : listeners)
 			listener.folderChanged();
-		toFile(0, 0);
+		toFile(0, 0, true);
 	}
 
 	private List<FileDescriptor> getAllFiles() {
@@ -101,7 +101,7 @@ public abstract class Player0 extends Player {
 		return files;
 	}
 
-	private void toFile(int idx, int pos) {
+	private void toFile(int idx, int pos, boolean play) {
 		Folder folder = folders.getFolder();
 		if (folder == null)
 			return;
@@ -112,11 +112,11 @@ public abstract class Player0 extends Player {
 			curFile = idx;
 
 		if (folder.filesToPlay.size() > curFile)
-			playFile(folder.filesToPlay.get(curFile).path, pos, true);
+			playFile(folder.filesToPlay.get(curFile).path, pos, play);
 	}
 
 	public void toFile(int idx) {
-		toFile(idx, 0);
+		toFile(idx, 0, true);
 	}
 
 	public void prev() {
