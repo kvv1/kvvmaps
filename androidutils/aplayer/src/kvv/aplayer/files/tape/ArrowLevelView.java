@@ -55,11 +55,15 @@ public class ArrowLevelView extends LevelView {
 	}
 
 	private float cx3(float w, float r, float val) {
+		if (val > 110)
+			val = 110;
 		double angle = Math.toRadians((val - 50) * 35 / 50);
 		return (float) (cx2(w) + r * Math.sin(angle));
 	}
 
 	private float cy3(float w, float r, float val) {
+		if (val > 110)
+			val = 110;
 		double angle = Math.toRadians((val - 50) * 35 / 50);
 		return (float) (cy2(w) - r * Math.cos(angle));
 	}

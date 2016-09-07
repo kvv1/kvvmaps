@@ -6,7 +6,8 @@ import kvv.aplayer.files.tape.LevelView;
 import kvv.aplayer.files.tape.TapePanel;
 import kvv.aplayer.files.tape.TapeView;
 import kvv.aplayer.player.Files;
-import kvv.aplayer.player.Player.OnChangedHint;
+import kvv.aplayer.player.Player.PlayerAdapter;
+import kvv.aplayer.player.Player.PlayerListener;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
@@ -38,6 +39,29 @@ public class FilesSectionFragment extends FilesSectionFragmentBase {
 		}
 	};
 
+	private PlayerListener listener = new PlayerAdapter() {
+		@Override
+		public void levelChanged(float indicatorLevel) {
+			if (arrowLevelView != null && tape)
+				arrowLevelView.setLevel(indicatorLevel);
+			if (magicEyeLevelView != null && tape)
+				magicEyeLevelView.setLevel(indicatorLevel);
+		}
+
+		public void folderChanged() {
+			FilesAdapter adapter = new FilesAdapter(getActivity(), conn.service);
+			listView.setAdapter(adapter);
+		}
+
+		public void fileChanged() {
+			clearButtons();
+			Files files = conn.service.getFiles();
+			listView.invalidateViews();
+			listView.setSelection(files.curFile - 2);
+			updateTapeViewState();
+		}
+	};
+
 	public FilesSectionFragment() {
 		super(APService.class, R.layout.fragment_files);
 	}
@@ -46,10 +70,6 @@ public class FilesSectionFragment extends FilesSectionFragmentBase {
 		rootView.findViewById(R.id.goto1).setVisibility(View.VISIBLE);
 		handler.removeCallbacks(buttonsRunnable);
 		handler.postDelayed(buttonsRunnable, APActivity.BUTTONS_DELAY);
-	}
-
-	@Override
-	public void onLoaded() {
 	}
 
 	@SuppressLint("ClickableViewAccessibility")
@@ -97,14 +117,6 @@ public class FilesSectionFragment extends FilesSectionFragmentBase {
 					}
 				});
 
-		folderTextView.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				tape = !tape;
-				setCurrentSkin();
-			}
-		});
-
 		new TouchListener(tapeView) {
 			@Override
 			protected void onClick(float touchX, float touchY) {
@@ -140,10 +152,18 @@ public class FilesSectionFragment extends FilesSectionFragmentBase {
 
 		setCurrentSkin();
 
-		onChanged(OnChangedHint.FOLDER);
-		onChanged(OnChangedHint.FILE);
+		service.addListener(listener);
+		listener.folderChanged();
+		listener.fileChanged();
 
 		setMagicEye();
+	}
+
+	@Override
+	public void onDestroy() {
+		if (conn.service != null)
+			conn.service.removeListener(listener);
+		super.onDestroy();
 	}
 
 	private void clearButtons() {
@@ -157,25 +177,6 @@ public class FilesSectionFragment extends FilesSectionFragmentBase {
 			adapter.sel = -1;
 			listView.invalidateViews();
 		}
-	}
-
-	protected void folderChanged() {
-		super.folderChanged();
-		FilesAdapter adapter = new FilesAdapter(getActivity(), conn.service);
-		listView.setAdapter(adapter);
-	}
-
-	protected void trackChanged() {
-		super.trackChanged();
-		clearButtons();
-		Files files = conn.service.getFiles();
-		listView.invalidateViews();
-		listView.setSelection(files.curFile - 2);
-	}
-
-	protected void stateChanged() {
-		super.stateChanged();
-		updateTapeViewState();
 	}
 
 	protected void setFolderProgress(int max, int cur) {
@@ -228,14 +229,6 @@ public class FilesSectionFragment extends FilesSectionFragmentBase {
 		setMagicEye();
 	}
 
-	@Override
-	public void onLevelChanged(float level) {
-		if (arrowLevelView != null && tape)
-			arrowLevelView.setLevel(level);
-		if (magicEyeLevelView != null && tape)
-			magicEyeLevelView.setLevel(level);
-	}
-
 	public void setMagicEye() {
 		handler.postDelayed(new Runnable1() {
 			@Override
@@ -261,6 +254,12 @@ public class FilesSectionFragment extends FilesSectionFragmentBase {
 	@Override
 	protected boolean isLevelNeeded() {
 		return tape;
+	}
+
+	@Override
+	protected void folderProgressClicked() {
+		tape = !tape;
+		setCurrentSkin();
 	}
 
 }

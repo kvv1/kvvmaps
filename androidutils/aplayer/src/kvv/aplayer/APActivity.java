@@ -3,10 +3,9 @@ package kvv.aplayer;
 import kvv.aplayer.files.FilesSectionFragment;
 import kvv.aplayer.files.TextSectionFragment;
 import kvv.aplayer.folders.FoldersSectionFragment;
-import kvv.aplayer.player.Player.OnChangedHint;
+import kvv.aplayer.player.Player.PlayerAdapter;
+import kvv.aplayer.player.Player.PlayerListener;
 import kvv.aplayer.service.APService;
-import kvv.aplayer.service.APServiceListener;
-import kvv.aplayer.service.APServiceListenerAdapter;
 import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
@@ -37,9 +36,9 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		return (ViewPager) findViewById(R.id.pager);
 	}
 
-	private APServiceListener listener = new APServiceListenerAdapter() {
+	private PlayerListener listener = new PlayerAdapter() {
 		@Override
-		public void onChanged(OnChangedHint hint) {
+		public void fileChanged() {
 			updateWakeLock();
 		}
 	};

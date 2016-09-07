@@ -17,14 +17,14 @@ public abstract class PlayerBadSongs extends Player2 {
 
 	public void addBadSong(String path) {
 		badSongs.addBadSong(path);
-		onChanged(OnChangedHint.FOLDER);
-		onChanged(OnChangedHint.FILE);
+		for (PlayerListener l : listeners)
+			l.folderChanged();
 	}
 
 	public void delBadSong(String path) {
 		badSongs.delBadSong(path);
-		onChanged(OnChangedHint.FOLDER);
-		onChanged(OnChangedHint.FILE);
+		for (PlayerListener l : listeners)
+			l.folderChanged();
 	}
 
 	public List<String> getBadSongs() {

@@ -3,15 +3,15 @@ package kvv.aplayer.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
 import kvv.aplayer.player.Files;
 import kvv.aplayer.player.Folders;
+import kvv.aplayer.player.Player.PlayerAdapter;
+import kvv.aplayer.player.Player.PlayerListener;
 import kvv.aplayer.player.PlayerUndoRedo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -35,8 +35,6 @@ import com.smartbean.androidutils.service.BaseService;
 
 public class APService extends BaseService implements IAPService {
 	public static APService staticInstance;
-
-	private Set<APServiceListener> listeners = new HashSet<APServiceListener>();
 
 	private PlayerUndoRedo player;
 
@@ -87,17 +85,14 @@ public class APService extends BaseService implements IAPService {
 
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
 
-
 		createPlayer();
 
 		telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 		phoneStateListener = new PhoneStateListener() {
 			@Override
 			public void onCallStateChanged(int state, String incomingNumber) {
-				if (state == TelephonyManager.CALL_STATE_RINGING) {
-					if (player.isPlaying())
-						player.pause();
-				}
+				if (state == TelephonyManager.CALL_STATE_RINGING)
+					player.pause();
 				super.onCallStateChanged(state, incomingNumber);
 			}
 		};
@@ -130,12 +125,11 @@ public class APService extends BaseService implements IAPService {
 			player.close();
 
 		List<Folder> folders = read();
-		player = new PlayerUndoRedo(this, folders) {
-			@Override
-			public void onChanged(OnChangedHint hint) {
-				System.out.println("onChanged " + isPlaying());
-				super.onChanged(hint);
+		player = new PlayerUndoRedo(this, folders);
 
+		player.addListener(new PlayerAdapter() {
+			@Override
+			public void fileChanged() {
 				if (isCarMode())
 					setMaxVolume();
 
@@ -143,22 +137,13 @@ public class APService extends BaseService implements IAPService {
 					stopGpsDelayed();
 				else
 					startGps();
-
-				for (APServiceListener l : listeners)
-					l.onChanged(hint);
 			}
-
-			@Override
-			protected void levelChanged(float indicatorLevel) {
-				for (APServiceListener l : listeners)
-					l.onLevelChanged(indicatorLevel);
-			}
-		};
-
+		});
+		
 		modeChanged();
 
-		for (APServiceListener l : listeners)
-			l.onLoaded();
+		for (PlayerListener l : player.listeners)
+			l.folderListChanged();
 	}
 
 	@Override
@@ -193,13 +178,13 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	@Override
-	public void addListener(APServiceListener listener) {
-		listeners.add(listener);
+	public void addListener(PlayerListener listener) {
+		player.addListener(listener);
 	}
 
 	@Override
-	public void removeListener(APServiceListener listener) {
-		listeners.remove(listener);
+	public void removeListener(PlayerListener listener) {
+		player.removeListener(listener);
 	}
 
 	@Override
@@ -291,7 +276,7 @@ public class APService extends BaseService implements IAPService {
 		System.out.println("undo");
 		player.undo();
 	}
-		
+
 	@Override
 	public void redo() {
 		System.out.println("redo");

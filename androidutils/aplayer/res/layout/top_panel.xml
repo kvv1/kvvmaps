@@ -9,16 +9,35 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <TextView
-        android:id="@+id/folder"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#80C0FFC0"
-        android:ellipsize="start"
-        android:gravity="center_horizontal"
-        android:singleLine="true"
-        android:text="&lt;not selected>"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textStyle="bold" />
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/folder"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#80C0FFC0"
+            android:ellipsize="start"
+            android:gravity="center_horizontal"
+            android:singleLine="true"
+            android:text="&lt;not selected>"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/foldertime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#80C0FFC0"
+            android:singleLine="true"
+            android:paddingLeft="8dp"
+            android:paddingRight="4dp"
+            android:text="time"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="bold" />
+    </LinearLayout>
 
 </FrameLayout>

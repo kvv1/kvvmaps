@@ -2,10 +2,9 @@ package kvv.aplayer.folders;
 
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
-import kvv.aplayer.player.Player.OnChangedHint;
+import kvv.aplayer.player.Player.PlayerAdapter;
+import kvv.aplayer.player.Player.PlayerListener;
 import kvv.aplayer.service.APService;
-import kvv.aplayer.service.APServiceListener;
-import kvv.aplayer.service.APServiceListenerAdapter;
 import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
 import android.os.Handler;
@@ -21,23 +20,21 @@ import com.smartbean.androidutils.fragment.FragmentX;
 public class FoldersSectionFragment extends FragmentX<APActivity, IAPService> {
 	private Handler handler = new Handler();
 
-	private final APServiceListener listener = new APServiceListenerAdapter() {
+	private final PlayerListener listener = new PlayerAdapter() {
 		@Override
-		public void onChanged(OnChangedHint hint) {
-			if (conn.service == null)
-				return;
-
+		public void folderListChanged() {
 			clearGoto();
-
-			if (hint == OnChangedHint.FOLDER_LIST) {
-				list.setAdapter(new FoldersAdapter(getActivity(), conn.service));
-			}
+			list.setAdapter(new FoldersAdapter(getActivity(), conn.service));
 		}
 
-		public void onLoaded() {
-			if (conn.service == null)
-				return;
-			list.setAdapter(new FoldersAdapter(getActivity(), conn.service));
+		@Override
+		public void folderChanged() {
+			clearGoto();
+		}
+
+		@Override
+		public void fileChanged() {
+			clearGoto();
 		}
 	};
 
@@ -70,8 +67,7 @@ public class FoldersSectionFragment extends FragmentX<APActivity, IAPService> {
 	protected void createUI(IAPService service) {
 		list = (ListView) rootView.findViewById(R.id.list);
 		service.addListener(listener);
-		listener.onLoaded();
-		listener.onChanged(OnChangedHint.FILE);
+		listener.folderListChanged();
 
 		list.setOnItemClickListener(new OnItemClickListener() {
 			@Override

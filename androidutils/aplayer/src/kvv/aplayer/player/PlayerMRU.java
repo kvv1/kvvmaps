@@ -20,7 +20,8 @@ public abstract class PlayerMRU extends PlayerBadSongs {
 		super.toFolder(folderIdx);
 		Folders folders = getFolders();
 		mru.addMRU(folders.folders.get(folderIdx).path);
-		onChanged(OnChangedHint.FOLDER_LIST);
+		for(PlayerListener l : listeners)
+			l.folderListChanged();
 	}
 	
 	public List<String> getMRU() {

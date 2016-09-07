@@ -1,6 +1,7 @@
 package kvv.aplayer.player;
 
-import com.smartbean.androidutils.util.Utils;
+import java.util.Collection;
+import java.util.HashSet;
 
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -8,13 +9,47 @@ import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
 import android.media.audiofx.Equalizer;
 
+import com.smartbean.androidutils.util.Utils;
+
 public abstract class Player {
 
-	public enum OnChangedHint {
-		FILE, STATE, FOLDER_LIST, FOLDER
+	public interface PlayerListener {
+		void folderListChanged();
+
+		void folderChanged();
+
+		void fileChanged();
+		
+		void levelChanged(float indicatorLevel);
 	}
 
-	public abstract void onChanged(OnChangedHint hint);
+	public static class PlayerAdapter implements PlayerListener {
+		@Override
+		public void folderListChanged() {
+		}
+
+		@Override
+		public void folderChanged() {
+		}
+
+		@Override
+		public void fileChanged() {
+		}
+
+		@Override
+		public void levelChanged(float indicatorLevel) {
+		}
+	}
+
+	public Collection<PlayerListener> listeners = new HashSet<Player.PlayerListener>();
+
+	public void addListener(PlayerListener listener) {
+		listeners.add(listener);
+	}
+
+	public void removeListener(PlayerListener listener) {
+		listeners.remove(listener);
+	}
 
 	private final MediaPlayer mp = new MediaPlayer();
 	private final Equalizer equalizer;
@@ -69,7 +104,8 @@ public abstract class Player {
 			if (start)
 				mp.start();
 
-			onChanged(OnChangedHint.FILE);
+			for (PlayerListener listener : listeners)
+				listener.fileChanged();
 
 			resetGain();
 		} catch (Exception e) {
@@ -81,7 +117,8 @@ public abstract class Player {
 		if (!prepared)
 			return;
 		mp.seekTo(pos);
-		onChanged(OnChangedHint.STATE);
+		for (PlayerListener listener : listeners)
+			listener.fileChanged();
 	}
 
 	public void pause() {
@@ -89,7 +126,8 @@ public abstract class Player {
 			return;
 		if (mp.isPlaying()) {
 			mp.pause();
-			onChanged(OnChangedHint.STATE);
+			for (PlayerListener listener : listeners)
+				listener.fileChanged();
 		}
 	}
 
@@ -99,7 +137,8 @@ public abstract class Player {
 		if (!mp.isPlaying()) {
 			resetGain();
 			mp.start();
-			onChanged(OnChangedHint.STATE);
+			for (PlayerListener listener : listeners)
+				listener.fileChanged();
 		}
 	}
 

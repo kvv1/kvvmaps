@@ -4,11 +4,12 @@ import java.util.List;
 
 import kvv.aplayer.player.Files;
 import kvv.aplayer.player.Folders;
+import kvv.aplayer.player.Player.PlayerListener;
 
 public interface IAPService {
-	void addListener(APServiceListener listener);
+	void addListener(PlayerListener listener);
 
-	void removeListener(APServiceListener listener);
+	void removeListener(PlayerListener listener);
 
 	Folders getFolders();
 

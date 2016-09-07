@@ -23,19 +23,17 @@ public abstract class Player2 extends Player1 {
 	public Player2(Context context, List<Folder> folders) {
 		super(folders);
 		settings = PreferenceManager.getDefaultSharedPreferences(context);
-	}
 
-	@Override
-	public void onChanged(OnChangedHint hint) {
-		super.onChanged(hint);
-		if (hint == OnChangedHint.FILE || hint == OnChangedHint.STATE) {
-			handler.removeCallbacks(saver);
-			if (isPlaying())
-				handler.post(saver);
-		}
-		if (hint == OnChangedHint.FOLDER) {
-			save();
-		}
+		addListener(new PlayerAdapter() {
+			@Override
+			public void fileChanged() {
+				save();
+				handler.removeCallbacks(saver);
+				if (isPlaying())
+					handler.post(saver);
+			}
+		});
+
 	}
 
 	public void toFolder(int folderIdx) {
@@ -85,10 +83,16 @@ public abstract class Player2 extends Player1 {
 	public void init() {
 		String path = settings.getString("lastFolder", null);
 		boolean state = settings.getBoolean("lastState", false);
-		if (path != null && state) {
+		if (path != null) {
 			int folderIdx = getFolders().getIndex(path);
-			if (folderIdx >= 0)
+			if (folderIdx >= 0) {
 				toFolder(folderIdx);
+				if(state)
+					play();
+				else
+					pause();
+			}
+			
 		}
 
 	}

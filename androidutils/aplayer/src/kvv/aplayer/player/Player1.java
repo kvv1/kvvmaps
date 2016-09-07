@@ -12,14 +12,16 @@ public abstract class Player1 extends Player0 {
 	private float dBPer100;
 	private float speedKMH;
 
-	@Override
-	public void onChanged(OnChangedHint hint) {
-		if (compr != null)
-			compr.setPlaying(isPlaying());
-	}
-
 	public Player1(List<Folder> folders) {
 		super(folders);
+
+		addListener(new PlayerAdapter() {
+			@Override
+			public void fileChanged() {
+				if (compr != null)
+					compr.setPlaying(isPlaying());
+			}
+		});
 
 		compr = new Compressor(getMP()) {
 			@Override
@@ -30,14 +32,13 @@ public abstract class Player1 extends Player0 {
 
 			@Override
 			protected void levelChanged(float indicatorLevel) {
-				Player1.this.levelChanged(indicatorLevel);
+				for (PlayerListener l : listeners)
+					l.levelChanged(indicatorLevel);
 			}
 		};
 
 		setEq();
 	}
-
-	protected abstract void levelChanged(float indicatorLevel);
 
 	@Override
 	public void close() {
@@ -75,4 +76,3 @@ public abstract class Player1 extends Player0 {
 		compr.setVisible(vis);
 	}
 }
-

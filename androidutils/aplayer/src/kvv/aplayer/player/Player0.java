@@ -25,9 +25,11 @@ public abstract class Player0 extends Player {
 				if (next == null) {
 					curFile = 0;
 					Folder folder = folders.getFolder();
-					if (folder.seed != null)
+					if (folder.seed != null) {
 						folder.seed = Shuffle.shuffle(folder.filesToPlay);
-					onChanged(OnChangedHint.FOLDER);
+						for (PlayerListener listener : listeners)
+							listener.folderChanged();
+					}
 					playFile(folder.filesToPlay.get(curFile).path, 0, false);
 				} else {
 					toFile(next);
@@ -63,7 +65,8 @@ public abstract class Player0 extends Player {
 			Shuffle.shuffle(folder.filesToPlay, folder.seed);
 
 		curFile = 0;
-		onChanged(OnChangedHint.FOLDER);
+		for(PlayerListener listener : listeners)
+			listener.folderChanged();
 
 		toFile(file, curPos);
 	}
@@ -80,7 +83,8 @@ public abstract class Player0 extends Player {
 			folder.seed = null;
 		}
 
-		onChanged(OnChangedHint.FOLDER);
+		for(PlayerListener listener : listeners)
+			listener.folderChanged();
 		toFile(0, 0);
 	}
 

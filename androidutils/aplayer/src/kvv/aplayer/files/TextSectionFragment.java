@@ -8,7 +8,8 @@ import java.io.InputStreamReader;
 import kvv.aplayer.R;
 import kvv.aplayer.files.TextView1.ScrollListener;
 import kvv.aplayer.player.Files;
-import kvv.aplayer.player.Player.OnChangedHint;
+import kvv.aplayer.player.Player.PlayerAdapter;
+import kvv.aplayer.player.Player.PlayerListener;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.FileDescriptor;
 import kvv.aplayer.service.IAPService;
@@ -38,49 +39,51 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 		}
 	};
 
+	private PlayerListener listener = new PlayerAdapter() {
+		public void fileChanged() {
+			textView.setText("");
+			Files files = conn.service.getFiles();
+			if (files != null && files.curFile >= 0) {
+				FileDescriptor fileDescriptor = files.files.get(files.curFile);
+				int idx = fileDescriptor.path.indexOf('.');
+				String textPath = fileDescriptor.path.substring(0, idx) + ".txt";
+				BufferedReader rd = null;
+				try {
+					rd = new BufferedReader(new InputStreamReader(
+							new FileInputStream(textPath), "utf8"));
+					String line;
+					while ((line = rd.readLine()) != null) {
+						textView.append(line + "\n");
+					}
+				} catch (Exception e) {
+				} finally {
+					if (rd != null)
+						try {
+							rd.close();
+						} catch (IOException e) {
+						}
+				}
+			}
+
+			handler.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					textView.scrollTo(0, calcScrollY());
+				}
+			}, 200);
+		}
+	};
+	
 	public TextSectionFragment() {
 		super(APService.class, R.layout.fragment_text);
-	}
-
-	@Override
-	protected void trackChanged() {
-		super.trackChanged();
-		textView.setText("");
-		Files files = conn.service.getFiles();
-		if (files != null && files.curFile >= 0) {
-			FileDescriptor fileDescriptor = files.files.get(files.curFile);
-			int idx = fileDescriptor.path.indexOf('.');
-			String textPath = fileDescriptor.path.substring(0, idx) + ".txt";
-			BufferedReader rd = null;
-			try {
-				rd = new BufferedReader(new InputStreamReader(
-						new FileInputStream(textPath), "utf8"));
-				String line;
-				while ((line = rd.readLine()) != null) {
-					textView.append(line + "\n");
-				}
-			} catch (Exception e) {
-			} finally {
-				if (rd != null)
-					try {
-						rd.close();
-					} catch (IOException e) {
-					}
-			}
-		}
-
-		handler.postDelayed(new Runnable() {
-
-			@Override
-			public void run() {
-				textView.scrollTo(0, calcScrollY());
-			}
-		}, 200);
 	}
 
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	protected void createUI(final IAPService service) {
+		System.out.println("TextSectionFragment.createUI");
+		
 		super.createUI(service);
 
 		textView = (TextView1) rootView.findViewById(R.id.text);
@@ -92,7 +95,10 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 
 			}
 		};
-		onChanged(OnChangedHint.FILE);
+
+		service.addListener(listener);
+		
+		listener.fileChanged();
 
 		Button sync = (Button) rootView.findViewById(R.id.syncText);
 		sync.setOnClickListener(new OnClickListener() {
@@ -103,6 +109,13 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 		});
 	}
 
+	@Override
+	public void onDestroy() {
+		if (conn.service != null)
+			conn.service.removeListener(listener);
+		super.onDestroy();
+	}
+	
 	private float dScroll(int ms) {
 		int h = textView.getHeight();
 		int lh = textView.getLayout().getHeight();
@@ -152,16 +165,12 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 	}
 
 	@Override
-	public void onLevelChanged(float level) {
-	}
-
-	@Override
-	public void onLoaded() {
-	}
-
-	@Override
 	protected boolean isLevelNeeded() {
 		return false;
+	}
+
+	@Override
+	protected void folderProgressClicked() {
 	}
 
 }

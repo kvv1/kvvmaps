@@ -11,15 +11,17 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 
-public class MRUDialog extends Dialog {
+public class PopupDialog extends Dialog {
 
 	private Handler handler = new Handler();
 
-	public MRUDialog(Context context, final IAPService service) {
-		super(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-
+	public PopupDialog(Context context, final IAPService service) {
+//		super(context);
+		super(context, android.R.style.Theme_DeviceDefault_Dialog_NoActionBar);
+//		super(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+		
 		setContentView(R.layout.popup_panel);
-
+		
 		findViewById(R.id.undo).setOnClickListener(
 				new android.view.View.OnClickListener() {
 					@Override
@@ -57,6 +59,16 @@ public class MRUDialog extends Dialog {
 					}
 				});
 
+		findViewById(R.id.end).setOnClickListener(
+				new android.view.View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if (service.getFiles().files.size() > 0)
+							service.toFile(service.getFiles().files.size() - 1);
+						dismiss();
+					}
+				});
+
 		final FileDescriptor file = service.getFiles().getFile();
 
 		if (file != null) {
@@ -84,7 +96,7 @@ public class MRUDialog extends Dialog {
 
 		showUndoRedoPanel();
 	}
-	
+
 	private void showUndoRedoPanel() {
 		handler.removeCallbacksAndMessages(null);
 		handler.postDelayed(new Runnable() {
@@ -94,7 +106,7 @@ public class MRUDialog extends Dialog {
 			}
 		}, 5000);
 	}
-	
+
 	@Override
 	public void dismiss() {
 		handler.removeCallbacksAndMessages(null);

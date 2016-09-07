@@ -6,7 +6,7 @@ import java.util.List;
 import kvv.aplayer.service.Folder;
 import android.content.Context;
 
-public abstract class PlayerUndoRedo extends PlayerMRU {
+public class PlayerUndoRedo extends PlayerMRU {
 
 	static class UndoItem {
 		int folder;
