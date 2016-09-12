@@ -28,8 +28,12 @@ public class RemoteControlReceiver extends BroadcastReceiver {
 		case KeyEvent.KEYCODE_MEDIA_PLAY:
 		case KeyEvent.KEYCODE_MEDIA_PAUSE:
 			if (event.getAction() == KeyEvent.ACTION_DOWN) {
-				if (APService.staticInstance != null)
-					APService.staticInstance.play_pause();
+				if (APService.staticInstance != null) {
+					if (APService.staticInstance.isPlaying())
+						APService.staticInstance.pause();
+					else
+						APService.staticInstance.play();
+				}
 			}
 			break;
 		}

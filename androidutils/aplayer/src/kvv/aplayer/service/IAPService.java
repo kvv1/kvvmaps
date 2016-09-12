@@ -25,7 +25,9 @@ public interface IAPService {
 
 	boolean isPlaying();
 
-	void play_pause();
+	void play();
+
+	void pause();
 
 	int getDuration();
 

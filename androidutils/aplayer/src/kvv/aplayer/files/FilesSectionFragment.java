@@ -132,7 +132,10 @@ public class FilesSectionFragment extends FilesSectionFragmentBase {
 						tapeView.setSeek(2000, true);
 					conn.service.next();
 				} else {
-					conn.service.play_pause();
+					if (conn.service.isPlaying())
+						conn.service.pause();
+					else
+						conn.service.play();
 				}
 			}
 
@@ -181,6 +184,8 @@ public class FilesSectionFragment extends FilesSectionFragmentBase {
 
 	protected void setFolderProgress(int max, int cur) {
 		super.setFolderProgress(max, cur);
+		if (tapeView == null)
+			return;
 		if (tape)
 			tapeView.setProgress(max, cur);
 	}

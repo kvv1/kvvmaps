@@ -139,7 +139,7 @@ public class APService extends BaseService implements IAPService {
 					startGps();
 			}
 		});
-		
+
 		modeChanged();
 
 		for (PlayerListener l : player.listeners)
@@ -223,11 +223,13 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	@Override
-	public void play_pause() {
-		if (player.isPlaying())
-			player.pause();
-		else
-			player.play();
+	public void play() {
+		player.play();
+	}
+
+	@Override
+	public void pause() {
+		player.pause();
 	}
 
 	@Override

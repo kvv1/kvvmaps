@@ -91,14 +91,19 @@ public abstract class FilesSectionFragmentBase extends
 
 			Random rnd = Shuffle.getTodayRandom(1);
 			// Random rnd = new Random();
-			int color = Color.HSVToColor(new float[] { rnd.nextInt(360), 0.5f,
-					1 });
 
-			folderProgressBar.getProgressDrawable().setColorFilter(color,
-					PorterDuff.Mode.MULTIPLY);
+			int angle = Shuffle.getRandom(rnd, 60, 240); 
+			
+			int color1 = Color.HSVToColor(new float[] { angle, 0.5f, 1 });
+			int color2 = Color.HSVToColor(new float[] { angle, 0.2f, 0.7f });
 
-			fileProgressBar.getProgressDrawable().setColorFilter(color,
-					PorterDuff.Mode.MULTIPLY);
+			folderProgressBar.getProgressDrawable().setColorFilter(color1,
+					PorterDuff.Mode.SRC);
+			folderProgressBar.setBackgroundColor(color2);
+
+			fileProgressBar.getProgressDrawable().setColorFilter(color1,
+					PorterDuff.Mode.SRC);
+			fileProgressBar.setBackgroundColor(color2);
 
 			setFileProgress();
 			setFolderProgress();
@@ -134,8 +139,12 @@ public abstract class FilesSectionFragmentBase extends
 		pause.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (conn.service != null)
-					conn.service.play_pause();
+				if (conn.service != null) {
+					if (conn.service.isPlaying())
+						conn.service.pause();
+					else
+						conn.service.play();
+				}
 			}
 		});
 

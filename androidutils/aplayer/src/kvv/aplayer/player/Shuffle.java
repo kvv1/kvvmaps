@@ -35,7 +35,7 @@ public class Shuffle {
 	}
 
 	public static int getRandom(Random rnd, int min, int max) {
-		return (rnd.nextInt() & 0xffffff) % (max - min) + min;
+		return rnd.nextInt(max - min) + min;
 	}
 
 }

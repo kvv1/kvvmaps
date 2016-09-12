@@ -212,19 +212,19 @@ public class TapeView extends View {
 		Random rnd = Shuffle.getTodayRandom(2);
 //		rnd = new Random();
 
-		int hue = rnd.nextInt(360);
+		int hue = rnd.nextInt(240);
 
-		int color = Color.HSVToColor(new float[] { hue, 0.3f, 1 });
+		float sat = rnd.nextFloat() * 0.3f;
+		
+		int color = Color.HSVToColor(new float[] { hue, sat, 1 });
 
 		b1.setColor(color);
 		b2.setColor(color);
 
-		// Random rnd = new Random();
-
-		hue = (hue + 90 + rnd.nextInt(180)) % 360;
+		hue = rnd.nextInt(240);
 
 		if (parent != null)
-			parent.setBackgroundColor(Color.HSVToColor(new float[] { hue, 0.2f,
+			parent.setBackgroundColor(Color.HSVToColor(new float[] { hue, 0.1f,
 					0.5f }));
 
 		// parent.setBackgroundColor(Color1.make(
