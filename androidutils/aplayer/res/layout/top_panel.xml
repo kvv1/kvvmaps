@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" 
-    android:id="@+id/folderProgressBg">
+    android:layout_height="wrap_content" >
 
     <ProgressBar
         android:id="@+id/folderProgress"
@@ -20,6 +19,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="#80C0FFC0"
             android:ellipsize="start"
             android:gravity="center_horizontal"
             android:singleLine="true"
@@ -31,9 +31,10 @@
             android:id="@+id/foldertime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:singleLine="true"
+            android:background="#80C0FFC0"
             android:paddingLeft="8dp"
             android:paddingRight="4dp"
+            android:singleLine="true"
             android:text="time"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textStyle="bold" />

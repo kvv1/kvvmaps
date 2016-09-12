@@ -89,21 +89,21 @@ public abstract class FilesSectionFragmentBase extends
 
 			pause.setText(conn.service.isPlaying() ? "Pause" : "Play");
 
-			Random rnd = Shuffle.getTodayRandom(1);
-			// Random rnd = new Random();
+//			Random rnd = Shuffle.getTodayRandom(1);
+//			rnd = new Random();
+//
+//			int angle = Shuffle.getRandom(rnd, 60, 240); 
+//			
+//			int color1 = Color.HSVToColor(new float[] { angle, 0.1f, 1 });
+//			int color2 = Color.HSVToColor(new float[] { angle, 0.2f, 0.7f });
 
-			int angle = Shuffle.getRandom(rnd, 60, 240); 
-			
-			int color1 = Color.HSVToColor(new float[] { angle, 0.5f, 1 });
-			int color2 = Color.HSVToColor(new float[] { angle, 0.2f, 0.7f });
+//			folderProgressBar.getProgressDrawable().setColorFilter(color1,
+//					PorterDuff.Mode.MULTIPLY);
+//			folderProgressBar.setBackgroundColor(color2);
 
-			folderProgressBar.getProgressDrawable().setColorFilter(color1,
-					PorterDuff.Mode.SRC);
-			folderProgressBar.setBackgroundColor(color2);
-
-			fileProgressBar.getProgressDrawable().setColorFilter(color1,
-					PorterDuff.Mode.SRC);
-			fileProgressBar.setBackgroundColor(color2);
+//			fileProgressBar.getProgressDrawable().setColorFilter(color1,
+//					PorterDuff.Mode.MULTIPLY);
+//			fileProgressBar.setBackgroundColor(color2);
 
 			setFileProgress();
 			setFolderProgress();
