@@ -83,7 +83,7 @@ public class Utils {
 		builder.setOnCancelListener(new OnCancelListener() {
 			@Override
 			public void onCancel(DialogInterface arg0) {
-				callback.onFailure();
+				callback.onFailure(null);
 			}
 		});
 		builder.show();
@@ -108,7 +108,7 @@ public class Utils {
 		builder.setOnCancelListener(new OnCancelListener() {
 			@Override
 			public void onCancel(DialogInterface arg0) {
-				callback.onFailure();
+				callback.onFailure(null);
 			}
 		});
 		builder.show();

@@ -103,14 +103,14 @@ public class Route {
 			@Override
 			protected void onPostExecute(List<Loc> result) {
 				if (e != null)
-					res.onFailure();
+					res.onFailure(e);
 				else
 					res.onSuccess(result);
 			}
 
 			@Override
 			protected void onCancelled() {
-				res.onFailure();
+				res.onFailure(e);
 			}
 		}.execute(addr);
 	}
