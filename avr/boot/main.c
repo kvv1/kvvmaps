@@ -2,6 +2,7 @@
 #include <avr/interrupt.h>
 #include <string.h>
 #include <util/delay.h>
+#include <avr/pgmspace.h>
 #include "utils.h"
 #include "hw.h"
 #include "packet.h"
@@ -19,23 +20,25 @@ void __jumpMain(void) {
 	asm volatile ( "rjmp crc16");
 }
 
+//PROGMEM char xxx = 'a';
+
 uint8_t getAddr() {
 	return MYADDR;
 }
 
 Globals globals;
 /*
-void on() {
-	DDRD |= 1 << 2;
-	PORTD |= 1 << 2;
-}
+ void on() {
+ DDRD |= 1 << 2;
+ PORTD |= 1 << 2;
+ }
 
-void off() {
-	DDRD |= 1 << 2;
-	PORTD &= ~(1 << 2);
-	_delay_ms(200);
-}
-*/
+ void off() {
+ DDRD |= 1 << 2;
+ PORTD &= ~(1 << 2);
+ _delay_ms(200);
+ }
+ */
 register uint8_t reg_r1 asm("r1");
 #define init() do { SP = RAMEND; reg_r1 = 0; SREG = reg_r1; } while(0)
 
@@ -52,12 +55,11 @@ int main() {
 
 	while (globals.startCnt < (unsigned int) (START_TIMEOUT_US / WAIT_UNIT_US)
 
-			 || !isAppOK()
+	|| !isAppOK()
 
-			) {
+	) {
 
 		int b = rdByte();
-
 
 		if (b == -1) {
 			if (globals.inputIdx) {
@@ -81,7 +83,7 @@ int main() {
 #else
 #ifdef __AVR_ATmega8__
 
-	((void (*)())0x0)();
+	((void (*)()) 0x0)();
 	//asm volatile ( "rjmp 0");
 
 #else
