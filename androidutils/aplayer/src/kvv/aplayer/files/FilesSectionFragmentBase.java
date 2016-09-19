@@ -72,7 +72,6 @@ public abstract class FilesSectionFragmentBase extends
 				FileDescriptor file = files.files.get(i);
 				folderFilesStartPos[i] = folderMax;
 				folderMax += file.duration;
-				// System.out.println("---  " + file.duration);
 			}
 		}
 

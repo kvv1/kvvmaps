@@ -16,15 +16,21 @@
         android:layout_alignParentTop="true"
         layout="@layout/top_panel" />
 
-    <kvv.aplayer.files.TextView1
-        android:id="@+id/text"
+    <ScrollView
+        android:id="@+id/scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/bottom"
-        android:layout_below="@+id/top"
-        android:text="kajdlkevjenv"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textStyle="bold" />
+        android:layout_below="@+id/top" >
+
+        <LinearLayout
+            android:id="@+id/lll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+        </LinearLayout>
+    </ScrollView>
 
     <Button
         android:id="@+id/syncText"

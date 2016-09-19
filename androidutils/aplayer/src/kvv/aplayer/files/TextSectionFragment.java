@@ -4,9 +4,10 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import kvv.aplayer.R;
-import kvv.aplayer.files.TextView1.ScrollListener;
 import kvv.aplayer.player.Files;
 import kvv.aplayer.player.Player.PlayerAdapter;
 import kvv.aplayer.player.Player.PlayerListener;
@@ -14,46 +15,66 @@ import kvv.aplayer.service.APService;
 import kvv.aplayer.service.FileDescriptor;
 import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.os.Bundle;
 import android.os.Handler;
-import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.smartbean.androidutils.util.AsyncCallback;
 
 public class TextSectionFragment extends FilesSectionFragmentBase {
 
 	private static final int STEP = 1000;
 
-	private TextView1 textView;
+	private int lineCnt;
+	private String lastTextPath;
 	private Handler handler = new Handler();
+
+	private Translator translator;
 
 	private Runnable r = new Runnable() {
 		@Override
 		public void run() {
-			if (conn.service != null && conn.service.isPlaying()
-					&& textView != null) {
-				int scrollY = textView.getScrollY();
-				textView.scrollTo(0, scrollY + (int) dScroll(STEP));
+			ScrollView sv = (ScrollView) rootView.findViewById(R.id.scroll);
+			if (conn.service != null && conn.service.isPlaying() && sv != null) {
+				int scrollY = sv.getScrollY();
+				sv.scrollTo(0, scrollY + (int) dScroll(STEP));
 			}
 			handler.postDelayed(this, STEP);
 		}
 	};
 
 	private PlayerListener listener = new PlayerAdapter() {
+
 		public void fileChanged() {
-			textView.setText("");
+			final List<String> lines = new ArrayList<String>();
+
 			Files files = conn.service.getFiles();
 			if (files != null && files.curFile >= 0) {
 				FileDescriptor fileDescriptor = files.files.get(files.curFile);
-				int idx = fileDescriptor.path.indexOf('.');
-				String textPath = fileDescriptor.path.substring(0, idx) + ".txt";
+				int idx = fileDescriptor.path.lastIndexOf('.');
+				String textPath = fileDescriptor.path.substring(0, idx)
+						+ ".txt";
+
+				if (textPath.equals(lastTextPath))
+					return;
+
+				lastTextPath = textPath;
+
 				BufferedReader rd = null;
 				try {
 					rd = new BufferedReader(new InputStreamReader(
 							new FileInputStream(textPath), "utf8"));
 					String line;
 					while ((line = rd.readLine()) != null) {
-						textView.append(line + "\n");
+						lines.add(line);
 					}
 				} catch (Exception e) {
 				} finally {
@@ -65,46 +86,90 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 				}
 			}
 
-			handler.postDelayed(new Runnable() {
+			lineCnt = lines.size();
 
-				@Override
-				public void run() {
-					textView.scrollTo(0, calcScrollY());
-				}
-			}, 200);
+			for (int i = 0; i < 5; i++)
+				lines.add(0, "");
+			for (int i = 0; i < 5; i++)
+				lines.add("");
+
+			LinearLayout ll = (LinearLayout) rootView.findViewById(R.id.lll);
+			ScrollView sv = (ScrollView) rootView.findViewById(R.id.scroll);
+			sv.scrollTo(0, 0);
+			ll.removeAllViews();
+			for (final String str : lines) {
+				TextView tv = new TextView(getActivity());
+				tv.setText(str);
+				tv.setTextAppearance(getActivity(),
+						android.R.style.TextAppearance_Large);
+				tv.setSingleLine(true);
+				ll.addView(tv);
+				tv.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						translator.translate(str, new AsyncCallback<String>() {
+							@Override
+							public void onSuccess(String res) {
+								Dialog dialog = new Dialog(
+										getActivity(),
+										android.R.style.Theme_DeviceDefault_Dialog_NoActionBar);
+								dialog.setContentView(R.layout.translate_panel);
+								((TextView) (dialog.findViewById(R.id.textFrom)))
+										.setText(str);
+								((TextView) (dialog.findViewById(R.id.textTo)))
+										.setText(res);
+								dialog.setCanceledOnTouchOutside(true);
+								dialog.show();
+
+								// AlertDialog.Builder builder = new
+								// AlertDialog.Builder(
+								// getActivity());
+								// builder.setMessage(str
+								// + "\n"
+								// + res
+								// + "\n"
+								// + "Переведено сервисом «Яндекс.Переводчик»");
+								// builder.create().show();
+
+								// Toast.makeText(getActivity(), res,
+								// Toast.LENGTH_LONG).show();
+							}
+						});
+					}
+
+				});
+			}
+
 		}
 	};
-	
+
 	public TextSectionFragment() {
 		super(APService.class, R.layout.fragment_text);
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		translator = new Translator(getActivity());
 	}
 
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	protected void createUI(final IAPService service) {
 		System.out.println("TextSectionFragment.createUI");
-		
+
 		super.createUI(service);
 
-		textView = (TextView1) rootView.findViewById(R.id.text);
-		textView.setMovementMethod(new ScrollingMovementMethod());
-
-		textView.scrollListener = new ScrollListener() {
-			@Override
-			public void onScroll(int horiz, int vert, int oldHoriz, int oldVert) {
-
-			}
-		};
-
 		service.addListener(listener);
-		
+
 		listener.fileChanged();
 
 		Button sync = (Button) rootView.findViewById(R.id.syncText);
 		sync.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				textView.scrollTo(0, calcScrollY());
+				ScrollView sv = (ScrollView) rootView.findViewById(R.id.scroll);
+				sv.scrollTo(0, calcScrollY());
 			}
 		});
 	}
@@ -115,41 +180,32 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 			conn.service.removeListener(listener);
 		super.onDestroy();
 	}
-	
+
 	private float dScroll(int ms) {
-		int h = textView.getHeight();
-		int lh = textView.getLayout().getHeight();
+		LinearLayout ll = (LinearLayout) rootView.findViewById(R.id.lll);
+		if (ll.getChildCount() <= 0)
+			return 0;
+		View itemAtPosition = ll.getChildAt(0);
+		if (itemAtPosition == null)
+			return 0;
+		if (lineCnt == 0)
+			return 0;
+
 		int durMS = conn.service.getDuration();
+		return ms * lineCnt * itemAtPosition.getHeight() / durMS;
 
-		float d = (float) ms * (lh - h) / durMS;
-
-		if (d < 0)
-			d = 0;
-
-		return d;
 	}
 
 	private int calcScrollY() {
-		int h = textView.getHeight();
-		int lh = textView.getLayout().getHeight();
+		LinearLayout ll = (LinearLayout) rootView.findViewById(R.id.lll);
+		if (ll.getChildCount() <= 0)
+			return 0;
+		View itemAtPosition = ll.getChildAt(0);
 
 		float pos = conn.service.getCurrentPosition() / 1000f;
 		float dur = conn.service.getDuration() / 1000f;
 
-		// return -100;
-		return (int) (pos * lh / dur - h / 2);
-
-		// float delta = 5;
-		// int y = (int) ((pos - delta) * lh / (dur - 2 * delta) - h / 2);
-		// return y;
-
-		//
-		// if (y > lh - h)
-		// y = lh - h;
-		// if (y < 0)
-		// y = 0;
-		//
-		// return y;
+		return (int) (itemAtPosition.getHeight() * lineCnt * pos / dur);
 	}
 
 	@Override

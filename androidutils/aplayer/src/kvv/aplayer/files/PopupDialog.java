@@ -19,6 +19,8 @@ public class PopupDialog extends Dialog {
 //		super(context);
 		super(context, android.R.style.Theme_DeviceDefault_Dialog_NoActionBar);
 //		super(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+		setCanceledOnTouchOutside(true);
+
 		
 		setContentView(R.layout.popup_panel);
 		
