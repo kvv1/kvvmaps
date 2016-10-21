@@ -15,7 +15,6 @@ import kvv.aplayer.service.APService;
 import kvv.aplayer.service.FileDescriptor;
 import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,7 +24,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.smartbean.androidutils.util.AsyncCallback;
 
@@ -53,50 +51,61 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 
 	private PlayerListener listener = new PlayerAdapter() {
 
+		@SuppressLint("InlinedApi")
 		public void fileChanged() {
-			final List<String> lines = new ArrayList<String>();
-
 			Files files = conn.service.getFiles();
-			if (files != null && files.curFile >= 0) {
-				FileDescriptor fileDescriptor = files.files.get(files.curFile);
-				int idx = fileDescriptor.path.lastIndexOf('.');
-				String textPath = fileDescriptor.path.substring(0, idx)
-						+ ".txt";
 
-				if (textPath.equals(lastTextPath))
-					return;
+			if (files == null || files.curFile < 0)
+				return;
 
-				lastTextPath = textPath;
+			FileDescriptor fileDescriptor = files.files.get(files.curFile);
+			String path = fileDescriptor.path;
 
-				BufferedReader rd = null;
-				try {
-					rd = new BufferedReader(new InputStreamReader(
-							new FileInputStream(textPath), "utf8"));
-					String line;
-					while ((line = rd.readLine()) != null) {
-						lines.add(line);
-					}
-				} catch (Exception e) {
-				} finally {
-					if (rd != null)
-						try {
-							rd.close();
-						} catch (IOException e) {
-						}
-				}
-			}
+			String textPath = path.substring(0, path.lastIndexOf('.')) + ".txt";
 
-			lineCnt = lines.size();
-
-			for (int i = 0; i < 5; i++)
-				lines.add(0, "");
-			for (int i = 0; i < 5; i++)
-				lines.add("");
+			if (textPath.equals(lastTextPath))
+				return;
+			lastTextPath = textPath;
 
 			LinearLayout ll = (LinearLayout) rootView.findViewById(R.id.lll);
 			ScrollView sv = (ScrollView) rootView.findViewById(R.id.scroll);
 			sv.scrollTo(0, 0);
 			ll.removeAllViews();
+
+			final List<String> lines = new ArrayList<String>();
+
+			BufferedReader rd = null;
+			try {
+				rd = new BufferedReader(new InputStreamReader(
+						new FileInputStream(textPath), "utf8"));
+				String line;
+				while ((line = rd.readLine()) != null) {
+					lines.add(line);
+				}
+			} catch (Exception e) {
+			} finally {
+				if (rd != null)
+					try {
+						rd.close();
+					} catch (IOException e) {
+					}
+			}
+
+			lineCnt = lines.size();
+
+			lines.add(0, "");
+			lines.add(
+					0,
+					path.substring(0, path.lastIndexOf('.')).substring(
+							path.lastIndexOf('/') + 1));
+			
+			for (int i = 0; i < 3; i++)
+				lines.add(0, "");
+
+			for (int i = 0; i < 5; i++)
+				lines.add("");
+
+
 			for (final String str : lines) {
 				TextView tv = new TextView(getActivity());
 				tv.setText(str);
@@ -120,19 +129,6 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 										.setText(res);
 								dialog.setCanceledOnTouchOutside(true);
 								dialog.show();
-
-								// AlertDialog.Builder builder = new
-								// AlertDialog.Builder(
-								// getActivity());
-								// builder.setMessage(str
-								// + "\n"
-								// + res
-								// + "\n"
-								// + "Переведено сервисом «Яндекс.Переводчик»");
-								// builder.create().show();
-
-								// Toast.makeText(getActivity(), res,
-								// Toast.LENGTH_LONG).show();
 							}
 						});
 					}

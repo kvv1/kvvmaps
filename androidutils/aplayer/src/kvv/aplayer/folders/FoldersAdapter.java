@@ -28,9 +28,6 @@ public class FoldersAdapter extends ArrayAdapter<Object> {
 		List<String> mru = service.getMRU();
 		res.addAll(mru);
 
-		// if (service.getFolders().getFolder() != null)
-		// res.remove(service.getFolders().getFolder().path);
-
 		for (Folder folder : service.getFolders().folders)
 			res.add(folder);
 
@@ -42,11 +39,16 @@ public class FoldersAdapter extends ArrayAdapter<Object> {
 		TextView tv = (TextView) convertView;
 		if (tv == null) {
 			tv = new TextView(getContext());
-			tv.setTextAppearance(getContext(), android.R.style.TextAppearance_Large);
+			tv.setTextAppearance(getContext(),
+					android.R.style.TextAppearance_Large);
 			tv.setSingleLine(true);
 		}
 
 		Object item = getItem(position);
+
+		tv.setPadding(0, 0, 0, 0);
+		tv.setEllipsize(TruncateAt.START);
+		tv.setTypeface(null, Typeface.NORMAL);
 
 		if (item instanceof Folder) {
 			Folder folder = (Folder) item;
@@ -54,15 +56,14 @@ public class FoldersAdapter extends ArrayAdapter<Object> {
 			tv.setPadding(folder.indent * 20, 0, 0, 0);
 		} else if (item instanceof String) {
 			tv.setText((String) item);
-			tv.setEllipsize(TruncateAt.START);
 			tv.setTypeface(null, Typeface.BOLD);
-			// tv.setTextAppearance(activity,
-			// android.R.style.TextAppearance_Medium);
 		}
 
 		if (position == sel)
 			tv.setBackgroundColor(0xFFFFFF80);
-		else if (sel < 0 && position == service.getFolders().curFolder + service.getMRU().size())
+		else if (sel < 0
+				&& position == service.getFolders().curFolder
+						+ service.getMRU().size())
 			tv.setBackgroundColor(0xFFFFFF80);
 		else
 			tv.setBackgroundColor(0xFFFFFFFF);

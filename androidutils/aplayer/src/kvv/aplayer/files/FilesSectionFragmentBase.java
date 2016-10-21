@@ -1,19 +1,14 @@
 package kvv.aplayer.files;
 
-import java.util.Random;
-
 import kvv.aplayer.APActivity;
 import kvv.aplayer.R;
 import kvv.aplayer.player.Files;
 import kvv.aplayer.player.Player.PlayerAdapter;
 import kvv.aplayer.player.Player.PlayerListener;
-import kvv.aplayer.player.Shuffle;
 import kvv.aplayer.service.FileDescriptor;
 import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -88,21 +83,21 @@ public abstract class FilesSectionFragmentBase extends
 
 			pause.setText(conn.service.isPlaying() ? "Pause" : "Play");
 
-//			Random rnd = Shuffle.getTodayRandom(1);
-//			rnd = new Random();
-//
-//			int angle = Shuffle.getRandom(rnd, 60, 240); 
-//			
-//			int color1 = Color.HSVToColor(new float[] { angle, 0.1f, 1 });
-//			int color2 = Color.HSVToColor(new float[] { angle, 0.2f, 0.7f });
+			// Random rnd = Shuffle.getTodayRandom(1);
+			// rnd = new Random();
+			//
+			// int angle = Shuffle.getRandom(rnd, 60, 240);
+			//
+			// int color1 = Color.HSVToColor(new float[] { angle, 0.1f, 1 });
+			// int color2 = Color.HSVToColor(new float[] { angle, 0.2f, 0.7f });
 
-//			folderProgressBar.getProgressDrawable().setColorFilter(color1,
-//					PorterDuff.Mode.MULTIPLY);
-//			folderProgressBar.setBackgroundColor(color2);
+			// folderProgressBar.getProgressDrawable().setColorFilter(color1,
+			// PorterDuff.Mode.MULTIPLY);
+			// folderProgressBar.setBackgroundColor(color2);
 
-//			fileProgressBar.getProgressDrawable().setColorFilter(color1,
-//					PorterDuff.Mode.MULTIPLY);
-//			fileProgressBar.setBackgroundColor(color2);
+			// fileProgressBar.getProgressDrawable().setColorFilter(color1,
+			// PorterDuff.Mode.MULTIPLY);
+			// fileProgressBar.setBackgroundColor(color2);
 
 			setFileProgress();
 			setFolderProgress();
@@ -229,8 +224,8 @@ public abstract class FilesSectionFragmentBase extends
 	protected void setFolderProgress(int max, int cur) {
 		folderProgressBar.setMax(max);
 		folderProgressBar.setProgress(cur);
-		String time = Utils.convertSecondsToHMmSs(cur) + "("
-				+ Utils.convertSecondsToHMmSs(max) + ")";
+		String time = Utils.convertSecondsToHMm(cur) + "("
+				+ Utils.convertSecondsToHMm(max) + ")";
 		folderTimeView.setText(time);
 	}
 

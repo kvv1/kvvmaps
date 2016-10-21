@@ -18,39 +18,26 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         android:layout_above="@+id/bottom"
         android:layout_below="@+id/top" >
 
-        <FrameLayout
-            android:id="@+id/listPanel"
+        <ListView
+            android:id="@+id/list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-
-            <ListView
-                android:id="@+id/list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:divider="#0000" >
-            </ListView>
-
-            <Button
-                android:id="@+id/goto1"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="right"
-                android:text="Play"
-                android:textColor="@color/greendark"
-                android:textSize="30sp"
-                android:textStyle="bold" />
-        </FrameLayout>
-
-        <include
-            android:id="@+id/tapePanel"
-            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            layout="@layout/view_tape"
-            android:visibility="visible" />
+            android:divider="#0000" >
+        </ListView>
+
+        <Button
+            android:id="@+id/goto1"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="right"
+            android:text="Play"
+            android:textColor="@color/greendark"
+            android:textSize="30sp"
+            android:textStyle="bold" />
     </FrameLayout>
 
     <include
