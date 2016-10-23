@@ -91,7 +91,7 @@ public class BobbinBmp {
 
 		Canvas canvas2 = new Canvas(bobbinBmp);
 		Paint bobbinPaint1 = new Paint(Paint.FILTER_BITMAP_FLAG);
-		bobbinPaint1.setAlpha(220);
+		bobbinPaint1.setAlpha(200);
 		canvas2.drawBitmap(bmp, 0, 0, bobbinPaint1);
 		canvas2.translate(cx, cy);
 

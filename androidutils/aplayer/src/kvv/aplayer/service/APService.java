@@ -12,6 +12,7 @@ import kvv.aplayer.player.Files;
 import kvv.aplayer.player.Folders;
 import kvv.aplayer.player.Player.PlayerAdapter;
 import kvv.aplayer.player.Player.PlayerListener;
+import kvv.aplayer.player.Player1.PlayerLevelListener;
 import kvv.aplayer.player.PlayerUndoRedo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -188,6 +189,17 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	@Override
+	public void addLevelListener(PlayerLevelListener listener) {
+		player.addLevelListener(listener);
+	}
+
+	@Override
+	public void removeLevelListener(PlayerLevelListener listener) {
+		player.removeLevelListener(listener);
+	}
+
+
+	@Override
 	public void toFolder(int folderIdx) {
 		Folders folders = player.getFolders();
 		if (folderIdx == folders.curFolder)
@@ -266,11 +278,6 @@ public class APService extends BaseService implements IAPService {
 	@Override
 	public Files getFiles() {
 		return player.getFiles();
-	}
-
-	@Override
-	public void setVisible(boolean vis) {
-		player.setVisible(vis);
 	}
 
 	@Override

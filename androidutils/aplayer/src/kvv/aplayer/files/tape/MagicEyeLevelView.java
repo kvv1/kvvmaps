@@ -25,8 +25,8 @@ public class MagicEyeLevelView extends LevelView {
 		super(context);
 	}
 
-	private static final int bgEdge = 20;
-	private static final int edge = 15;
+	private static final int bgEdge = 5;
+	private static final int edge = 0;
 
 	private static final int W = 50;
 	private static final int H = 75;

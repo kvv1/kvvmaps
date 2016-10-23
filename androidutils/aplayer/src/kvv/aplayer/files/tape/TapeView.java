@@ -1,13 +1,9 @@
 package kvv.aplayer.files.tape;
 
-import java.util.Random;
-
 import kvv.aplayer.R;
-import kvv.aplayer.player.Shuffle;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.media.AudioManager;
@@ -19,7 +15,7 @@ import android.view.View;
 
 @SuppressLint("NewApi")
 public class TapeView extends View {
-	private final static int STEP_MS = 20;
+	private final static int STEP_MS = 10;
 
 	private static final int TAPE_COLOR = 0xFF401004;
 
@@ -35,7 +31,6 @@ public class TapeView extends View {
 
 	private BobbinView b1;
 	private BobbinView b2;
-	private TapePanel parent;
 
 	static class Params {
 
@@ -206,41 +201,27 @@ public class TapeView extends View {
 	private boolean started;
 
 	public void start() {
-		if (started || b1 == null)
+		if (started)
 			return;
-
-		Random rnd = Shuffle.getTodayRandom(2);
-//		rnd = new Random();
-
-		int hue = rnd.nextInt(240);
-
-		float sat = rnd.nextFloat() * 0.3f;
-		
-		int color = Color.HSVToColor(new float[] { hue, sat, 1 });
-
-		b1.setColor(color);
-		b2.setColor(color);
-
-		hue = rnd.nextInt(240);
-
-		if (parent != null)
-			parent.setBackgroundColor(Color.HSVToColor(new float[] { hue, 0.1f,
-					0.5f }));
-
-		// parent.setBackgroundColor(Color1.make(
-		// Shuffle.getRandom(rnd, 100, 110),
-		// Shuffle.getRandom(rnd, 110, 120),
-		// Shuffle.getRandom(rnd, 110, 120)));
 
 		playClick();
 
 		started = true;
 
-		b1.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-		b2.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-
 		if (r != null)
 			return;
+
+		if (b1 != null) {
+			b1.setDrawingCacheEnabled(true);
+			b2.setDrawingCacheEnabled(true);
+		}
+		// RotateAnimation rAnim = new RotateAnimation(0.0F, 360.0F,
+		// Animation.RELATIVE_TO_SELF, 0.5F, Animation.RELATIVE_TO_SELF,
+		// 0.5F);
+		// rAnim.setInterpolator(new LinearInterpolator());
+		// rAnim.setRepeatCount(Animation.INFINITE);
+		// rAnim.setDuration(5000);
+		// b1.startAnimation(rAnim);
 
 		r = new Runnable() {
 			private long time = SystemClock.uptimeMillis();
@@ -250,17 +231,22 @@ public class TapeView extends View {
 				long t = SystemClock.uptimeMillis();
 				int dt = (int) (t - time);
 				time = t;
-				if (seekStep == 0) {
-					int step = STEP_MS;
-					step = (dt + STEP_MS) / 2;
-					step(b1, step);
-					step(b2, step);
-				} else {
-					int step = seekStep / 5;
-					if (step > 500)
-						step = 500;
-					step(b1, step);
-					step(b2, step);
+
+				if (b1 != null) {
+
+					if (seekStep == 0) {
+						int step = STEP_MS;
+						step = (dt + STEP_MS) / 2;
+						step = dt;
+						step(b1, step);
+						step(b2, step);
+					} else {
+						int step = seekStep / 5;
+						if (step > 500)
+							step = 500;
+						step(b1, step);
+						step(b2, step);
+					}
 				}
 
 				invalidate();
@@ -272,7 +258,7 @@ public class TapeView extends View {
 	}
 
 	public void stop() {
-		if (!started || b1 == null)
+		if (!started)
 			return;
 
 		playClick();
@@ -282,7 +268,6 @@ public class TapeView extends View {
 		if (r != null)
 			handler.removeCallbacks(r);
 		r = null;
-
 	}
 
 	public void setSeek(int step, boolean scheduleOff) {
@@ -305,9 +290,9 @@ public class TapeView extends View {
 		float angle = bobbin.getRotation();
 		angle -= da;
 
-		if (angle < -360)
+		if (angle <= -360)
 			angle += 360;
-		if (angle > 360)
+		if (angle >= 360)
 			angle -= 360;
 
 		bobbin.setRotation(angle);
@@ -316,9 +301,16 @@ public class TapeView extends View {
 	public void setBobbins(BobbinView b1, BobbinView b2) {
 		this.b1 = b1;
 		this.b2 = b2;
+
+		b1.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+		b2.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
 	}
 
 	private boolean hitTest(float x, float y, int bobbin) {
+		if (b1 == null)
+			return false;
+
 		float bobbinSize = b1.getWidth();
 		float bobbinX1 = b1.getX() + bobbinSize / 2;
 		float bobbinX2 = b2.getX() + bobbinSize / 2;
@@ -344,9 +336,4 @@ public class TapeView extends View {
 			return 1;
 		return 0;
 	}
-
-	public void setParent(TapePanel parent) {
-		this.parent = parent;
-	}
-
 }

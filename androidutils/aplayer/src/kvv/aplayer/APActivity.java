@@ -1,6 +1,7 @@
 package kvv.aplayer;
 
-import kvv.aplayer.files.FilesSectionFragment;
+import kvv.aplayer.files.FilesSectionFragmentList;
+import kvv.aplayer.files.FilesSectionFragmentTape;
 import kvv.aplayer.files.TextSectionFragment;
 import kvv.aplayer.folders.FoldersSectionFragment;
 import kvv.aplayer.player.Player.PlayerAdapter;
@@ -51,18 +52,20 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 	protected void onCreate(Bundle savedInstanceState) {
 		System.out.println(getClass().getSimpleName() + ".onCreate()");
 
-		super.onCreate(savedInstanceState);
+		super.onCreate(null);
 		setContentView(R.layout.activity_ap);
 
 		startService(new Intent(this, APService.class));
 		bindService(new Intent(this, APService.class), conn,
 				Context.BIND_AUTO_CREATE);
 
-		add("Text", new TextSectionFragment());
-		add("Files", new FilesSectionFragment());
-		add("Folders", new FoldersSectionFragment());
-
-		selectMainPage();
+//		if (savedInstanceState == null) {
+			add("Text", new TextSectionFragment());
+			add("Files", new FilesSectionFragmentList());
+			add("Files1", new FilesSectionFragmentTape());
+			add("Folders", new FoldersSectionFragment());
+			selectMainPage();
+//		}
 	}
 
 	@Override

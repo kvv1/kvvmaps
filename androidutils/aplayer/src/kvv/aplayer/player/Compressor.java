@@ -65,7 +65,7 @@ public abstract class Compressor {
 
 	private void enDis() {
 		boolean b = playing && (visible | db != 0);
-		System.out.println("setEnabled " + b);
+		//System.out.println("setEnabled " + b);
 		visualizer.setEnabled(b);
 		if (!b) {
 			if (levelLPF != null)

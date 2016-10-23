@@ -21,7 +21,7 @@ public abstract class Player2 extends Player1 {
 	private SharedPreferences settings;
 
 	public Player2(Context context, List<Folder> folders) {
-		super(folders);
+		super(context, folders);
 		settings = PreferenceManager.getDefaultSharedPreferences(context);
 
 		addListener(new PlayerAdapter() {

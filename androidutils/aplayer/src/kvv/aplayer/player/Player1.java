@@ -1,10 +1,29 @@
 package kvv.aplayer.player;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
+import android.content.Context;
 import kvv.aplayer.service.Folder;
 
 public abstract class Player1 extends Player0 {
+
+	public interface PlayerLevelListener {
+		void levelChanged(float indicatorLevel);
+	}
+
+	public Collection<PlayerLevelListener> levelListeners = new HashSet<PlayerLevelListener>();
+
+	public void addLevelListener(PlayerLevelListener listener) {
+		levelListeners.add(listener);
+		compr.setVisible(!levelListeners.isEmpty());
+	}
+
+	public void removeLevelListener(PlayerLevelListener listener) {
+		levelListeners.remove(listener);
+		compr.setVisible(!levelListeners.isEmpty());
+	}
 
 	private final Compressor compr;
 
@@ -12,8 +31,8 @@ public abstract class Player1 extends Player0 {
 	private float dBPer100;
 	private float speedKMH;
 
-	public Player1(List<Folder> folders) {
-		super(folders);
+	public Player1(Context context, List<Folder> folders) {
+		super(context, folders);
 
 		addListener(new PlayerAdapter() {
 			@Override
@@ -32,7 +51,7 @@ public abstract class Player1 extends Player0 {
 
 			@Override
 			protected void levelChanged(float indicatorLevel) {
-				for (PlayerListener l : listeners)
+				for (PlayerLevelListener l : levelListeners)
 					l.levelChanged(indicatorLevel);
 			}
 		};
@@ -72,7 +91,4 @@ public abstract class Player1 extends Player0 {
 		compr.resetGain();
 	}
 
-	public void setVisible(boolean vis) {
-		compr.setVisible(vis);
-	}
 }

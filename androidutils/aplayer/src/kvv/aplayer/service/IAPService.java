@@ -5,11 +5,16 @@ import java.util.List;
 import kvv.aplayer.player.Files;
 import kvv.aplayer.player.Folders;
 import kvv.aplayer.player.Player.PlayerListener;
+import kvv.aplayer.player.Player1.PlayerLevelListener;
 
 public interface IAPService {
 	void addListener(PlayerListener listener);
 
 	void removeListener(PlayerListener listener);
+
+	void addLevelListener(PlayerLevelListener listener);
+
+	void removeLevelListener(PlayerLevelListener listener);
 
 	Folders getFolders();
 
@@ -46,8 +51,6 @@ public interface IAPService {
 	void redo();
 
 	void undo();
-
-	void setVisible(boolean vis);
 
 	void addBadSong(String path);
 

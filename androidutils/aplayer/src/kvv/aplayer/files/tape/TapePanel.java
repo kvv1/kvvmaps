@@ -38,7 +38,6 @@ public class TapePanel extends FrameLayout {
 				BobbinView b2 = (BobbinView) findViewById(R.id.rightBobbin);
 
 				TapeView tapeView = (TapeView) findViewById(R.id.tape);
-				tapeView.setParent(TapePanel.this);
 				tapeView.setBobbins(b1, b2);
 			}
 		});

@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#969678"
     tools:context=".APActivity" >
 
     <kvv.aplayer.files.tape.TapeView
@@ -23,7 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
             android:layout_marginTop="4dp"
-            android:layout_weight="3"
+            android:layout_weight="4"
             android:gravity="top"
             android:scaleType="centerCrop" />
 
@@ -31,8 +30,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|top"
-            android:layout_marginLeft="-10dp"
-            android:layout_marginRight="-10dp"
+            android:layout_marginLeft="-22dp"
+            android:layout_marginRight="-22dp"
+            android:layout_marginTop="16dp"
             android:layout_weight="1" >
 
             <kvv.aplayer.files.tape.ArrowLevelView
@@ -43,7 +43,9 @@
             <kvv.aplayer.files.tape.MagicEyeLevelView
                 android:id="@+id/magicEyeLevel"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="6dp" />
         </FrameLayout>
 
         <kvv.aplayer.files.tape.BobbinView
@@ -52,7 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="4dp"
             android:layout_marginTop="4dp"
-            android:layout_weight="3"
+            android:layout_weight="4"
             android:scaleType="centerCrop" />
     </LinearLayout>
 

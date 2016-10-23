@@ -20,7 +20,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/bottom"
-        android:layout_below="@+id/top" >
+        android:layout_below="@+id/top"
+        android:layout_marginTop="-16dp" >
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp"
+            android:background="#969678" />
 
         <include
             android:id="@+id/tapePanel"

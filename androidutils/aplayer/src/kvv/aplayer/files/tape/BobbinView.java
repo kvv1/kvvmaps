@@ -22,7 +22,7 @@ public class BobbinView extends ImageView {
 	}
 
 	private void init() {
-		setColor(0xFFFFFFFF);
+		setColor(0xFFE0FFFF);
 		// setImageBitmap(BobbinBmp.createBmp(color));
 	}
 

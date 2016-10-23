@@ -18,11 +18,12 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.smartbean.androidutils.activity.FragmentActivityTabsNoActionBar.FragmentEx;
 import com.smartbean.androidutils.fragment.FragmentX;
 import com.smartbean.androidutils.util.Utils;
 
 public abstract class FilesSectionFragmentBase extends
-		FragmentX<APActivity, IAPService> {
+		FragmentX<APActivity, IAPService> implements FragmentEx {
 
 	protected SharedPreferences settings;
 	private Button pause;
@@ -35,16 +36,23 @@ public abstract class FilesSectionFragmentBase extends
 
 	private Handler handler = new Handler();
 
+	protected boolean resumed;
+	protected boolean visible;
+
 	private Runnable progressRunnable = new Runnable1() {
 		@Override
 		public void run1() {
-			setFolderProgress();
-			setFileProgress();
+			onProgress();
 			handler.removeCallbacks(this);
 			handler.postDelayed(this, 1000);
 		}
 	};
 
+	protected void onProgress() {
+		setFolderProgress();
+		setFileProgress();
+	}
+	
 	public FilesSectionFragmentBase(Class<?> serviceClass, int layout) {
 		super(serviceClass, layout);
 	}
@@ -52,7 +60,7 @@ public abstract class FilesSectionFragmentBase extends
 	private PlayerListener listener = new PlayerAdapter() {
 		@Override
 		public void folderChanged() {
-			System.out.println("folderChanged()");
+			// System.out.println("folderChanged()");
 			Folder folder = conn.service.getFolders().getFolder();
 			if (folder != null)
 				folderTextView.setText(folder.getDisplayName());
@@ -74,7 +82,7 @@ public abstract class FilesSectionFragmentBase extends
 			if (conn.service == null)
 				return;
 
-			System.out.println("trackChanged()");
+			// System.out.println("trackChanged()");
 			Files files = conn.service.getFiles();
 			FileDescriptor file = files.getFile();
 			if (file != null)
@@ -82,22 +90,6 @@ public abstract class FilesSectionFragmentBase extends
 			trackTimeView.setText("");
 
 			pause.setText(conn.service.isPlaying() ? "Pause" : "Play");
-
-			// Random rnd = Shuffle.getTodayRandom(1);
-			// rnd = new Random();
-			//
-			// int angle = Shuffle.getRandom(rnd, 60, 240);
-			//
-			// int color1 = Color.HSVToColor(new float[] { angle, 0.1f, 1 });
-			// int color2 = Color.HSVToColor(new float[] { angle, 0.2f, 0.7f });
-
-			// folderProgressBar.getProgressDrawable().setColorFilter(color1,
-			// PorterDuff.Mode.MULTIPLY);
-			// folderProgressBar.setBackgroundColor(color2);
-
-			// fileProgressBar.getProgressDrawable().setColorFilter(color1,
-			// PorterDuff.Mode.MULTIPLY);
-			// fileProgressBar.setBackgroundColor(color2);
 
 			setFileProgress();
 			setFolderProgress();
@@ -159,7 +151,7 @@ public abstract class FilesSectionFragmentBase extends
 					int dur = conn.service.getDuration();
 					int pos = (int) (dur * touchX / fileprogresstouch
 							.getWidth());
-					System.out.println("seek to " + pos);
+					// System.out.println("seek to " + pos);
 					conn.service.seekTo(pos);
 				}
 			}
@@ -185,20 +177,6 @@ public abstract class FilesSectionFragmentBase extends
 			}
 		};
 
-		folderTextView.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				folderProgressClicked();
-			}
-		});
-
-		folderTimeView.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				folderProgressClicked();
-			}
-		});
-
 		service.addListener(listener);
 		listener.folderChanged();
 		listener.fileChanged();
@@ -207,6 +185,7 @@ public abstract class FilesSectionFragmentBase extends
 	public void onDestroy() {
 		if (conn.service != null)
 			conn.service.removeListener(listener);
+		handler.removeCallbacksAndMessages(null);
 		super.onDestroy();
 	}
 
@@ -245,21 +224,30 @@ public abstract class FilesSectionFragmentBase extends
 
 	@Override
 	public void onPause() {
-		if (conn.service != null)
-			conn.service.setVisible(false);
-		handler.removeCallbacksAndMessages(null);
 		super.onPause();
+		resumed = false;
+		startStopAnim();
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (conn.service != null)
-			conn.service.setVisible(isLevelNeeded());
-		progressRunnable.run();
+		resumed = true;
+		startStopAnim();
 	}
 
-	protected abstract boolean isLevelNeeded();
+	@Override
+	public void onSelected(boolean b) {
+		Utils.log(this, "onSelected " + b);
+		visible = b;
+		startStopAnim();
+	}
 
-	protected abstract void folderProgressClicked();
+	protected void startStopAnim() {
+		if (resumed && visible) {
+			progressRunnable.run();
+		} else {
+			handler.removeCallbacksAndMessages(null);
+		}
+	}
 }

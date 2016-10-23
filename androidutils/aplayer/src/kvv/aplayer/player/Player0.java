@@ -6,6 +6,7 @@ import java.util.List;
 
 import kvv.aplayer.service.FileDescriptor;
 import kvv.aplayer.service.Folder;
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 
@@ -14,7 +15,8 @@ public abstract class Player0 extends Player {
 	private Folders folders;
 	private int curFile = 0;
 
-	public Player0(final List<Folder> _folders) {
+	public Player0(Context context, final List<Folder> _folders) {
+		super(context);
 		this.folders = new Folders(_folders, -1);
 		setOnCompletionListener(new OnCompletionListener() {
 			@Override

@@ -17,7 +17,6 @@ import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -33,21 +32,17 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 
 	private int lineCnt;
 	private String lastTextPath;
-	private Handler handler = new Handler();
-
 	private Translator translator;
 
-	private Runnable r = new Runnable() {
-		@Override
-		public void run() {
-			ScrollView sv = (ScrollView) rootView.findViewById(R.id.scroll);
-			if (conn.service != null && conn.service.isPlaying() && sv != null) {
-				int scrollY = sv.getScrollY();
-				sv.scrollTo(0, scrollY + (int) dScroll(STEP));
-			}
-			handler.postDelayed(this, STEP);
+	@Override
+	protected void onProgress() {
+		super.onProgress();
+		ScrollView sv = (ScrollView) rootView.findViewById(R.id.scroll);
+		if (conn.service != null && conn.service.isPlaying() && sv != null) {
+			int scrollY = sv.getScrollY();
+			sv.scrollTo(0, scrollY + (int) dScroll(STEP));
 		}
-	};
+	}
 
 	private PlayerListener listener = new PlayerAdapter() {
 
@@ -98,13 +93,12 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 					0,
 					path.substring(0, path.lastIndexOf('.')).substring(
 							path.lastIndexOf('/') + 1));
-			
+
 			for (int i = 0; i < 3; i++)
 				lines.add(0, "");
 
 			for (int i = 0; i < 5; i++)
 				lines.add("");
-
 
 			for (final String str : lines) {
 				TextView tv = new TextView(getActivity());
@@ -152,8 +146,6 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	protected void createUI(final IAPService service) {
-		System.out.println("TextSectionFragment.createUI");
-
 		super.createUI(service);
 
 		service.addListener(listener);
@@ -202,27 +194,6 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 		float dur = conn.service.getDuration() / 1000f;
 
 		return (int) (itemAtPosition.getHeight() * lineCnt * pos / dur);
-	}
-
-	@Override
-	public void onPause() {
-		handler.removeCallbacksAndMessages(null);
-		super.onPause();
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		handler.post(r);
-	}
-
-	@Override
-	protected boolean isLevelNeeded() {
-		return false;
-	}
-
-	@Override
-	protected void folderProgressClicked() {
 	}
 
 }

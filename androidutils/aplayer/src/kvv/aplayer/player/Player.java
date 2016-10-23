@@ -3,11 +3,13 @@ package kvv.aplayer.player;
 import java.util.Collection;
 import java.util.HashSet;
 
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
 import android.media.audiofx.Equalizer;
+import android.os.PowerManager;
 
 import com.smartbean.androidutils.util.Utils;
 
@@ -19,8 +21,6 @@ public abstract class Player {
 		void folderChanged();
 
 		void fileChanged();
-		
-		void levelChanged(float indicatorLevel);
 	}
 
 	public static class PlayerAdapter implements PlayerListener {
@@ -34,10 +34,6 @@ public abstract class Player {
 
 		@Override
 		public void fileChanged() {
-		}
-
-		@Override
-		public void levelChanged(float indicatorLevel) {
 		}
 	}
 
@@ -56,7 +52,7 @@ public abstract class Player {
 
 	private boolean prepared;
 
-	public Player() {
+	public Player(Context context) {
 		mp.setVolume(1, 1);
 
 		mp.setOnErrorListener(new OnErrorListener() {
@@ -74,6 +70,8 @@ public abstract class Player {
 			}
 		});
 
+		mp.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
+		
 		equalizer = new Equalizer(10, mp.getAudioSessionId());
 		equalizer.setEnabled(true);
 

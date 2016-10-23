@@ -1,26 +1,24 @@
 package kvv.aplayer.files;
 
 import java.util.List;
-
 import kvv.aplayer.R;
 import kvv.aplayer.service.FileDescriptor;
 import kvv.aplayer.service.IAPService;
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 
+@SuppressLint("InlinedApi")
 public class PopupDialog extends Dialog {
 
 	private Handler handler = new Handler();
 
 	public PopupDialog(Context context, final IAPService service) {
-//		super(context);
 		super(context, android.R.style.Theme_DeviceDefault_Dialog_NoActionBar);
-//		super(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
 		setCanceledOnTouchOutside(true);
-
 		
 		setContentView(R.layout.popup_panel);
 		
