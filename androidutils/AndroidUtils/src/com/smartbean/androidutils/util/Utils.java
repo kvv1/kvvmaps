@@ -162,6 +162,16 @@ public class Utils {
 		return String.format("%02d:%02d", m, s);
 	}
 
+	@SuppressLint("DefaultLocale")
+	public static String convertSecondsToHMm(long seconds) {
+		long m = (seconds / 60) % 60;
+		long h = (seconds / (60 * 60)) % 24;
+
+		if (h != 0)
+			return String.format("%d:%02d", h, m);
+		return String.format("%02d", m);
+	}
+
 	public static double n2db(double n) {
 		return 20 * Math.log10(n);
 	}

@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 
 import com.smartbean.androidutils.util.Drawables;
+import com.smartbean.androidutils.util.Utils;
 
 public abstract class FragmentActivityTabsNoActionBar extends FragmentActivity {
 
@@ -18,6 +19,16 @@ public abstract class FragmentActivityTabsNoActionBar extends FragmentActivity {
 	private List<String> titles = new ArrayList<String>();
 	private List<Fragment> fragments = new ArrayList<Fragment>();
 
+	public interface FragmentEx {
+		void onSelected(boolean b);
+	}
+
+	public void clear() {
+		titles.clear();
+		fragments.clear();
+		setPager();
+	}
+
 	public void add(String title, Fragment fragment) {
 		titles.add(title);
 		fragments.add(fragment);
@@ -25,8 +36,9 @@ public abstract class FragmentActivityTabsNoActionBar extends FragmentActivity {
 	}
 
 	private void setPager() {
-		getPager().setAdapter(new FragmentPagerAdapter(
-				getSupportFragmentManager()) {
+		final ViewPager pager = getPager();
+
+		pager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
 			@Override
 			public Fragment getItem(int position) {
 				return fragments.get(position);
@@ -42,12 +54,27 @@ public abstract class FragmentActivityTabsNoActionBar extends FragmentActivity {
 				return titles.get(position);
 			}
 		});
+
+		pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+			@Override
+			public void onPageSelected(int position) {
+
+				System.out.println("onPageSelected " + position + " "
+						+ fragments.size());
+				for (int i = 0; i < fragments.size(); i++) {
+					if (fragments.get(i) instanceof FragmentEx) {
+						((FragmentEx) (fragments.get(i)))
+								.onSelected(position == i);
+					}
+				}
+			}
+		});
 	}
-	
+
 	public void selectTab(int tab) {
 		getPager().setCurrentItem(tab, true);
 	}
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
