@@ -20,7 +20,7 @@ public class Translator {
 	private final SQLiteOpenHelper db;
 
 	public Translator(Context context) {
-		db = new SQLiteOpenHelper(context, "transl", null, 1) {
+		db = new SQLiteOpenHelper(context, "transl", null, 3) {
 
 			@Override
 			public void onUpgrade(SQLiteDatabase db, int oldVersion,
@@ -56,17 +56,20 @@ public class Translator {
 				try {
 					return translate1(params[0]);
 				} catch (IOException e) {
-					return e.getMessage();
+					return null;
 				}
 			}
 
 			@Override
 			protected void onPostExecute(String result) {
-				SQLiteDatabase db = Translator.this.db.getWritableDatabase();
-				ContentValues contentValues = new ContentValues();
-				contentValues.put("textFrom", text);
-				contentValues.put("textTo", result);
-				db.insert("translations", null, contentValues);
+				if (result != null) {
+					SQLiteDatabase db = Translator.this.db
+							.getWritableDatabase();
+					ContentValues contentValues = new ContentValues();
+					contentValues.put("textFrom", text);
+					contentValues.put("textTo", result);
+					db.insert("translations", null, contentValues);
+				}
 				callback.onSuccess(result);
 			}
 		}.execute(text);
@@ -75,13 +78,16 @@ public class Translator {
 	private static String translate1(String text) throws IOException {
 		String url = "https://translate.yandex.net/api/v1.5/tr.json/translate"
 				+ "?key=trnsl.1.1.20160915T110302Z.765d9f266bc455af.3339c06bc26030c406ce0cd7b1978896c3639520"
-				+ "&text=" + URLEncoder.encode(text, "utf8") + ""
+				+ "&text=" + URLEncoder.encode(text, "utf8")
 				+ "&lang=fr-ru";
 
 		HttpURLConnection conn = (HttpURLConnection) new URL(url)
 				.openConnection();
 
 		conn.connect();
+
+		if (conn.getResponseCode() != 200)
+			return null;
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(
 				conn.getInputStream(), "utf8"));

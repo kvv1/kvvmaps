@@ -15,7 +15,7 @@ import android.view.View;
 
 @SuppressLint("NewApi")
 public class TapeView extends View {
-	private final static int STEP_MS = 10;
+	private final static int STEP_MS = 20;
 
 	private static final int TAPE_COLOR = 0xFF401004;
 

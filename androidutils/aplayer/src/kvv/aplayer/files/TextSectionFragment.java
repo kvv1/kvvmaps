@@ -48,10 +48,13 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 
 		@SuppressLint("InlinedApi")
 		public void fileChanged() {
+			System.out.println("FILE CHANGED");
 			Files files = conn.service.getFiles();
 
 			if (files == null || files.curFile < 0)
 				return;
+
+			System.out.println("OK");
 
 			FileDescriptor fileDescriptor = files.files.get(files.curFile);
 			String path = fileDescriptor.path;
@@ -113,6 +116,8 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 						translator.translate(str, new AsyncCallback<String>() {
 							@Override
 							public void onSuccess(String res) {
+								if(res == null)
+									res = "ERROR";
 								Dialog dialog = new Dialog(
 										getActivity(),
 										android.R.style.Theme_DeviceDefault_Dialog_NoActionBar);
@@ -146,6 +151,10 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	protected void createUI(final IAPService service) {
+		System.out.println("CREATE UI");
+		
+		lastTextPath = null;
+		
 		super.createUI(service);
 
 		service.addListener(listener);
