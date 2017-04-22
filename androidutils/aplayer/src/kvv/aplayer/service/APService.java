@@ -141,7 +141,7 @@ public class APService extends BaseService implements IAPService {
 			}
 		});
 
-		modeChanged();
+		settingsChanged();
 
 		for (PlayerListener l : player.listeners)
 			l.folderListChanged();
@@ -197,7 +197,6 @@ public class APService extends BaseService implements IAPService {
 	public void removeLevelListener(PlayerLevelListener listener) {
 		player.removeLevelListener(listener);
 	}
-
 
 	@Override
 	public void toFolder(int folderIdx) {
@@ -265,9 +264,15 @@ public class APService extends BaseService implements IAPService {
 	}
 
 	@Override
-	public void modeChanged() {
+	public void settingsChanged() {
 		player.setCompr(isCarMode() ? 15 : 0);
 		player.setDbPer100(isCarMode() ? 5 : 0);
+
+		if (settings.getBoolean(getString(R.string.prefNoCompr), false))
+			player.setCompr(0);
+
+		player.setPlus10(settings.getBoolean(getString(R.string.prefNoCompr),
+				false));
 	}
 
 	@Override

@@ -44,7 +44,7 @@ public interface IAPService {
 
 	List<String> getMRU();
 
-	void modeChanged();
+	void settingsChanged();
 
 	void reload();
 

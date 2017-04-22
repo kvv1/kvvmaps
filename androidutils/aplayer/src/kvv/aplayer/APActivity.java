@@ -1,5 +1,9 @@
 package kvv.aplayer;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import kvv.aplayer.files.FilesSectionFragmentList;
 import kvv.aplayer.files.FilesSectionFragmentTape;
 import kvv.aplayer.files.TextSectionFragment;
@@ -14,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -55,17 +60,40 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 		super.onCreate(null);
 		setContentView(R.layout.activity_ap);
 
+		// File path = getExternalFilesDir(Environment.DIRECTORY_MUSIC);
+		// System.out.println("+++++++++++++++" + path);
+		// path =
+		// Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
+		// System.out.println("+++++++++++++++" + path);
+		//
+		//
+		//
+		// FileWriter wr;
+		// try {
+		// wr = new FileWriter(new File(path, "text.txt"));
+		//
+		// wr.write("xaxa");
+		//
+		//
+		// wr.close();
+		// } catch (IOException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		//
+		//
+
 		startService(new Intent(this, APService.class));
 		bindService(new Intent(this, APService.class), conn,
 				Context.BIND_AUTO_CREATE);
 
-//		if (savedInstanceState == null) {
-			add("Text", new TextSectionFragment());
-			add("Files", new FilesSectionFragmentList());
-			add("Files1", new FilesSectionFragmentTape());
-			add("Folders", new FoldersSectionFragment());
-			selectMainPage();
-//		}
+		// if (savedInstanceState == null) {
+		add("Text", new TextSectionFragment());
+		add("Files", new FilesSectionFragmentList());
+		add("Files1", new FilesSectionFragmentTape());
+		add("Folders", new FoldersSectionFragment());
+		selectMainPage();
+		// }
 	}
 
 	@Override
@@ -125,16 +153,7 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 			updateWakeLock();
 
 			if (conn.service != null)
-				conn.service.modeChanged();
-
-			// new Handler().postDelayed(new Runnable() {
-			//
-			// @Override
-			// public void run() {
-			// filesSectionFragmentList.setMagicEye();
-			// }
-			// }, 1000);
-
+				conn.service.settingsChanged();
 			break;
 		}
 	}

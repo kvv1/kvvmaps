@@ -7,6 +7,8 @@
     <string name="prefMagicEye">prefMagicEye</string>
     <string name="prefClick">prefClick</string>
     <string name="prefTest">prefTest</string>
+    <string name="prefNoCompr">prefNoCompr</string>
+    <string name="prefPlus10">prefPlus10</string>
     <string name="title_activity_preferences">Настройки</string>
 
 </resources>

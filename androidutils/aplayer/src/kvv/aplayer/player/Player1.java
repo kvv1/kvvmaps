@@ -81,9 +81,24 @@ public abstract class Player1 extends Player0 {
 		setEq();
 	}
 
+	boolean plus10;
+
+	public void setPlus10(boolean plus10) {
+		this.plus10 = plus10;
+	}
+
 	private void setEq() {
-		setVolume(comprGain - compr.getComprLevel());
-		setEq(speedKMH * dBPer100 / 100 - dBPer100 * 1.2f);
+		float volume = comprGain - compr.getComprLevel();
+		System.out.println("vol " + volume);
+		setVolume(volume);
+
+		// setEq(speedKMH * dBPer100 / 100 - dBPer100 * 1.2f);
+
+		float eq = dBPer100 * (speedKMH - 120) / 100;
+		if (plus10)
+			eq += 10;
+
+		setEq(eq);
 	}
 
 	@Override

@@ -13,5 +13,11 @@
         <CheckBoxPreference
             android:key="@string/prefTest"
             android:title="Test" />
+        <CheckBoxPreference
+            android:key="@string/prefNoCompr"
+            android:title="No compession" />
+        <CheckBoxPreference
+            android:key="@string/prefPlus10"
+            android:title="Plus10" />
         
 </PreferenceScreen>

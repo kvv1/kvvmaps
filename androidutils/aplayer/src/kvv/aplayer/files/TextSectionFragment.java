@@ -1,6 +1,7 @@
 package kvv.aplayer.files;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,7 +13,6 @@ import kvv.aplayer.player.Files;
 import kvv.aplayer.player.Player.PlayerAdapter;
 import kvv.aplayer.player.Player.PlayerListener;
 import kvv.aplayer.service.APService;
-import kvv.aplayer.service.FileDescriptor;
 import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -56,10 +56,9 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 
 			System.out.println("OK");
 
-			FileDescriptor fileDescriptor = files.files.get(files.curFile);
-			String path = fileDescriptor.path;
+			String path = files.files.get(files.curFile).path;
 
-			String textPath = path.substring(0, path.lastIndexOf('.')) + ".txt";
+			String textPath = getTextFilePath(path);
 
 			if (textPath.equals(lastTextPath))
 				return;
@@ -92,10 +91,7 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 			lineCnt = lines.size();
 
 			lines.add(0, "");
-			lines.add(
-					0,
-					path.substring(0, path.lastIndexOf('.')).substring(
-							path.lastIndexOf('/') + 1));
+			lines.add(0, textPath.substring(textPath.lastIndexOf('/') + 1));
 
 			for (int i = 0; i < 3; i++)
 				lines.add(0, "");
@@ -116,7 +112,7 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 						translator.translate(str, new AsyncCallback<String>() {
 							@Override
 							public void onSuccess(String res) {
-								if(res == null)
+								if (res == null)
 									res = "ERROR";
 								Dialog dialog = new Dialog(
 										getActivity(),
@@ -136,6 +132,39 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 			}
 
 		}
+
+		private String getTextFilePath(String path) {
+			String name = path.substring(path.lastIndexOf('/') + 1,
+					path.lastIndexOf('.'));
+
+			String best = null;
+			double bestSimilarity = 0;
+
+			File dir = new File(path).getParentFile();
+
+			while (dir != null) {
+				File texts = new File(dir, "texts");
+				if (texts.exists() && texts.isDirectory()) {
+					String[] list = texts.list();
+					for (String name1 : list) {
+						String name2 = name1;
+						if (name2.contains("."))
+							name2 = name2.substring(0, name2.lastIndexOf('.'));
+						double sim = StringSimilarity.similarity(name, name2);
+						if (sim > bestSimilarity) {
+							bestSimilarity = sim;
+							best = new File(texts, name1).getAbsolutePath();
+						}
+					}
+				}
+				dir = dir.getParentFile();
+			}
+
+			if (best == null)
+				return "";
+
+			return best;
+		}
 	};
 
 	public TextSectionFragment() {
@@ -152,9 +181,9 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 	@Override
 	protected void createUI(final IAPService service) {
 		System.out.println("CREATE UI");
-		
+
 		lastTextPath = null;
-		
+
 		super.createUI(service);
 
 		service.addListener(listener);
