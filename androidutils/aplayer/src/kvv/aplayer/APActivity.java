@@ -1,9 +1,5 @@
 package kvv.aplayer;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
 import kvv.aplayer.files.FilesSectionFragmentList;
 import kvv.aplayer.files.FilesSectionFragmentTape;
 import kvv.aplayer.files.TextSectionFragment;
@@ -18,7 +14,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -182,16 +177,6 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		// View decorView = getWindow().getDecorView();
-		// int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-		// decorView.setSystemUiVisibility(uiOptions);
-
-		// Remember that you should never show the action bar if the
-		// status bar is hidden, so hide that too if necessary.
-		// ActionBar actionBar = getActionBar();
-		// actionBar.hide();
-
 		fg = true;
 		updateWakeLock();
 	}

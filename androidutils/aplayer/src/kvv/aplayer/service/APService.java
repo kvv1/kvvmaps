@@ -52,21 +52,24 @@ public class APService extends BaseService implements IAPService {
 			String action = intent.getAction();
 			System.out.println("BroadcastReceiver " + action);
 
-			if ("kvv.aplayer.PAUSE".equals(action)) {
+			if ("kvv.aplayer.PAUSE".equals(action)) 
 				player.pause();
-			}
+			
 			if ("kvv.aplayer.PLAY_PAUSE".equals(action)) {
 				if (player.isPlaying())
 					player.pause();
 				else
 					player.play();
 			}
-			if ("kvv.aplayer.PREV".equals(action)) {
+			
+			if ("kvv.aplayer.PREV".equals(action)) 
 				player.prev();
-			}
-			if ("kvv.aplayer.NEXT".equals(action)) {
+
+			if ("kvv.aplayer.NEXT".equals(action)) 
 				player.next();
-			}
+
+			if ("kvv.sound.OFF".equals(action)) 
+				player.pause();
 
 			if (Intent.ACTION_SCREEN_OFF.equals(action)) {
 				if (isCarMode())
@@ -106,6 +109,7 @@ public class APService extends BaseService implements IAPService {
 		filter.addAction("kvv.aplayer.PLAY_PAUSE");
 		filter.addAction("kvv.aplayer.NEXT");
 		filter.addAction("kvv.aplayer.PREV");
+		filter.addAction("kvv.sound.OFF");
 		filter.addAction(Intent.ACTION_SCREEN_OFF);
 		filter.addAction(Intent.ACTION_SCREEN_ON);
 		registerReceiver(broadcastReceiver, filter);
@@ -136,8 +140,11 @@ public class APService extends BaseService implements IAPService {
 
 				if (!isPlaying())
 					stopGpsDelayed();
-				else
+				else {
 					startGps();
+					sendBroadcast(new Intent().setAction("kvv.radio.PAUSE"));
+				}
+
 			}
 		});
 
@@ -236,6 +243,7 @@ public class APService extends BaseService implements IAPService {
 	@Override
 	public void play() {
 		player.play();
+		sendBroadcast(new Intent().setAction("kvv.radio.PAUSE"));
 	}
 
 	@Override
@@ -360,8 +368,6 @@ public class APService extends BaseService implements IAPService {
 
 	private List<Folder> read() {
 
-		List<Folder> folders = new ArrayList<Folder>();
-
 		Cursor mCursor = getContentResolver().query(
 				MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
 				new String[] { MediaStore.Audio.Media.DISPLAY_NAME,
@@ -369,7 +375,7 @@ public class APService extends BaseService implements IAPService {
 						MediaStore.Audio.Media.DURATION }, null, null, null);
 
 		if (mCursor == null)
-			return folders;
+			return new ArrayList<Folder>();
 
 		Map<String, List<FileDescriptor>> map = new HashMap<String, List<FileDescriptor>>();
 
@@ -409,16 +415,31 @@ public class APService extends BaseService implements IAPService {
 		List<String> folds = new ArrayList<String>(map.keySet());
 		Collections.sort(folds);
 
+		List<Folder> folders = new ArrayList<Folder>();
+
+//		{
+//			List<FileDescriptor> files = new ArrayList<FileDescriptor>();
+//			files.add(new FileDescriptor(
+//					"http://icecast.vgtrk.cdnvideo.ru/vestifm_mp3_64kbps",
+//					"Вести ФМ", 1));
+//			files.add(new FileDescriptor(
+//					"http://adsi-e-02-boh.sharp-stream.com/jazzfmmobile.mp3",
+//					"Jazz", 1));
+//			files.add(new FileDescriptor(
+//					"http://air.radiorecord.ru:805/naft_320", "Нафталин", 1));
+//			folders.add(new Folder("radio", 0, files));
+//		}
+
 		for (String folder : folds) {
-			int ind = 0;
+			int indent = 0;
 			for (int i = 0; i < folder.length(); i++)
 				if (folder.charAt(i) == '/')
-					ind++;
+					indent++;
 
 			List<FileDescriptor> files = map.get(folder);
 			Collections.sort(files);
 
-			folders.add(new Folder(folder, ind, files));
+			folders.add(new Folder(folder, indent, files));
 		}
 
 		return folders;

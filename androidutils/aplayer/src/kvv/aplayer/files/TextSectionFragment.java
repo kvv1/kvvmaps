@@ -134,8 +134,13 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 		}
 
 		private String getTextFilePath(String path) {
-			String name = path.substring(path.lastIndexOf('/') + 1,
-					path.lastIndexOf('.'));
+			String name;
+			try {
+				name = path.substring(path.lastIndexOf('/') + 1,
+						path.lastIndexOf('.'));
+			} catch (Exception e) {
+				return "";
+			}
 
 			String best = null;
 			double bestSimilarity = 0;

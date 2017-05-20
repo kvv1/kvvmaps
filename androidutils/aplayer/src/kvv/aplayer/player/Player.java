@@ -8,6 +8,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
+import android.media.MediaPlayer.OnPreparedListener;
 import android.media.audiofx.Equalizer;
 import android.os.PowerManager;
 
@@ -71,7 +72,7 @@ public abstract class Player {
 		});
 
 		mp.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
-		
+
 		equalizer = new Equalizer(10, mp.getAudioSessionId());
 		equalizer.setEnabled(true);
 
@@ -85,7 +86,7 @@ public abstract class Player {
 		mp.setOnCompletionListener(listener);
 	}
 
-	protected void playFile(String path, int pos, boolean start) {
+	protected void playFile(String path, final int pos, final boolean start) {
 		try {
 			if (mp.isPlaying())
 				mp.stop();
@@ -94,18 +95,25 @@ public abstract class Player {
 			prepared = false;
 
 			mp.setDataSource(path);
-			mp.prepare();
 
-			prepared = true;
+			mp.setOnPreparedListener(new OnPreparedListener() {
+				@Override
+				public void onPrepared(MediaPlayer mp) {
+					prepared = true;
 
-			mp.seekTo(pos);
-			if (start)
-				mp.start();
+					mp.seekTo(pos);
+					if (start)
+						mp.start();
 
-			for (PlayerListener listener : listeners)
-				listener.fileChanged();
+					for (PlayerListener listener : listeners)
+						listener.fileChanged();
 
-			resetGain();
+					resetGain();
+				}
+			});
+
+			mp.prepareAsync();
+
 		} catch (Exception e) {
 			prepared = false;
 		}

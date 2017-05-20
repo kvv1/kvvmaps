@@ -52,7 +52,7 @@ public abstract class FilesSectionFragmentBase extends
 		setFolderProgress();
 		setFileProgress();
 	}
-	
+
 	public FilesSectionFragmentBase(Class<?> serviceClass, int layout) {
 		super(serviceClass, layout);
 	}
@@ -174,6 +174,18 @@ public abstract class FilesSectionFragmentBase extends
 			protected void onClick(float touchX, float touchY) {
 				if (conn.service != null)
 					conn.service.next();
+			}
+		};
+
+		Button back5s = (Button) rootView.findViewById(R.id.back5s);
+
+		new TouchListener(back5s) {
+			@Override
+			protected void onClick(float touchX, float touchY) {
+				if (conn.service != null) {
+					int pos = conn.service.getCurrentPosition();
+					conn.service.seekTo(Math.max(0, pos - 5000));
+				}
 			}
 		};
 
