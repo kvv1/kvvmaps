@@ -40,7 +40,7 @@ import com.smartbean.androidutils.util.AsyncCallback;
 public class NLActivity extends Activity {
 
 	private int[] buttons = { R.id.app0, R.id.app1, R.id.app2, R.id.app3,
-			R.id.app4, R.id.app5 };
+			R.id.app4, R.id.app5, R.id.app6, R.id.app7 };
 	private AppInfo[] appInfos = new AppInfo[buttons.length];
 
 	private Handler handler = new Handler();
@@ -251,8 +251,7 @@ public class NLActivity extends Activity {
 				.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View arg0) {
-						sendBroadcast(new Intent()
-								.setAction("kvv.aplayer.PAUSE"));
+						sendBroadcast(new Intent().setAction("kvv.sound.OFF"));
 					}
 				});
 	}
