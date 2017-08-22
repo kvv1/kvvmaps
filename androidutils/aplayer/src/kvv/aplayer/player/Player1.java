@@ -77,7 +77,7 @@ public abstract class Player1 extends Player0 {
 
 	public void setSpeedKMH(float speed) {
 		this.speedKMH = speed;
-		System.out.println("speed=" + speed);
+		//System.out.println("speed=" + speed);
 		setEq();
 	}
 
@@ -89,7 +89,7 @@ public abstract class Player1 extends Player0 {
 
 	private void setEq() {
 		float volume = comprGain - compr.getComprLevel();
-		System.out.println("vol " + volume);
+		//System.out.println("vol " + volume);
 		setVolume(volume);
 
 		// setEq(speedKMH * dBPer100 / 100 - dBPer100 * 1.2f);

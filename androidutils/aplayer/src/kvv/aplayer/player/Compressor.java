@@ -12,7 +12,7 @@ public abstract class Compressor {
 
 	private static final int RATE = 16;
 
-	private static final double MEAN = 40;
+	private static final double MEAN = 128;
 
 	private Visualizer visualizer;
 
@@ -163,7 +163,7 @@ public abstract class Compressor {
 		@Override
 		public void reset() {
 			if (lpf != null)
-				lpf.set(MEAN / 2);
+				lpf.set(MEAN/4);
 		}
 
 	}

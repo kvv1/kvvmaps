@@ -24,11 +24,34 @@ public class StringSimilarity {
 		 * StringUtils.getLevenshteinDistance(longer, shorter)) / (double)
 		 * longerLength;
 		 */
-		return (longerLength - editDistance(longer, shorter))
+		
+		double sim = (longerLength - editDistance(longer, shorter))
 				/ (double) longerLength;
+
+		//System.out.println(s1 + " " + s2 + " " + sim);
+		
+		return sim;
 
 	}
 
+	public static double similarity2(String s1, String s2) {
+		String longer = s1, shorter = s2;
+		if (s1.length() < s2.length()) { // longer should always have greater
+											// length
+			longer = s2;
+			shorter = s1;
+		}
+		int longerLength = longer.length();
+		if (longerLength == 0) 
+			return 1.0; /* both strings are zero length */
+		
+		double sim = (longerLength - editDistance(longer, shorter))
+				/ (double) shorter.length();
+		return sim;
+	}
+
+
+	
 	// Example implementation of the Levenshtein Edit Distance
 	// See http://rosettacode.org/wiki/Levenshtein_distance#Java
 	@SuppressLint("DefaultLocale")

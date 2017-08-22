@@ -278,9 +278,9 @@ public class APService extends BaseService implements IAPService {
 
 		if (settings.getBoolean(getString(R.string.prefNoCompr), false))
 			player.setCompr(0);
-
-		player.setPlus10(settings.getBoolean(getString(R.string.prefNoCompr),
-				false));
+//
+//		player.setPlus10(settings.getBoolean(getString(R.string.prefNoCompr),
+//				false));
 	}
 
 	@Override

@@ -177,14 +177,14 @@ public abstract class FilesSectionFragmentBase extends
 			}
 		};
 
-		Button back5s = (Button) rootView.findViewById(R.id.back5s);
+		Button back10s = (Button) rootView.findViewById(R.id.back10s);
 
-		new TouchListener(back5s) {
+		new TouchListener(back10s) {
 			@Override
 			protected void onClick(float touchX, float touchY) {
 				if (conn.service != null) {
 					int pos = conn.service.getCurrentPosition();
-					conn.service.seekTo(Math.max(0, pos - 5000));
+					conn.service.seekTo(Math.max(0, pos - 10000));
 				}
 			}
 		};

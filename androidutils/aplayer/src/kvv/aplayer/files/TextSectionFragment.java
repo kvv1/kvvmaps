@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import kvv.aplayer.R;
 import kvv.aplayer.player.Files;
@@ -147,6 +149,8 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 
 			File dir = new File(path).getParentFile();
 
+			Map<Double, String> map = new TreeMap<Double, String>();
+
 			while (dir != null) {
 				File texts = new File(dir, "texts");
 				if (texts.exists() && texts.isDirectory()) {
@@ -155,7 +159,10 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 						String name2 = name1;
 						if (name2.contains("."))
 							name2 = name2.substring(0, name2.lastIndexOf('.'));
-						double sim = StringSimilarity.similarity(name, name2);
+						double sim = similarity(name, name2);
+
+						map.put(sim, name2);
+
 						if (sim > bestSimilarity) {
 							bestSimilarity = sim;
 							best = new File(texts, name1).getAbsolutePath();
@@ -165,10 +172,33 @@ public class TextSectionFragment extends FilesSectionFragmentBase {
 				dir = dir.getParentFile();
 			}
 
+			for (Double d : map.keySet())
+				System.out.println(d + " " + map.get(d));
+
 			if (best == null)
 				return "";
 
+			if (bestSimilarity < 0.7)
+				return "";
+
 			return best;
+		}
+
+		private double similarity(String s1, String s2) {
+			String longer = s1, shorter = s2;
+			if (s1.length() < s2.length()) { // longer should always have
+												// greater
+												// length
+				longer = s2;
+				shorter = s1;
+			}
+
+			double sim1 = StringSimilarity.similarity(shorter,
+					longer.substring(0, shorter.length()));
+			double sim2 = StringSimilarity.similarity(shorter,
+					longer.substring(longer.length() - shorter.length()));
+
+			return Math.max(sim1, sim2);
 		}
 	};
 
