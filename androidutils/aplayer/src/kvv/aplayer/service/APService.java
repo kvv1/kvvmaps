@@ -6,14 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import kvv.aplayer.APActivity;
-import kvv.aplayer.R;
-import kvv.aplayer.player.Files;
-import kvv.aplayer.player.Folders;
-import kvv.aplayer.player.Player.PlayerAdapter;
-import kvv.aplayer.player.Player.PlayerListener;
-import kvv.aplayer.player.Player1.PlayerLevelListener;
-import kvv.aplayer.player.PlayerUndoRedo;
+import com.smartbean.androidutils.service.BaseService;
+
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -31,8 +25,14 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-
-import com.smartbean.androidutils.service.BaseService;
+import kvv.aplayer.APActivity;
+import kvv.aplayer.R;
+import kvv.aplayer.player.Files;
+import kvv.aplayer.player.Folders;
+import kvv.aplayer.player.Player.PlayerAdapter;
+import kvv.aplayer.player.Player.PlayerListener;
+import kvv.aplayer.player.Player1.PlayerLevelListener;
+import kvv.aplayer.player.PlayerUndoRedo;
 
 public class APService extends BaseService implements IAPService {
 	public static APService staticInstance;
@@ -51,26 +51,6 @@ public class APService extends BaseService implements IAPService {
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			System.out.println("BroadcastReceiver " + action);
-
-			if ("kvv.aplayer.PAUSE".equals(action)) 
-				player.pause();
-			
-			if ("kvv.aplayer.PLAY_PAUSE".equals(action)) {
-				if (player.isPlaying())
-					player.pause();
-				else
-					player.play();
-			}
-			
-			if ("kvv.aplayer.PREV".equals(action)) 
-				player.prev();
-
-			if ("kvv.aplayer.NEXT".equals(action)) 
-				player.next();
-
-			if ("kvv.sound.OFF".equals(action)) 
-				player.pause();
-
 			if (Intent.ACTION_SCREEN_OFF.equals(action)) {
 				if (isCarMode())
 					player.pause();
@@ -79,8 +59,13 @@ public class APService extends BaseService implements IAPService {
 	};
 
 	public APService() {
-		super(R.drawable.ap, R.drawable.ap, APActivity.class,
-				R.string.app_name, R.string.app_name, false, false);
+		super(R.drawable.ap, R.drawable.ap, APActivity.class, R.string.app_name, R.string.app_name, false, false);
+	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		// TODO Auto-generated method stub
+		return super.onStartCommand(intent, flags, startId);
 	}
 
 	@Override
@@ -101,22 +86,15 @@ public class APService extends BaseService implements IAPService {
 			}
 		};
 
-		telephonyManager.listen(phoneStateListener,
-				PhoneStateListener.LISTEN_CALL_STATE);
+		telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
 
 		IntentFilter filter = new IntentFilter();
-		filter.addAction("kvv.aplayer.PAUSE");
-		filter.addAction("kvv.aplayer.PLAY_PAUSE");
-		filter.addAction("kvv.aplayer.NEXT");
-		filter.addAction("kvv.aplayer.PREV");
-		filter.addAction("kvv.sound.OFF");
 		filter.addAction(Intent.ACTION_SCREEN_OFF);
 		filter.addAction(Intent.ACTION_SCREEN_ON);
 		registerReceiver(broadcastReceiver, filter);
 
 		AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		am.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
-				RemoteControlReceiver.class.getName()));
+		am.registerMediaButtonEventReceiver(new ComponentName(getPackageName(), RemoteControlReceiver.class.getName()));
 
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -159,8 +137,7 @@ public class APService extends BaseService implements IAPService {
 		staticInstance = null;
 		unregisterReceiver(broadcastReceiver);
 		player.close();
-		telephonyManager.listen(phoneStateListener,
-				PhoneStateListener.LISTEN_NONE);
+		telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
 		stopGpsRunnable.run();
 		super.onDestroy();
 	}
@@ -228,25 +205,21 @@ public class APService extends BaseService implements IAPService {
 		player.toFile(position);
 	}
 
-	@Override
 	public void prev() {
 		player.prev();
 	}
 
-	@Override
 	public void next() {
 		if (player.hasNext()) {
 			player.next();
 		}
 	}
 
-	@Override
 	public void play() {
 		player.play();
 		sendBroadcast(new Intent().setAction("kvv.radio.PAUSE"));
 	}
 
-	@Override
 	public void pause() {
 		player.pause();
 	}
@@ -343,8 +316,7 @@ public class APService extends BaseService implements IAPService {
 					player.setSpeedKMH(speed);
 				}
 			};
-			locationManager.requestLocationUpdates(
-					LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 		}
 	}
 
@@ -368,11 +340,9 @@ public class APService extends BaseService implements IAPService {
 
 	private List<Folder> read() {
 
-		Cursor mCursor = getContentResolver().query(
-				MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-				new String[] { MediaStore.Audio.Media.DISPLAY_NAME,
-						MediaStore.Audio.Media.DATA,
-						MediaStore.Audio.Media.DURATION }, null, null, null);
+		Cursor mCursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, new String[] {
+				MediaStore.Audio.Media.DISPLAY_NAME, MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.DURATION },
+				null, null, null);
 
 		if (mCursor == null)
 			return new ArrayList<Folder>();
@@ -380,20 +350,14 @@ public class APService extends BaseService implements IAPService {
 		Map<String, List<FileDescriptor>> map = new HashMap<String, List<FileDescriptor>>();
 
 		while (mCursor.moveToNext()) {
-			String title = mCursor
-					.getString(mCursor
-							.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
+			String title = mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
 
-			String path = mCursor.getString(mCursor
-					.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+			String path = mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
 
-			long dur = mCursor.getLong(mCursor
-					.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+			long dur = mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
 			// System.out.println(title + " " + path + " " + dur);
 
-			if (path.contains("/_/")
-					&& !settings
-							.getBoolean(getString(R.string.prefTest), false))
+			if (path.contains("/_/") && !settings.getBoolean(getString(R.string.prefTest), false))
 				continue;
 
 			String p = path.substring(path.indexOf('/', 1) + 1);

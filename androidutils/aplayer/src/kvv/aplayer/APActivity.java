@@ -1,13 +1,8 @@
 package kvv.aplayer;
 
-import kvv.aplayer.files.FilesSectionFragmentList;
-import kvv.aplayer.files.FilesSectionFragmentTape;
-import kvv.aplayer.files.TextSectionFragment;
-import kvv.aplayer.folders.FoldersSectionFragment;
-import kvv.aplayer.player.Player.PlayerAdapter;
-import kvv.aplayer.player.Player.PlayerListener;
-import kvv.aplayer.service.APService;
-import kvv.aplayer.service.IAPService;
+import com.smartbean.androidutils.activity.FragmentActivityTabsNoActionBar;
+import com.smartbean.androidutils.service.ServiceConnectionAdapter;
+
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
@@ -21,9 +16,14 @@ import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import com.smartbean.androidutils.activity.FragmentActivityTabsNoActionBar;
-import com.smartbean.androidutils.service.ServiceConnectionAdapter;
+import kvv.aplayer.files.FilesSectionFragmentList;
+import kvv.aplayer.files.FilesSectionFragmentTape;
+import kvv.aplayer.files.TextSectionFragment;
+import kvv.aplayer.folders.FoldersSectionFragment;
+import kvv.aplayer.player.Player.PlayerAdapter;
+import kvv.aplayer.player.Player.PlayerListener;
+import kvv.aplayer.service.APService;
+import kvv.aplayer.service.IAPService;
 
 @SuppressLint("NewApi")
 public class APActivity extends FragmentActivityTabsNoActionBar {
@@ -120,19 +120,19 @@ public class APActivity extends FragmentActivityTabsNoActionBar {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.action_exit:
+		int itemId = item.getItemId();
+		if (itemId == R.id.action_exit) {
 			exit();
 			return true;
-		case R.id.action_reload:
+		} else if (itemId == R.id.action_reload) {
 			if (conn.service != null)
 				conn.service.reload();
 			return true;
-		case R.id.action_settings:
+		} else if (itemId == R.id.action_settings) {
 			Intent i = new Intent(this, Preferences.class);
 			startActivityForResult(i, RESULT_SETTINGS);
 			return true;
-		default:
+		} else {
 			return super.onOptionsItemSelected(item);
 		}
 	}

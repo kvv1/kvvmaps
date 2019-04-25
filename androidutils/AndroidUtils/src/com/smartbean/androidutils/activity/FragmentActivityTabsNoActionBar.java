@@ -3,14 +3,13 @@ package com.smartbean.androidutils.activity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.smartbean.androidutils.util.Drawables;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-
-import com.smartbean.androidutils.util.Drawables;
-import com.smartbean.androidutils.util.Utils;
 
 public abstract class FragmentActivityTabsNoActionBar extends FragmentActivity {
 

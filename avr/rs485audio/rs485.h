@@ -8,8 +8,9 @@
 #ifndef RS485_H_
 #define RS485_H_
 
-void rs485sendBuffer();
 void rs485put(char c);
+void rs485endOfPacket();
+int8_t rs485sendBufferIfValid(uint16_t* id);
 
 
 #endif /* RS485_H_ */

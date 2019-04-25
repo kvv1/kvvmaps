@@ -24,15 +24,15 @@ public interface IAPService {
 
 	void toFile(int position);
 
-	void prev();
-
-	void next();
+//	void prev();
+//
+//	void next();
 
 	boolean isPlaying();
 
-	void play();
-
-	void pause();
+//	void play();
+//
+//	void pause();
 
 	int getDuration();
 

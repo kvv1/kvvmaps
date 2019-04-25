@@ -5,6 +5,7 @@
 
 #include "audioInput.h"
 #include "audioOutput.h"
+#include "rs485.h"
 
 #define UART_SPEED 9600UL
 
@@ -34,33 +35,87 @@ enum STATE {
 	WAIT, RECEIVE_AUDIO, SEND_RS485, RECEIVE_RS485, SEND_AUDIO,
 };
 
-static volatile uint8_t span;
+#define TIME_UNIT_MKS 34
+static volatile uint16_t time;
 
-static void onSampleIn(uint8_t in) {
+//#define MODBUS_TIMEOUT_BYTE_TICKS (4 * 1000000 / 9600 / TIME_UNIT_MKS)
+#define MODBUS_TIMEOUT_BYTE_TICKS 100
+#define MODBUS_TIMEOUT_PACKET_TICKS 15000
+//#define MODBUS_TIMEOUT_BYTE_TICKS (3 * 1000 / TIME_UNIT_MKS)
+//#define MODBUS_TIMEOUT_PACKET_TICKS (20 * 1000 / TIME_UNIT_MKS)
+
+static uint8_t onSampleIn(uint8_t in) {
+	static uint16_t time1;
 	static uint8_t prev;
-	static uint8_t cnt;
 
-	if ((prev != in || cnt > 100) && span == 255) {
-		span = cnt;
-		cnt = 0;
+	uint8_t dt = time - time1;
+	if (prev != in || dt > 100) {
+		time1 = time;
 		prev = in;
+		return dt;
 	}
-	cnt++;
+	return 255;
 }
 
 ISR(TIMER0_OVF_vect) {
+	static uint8_t o;
+
 	TCNT0 = 256 - 30;
 	//TCNT0 = 256 - 18;
+
+	time++;
 
 	out(1);
 	uint8_t in = readAdc();
 
-	uint8_t o = onSampleOut();
 	audioOut(o);
 
-	onSampleIn(in);
+	uint8_t span = onSampleIn(in);
 
 	out(0);
+
+	sei();
+
+	o = onSampleOut();
+
+	if (span != 255)
+		transitionReceived(span);
+}
+
+void put485ToAudio(uint16_t id) {
+	while (UCSRA & (1 << RXC))
+		UDR;
+
+	int timeout = MODBUS_TIMEOUT_PACKET_TICKS;
+
+	int time1;
+
+	cli();
+	time1 = time;
+	sei();
+
+	for (;;) {
+		cli();
+		int dt = time - time1;
+		sei();
+		if (dt > timeout)
+			break;
+
+		if (UCSRA & (1 << RXC)) {
+			if (timeout != MODBUS_TIMEOUT_BYTE_TICKS) {
+				audioPut(id >> 8);
+				audioPut(id);
+				audioPut((id ^ -1) >> 8);
+				audioPut(id ^ -1);
+			}
+
+			audioPut(UDR);
+			timeout = MODBUS_TIMEOUT_BYTE_TICKS;
+			cli();
+			time1 = time;
+			sei();
+		}
+	}
 }
 
 int main() {
@@ -74,19 +129,12 @@ int main() {
 	//INDDR &= ~(1 << INBIT);
 
 	sei();
-//	rs485put('a');
-//	rs485put('b');
-//	rs485put('c');
-	//rs485sendBuffer();
 	for (;;) {
-		if (span != 255) {
-			uint8_t sp = span;
-			span = 255;
-			transitionReceived(sp);
-		}
-		if (UCSRA & (1 << RXC)) {
-			audioPut(UDR);
-		}
+		uint16_t id;
+		if (rs485sendBufferIfValid(&id))
+			put485ToAudio(id);
+		while (!audioEmpty())
+			;
 	}
 }
 
@@ -95,8 +143,9 @@ void byteReceived(uint8_t b) {
 }
 
 void endOfInput() {
+	rs485endOfPacket();
+	//txBufReady = 1;
 	//rs485buffer2audio();
-	rs485sendBuffer();
 }
 
 void timer0Init() {

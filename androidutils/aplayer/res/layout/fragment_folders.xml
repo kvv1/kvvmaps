@@ -12,6 +12,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:baselineAligned="false"
         android:orientation="horizontal" >
 
         <ListView
@@ -21,44 +22,50 @@
             android:layout_weight="1"
             android:divider="#0000" >
         </ListView>
+    </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/buttons"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:orientation="vertical" >
-<!-- 
-            <Button
-                android:id="@+id/home"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="Home"
-                android:textColor="@color/greendark"
-                android:textSize="30sp"
-                android:textStyle="bold" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:orientation="vertical" >
 
-            <Button
-                android:id="@+id/cur"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="Cur"
-                android:textColor="@color/greendark"
-                android:textSize="30sp"
-                android:textStyle="bold" />
- -->
-            <Button
-                android:id="@+id/goto1"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="Play"
-                android:textColor="@color/greendark"
-                android:textSize="30sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/home"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Home"
+            android:textColor="@color/greendark"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/cur"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cur"
+            android:textColor="@color/greendark"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/goto1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="Play"
+            android:textColor="@color/greendark"
+            android:textSize="30sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </RelativeLayout>

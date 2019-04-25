@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.smartbean.androidutils.util.AsyncCallback;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -22,25 +24,22 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import com.smartbean.androidutils.util.AsyncCallback;
-
 public class NLActivity extends Activity {
 
-	private int[] buttons = { R.id.app0, R.id.app1, R.id.app2, R.id.app3,
-			R.id.app4, R.id.app5, R.id.app6, R.id.app7 };
+	private int[] buttons = { R.id.app0, R.id.app1, R.id.app2, R.id.app3, R.id.app4, R.id.app5, R.id.app6, R.id.app7,
+			R.id.app8, R.id.app9 };
 	private AppInfo[] appInfos = new AppInfo[buttons.length];
 
 	private Handler handler = new Handler();
@@ -66,18 +65,15 @@ public class NLActivity extends Activity {
 
 				try {
 					Intent i = new Intent();
-					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-							| Intent.FLAG_ACTIVITY_SINGLE_TOP
+					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
 					/* | Intent.FLAG_ACTIVITY_CLEAR_TOP */);
 					i.setComponent(new ComponentName(packageName, className));
 					startActivity(i);
 					// finish();
 					return;
 				} catch (Exception e) {
-					Intent i = getPackageManager().getLaunchIntentForPackage(
-							packageName);
-					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-							| Intent.FLAG_ACTIVITY_SINGLE_TOP
+					Intent i = getPackageManager().getLaunchIntentForPackage(packageName);
+					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
 							| Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(i);
 				}
@@ -94,8 +90,7 @@ public class NLActivity extends Activity {
 	private void updateAppButtons() {
 		List<AppInfo> infos = getInstalledComponentList();
 
-		final SharedPreferences settings = PreferenceManager
-				.getDefaultSharedPreferences(this);
+		final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 
 		for (int button = 0; button < buttons.length; button++) {
 			final int button1 = button;
@@ -110,8 +105,7 @@ public class NLActivity extends Activity {
 				if (appInfo.packageName.equals(pack)) {
 					appInfos[button] = appInfo;
 					b.setText(appInfo.appName);
-					b.setCompoundDrawablesWithIntrinsicBounds(null,
-							appInfo.icon, null, null);
+					b.setCompoundDrawablesWithIntrinsicBounds(null, appInfo.icon, null, null);
 				}
 			}
 
@@ -132,11 +126,9 @@ public class NLActivity extends Activity {
 						try {
 							if (packageName.equals(appInfo.packageName)) {
 								Intent i = new Intent();
-								i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-										| Intent.FLAG_ACTIVITY_SINGLE_TOP
+								i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
 								/* | Intent.FLAG_ACTIVITY_CLEAR_TOP */);
-								i.setComponent(new ComponentName(packageName,
-										className));
+								i.setComponent(new ComponentName(packageName, className));
 								startActivity(i);
 								// finish();
 								return;
@@ -145,13 +137,11 @@ public class NLActivity extends Activity {
 						}
 					}
 
-					Intent i = getPackageManager().getLaunchIntentForPackage(
-							appInfo.packageName);
+					Intent i = getPackageManager().getLaunchIntentForPackage(appInfo.packageName);
 
 					System.out.println("*** " + appInfo.packageName);
 
-					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-							| Intent.FLAG_ACTIVITY_SINGLE_TOP
+					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
 							| Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(i);
 					// finish();
@@ -165,8 +155,7 @@ public class NLActivity extends Activity {
 						@Override
 						public void onSuccess(AppInfo res) {
 							SharedPreferences.Editor editor = settings.edit();
-							editor.putString("appInfo" + button1,
-									res.packageName);
+							editor.putString("appInfo" + button1, res.packageName);
 							editor.commit();
 							updateAppButtons();
 						}
@@ -186,74 +175,64 @@ public class NLActivity extends Activity {
 
 		updateAppButtons();
 
-		((Button) findViewById(R.id.pause))
-				.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View arg0) {
-						sendBroadcast(new Intent()
-								.setAction("kvv.aplayer.PLAY_PAUSE"));
-						startFinishTimer();
-					}
-				});
+		((Button) findViewById(R.id.pause)).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				getApplication().sendBroadcast(new Intent().setAction(Intent.ACTION_MEDIA_BUTTON).putExtra(
+						Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)));
+				startFinishTimer();
+			}
+		});
 
-		((Button) findViewById(R.id.prev))
-				.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View arg0) {
-						sendBroadcast(new Intent()
-								.setAction("kvv.aplayer.PREV"));
-						startFinishTimer();
-					}
-				});
+		((Button) findViewById(R.id.prev)).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				getApplication().sendBroadcast(new Intent().setAction(Intent.ACTION_MEDIA_BUTTON).putExtra(
+						Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS)));
+				startFinishTimer();
+			}
+		});
 
-		((Button) findViewById(R.id.next))
-				.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View arg0) {
-						sendBroadcast(new Intent()
-								.setAction("kvv.aplayer.NEXT"));
-						startFinishTimer();
-					}
-				});
+		((Button) findViewById(R.id.next)).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				getApplication().sendBroadcast(new Intent().setAction(Intent.ACTION_MEDIA_BUTTON).putExtra(
+						Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT)));
+				startFinishTimer();
+			}
+		});
 
-		((Button) findViewById(R.id.brightness))
-				.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View arg0) {
-						WindowManager.LayoutParams localLayoutParams = getWindow()
-								.getAttributes();
-
-						int br = Settings.System.getInt(getContentResolver(),
-								"screen_brightness", 0);
-
-						System.out.println("BR " + br);
-
-						if (br > 250) {
-							localLayoutParams.screenBrightness = 0.1f;
-							Settings.System
-									.putInt(getContentResolver(),
-											"screen_brightness",
-											(int) (localLayoutParams.screenBrightness * 255));
-						} else {
-							localLayoutParams.screenBrightness = 1;
-							Settings.System
-									.putInt(getContentResolver(),
-											"screen_brightness",
-											(int) (localLayoutParams.screenBrightness * 255));
-						}
-
-						getWindow().setAttributes(localLayoutParams);
-						startFinishTimer();
-					}
-				});
-
-		((Button) findViewById(R.id.off))
-				.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View arg0) {
-						sendBroadcast(new Intent().setAction("kvv.sound.OFF"));
-					}
-				});
+//		((Button) findViewById(R.id.brightness)).setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View arg0) {
+//				WindowManager.LayoutParams localLayoutParams = getWindow().getAttributes();
+//
+//				int br = Settings.System.getInt(getContentResolver(), "screen_brightness", 0);
+//
+//				System.out.println("BR " + br);
+//
+//				if (br > 250) {
+//					localLayoutParams.screenBrightness = 0.1f;
+//					Settings.System.putInt(getContentResolver(), "screen_brightness",
+//							(int) (localLayoutParams.screenBrightness * 255));
+//				} else {
+//					localLayoutParams.screenBrightness = 1;
+//					Settings.System.putInt(getContentResolver(), "screen_brightness",
+//							(int) (localLayoutParams.screenBrightness * 255));
+//				}
+//
+//				getWindow().setAttributes(localLayoutParams);
+//				startFinishTimer();
+//			}
+//		});
+//
+//		((Button) findViewById(R.id.off)).setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View arg0) {
+//				getApplication().sendBroadcast(new Intent().setAction(Intent.ACTION_MEDIA_BUTTON).putExtra(
+//						Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE)));
+//			}
+//		});
 	}
 
 	@Override
@@ -266,10 +245,8 @@ public class NLActivity extends Activity {
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		try {
-			menu.findItem(R.id.action_update).setTitle(
-					"Ver. "
-							+ getPackageManager().getPackageInfo(
-									this.getPackageName(), 0).versionName);
+			menu.findItem(R.id.action_update)
+					.setTitle("Ver. " + getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName);
 		} catch (NameNotFoundException e) {
 		}
 		return true;
@@ -279,29 +256,25 @@ public class NLActivity extends Activity {
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_settings:
-			Intent i = getPackageManager().getLaunchIntentForPackage(
-					"com.android.settings");
+			Intent i = getPackageManager().getLaunchIntentForPackage("com.android.settings");
 			i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 			startActivity(i);
 			return true;
 		case R.id.action_default_launcher:
-			getPackageManager().clearPackagePreferredActivities(
-					getPackageName());
+			getPackageManager().clearPackagePreferredActivities(getPackageName());
 			final Intent intent = new Intent();
 			intent.setAction(Intent.ACTION_MAIN);
 			intent.addCategory(Intent.CATEGORY_HOME);
 			startActivity(intent);
 			return true;
 		case R.id.action_camera:
-			i = getPackageManager().getLaunchIntentForPackage(
-					"com.sec.android.app.camera");
+			i = getPackageManager().getLaunchIntentForPackage("com.sec.android.app.camera");
 			i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 			i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 			startActivity(i);
 			return true;
 		case R.id.action_update:
-			startActivity(new Intent(Intent.ACTION_VIEW,
-					Uri.parse("http://palermo.ru/vladimir/NavLauncher.apk")));
+			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://palermo.ru/vladimir/NavLauncher.apk")));
 			return true;
 		}
 
@@ -333,16 +306,15 @@ public class NLActivity extends Activity {
 			}
 		});
 
-		ListAdapter adapter = new ArrayAdapter<AppInfo>(NLActivity.this,
-				android.R.layout.select_dialog_item, android.R.id.text1, list) {
+		ListAdapter adapter = new ArrayAdapter<AppInfo>(NLActivity.this, android.R.layout.select_dialog_item,
+				android.R.id.text1, list) {
 			public View getView(int position, View convertView, ViewGroup parent) {
 				// Use super class to create the View
 				View v = super.getView(position, convertView, parent);
 				TextView tv = (TextView) v.findViewById(android.R.id.text1);
 
 				// Put the image on the TextView
-				tv.setCompoundDrawablesWithIntrinsicBounds(
-						list.get(position).icon, null, null, null);
+				tv.setCompoundDrawablesWithIntrinsicBounds(list.get(position).icon, null, null, null);
 
 				// Add margin between image and text (support
 				// various screen densities)
@@ -366,8 +338,7 @@ public class NLActivity extends Activity {
 	private List<AppInfo> getInstalledComponentList() {
 		final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
 		mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-		List<ResolveInfo> ril = getPackageManager().queryIntentActivities(
-				mainIntent, 0);
+		List<ResolveInfo> ril = getPackageManager().queryIntentActivities(mainIntent, 0);
 		List<AppInfo> componentList = new ArrayList<AppInfo>();
 
 		for (ResolveInfo ri : ril) {
@@ -376,17 +347,14 @@ public class NLActivity extends Activity {
 
 				Resources res;
 				try {
-					res = getPackageManager().getResourcesForApplication(
-							ri.activityInfo.applicationInfo);
+					res = getPackageManager().getResourcesForApplication(ri.activityInfo.applicationInfo);
 					if (ri.activityInfo.labelRes != 0) {
 						name = res.getString(ri.activityInfo.labelRes);
 					} else {
-						name = ri.activityInfo.applicationInfo.loadLabel(
-								getPackageManager()).toString();
+						name = ri.activityInfo.applicationInfo.loadLabel(getPackageManager()).toString();
 					}
 
-					AppInfo appInfo = new AppInfo(name,
-							ri.activityInfo.packageName,
+					AppInfo appInfo = new AppInfo(name, ri.activityInfo.packageName,
 							ri.activityInfo.loadIcon(getPackageManager()));
 
 					componentList.add(appInfo);

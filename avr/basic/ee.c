@@ -37,12 +37,12 @@ void _EEPROM_write(uint16_t uiAddress, uint8_t ucData, uint8_t magic) {
 	}
 }
 
-void EEPROM_write(uint16_t uiAddress, uint8_t ucData) {
+void EEPROM_writeByte(uint16_t uiAddress, uint8_t ucData) {
 	_EEPROM_write(uiAddress, ucData, MAGIC8);
 }
 
 
-uint8_t EEPROM_read(uint16_t uiAddress) {
+uint8_t EEPROM_readByte(uint16_t uiAddress) {
 	while (EECR & (1 << EEWE))
 		;
 	EEAR = uiAddress;
@@ -51,21 +51,21 @@ uint8_t EEPROM_read(uint16_t uiAddress) {
 }
 
 uint16_t EEPROM_readWord(uint16_t uiAddress) {
-	return (EEPROM_read(uiAddress) << 8) | EEPROM_read(uiAddress + 1);
+	return (EEPROM_readByte(uiAddress) << 8) | EEPROM_readByte(uiAddress + 1);
 }
 
 void EEPROM_readBlock(uint16_t uiAddress, int sz, uint8_t* dest) {
 	while (sz--)
-		*(dest++) = EEPROM_read(uiAddress++);
+		*(dest++) = EEPROM_readByte(uiAddress++);
 }
 
 void EEPROM_writeWord(uint16_t uiAddress, uint16_t ucData) {
-	EEPROM_write(uiAddress, ucData >> 8);
-	EEPROM_write(uiAddress + 1, ucData);
+	EEPROM_writeByte(uiAddress, ucData >> 8);
+	EEPROM_writeByte(uiAddress + 1, ucData);
 }
 
 void EEPROM_writeBlock(uint16_t uiAddress, int sz, uint8_t* src) {
 	while (sz--)
-		EEPROM_write(uiAddress++, *(src++));
+		EEPROM_writeByte(uiAddress++, *(src++));
 }
 

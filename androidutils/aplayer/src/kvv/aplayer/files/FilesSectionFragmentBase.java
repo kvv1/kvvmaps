@@ -8,9 +8,11 @@ import kvv.aplayer.player.Player.PlayerListener;
 import kvv.aplayer.service.FileDescriptor;
 import kvv.aplayer.service.Folder;
 import kvv.aplayer.service.IAPService;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -22,8 +24,7 @@ import com.smartbean.androidutils.activity.FragmentActivityTabsNoActionBar.Fragm
 import com.smartbean.androidutils.fragment.FragmentX;
 import com.smartbean.androidutils.util.Utils;
 
-public abstract class FilesSectionFragmentBase extends
-		FragmentX<APActivity, IAPService> implements FragmentEx {
+public abstract class FilesSectionFragmentBase extends FragmentX<APActivity, IAPService> implements FragmentEx {
 
 	protected SharedPreferences settings;
 	private Button pause;
@@ -103,8 +104,7 @@ public abstract class FilesSectionFragmentBase extends
 		int pos = conn.service.getCurrentPosition();
 		fileProgressBar.setMax(dur);
 		fileProgressBar.setProgress(pos);
-		String time = Utils.convertSecondsToHMmSs(pos / 1000) + "("
-				+ Utils.convertSecondsToHMmSs(dur / 1000) + ")";
+		String time = Utils.convertSecondsToHMmSs(pos / 1000) + "(" + Utils.convertSecondsToHMmSs(dur / 1000) + ")";
 		trackTimeView.setText(time);
 	}
 
@@ -115,8 +115,7 @@ public abstract class FilesSectionFragmentBase extends
 
 		folderTextView = (TextView) rootView.findViewById(R.id.folder);
 		fileProgressBar = (ProgressBar) rootView.findViewById(R.id.progress);
-		folderProgressBar = (ProgressBar) rootView
-				.findViewById(R.id.folderProgress);
+		folderProgressBar = (ProgressBar) rootView.findViewById(R.id.folderProgress);
 		progressText = (TextView) rootView.findViewById(R.id.progressText);
 		trackTimeView = (TextView) rootView.findViewById(R.id.tracktime);
 		folderTimeView = (TextView) rootView.findViewById(R.id.foldertime);
@@ -125,12 +124,8 @@ public abstract class FilesSectionFragmentBase extends
 		pause.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (conn.service != null) {
-					if (conn.service.isPlaying())
-						conn.service.pause();
-					else
-						conn.service.play();
-				}
+				rootView.getContext().sendBroadcast(new Intent().setAction(Intent.ACTION_MEDIA_BUTTON).putExtra(
+						Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)));
 			}
 		});
 
@@ -142,15 +137,13 @@ public abstract class FilesSectionFragmentBase extends
 			}
 		});
 
-		final View fileprogresstouch = rootView
-				.findViewById(R.id.fileprogresstouch);
+		final View fileprogresstouch = rootView.findViewById(R.id.fileprogresstouch);
 		new TouchListener(fileprogresstouch) {
 			@Override
 			protected void onClick(float touchX, float touchY) {
 				if (conn.service != null) {
 					int dur = conn.service.getDuration();
-					int pos = (int) (dur * touchX / fileprogresstouch
-							.getWidth());
+					int pos = (int) (dur * touchX / fileprogresstouch.getWidth());
 					// System.out.println("seek to " + pos);
 					conn.service.seekTo(pos);
 				}
@@ -162,8 +155,8 @@ public abstract class FilesSectionFragmentBase extends
 		new TouchListener(prev) {
 			@Override
 			protected void onClick(float touchX, float touchY) {
-				if (conn.service != null)
-					conn.service.prev();
+				rootView.getContext().sendBroadcast(new Intent().setAction(Intent.ACTION_MEDIA_BUTTON).putExtra(
+						Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS)));
 			}
 		};
 
@@ -172,8 +165,8 @@ public abstract class FilesSectionFragmentBase extends
 		new TouchListener(next) {
 			@Override
 			protected void onClick(float touchX, float touchY) {
-				if (conn.service != null)
-					conn.service.next();
+				rootView.getContext().sendBroadcast(new Intent().setAction(Intent.ACTION_MEDIA_BUTTON).putExtra(
+						Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT)));
 			}
 		};
 
@@ -215,8 +208,7 @@ public abstract class FilesSectionFragmentBase extends
 	protected void setFolderProgress(int max, int cur) {
 		folderProgressBar.setMax(max);
 		folderProgressBar.setProgress(cur);
-		String time = Utils.convertSecondsToHMm(cur) + "("
-				+ Utils.convertSecondsToHMm(max) + ")";
+		String time = Utils.convertSecondsToHMm(cur) + "(" + Utils.convertSecondsToHMm(max) + ")";
 		folderTimeView.setText(time);
 	}
 
@@ -225,8 +217,7 @@ public abstract class FilesSectionFragmentBase extends
 			return;
 
 		Files files = conn.service.getFiles();
-		if (files.files.size() > 0 && folderFilesStartPos != null
-				&& folderFilesStartPos.length > files.curFile) {
+		if (files.files.size() > 0 && folderFilesStartPos != null && folderFilesStartPos.length > files.curFile) {
 			int pos = conn.service.getCurrentPosition();
 			int max = (int) (folderMax / 1000);
 			int cur = (int) (folderFilesStartPos[files.curFile] + pos) / 1000;

@@ -17,7 +17,7 @@
 #include "stepper.h"
 #include "rules1.h"
 
-#define VERSION 20
+#define VERSION 21
 
 void packetReceived(uint8_t* buffer, uint8_t len);
 

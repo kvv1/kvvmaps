@@ -183,7 +183,9 @@ public class PacketTransceiver {
 	}
 
 	public void close() {
-		serPort.close();
+		if (serPort != null) {
+			serPort.close();
+		}
 	}
 
 }

@@ -9,6 +9,8 @@ import kvv.aplayer.player.Player.PlayerListener;
 import kvv.aplayer.player.Player1.PlayerLevelListener;
 import kvv.aplayer.service.APService;
 import kvv.aplayer.service.IAPService;
+import android.content.Intent;
+import android.view.KeyEvent;
 import android.view.View;
 
 import com.smartbean.androidutils.util.Utils;
@@ -49,8 +51,7 @@ public class FilesSectionFragmentTape extends FilesSectionFragmentBase {
 
 		arrowLevelView = (LevelView) rootView.findViewById(R.id.arrowLevel);
 		arrowLevelView.setScale(new int[] { -20, -10, -6, -3, 0, 3 });
-		magicEyeLevelView = (LevelView) rootView
-				.findViewById(R.id.magicEyeLevel);
+		magicEyeLevelView = (LevelView) rootView.findViewById(R.id.magicEyeLevel);
 		magicEyeLevelView.setScale(new int[] { -20, -10, -6, -3, 0, 3 });
 
 		new TouchListener(tapeView) {
@@ -61,17 +62,17 @@ public class FilesSectionFragmentTape extends FilesSectionFragmentBase {
 				int ht = tapeView.hitTest(touchX, touchY);
 				if (ht == -1) {
 					tapeView.setSeek(-2000, true);
-					conn.service.prev();
+					rootView.getContext().sendBroadcast(new Intent().setAction(Intent.ACTION_MEDIA_BUTTON).putExtra(
+							Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS)));
 				} else if (ht == 1) {
 					Files files = conn.service.getFiles();
 					if (files.curFile < files.files.size() - 1)
 						tapeView.setSeek(2000, true);
-					conn.service.next();
+					rootView.getContext().sendBroadcast(new Intent().setAction(Intent.ACTION_MEDIA_BUTTON).putExtra(
+							Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT)));
 				} else {
-					if (conn.service.isPlaying())
-						conn.service.pause();
-					else
-						conn.service.play();
+					rootView.getContext().sendBroadcast(new Intent().setAction(Intent.ACTION_MEDIA_BUTTON).putExtra(
+							Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)));
 				}
 			}
 
@@ -132,18 +133,15 @@ public class FilesSectionFragmentTape extends FilesSectionFragmentBase {
 		if (tapeView == null)
 			return;
 
-		boolean magicEye = settings.getBoolean(
-				getString(R.string.prefMagicEye), false);
+		boolean magicEye = settings.getBoolean(getString(R.string.prefMagicEye), false);
 
 		arrowLevelView.setVisibility(magicEye ? View.GONE : View.VISIBLE);
 		magicEyeLevelView.setVisibility(magicEye ? View.VISIBLE : View.GONE);
 
 		if (tapeView != null)
-			tapeView.click = settings.getBoolean(getString(R.string.prefClick),
-					false);
+			tapeView.click = settings.getBoolean(getString(R.string.prefClick), false);
 
-		if (resumed && visible && conn.service != null
-				&& conn.service.isPlaying()) {
+		if (resumed && visible && conn.service != null && conn.service.isPlaying()) {
 			System.out.println("tapeView.start");
 			conn.service.addLevelListener(levelListener);
 			tapeView.start();

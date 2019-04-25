@@ -7,7 +7,9 @@ import kvv.aplayer.service.IAPService;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 
@@ -19,55 +21,50 @@ public class PopupDialog extends Dialog {
 	public PopupDialog(Context context, final IAPService service) {
 		super(context, android.R.style.Theme_DeviceDefault_Dialog_NoActionBar);
 		setCanceledOnTouchOutside(true);
-		
+
 		setContentView(R.layout.popup_panel);
-		
-		findViewById(R.id.undo).setOnClickListener(
-				new android.view.View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						service.undo();
-						showUndoRedoPanel();
-					}
 
-				});
+		findViewById(R.id.undo).setOnClickListener(new android.view.View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				service.undo();
+				showUndoRedoPanel();
+			}
 
-		findViewById(R.id.redo).setOnClickListener(
-				new android.view.View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						service.redo();
-						showUndoRedoPanel();
-					}
-				});
+		});
 
-		findViewById(R.id.random).setOnClickListener(
-				new android.view.View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						service.setRandom();
-						dismiss();
-					}
-				});
+		findViewById(R.id.redo).setOnClickListener(new android.view.View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				service.redo();
+				showUndoRedoPanel();
+			}
+		});
 
-		findViewById(R.id.home).setOnClickListener(
-				new android.view.View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						service.toFile(0);
-						dismiss();
-					}
-				});
+		findViewById(R.id.random).setOnClickListener(new android.view.View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				service.setRandom();
+				dismiss();
+			}
+		});
 
-		findViewById(R.id.end).setOnClickListener(
-				new android.view.View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						if (service.getFiles().files.size() > 0)
-							service.toFile(service.getFiles().files.size() - 1);
-						dismiss();
-					}
-				});
+		findViewById(R.id.home).setOnClickListener(new android.view.View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				service.toFile(0);
+				dismiss();
+			}
+		});
+
+		findViewById(R.id.end).setOnClickListener(new android.view.View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (service.getFiles().files.size() > 0)
+					service.toFile(service.getFiles().files.size() - 1);
+				dismiss();
+			}
+		});
 
 		final FileDescriptor file = service.getFiles().getFile();
 
@@ -87,7 +84,9 @@ public class PopupDialog extends Dialog {
 						service.delBadSong(file.path);
 					else {
 						service.addBadSong(file.path);
-						service.next();
+						getContext().sendBroadcast(
+								new Intent().setAction(Intent.ACTION_MEDIA_BUTTON).putExtra(Intent.EXTRA_KEY_EVENT,
+										new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT)));
 					}
 					dismiss();
 				}

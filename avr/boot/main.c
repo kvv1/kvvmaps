@@ -54,10 +54,7 @@ int main() {
 	hwInit();
 
 	while (globals.startCnt < (unsigned int) (START_TIMEOUT_US / WAIT_UNIT_US)
-
-	|| !isAppOK()
-
-	) {
+			|| !isAppOK()) {
 
 		int b = rdByte();
 

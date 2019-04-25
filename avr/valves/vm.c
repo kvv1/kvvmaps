@@ -44,7 +44,7 @@ int8_t vmSetReg(uint8_t reg, int16_t val) {
 }
 
 uint8_t vmReadByte(uint16_t addr) {
-	return EEPROM_read((uint16_t) code + addr);
+	return EEPROM_readByte((uint16_t) code + addr);
 }
 
 void vmPrintInt(int16_t n) {
